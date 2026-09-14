@@ -33,6 +33,7 @@ class GeometryPlot(QWidget):
             return
         fm = p.fontMetrics()
         peak = max(self.values)
+        scale_peak = peak if peak > 0 else 1.0
         def number(v):
             return f"{v:.2f}" if abs(v) < 100000 else f"{v:.2e}"
         margin = max(56, fm.horizontalAdvance(number(peak)) + 12)
@@ -57,7 +58,7 @@ class GeometryPlot(QWidget):
         p.drawText(QRectF(12, 30, self.width()-24, 20), Qt.AlignmentFlag.AlignCenter, caption)
         curve = QPainterPath()
         for i, value in enumerate(self.values):
-            point = QPointF(box.left()+i/self.end_angle*box.width(), box.bottom()-value/peak*box.height())
+            point = QPointF(box.left()+i/self.end_angle*box.width(), box.bottom()-value/scale_peak*box.height())
             if i == 0:
                 curve.moveTo(point)
             else:

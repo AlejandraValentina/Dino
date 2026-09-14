@@ -3,7 +3,7 @@ schema: spec-driven
 context: |
   MotorSim (repositorio Dino) es una aplicación de escritorio para Windows.
   Python, PySide6/Qt Widgets y biblioteca estándar; archivos locales JSON.
-  El trabajo actual se define en changes/geometria-cinematica/.
+  El trabajo actual se define en changes/configuracion-2t/.
   base-escritorio conserva sus requisitos y comprobaciones históricas pendientes.
   Escribir contenido en español; conservar los encabezados y palabras clave
   que OpenSpec necesita para interpretar requisitos y escenarios.

@@ -166,7 +166,7 @@ class WindowTests(unittest.TestCase):
         for edit in self.window.numeric_edits.values():
             self.assertEqual(edit.text(), "")
         self.assertTrue(self.window.save())
-        self.assertIn('"format_version": 2', self.path.read_text(encoding="utf-8"))
+        self.assertIn('"format_version": 3', self.path.read_text(encoding="utf-8"))
 
     def test_responsive_groups(self):
         self.window.resize(1100, 760)
@@ -236,6 +236,92 @@ class WindowTests(unittest.TestCase):
             self.window.open_project()
         self.assertTrue(self.window.save())
         self.assertEqual(load_project(self.path).bore_mm, project.bore_mm)
+
+    def test_ports_edit_save_switch_delete_reopen(self):
+        view=self.window.ports_view
+        self.window.tabs.setCurrentWidget(view)
+        self.window.numeric_edits['stroke_mm'].setText('56')
+        self.window.numeric_edits['rod_length_mm'].setText('100')
+        QTest.mouseClick(view.add_button, Qt.MouseButton.LeftButton)
+        view.name_edit.setText('Sintético escape')
+        view.function_combo.setCurrentIndex(1)
+        for key,value in zip(view.edits,('32','10','20')):view.edits[key].setText(value)
+        view.crankcase_edit.setText('250,125')
+        self.assertEqual(view.plot.values[180],200)
+        self.assertIn('90.00',view.results.text())
+        QTest.mouseClick(view.add_button, Qt.MouseButton.LeftButton)
+        view.name_edit.setText('Transferencia sin dimensiones')
+        view.function_combo.setCurrentIndex(2)
+        with patch.object(self.window,'_choose_file',return_value=self.path):
+            self.assertTrue(self.window.save())
+        expected=self.window.project()
+        view.list.setCurrentRow(0)
+        self.assertFalse(self.window.dirty)
+        self.window.cycle_combo.setCurrentText('4T')
+        self.assertFalse(view.panel.isVisible())
+        self.assertFalse(view.plot.values)
+        self.assertEqual(self.window.project().ports,expected.ports)
+        self.assertTrue(self.window.save())
+        self.window.new_project()
+        with patch.object(self.window,'_choose_file',return_value=self.path):self.window.open_project()
+        self.window.cycle_combo.setCurrentText('2T')
+        self.assertEqual(self.window.project().ports,expected.ports)
+        self.assertEqual(self.window.project().crankcase_volume_bdc_cm3,250.125)
+        self.assertEqual(view.name_edit.text(),'Sintético escape')
+        self.assertEqual(view.plot.values[180],200)
+        view.list.setCurrentRow(1)
+        QTest.mouseClick(view.remove_button,Qt.MouseButton.LeftButton)
+        self.assertTrue(self.window.dirty)
+        self.assertTrue(self.window.save())
+        self.window.new_project()
+        with patch.object(self.window,'_choose_file',return_value=self.path):self.window.open_project()
+        self.assertEqual(len(self.window.project().ports),1)
+
+    def test_ports_invalid_draft_survives_selection_and_cancel(self):
+        view=self.window.ports_view
+        self.window.tabs.setCurrentWidget(view)
+        view.add_port();view.edits['width_mm'].setText('inválido')
+        view.add_port();view.name_edit.setText('Otra fila')
+        with patch.object(self.window,'_choose_file') as choose:
+            self.assertFalse(self.window.save());choose.assert_not_called()
+        with patch.object(self.window,'_ask_changes',return_value='cancel'):self.window.new_project()
+        self.assertEqual(len(view.drafts),2)
+        view.list.setCurrentRow(0)
+        self.assertEqual(view.edits['width_mm'].text(),'inválido')
+        self.window.cycle_combo.setCurrentText('4T')
+        self.assertFalse(self.window.save())
+        self.window.cycle_combo.setCurrentText('2T')
+        view.edits['width_mm'].clear()
+        self.assertIsNone(self.window.project().ports[0].width_mm)
+        view.crankcase_edit.setText('0')
+        self.assertFalse(self.window.save())
+
+    def test_port_curves_update_and_clear(self):
+        view=self.window.ports_view
+        self.window.tabs.setCurrentWidget(view)
+        self.window.numeric_edits['stroke_mm'].setText('56')
+        self.window.numeric_edits['rod_length_mm'].setText('100')
+        view.add_port()
+        for key,value in zip(view.edits,('32','10','20')):view.edits[key].setText(value)
+        before=view.plot.values
+        self.window.numeric_edits['rod_length_mm'].setText('110')
+        self.assertNotEqual(view.plot.values,before)
+        before=view.plot.values
+        self.window.numeric_edits['stroke_mm'].setText('58')
+        self.assertNotEqual(view.plot.values,before)
+        view.edits['top_mm'].setText('57')
+        self.assertEqual(view.plot.values[180],20)
+        view.edits['top_mm'].setText('58')
+        self.assertIn('No se abre',view.results.text())
+        self.assertTrue(all(v==0 for v in view.plot.values))
+        self.app.processEvents()  # También dibuja curva cero sin división por cero.
+        view.edits['height_mm'].clear()
+        self.assertFalse(view.plot.values)
+        self.assertIn('Falta',view.plot.error)
+        view.edits['height_mm'].setText('10')
+        self.window.numeric_edits['rod_length_mm'].setText('20')
+        self.assertFalse(view.plot.values)
+        self.assertTrue(view.plot.error)
 
     def test_visible_toolbar_uses_protected_file_actions(self):
         self.edit()

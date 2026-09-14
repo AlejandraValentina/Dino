@@ -5,9 +5,10 @@
 Leer README.md y el cambio solicitado dentro de `openspec/changes/` antes de
 modificar archivos. `base-escritorio` es la entrega inicial; su límite de nombre,
 tipo y archivos pertenece a esa entrega. El cambio autorizado actual es
-`geometria-cinematica`: proposal.md, design.md, specs/geometria-cinematica/spec.md
+`configuracion-2t`: proposal.md, design.md, specs/configuracion-2t/spec.md
 y tasks.md. Entregas 1 y 2 completadas y aceptadas por la usuaria; cambios sin
-archivar. La entrega 3 requiere nueva autorización.
+archivar. Entrega 3 autorizada solo para escape/transferencia rectangulares y
+registro de cárter; admisión pendiente de definición. No iniciar entrega 4.
 No alterar retrospectivamente requisitos ni verificaciones de entregas anteriores.
 
 La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md) define el orden, los objetivos y

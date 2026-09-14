@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 from .project import NUMERIC_FIELDS, Project, ProjectError, displacements, parse_number
 from .storage import load_project, save_project
 from .geometry_view import GeometryView
+from .ports_view import PortsView
 
 
 class _FilePathLabel(QLabel):
@@ -265,6 +266,9 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.workspace_scroll, "&Ficha")
         self.geometry_view = GeometryView()
         self.tabs.addTab(self.geometry_view, "&Geometría")
+        self.ports_view = PortsView()
+        self.tabs.addTab(self.ports_view, "Configuración &2T")
+        self.ports_view.changed.connect(self._edited)
         self.setCentralWidget(self.tabs)
         self._arrange_groups()
         for previous, following in zip(self._edit_widgets, self._edit_widgets[1:]):
@@ -314,6 +318,9 @@ class MainWindow(QMainWindow):
                                       {field: label.text() for field, label in self.numeric_errors.items()},
                                       self.name_edit.text())
 
+        self.ports_view.set_common(parsed, self.cycle_combo.currentText(),
+                                   {field: label.text() for field, label in self.numeric_errors.items()})
+
     def _build_statusbar(self) -> None:
         information = QWidget()
         layout = QHBoxLayout(information)
@@ -330,7 +337,9 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(information, 1)
 
     def project(self) -> Project:
+        ports, crankcase = self.ports_view.snapshot()
         return Project(
+            ports=ports, crankcase_volume_bdc_cm3=crankcase,
             name=self.name_edit.text(), cycle=self.cycle_combo.currentText(),
             manufacturer=self.text_edits["manufacturer"].text(),
             model=self.text_edits["model"].text(), notes=self.notes_edit.toPlainText(),
@@ -364,6 +373,7 @@ class MainWindow(QMainWindow):
         finally:
             for widget, was_blocked in zip(self._edit_widgets, blocked):
                 widget.blockSignals(was_blocked)
+        self.ports_view.load(project)
         self.path = path
         self.dirty = False
         self._update_geometry()

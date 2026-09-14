@@ -1,8 +1,9 @@
 # MotorSim
 
 Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La entrega
-actual [geometria-cinematica](openspec/changes/geometria-cinematica/specs/geometria-cinematica/spec.md)
-añade posición del pistón, volúmenes y curvas geométricas a la ficha existente.
+actual [configuracion-2t](openspec/changes/configuracion-2t/specs/configuracion-2t/spec.md)
+añade lumbreras rectangulares de escape/transferencia y registro de cárter.
+La ficha, posición del pistón, volúmenes y curvas geométricas existentes se conservan.
 No contiene simulación física ni estimaciones de rendimiento.
 
 Estado de las entregas 1 y 2: **Completadas**. La usuaria comunicó el 14/09/2026
@@ -10,8 +11,9 @@ que realizó las comprobaciones manuales pendientes, incluido el uso sin Interne
 y aceptó ambas entregas. No quedan otros criterios obligatorios pendientes según
 las tareas existentes. La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md#estado-de-avance)
 resume el estado. Esta aceptación es evidencia de la usuaria, separada de las
-pruebas automatizadas e inspección visual del agente. Sin archivar; entrega 3
-no autorizada. La publicación de esta actualización queda a cargo de la usuaria.
+pruebas automatizadas e inspección visual del agente. Sin archivar. La entrega 3
+está **En curso**: este primer tramo está implementado; admisión pendiente de
+definición dentro de la misma entrega. No se inicia la entrega 4.
 
 ## Interfaz y uso
 
@@ -69,7 +71,7 @@ resultados afectados y muestra la causa, sin corregir dimensiones. Posición y
 esquema solo necesitan carrera/biela; cilindrada, diámetro/carrera; cámara y
 extremos, además compresión; curva de volumen, todas estas entradas. La ficha
 incompleta o con biela positiva incompatible se puede guardar para corregirla.
-No se guardan curvas; JSON sigue en versión 2. Ecuaciones y caso admitido en el
+No se guardan curvas; el formato actual es JSON versión 3. Ecuaciones y caso admitido en el
 [diseño](openspec/changes/geometria-cinematica/design.md).
 
 Comprobación del 14/09/2026 sobre `7ef0628`: escritorio Windows desbloqueado,
@@ -93,6 +95,65 @@ tasks existentes; esta ejecución es actual, no una verificación histórica.
 **Aceptación manual de la usuaria:** recorrido existente completado, incluido
 el paso 9 sin Internet, según su declaración explícita. No se repitieron pruebas
 ni se generó otra revisión para registrar esta aceptación documental.
+
+## Configuración 2T — primer tramo de la entrega 3
+
+Abrir la pestaña **Configuración 2T**, añadir una lumbrera y editar la fila
+seleccionada. Cada fila corresponde a una ventana individual del cilindro de
+referencia; no se multiplica por N. Se puede eliminar la seleccionada. La lista
+conserva borradores incompletos y textos inválidos al cambiar de fila.
+
+Campos: nombre, función Escape/Transferencia (sin elección inicial), distancia
+al borde superior, altura y ancho desarrollado, en mm. La distancia se mide hacia
+abajo desde el borde superior periférico del pistón en PMS, no desde la cara del
+cilindro ni una cúpula. El ancho es desarrollado sobre la pared, no cuerda. La
+ventana rectangular es una aproximación, sin puentes, perfiles ni válvula de escape.
+
+Se muestran apertura/cierre/duración y máximo efectivo, con curva 0–360° de área
+geométrica descubierta. Los eventos usan cruce acotado del mecanismo existente,
+no redondeo a la muestra dibujada. Una ventana puede abrir parcialmente en PMI.
+Si no se descubre, se indica «No se abre», duración/área cero y ángulos ausentes.
+No es área efectiva de flujo, caudal, barrido o potencia. Eventos necesitan carrera,
+biela y borde superior; área, además altura/ancho. Compresión y cárter no se exigen.
+Datos insuficientes o incompatibles retiran solo los resultados afectados con causa;
+el límite numérico de área se informa sin modificar las dimensiones guardadas.
+
+El volumen libre del cárter con pistón en PMI es opcional, cm³ positivos finitos,
+individual y sin conductos externos. Registrar procedencia en las Observaciones
+existentes. No se deduce ni genera presión/compresión. **Admisión: Pendiente de
+definición**; no se elige un sistema ni se generan eventos de admisión.
+
+Los campos nuevos pueden guardarse sin informar (números null, texto vacío,
+función null); los números informados deben ser positivos finitos. Coma o punto
+admitidos, sin separadores de miles. Un texto inválido bloquea guardar y permanece
+intacto. Añadir/editar/eliminar marca cambios. En 4T se ocultan editor y resultados
+2T, conservando los datos al volver y al guardar/reabrir.
+
+![Configuración 2T en Windows: caso sintético](docs/images/motorsim-configuracion-2t.png)
+
+Captura real del escritorio Windows, con caso sintético identificado. Inspeccionada
+también la vista apilada al 150 %, sin desplazamiento horizontal, con curva, unidades
+y referencias legibles. Automatización e inspección visual no son aceptación manual
+de este tramo ni modifican la aceptación de las entregas 1 y 2.
+
+Comprobaciones del tramo: suite de **58 pruebas aprobadas**; después de corregir
+un subdesbordamiento numérico detectado en revisión independiente, **9 pruebas
+focalizadas de lumbreras aprobadas** (incluida la nueva regresión) y **30 pruebas
+de widgets Windows aprobadas**. La colección actual contiene 59 tests. Se conserva
+la evidencia histórica anterior en sus tareas; no se vuelve a atribuir al agente
+el recorrido manual de la usuaria. Comandos focalizados ejecutados:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_ports.py -q
+$env:QT_QPA_PLATFORM = "windows"
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_window.py -v
+$env:QT_QPA_PLATFORM = $null
+```
+
+Caso independiente de la usuaria: S=56, L=100, u=32, h=10, w=20 mm produce 90°,
+270°, 180° y 200 mm². También se comprobaron ventanas parciales/cerradas, datos
+incompletos/inválidos, límites numéricos, actualización al editar, varias filas,
+eliminación, v1/v2/v3, alternancia 2T/4T y regresiones de guardado/cancelación.
 
 ## Instalar, iniciar y probar
 
@@ -156,24 +217,30 @@ Revisión independiente puntual: detectó dependencia indebida de cilindrada res
 a compresión; corregida y cubierta por regresión. Autorrevisión del principal de
 la corrección y documentación. La integración OpenSpec global no se modifica.
 
-## Formato JSON versión 2
+## Formato JSON versión 3
 
-Objeto UTF-8 con claves obligatorias: `format_version` (entero 2), `name`, `cycle`
-(`2T`/`4T`), `manufacturer`, `model`, `notes` (textos; los opcionales vacíos son `""`),
-`cylinder_count` (entero positivo o null), `bore_mm`, `stroke_mm`, `rod_length_mm`
-(números positivos finitos o null), `compression_ratio` (número finito > 1 o null).
-No se almacenan unidades ni resultados derivados. No se redondean las entradas al
-guardar; los decimales usan la precisión numérica de Python, no la precisión de
-presentación de resultados. No se utilizan ceros como sustitutos de datos ausentes.
+Conserva todos los campos de ficha de versión 2 (`name`, `cycle`, `manufacturer`,
+`model`, `notes`, `cylinder_count`, `bore_mm`, `stroke_mm`, `rod_length_mm`,
+`compression_ratio`) y añade `ports`, `crankcase_volume_bdc_cm3` y
+`two_stroke_reference`. `format_version` es el entero 3. Cada fila de `ports`
+guarda `name`, `function` (`escape`, `transfer` o null), `top_mm`, `height_mm`,
+`width_mm`. La lista vacía representa ausencia de lumbreras. Dimensiones/cárter
+no informados son null; los textos opcionales, cadenas vacías. No se redondean
+entradas para guardarlas ni se incluyen unidades en los valores numéricos.
 
-Se leen archivos versión 1 con `name` y `cycle`; las características quedan vacías.
-Abrir no modifica el archivo ni marca una conversión como edición. Solo un Guardar
-o Guardar como explícito escribe versión 2. No hay sistema general de migraciones.
+Referencia fija: `rectangular-peripheral-tdc-developed-bdc-v1`, con las convenciones
+explicadas en el [diseño](openspec/changes/configuracion-2t/design.md).
+Una referencia diferente se rechaza para no reinterpretar medidas. No se guardan
+curvas ni resultados. Se mantienen guardado seguro y confirmación de sobrescritura.
+
+Se leen versiones 1 y 2 conservando sus campos; se inicializan lumbreras vacías
+y volumen de cárter null. Abrir no reescribe el archivo: la conversión a v3 solo
+se persiste mediante Guardar/Guardar como explícito.
 
 ## OpenSpec y estado
 
-Cambio activo: [geometria-cinematica](openspec/changes/geometria-cinematica/),
-con [registro de tareas](openspec/changes/geometria-cinematica/tasks.md).
+Cambio activo: [configuracion-2t](openspec/changes/configuracion-2t/),
+con [registro de tareas](openspec/changes/configuracion-2t/tasks.md).
 Entregas 1 y 2 publicadas en `040e789` y `7ef0628`, respectivamente: pertenencia
 a origin/main comprobada tras fetch. No se recrearon esos commits ni se acepta
 retrospectivamente el recorrido manual.
@@ -186,12 +253,13 @@ para preservar prompts y configuración global. No se ejecutó init/update ni se
 reinstalaron herramientas. Comandos documentales ejecutados:
 
 ```powershell
-openspec instructions apply --change geometria-cinematica --json
-openspec validate geometria-cinematica --strict --no-interactive
+openspec instructions apply --change configuracion-2t --json
+openspec validate configuracion-2t --strict --no-interactive
 ```
 
 Validación estricta aprobada. Ningún cambio se archiva ni se sincroniza por esta
-entrega. El alcance termina en geometría/cinemática; entrega 3 y simulador requieren otra autorización.
+entrega. El tramo termina en lumbreras y registro de cárter; admisión queda pendiente.
+No se comienza entrega 4 ni simulador.
 Se preservan la captura previa y el registro histórico de base-escritorio.
 
 ## Recorrido manual existente: base-escritorio

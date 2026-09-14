@@ -19,10 +19,17 @@ NUMERIC_FIELDS = {
 }
 
 
+PORT_FIELDS = {"top_mm": "Distancia al borde superior", "height_mm": "Altura de ventana",
+               "width_mm": "Ancho desarrollado"}
+NUMBER_LABELS = {**NUMERIC_FIELDS, **PORT_FIELDS,
+                 "crankcase_volume_bdc_cm3": "Volumen libre del cárter en PMI"}
+TWO_STROKE_REFERENCE = "rectangular-peripheral-tdc-developed-bdc-v1"
+
+
 def validate_number(value: object, field: str) -> None:
     if value is None:
         return
-    label = NUMERIC_FIELDS[field]
+    label = NUMBER_LABELS[field]
     if field == "cylinder_count":
         if type(value) is not int or value <= 0:
             raise ProjectError(f"{label}: debe ser un entero positivo.")
@@ -44,11 +51,11 @@ def parse_number(text: str, field: str) -> int | float | None:
     pattern = (r"\+?[0-9]+" if field == "cylinder_count" else
                r"[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)(?:[eE][+-]?[0-9]+)?")
     if not re.fullmatch(pattern, text):
-        raise ProjectError(f"{NUMERIC_FIELDS[field]}: número inválido; no uses separadores de miles.")
+        raise ProjectError(f"{NUMBER_LABELS[field]}: número inválido; no uses separadores de miles.")
     try:
         value = int(text) if re.fullmatch(r"[+-]?[0-9]+", text) else float(text.replace(",", "."))
     except ValueError as exc:
-        raise ProjectError(f"{NUMERIC_FIELDS[field]}: número fuera del rango admitido.") from exc
+        raise ProjectError(f"{NUMBER_LABELS[field]}: número fuera del rango admitido.") from exc
     validate_number(value, field)
     return value
 
@@ -74,6 +81,31 @@ def displacements(bore: object, stroke: object, cylinders: object) -> tuple[Deci
 
 
 @dataclass(frozen=True)
+class Port:
+    name: str = ""
+    function: str | None = None
+    top_mm: float | None = None
+    height_mm: float | None = None
+    width_mm: float | None = None
+
+    def validate(self):
+        if not isinstance(self.name, str):
+            raise ProjectError("El nombre de lumbrera debe ser texto.")
+        if self.function is not None and self.function not in ("escape", "transfer"):
+            raise ProjectError("Función de lumbrera inválida: Escape o Transferencia.")
+        for field in PORT_FIELDS:
+            validate_number(getattr(self, field), field)
+
+    @classmethod
+    def from_dict(cls, data):
+        if not isinstance(data, dict) or not cls.__dataclass_fields__.keys() <= data.keys():
+            raise ProjectError("Faltan campos de la lumbrera.")
+        port = cls(**{key: data[key] for key in cls.__dataclass_fields__})
+        port.validate()
+        return port
+
+
+@dataclass(frozen=True)
 class Project:
     name: str = "Sin título"
     cycle: str = "2T"
@@ -85,6 +117,8 @@ class Project:
     rod_length_mm: float | None = None
     compression_ratio: float | None = None
     notes: str = ""
+    ports: tuple[Port, ...] = ()
+    crankcase_volume_bdc_cm3: float | None = None
 
     def validate(self) -> None:
         if not isinstance(self.name, str) or not self.name.strip():
@@ -97,9 +131,16 @@ class Project:
         for field in NUMERIC_FIELDS:
             validate_number(getattr(self, field), field)
 
+        validate_number(self.crankcase_volume_bdc_cm3, "crankcase_volume_bdc_cm3")
+        if not isinstance(self.ports, tuple) or any(not isinstance(port, Port) for port in self.ports):
+            raise ProjectError("La colección de lumbreras es inválida.")
+        for port in self.ports:
+            port.validate()
+
     def to_dict(self) -> dict:
         self.validate()
-        return {"format_version": 2, **asdict(self)}
+        return {"format_version": 3, **asdict(self), "ports": [asdict(port) for port in self.ports],
+                "two_stroke_reference": TWO_STROKE_REFERENCE}
 
     @classmethod
     def from_dict(cls, data: object) -> "Project":
@@ -108,14 +149,23 @@ class Project:
         if not {"format_version", "name", "cycle"} <= data.keys():
             raise ProjectError("Faltan campos obligatorios: format_version, name o cycle.")
         version = data["format_version"]
-        if type(version) is not int or version not in (1, 2):
-            raise ProjectError("La versión del archivo debe ser el entero 1 o 2.")
+        if type(version) is not int or version not in (1, 2, 3):
+            raise ProjectError("La versión del archivo debe ser el entero 1, 2 o 3.")
         if version == 1:
             project = cls(data["name"], data["cycle"])
         else:
-            fields = cls.__dataclass_fields__
-            if not fields.keys() <= data.keys():
-                raise ProjectError("Faltan campos obligatorios de la ficha de motor versión 2.")
-            project = cls(**{field: data[field] for field in fields})
+            fields = set(cls.__dataclass_fields__)
+            if version == 2:
+                fields -= {"ports", "crankcase_volume_bdc_cm3"}
+            if not fields <= data.keys():
+                raise ProjectError(f"Faltan campos obligatorios de la ficha versión {version}.")
+            values = {field: data[field] for field in fields}
+            if version == 3:
+                if data.get("two_stroke_reference") != TWO_STROKE_REFERENCE:
+                    raise ProjectError("Referencia de geometría 2T no admitida.")
+                if not isinstance(data["ports"], list):
+                    raise ProjectError("Las lumbreras deben ser una lista.")
+                values["ports"] = tuple(Port.from_dict(port) for port in data["ports"])
+            project = cls(**values)
         project.validate()
         return project

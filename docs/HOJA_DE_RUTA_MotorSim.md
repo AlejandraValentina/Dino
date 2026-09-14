@@ -20,7 +20,8 @@ Prioridad propuesta: datos generales para 2T y 4T desde el editor común; primer
 ## Estado de avance
 
 Seguimiento de la copia local comprobada el 14/09/2026. Las entregas 1 y 2 están
-autorizadas; desde la 3 requieren nueva autorización expresa. La usuaria comunicó
+autorizadas y aceptadas. Entrega 3 autorizada en su primer tramo de lumbreras y
+cárter; admisión pendiente. Desde la 4 requieren nueva autorización expresa. La usuaria comunicó
 la realización del recorrido manual, incluido uso sin Internet, y aceptó ambas
 entregas el 14/09/2026; su evidencia se registra separada en los cambios enlazados.
 
@@ -28,7 +29,7 @@ entregas el 14/09/2026; su evidencia se registra separada en los cambios enlazad
 | --- | --- | --- | --- |
 | 1. Características del motor y diseño moderno | Completada | [caracteristicas-motor](../openspec/changes/caracteristicas-motor/tasks.md) | Comprobaciones acreditadas; aceptada por la usuaria. |
 | 2. Geometría y cinemática | Completada | [geometria-cinematica](../openspec/changes/geometria-cinematica/tasks.md) | Comprobaciones acreditadas; aceptada por la usuaria. |
-| 3. Configuración específica 2T | Pendiente | — | No autorizada. |
+| 3. Configuración específica 2T | En curso | [configuracion-2t](../openspec/changes/configuracion-2t/tasks.md) | Lumbreras/cárter implementados y probados; admisión pendiente de definición. |
 | 4. Admisión y escape | Pendiente | — | No autorizada. |
 | 5. Primer caso de simulación 2T | Pendiente | — | No autorizada. |
 | 6. Barridos, comparación y contraste experimental | Pendiente | — | No autorizada. |
