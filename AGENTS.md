@@ -3,8 +3,10 @@
 ## Lectura y autoridad
 
 Leer README.md y el cambio solicitado dentro de `openspec/changes/` antes de
-modificar archivos. El cambio inicial es `base-escritorio`: proposal.md, design.md,
-specs/gestion-proyectos/spec.md y tasks.md.
+modificar archivos. `base-escritorio` es la entrega inicial; su límite de nombre,
+tipo y archivos pertenece a esa entrega. El cambio autorizado actual es
+`caracteristicas-motor`: proposal.md, design.md, specs/ficha-motor/spec.md y tasks.md.
+No alterar retrospectivamente requisitos ni verificaciones de entregas anteriores.
 
 La usuaria decide alcance y autorización. Estos archivos no inician tareas por
 sí mismos. Una petición documental solo autoriza documentación; implementar la
@@ -50,8 +52,10 @@ el estado verificable y el impedimento concreto sin declarar éxito.
   general ni una etapa futura para ejecutar la tarea actual.
 - Mantener tasks.md como único registro de avance. Marcar tareas únicamente con
   evidencia de ejecución; no confundir preparación documental con implementación.
-- Respetar la especificación: solo nombre, tipo y archivos; ni geometría ni
-  simulador físico, gráficas ficticias o arquitectura de solvers.
+- Respetar la especificación del cambio autorizado. En `base-escritorio` el alcance
+  era solo nombre, tipo y archivos, sin geometría. `caracteristicas-motor` incorpora
+  ficha y cilindrada geométrica; no autoriza simulación física, rendimiento,
+  gráficas ficticias ni arquitectura de solvers.
 - Elegir pocos módulos, Python estándar y PySide6. Mantener datos y
   archivos separables de los widgets. No añadir dependencias preventivas.
 - No importar código, contratos, fases o infraestructura de proyectos anteriores.

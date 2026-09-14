@@ -1,0 +1,58 @@
+/* Estilos de la aplicación; no modifican el escritorio de Windows. */
+QWidget {
+    background-color: #0b1326;
+    color: #dae2fd;
+    font-family: "Segoe UI";
+    font-size: 10pt;
+}
+QLabel { background: transparent; border: none; }
+QLabel#pageTitle { font-size: 22pt; font-weight: 600; }
+QMenuBar { background: #0d1729; padding: 0 10px; }
+QMenuBar::item { background: transparent; padding: 4px 10px; }
+QMenuBar::item:selected { background: #222e43; }
+QMenu { background: #171f33; border: 1px solid #39475b; padding: 5px; }
+QMenu::item { padding: 7px 26px 7px 12px; }
+QMenu::item:selected { background: #24415b; }
+QMenu::separator { height: 1px; background: #39475b; margin: 4px 8px; }
+QToolBar {
+    background: #0d1729; border: none; border-bottom: 1px solid #26344a;
+    spacing: 6px; padding: 5px 14px;
+}
+QToolBar::separator { background: #34455c; width: 1px; margin: 5px 7px; }
+QToolButton, QPushButton {
+    background: #172338; color: #dae2fd; border: 1px solid #34455c;
+    border-radius: 4px; padding: 5px 12px;
+}
+QToolButton:hover, QPushButton:hover { background: #22334b; border-color: #739fc5; }
+QToolButton:pressed, QPushButton:pressed { background: #101c30; }
+QToolButton:focus, QPushButton:focus { border: 2px solid #b0dcff; }
+QToolButton#primaryAction { background: #3198dc; color: #002c47; border-color: #3198dc; font-weight: 600; }
+QToolButton#primaryAction:hover { background: #69baf0; }
+QToolButton#primaryAction:focus { border: 2px solid #d5efff; }
+QLineEdit, QComboBox {
+    background: #101b2e; color: #edf2ff; border: 1px solid #40546e;
+    border-radius: 4px; padding: 7px 10px; min-height: 20px;
+    selection-background-color: #315b80; selection-color: #ffffff;
+}
+QLineEdit:focus, QComboBox:focus { border: 1px solid #8bcfff; background: #142238; }
+QComboBox { padding-right: 28px; }
+QComboBox::drop-down { width: 25px; border: none; }
+QComboBox QAbstractItemView { background: #171f33; color: #dae2fd; selection-background-color: #24415b; }
+QPushButton#cycleCard { background: #111d31; border: 1px solid #34455c; font-size: 12pt; padding: 0; }
+QPushButton#cycleCard:hover { border-color: #739fc5; }
+QPushButton#cycleCard:checked { background: #172f4a; border: 1px solid #65b8f0; color: #b5e0ff; }
+QPushButton#cycleCard:focus { border: 2px solid #d5efff; }
+QStatusBar { background: #0d1729; border-top: 1px solid #26344a; padding: 4px 8px; }
+QStatusBar::item { border: none; }
+QStatusBar QWidget { background: transparent; }
+QStatusBar QLabel { font-size: 9pt; color: #9eb1c7; }
+QLabel#projectState { color: #b9cfdf; }
+QLabel#projectState[pending="true"] { color: #ffbf83; }
+QFrame#statusDivider { color: #34455c; }
+QToolTip { background: #172338; color: #edf2ff; border: 1px solid #739fc5; padding: 6px; }
+QDialog, QMessageBox { background: #0b1326; }
+QAbstractItemView {
+    background: #101b2e; alternate-background-color: #172338; color: #dae2fd;
+    border: 1px solid #39475b; selection-background-color: #24415b;
+}
+QHeaderView::section { background: #172338; color: #bfc7d2; border: none; padding: 6px; }

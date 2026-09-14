@@ -10,7 +10,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication, QFileDialog, QLineEdit, QMessageBox
+from PySide6.QtWidgets import QApplication, QFileDialog, QLineEdit, QMessageBox, QDialogButtonBox
 
 from motorsim.project import Project, ProjectError
 from motorsim.storage import load_project, save_project
@@ -43,22 +43,80 @@ class WindowTests(unittest.TestCase):
     def edit(self):
         self.window.name_edit.selectAll()
         QTest.keyClicks(self.window.name_edit, "Motor editado")
-        self.window.cycle_combo.setCurrentText("4T")
+        self.window.cycle_buttons["4T"].setChecked(True)
 
     def snapshot(self):
         return self.window.project(), self.window.path, self.window.dirty
 
     def test_initial_window_and_edit(self):
         self.assertEqual(self.snapshot(), (Project(), None, False))
-        self.assertEqual([self.window.cycle_combo.itemText(i) for i in range(2)], ["2T", "4T"])
-        self.assertEqual(self.window.cycle_combo.count(), 2)
-        self.assertFalse(self.window.cycle_combo.isEditable())
-        self.assertIn("simulación no disponible", self.window.notice.text())
+        self.assertEqual(list(self.window.cycle_buttons), ["2T", "4T"])
+        self.assertEqual(len(self.window.cycle_group.buttons()), 2)
+        self.assertTrue(self.window.cycle_group.exclusive())
+        self.assertEqual("Simulación no disponible", self.window.notice.text())
         self.assertIn("Sin archivo", self.window.file_label.text())
         self.edit()
         self.assertTrue(self.window.dirty)
-        self.assertIn("*", self.window.windowTitle())
+        self.assertEqual("MotorSim", self.window.windowTitle())
         self.assertEqual(self.window.state_label.text(), "Cambios pendientes")
+
+    def test_cycle_cards_click_keyboard_and_reopen(self):
+        four = self.window.cycle_buttons["4T"]
+        two = self.window.cycle_buttons["2T"]
+        self.window.name_edit.setFocus()
+        QTest.keyClick(self.window.name_edit, Qt.Key.Key_Tab)
+        self.assertTrue(two.hasFocus())
+        QTest.mouseClick(four, Qt.MouseButton.LeftButton)
+        self.assertEqual(self.window.project().cycle, "4T")
+        self.assertTrue(four.isChecked())
+        self.assertFalse(two.isChecked())
+        self.assertTrue(self.window.dirty)
+        four.setFocus()
+        QTest.keyClick(four, Qt.Key.Key_Left)
+        self.assertTrue(two.isChecked())
+        self.assertEqual(self.window.project().cycle, "2T")
+        with patch.object(self.window, "_choose_file", return_value=self.path):
+            self.assertTrue(self.window.save())
+        self.assertFalse(self.window.state_label.property("pending"))
+        self.assertEqual(str(self.path), self.window.file_label.toolTip())
+        self.window.new_project()
+        with patch.object(self.window, "_choose_file", return_value=self.path):
+            self.window.open_project()
+        self.assertTrue(two.isChecked())
+        self.assertEqual(self.window.state_label.text(), "Guardado")
+
+    def test_visible_toolbar_uses_protected_file_actions(self):
+        self.edit()
+        save_button = self.window.file_toolbar.widgetForAction(self.window.actions["save"])
+        with patch.object(self.window, "_choose_file", return_value=self.path):
+            QTest.mouseClick(save_button, Qt.MouseButton.LeftButton)
+        self.assertEqual(load_project(self.path), self.window.project())
+        self.edit()
+        before = self.snapshot()
+        new_button = self.window.file_toolbar.widgetForAction(self.window.actions["new"])
+        with patch.object(self.window, "_ask_changes", return_value="cancel"):
+            QTest.mouseClick(new_button, Qt.MouseButton.LeftButton)
+        self.assertEqual(self.snapshot(), before)
+
+    def test_compact_window_keeps_status_and_notice_visible(self):
+        self.window.resize(680, 440)
+        self.app.processEvents()
+        for widget in (self.window.file_label, self.window.notice, self.window.state_label, self.window.statusBar()):
+            top_left = widget.mapTo(self.window, widget.rect().topLeft())
+            bottom_right = widget.mapTo(self.window, widget.rect().bottomRight())
+            self.assertTrue(self.window.rect().contains(top_left))
+            self.assertTrue(self.window.rect().contains(bottom_right))
+
+    def test_long_path_remains_available_without_hiding_status(self):
+        path = Path("C:/proyectos") / ("carpeta-" * 30) / "motor.json"
+        self.window._activate(Project(), path)
+        self.window.resize(680, 440)
+        self.app.processEvents()
+        self.assertEqual(self.window.file_label.toolTip(), str(path))
+        self.assertIn("…", self.window.file_label.text())
+        self.assertTrue(self.window.file_label.text().endswith("motor.json"))
+        self.assertEqual(self.window.state_label.text(), "Guardado")
+        self.assertTrue(self.window.notice.isVisible())
 
     def test_save_as_keeps_original_and_changes_active_path(self):
         self.edit()
@@ -249,10 +307,12 @@ class WindowTests(unittest.TestCase):
                         QTest.keyClick(dialog, Qt.Key.Key_Escape)
                     else:
                         filename = dialog.findChild(QLineEdit, "fileNameEdit")
-                        filename.setFocus()
-                        filename.selectAll()
-                        QTest.keyClicks(filename, str(path))
-                        QTest.keyClick(filename, Qt.Key.Key_Return)
+                        filename.setText(str(path))
+                        buttons = dialog.findChild(QDialogButtonBox)
+                        choice = (QDialogButtonBox.StandardButton.Save
+                                  if dialog.acceptMode() == QFileDialog.AcceptMode.AcceptSave
+                                  else QDialogButtonBox.StandardButton.Open)
+                        QTest.mouseClick(buttons.button(choice), Qt.MouseButton.LeftButton)
                 except Exception as exc:
                     failures.append(exc)
                     if dialog:

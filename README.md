@@ -12,6 +12,36 @@ Se conservan [AGENTS.md](AGENTS.md), la [propuesta](openspec/changes/base-escrit
 y el [diseño](openspec/changes/base-escritorio/design.md). El registro de avance es
 [tasks.md](openspec/changes/base-escritorio/tasks.md).
 
+## Interfaz de escritorio
+
+Composición simplificada sobre la aplicación existente, con identidad oscura y
+azul. Se conserva el título nativo de Windows. Solo hay un menú Archivo, una
+barra compacta con Nuevo, Abrir, Guardar y Guardar como, y un título «Proyecto».
+
+Nombre y tipo se agrupan en un formulario de ancho máximo 560 px, sin cuadrícula
+ni paneles anidados. Las tarjetas 2T/4T tienen 64 px de alto, selección exclusiva
+con marca visible y navegación por Tab/flechas. No hay cabecera de marca, barra
+lateral, subtítulos repetidos ni panel de archivo. Se usa Segoe UI en toda la
+interfaz, con foco visible.
+
+Una única barra inferior reúne la ruta, el estado de guardado y «Simulación no
+disponible». Las rutas largas se abrevian visualmente; la ayuda emergente conserva
+la ruta completa. El menú Archivo también permite Salir. Las operaciones JSON,
+validación, persistencia y protección de cambios no se modificaron.
+
+La captura aprobada `screen.png` y los archivos `DESIGN.md` y `code.html` del
+Escritorio se usaron como referencias visuales, con la composición ajustada según
+la última corrección solicitada. No se incrusta HTML ni se agregan dependencias,
+módulos, métricas, resultados o botones sin acción.
+
+![MotorSim: composición simplificada en Windows](docs/images/motorsim-escritorio.png)
+
+Captura directa de la ventana visible en Windows, incluido su título nativo:
+900 × 551 px (área cliente 900 × 520). También se inspeccionaron el tamaño mínimo
+680 × 440, el foco por teclado y el estado pendiente con 4T seleccionado. La
+inspección visual se realizó sobre las capturas, separada de los tests. El recorrido
+manual completo de Windows continúa pendiente.
+
 ## Instalar y abrir en Windows
 
 Versiones comprobadas el 14/09/2026: Windows 10 (10.0.19045), Python 3.11.0,
@@ -41,7 +71,7 @@ Internet solo se necesita para descargar las dependencias, no para usar MotorSim
 
 El menú **Archivo** ofrece Nuevo, Abrir, Guardar, Guardar como y Salir. Al iniciar,
 el proyecto es «Sin título», 2T y sin archivo asociado. La ventana muestra la ruta,
-los cambios pendientes y «Versión básica: simulación no disponible».
+los cambios pendientes y «Simulación no disponible».
 
 El nombre puede editarse libremente; al guardar no puede estar vacío ni contener
 solo espacios. Guardar solicita destino la primera vez. Guardar como permite una
@@ -60,14 +90,16 @@ la ruta y el estado pendiente. Un error de guardado conserva el archivo anterior
 .\.venv\Scripts\python.exe -m pip check
 ```
 
-Resultado: **22 pruebas aprobadas**; `pip check` sin dependencias rotas. Cubren
+Resultado: **26 pruebas aprobadas**; `pip check` sin dependencias rotas. Cubren
 validación de nombres y tipos, versión entera (rechaza booleanos), JSON inválido,
 UTF-8 y acentos, ambos tipos de motor, ida y vuelta, fallos de escritura/sincronización/
 reemplazo, conservación del archivo anterior, cancelaciones, sobrescritura y
-transiciones con cambios pendientes. Se usan archivos temporales de prueba.
+transiciones con cambios pendientes. El rediseño añade comprobaciones de selección
+mediante tarjetas y teclado, acciones visibles que conservan las protecciones y
+estado/aviso en tamaño compacto y abreviación de rutas largas sin ocultar el estado. Se usan archivos temporales de prueba.
 
 Por defecto los tests de widgets usan `offscreen`: no equivalen a una prueba
-visual de Windows. También se ejecutaron **15 pruebas de widgets con la plataforma
+visual de Windows. También se ejecutaron **19 pruebas de widgets con la plataforma
 Qt `windows`, todas aprobadas**, incluidos diálogos reales de selección de archivo,
 Guardar/Descartar/Cancelar y confirmación de sobrescritura. Otras pruebas sustituyen
 los diálogos para cubrir errores y transiciones de forma determinista.
@@ -86,11 +118,13 @@ del escritorio Windows: ventana, formulario, selector, indicador de edición y
 aviso de simulación no disponible visibles. Esto es una comprobación visual
 parcial y automatización visible, **no el recorrido manual completo**.
 
-Se realizó autorrevisión del cambio y una revisión independiente de solo lectura
-mediante subagente, conforme a AGENTS.md. El revisor no identificó defectos concretos
-en el código y ejecutó las 20 pruebas existentes en ese momento: todas aprobadas.
-Las dos pruebas adicionales de diálogos y la documentación final fueron comprobadas
-por el principal. No se presenta esa última pasada como revisión independiente.
+Se realizó una revisión independiente de solo lectura de la composición, conforme
+a AGENTS.md. Detectó una discrepancia entre el recorte de rutas y la expectativa de
+una prueba: se corrigió el recorte para abreviar desde el inicio. El principal
+volvió a ejecutar las 26 pruebas, todas aprobadas, e hizo la autorrevisión de la
+corrección y la documentación. El revisor no identificó regresiones en acciones,
+selección o protecciones e inspeccionó la captura. Estas comprobaciones no equivalen
+al recorrido manual completo.
 
 ### Recorrido manual pendiente en Windows
 

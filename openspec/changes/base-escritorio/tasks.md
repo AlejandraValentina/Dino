@@ -55,6 +55,37 @@ Requisitos: [gestion-proyectos](specs/gestion-proyectos/spec.md).
 - README actualizado con instalación, ejecución, versiones, resultados y límites.
   No se inició simulación, no se sincronizaron specs ni se archivó el cambio.
 
+## Rediseño visual autorizado
+
+- Implementado sobre `b8fd40ca0f9c8b159aae1a942592dd16a5838f23`, sin rehacer la
+  aplicación. Se inspeccionaron captura, HTML y DESIGN.md del Escritorio,
+  confirmados por la usuaria al no encontrarse `design/stitch/`. Las referencias
+  visuales no amplían requisitos funcionales; se aplicó la posterior corrección
+  de composición solicitada por la usuaria.
+- Composición actual: título nativo Windows, menú Archivo, una sola barra de cuatro
+  acciones y título «Proyecto». Formulario de ancho máximo 560 px con nombre y
+  tarjetas exclusivas 2T/4T de 64 px, sin subtítulos. Sin cabecera de marca, lateral,
+  cuadrícula ni panel grande de archivo. Tipografía Segoe UI y foco visible.
+- Ruta, estado de guardado y «Simulación no disponible» están únicamente en la
+  barra inferior. Ruta larga abreviada con texto completo en ayuda emergente.
+- JSON, validación, persistencia y protección de cambios conservados. Sin nuevas
+  dependencias, módulos, resultados ficticios, HTML incrustado ni integración OpenSpec.
+- 26 pruebas automatizadas aprobadas. 19 pruebas de widgets aprobadas con la
+  plataforma Qt `windows`, incluidas navegación por teclado, acciones protegidas,
+  selección exclusiva, ventana compacta y rutas largas.
+- Capturas directas Windows inspeccionadas: ventana con título nativo, área cliente
+  900 × 520 y tamaño mínimo 680 × 440, selección 4T pendiente con foco visible.
+  Captura final en `docs/images/motorsim-escritorio.png`. La revisión visual es
+  independiente de la aprobación de tests; no se deduce calidad visual de ellos.
+- Revisión independiente de solo lectura de la composición, conforme AGENTS.md:
+  detectó una discrepancia entre recorte de rutas y aserción del test, corregida
+  abreviando desde el inicio. El principal reejecutó las 26 pruebas: todas aprobadas.
+  Sin regresiones encontradas en acciones, selección ni protecciones. Captura
+  inspeccionada por principal y revisor; corrección final y documentación bajo
+  autorrevisión del principal. README actualizado con la composición final.
+- La tarea 4.2 sigue sin marcar: estas comprobaciones parciales no acreditan el
+  recorrido manual completo. Cambio sin archivar.
+
 ## Cierre
 
 Marcar solo lo efectivamente realizado. Una entrega con verificación Windows

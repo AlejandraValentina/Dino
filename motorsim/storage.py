@@ -29,7 +29,7 @@ def save_project(path: Path, project: Project) -> None:
             prefix=".motorsim-", suffix=".tmp", delete=False,
         ) as stream:
             temporary = Path(stream.name)
-            json.dump(data, stream, ensure_ascii=False, indent=2)
+            json.dump(data, stream, ensure_ascii=False, indent=2, allow_nan=False)
             stream.write("\n")
             stream.flush()
             os.fsync(stream.fileno())
