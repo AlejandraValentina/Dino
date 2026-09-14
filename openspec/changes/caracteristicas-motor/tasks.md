@@ -37,3 +37,14 @@ vista apilada al 150 % con foco y sin desplazamiento horizontal. Autorrevisión
 puntual de código, pruebas, documentos y captura, sin nueva revisión independiente.
 La tarea 10 sigue pendiente: automatización visible e inspección de capturas no
 acreditan el recorrido manual completo. Estado resumido: Por verificar.
+
+## Comprobación actual conjunta — 14/09/2026
+
+Implementación sin cambios sobre 7ef0628, publicado. Se comprobaron ahora ficha,
+archivos v1/v2, cambios pendientes y geometría con 47 tests automáticos, 27 de
+widgets Windows y recorrido adicional con diálogos reales, incluido error real
+Solo lectura en 2T/4T. Evidencia conjunta detallada en
+[geometria-cinematica/tasks.md](../geometria-cinematica/tasks.md#comprobación-conjunta-actual--14092026).
+Captura actual: `docs/images/motorsim-ficha-verificacion.png`.
+La tarea 10 permanece pendiente: automatización visible e inspección actual no
+son aceptación manual; falta además el paso 9 con desconexión real de Internet.

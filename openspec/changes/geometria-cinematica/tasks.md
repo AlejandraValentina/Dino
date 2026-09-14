@@ -4,7 +4,7 @@
 - [x] 2. Implementar cálculos directos y dependencias por resultado; contrastar caso independiente.
 - [x] 3. Añadir pestaña, esquema y curvas Qt con actualización y teclado.
 - [x] 4. Ejecutar regresiones de datos, archivos y cambios pendientes, y pruebas de geometría.
-- [ ] 5. Inspeccionar pestaña Windows y escalado, conservar captura real y hacer revisión puntual.
+- [x] 5. Inspeccionar pestaña Windows y escalado, conservar captura real y hacer revisión puntual.
 - [x] 6. Actualizar README y estado y preparar archivos revisados para registro/publicación separados. Detenerse sin archivar.
 
 ## Evidencia
@@ -24,3 +24,30 @@
   a captura real. Pasos pendientes concretos en README, sección Geometría.
   La automatización no acredita el recorrido manual histórico de entrega 1.
 - Estado: Por verificar. No se archiva ningún cambio ni se comienza entrega 3.
+
+## Comprobación conjunta actual — 14/09/2026
+
+Sobre main `7ef0628`, árbol inicialmente limpio; commit confirmado contenido en
+origin/main tras fetch, sin push innecesario ni cambios de remoto o credenciales.
+Implementación conservada, sin defectos nuevos reproducidos ni funciones añadidas.
+47 pruebas automáticas y 27 de widgets Windows aprobadas. Recorrido adicional
+mediante automatización visible y diálogos reales en ambos ciclos: edición de
+ficha completa, guardar, cerrar/reabrir, Guardar como (cancelar/reemplazar), JSON
+inválido, nombre inválido, protección al cancelar/descartar y lectura v1 sin
+reescritura hasta guardar. Archivo temporal Solo lectura: guardar falla, conserva
+bytes y edición; cerrar eligiendo Guardar queda bloqueado hasta corregir el permiso.
+Sin sustituir los diálogos ni simular el error del sistema de archivos.
+
+Geometría: cambio de carrera actualiza esquema/curvas; compresión ausente retira
+solo volumen, biela ausente/incompatible retira cinemática sin impedir guardar
+la ficha positiva. Rangos 360°/720°, teclado, pestañas y redimensionado comprobados.
+Escritorio desbloqueado: capturas reales inspeccionadas, incluidos ambos rangos,
+resultados retirados y escala 150 % del proceso Qt. Se conservan
+`docs/images/motorsim-geometria.png` y `docs/images/motorsim-ficha-verificacion.png`.
+Los datos están identificados como prueba. Inspección visual separada de tests.
+
+Esto acredita comprobaciones técnicas actuales para ambas entregas, no aceptación
+manual ni evidencia histórica. Sigue pendiente realizar y aceptar el recorrido
+manual de README, incluido paso 9 con el equipo realmente desconectado de Internet;
+no se modificó la conectividad del entorno compartido. No se archiva ni inicia
+entrega 3. Estado de cierre conjunto: Por verificar.

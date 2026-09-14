@@ -93,3 +93,11 @@ pendiente puede compartirse, pero no se declara completamente comprobada ni se
 archiva como terminada. La validación de OpenSpec comprueba los documentos,
 no el funcionamiento de MotorSim. No sincronizar ni archivar este cambio antes
 de cumplir las tareas y recibir autorización de cierre.
+
+## Evidencia actual sobre versión con ficha y geometría — 14/09/2026
+
+La comprobación conjunta actual de entregas 1/2 volvió a cubrir archivos,
+validación y protección de cambios, incluidos diálogos reales y atributo Solo
+lectura del paso 8 en archivos temporales. No se presenta como prueba histórica.
+Detalle en `../geometria-cinematica/tasks.md`. La tarea 4.2 sigue sin marcar:
+pendientes recorrido/aceptación manual y paso 9 con el equipo sin Internet.

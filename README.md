@@ -8,8 +8,9 @@ No contiene simulación física ni estimaciones de rendimiento.
 Estado de la entrega 1: **Por verificar**, por el recorrido manual Windows
 heredado aún pendiente. La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md#estado-de-avance)
 resume el avance; [tasks.md](openspec/changes/caracteristicas-motor/tasks.md)
-conserva el detalle histórico. Entrega 2 autorizada y **Por verificar**: falta
-la captura e inspección del escritorio Windows desbloqueado. Entrega 3 no autorizada.
+conserva el detalle histórico. Entregas 1 y 2 **Por verificar** en cuanto al
+cierre manual conjunto: la comprobación técnica actual y las capturas están
+acreditadas; no constituyen aceptación de la usuaria. Entrega 3 no autorizada.
 
 ## Interfaz y uso
 
@@ -70,14 +71,28 @@ incompleta o con biela positiva incompatible se puede guardar para corregirla.
 No se guardan curvas; JSON sigue en versión 2. Ecuaciones y caso admitido en el
 [diseño](openspec/changes/geometria-cinematica/design.md).
 
-Comprobación visual real **pendiente**: las capturas del escritorio devolvieron
-una imagen azul uniforme, con LogonUI activo. Se inspeccionó únicamente el
-renderizado de los widgets Qt Windows a escala normal y 150 %; no se presenta
-como captura real ni acredita la sesión visible. Para completar: desbloquear
-Windows, cargar datos de prueba identificados (D=80, S=90, L=150 mm, C=10,5),
-abrir Geometría, inspeccionar curvas/esquema, cambiar 2T/4T, mover ángulo por
-teclado, vaciar C y luego L verificando retirada selectiva; redimensionar y
-comprobar escalado. Conservar captura real y registrar evidencia en tasks.md.
+Comprobación del 14/09/2026 sobre `7ef0628`: escritorio Windows desbloqueado,
+recorrido automatizado visible de ficha y geometría, e inspección de capturas
+reales. Se verificaron 360°/720°, actualización, retirada selectiva con datos
+ausentes e incompatibles, navegación entre pestañas, foco y ventana al 150 %.
+
+![Geometría: captura real de Windows](docs/images/motorsim-geometria.png)
+
+[Ficha actual: captura real](docs/images/motorsim-ficha-verificacion.png).
+La imagen anterior de la ficha se conserva como evidencia de su entrega original.
+Las capturas nuevas tienen datos de prueba identificados y no son renders aislados.
+
+Las 47 pruebas automáticas y las 27 de widgets Windows volvieron a aprobar.
+Un recorrido adicional con diálogos reales comprobó guardado/cierre/reapertura,
+sobrescritura, archivos inválidos, versión 1, cambios pendientes y el fallo real
+sobre archivo temporal con atributo Solo lectura, en 2T y 4T. No se encontraron
+defectos que requirieran modificar la implementación. Evidencia detallada en los
+tasks existentes; esta ejecución es actual, no una verificación histórica.
+
+**Aceptación manual pendiente:** la usuaria debe realizar y aceptar el recorrido
+manual existente. Su paso 9 con el equipo realmente sin Internet sigue sin ejecutar;
+no se desconectó el equipo ni se alteraron redes del entorno compartido. La
+comprobación automatizada y la inspección visual no se presentan como aceptación.
 
 ## Instalar, iniciar y probar
 
@@ -111,8 +126,8 @@ cambios pendientes de todos los campos, teclado, adaptación de ancho y regresio
 de errores de archivo, guardado seguro, sobrescritura y cancelaciones.
 
 También se ejecutaron **27 pruebas de widgets con plataforma Qt Windows**, todas
-aprobadas, incluidos diálogos Qt reales (automatización; no acredita escritorio
-desbloqueado ni recorrido manual). Para repetirlas:
+aprobadas, incluidos diálogos Qt reales (automatización visible en la comprobación
+actual; no aceptación manual). Para repetirlas:
 
 ```powershell
 $env:QT_QPA_PLATFORM = "windows"
@@ -158,8 +173,9 @@ o Guardar como explícito escribe versión 2. No hay sistema general de migracio
 
 Cambio activo: [geometria-cinematica](openspec/changes/geometria-cinematica/),
 con [registro de tareas](openspec/changes/geometria-cinematica/tasks.md).
-Entrega 1 ya registrada y publicada en `040e789`; no se rehízo ni se acepta
-retrospectivamente su recorrido manual.
+Entregas 1 y 2 publicadas en `040e789` y `7ef0628`, respectivamente: pertenencia
+a origin/main comprobada tras fetch. No se recrearon esos commits ni se acepta
+retrospectivamente el recorrido manual.
 AGENTS.md vincula la restricción de nombre/tipo sin geometría a base-escritorio.
 No se alteran sus criterios ni se completa su recorrido pendiente retrospectivamente.
 
