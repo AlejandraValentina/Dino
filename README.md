@@ -1,14 +1,15 @@
 # MotorSim
 
 Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La entrega
-actual [caracteristicas-motor](openspec/changes/caracteristicas-motor/specs/ficha-motor/spec.md)
-añade datos generales, geometría y cilindrada calculada. No contiene simulación
-física, estimaciones de rendimiento ni gráficos.
+actual [geometria-cinematica](openspec/changes/geometria-cinematica/specs/geometria-cinematica/spec.md)
+añade posición del pistón, volúmenes y curvas geométricas a la ficha existente.
+No contiene simulación física ni estimaciones de rendimiento.
 
 Estado de la entrega 1: **Por verificar**, por el recorrido manual Windows
 heredado aún pendiente. La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md#estado-de-avance)
 resume el avance; [tasks.md](openspec/changes/caracteristicas-motor/tasks.md)
-conserva el detalle. Entrega 2 (Geometría y cinemática): siguiente, no autorizada.
+conserva el detalle histórico. Entrega 2 autorizada y **Por verificar**: falta
+la captura e inspección del escritorio Windows desbloqueado. Entrega 3 no autorizada.
 
 ## Interfaz y uso
 
@@ -33,7 +34,7 @@ Cilindrada por cilindro = π × diámetro² × carrera / 4000, con mm de entrada
 de salida. La total multiplica por el número de cilindros, suponiendo geometría común
 a todos ellos (no es simulación multicilíndrica). Los resultados son
 solo lectura, con dos decimales; faltantes o errores en sus entradas muestran
-«—», sin conservar resultados anteriores. Biela y compresión solo se registran.
+«—», sin conservar resultados anteriores. Biela y compresión se utilizan en la pestaña Geometría, sin simulación física.
 
 Guardar pide destino inicialmente. Guardar como confirma sobrescritura. Nuevo,
 Abrir y Salir mantienen Guardar/Descartar/Cancelar. Abrir valida antes de
@@ -47,6 +48,36 @@ están identificados como prueba y no se precargan en proyectos nuevos. Se
 inspeccionó además la ficha apilada al 150 % con ventana de 700 × 480 unidades
 lógicas: desplazamiento vertical, campos, foco y barra inferior utilizables,
 sin desplazamiento horizontal. El escalado se aplicó solo al proceso Qt.
+
+## Pestaña Geometría — entrega 2
+
+Editar dimensiones en **Ficha** y abrir **Geometría**, junto a ella. Sin campos
+duplicados: posición desde PMS en mm, cámara y volumen instantáneo en cm³, para
+un cilindro de geometría común. No se multiplican por el número de cilindros.
+El esquema 2D y las dos curvas usan el mismo cálculo; el selector de ángulo se
+maneja por teclado y no modifica el archivo ni el estado de cambios pendientes.
+
+PMS de referencia = 0°, ángulo horario en el esquema; PMI a 180°. 2T muestra
+0–360° y 4T 0–720° con segunda revolución diferenciada. El mecanismo se repite
+cada 360°; no se asignan eventos de combustión o distribución. El esquema no es
+CAD ni comprueba holguras, interferencias o resistencia.
+
+El mecanismo admite biela > carrera/2. Ausencia o incompatibilidad retira los
+resultados afectados y muestra la causa, sin corregir dimensiones. Posición y
+esquema solo necesitan carrera/biela; cilindrada, diámetro/carrera; cámara y
+extremos, además compresión; curva de volumen, todas estas entradas. La ficha
+incompleta o con biela positiva incompatible se puede guardar para corregirla.
+No se guardan curvas; JSON sigue en versión 2. Ecuaciones y caso admitido en el
+[diseño](openspec/changes/geometria-cinematica/design.md).
+
+Comprobación visual real **pendiente**: las capturas del escritorio devolvieron
+una imagen azul uniforme, con LogonUI activo. Se inspeccionó únicamente el
+renderizado de los widgets Qt Windows a escala normal y 150 %; no se presenta
+como captura real ni acredita la sesión visible. Para completar: desbloquear
+Windows, cargar datos de prueba identificados (D=80, S=90, L=150 mm, C=10,5),
+abrir Geometría, inspeccionar curvas/esquema, cambiar 2T/4T, mover ángulo por
+teclado, vaciar C y luego L verificando retirada selectiva; redimensionar y
+comprobar escalado. Conservar captura real y registrar evidencia en tasks.md.
 
 ## Instalar, iniciar y probar
 
@@ -73,14 +104,15 @@ Pruebas y dependencias:
 .\.venv\Scripts\python.exe -m pip check
 ```
 
-**38 pruebas aprobadas** y `pip check` sin dependencias rotas. Cubren JSON v2
+**47 pruebas aprobadas** y `pip check` sin dependencias rotas. Cubren JSON v2
 completo/incompleto, lectura v1 sin escritura automática, valores vacíos/inválidos,
 coma/punto, finitud, cilindrada y actualización, conservación al cambiar ciclo,
 cambios pendientes de todos los campos, teclado, adaptación de ancho y regresiones
 de errores de archivo, guardado seguro, sobrescritura y cancelaciones.
 
-También se ejecutaron **25 pruebas de widgets con plataforma Qt Windows**, todas
-aprobadas, incluidos diálogos Qt reales. Para repetirlas:
+También se ejecutaron **27 pruebas de widgets con plataforma Qt Windows**, todas
+aprobadas, incluidos diálogos Qt reales (automatización; no acredita escritorio
+desbloqueado ni recorrido manual). Para repetirlas:
 
 ```powershell
 $env:QT_QPA_PLATFORM = "windows"
@@ -92,13 +124,21 @@ Las pruebas por defecto usan `offscreen`. La automatización visible y la inspec
 de capturas Windows son evidencia distinta; no equivalen al recorrido manual
 completo histórico de base-escritorio, que sigue pendiente y sin marcar.
 
-Se realizó una revisión independiente de solo lectura conforme a AGENTS.md.
+En entrega 1 se realizó una revisión independiente de solo lectura conforme a AGENTS.md.
 Detectó pérdida de precisión al reabrir un entero dimensional grande; se corrigió
 el parseo para conservar enteros y se agregó una prueba de regresión. El principal
 comprobó esa corrección, la documentación y las capturas (autorrevisión).
 En esta retoma se reutilizó la ficha, se declaró la geometría común y se verificó
 además cierre/reapertura en otra ventana y lectura v1 desde el editor. La revisión
 puntual de estos ajustes fue autorrevisión; no se abrió otra campaña independiente.
+
+La entrega 2 añade pruebas de puntos muertos, periodicidad, extremos, independencia
+de N, datos ausentes/incompatibles y retirada de curvas. Contraste independiente:
+r=3 mm, L=5 mm, θ=90° forman triángulo 3-4-5; posición=4 mm. Con D=20 mm y C=3,
+Vc=0,3π cm³ y V(90°)=0,7π cm³, sin usar la función probada para el valor esperado.
+Revisión independiente puntual: detectó dependencia indebida de cilindrada respecto
+a compresión; corregida y cubierta por regresión. Autorrevisión del principal de
+la corrección y documentación. La integración OpenSpec global no se modifica.
 
 ## Formato JSON versión 2
 
@@ -116,8 +156,10 @@ o Guardar como explícito escribe versión 2. No hay sistema general de migracio
 
 ## OpenSpec y estado
 
-Único cambio nuevo: [caracteristicas-motor](openspec/changes/caracteristicas-motor/),
-con documentación breve y [registro de tareas](openspec/changes/caracteristicas-motor/tasks.md).
+Cambio activo: [geometria-cinematica](openspec/changes/geometria-cinematica/),
+con [registro de tareas](openspec/changes/geometria-cinematica/tasks.md).
+Entrega 1 ya registrada y publicada en `040e789`; no se rehízo ni se acepta
+retrospectivamente su recorrido manual.
 AGENTS.md vincula la restricción de nombre/tipo sin geometría a base-escritorio.
 No se alteran sus criterios ni se completa su recorrido pendiente retrospectivamente.
 
@@ -126,12 +168,12 @@ para preservar prompts y configuración global. No se ejecutó init/update ni se
 reinstalaron herramientas. Comandos documentales ejecutados:
 
 ```powershell
-openspec instructions apply --change caracteristicas-motor --json
-openspec validate caracteristicas-motor --strict --no-interactive
+openspec instructions apply --change geometria-cinematica --json
+openspec validate geometria-cinematica --strict --no-interactive
 ```
 
 Validación estricta aprobada. Ningún cambio se archiva ni se sincroniza por esta
-entrega. El alcance termina en la ficha; el simulador requiere otra autorización.
+entrega. El alcance termina en geometría/cinemática; entrega 3 y simulador requieren otra autorización.
 Se preservan la captura previa y el registro histórico de base-escritorio.
 
 ## Recorrido manual histórico pendiente: base-escritorio

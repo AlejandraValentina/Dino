@@ -177,6 +177,58 @@ class WindowTests(unittest.TestCase):
         self.assertFalse(self.window._wide_layout)
         self.assertEqual(self.window.workspace_scroll.horizontalScrollBar().maximum(), 0)
 
+    def test_kinematics_updates_clears_and_preserves_json(self):
+        for field, value in zip(self.window.numeric_edits, ("4", "20", "6", "5", "3")):
+            self.window.numeric_edits[field].setText(value)
+        view = self.window.geometry_view
+        self.window.tabs.setCurrentWidget(view)
+        self.app.processEvents()
+        self.assertAlmostEqual(view.data.positions[90], 4)
+        with patch.object(self.window, "_choose_file", return_value=self.path):
+            self.assertTrue(self.window.save())
+        original = self.path.read_bytes()
+        view.angle_slider.setValue(90)
+        self.assertFalse(self.window.dirty)
+        self.assertEqual(self.path.read_bytes(), original)
+        self.assertIn("4.00 mm", view.current.text())
+        self.window.numeric_edits["compression_ratio"].clear()
+        self.assertTrue(view.position_plot.values)
+        self.assertFalse(view.volume_plot.values)
+        self.assertIn("Falta", view.volume_plot.error)
+        self.window.numeric_edits["rod_length_mm"].setText("3")
+        self.assertFalse(view.position_plot.values)
+        self.assertFalse(view.mechanism.data.positions)
+        self.assertIn("incompatible", view.position_plot.error)
+        self.assertTrue(self.window.save())
+        self.assertEqual(load_project(self.path).rod_length_mm, 3)
+        with patch.object(self.window, "_choose_file", return_value=self.path):
+            self.window.open_project()
+        self.assertFalse(view.position_plot.values)
+        self.window.new_project()
+        self.assertFalse(view.volume_plot.values)
+        self.assertFalse(view.position_plot.values)
+
+    def test_kinematics_cycle_keyboard_and_compact_layout(self):
+        for field, value in zip(self.window.numeric_edits, ("1", "80", "90", "150", "10")):
+            self.window.numeric_edits[field].setText(value)
+        self.window.cycle_combo.setCurrentText("4T")
+        view = self.window.geometry_view
+        self.window.tabs.setCurrentWidget(view)
+        self.assertEqual(len(view.volume_plot.values), 721)
+        view.angle_slider.setValue(540)
+        self.assertEqual(view.data.positions[540], 90)
+        self.assertIn("2.ª", view.angle_label.text())
+        view.angle_slider.setFocus()
+        QTest.keyClick(view.angle_slider, Qt.Key.Key_Left)
+        self.assertEqual(view.angle_slider.value(), 539)
+        self.window.resize(640, 480)
+        self.app.processEvents()
+        self.assertFalse(view._wide)
+        self.assertEqual(view.horizontalScrollBar().maximum(), 0)
+        self.window.cycle_combo.setCurrentText("2T")
+        self.assertEqual(view.angle_slider.maximum(), 360)
+        self.assertEqual(len(view.volume_plot.values), 361)
+
     def test_large_integer_dimension_survives_open_and_save(self):
         project = Project(bore_mm=9007199254740993)
         save_project(self.path, project)

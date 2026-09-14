@@ -64,3 +64,11 @@ QScrollBar:vertical { background: #0d1729; width: 12px; margin: 0; }
 QScrollBar::handle:vertical { background: #34455c; min-height: 24px; border-radius: 4px; }
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
 QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }
+
+QTabWidget::pane { border: none; }
+QTabBar::tab { background: #0d1729; color: #9eb1c7; padding: 8px 22px; border-bottom: 2px solid transparent; }
+QTabBar::tab:selected { color: #b4d9f5; border-bottom-color: #69baf0; }
+QTabBar::tab:focus { background: #24415b; }
+QSlider::groove:horizontal { background: #34455c; height: 5px; }
+QSlider::handle:horizontal { background: #69baf0; border: 1px solid #b4d9f5; width: 14px; margin: -5px 0; border-radius: 4px; }
+QSlider::handle:horizontal:focus { background: #d5efff; border-color: #ffffff; }

@@ -10,11 +10,12 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QComboBox, QDialog, QFileDialog, QFormLayout, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
     QMainWindow, QMessageBox, QPlainTextEdit, QScrollArea, QSizePolicy,
-    QToolBar, QVBoxLayout, QWidget,
+    QTabWidget, QToolBar, QVBoxLayout, QWidget,
 )
 
 from .project import NUMERIC_FIELDS, Project, ProjectError, displacements, parse_number
 from .storage import load_project, save_project
+from .geometry_view import GeometryView
 
 
 class _FilePathLabel(QLabel):
@@ -260,7 +261,11 @@ class MainWindow(QMainWindow):
         outer.addLayout(row)
         outer.addStretch()
         self.workspace_scroll.setWidget(central)
-        self.setCentralWidget(self.workspace_scroll)
+        self.tabs = QTabWidget()
+        self.tabs.addTab(self.workspace_scroll, "&Ficha")
+        self.geometry_view = GeometryView()
+        self.tabs.addTab(self.geometry_view, "&Geometría")
+        self.setCentralWidget(self.tabs)
         self._arrange_groups()
         for previous, following in zip(self._edit_widgets, self._edit_widgets[1:]):
             QWidget.setTabOrder(previous, following)
@@ -304,6 +309,10 @@ class MainWindow(QMainWindow):
         for label, value in ((self.volume_label, per_cylinder), (self.total_volume_label, total)):
             label.setText("—" if value is None else f"{value:.2f}")
             label.setToolTip(label.text())
+
+        self.geometry_view.set_inputs(parsed, self.cycle_combo.currentText(),
+                                      {field: label.text() for field, label in self.numeric_errors.items()},
+                                      self.name_edit.text())
 
     def _build_statusbar(self) -> None:
         information = QWidget()

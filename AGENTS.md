@@ -5,7 +5,8 @@
 Leer README.md y el cambio solicitado dentro de `openspec/changes/` antes de
 modificar archivos. `base-escritorio` es la entrega inicial; su límite de nombre,
 tipo y archivos pertenece a esa entrega. El cambio autorizado actual es
-`caracteristicas-motor`: proposal.md, design.md, specs/ficha-motor/spec.md y tasks.md.
+`geometria-cinematica`: proposal.md, design.md, specs/geometria-cinematica/spec.md
+y tasks.md. Entrega 2 autorizada aunque la aceptación manual de entrega 1 siga pendiente.
 No alterar retrospectivamente requisitos ni verificaciones de entregas anteriores.
 
 La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md) define el orden, los objetivos y

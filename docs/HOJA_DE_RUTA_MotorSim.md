@@ -19,13 +19,14 @@ Prioridad propuesta: datos generales para 2T y 4T desde el editor común; primer
 
 ## Estado de avance
 
-Seguimiento de la copia local comprobada el 14/09/2026. Solo la entrega 1 está
-autorizada; las siguientes requieren autorización expresa.
+Seguimiento de la copia local comprobada el 14/09/2026. Las entregas 1 y 2 están
+autorizadas; desde la 3 requieren nueva autorización expresa. La aceptación
+manual pendiente de la 1 no bloquea la 2 por decisión explícita de la usuaria.
 
 | Entrega | Estado | Cambio | Observación |
 | --- | --- | --- | --- |
 | 1. Características del motor y diseño moderno | Por verificar | [caracteristicas-motor](../openspec/changes/caracteristicas-motor/tasks.md) | Ficha preparada; queda el recorrido manual Windows heredado. |
-| 2. Geometría y cinemática | Pendiente | — | Siguiente; no autorizada. |
+| 2. Geometría y cinemática | Por verificar | [geometria-cinematica](../openspec/changes/geometria-cinematica/tasks.md) | Preparada; captura e inspección del escritorio Windows pendientes. |
 | 3. Configuración específica 2T | Pendiente | — | No autorizada. |
 | 4. Admisión y escape | Pendiente | — | No autorizada. |
 | 5. Primer caso de simulación 2T | Pendiente | — | No autorizada. |
