@@ -1,6 +1,10 @@
 # Tareas de base-escritorio
 
-Estado al 14/09/2026: implementación autorizada y realizada; pruebas automatizadas
+Estado vigente: comprobaciones manuales acreditadas por declaración de la usuaria;
+entregas 1 y 2 Completadas. Evidencia y pendientes anteriores conservados abajo
+como historial; la aceptación actual se registra al final. Sin archivar.
+
+Estado histórico previo a la aceptación manual: implementación autorizada y realizada; pruebas automatizadas
 aprobadas. Recorrido manual completo Windows pendiente. Integración automática
 omitida por decisión explícita de la usuaria; se conservan los prompts globales.
 Requisitos: [gestion-proyectos](specs/gestion-proyectos/spec.md).
@@ -23,7 +27,7 @@ Requisitos: [gestion-proyectos](specs/gestion-proyectos/spec.md).
 ## 4. Comprobación y entrega
 
 - [x] 4.1 Ejecutar las pruebas focalizadas y corregir los incumplimientos concretos de la especificación.
-- [ ] 4.2 Comprobar manualmente el recorrido en Windows, incluidos errores y cambios pendientes. Dejar esta casilla sin marcar si no se ejecutó.
+- [x] 4.2 Comprobar manualmente el recorrido en Windows, incluidos errores y cambios pendientes. Dejar esta casilla sin marcar si no se ejecutó.
 - [x] 4.3 Realizar la revisión puntual definida en AGENTS.md y resolver defectos comprobables sin ampliar el alcance.
 - [x] 4.4 Actualizar README con comandos realmente comprobados, versiones, resultados y limitaciones. Entregar y detenerse sin comenzar el simulador.
 
@@ -101,3 +105,14 @@ validación y protección de cambios, incluidos diálogos reales y atributo Solo
 lectura del paso 8 en archivos temporales. No se presenta como prueba histórica.
 Detalle en `../geometria-cinematica/tasks.md`. La tarea 4.2 sigue sin marcar:
 pendientes recorrido/aceptación manual y paso 9 con el equipo sin Internet.
+
+## Aceptación manual comunicada por la usuaria — 14/09/2026
+
+La usuaria declara haber completado las comprobaciones manuales pendientes del
+README, incluido el funcionamiento sin Internet, y acepta las entregas 1 y 2.
+Esta evidencia corresponde a comprobaciones realizadas por la usuaria; no se
+atribuye al agente ni a las pruebas automatizadas o a la inspección de capturas.
+Resuelve el pendiente manual anterior sin reescribir su historial. No quedan
+criterios obligatorios de comprobación pendientes para estas dos entregas.
+No se repitieron pruebas por esta actualización documental. No se archivan
+cambios ni se inicia la entrega 3. La publicación queda a cargo de la usuaria.

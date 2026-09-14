@@ -5,12 +5,13 @@ actual [geometria-cinematica](openspec/changes/geometria-cinematica/specs/geomet
 añade posición del pistón, volúmenes y curvas geométricas a la ficha existente.
 No contiene simulación física ni estimaciones de rendimiento.
 
-Estado de la entrega 1: **Por verificar**, por el recorrido manual Windows
-heredado aún pendiente. La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md#estado-de-avance)
-resume el avance; [tasks.md](openspec/changes/caracteristicas-motor/tasks.md)
-conserva el detalle histórico. Entregas 1 y 2 **Por verificar** en cuanto al
-cierre manual conjunto: la comprobación técnica actual y las capturas están
-acreditadas; no constituyen aceptación de la usuaria. Entrega 3 no autorizada.
+Estado de las entregas 1 y 2: **Completadas**. La usuaria comunicó el 14/09/2026
+que realizó las comprobaciones manuales pendientes, incluido el uso sin Internet,
+y aceptó ambas entregas. No quedan otros criterios obligatorios pendientes según
+las tareas existentes. La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md#estado-de-avance)
+resume el estado. Esta aceptación es evidencia de la usuaria, separada de las
+pruebas automatizadas e inspección visual del agente. Sin archivar; entrega 3
+no autorizada. La publicación de esta actualización queda a cargo de la usuaria.
 
 ## Interfaz y uso
 
@@ -89,10 +90,9 @@ sobre archivo temporal con atributo Solo lectura, en 2T y 4T. No se encontraron
 defectos que requirieran modificar la implementación. Evidencia detallada en los
 tasks existentes; esta ejecución es actual, no una verificación histórica.
 
-**Aceptación manual pendiente:** la usuaria debe realizar y aceptar el recorrido
-manual existente. Su paso 9 con el equipo realmente sin Internet sigue sin ejecutar;
-no se desconectó el equipo ni se alteraron redes del entorno compartido. La
-comprobación automatizada y la inspección visual no se presentan como aceptación.
+**Aceptación manual de la usuaria:** recorrido existente completado, incluido
+el paso 9 sin Internet, según su declaración explícita. No se repitieron pruebas
+ni se generó otra revisión para registrar esta aceptación documental.
 
 ## Instalar, iniciar y probar
 
@@ -136,8 +136,9 @@ $env:QT_QPA_PLATFORM = $null
 ```
 
 Las pruebas por defecto usan `offscreen`. La automatización visible y la inspección
-de capturas Windows son evidencia distinta; no equivalen al recorrido manual
-completo histórico de base-escritorio, que sigue pendiente y sin marcar.
+de capturas Windows son evidencia distinta; no equivalen al recorrido
+manual realizado y confirmado posteriormente por la usuaria; ambas evidencias
+se mantienen separadas.
 
 En entrega 1 se realizó una revisión independiente de solo lectura conforme a AGENTS.md.
 Detectó pérdida de precisión al reabrir un entero dimensional grande; se corrigió
@@ -177,7 +178,8 @@ Entregas 1 y 2 publicadas en `040e789` y `7ef0628`, respectivamente: pertenencia
 a origin/main comprobada tras fetch. No se recrearon esos commits ni se acepta
 retrospectivamente el recorrido manual.
 AGENTS.md vincula la restricción de nombre/tipo sin geometría a base-escritorio.
-No se alteran sus criterios ni se completa su recorrido pendiente retrospectivamente.
+No se alteran sus criterios. El recorrido manual se acredita mediante la
+declaración posterior de la usuaria, sin atribuirlo a verificaciones históricas.
 
 La integración automática OpenSpec–Codex sigue omitida por decisión explícita
 para preservar prompts y configuración global. No se ejecutó init/update ni se
@@ -192,7 +194,10 @@ Validación estricta aprobada. Ningún cambio se archiva ni se sincroniza por es
 entrega. El alcance termina en geometría/cinemática; entrega 3 y simulador requieren otra autorización.
 Se preservan la captura previa y el registro histórico de base-escritorio.
 
-## Recorrido manual histórico pendiente: base-escritorio
+## Recorrido manual existente: base-escritorio
+
+Completado según declaración de la usuaria del 14/09/2026. Se conservan los pasos
+originales como referencia, sin modificar criterios ni atribuir su ejecución al agente.
 
 Usar una carpeta de prueba y archivos descartables, sin reemplazar proyectos reales.
 
@@ -229,5 +234,5 @@ Usar una carpeta de prueba y archivos descartables, sin reemplazar proyectos rea
 9. En la versión base-escritorio, repetir creación, guardado y apertura sin conexión a Internet. Comprobar que
    cambiar 2T/4T no muestra ni ejecuta cálculos o simulación.
 
-Registrar lo observado en tasks.md antes de marcar 4.2. La entrega no se declara
-completamente comprobada mientras este recorrido obligatorio siga pendiente.
+La tarea 4.2 se marca con la declaración de comprobación manual de la usuaria,
+registrada separadamente en tasks.md. Las entregas permanecen sin archivar.

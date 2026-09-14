@@ -1,5 +1,9 @@
 # Tareas de caracteristicas-motor
 
+Estado vigente: comprobaciones manuales acreditadas por declaración de la usuaria;
+entregas 1 y 2 Completadas. Evidencia y pendientes anteriores conservados abajo
+como historial; la aceptación actual se registra al final. Sin archivar.
+
 - [x] 1. Registrar el alcance autorizado y validar el único cambio OpenSpec.
 - [x] 2. Implementar datos opcionales, parseo y validación, JSON v2 y lectura v1.
 - [x] 3. Implementar ficha adaptable, geometría calculada y estado pendiente completo.
@@ -24,7 +28,7 @@ No equivale al recorrido manual completo histórico de base-escritorio.
 - [x] 7. Vincular el seguimiento persistente a la hoja de ruta y declarar geometría común.
 - [x] 8. Comprobar cierre/reapertura de ficha completa en otra ventana y lectura v1 desde el editor; ejecutar regresiones y revisar la ventana Windows.
 - [x] 9. Realizar autorrevisión puntual del ajuste y actualizar README y estado resumido.
-- [ ] 10. Acreditar el recorrido manual Windows heredado antes del cierre completo; referencia única de pasos: README y tarea 4.2 de base-escritorio, que permanece sin marcar.
+- [x] 10. Acreditar el recorrido manual Windows heredado antes del cierre completo; referencia única de pasos: README y tarea 4.2 de base-escritorio.
 
 Evidencia de la retoma (14/09/2026): estado local contrastado en main, HEAD
 7301848; cambios previos preservados. Reutilizada la implementación existente.
@@ -48,3 +52,14 @@ Solo lectura en 2T/4T. Evidencia conjunta detallada en
 Captura actual: `docs/images/motorsim-ficha-verificacion.png`.
 La tarea 10 permanece pendiente: automatización visible e inspección actual no
 son aceptación manual; falta además el paso 9 con desconexión real de Internet.
+
+## Aceptación manual comunicada por la usuaria — 14/09/2026
+
+La usuaria declara haber completado las comprobaciones manuales pendientes del
+README, incluido el funcionamiento sin Internet, y acepta las entregas 1 y 2.
+Esta evidencia corresponde a comprobaciones realizadas por la usuaria; no se
+atribuye al agente ni a las pruebas automatizadas o a la inspección de capturas.
+Resuelve el pendiente manual anterior sin reescribir su historial. No quedan
+criterios obligatorios de comprobación pendientes para estas dos entregas.
+No se repitieron pruebas por esta actualización documental. No se archivan
+cambios ni se inicia la entrega 3. La publicación queda a cargo de la usuaria.

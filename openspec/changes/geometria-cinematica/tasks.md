@@ -1,5 +1,9 @@
 # Tareas de geometria-cinematica
 
+Estado vigente: comprobaciones manuales acreditadas por declaración de la usuaria;
+entregas 1 y 2 Completadas. Evidencia y pendientes anteriores conservados abajo
+como historial; la aceptación actual se registra al final. Sin archivar.
+
 - [x] 1. Comprobar registro/publicación de entrega 1, preservar pendientes y validar este único cambio.
 - [x] 2. Implementar cálculos directos y dependencias por resultado; contrastar caso independiente.
 - [x] 3. Añadir pestaña, esquema y curvas Qt con actualización y teclado.
@@ -51,3 +55,14 @@ manual ni evidencia histórica. Sigue pendiente realizar y aceptar el recorrido
 manual de README, incluido paso 9 con el equipo realmente desconectado de Internet;
 no se modificó la conectividad del entorno compartido. No se archiva ni inicia
 entrega 3. Estado de cierre conjunto: Por verificar.
+
+## Aceptación manual comunicada por la usuaria — 14/09/2026
+
+La usuaria declara haber completado las comprobaciones manuales pendientes del
+README, incluido el funcionamiento sin Internet, y acepta las entregas 1 y 2.
+Esta evidencia corresponde a comprobaciones realizadas por la usuaria; no se
+atribuye al agente ni a las pruebas automatizadas o a la inspección de capturas.
+Resuelve el pendiente manual anterior sin reescribir su historial. No quedan
+criterios obligatorios de comprobación pendientes para estas dos entregas.
+No se repitieron pruebas por esta actualización documental. No se archivan
+cambios ni se inicia la entrega 3. La publicación queda a cargo de la usuaria.
