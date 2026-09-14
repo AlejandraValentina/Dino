@@ -1,42 +1,82 @@
-# Instrucciones para Codex
+# MotorSim — Instrucciones de trabajo para Codex
 
-## Contexto y lectura
+## Lectura y autoridad
 
-MotorSim es el nombre de trabajo de la aplicación; Dino es el repositorio. Es una aplicación de escritorio en Python y PySide6/Qt Widgets, con Windows como plataforma inicial.
+Leer README.md y el cambio solicitado dentro de `openspec/changes/` antes de
+modificar archivos. El cambio inicial es `base-escritorio`: proposal.md, design.md,
+specs/gestion-proyectos/spec.md y tasks.md.
 
-Leer `README.md` y `docs/ALCANCE_INICIAL.md` antes de cambiar archivos. La etapa inicial es una base de escritorio para gestionar proyectos, no el simulador físico.
+La usuaria decide alcance y autorización. Estos archivos no inician tareas por
+sí mismos. Una petición documental solo autoriza documentación; implementar la
+aplicación requiere una petición explícita. No interpretar «documentos completos»
+o «ready to apply» de OpenSpec como autorización ni como código terminado.
 
-Este archivo orienta el trabajo, pero no inicia tareas por sí mismo. Si la solicitud es documental, modificar solo documentación. Implementar cuando la tarea de la usuaria lo solicite y respetar su alcance.
+Los requisitos observables tienen una única fuente: la especificación del cambio
+activo. Tras un cierre autorizado, las especificaciones consolidadas estarán en
+`openspec/specs/`. La ruta antigua en docs/ es una referencia, no requisitos
+alternativos. Si hay una contradicción material nueva, identificarla y no ampliar
+silenciosamente el alcance ni escoger la interpretación más exigente.
 
-## Límites
+## Responsable y coordinación
 
-- Implementar únicamente la tarea solicitada. No comenzar la etapa siguiente de forma autónoma.
-- Para la versión básica, limitarse a ventana, nombre de proyecto, selector 2T/4T, archivos JSON y protección de cambios pendientes.
-- No implementar cálculos físicos, simulación ficticia, curvas inventadas ni parámetros físicos todavía indefinidos.
-- No importar el proyecto anterior ni sus contratos, fases o infraestructura sin autorización explícita.
-- No convertir mejoras opcionales en bloqueos de entrega. Registrar una limitación concreta en lugar de abrir otra campaña de trabajo.
-- No ampliar el alcance mediante arquitectura preventiva, microservicios, API web, extensiones, múltiples agentes obligatorios o documentos de proceso adicionales.
+Un Codex principal implementa, prueba e integra el cambio. También coordina el
+trabajo: no se construye un orquestador externo, servicio de agentes ni plataforma
+multiagente. Hay un único escritor de código por tarea. La elección del modelo
+(Astra u otro disponible) pertenece a la configuración del entorno de la usuaria;
+no se codifica ni modifica en MotorSim.
 
-## Implementación proporcional
+Se realiza una revisión puntual al terminar, preferentemente en otra sesión o
+con un subagente de solo lectura si está disponible. No requiere agentes
+permanentes ni bloquea el trabajo por no disponer de subagentes. Sin revisión
+independiente, hacer una pasada separada y declararla como autorrevisión, no como
+auditoría independiente. El principal conserva la responsabilidad de integrar.
 
-Preferir Python estándar y PySide6 para la aplicación básica. Añadir una dependencia solo cuando la función actual la requiera y explicar su uso. Mantener los datos y los archivos separados de los widgets sin imponer capas innecesarias.
+## Code Review Rules
 
-Usar textos de interfaz y documentación en español. Evitar rutas personales codificadas: el repositorio debe funcionar desde otra carpeta además de la ubicación de trabajo indicada por la usuaria.
+Revisar únicamente el diff del cambio, su especificación y evidencia de pruebas.
+Informar defectos reproducibles, pérdida de datos, requisitos incumplidos o una
+comprobación necesaria ausente. Cada hallazgo debe indicar archivo/ubicación,
+requisito afectado y reproducción o razonamiento concreto. No inventar evidencia.
 
-Conservar los cambios y archivos ajenos a la tarea. No reescribir la historia de Git ni usar operaciones destructivas para resolver diferencias. No subir credenciales, entornos virtuales ni datos personales de prueba.
+Separar defectos de mejoras opcionales. Estas últimas no bloquean la entrega ni
+se convierten en requisitos. El revisor no modifica código ni requisitos; el
+principal corrige los defectos y vuelve a comprobar lo afectado. No encadenar
+revisores o rondas generales indefinidas: ante un bloqueo persistente, entregar
+el estado verificable y el impedimento concreto sin declarar éxito.
 
-La elección del modelo de Codex corresponde a la configuración del entorno de la usuaria; no forma parte de las dependencias de MotorSim ni se modifica desde esta tarea.
+## Flujo y límites
 
-## Verificación y entrega
+- Trabajar solo sobre el cambio solicitado; no generar otro plan, otra auditoría
+  general ni una etapa futura para ejecutar la tarea actual.
+- Mantener tasks.md como único registro de avance. Marcar tareas únicamente con
+  evidencia de ejecución; no confundir preparación documental con implementación.
+- Respetar la especificación: solo nombre, tipo y archivos; ni geometría ni
+  simulador físico, gráficas ficticias o arquitectura de solvers.
+- Elegir pocos módulos, Python estándar y PySide6. Mantener datos y
+  archivos separables de los widgets. No añadir dependencias preventivas.
+- No importar código, contratos, fases o infraestructura de proyectos anteriores.
+- No modificar requisitos o aceptación para ocultar un fallo o facilitar el cierre.
+- Usar comandos con salida y límites de ejecución razonables. No repetir una
+  operación bloqueada sin hipótesis nueva; no dejar procesos duplicados o esperas
+  indefinidas. Entregar lo verificado y la limitación del entorno.
+- No sincronizar specs ni archivar el cambio por el solo hecho de completar
+  documentos. Archivar únicamente con trabajo comprobado y cierre autorizado.
+- Al completar el cambio autorizado, detenerse. La física requiere otra definición.
 
-Probar lo necesario para el alcance actual: validación de datos, guardado/apertura y protección frente a errores o pérdida de cambios. Complementar con el recorrido de interfaz indicado en `docs/ALCANCE_INICIAL.md`.
+## Cuidado del repositorio y entrega
 
-No afirmar que una prueba pasó sin ejecutarla. Distinguir comprobaciones automatizadas, comprobaciones manuales y verificaciones pendientes, especialmente en Windows. No crear esperas o reintentos ilimitados ante un bloqueo del entorno; explicar el impedimento y entregar el trabajo verificable.
+Preservar cambios ajenos, comprobar el estado de Git antes de editar y no
+reescribir historia ni descartar trabajo para resolver diferencias. No subir
+credenciales, entornos virtuales o datos personales. No modificar configuración
+global de Codex, permisos o preferencias del equipo sin autorización específica.
+No codificar `E:\dino` como ruta de aplicación.
 
-Actualizar el README con los comandos reales de instalación, ejecución y pruebas cuando existan. Mantenerlo fiel al estado del repositorio. No añadir comandos para archivos o módulos inexistentes.
+Actualizar README con instrucciones reales de instalación, ejecución y pruebas
+cuando existan. Distinguir pruebas automatizadas, recorrido manual de Windows,
+revisión y comprobaciones pendientes. Una prueba sin pantalla no valida Windows.
 
-Al cerrar una tarea, informar brevemente qué cambió, qué se comprobó y qué quedó pendiente. No declarar que el simulador funciona por haber terminado la interfaz. Al completar la versión básica, detenerse: la física requiere otra tarea.
+La entrega informa brevemente archivos cambiados, comprobaciones ejecutadas y
+resultados, pendientes y referencia Git. No requiere otro informe obligatorio.
+No declarar que funciona el simulador por haber terminado su base de escritorio.
 
-## Referencia del formato
-
-OpenAI documenta `AGENTS.md` como mecanismo de instrucciones de proyecto para Codex: https://developers.openai.com/codex/agent-configuration/agents-md
+Referencia del formato: https://developers.openai.com/codex/guides/agents-md
