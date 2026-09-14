@@ -24,7 +24,9 @@ entrada al guardar y todos los campos al cambiar 2T/4T.
 
 ### Requirement: Cilindrada geométrica vigente
 La ficha MUST mostrar solo lectura cilindrada por cilindro = pi * D**2 * S / 4000
-y total = N * cilindrada por cilindro, en cm³ con dos decimales. Cada resultado
+y total = N * cilindrada por cilindro, en cm³ con dos decimales. La ficha
+MUST declarar la hipótesis de geometría común a todos los cilindros; esto no
+representa simulación multicilíndrica. Cada resultado
 MUST calcularse solo con sus entradas disponibles y válidas; de otro modo MUST
 mostrar «—» inmediatamente. Biela y compresión MUST NOT generar simulación,
 animación o rendimiento.

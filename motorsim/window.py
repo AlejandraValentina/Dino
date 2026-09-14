@@ -1,4 +1,4 @@
-"""Ventana de edición de la base de escritorio."""
+"""Editor de la ficha del motor."""
 
 from pathlib import Path
 
@@ -8,12 +8,12 @@ from PySide6.QtGui import (
     QPalette, QPen, QPixmap,
 )
 from PySide6.QtWidgets import (
-    QButtonGroup, QDialog, QFileDialog, QFrame, QHBoxLayout, QLabel, QLineEdit,
-    QMainWindow, QMessageBox, QSizePolicy,
-    QPushButton, QToolBar, QVBoxLayout, QWidget,
+    QComboBox, QDialog, QFileDialog, QFormLayout, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
+    QMainWindow, QMessageBox, QPlainTextEdit, QScrollArea, QSizePolicy,
+    QToolBar, QVBoxLayout, QWidget,
 )
 
-from .project import Project, ProjectError
+from .project import NUMERIC_FIELDS, Project, ProjectError, displacements, parse_number
 from .storage import load_project, save_project
 
 
@@ -47,8 +47,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.path: Path | None = None
         self.dirty = False
-        self.resize(900, 520)
-        self.setMinimumSize(680, 440)
+        self.resize(1080, 760)
+        self.setMinimumSize(640, 480)
         self.setWindowTitle("MotorSim")
         self.setStyleSheet(Path(__file__).with_name("theme.qss").read_text(encoding="utf-8"))
         palette = self.palette()
@@ -69,9 +69,25 @@ class MainWindow(QMainWindow):
         self.name_edit = QLineEdit()
         self.name_edit.setMaxLength(2147483647)
         self.name_edit.setObjectName("project_name")
-        self.cycle_group = QButtonGroup(self)
-        self.cycle_group.setExclusive(True)
-        self.cycle_buttons = {}
+        self.cycle_combo = QComboBox()
+        self.cycle_combo.addItems(["2T", "4T"])
+        self.cycle_combo.setMaximumWidth(140)
+        self.text_edits = {field: QLineEdit() for field in ("manufacturer", "model")}
+        for edit in self.text_edits.values():
+            edit.setMaxLength(2147483647)
+            edit.setPlaceholderText("Opcional")
+        self.notes_edit = QPlainTextEdit()
+        self.notes_edit.setPlaceholderText("Opcional")
+        self.notes_edit.setTabChangesFocus(True)
+        self.notes_edit.setMinimumHeight(96)
+        self.notes_edit.setMaximumHeight(160)
+        self.numeric_edits = {field: QLineEdit() for field in NUMERIC_FIELDS}
+        self.numeric_errors = {field: self._label("", "fieldError") for field in NUMERIC_FIELDS}
+        self.volume_label = self._label("—", "resultValue")
+        self.total_volume_label = self._label("—", "resultValue")
+        self._edit_widgets = [self.name_edit, self.cycle_combo, *self.text_edits.values(),
+                              self.notes_edit, *self.numeric_edits.values()]
+        self._wide_layout = None
         self.file_label = _FilePathLabel()
         self.state_label = QLabel()
         self.state_label.setObjectName("projectState")
@@ -101,7 +117,10 @@ class MainWindow(QMainWindow):
         self._build_statusbar()
 
         self.name_edit.textChanged.connect(self._edited)
-        self.cycle_group.buttonToggled.connect(lambda button, checked: self._edited() if checked else None)
+        self.cycle_combo.currentTextChanged.connect(self._edited)
+        for edit in (*self.text_edits.values(), *self.numeric_edits.values()):
+            edit.textChanged.connect(self._edited)
+        self.notes_edit.textChanged.connect(self._edited)
         self._activate(Project(), None)
 
     @staticmethod
@@ -155,49 +174,136 @@ class MainWindow(QMainWindow):
         return QIcon(pixmap)
 
     def _build_workspace(self) -> None:
+        self.workspace_scroll = QScrollArea()
+        self.workspace_scroll.setWidgetResizable(True)
+        self.workspace_scroll.setFrameShape(QFrame.Shape.NoFrame)
         central = QWidget()
         outer = QVBoxLayout(central)
-        outer.setContentsMargins(36, 32, 36, 32)
-        form = QWidget()
-        form.setObjectName("projectForm")
-        form.setMaximumWidth(560)
-        form.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        content = QVBoxLayout(form)
+        outer.setContentsMargins(24, 24, 24, 24)
+        self.form = QWidget()
+        self.form.setMaximumWidth(1120)
+        content = QVBoxLayout(self.form)
         content.setContentsMargins(0, 0, 0, 0)
-        content.setSpacing(10)
-        content.addWidget(self._label("Proyecto", "pageTitle"))
-        content.addSpacing(12)
-        name_label = self._label("&Nombre del proyecto")
-        name_label.setBuddy(self.name_edit)
-        content.addWidget(name_label)
-        content.addWidget(self.name_edit)
-        content.addSpacing(10)
-        type_label = self._label("&Tipo de motor")
-        content.addWidget(type_label)
-        cycle_row = QHBoxLayout()
-        cycle_row.setSpacing(12)
-        for cycle, title in (("2T", "2 tiempos (2T)"), ("4T", "4 tiempos (4T)")):
-            button = QPushButton(title)
-            button.setObjectName("cycleCard")
-            button.setCheckable(True)
-            button.setFixedHeight(64)
-            button.setAccessibleName(title)
-            button.setToolTip(f"Seleccionar {title}")
-            button.setProperty("cycle", cycle)
-            self.cycle_group.addButton(button)
-            self.cycle_buttons[cycle] = button
-            cycle_row.addWidget(button, 1)
-        type_label.setBuddy(self.cycle_buttons["2T"])
-        content.addLayout(cycle_row)
+        content.setSpacing(22)
+        content.addWidget(self._label("Motor", "pageTitle"))
+        self.groups_grid = QGridLayout()
+        self.groups_grid.setHorizontalSpacing(28)
+        self.groups_grid.setVerticalSpacing(24)
+        self.general_group = QGroupBox("Datos generales")
+        general = QVBoxLayout(self.general_group)
+        general.setContentsMargins(18, 28, 18, 18)
+        general.setSpacing(9)
+        for label, edit in (("&Nombre del proyecto", self.name_edit),
+                            ("&Tipo de motor", self.cycle_combo),
+                            ("&Fabricante", self.text_edits["manufacturer"]),
+                            ("&Modelo", self.text_edits["model"]),
+                            ("&Observaciones", self.notes_edit)):
+            caption = self._label(label)
+            caption.setBuddy(edit)
+            general.addWidget(caption)
+            general.addWidget(edit)
+        self.geometry_group = QGroupBox("Geometría")
+        geometry = QVBoxLayout(self.geometry_group)
+        geometry.setContentsMargins(18, 28, 18, 18)
+        geometry.setSpacing(18)
+        fields = QFormLayout()
+        fields.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
+        fields.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        fields.setHorizontalSpacing(18)
+        fields.setVerticalSpacing(12)
+        captions = {
+            "cylinder_count": ("Número de &cilindros", "cil."),
+            "bore_mm": ("&Diámetro del cilindro", "mm"),
+            "stroke_mm": ("Ca&rrera", "mm"),
+            "rod_length_mm": ("&Biela entre centros", "mm"),
+            "compression_ratio": ("Compresión &geométrica", ":1"),
+        }
+        for field, (title, unit) in captions.items():
+            edit = self.numeric_edits[field]
+            edit.setObjectName(field)
+            edit.setMinimumWidth(70)
+            edit.setMaximumWidth(200)
+            caption = self._label(title)
+            caption.setBuddy(edit)
+            container = QWidget()
+            column = QVBoxLayout(container)
+            column.setContentsMargins(0, 0, 0, 0)
+            column.setSpacing(4)
+            row = QHBoxLayout()
+            row.setContentsMargins(0, 0, 0, 0)
+            row.setSpacing(8)
+            row.addWidget(edit, 1)
+            row.addWidget(self._label(unit, "unit"))
+            column.addLayout(row)
+            column.addWidget(self.numeric_errors[field])
+            fields.addRow(caption, container)
+        geometry.addLayout(fields)
+        results = QFormLayout()
+        results.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
+        results.setVerticalSpacing(10)
+        for title, result in (("Cilindrada por cilindro", self.volume_label),
+                              ("Cilindrada total", self.total_volume_label)):
+            result.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+            result.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+            result.setMinimumWidth(100)
+            row = QHBoxLayout()
+            row.addWidget(result, 1)
+            row.addWidget(self._label("cm³", "unit"))
+            results.addRow(self._label(title), row)
+        geometry.addLayout(results)
+        geometry.addWidget(self._label("Cilindrada total: todos los cilindros comparten geometría.", "unit"))
+        content.addLayout(self.groups_grid)
         row = QHBoxLayout()
         row.addStretch()
-        row.addWidget(form, 1)
+        row.addWidget(self.form, 1)
         row.addStretch()
         outer.addLayout(row)
         outer.addStretch()
-        self.setCentralWidget(central)
-        QWidget.setTabOrder(self.name_edit, self.cycle_buttons["2T"])
-        QWidget.setTabOrder(self.cycle_buttons["2T"], self.cycle_buttons["4T"])
+        self.workspace_scroll.setWidget(central)
+        self.setCentralWidget(self.workspace_scroll)
+        self._arrange_groups()
+        for previous, following in zip(self._edit_widgets, self._edit_widgets[1:]):
+            QWidget.setTabOrder(previous, following)
+
+    def _arrange_groups(self) -> None:
+        wide = self.width() >= max(880, self.fontMetrics().horizontalAdvance("M") * 65)
+        if wide == self._wide_layout:
+            return
+        self._wide_layout = wide
+        self.groups_grid.removeWidget(self.general_group)
+        self.groups_grid.removeWidget(self.geometry_group)
+        self.groups_grid.addWidget(self.general_group, 0, 0, Qt.AlignmentFlag.AlignTop)
+        self.groups_grid.addWidget(self.geometry_group, 0 if wide else 1, 1 if wide else 0,
+                                   Qt.AlignmentFlag.AlignTop)
+        self.groups_grid.setColumnStretch(0, 1)
+        self.groups_grid.setColumnStretch(1, 1 if wide else 0)
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        if hasattr(self, "groups_grid"):
+            self._arrange_groups()
+
+    def _update_geometry(self) -> None:
+        parsed = {}
+        for field, edit in self.numeric_edits.items():
+            try:
+                parsed[field] = parse_number(edit.text(), field)
+                message = ""
+            except ProjectError as exc:
+                # Ausente solo para este cálculo; el texto inválido sigue en el
+                # widget y project() volverá a rechazarlo antes de guardar.
+                parsed[field] = None
+                message = str(exc)
+            self.numeric_errors[field].setText(message)
+            self.numeric_errors[field].setVisible(bool(message))
+            edit.setProperty("invalid", bool(message))
+            edit.setAccessibleDescription(message)
+            edit.style().unpolish(edit)
+            edit.style().polish(edit)
+        per_cylinder, total = displacements(parsed["bore_mm"], parsed["stroke_mm"], parsed["cylinder_count"])
+        for label, value in ((self.volume_label, per_cylinder), (self.total_volume_label, total)):
+            label.setText("—" if value is None else f"{value:.2f}")
+            label.setToolTip(label.text())
 
     def _build_statusbar(self) -> None:
         information = QWidget()
@@ -215,11 +321,16 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(information, 1)
 
     def project(self) -> Project:
-        selected = self.cycle_group.checkedButton()
-        return Project(self.name_edit.text(), selected.property("cycle") if selected else "2T")
+        return Project(
+            name=self.name_edit.text(), cycle=self.cycle_combo.currentText(),
+            manufacturer=self.text_edits["manufacturer"].text(),
+            model=self.text_edits["model"].text(), notes=self.notes_edit.toPlainText(),
+            **{field: parse_number(edit.text(), field) for field, edit in self.numeric_edits.items()},
+        )
 
     def _edited(self) -> None:
         self.dirty = True
+        self._update_geometry()
         self._refresh_status()
 
     def _refresh_status(self) -> None:
@@ -229,15 +340,24 @@ class MainWindow(QMainWindow):
         self.state_label.setProperty("pending", self.dirty)
         self.state_label.style().unpolish(self.state_label)
         self.state_label.style().polish(self.state_label)
-        for cycle, button in self.cycle_buttons.items():
-            title = "2 tiempos (2T)" if cycle == "2T" else "4 tiempos (4T)"
-            button.setText(f"✓  {title}" if button.isChecked() else title)
 
     def _activate(self, project: Project, path: Path | None) -> None:
-        self.name_edit.setText(project.name)
-        self.cycle_buttons[project.cycle].setChecked(True)
+        blocked = [widget.blockSignals(True) for widget in self._edit_widgets]
+        try:
+            self.name_edit.setText(project.name)
+            self.cycle_combo.setCurrentText(project.cycle)
+            for field, edit in self.text_edits.items():
+                edit.setText(getattr(project, field))
+            self.notes_edit.setPlainText(project.notes)
+            for field, edit in self.numeric_edits.items():
+                value = getattr(project, field)
+                edit.setText("" if value is None else str(value))
+        finally:
+            for widget, was_blocked in zip(self._edit_widgets, blocked):
+                widget.blockSignals(was_blocked)
         self.path = path
         self.dirty = False
+        self._update_geometry()
         self._refresh_status()
 
     def _error(self, error: ProjectError) -> None:

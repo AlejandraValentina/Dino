@@ -1,54 +1,58 @@
 # MotorSim
 
-Base de escritorio para crear, editar, guardar y abrir proyectos locales de motor.
-Solo almacena nombre y tipo 2T/4T. **No contiene simulación, geometría ni gráficos.**
+Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La entrega
+actual [caracteristicas-motor](openspec/changes/caracteristicas-motor/specs/ficha-motor/spec.md)
+añade datos generales, geometría y cilindrada calculada. No contiene simulación
+física, estimaciones de rendimiento ni gráficos.
 
-**Estado: base implementada y probada automáticamente; recorrido manual completo
-Windows pendiente. El cambio permanece abierto y no archivado.**
+Estado de la entrega 1: **Por verificar**, por el recorrido manual Windows
+heredado aún pendiente. La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md#estado-de-avance)
+resume el avance; [tasks.md](openspec/changes/caracteristicas-motor/tasks.md)
+conserva el detalle. Entrega 2 (Geometría y cinemática): siguiente, no autorizada.
 
-El comportamiento está definido únicamente en
-[la especificación de base-escritorio](openspec/changes/base-escritorio/specs/gestion-proyectos/spec.md).
-Se conservan [AGENTS.md](AGENTS.md), la [propuesta](openspec/changes/base-escritorio/proposal.md)
-y el [diseño](openspec/changes/base-escritorio/design.md). El registro de avance es
-[tasks.md](openspec/changes/base-escritorio/tasks.md).
+## Interfaz y uso
 
-## Interfaz de escritorio
+Título nativo de Windows, menú Archivo, barra compacta con Nuevo, Abrir, Guardar
+y Guardar como, y un único encabezado «Motor». Datos generales y Geometría se
+organizan en dos columnas o se apilan al reducir el ancho; el desplazamiento
+vertical permite acceder al formulario completo. Fondo oscuro liso, acentos
+azules, Segoe UI, foco visible y navegación por Tab. El selector compacto 2T/4T
+conserva los datos comunes. Una sola barra inferior muestra ruta, estado de
+guardado y «Simulación no disponible». La ruta completa está en su ayuda emergente.
 
-Composición simplificada sobre la aplicación existente, con identidad oscura y
-azul. Se conserva el título nativo de Windows. Solo hay un menú Archivo, una
-barra compacta con Nuevo, Abrir, Guardar y Guardar como, y un título «Proyecto».
+Nombre obligatorio al guardar; fabricante, modelo y observaciones opcionales.
+Cilindros, diámetro, carrera, biela entre centros y compresión pueden quedar
+vacíos. Vacío significa sin informar; un valor inválido se señala y bloquea el
+guardado, conservando la edición. Se acepta coma o punto decimal, sin agrupación
+de miles (un único separador se interpreta siempre como decimal). También se
+admite notación científica en dimensiones y compresión. Cilindros requiere un
+entero positivo; dimensiones, números positivos finitos; compresión, finita > 1.
+Las unidades se muestran junto a los controles; la compresión se expresa como x:1.
 
-Nombre y tipo se agrupan en un formulario de ancho máximo 560 px, sin cuadrícula
-ni paneles anidados. Las tarjetas 2T/4T tienen 64 px de alto, selección exclusiva
-con marca visible y navegación por Tab/flechas. No hay cabecera de marca, barra
-lateral, subtítulos repetidos ni panel de archivo. Se usa Segoe UI en toda la
-interfaz, con foco visible.
+Cilindrada por cilindro = π × diámetro² × carrera / 4000, con mm de entrada y cm³
+de salida. La total multiplica por el número de cilindros, suponiendo geometría común
+a todos ellos (no es simulación multicilíndrica). Los resultados son
+solo lectura, con dos decimales; faltantes o errores en sus entradas muestran
+«—», sin conservar resultados anteriores. Biela y compresión solo se registran.
 
-Una única barra inferior reúne la ruta, el estado de guardado y «Simulación no
-disponible». Las rutas largas se abrevian visualmente; la ayuda emergente conserva
-la ruta completa. El menú Archivo también permite Salir. Las operaciones JSON,
-validación, persistencia y protección de cambios no se modificaron.
+Guardar pide destino inicialmente. Guardar como confirma sobrescritura. Nuevo,
+Abrir y Salir mantienen Guardar/Descartar/Cancelar. Abrir valida antes de
+reemplazar la edición; errores y cancelaciones conservan el trabajo. El guardado
+mantiene archivo temporal, sincronización y reemplazo seguro en el mismo directorio.
 
-La captura aprobada `screen.png` y los archivos `DESIGN.md` y `code.html` del
-Escritorio se usaron como referencias visuales, con la composición ajustada según
-la última corrección solicitada. No se incrusta HTML ni se agregan dependencias,
-módulos, métricas, resultados o botones sin acción.
+![MotorSim en Windows: datos exclusivamente de prueba](docs/images/motorsim-motor.png)
 
-![MotorSim: composición simplificada en Windows](docs/images/motorsim-escritorio.png)
+Captura real de Windows, con título nativo, de 1080 × 791 píxeles. Los datos
+están identificados como prueba y no se precargan en proyectos nuevos. Se
+inspeccionó además la ficha apilada al 150 % con ventana de 700 × 480 unidades
+lógicas: desplazamiento vertical, campos, foco y barra inferior utilizables,
+sin desplazamiento horizontal. El escalado se aplicó solo al proceso Qt.
 
-Captura directa de la ventana visible en Windows, incluido su título nativo:
-900 × 551 px (área cliente 900 × 520). También se inspeccionaron el tamaño mínimo
-680 × 440, el foco por teclado y el estado pendiente con 4T seleccionado. La
-inspección visual se realizó sobre las capturas, separada de los tests. El recorrido
-manual completo de Windows continúa pendiente.
+## Instalar, iniciar y probar
 
-## Instalar y abrir en Windows
-
-Versiones comprobadas el 14/09/2026: Windows 10 (10.0.19045), Python 3.11.0,
-PySide6 6.11.2 y Qt 6.11.2. Se creó un entorno virtual nuevo en el proyecto;
-las dependencias Python se instalaron allí. No se requiere activar el entorno.
-
-Desde PowerShell, para instalar en una copia limpia con Python disponible:
+Versiones comprobadas: Windows 10 (10.0.19045), Python 3.11.0, PySide6 6.11.2,
+Qt 6.11.2, Node.js 24.19.0 y OpenSpec 1.3.1. Se conserva el entorno virtual del
+proyecto; esta entrega no añade dependencias. Instalación en una copia limpia:
 
 ```powershell
 Set-Location E:\dino\Dino
@@ -56,56 +60,27 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Para abrir MotorSim desde esa carpeta:
+Inicio desde la raíz:
 
 ```powershell
 .\.venv\Scripts\python.exe -m motorsim
 ```
 
-Se ejecutaron la creación del entorno, la instalación, el comando de inicio y
-la comprobación de dependencias. La ruta anterior es la ubicación local de esta
-copia; la aplicación no la tiene codificada. No hay instalador ni servidor.
-Internet solo se necesita para descargar las dependencias, no para usar MotorSim.
-
-## Uso
-
-El menú **Archivo** ofrece Nuevo, Abrir, Guardar, Guardar como y Salir. Al iniciar,
-el proyecto es «Sin título», 2T y sin archivo asociado. La ventana muestra la ruta,
-los cambios pendientes y «Simulación no disponible».
-
-El nombre puede editarse libremente; al guardar no puede estar vacío ni contener
-solo espacios. Guardar solicita destino la primera vez. Guardar como permite una
-copia y confirma la sobrescritura de un destino existente. El archivo JSON UTF-8
-contiene únicamente `format_version: 1`, `name` y `cycle`.
-
-Nuevo y cierre ofrecen Guardar, Descartar o Cancelar si hay cambios. Abrir primero
-elige y valida el archivo, y después ofrece esas opciones antes de sustituir el
-proyecto. Cancelar el diálogo o elegir un archivo inválido conserva la edición,
-la ruta y el estado pendiente. Un error de guardado conserva el archivo anterior.
-
-## Pruebas y revisión
+Pruebas y dependencias:
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 .\.venv\Scripts\python.exe -m pip check
 ```
 
-Resultado: **26 pruebas aprobadas**; `pip check` sin dependencias rotas. Cubren
-validación de nombres y tipos, versión entera (rechaza booleanos), JSON inválido,
-UTF-8 y acentos, ambos tipos de motor, ida y vuelta, fallos de escritura/sincronización/
-reemplazo, conservación del archivo anterior, cancelaciones, sobrescritura y
-transiciones con cambios pendientes. El rediseño añade comprobaciones de selección
-mediante tarjetas y teclado, acciones visibles que conservan las protecciones y
-estado/aviso en tamaño compacto y abreviación de rutas largas sin ocultar el estado. Se usan archivos temporales de prueba.
+**38 pruebas aprobadas** y `pip check` sin dependencias rotas. Cubren JSON v2
+completo/incompleto, lectura v1 sin escritura automática, valores vacíos/inválidos,
+coma/punto, finitud, cilindrada y actualización, conservación al cambiar ciclo,
+cambios pendientes de todos los campos, teclado, adaptación de ancho y regresiones
+de errores de archivo, guardado seguro, sobrescritura y cancelaciones.
 
-Por defecto los tests de widgets usan `offscreen`: no equivalen a una prueba
-visual de Windows. También se ejecutaron **19 pruebas de widgets con la plataforma
-Qt `windows`, todas aprobadas**, incluidos diálogos reales de selección de archivo,
-Guardar/Descartar/Cancelar y confirmación de sobrescritura. Otras pruebas sustituyen
-los diálogos para cubrir errores y transiciones de forma determinista.
-
-Para repetir las pruebas de widgets con ventanas visibles en una consola PowerShell
-sin una selección previa de plataforma Qt:
+También se ejecutaron **25 pruebas de widgets con plataforma Qt Windows**, todas
+aprobadas, incluidos diálogos Qt reales. Para repetirlas:
 
 ```powershell
 $env:QT_QPA_PLATFORM = "windows"
@@ -113,20 +88,53 @@ $env:QT_QPA_PLATFORM = "windows"
 $env:QT_QPA_PLATFORM = $null
 ```
 
-Se abrió además la aplicación con su comando real y se inspeccionó una captura
-del escritorio Windows: ventana, formulario, selector, indicador de edición y
-aviso de simulación no disponible visibles. Esto es una comprobación visual
-parcial y automatización visible, **no el recorrido manual completo**.
+Las pruebas por defecto usan `offscreen`. La automatización visible y la inspección
+de capturas Windows son evidencia distinta; no equivalen al recorrido manual
+completo histórico de base-escritorio, que sigue pendiente y sin marcar.
 
-Se realizó una revisión independiente de solo lectura de la composición, conforme
-a AGENTS.md. Detectó una discrepancia entre el recorte de rutas y la expectativa de
-una prueba: se corrigió el recorte para abreviar desde el inicio. El principal
-volvió a ejecutar las 26 pruebas, todas aprobadas, e hizo la autorrevisión de la
-corrección y la documentación. El revisor no identificó regresiones en acciones,
-selección o protecciones e inspeccionó la captura. Estas comprobaciones no equivalen
-al recorrido manual completo.
+Se realizó una revisión independiente de solo lectura conforme a AGENTS.md.
+Detectó pérdida de precisión al reabrir un entero dimensional grande; se corrigió
+el parseo para conservar enteros y se agregó una prueba de regresión. El principal
+comprobó esa corrección, la documentación y las capturas (autorrevisión).
+En esta retoma se reutilizó la ficha, se declaró la geometría común y se verificó
+además cierre/reapertura en otra ventana y lectura v1 desde el editor. La revisión
+puntual de estos ajustes fue autorrevisión; no se abrió otra campaña independiente.
 
-### Recorrido manual pendiente en Windows
+## Formato JSON versión 2
+
+Objeto UTF-8 con claves obligatorias: `format_version` (entero 2), `name`, `cycle`
+(`2T`/`4T`), `manufacturer`, `model`, `notes` (textos; los opcionales vacíos son `""`),
+`cylinder_count` (entero positivo o null), `bore_mm`, `stroke_mm`, `rod_length_mm`
+(números positivos finitos o null), `compression_ratio` (número finito > 1 o null).
+No se almacenan unidades ni resultados derivados. No se redondean las entradas al
+guardar; los decimales usan la precisión numérica de Python, no la precisión de
+presentación de resultados. No se utilizan ceros como sustitutos de datos ausentes.
+
+Se leen archivos versión 1 con `name` y `cycle`; las características quedan vacías.
+Abrir no modifica el archivo ni marca una conversión como edición. Solo un Guardar
+o Guardar como explícito escribe versión 2. No hay sistema general de migraciones.
+
+## OpenSpec y estado
+
+Único cambio nuevo: [caracteristicas-motor](openspec/changes/caracteristicas-motor/),
+con documentación breve y [registro de tareas](openspec/changes/caracteristicas-motor/tasks.md).
+AGENTS.md vincula la restricción de nombre/tipo sin geometría a base-escritorio.
+No se alteran sus criterios ni se completa su recorrido pendiente retrospectivamente.
+
+La integración automática OpenSpec–Codex sigue omitida por decisión explícita
+para preservar prompts y configuración global. No se ejecutó init/update ni se
+reinstalaron herramientas. Comandos documentales ejecutados:
+
+```powershell
+openspec instructions apply --change caracteristicas-motor --json
+openspec validate caracteristicas-motor --strict --no-interactive
+```
+
+Validación estricta aprobada. Ningún cambio se archiva ni se sincroniza por esta
+entrega. El alcance termina en la ficha; el simulador requiere otra autorización.
+Se preservan la captura previa y el registro histórico de base-escritorio.
+
+## Recorrido manual histórico pendiente: base-escritorio
 
 Usar una carpeta de prueba y archivos descartables, sin reemplazar proyectos reales.
 
@@ -160,36 +168,8 @@ Usar una carpeta de prueba y archivos descartables, sin reemplazar proyectos rea
    Propiedades de Windows. Editar e intentar Guardar: comprobar error, archivo
    anterior intacto y cambios pendientes. Intentar cerrar eligiendo Guardar:
    debe permanecer abierto. Quitar «Solo lectura» al terminar y volver a guardar.
-9. Repetir creación, guardado y apertura sin conexión a Internet. Comprobar que
+9. En la versión base-escritorio, repetir creación, guardado y apertura sin conexión a Internet. Comprobar que
    cambiar 2T/4T no muestra ni ejecuta cálculos o simulación.
 
 Registrar lo observado en tasks.md antes de marcar 4.2. La entrega no se declara
 completamente comprobada mientras este recorrido obligatorio siga pendiente.
-
-## OpenSpec
-
-Se conserva el cambio existente `base-escritorio`, esquema `spec-driven` y
-`openspec/config.yaml`. Versiones disponibles comprobadas: Node.js 24.19.0 y
-OpenSpec 1.3.1. Se conservó la instalación existente, sin reinstalar herramientas.
-
-La generación automática de la integración OpenSpec–Codex se **omitió por decisión
-explícita de la usuaria**, para conservar intactos los prompts globales existentes.
-No se ejecutó `openspec init` ni `openspec update`, ni se modificaron `delivery`,
-los prompts o la configuración global de Codex u OpenSpec. No se presenta esa
-integración como realizada ni como requisito pendiente para implementar esta base.
-
-Comandos ejecutados satisfactoriamente desde la raíz:
-
-```powershell
-openspec instructions apply --change base-escritorio --json
-openspec status --change base-escritorio --json
-openspec validate base-escritorio --strict --no-interactive
-```
-
-La validación documental estricta aprobó. El estado completo de los artefactos
-significa documentos preparados, no aplicación terminada. Node y OpenSpec no
-son dependencias de ejecución de MotorSim.
-
-No se sincronizan especificaciones ni se archiva el cambio sin autorización.
-La base no autoriza comenzar el simulador físico. `docs/ALCANCE_INICIAL.md` sigue
-como referencia y `redme.txt` se conserva sin cambios.

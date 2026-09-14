@@ -8,6 +8,17 @@ tipo y archivos pertenece a esa entrega. El cambio autorizado actual es
 `caracteristicas-motor`: proposal.md, design.md, specs/ficha-motor/spec.md y tasks.md.
 No alterar retrospectivamente requisitos ni verificaciones de entregas anteriores.
 
+La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md) define el orden, los objetivos y
+las exclusiones; la especificación del cambio activo define requisitos y aceptación.
+Su `tasks.md` es el único listado detallado de tareas. La sección «Estado de avance»
+de la hoja resume las entregas, sin duplicar ese listado.
+Al retomar una sesión, leer esos archivos y README, contrastarlos con código y
+pruebas y continuar lo pendiente; no reiniciar ni generar planificación equivalente.
+Una entrega autorizada permite avanzar por sus tareas, archivos y pruebas sin
+pedir permiso para cada paso. La siguiente entrega requiere nueva autorización.
+No inventar decisiones de producto o física que la hoja deje abiertas: informar
+la decisión pendiente y detener únicamente el trabajo que dependa de ella.
+
 La usuaria decide alcance y autorización. Estos archivos no inician tareas por
 sí mismos. Una petición documental solo autoriza documentación; implementar la
 aplicación requiere una petición explícita. No interpretar «documentos completos»
@@ -50,7 +61,7 @@ el estado verificable y el impedimento concreto sin declarar éxito.
 
 - Trabajar solo sobre el cambio solicitado; no generar otro plan, otra auditoría
   general ni una etapa futura para ejecutar la tarea actual.
-- Mantener tasks.md como único registro de avance. Marcar tareas únicamente con
+- Mantener tasks.md como único registro detallado de avance. Marcar tareas únicamente con
   evidencia de ejecución; no confundir preparación documental con implementación.
 - Respetar la especificación del cambio autorizado. En `base-escritorio` el alcance
   era solo nombre, tipo y archivos, sin geometría. `caracteristicas-motor` incorpora

@@ -43,16 +43,14 @@ class WindowTests(unittest.TestCase):
     def edit(self):
         self.window.name_edit.selectAll()
         QTest.keyClicks(self.window.name_edit, "Motor editado")
-        self.window.cycle_buttons["4T"].setChecked(True)
+        self.window.cycle_combo.setCurrentText("4T")
 
     def snapshot(self):
         return self.window.project(), self.window.path, self.window.dirty
 
     def test_initial_window_and_edit(self):
         self.assertEqual(self.snapshot(), (Project(), None, False))
-        self.assertEqual(list(self.window.cycle_buttons), ["2T", "4T"])
-        self.assertEqual(len(self.window.cycle_group.buttons()), 2)
-        self.assertTrue(self.window.cycle_group.exclusive())
+        self.assertEqual([self.window.cycle_combo.itemText(i) for i in range(2)], ["2T", "4T"])
         self.assertEqual("Simulación no disponible", self.window.notice.text())
         self.assertIn("Sin archivo", self.window.file_label.text())
         self.edit()
@@ -60,30 +58,132 @@ class WindowTests(unittest.TestCase):
         self.assertEqual("MotorSim", self.window.windowTitle())
         self.assertEqual(self.window.state_label.text(), "Cambios pendientes")
 
-    def test_cycle_cards_click_keyboard_and_reopen(self):
-        four = self.window.cycle_buttons["4T"]
-        two = self.window.cycle_buttons["2T"]
+    def test_cycle_keyboard_and_reopen(self):
+        combo = self.window.cycle_combo
         self.window.name_edit.setFocus()
         QTest.keyClick(self.window.name_edit, Qt.Key.Key_Tab)
-        self.assertTrue(two.hasFocus())
-        QTest.mouseClick(four, Qt.MouseButton.LeftButton)
+        self.assertTrue(combo.hasFocus())
+        QTest.keyClick(combo, Qt.Key.Key_Down)
         self.assertEqual(self.window.project().cycle, "4T")
-        self.assertTrue(four.isChecked())
-        self.assertFalse(two.isChecked())
         self.assertTrue(self.window.dirty)
-        four.setFocus()
-        QTest.keyClick(four, Qt.Key.Key_Left)
-        self.assertTrue(two.isChecked())
+        QTest.keyClick(combo, Qt.Key.Key_Up)
         self.assertEqual(self.window.project().cycle, "2T")
         with patch.object(self.window, "_choose_file", return_value=self.path):
             self.assertTrue(self.window.save())
-        self.assertFalse(self.window.state_label.property("pending"))
-        self.assertEqual(str(self.path), self.window.file_label.toolTip())
         self.window.new_project()
         with patch.object(self.window, "_choose_file", return_value=self.path):
             self.window.open_project()
-        self.assertTrue(two.isChecked())
+        self.assertEqual(combo.currentText(), "2T")
         self.assertEqual(self.window.state_label.text(), "Guardado")
+
+    def test_characteristics_roundtrip_cycle_and_dirty(self):
+        self.window.text_edits["manufacturer"].setText("Fabricante de prueba")
+        self.window.text_edits["model"].setText("Modelo de prueba")
+        self.window.notes_edit.setPlainText("Notas\ncon acentos á")
+        for field, value in zip(self.window.numeric_edits, ("2", "54,123456789", "54.5", "110", "10,5")):
+            self.window.numeric_edits[field].setText(value)
+        before = self.window.project()
+        self.window.cycle_combo.setCurrentText("4T")
+        self.window.cycle_combo.setCurrentText("2T")
+        self.assertEqual(self.window.project(), before)
+        with patch.object(self.window, "_choose_file", return_value=self.path):
+            self.assertTrue(self.window.save())
+        self.window.new_project()
+        with patch.object(self.window, "_choose_file", return_value=self.path):
+            self.window.open_project()
+        self.assertEqual(self.window.project(), before)
+        for widget in (*self.window.text_edits.values(), *self.window.numeric_edits.values()):
+            self.window.dirty = False
+            widget.setText(widget.text() + "1")
+            self.assertTrue(self.window.dirty)
+        self.window.dirty = False
+        self.window.notes_edit.insertPlainText("más")
+        self.assertTrue(self.window.dirty)
+
+    def test_geometry_dependencies_and_invalid_save(self):
+        edits = self.window.numeric_edits
+        edits["bore_mm"].setText("80")
+        edits["stroke_mm"].setText("90")
+        self.assertEqual(self.window.volume_label.text(), "452.39")
+        self.assertEqual(self.window.total_volume_label.text(), "—")
+        edits["cylinder_count"].setText("4")
+        self.assertEqual(self.window.total_volume_label.text(), "1809.56")
+        edits["stroke_mm"].setText("45")
+        self.assertEqual(self.window.volume_label.text(), "226.19")
+        edits["rod_length_mm"].setText("inválido")
+        self.assertEqual(self.window.volume_label.text(), "226.19")
+        with patch.object(self.window, "_choose_file") as choose:
+            self.assertFalse(self.window.save())
+            choose.assert_not_called()
+        self.assertEqual(edits["rod_length_mm"].text(), "inválido")
+        with patch.object(self.window, "_ask_changes", return_value="save"):
+            self.window.new_project()
+            self.assertFalse(self.window.close())
+        self.assertTrue(self.window.dirty)
+        edits["bore_mm"].setText("nan")
+        self.assertEqual(self.window.volume_label.text(), "—")
+        self.assertEqual(self.window.total_volume_label.text(), "—")
+        edits["bore_mm"].clear()
+        self.assertFalse(edits["bore_mm"].property("invalid"))
+        self.assertEqual(self.window.volume_label.text(), "—")
+
+    def test_complete_sheet_survives_close_and_new_window(self):
+        self.window.name_edit.setText("Ficha de prueba")
+        self.window.text_edits["manufacturer"].setText("Fabricante á")
+        self.window.text_edits["model"].setText("Modelo de prueba")
+        self.window.notes_edit.setPlainText("Observaciones\nsegunda línea")
+        for field, value in zip(self.window.numeric_edits, ("4", "80", "90", "150", "10,5")):
+            self.window.numeric_edits[field].setText(value)
+        self.window.cycle_combo.setCurrentText("4T")
+        expected = self.window.project()
+        with patch.object(self.window, "_choose_file", return_value=self.path):
+            self.assertTrue(self.window.save())
+        self.assertTrue(self.window.close())
+        reopened = MainWindow()
+        try:
+            reopened.show()
+            with patch.object(reopened, "_choose_file", return_value=self.path):
+                reopened.open_project()
+            self.assertEqual(reopened.project(), expected)
+            self.assertFalse(reopened.dirty)
+            self.assertEqual(reopened.volume_label.text(), "452.39")
+            self.assertEqual(reopened.total_volume_label.text(), "1809.56")
+        finally:
+            reopened.dirty = False
+            reopened.close()
+            reopened.deleteLater()
+
+    def test_v1_editor_opens_empty_features_without_rewriting(self):
+        original = b'{"format_version":1,"name":"Anterior","cycle":"4T"}'
+        self.path.write_bytes(original)
+        with patch.object(self.window, "_choose_file", return_value=self.path):
+            self.window.open_project()
+        self.assertEqual(self.window.project(), Project("Anterior", "4T"))
+        self.assertFalse(self.window.dirty)
+        self.assertEqual(self.path.read_bytes(), original)
+        self.assertEqual(self.window.volume_label.text(), "—")
+        self.assertEqual(self.window.total_volume_label.text(), "—")
+        for edit in self.window.numeric_edits.values():
+            self.assertEqual(edit.text(), "")
+        self.assertTrue(self.window.save())
+        self.assertIn('"format_version": 2', self.path.read_text(encoding="utf-8"))
+
+    def test_responsive_groups(self):
+        self.window.resize(1100, 760)
+        self.app.processEvents()
+        self.assertTrue(self.window._wide_layout)
+        self.window.resize(640, 480)
+        self.app.processEvents()
+        self.assertFalse(self.window._wide_layout)
+        self.assertEqual(self.window.workspace_scroll.horizontalScrollBar().maximum(), 0)
+
+    def test_large_integer_dimension_survives_open_and_save(self):
+        project = Project(bore_mm=9007199254740993)
+        save_project(self.path, project)
+        with patch.object(self.window, "_choose_file", return_value=self.path):
+            self.window.open_project()
+        self.assertTrue(self.window.save())
+        self.assertEqual(load_project(self.path).bore_mm, project.bore_mm)
 
     def test_visible_toolbar_uses_protected_file_actions(self):
         self.edit()

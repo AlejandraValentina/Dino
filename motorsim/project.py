@@ -46,7 +46,7 @@ def parse_number(text: str, field: str) -> int | float | None:
     if not re.fullmatch(pattern, text):
         raise ProjectError(f"{NUMERIC_FIELDS[field]}: número inválido; no uses separadores de miles.")
     try:
-        value = int(text) if field == "cylinder_count" else float(text.replace(",", "."))
+        value = int(text) if re.fullmatch(r"[+-]?[0-9]+", text) else float(text.replace(",", "."))
     except ValueError as exc:
         raise ProjectError(f"{NUMERIC_FIELDS[field]}: número fuera del rango admitido.") from exc
     validate_number(value, field)
