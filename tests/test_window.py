@@ -166,7 +166,7 @@ class WindowTests(unittest.TestCase):
         for edit in self.window.numeric_edits.values():
             self.assertEqual(edit.text(), "")
         self.assertTrue(self.window.save())
-        self.assertIn('"format_version": 3', self.path.read_text(encoding="utf-8"))
+        self.assertIn('"format_version": 4', self.path.read_text(encoding="utf-8"))
 
     def test_responsive_groups(self):
         self.window.resize(1100, 760)
@@ -236,6 +236,130 @@ class WindowTests(unittest.TestCase):
             self.window.open_project()
         self.assertTrue(self.window.save())
         self.assertEqual(load_project(self.path).bore_mm, project.bore_mm)
+
+    def configure_intake(self):
+        w = self.window
+        w.name_edit.setText('CASO SINTÉTICO — Admisión')
+        w.numeric_edits['stroke_mm'].setText('56')
+        w.numeric_edits['rod_length_mm'].setText('100')
+        v = w.ports_view.intake
+        w.tabs.setCurrentWidget(w.ports_view)
+        v.mode_combo.setCurrentIndex(1)
+        for key, text in zip(v.edits, ('64', '10', '20', '42')):
+            v.edits[key].setText(text)
+        return v
+
+    def test_intake_save_reopen_cycles_and_undefined(self):
+        v = self.configure_intake()
+        self.assertIn('270.00',v.results.text())
+        self.assertIn('∪',v.results.text())
+        with patch.object(self.window, '_choose_file', return_value=self.path):
+            self.assertTrue(self.window.save())
+        original = self.window.project()
+        self.assertFalse(self.window.dirty)
+        self.window.cycle_combo.setCurrentText('4T')
+        self.assertEqual(self.window.project().intake,original.intake)
+        self.assertFalse(v.plot.values)
+        self.assertTrue(self.window.save())
+        self.window.new_project()
+        self.assertIsNone(v.mode_combo.currentData())
+        with patch.object(self.window, '_choose_file', return_value=self.path):
+            self.window.open_project()
+        self.assertEqual(self.window.project().intake,original.intake)
+        self.window.cycle_combo.setCurrentText('2T')
+        self.assertEqual(v.plot.values[0],200)
+        v.mode_combo.setCurrentIndex(0)
+        self.assertFalse(v.plot.values)
+        self.assertEqual(v.edits['skirt_mm'].text(),'42')
+        self.assertTrue(self.window.save())
+        self.assertIsNone(load_project(self.path).intake.mode)
+        v.mode_combo.setCurrentIndex(1)
+        self.assertEqual(v.plot.values[360],200)
+
+    def test_intake_invalid_draft_cancel_and_file_errors(self):
+        v = self.configure_intake()
+        with patch.object(self.window, '_choose_file', return_value=self.path):
+            self.assertTrue(self.window.save())
+        original = self.path.read_bytes()
+        v.edits['skirt_mm'].setText('inválido')
+        self.assertFalse(v.plot.values)
+        for cycle in ('4T','2T'):
+            self.window.cycle_combo.setCurrentText(cycle)
+            v.mode_combo.setCurrentIndex(0)
+            self.window.tabs.setCurrentIndex(0)
+            self.window.tabs.setCurrentWidget(self.window.ports_view)
+            self.assertEqual(v.edits['skirt_mm'].text(),'inválido')
+            self.assertFalse(self.window.save())
+            with patch.object(self.window,'_ask_changes',return_value='cancel'):
+                self.window.new_project()
+                self.assertFalse(self.window.close())
+            self.assertEqual(v.edits['skirt_mm'].text(),'inválido')
+            self.assertEqual(self.path.read_bytes(),original)
+        v.edits['skirt_mm'].setText('43,125')
+        v.mode_combo.setCurrentIndex(1)
+        before=self.snapshot()
+        with patch.object(self.window,'_choose_file',return_value=None):
+            self.assertFalse(self.window.save_as())
+        with patch.object(self.window,'_choose_file',return_value=self.path), \
+             patch.object(self.window,'_confirm_overwrite',return_value=False):
+            self.assertFalse(self.window.save_as())
+        with patch('motorsim.storage.os.replace',side_effect=PermissionError('Prueba')):
+            self.assertFalse(self.window.save())
+        self.assertEqual(self.snapshot(),before)
+        self.assertEqual(self.path.read_bytes(),original)
+        self.assertTrue(self.window.save())
+        self.assertEqual(load_project(self.path).intake.skirt_mm,43.125)
+
+    def test_intake_results_update_and_clear_by_dependency(self):
+        v=self.configure_intake()
+        for edit, text in ((self.window.numeric_edits['stroke_mm'],'58'),
+                           (self.window.numeric_edits['rod_length_mm'],'110'),
+                           (v.edits['top_mm'],'65'),(v.edits['height_mm'],'11'),
+                           (v.edits['skirt_mm'],'43')):
+            previous=v.plot.values
+            edit.setText(text)
+            self.assertTrue(v.plot.values)
+            self.assertNotEqual(v.plot.values,previous)
+        for text in ('','inválido'):
+            v.edits['width_mm'].setText(text)
+            self.assertFalse(v.plot.values)
+            self.assertNotIn('Apertura: —',v.results.text())
+        v.edits['width_mm'].setText('20')
+        for text in ('','inválido','1'):
+            v.edits['skirt_mm'].setText(text)
+            self.assertFalse(v.plot.values)
+            self.assertIn('Apertura: —',v.results.text())
+        v.edits['skirt_mm'].setText('80')
+        self.assertEqual(v.plot.values,(0,)*361)
+        self.assertIn('No se abre',v.results.text())
+        self.app.processEvents()
+
+    def test_intake_legacy_v3_no_rewrite_and_keyboard(self):
+        import json
+        from motorsim.project import Intake, Port
+        data=Project(ports=(Port('Conservada','transfer',32,10,20),),
+                     crankcase_volume_bdc_cm3=200).to_dict()
+        data.pop('intake'); data['format_version']=3
+        raw=json.dumps(data).encode(); self.path.write_bytes(raw)
+        with patch.object(self.window,'_choose_file',return_value=self.path):
+            self.window.open_project()
+        self.assertEqual(self.path.read_bytes(),raw)
+        self.assertEqual(self.window.project().intake,Intake())
+        self.assertFalse(self.window.dirty)
+        v=self.window.ports_view.intake
+        self.window.tabs.setCurrentWidget(self.window.ports_view)
+        v.mode_combo.setFocus()
+        QTest.keyClick(v.mode_combo,Qt.Key.Key_Down)
+        self.assertEqual(v.mode_combo.currentData(),'piston_port')
+        QTest.keyClick(v.mode_combo,Qt.Key.Key_Tab)
+        self.assertIs(self.app.focusWidget(),v.edits['top_mm'])
+        self.assertTrue(self.window.dirty)
+        self.window.resize(700,480); self.app.processEvents()
+        self.assertFalse(v._wide)
+        self.assertEqual(self.window.ports_view.horizontalScrollBar().maximum(),0)
+        self.assertTrue(self.window.save())
+        self.assertEqual(load_project(self.path).ports[0].name,'Conservada')
+        self.assertEqual(load_project(self.path).crankcase_volume_bdc_cm3,200)
 
     def test_ports_edit_save_switch_delete_reopen(self):
         view=self.window.ports_view

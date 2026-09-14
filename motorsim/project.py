@@ -1,6 +1,6 @@
 """Datos del proyecto, independientes de la interfaz."""
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from decimal import Decimal, localcontext
 import math
 import re
@@ -21,7 +21,9 @@ NUMERIC_FIELDS = {
 
 PORT_FIELDS = {"top_mm": "Distancia al borde superior", "height_mm": "Altura de ventana",
                "width_mm": "Ancho desarrollado"}
-NUMBER_LABELS = {**NUMERIC_FIELDS, **PORT_FIELDS,
+INTAKE_FIELDS = {**PORT_FIELDS, "skirt_mm": "Distancia al borde inferior de falda"}
+INTAKE_REFERENCE = "straight-skirt-peripheral-tdc-developed-v1"
+NUMBER_LABELS = {**NUMERIC_FIELDS, **INTAKE_FIELDS,
                  "crankcase_volume_bdc_cm3": "Volumen libre del cárter en PMI"}
 TWO_STROKE_REFERENCE = "rectangular-peripheral-tdc-developed-bdc-v1"
 
@@ -106,6 +108,32 @@ class Port:
 
 
 @dataclass(frozen=True)
+class Intake:
+    mode: str | None = None
+    top_mm: float | None = None
+    height_mm: float | None = None
+    width_mm: float | None = None
+    skirt_mm: float | None = None
+    reference: str = INTAKE_REFERENCE
+
+    def validate(self):
+        if self.mode is not None and self.mode != "piston_port":
+            raise ProjectError("Modalidad de admisión no admitida.")
+        if self.reference != INTAKE_REFERENCE:
+            raise ProjectError("Referencia de admisión no admitida.")
+        for key in INTAKE_FIELDS:
+            validate_number(getattr(self, key), key)
+
+    @classmethod
+    def from_dict(cls, data):
+        if not isinstance(data, dict) or not cls.__dataclass_fields__.keys() <= data.keys():
+            raise ProjectError("Faltan campos de admisión.")
+        intake = cls(**{key: data[key] for key in cls.__dataclass_fields__})
+        intake.validate()
+        return intake
+
+
+@dataclass(frozen=True)
 class Project:
     name: str = "Sin título"
     cycle: str = "2T"
@@ -119,6 +147,7 @@ class Project:
     notes: str = ""
     ports: tuple[Port, ...] = ()
     crankcase_volume_bdc_cm3: float | None = None
+    intake: Intake = field(default_factory=Intake)
 
     def validate(self) -> None:
         if not isinstance(self.name, str) or not self.name.strip():
@@ -136,10 +165,13 @@ class Project:
             raise ProjectError("La colección de lumbreras es inválida.")
         for port in self.ports:
             port.validate()
+        if not isinstance(self.intake, Intake):
+            raise ProjectError("Datos de admisión inválidos.")
+        self.intake.validate()
 
     def to_dict(self) -> dict:
         self.validate()
-        return {"format_version": 3, **asdict(self), "ports": [asdict(port) for port in self.ports],
+        return {"format_version": 4, **asdict(self), "ports": [asdict(port) for port in self.ports],
                 "two_stroke_reference": TWO_STROKE_REFERENCE}
 
     @classmethod
@@ -149,23 +181,27 @@ class Project:
         if not {"format_version", "name", "cycle"} <= data.keys():
             raise ProjectError("Faltan campos obligatorios: format_version, name o cycle.")
         version = data["format_version"]
-        if type(version) is not int or version not in (1, 2, 3):
-            raise ProjectError("La versión del archivo debe ser el entero 1, 2 o 3.")
+        if type(version) is not int or version not in (1, 2, 3, 4):
+            raise ProjectError("La versión del archivo debe ser el entero 1, 2, 3 o 4.")
         if version == 1:
             project = cls(data["name"], data["cycle"])
         else:
             fields = set(cls.__dataclass_fields__)
+            if version < 4:
+                fields -= {"intake"}
             if version == 2:
                 fields -= {"ports", "crankcase_volume_bdc_cm3"}
             if not fields <= data.keys():
                 raise ProjectError(f"Faltan campos obligatorios de la ficha versión {version}.")
             values = {field: data[field] for field in fields}
-            if version == 3:
+            if version >= 3:
                 if data.get("two_stroke_reference") != TWO_STROKE_REFERENCE:
                     raise ProjectError("Referencia de geometría 2T no admitida.")
                 if not isinstance(data["ports"], list):
                     raise ProjectError("Las lumbreras deben ser una lista.")
                 values["ports"] = tuple(Port.from_dict(port) for port in data["ports"])
+            if version == 4:
+                values["intake"] = Intake.from_dict(data["intake"])
             project = cls(**values)
         project.validate()
         return project

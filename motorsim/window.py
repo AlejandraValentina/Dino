@@ -337,9 +337,9 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(information, 1)
 
     def project(self) -> Project:
-        ports, crankcase = self.ports_view.snapshot()
+        ports, crankcase, intake = self.ports_view.snapshot()
         return Project(
-            ports=ports, crankcase_volume_bdc_cm3=crankcase,
+            ports=ports, crankcase_volume_bdc_cm3=crankcase, intake=intake,
             name=self.name_edit.text(), cycle=self.cycle_combo.currentText(),
             manufacturer=self.text_edits["manufacturer"].text(),
             model=self.text_edits["model"].text(), notes=self.notes_edit.toPlainText(),

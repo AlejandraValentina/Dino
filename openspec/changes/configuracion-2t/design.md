@@ -31,9 +31,37 @@ piston_position de kinematics.py y GeometryPlot; no se rehace el editor.
 - La pestaña muestra lista y editor de la selección, botones Añadir/Eliminar,
   resultados y área con gráfico existente. En 4T se oculta editor/resultados y se
   retienen los datos en memoria y JSON. Seleccionar una fila no marca cambios;
-  añadir/editar/eliminar sí. No se agrega un sistema de admisión.
+  añadir/editar/eliminar sí. El tramo inicial no agregaba admisión; su ampliación se define abajo.
 
 ## Risks / Trade-offs
 Aproximación rectangular; no es CAD, área efectiva de flujo, caudal o barrido.
-La admisión pendiente impide declarar completada toda la entrega 3. Pruebas,
+La decisión de admisión queda resuelta por autorización de la usuaria. Pruebas,
 inspección Windows y aceptación manual siguen siendo evidencias separadas.
+
+## Ampliación autorizada: admisión por falda
+- Sección separada Admisión: modalidad null (sin definir) o piston_port. No se
+  asigna modalidad al abrir proyectos anteriores. Cuatro números opcionales
+  positivos finitos: top_mm=u, height_mm=h, width_mm=w y skirt_mm=f, en mm.
+- Ventana rectangular y borde inferior de falda recto. u hacia abajo desde el
+  borde superior periférico del pistón en PMS; f distancia axial desde ese mismo
+  borde hasta el borde inferior de falda en admisión, no biela/cúpula/bulón.
+  w desarrollado, no cuerda. Un cilindro/cárter, sin multiplicar por N.
+- x reutiliza piston_position. b=u+h, e=f+x; A=w*max(0,min(h,u+h-f-x)).
+  Se exige L>S/2 y u>=S. d=u+h-f: d<=0 nunca abre; 0<d<S usa bisección
+  compartida de 60 iteraciones para x(beta)=d; d>=S queda fuera del modelo por
+  ausencia de intervalo de cierre alrededor de PMI, incluso con contacto en PMI.
+- Cierre=beta, apertura=360-beta, duración=2beta; intervalo [apertura,360] unido
+  a [0,cierre], sin contar PMS dos veces. Máximo=w*max(0,min(h,d)). Curva 0–360°.
+  Eventos necesitan S/L/u/h/f; área además w; no diámetro, N, compresión ni cárter.
+  Suma/resta de d usa Decimal desde los float validados para evitar cancelación
+  y desbordamiento intermedio; resultados fuera de rango se retiran con causa.
+- JSON v4 conserva referencia y claves v3 y añade intake con mode, top_mm,
+  height_mm, width_mm, skirt_mm y reference: straight-skirt-peripheral-tdc-developed-v1.
+  Todas las claves del objeto se requieren; números ausentes null. No guarda
+  eventos/curvas. v1/v2/v3 inicializan Intake vacío y solo convierten al guardar.
+- Borradores permanecen al cambiar modalidad, sección y 2T/4T, incluidos textos
+  inválidos que bloquean guardar. Ayuda contextual/desplegable, unidades visibles,
+  disposición apilada en ancho reducido y gráfico Qt existente.
+- Contraste sintético independiente: S56/L100/u64/h10/w20/f42 -> 270°/90°/180°,
+  máximo200 mm², A0=A360=200 y A90=A180=A270=0. No identifica motor experimental
+  ni acredita rendimiento. No hay otras modalidades, conductos, caudal o presión.

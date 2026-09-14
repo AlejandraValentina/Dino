@@ -2,7 +2,8 @@
 
 Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La entrega
 actual [configuracion-2t](openspec/changes/configuracion-2t/specs/configuracion-2t/spec.md)
-añade lumbreras rectangulares de escape/transferencia y registro de cárter.
+añade lumbreras rectangulares de escape/transferencia, registro de cárter y
+admisión rectangular al cárter por falda recta del pistón.
 La ficha, posición del pistón, volúmenes y curvas geométricas existentes se conservan.
 No contiene simulación física ni estimaciones de rendimiento.
 
@@ -12,8 +13,9 @@ y aceptó ambas entregas. No quedan otros criterios obligatorios pendientes seg�
 las tareas existentes. La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md#estado-de-avance)
 resume el estado. Esta aceptación es evidencia de la usuaria, separada de las
 pruebas automatizadas e inspección visual del agente. Sin archivar. La entrega 3
-está **En curso**: este primer tramo está implementado; admisión pendiente de
-definición dentro de la misma entrega. No se inicia la entrega 4.
+está **Completada** para la configuración geométrica admitida: lumbreras, cárter
+y admisión por falda comprobados. Esto no es aceptación manual de la usuaria
+ni validación predictiva. No se inicia la entrega 4.
 
 ## Interfaz y uso
 
@@ -71,7 +73,7 @@ resultados afectados y muestra la causa, sin corregir dimensiones. Posición y
 esquema solo necesitan carrera/biela; cilindrada, diámetro/carrera; cámara y
 extremos, además compresión; curva de volumen, todas estas entradas. La ficha
 incompleta o con biela positiva incompatible se puede guardar para corregirla.
-No se guardan curvas; el formato actual es JSON versión 3. Ecuaciones y caso admitido en el
+No se guardan curvas; el formato actual es JSON versión 4. Ecuaciones y caso admitido en el
 [diseño](openspec/changes/geometria-cinematica/design.md).
 
 Comprobación del 14/09/2026 sobre `7ef0628`: escritorio Windows desbloqueado,
@@ -120,8 +122,8 @@ el límite numérico de área se informa sin modificar las dimensiones guardadas
 
 El volumen libre del cárter con pistón en PMI es opcional, cm³ positivos finitos,
 individual y sin conductos externos. Registrar procedencia en las Observaciones
-existentes. No se deduce ni genera presión/compresión. **Admisión: Pendiente de
-definición**; no se elige un sistema ni se generan eventos de admisión.
+existentes. No se deduce ni genera presión/compresión. La admisión, inicialmente
+pendiente, se incorpora en el tramo siguiente del mismo cambio.
 
 Los campos nuevos pueden guardarse sin informar (números null, texto vacío,
 función null); los números informados deben ser positivos finitos. Coma o punto
@@ -139,7 +141,7 @@ de este tramo ni modifican la aceptación de las entregas 1 y 2.
 Comprobaciones del tramo: suite de **58 pruebas aprobadas**; después de corregir
 un subdesbordamiento numérico detectado en revisión independiente, **9 pruebas
 focalizadas de lumbreras aprobadas** (incluida la nueva regresión) y **30 pruebas
-de widgets Windows aprobadas**. La colección actual contiene 59 tests. Se conserva
+de widgets Windows aprobadas**. La colección al finalizar ese tramo contenía 59 tests. Se conserva
 la evidencia histórica anterior en sus tareas; no se vuelve a atribuir al agente
 el recorrido manual de la usuaria. Comandos focalizados ejecutados:
 
@@ -154,6 +156,65 @@ Caso independiente de la usuaria: S=56, L=100, u=32, h=10, w=20 mm produce 90°,
 270°, 180° y 200 mm². También se comprobaron ventanas parciales/cerradas, datos
 incompletos/inválidos, límites numéricos, actualización al editar, varias filas,
 eliminación, v1/v2/v3, alternancia 2T/4T y regresiones de guardado/cancelación.
+
+## Admisión por falda — ampliación de la entrega 3
+
+En **Configuración 2T**, desplazarse hasta **Admisión** y elegir **Falda del pistón**.
+Por defecto permanece **Sin definir**, también en los proyectos antiguos. Los campos
+u (borde superior), h (altura), w (ancho desarrollado) y f (borde inferior de falda)
+se expresan en mm, sin valores precargados. Las referencias completas están en
+**Referencias de medida** y en la ayuda de los campos. f mide desde el borde superior
+periférico del pistón hasta el borde inferior de falda en el lado de admisión.
+No es biela, cúpula ni distancia al bulón. w es desarrollado, no cuerda.
+
+Ventana rectangular y borde de falda recto. Se reutiliza la posición x de Geometría:
+A(θ)=w×max(0,min(h,u+h−f−x(θ))). El dominio exige biela > carrera/2 y u ≥ carrera.
+Con d=u+h−f: d≤0 no abre; d≥carrera queda fuera del modelo por ausencia de cierre
+finito alrededor de PMI. Los valores positivos incompatibles se pueden guardar.
+Para 0<d<carrera, el cruce x(β)=d determina apertura=360−β, cierre=β y duración=2β.
+El intervalo atraviesa PMS: [apertura,360] ∪ [0,cierre]. El máximo es w×max(0,min(h,d)),
+que puede ser menor que w×h. No se multiplica por N.
+
+Los eventos necesitan carrera, biela, u, h y f; el área necesita además w. Ni
+compresión, diámetro ni cárter bloquean estos resultados. Faltantes, errores de
+entrada o rango retiran los resultados afectados con causa. Cambiar modalidad o
+2T/4T conserva dimensiones y textos inválidos; estos bloquean el guardado. En 4T
+no se calculan ni muestran resultados específicos 2T.
+
+Caso sintético independiente de la usuaria: S=56, L=100, u=64, h=10, w=20, f=42 mm.
+Apertura 270°, cierre 90°, duración 180°, máximo 200 mm²; área 200 en 0°/360° y cero
+en 90°/180°/270°. Es una prueba geométrica, no un motor experimental seleccionado
+ni evidencia predictiva. No se calculan caudal, presión, carburación ni rendimiento.
+
+**Pruebas automatizadas finales:** 72/72 aprobadas en 11,647 s, ejecutadas una vez
+con Qt Windows después de la última corrección. Incluyen 34 pruebas de widgets
+con ventanas/diálogos reales automatizados y las regresiones de archivos, ficha,
+cinemática y lumbreras. Durante implementación pasaron también 9 pruebas numéricas
+de admisión y 34 de widgets sin pantalla; esas ejecuciones no sustituyen la suite final.
+
+```powershell
+$env:QT_QPA_PLATFORM = "windows"
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+$env:QT_QPA_PLATFORM = $null
+```
+
+**Revisión puntual independiente:** sin defectos reproducibles de código; aclarada
+la compatibilidad documental v3 (conserva lumbreras/cárter, no los vacía). Autorrevisión
+del principal de la integración, corrección de señales, documentación y capturas.
+Validación estricta OpenSpec aprobada; integración global intacta.
+
+**Inspección visual:** captura real del escritorio Windows desbloqueado, ventana
+1080×791, caso sintético identificado en la ruta del archivo. Curva con dos segmentos
+junto a PMS y área cero alrededor de PMI. También inspeccionados formulario y curva
+apilados al 150 % en 700×480 unidades lógicas, navegación por Tab, foco, referencias
+desplegables y ausencia de desplazamiento horizontal. Escalado solo del proceso Qt.
+
+![Admisión por falda: captura real Windows, caso sintético S56/L100](docs/images/motorsim-admision-2t.png)
+
+**Aceptación manual:** no realizada por la usuaria para entrega 3. Automatización
+visible e inspección del agente se registran separadas de la aceptación previa de
+entregas 1 y 2. No quedan comprobaciones técnicas obligatorias pendientes de este
+tramo; no se atribuye validez experimental ni se selecciona un motor real.
 
 ## Instalar, iniciar y probar
 
@@ -217,12 +278,12 @@ Revisión independiente puntual: detectó dependencia indebida de cilindrada res
 a compresión; corregida y cubierta por regresión. Autorrevisión del principal de
 la corrección y documentación. La integración OpenSpec global no se modifica.
 
-## Formato JSON versión 3
+## Formato JSON versión 4
 
 Conserva todos los campos de ficha de versión 2 (`name`, `cycle`, `manufacturer`,
 `model`, `notes`, `cylinder_count`, `bore_mm`, `stroke_mm`, `rod_length_mm`,
 `compression_ratio`) y añade `ports`, `crankcase_volume_bdc_cm3` y
-`two_stroke_reference`. `format_version` es el entero 3. Cada fila de `ports`
+`two_stroke_reference`. La versión 4 añade `intake`; `format_version` es el entero 4. Cada fila de `ports`
 guarda `name`, `function` (`escape`, `transfer` o null), `top_mm`, `height_mm`,
 `width_mm`. La lista vacía representa ausencia de lumbreras. Dimensiones/cárter
 no informados son null; los textos opcionales, cadenas vacías. No se redondean
@@ -234,8 +295,15 @@ Una referencia diferente se rechaza para no reinterpretar medidas. No se guardan
 curvas ni resultados. Se mantienen guardado seguro y confirmación de sobrescritura.
 
 Se leen versiones 1 y 2 conservando sus campos; se inicializan lumbreras vacías
-y volumen de cárter null. Abrir no reescribe el archivo: la conversión a v3 solo
-se persiste mediante Guardar/Guardar como explícito.
+y volumen de cárter null. Se lee también v3 conservando lumbreras y cárter. En
+v1/v2/v3, `intake` se inicializa sin definir y con todas las dimensiones null.
+Abrir no reescribe: la conversión a v4 solo se persiste con Guardar/Guardar como.
+
+`intake` contiene `mode` (null o `piston_port`), `top_mm`, `height_mm`, `width_mm`,
+`skirt_mm` (números positivos finitos o null) y `reference`, obligatoria con valor
+`straight-skirt-peripheral-tdc-developed-v1`. No modifica la referencia v3 de
+lumbreras/cárter ni guarda resultados. Admite dimensiones con modalidad sin definir;
+una modalidad no admitida o referencia diferente se rechaza, sin perder la edición.
 
 ## OpenSpec y estado
 
@@ -258,7 +326,7 @@ openspec validate configuracion-2t --strict --no-interactive
 ```
 
 Validación estricta aprobada. Ningún cambio se archiva ni se sincroniza por esta
-entrega. El tramo termina en lumbreras y registro de cárter; admisión queda pendiente.
+entrega. El tramo termina en lumbreras, registro de cárter y admisión por falda.
 No se comienza entrega 4 ni simulador.
 Se preservan la captura previa y el registro histórico de base-escritorio.
 

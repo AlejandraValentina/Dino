@@ -86,7 +86,7 @@ class PortTests(unittest.TestCase):
             for cycle in ('2T','4T'):
                 p=replace(p,cycle=cycle);save_project(path,p)
                 self.assertEqual(load_project(path),p)
-                self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['format_version'],3)
+                self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['format_version'],4)
             p=replace(p,ports=p.ports[1:]);save_project(path,p)
             self.assertEqual(load_project(path),p)
 
@@ -105,7 +105,7 @@ class PortTests(unittest.TestCase):
                 for key,value in data.items():
                     if key!='format_version':self.assertEqual(getattr(project,key),value)
                 save_project(path,project)
-                self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['format_version'],3)
+                self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['format_version'],4)
 
     def test_malformed_v3_rejected(self):
         valid=Project(ports=(self.port,)).to_dict()

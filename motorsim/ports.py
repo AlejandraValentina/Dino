@@ -40,14 +40,7 @@ def port_results(port: Port, stroke, rod, errors=None) -> PortResult:
             result.never_opens = True
             result.duration = 0.0
         else:
-            low, high = 0.0, 180.0
-            for _ in range(60):
-                middle = (low + high) / 2
-                if piston_position(stroke, rod, middle) < top:
-                    low = middle
-                else:
-                    high = middle
-            result.opening = (low + high) / 2
+            result.opening = crossing_angle(stroke, rod, top)
             result.closing = 360 - result.opening
             result.duration = result.closing - result.opening
     except (ProjectError, ValueError, OverflowError) as exc:
@@ -69,3 +62,15 @@ def port_results(port: Port, stroke, rod, errors=None) -> PortResult:
     except (ProjectError, ValueError, OverflowError) as exc:
         result.area_error = str(exc)
     return result
+
+
+def crossing_angle(stroke, rod, distance):
+    """Cruce en la rama descendente; el llamador valida 0 < distancia < S."""
+    low, high = 0.0, 180.0
+    for _ in range(60):
+        middle = (low + high) / 2
+        if piston_position(stroke, rod, middle) < distance:
+            low = middle
+        else:
+            high = middle
+    return (low + high) / 2

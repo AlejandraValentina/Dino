@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (QComboBox, QFormLayout, QGridLayout, QHBoxLayout,
 from .project import Port, PORT_FIELDS, ProjectError, parse_number
 from .ports import port_results
 from .geometry_view import GeometryPlot
+from .intake_view import IntakeView
 
 
 class PortsView(QScrollArea):
@@ -24,13 +25,13 @@ class PortsView(QScrollArea):
         layout.setContentsMargins(24, 16, 24, 16)
         title = QLabel("Configuración 2T"); title.setObjectName("pageTitle")
         layout.addWidget(title)
-        self.availability = QLabel("Admisión: Pendiente de definición")
+        self.availability = QLabel("Un cilindro de referencia · Aproximación rectangular")
         self.availability.setWordWrap(True)
         layout.addWidget(self.availability)
         self.panel = QWidget()
         panel = QVBoxLayout(self.panel); panel.setContentsMargins(0, 0, 0, 0)
         note = QLabel("Aproximación rectangular · Un cilindro de referencia. Distancia hacia abajo desde el borde superior periférico del pistón en PMS; no desde la cara del cilindro ni una cúpula. Ancho desarrollado sobre la pared, no cuerda.")
-        note.setWordWrap(True); panel.addWidget(note)
+        note.setWordWrap(True); self.availability.setToolTip(note.text())
         self.crankcase_edit = QLineEdit(); self.crankcase_edit.setMaximumWidth(220)
         self.crankcase_edit.setPlaceholderText("Sin informar")
         self.crankcase_error = QLabel(); self.crankcase_error.setObjectName("fieldError");self.crankcase_error.setWordWrap(True)
@@ -41,7 +42,7 @@ class PortsView(QScrollArea):
         crank.addRow(caption, self.crankcase_edit)
         panel.addLayout(crank)
         hint = QLabel("Cárter individual, sin conductos externos. Procedencia o medición: usar Observaciones en Ficha.")
-        hint.setWordWrap(True); panel.addWidget(hint); panel.addWidget(self.crankcase_error)
+        self.crankcase_edit.setToolTip(hint.text()); panel.addWidget(self.crankcase_error)
         self.grid = QGridLayout(); self.grid.setSpacing(22)
         self.editor = QWidget(); edit_layout = QVBoxLayout(self.editor); edit_layout.setContentsMargins(0, 0, 0, 0)
         self.list = QListWidget(); self.list.setAccessibleName("Lumbreras del cilindro de referencia")
@@ -77,7 +78,10 @@ class PortsView(QScrollArea):
         output.addWidget(self.plot)
         area_note = QLabel("Área sobre la pared: no es área efectiva de flujo, caudal, eficiencia de barrido ni potencia.")
         area_note.setWordWrap(True); output.addWidget(area_note)
-        panel.addLayout(self.grid); layout.addWidget(self.panel);layout.addStretch();self.setWidget(body)
+        panel.addLayout(self.grid)
+        self.intake = IntakeView(); panel.addWidget(self.intake)
+        self.intake.changed.connect(self.changed.emit)
+        layout.addWidget(self.panel);layout.addStretch();self.setWidget(body)
         self._wide=None; self._arrange()
         self.add_button.clicked.connect(self.add_port)
         self.remove_button.clicked.connect(self.remove_port)
@@ -95,12 +99,14 @@ class PortsView(QScrollArea):
         wide=self.viewport().width()>=900
         if wide==self._wide:return
         self._wide=wide
+        self.intake.arrange(wide)
         for widget in (self.editor,self.output): self.grid.removeWidget(widget)
         self.grid.addWidget(self.editor,0,0)
         self.grid.addWidget(self.output,0 if wide else 1,1 if wide else 0)
         self.grid.setColumnStretch(0,1);self.grid.setColumnStretch(1,1 if wide else 0)
 
     def load(self, project):
+        self.intake.load(project.intake)
         self.drafts=[dict(name=p.name,function=p.function,
                           **{key:'' if getattr(p,key) is None else str(getattr(p,key)) for key in PORT_FIELDS})
                      for p in project.ports]
@@ -159,16 +165,17 @@ class PortsView(QScrollArea):
                                   **{key:parse_number(draft[key],key) for key in PORT_FIELDS}))
             except ProjectError as exc:
                 raise ProjectError(f"Lumbrera {i+1}: {exc}") from exc
-        return tuple(ports),parse_number(self.crankcase_edit.text(),'crankcase_volume_bdc_cm3')
+        return tuple(ports),parse_number(self.crankcase_edit.text(),'crankcase_volume_bdc_cm3'),self.intake.snapshot()
 
     def set_common(self,values,cycle,errors):
         self.values,self.cycle,self.errors=values,cycle,errors
         self.panel.setVisible(cycle=='2T')
-        self.availability.setText('Admisión: Pendiente de definición' if cycle=='2T' else
-                                  'Configuración 2T no disponible en proyectos 4T. Datos conservados. Admisión: Pendiente de definición')
+        self.availability.setText('Un cilindro de referencia · Aproximación rectangular' if cycle=='2T' else
+                                  'Configuración 2T no disponible en proyectos 4T. Datos conservados.')
         self.refresh()
 
     def refresh(self):
+        self.intake.refresh(self.values,self.cycle,self.errors)
         self.plot.values=();self.plot.error='Seleccioná o añadí una lumbrera.'
         self.results.setText('Sin lumbrera seleccionada.');self.input_error.clear()
         try:

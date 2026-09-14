@@ -74,3 +74,5 @@ QTabBar::tab:focus { background: #24415b; }
 QSlider::groove:horizontal { background: #34455c; height: 5px; }
 QSlider::handle:horizontal { background: #69baf0; border: 1px solid #b4d9f5; width: 14px; margin: -5px 0; border-radius: 4px; }
 QSlider::handle:horizontal:focus { background: #d5efff; border-color: #ffffff; }
+
+QLabel#sectionTitle { font-size: 12pt; font-weight: 600; color: #b4d9f5; }
