@@ -451,6 +451,66 @@ de RHS, mínimo real 0,001°, ocho rechazos consecutivos y dominio físico previ
 Progreso y cancelación observables. Conservar evidencias en directorios nuevos;
 no reintentos de serie, otras bandas, Qt/JSON, autenticación, archivo u otra entrega.
 
+## Primer tramo gráfico del caso fijo autorizado — 15/09/2026
+
+Nueva orden: integrar únicamente S2T-0D-01 a 3000 rpm, banda exterior 100 Pa,
+perfil B. No convierte parámetros del editor en un caso ni modifica proyectos.
+Preservar 0cb0c754, física, controles y ensayo anterior. Una ejecución individual
+no vuelve a comprobar sensibilidad. Entrega 5 abierta: falta definir/comprobar
+su uso con entradas del editor, fuera de este tramo.
+
+`reference_run` ejecuta una sola llamada a `run_adaptive` con `Model`, sin Qt.
+`reference_results.reference_inputs()` comparte la definición SyntheticCase,
+el perfil B existente y la banda fijada; la ventana no copia constantes del motor.
+El comando original y `regularized_trial` permanecen disponibles y sin cambios.
+Se mantienen 30 ciclos/60 s de integración, 512 MiB del proceso numérico, 2 millones
+de RHS, mínimo real 0,001°, ocho rechazos y dominio físico. El coste de interfaz
+se muestra por separado. No se repite la serie A/B/C ni la comparación de bandas.
+
+QProcess inicia Python del entorno con argumentos separados y directorio del
+paquete, sin shell ni espera bloqueante. Recibe JSON por líneas con ciclos reales,
+tiempo y RHS, sin porcentaje inventado. Solo un proceso activo; Ejecutar y Abrir
+resultado quedan deshabilitados durante el cálculo. Nuevo intento borra las curvas
+y resultados anteriores antes de arrancar. Error al abrir un archivo conserva
+el resultado válido anterior y señala que no se abrió el archivo solicitado.
+
+Cancelación: pipe stdin con `cancel\n`; un hilo estándar del hijo activa Event,
+consultado por el monitor existente. EOF también cancela si desaparece el padre.
+Consola conserva Ctrl+C. Tras 3 s sin respuesta a cancelar, QProcess.kill detiene
+el hijo y se informa cancelación forzada, nunca éxito. Supervisión de interfaz
+a 65 s solicita cancelar un proceso sin finalización; no amplía los 60 s del núcleo.
+Cerrar primero aplica Guardar/Descartar/Cancelar del editor. Si se permite cerrar,
+deshabilita edición, cancela y cierra por señal de proceso finalizado, sin huérfanos.
+
+Pestaña Simulación 2T: caso sintético identificado, explicación de independencia
+respecto del proyecto, resumen y detalles efectivos de solo lectura; Ejecutar,
+Cancelar y Abrir resultado. Convergencia requiere estado y balances validados,
+no solo código cero. Mostrar último ciclo completo: presión absoluta en kPa frente
+a ángulo continuo 180–540° (PMI/PMS/PMI) y P-V en cm³/kPa, preservando orden temporal.
+Trabajo C/K proviene del resumen del núcleo, no de integrar puntos de dibujo.
+Resultados no convergidos/cancelados/errores se identifican como diagnóstico no
+aceptado y no muestran curvas de éxito. Limitación visible única: modelo 0D con
+energía prescrita, sin ondas ni validación experimental.
+
+Formato de resultados independiente de JSON v5: `manifest.json`, formato
+`motorsim-reference-result`, versión 1, versión de modelo
+`four-cv-0d-prescribed-heat-v1-external-regularized-rk4-v1`, run_id y unidades.
+Vincula nombres fijos `case.json` (entradas efectivas), `summary.json` (estado,
+entorno, resumen por ciclo/coste y diagnóstico parcial) y `samples.json` (últimos
+dos ciclos completos y muestras parciales), mediante run_id y SHA256. Se reutilizan
+los registros/muestras del núcleo, sin ecuaciones de ejecución duplicadas. El
+manifiesto se escribe al terminar; una escritura incompleta no parece resultado válido.
+`attempts.csv` conserva la traza numérica, no necesaria para dibujar/reabrir.
+Hashes detectan mezcla/alteración de archivos; no constituyen firma o autenticidad.
+
+Abrir valida formato/modelo/unidades, nombres y hashes, entradas del caso fijo,
+estructura/números finitos, dominio/inventarios, continuidad temporal, correspondencia
+de muestras/resumen, balances y tres ciclos de convergencia. No ejecuta contenido.
+Límite de 16 MiB por archivo JSON. Carpeta nueva por ejecución, predeterminada en
+LOCALAPPDATA/MotorSim/Resultados (alternativa de usuario en otros sistemas); nunca
+.venv ni una ruta E: codificada. `--output` permite una carpeta nueva explícita.
+Cambiar proyecto o 2T/4T no modifica, reasigna ni borra los resultados del caso.
+
 ## Fuentes primarias consultadas — 15/09/2026
 [1] [MIT, Control volume form of the conservation laws](https://web.mit.edu/16.unified/www/FALL/thermodynamics/notes/node19.html):
 balances abiertos y transporte de entalpía; justifica signos, no coeficientes del caso.

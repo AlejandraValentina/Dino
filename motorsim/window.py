@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QTimer
 from PySide6.QtGui import (
     QAction, QCloseEvent, QColor, QIcon, QKeySequence, QPainter, QPainterPath,
     QPalette, QPen, QPixmap,
@@ -18,6 +18,7 @@ from .storage import load_project, save_project
 from .geometry_view import GeometryView
 from .ports_view import PortsView
 from .ducts_view import DuctsView
+from .simulation_view import SimulationView
 
 
 class _FilePathLabel(QLabel):
@@ -50,6 +51,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.path: Path | None = None
         self.dirty = False
+        self._closing_after_simulation = False
         self.resize(1080, 760)
         self.setMinimumSize(640, 480)
         self.setWindowTitle("MotorSim")
@@ -94,7 +96,7 @@ class MainWindow(QMainWindow):
         self.file_label = _FilePathLabel()
         self.state_label = QLabel()
         self.state_label.setObjectName("projectState")
-        self.notice = QLabel("Simulación no disponible")
+        self.notice = QLabel("Simulación: caso de referencia")
         self.notice.setObjectName("availability")
 
         menu = self.menuBar().addMenu("&Archivo")
@@ -273,6 +275,9 @@ class MainWindow(QMainWindow):
         self.ducts_view = DuctsView()
         self.tabs.addTab(self.ducts_view, "&Conductos")
         self.ducts_view.changed.connect(self._edited)
+        self.simulation_view = SimulationView()
+        self.tabs.addTab(self.simulation_view, "&Simulación 2T")
+        self.simulation_view.idle.connect(self._simulation_idle)
         self.setCentralWidget(self.tabs)
         self._arrange_groups()
         for previous, following in zip(self._edit_widgets, self._edit_widgets[1:]):
@@ -498,7 +503,17 @@ class MainWindow(QMainWindow):
         return self._save_to(path)
 
     def closeEvent(self, event: QCloseEvent) -> None:
-        if self._can_leave():
-            event.accept()
-        else:
+        if not self._closing_after_simulation and not self._can_leave():
             event.ignore()
+            return
+        if self.simulation_view.active:
+            self._closing_after_simulation = True
+            self.setEnabled(False)
+            self.simulation_view.cancel()
+            event.ignore()
+            return
+        event.accept()
+
+    def _simulation_idle(self):
+        if self._closing_after_simulation:
+            QTimer.singleShot(0, self.close)

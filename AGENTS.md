@@ -10,14 +10,13 @@ Entregas 1 y 2 completadas y aceptadas por la usuaria; 3 y 4 comprobadas técnic
 sin aceptación manual atribuida. Se preserva el trabajo existente y se comprueba Git.
 Entrega 5: modelo/caso/protocolo de `simulacion-2t/design.md` aprobados expresamente
 para implementar y ejecutar únicamente el prototipo de consola de viabilidad.
-Biblioteca estándar, controles elementales antes del caso y tres resoluciones
-con los límites previos. Sin integración Qt, cambios JSON, ondas ni barridos.
-Etapa actual: variante candidata autorizada en los dos enlaces exteriores,
-regularización fija de 100 Pa (comparación local de 50 Pa). Preservar 8d924949,
-ley original y evidencias previas. RK4 A/B/C, interiores y aceptación intactos.
-Tras controles locales, ejecutar A a 100 Pa; si no converge, detener. Solo tras
-A convergido continuar B/C, y solo tras aprobar la serie comparar C a 50 Pa.
-Sin ampliar mínimos/presupuestos ni presentar la variante como calibrada.
+Etapa actual autorizada: primer tramo de integración Qt del caso de referencia
+S2T-0D-01, 3000 rpm, banda exterior 100 Pa y perfil B, en QProcess asíncrono.
+Preservar 0cb0c754, ley original y evidencias. Núcleo sin Qt; ejecución individual,
+cancelación cooperativa Windows, consulta/reapertura y gráficos de datos calculados.
+No usar entradas del editor ni cambiar JSON v5, física, aceptación o presupuestos.
+No repetir A/B/C ni bandas. La viabilidad previa corresponde a la variante candidata,
+sin calibración. Entrega 5 abierta: uso con entradas del editor todavía fuera del tramo.
 Revisión puntual, pruebas pertinentes y commit propio;
 autenticación fuera de esta tarea, sin nuevos intentos ni configuración global.
 No iniciar entrega 6.

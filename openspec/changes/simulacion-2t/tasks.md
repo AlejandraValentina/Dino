@@ -18,9 +18,13 @@
 - [x] 13. Ejecutar una serie A/B/C acotada desde los estados originales, registrar coste/precisión y detener sin extender presupuestos.
 - [x] 14. Implementar la variante exterior autorizada de 100/50 Pa, conservar ley original y comprobar transporte, empalme y diagnóstico local con retorno físico.
 - [x] 15. Ejecutar el ensayo integrado condicional autorizado y registrar resultados, omisiones, coste, revisión y commit propio.
+- [x] 16. Añadir ejecución individual B/100 Pa sin Qt y resultados separados, vinculados y validados para reapertura.
+- [x] 17. Integrar pestaña del caso de referencia, QProcess, progreso, cancelación/cierre y gráficos sin afectar proyectos.
+- [x] 18. Comprobar consola/interfaz/referencia B, errores/reapertura y Windows visible al 150 %, con captura real.
+- [x] 19. Registrar pruebas finales, revisión puntual, estado y commit propio del tramo gráfico.
 
-No se detallan aquí integración Qt, nuevos archivos ni entregas posteriores: no
-están autorizados. Aprobar documentos no marca tareas 7–10 automáticamente.
+La orden posterior autoriza tareas 16–19 para el caso fijo, no para motores del
+editor ni otras entregas. Aprobar documentos no acredita implementación o pruebas.
 
 ## Evidencia de esta definición — 15/09/2026
 Inicio main 545685b, árbol limpio y un commit por delante de origin/main.
@@ -573,3 +577,131 @@ ni a calibración física, validación experimental, ondas o sintonía. La entre
 sigue abierta por posterior integración, fuera de esta orden. No se integra Qt,
 cambia JSON, archiva ni empieza otra entrega. Commit propio; publicación por la
 usuaria, sin intentar autenticación.
+
+
+## Integración gráfica del caso fijo — evidencia del 15/09/2026
+
+Inicio en main limpio, 0cb0c754bdedcd67e39269e77a91f65b562b8e31, igual a la
+referencia local origin/main. Commit, ley original y todos los directorios previos
+preservados. No hubo publicación, consulta de credenciales ni cambios globales.
+La nueva orden autoriza Qt exclusivamente para el caso fijo; no entradas del editor.
+
+### Implementación
+
+- `reference_run.py`: una ejecución de Model/run_adaptive, B/100 Pa, definición
+  compartida del caso y límites originales. No importa Qt ni ejecuta la serie.
+  Avance JSON por líneas, cancelación Event por stdin/EOF o Ctrl+C en consola.
+- `reference_results.py`: entradas efectivas y contrato pequeño manifest/case/
+  summary/samples, con unidades, versión e identificador/hashes. Reapertura valida
+  estructura, números, dominio, inventarios, balances, secuencia/correspondencia
+  y convergencia; no ejecuta contenido. Resultados fuera de proyectos JSON v5.
+- `simulation_view.py`: pestaña con parámetros de solo lectura, QProcess sin shell,
+  avance real, un único hijo, cancelación y parada de respaldo tras tres segundos.
+  Trabajos provienen del núcleo; P-V mantiene el orden temporal y ángulo usa una
+  vuelta continua 180–540 grados. Sin curvas de éxito para estados no aceptados.
+- Cierre de MainWindow conserva primero la protección del editor; tras autorizarlo,
+  cancela y cierra por señal del hijo. No usa waitForFinished ni processEvents en
+  producción. Nuevo cálculo limpia datos anteriores; archivo ilegible conserva
+  el resultado válido al abrir. Cambiar proyecto/tipo no reasigna el resultado.
+
+### Ejecuciones reales y comparación
+
+Consola, una sola ejecución (no serie):
+
+```powershell
+.\.venv\Scripts\python.exe -m motorsim.reference_run --output results/simulacion-2t/integracion-consola-20260915
+```
+
+Interfaz, botón Ejecutar mediante automatización visible:
+
+```powershell
+.\.venv\Scripts\python.exe tests/verify_reference_windows.py --output results/simulacion-2t/integracion-ui-20260915
+```
+
+| Ejecución | Perfil / banda | Ciclos / parada | Integración s | Pico del cálculo MiB | RHS |
+| --- | --- | --- | ---: | ---: | ---: |
+| Consola individual | B / 100 Pa | 10 / convergencia completa | 11,719 | 24,598 | 228171 |
+| Interfaz real | B / 100 Pa | 10 / convergencia completa | 10,719 | 24,445 | 228171 |
+| Referencia previa preservada | B / 100 Pa | 10 / convergencia completa | 10,735 | 28,668 | 228171 |
+
+Comparación exacta de entradas consola/interfaz, todos los resúmenes por ciclo
+contra la referencia B (no C), RHS y muestras consola/interfaz: iguales. No se
+comparó el tiempo como si fuera determinista. La memoria histórica de B incluía
+el proceso que ya había ejecutado A; las nuevas son procesos individuales.
+Qt no cargado en el hijo, Windows 10.0.19045 AMD64, Python 3.11.0, Intel i5-10400.
+
+Último ciclo idéntico: W_C=16,49050751206088 J/ciclo,
+W_K=-3,3651306484080394 J/ciclo, p_max=1331530,846070603 Pa absolutos.
+Y_I/K/C/E=0,9855942761818735 / 0,9771350157648919 /
+0,5621858698264297 / 0,38108950299160227. Máximo residuo independiente
+normalizado=4,459656622212729e-6 (0,000445966 %, límite 0,1 %), masa en C.
+Balances discretos/independientes y convergencia compuesta aprobados en ciclos
+8/9/10. No se volvieron a comprobar sensibilidad temporal ni bandas: su evidencia
+pertenece al ensayo anterior. No se ejecutaron A/B/C formales, otras bandas ni física nueva.
+
+Los dos directorios nuevos conservan entradas/versión, manifiesto, resúmenes,
+muestras e intentos. No sobrescriben la referencia previa. Ubicación predeterminada
+para uso normal: LOCALAPPDATA/MotorSim/Resultados; `--output` se usó para evidencia
+identificable del recorrido, no está codificado en la aplicación.
+
+### Windows visible y captura
+
+Escritorio Default accesible. Automatización visible, no aceptación manual:
+se ejecutó el caso desde la pestaña, conservando un proyecto de prueba con nombre,
+4T y cambios pendientes. Se verificó que el proyecto no se modifica al calcular,
+que no admite ejecución duplicada, conserva el resultado al navegar y reabre sin
+recalcular. Cancelación visible mediante botones Ejecutar/Cancelar aprobada sin
+parada forzada; manifiesto Cancelado, curvas retiradas y resultado previo reabierto.
+
+```powershell
+.\.venv\Scripts\python.exe tests/verify_reference_windows.py --cancel --output results/simulacion-2t/integracion-cancelacion-visible-20260915 --result results/simulacion-2t/integracion-ui-20260915/manifest.json
+.\.venv\Scripts\python.exe tests/verify_reference_windows.py --scale 1.2 --suffix=-ajustada --result results/simulacion-2t/integracion-ui-20260915/manifest.json
+```
+
+Al 150 % efectivo (devicePixelRatio=1,5; base de escritorio 125 % por factor Qt
+1,2 solo del proceso), se inspeccionaron título nativo, parámetros, controles,
+foco, texto, curva angular con PMS/PMI, lazo P-V, unidades y limitación. En ancho
+compacto los gráficos se apilan y la barra vertical permite consultar ambos,
+sin desplazamiento horizontal. Pico observado de interfaz 87,7 MiB, separado
+explícitamente del cálculo. El primer encuadre excedía la pantalla; se ajustó
+el tamaño de la ventana de comprobación y se repitieron capturas al reabrir el
+resultado, sin otra simulación. No se cambiaron políticas ni escalado global.
+
+Capturas reales finales inspeccionadas, sin generar ni editar imágenes:
+- `docs/images/motorsim-simulacion-150-ajustada.png`: encabezado, caso y estado.
+- `docs/images/motorsim-simulacion-150-resultados-ajustada.png`: ambos gráficos,
+  valores, unidades, ruta y memoria/limitación.
+- `docs/images/motorsim-simulacion-150-compacta-ajustada.png` y
+  `docs/images/motorsim-simulacion-150-compacta-resultados-ajustada.png`: ancho
+  compacto y desplazamiento. No se atribuye una ejecución nueva al reabrir.
+
+### Pruebas finales y revisión puntual
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -q
+```
+
+**134/134 aprobadas en 13,032 s** en el estado final de código. Incluyen 13 controles
+nuevos de archivos/integración, los existentes del núcleo y regresiones del editor.
+Las pruebas Qt de suite son offscreen; la evidencia visual Windows está separada.
+OpenSpec: `openspec validate simulacion-2t --strict --no-interactive` aprobado;
+`git diff --check` sin errores de espacios. Importación independiente de
+`motorsim.reference_run`: ningún módulo PySide6 cargado.
+Cobertura pertinente: inicio, señales de progreso, cancelación cooperativa real,
+rechazo de doble ejecución, cierre con Cancelar/Descartar del editor, hijo simulado
+sin respuesta detenido de forma acotada, fallo de arranque, salida cero sin resultado,
+no convergencia/presupuesto, reapertura, archivos mezclados/faltantes/alterados,
+unidades/NaN/tipos/dominio, falso éxito, orden temporal de gráficos e independencia
+del proyecto. La suite usa ensayos breves/controlados, no repite la serie formal.
+
+Una revisión independiente de solo lectura encontró dos defectos concretos:
+estructura de balances podía lanzar AttributeError y presión máxima negativa
+podía pasar. Corregidos con verificación de diccionario, dominio y máximo no menor
+al de muestras; añadida regresión. Autorrevisión del principal de correcciones,
+resultados/capturas y diff, sin otra campaña de revisión.
+
+Viabilidad numérica del caso: ya acreditada para la variante. Integración gráfica
+del caso fijo: comprobada ahora. Aceptación manual de la usuaria: no atribuida.
+Uso con motores editados: pendiente de definición y comprobación, fuera del tramo.
+Entrega 5 sigue En curso. No se archiva ni comienza entrega 6. Commit propio;
+la publicación queda a cargo de la usuaria, sin reintentar autenticación.

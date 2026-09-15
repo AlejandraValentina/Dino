@@ -25,6 +25,7 @@ QToolButton, QPushButton {
 }
 QToolButton:hover, QPushButton:hover { background: #22334b; border-color: #739fc5; }
 QToolButton:pressed, QPushButton:pressed { background: #101c30; }
+QPushButton:disabled { color: #687c94; background: #101a2b; border-color: #26344a; }
 QToolButton:focus, QPushButton:focus { border: 2px solid #b0dcff; }
 QToolButton#primaryAction { background: #3198dc; color: #002c47; border-color: #3198dc; font-weight: 600; }
 QToolButton#primaryAction:hover { background: #69baf0; }

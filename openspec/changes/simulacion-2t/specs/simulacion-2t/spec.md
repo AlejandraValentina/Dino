@@ -1,5 +1,41 @@
 ## ADDED Requirements
 
+Actualización posterior: la orden de integración gráfica autoriza el caso fijo
+S2T-0D-01 B/100 Pa mediante ejecución individual separada, sin motores del editor.
+Las exclusiones de Qt y autorizaciones de push de etapas anteriores conservadas
+abajo son históricas; este tramo permite Qt y commit propio, sin publicación.
+
+### Requirement: Ejecutar y consultar el caso de referencia desde Qt
+La pestaña Simulación 2T MUST ejecutar únicamente S2T-0D-01 a 3000 rpm, banda
+exterior 100 Pa y perfil B mediante QProcess asíncrono, reutilizando el núcleo sin
+Qt y sus presupuestos/criterios. MUST mostrar caso sintético, parámetros de solo
+lectura y separación del proyecto. MUST NOT modificar JSON v5 ni usar el editor.
+
+#### Scenario: Proyecto independiente
+- **WHEN** se ejecuta o reabre el caso y después cambia el proyecto o su tipo
+- **THEN** el proyecto conserva sus datos/estado de cambios y el resultado sigue identificado como caso de referencia.
+
+### Requirement: Cancelación y estados fiables
+MUST admitir un único proceso, progreso real y cancelación cooperativa Windows.
+Cerrar MUST conservar protección del editor y cancelar sin esperar indefinidamente
+ni dejar hijos huérfanos. MUST distinguir convergencia, cancelación, no convergencia
+y error; código cero solo no acredita éxito. Nuevo cálculo MUST retirar datos previos.
+
+#### Scenario: Cancelar cálculo activo
+- **WHEN** se solicita Cancelar o se autoriza cerrar durante el cálculo
+- **THEN** el proceso se detiene con estado Cancelado, con parada forzada acotada si no responde, sin éxito atribuido.
+
+### Requirement: Visualizar y recuperar resultados del caso fijo
+MUST mostrar presión absoluta/ángulo continuo con PMS/PMI, P-V en orden temporal,
+trabajos C/K calculados, máximo, ciclos/tiempo, balances y parada. MUST validar
+resultados guardados separados, entradas, unidades, correspondencia y valores
+antes de mostrarlos. MUST identificar parciales como diagnóstico no aceptado,
+sin inventar curvas, sensibilidad nueva, validación experimental o soporte general.
+
+#### Scenario: Resultado ilegible
+- **WHEN** Abrir resultado recibe estructura, unidades o archivos incompatibles
+- **THEN** informa el error sin cerrar la aplicación ni sustituir el resultado válido anterior por datos incoherentes.
+
 Actualización de autorización, 15/09/2026: la usuaria aprobó explícitamente modelo,
 caso, aproximaciones y protocolo y autorizó implementación/ejecución del prototipo.
 Las restricciones de la tarea documental original conservadas abajo describen
