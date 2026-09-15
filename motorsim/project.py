@@ -23,7 +23,10 @@ PORT_FIELDS = {"top_mm": "Distancia al borde superior", "height_mm": "Altura de 
                "width_mm": "Ancho desarrollado"}
 INTAKE_FIELDS = {**PORT_FIELDS, "skirt_mm": "Distancia al borde inferior de falda"}
 INTAKE_REFERENCE = "straight-skirt-peripheral-tdc-developed-v1"
-NUMBER_LABELS = {**NUMERIC_FIELDS, **INTAKE_FIELDS,
+DUCT_FIELDS = {"length_mm": "Longitud axial", "start_diameter_mm": "Diámetro interior inicial",
+               "end_diameter_mm": "Diámetro interior final"}
+DUCT_REFERENCE = "ordered-circular-inner-axial-linear-2t-v1"
+NUMBER_LABELS = {**NUMERIC_FIELDS, **INTAKE_FIELDS, **DUCT_FIELDS,
                  "crankcase_volume_bdc_cm3": "Volumen libre del cárter en PMI"}
 TWO_STROKE_REFERENCE = "rectangular-peripheral-tdc-developed-bdc-v1"
 
@@ -134,6 +137,60 @@ class Intake:
 
 
 @dataclass(frozen=True)
+class DuctSegment:
+    name: str = ""
+    length_mm: float | None = None
+    start_diameter_mm: float | None = None
+    end_diameter_mm: float | None = None
+
+    def validate(self):
+        if not isinstance(self.name, str):
+            raise ProjectError("El nombre de tramo debe ser texto.")
+        for key in DUCT_FIELDS:
+            validate_number(getattr(self, key), key)
+
+    @classmethod
+    def from_dict(cls, data):
+        if not isinstance(data, dict) or not cls.__dataclass_fields__.keys() <= data.keys():
+            raise ProjectError("Faltan campos del tramo de conducto.")
+        segment = cls(**{key: data[key] for key in cls.__dataclass_fields__})
+        segment.validate()
+        return segment
+
+
+@dataclass(frozen=True)
+class Ducts:
+    intake: tuple[DuctSegment, ...] = ()
+    exhaust: tuple[DuctSegment, ...] = ()
+    reference: str = DUCT_REFERENCE
+
+    def validate(self):
+        if self.reference != DUCT_REFERENCE:
+            raise ProjectError("Referencia de conductos no admitida.")
+        for route in (self.intake, self.exhaust):
+            if not isinstance(route, tuple) or any(not isinstance(s, DuctSegment) for s in route):
+                raise ProjectError("La colección de tramos es inválida.")
+            for segment in route:
+                segment.validate()
+
+    def to_dict(self):
+        return {"reference": self.reference,
+                "intake": [asdict(s) for s in self.intake],
+                "exhaust": [asdict(s) for s in self.exhaust]}
+
+    @classmethod
+    def from_dict(cls, data):
+        if not isinstance(data, dict) or not cls.__dataclass_fields__.keys() <= data.keys():
+            raise ProjectError("Faltan campos de conductos.")
+        if not all(isinstance(data[key], list) for key in ("intake", "exhaust")):
+            raise ProjectError("Los recorridos deben ser listas.")
+        ducts = cls(tuple(DuctSegment.from_dict(s) for s in data["intake"]),
+                    tuple(DuctSegment.from_dict(s) for s in data["exhaust"]), data["reference"])
+        ducts.validate()
+        return ducts
+
+
+@dataclass(frozen=True)
 class Project:
     name: str = "Sin título"
     cycle: str = "2T"
@@ -148,6 +205,7 @@ class Project:
     ports: tuple[Port, ...] = ()
     crankcase_volume_bdc_cm3: float | None = None
     intake: Intake = field(default_factory=Intake)
+    ducts: Ducts = field(default_factory=Ducts)
 
     def validate(self) -> None:
         if not isinstance(self.name, str) or not self.name.strip():
@@ -168,10 +226,13 @@ class Project:
         if not isinstance(self.intake, Intake):
             raise ProjectError("Datos de admisión inválidos.")
         self.intake.validate()
+        if not isinstance(self.ducts, Ducts):
+            raise ProjectError("Datos de conductos inválidos.")
+        self.ducts.validate()
 
     def to_dict(self) -> dict:
         self.validate()
-        return {"format_version": 4, **asdict(self), "ports": [asdict(port) for port in self.ports],
+        return {"format_version": 5, **asdict(self), "ducts": self.ducts.to_dict(), "ports": [asdict(port) for port in self.ports],
                 "two_stroke_reference": TWO_STROKE_REFERENCE}
 
     @classmethod
@@ -181,12 +242,14 @@ class Project:
         if not {"format_version", "name", "cycle"} <= data.keys():
             raise ProjectError("Faltan campos obligatorios: format_version, name o cycle.")
         version = data["format_version"]
-        if type(version) is not int or version not in (1, 2, 3, 4):
-            raise ProjectError("La versión del archivo debe ser el entero 1, 2, 3 o 4.")
+        if type(version) is not int or version not in (1, 2, 3, 4, 5):
+            raise ProjectError("La versión del archivo debe ser el entero 1, 2, 3, 4 o 5.")
         if version == 1:
             project = cls(data["name"], data["cycle"])
         else:
             fields = set(cls.__dataclass_fields__)
+            if version < 5:
+                fields -= {"ducts"}
             if version < 4:
                 fields -= {"intake"}
             if version == 2:
@@ -200,8 +263,10 @@ class Project:
                 if not isinstance(data["ports"], list):
                     raise ProjectError("Las lumbreras deben ser una lista.")
                 values["ports"] = tuple(Port.from_dict(port) for port in data["ports"])
-            if version == 4:
+            if version >= 4:
                 values["intake"] = Intake.from_dict(data["intake"])
+            if version == 5:
+                values["ducts"] = Ducts.from_dict(data["ducts"])
             project = cls(**values)
         project.validate()
         return project

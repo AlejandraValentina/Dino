@@ -25,7 +25,7 @@ class ProjectTests(unittest.TestCase):
         valid = Project().to_dict()
         for key in valid:
             cases.append({k: v for k, v in valid.items() if k != key})
-        for version in (True, False, 1.0, "1", 0, 5, None):
+        for version in (True, False, 1.0, "1", 0, 6, None):
             cases.append({**valid, "format_version": version})
         cases.extend([{**valid, "name": 1}, {**valid, "cycle": 4}])
         for data in cases:

@@ -166,7 +166,7 @@ class WindowTests(unittest.TestCase):
         for edit in self.window.numeric_edits.values():
             self.assertEqual(edit.text(), "")
         self.assertTrue(self.window.save())
-        self.assertIn('"format_version": 4', self.path.read_text(encoding="utf-8"))
+        self.assertIn('"format_version": 5', self.path.read_text(encoding="utf-8"))
 
     def test_responsive_groups(self):
         self.window.resize(1100, 760)
@@ -236,6 +236,132 @@ class WindowTests(unittest.TestCase):
             self.window.open_project()
         self.assertTrue(self.window.save())
         self.assertEqual(load_project(self.path).bore_mm, project.bore_mm)
+
+    def configure_ducts(self):
+        v=self.window.ducts_view
+        self.window.tabs.setCurrentWidget(v)
+        for name,values in (('Tubo sintético',('100','20','20')),('Cono sintético',('100','20','40'))):
+            v.add_segment();v.name_edit.setText(name)
+            for key,value in zip(v.edits,values):v.edits[key].setText(value)
+        return v
+
+    def test_ducts_edit_reorder_delete_and_profile(self):
+        v=self.configure_ducts()
+        self.assertEqual(v.profile.data.profile,((0,100,10,10),(100,200,10,20)))
+        self.assertIn('104.72',v.totals.text())
+        with patch.object(self.window,'_choose_file',return_value=self.path):
+            self.assertTrue(self.window.save())
+        v.list.setCurrentRow(0)
+        self.assertFalse(self.window.dirty)
+        self.assertEqual(v.profile.selected,0)
+        v.down_button.click()
+        self.assertTrue(self.window.dirty)
+        self.assertEqual(v.profile.data.profile,((0,100,10,20),(100,200,10,10)))
+        self.assertIn('discontinua',v.joints.text())
+        self.assertIn('104.72',v.totals.text())
+        self.assertEqual(v.name_edit.text(),'Tubo sintético')
+        v.up_button.click()
+        self.assertEqual(v.profile.data.joints,(True,))
+        v.edits['length_mm'].setText('150,125')
+        self.assertEqual(float(v.profile.data.length),250.125)
+        v.remove_button.click()
+        self.assertEqual(len(v.profile.data.profile),1)
+        self.assertEqual(v.name_edit.text(),'Cono sintético')
+        self.assertTrue(self.window.save())
+        self.assertEqual(load_project(self.path).ducts.intake[0].name,'Cono sintético')
+        v.remove_button.click()
+        self.assertIn('Sin tramos',v.totals.text());self.assertFalse(v.profile.data.profile)
+        self.assertTrue(self.window.save())
+        self.assertFalse(load_project(self.path).ducts.intake)
+
+    def test_ducts_both_routes_cycle_save_close_reopen(self):
+        v=self.configure_ducts()
+        v.route_combo.setCurrentIndex(1)
+        self.assertFalse(v.drafts['exhaust']);v.add_segment()
+        v.name_edit.setText('Escape incompleto');v.edits['length_mm'].setText('55.125')
+        with patch.object(self.window,'_choose_file',return_value=self.path):
+            self.assertTrue(self.window.save())
+        original=self.window.project()
+        v.route_combo.setCurrentIndex(0);v.list.setCurrentRow(0)
+        self.assertFalse(self.window.dirty)
+        self.window.cycle_combo.setCurrentText('4T')
+        self.assertFalse(v.profile.data.profile);self.assertTrue(v.panel.isHidden())
+        self.assertEqual(self.window.project().ducts,original.ducts)
+        self.assertTrue(self.window.save());self.assertTrue(self.window.close())
+        reopened=MainWindow()
+        try:
+            with patch.object(reopened,'_choose_file',return_value=self.path):reopened.open_project()
+            self.assertEqual(reopened.project().ducts,original.ducts)
+            reopened.cycle_combo.setCurrentText('2T')
+            self.assertEqual(reopened.ducts_view.profile.data.length,200)
+        finally:
+            reopened.dirty=False;reopened.close();reopened.deleteLater()
+
+    def test_ducts_invalid_drafts_survive_selection_reorder_and_cancel(self):
+        v=self.configure_ducts()
+        with patch.object(self.window,'_choose_file',return_value=self.path):self.assertTrue(self.window.save())
+        raw=self.path.read_bytes()
+        v.edits['start_diameter_mm'].setText('inválido')
+        self.assertFalse(v.profile.data.profile);self.assertIsNone(v.profile.data.volume)
+        self.assertEqual(v.profile.data.length,200)
+        v.up_button.click();v.list.setCurrentRow(1);v.route_combo.setCurrentIndex(1)
+        for cycle in ('4T','2T'):
+            self.window.cycle_combo.setCurrentText(cycle)
+            with patch.object(self.window,'_choose_file') as choose:
+                self.assertFalse(self.window.save());choose.assert_not_called()
+            with patch.object(self.window,'_ask_changes',return_value='cancel'):
+                self.window.new_project();self.assertFalse(self.window.close())
+            self.assertEqual(self.path.read_bytes(),raw)
+            self.assertEqual(v.drafts['intake'][0]['start_diameter_mm'],'inválido')
+        v.route_combo.setCurrentIndex(0);v.list.setCurrentRow(0)
+        self.assertEqual(v.edits['start_diameter_mm'].text(),'inválido')
+        v.edits['start_diameter_mm'].clear()
+        self.assertTrue(self.window.save());self.assertIsNone(load_project(self.path).ducts.intake[0].start_diameter_mm)
+        v.edits['start_diameter_mm'].setText('20')
+        self.assertTrue(v.profile.data.profile)
+        v.edits['length_mm'].clear()
+        self.assertFalse(v.profile.data.profile);self.assertIsNone(v.profile.data.length)
+        self.assertIn('Área inicial: 314.16',v.piece_results.text())
+        self.app.processEvents()
+
+    def test_ducts_file_failures_protect_data_and_v4_open(self):
+        import json
+        from motorsim.project import Intake, Port, Ducts
+        v=self.configure_ducts()
+        with patch.object(self.window,'_choose_file',return_value=self.path):self.assertTrue(self.window.save())
+        raw=self.path.read_bytes();v.edits['length_mm'].setText('101')
+        before=self.snapshot()
+        with patch.object(self.window,'_choose_file',return_value=None):self.assertFalse(self.window.save_as())
+        with patch.object(self.window,'_choose_file',return_value=self.path), \
+             patch.object(self.window,'_confirm_overwrite',return_value=False):self.assertFalse(self.window.save_as())
+        with patch('motorsim.storage.os.replace',side_effect=PermissionError('Prueba')):
+            self.assertFalse(self.window.save())
+        self.assertEqual(self.snapshot(),before);self.assertEqual(self.path.read_bytes(),raw)
+        self.copy.write_text('{',encoding='utf-8')
+        with patch.object(self.window,'_choose_file',return_value=self.copy):self.window.open_project()
+        self.assertEqual(self.snapshot(),before)
+        old=Project('Anterior','2T',ports=(Port('Escape','escape',32,10,20),),
+                    crankcase_volume_bdc_cm3=250,intake=Intake('piston_port',64,10,20,42))
+        data=old.to_dict();data.pop('ducts');data['format_version']=4
+        raw=json.dumps(data).encode();self.copy.write_bytes(raw)
+        with patch.object(self.window,'_choose_file',return_value=self.copy), \
+             patch.object(self.window,'_ask_changes',return_value='discard'):self.window.open_project()
+        self.assertEqual(self.window.project(),old);self.assertEqual(self.copy.read_bytes(),raw)
+        self.assertEqual(self.window.project().ducts,Ducts())
+        self.assertFalse(self.window.dirty)
+
+    def test_ducts_keyboard_and_compact_layout(self):
+        v=self.configure_ducts()
+        with patch.object(self.window,'_choose_file',return_value=self.path):self.assertTrue(self.window.save())
+        v.route_combo.setFocus();QTest.keyClick(v.route_combo,Qt.Key.Key_Down)
+        self.assertEqual(v.route,'exhaust');self.assertFalse(self.window.dirty)
+        QTest.keyClick(v.route_combo,Qt.Key.Key_Up)
+        self.assertEqual(v.route,'intake');self.assertFalse(self.window.dirty)
+        v.name_edit.setFocus();QTest.keyClick(v.name_edit,Qt.Key.Key_Tab)
+        self.assertIs(self.app.focusWidget(),v.edits['length_mm'])
+        self.window.resize(700,480);self.app.processEvents()
+        self.assertFalse(v._wide);self.assertEqual(v.horizontalScrollBar().maximum(),0)
+        self.assertEqual(v.profile.data.length,200)
 
     def configure_intake(self):
         w = self.window

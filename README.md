@@ -1,9 +1,8 @@
 # MotorSim
 
 Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La entrega
-actual [configuracion-2t](openspec/changes/configuracion-2t/specs/configuracion-2t/spec.md)
-añade lumbreras rectangulares de escape/transferencia, registro de cárter y
-admisión rectangular al cárter por falda recta del pistón.
+actual [conductos-admision-escape](openspec/changes/conductos-admision-escape/specs/conductos-admision-escape/spec.md)
+añade recorridos geométricos de conductos circulares de admisión y escape 2T.
 La ficha, posición del pistón, volúmenes y curvas geométricas existentes se conservan.
 No contiene simulación física ni estimaciones de rendimiento.
 
@@ -15,7 +14,8 @@ resume el estado. Esta aceptación es evidencia de la usuaria, separada de las
 pruebas automatizadas e inspección visual del agente. Sin archivar. La entrega 3
 está **Completada** para la configuración geométrica admitida: lumbreras, cárter
 y admisión por falda comprobados. Esto no es aceptación manual de la usuaria
-ni validación predictiva. No se inicia la entrega 4.
+ni validación predictiva. La entrega 4 está **Completada** para el editor geométrico autorizado el 15/09/2026.
+No se inicia la entrega 5.
 
 ## Interfaz y uso
 
@@ -73,7 +73,7 @@ resultados afectados y muestra la causa, sin corregir dimensiones. Posición y
 esquema solo necesitan carrera/biela; cilindrada, diámetro/carrera; cámara y
 extremos, además compresión; curva de volumen, todas estas entradas. La ficha
 incompleta o con biela positiva incompatible se puede guardar para corregirla.
-No se guardan curvas; el formato actual es JSON versión 4. Ecuaciones y caso admitido en el
+No se guardan curvas; el formato actual es JSON versión 5. Ecuaciones y caso admitido en el
 [diseño](openspec/changes/geometria-cinematica/design.md).
 
 Comprobación del 14/09/2026 sobre `7ef0628`: escritorio Windows desbloqueado,
@@ -216,6 +216,79 @@ visible e inspección del agente se registran separadas de la aceptación previa
 entregas 1 y 2. No quedan comprobaciones técnicas obligatorias pendientes de este
 tramo; no se atribuye validez experimental ni se selecciona un motor real.
 
+## Conductos de admisión y escape — entrega 4
+
+Pestaña **Conductos**: elegir **Admisión** o **Escape**. Se muestra un único editor
+con la lista ordenada del recorrido elegido. **Añadir tramo**, **Eliminar**, **Subir**
+y **Bajar** modifican el proyecto; seleccionar fila o cambiar recorrido no lo modifica.
+Cada tramo tiene nombre opcional, longitud axial L y diámetros interiores D1/D2, en mm.
+Tubo cilíndrico si D1=D2; en otro caso troncocónico de diámetro lineal. Sin geometrías
+precargadas, ramificaciones, accesorios, curvas espaciales ni espesores.
+
+El sentido de admisión es entrada exterior → ventana al cárter; escape, salida del
+cilindro → extremo exterior. Define orden y dibujo, no condiciones de flujo. Un
+recorrido por sistema del cilindro de referencia, sin multiplicación por N. No se
+deduce diámetro desde lumbreras ni se suma volumen de conductos al cárter registrado.
+
+Campos vacíos se guardan como null; texto inválido conserva el borrador y bloquea
+Guardar, incluso al cambiar fila, recorrido o 2T/4T. Se aceptan números positivos
+finitos, coma/punto sin separadores de miles y notación científica como en la ficha.
+En 4T se ocultan editor y resultados 2T, conservando todos los datos.
+
+Por pieza: A1=πD1²/4 y A2=πD2²/4 mm²; V=πL(D1²+D1D2+D2²)/12000 cm³.
+Los totales requieren las entradas de **todos** los tramos para cada magnitud:
+la longitud no depende de diámetros; el volumen no se presenta como suma parcial.
+Ausencias e invalidez muestran «—» con causa; lista vacía indica **Sin tramos**.
+Se muestran resultados redondeados, manteniendo las entradas originales en JSON.
+
+Uniones continuas requieren igualdad numérica exacta D2 anterior=D1 siguiente,
+sin ajustes automáticos ni tolerancia oculta. Las uniones discontinuas se identifican
+por números de tramo y marcador en el perfil; quedan fuera del modelo continuo,
+pero conservan áreas y suma de volúmenes calculables de las piezas. No se dibujan
+adaptadores. Diámetros faltantes dejan la unión sin verificar.
+
+El perfil usa posición axial acumulada y contornos interiores ±D/2, con selección
+en azul, uniones marcadas, sentido y unidades. Misma escala en ambos ejes; no CAD
+de fabricación. Se retira entero si falta una dimensión necesaria o hay texto
+inválido, explicando la causa; no se dibujan medidas supuestas. El rango de dibujo
+se comprueba independientemente de los cálculos numéricos. No calcula caudal,
+presión, velocidad del gas, temperatura, resonancia, RPM óptimas, potencia ni par.
+
+Caso sintético independiente: tubo L100/D1=20/D2=20 seguido de cono L100/D1=20/D2=40
+mm. Volúmenes 10π y (70/3)π cm³; unión20 mm, longitud200 mm y volumen total(100/3)π
+≈104,71975512 cm³. No corresponde a un motor real ni acredita validez predictiva.
+
+**Suite final del 15/09/2026:** 85/85 pruebas aprobadas en 22,311 s, ejecutadas una
+vez después de la última corrección con Qt Windows. Incluye 39 pruebas de widgets,
+archivos y diálogos reales automatizados; 8 pruebas específicas de geometría y
+persistencia de conductos, además de regresiones anteriores. Durante implementación
+pasaron 8 pruebas numéricas y 39 sin pantalla; no sustituyen la suite final.
+
+```powershell
+$env:QT_QPA_PLATFORM = "windows"
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+$env:QT_QPA_PLATFORM = $null
+```
+
+**Revisión independiente puntual:** sin defectos reproducibles. Autorrevisión del
+principal de integración y capturas; se ajustó el orden de dibujo para mantener
+visible el eje central sobre el relleno, antes de la suite final. OpenSpec estricto
+aprobado. No se añadieron dependencias ni se modificó configuración global.
+
+**Inspección visual:** ventana real en escritorio Windows disponible, captura
+1350×988 píxeles con escalado efectivo 125 %. Se comprobaron perfil continuo,
+discontinuidad sin adaptador, selección y retirada del perfil ante texto inválido.
+También se inspeccionaron editor/perfil apilados al 150 %, ventana de 700×480 unidades
+lógicas, foco por Tab y ausencia de desplazamiento horizontal. El ajuste de escala
+se limitó al proceso Qt. Los archivos JSON del recorrido fueron temporales, fuera
+de .venv; no se cambian destinos de proyectos de la usuaria.
+
+![Conductos en Windows: caso sintético independiente](docs/images/motorsim-conductos.png)
+
+**Aceptación manual:** no realizada por la usuaria para esta entrega. Las pruebas
+visibles automatizadas y la inspección del agente son evidencias separadas. No quedan
+comprobaciones técnicas obligatorias pendientes; sin validez predictiva ni entrega 5.
+
 ## Instalar, iniciar y probar
 
 Versiones comprobadas: Windows 10 (10.0.19045), Python 3.11.0, PySide6 6.11.2,
@@ -241,7 +314,7 @@ Pruebas y dependencias:
 .\.venv\Scripts\python.exe -m pip check
 ```
 
-**47 pruebas aprobadas** y `pip check` sin dependencias rotas. Cubren JSON v2
+Evidencia de las entregas anteriores: **47 pruebas aprobadas** y `pip check` sin dependencias rotas. Cubren JSON v2
 completo/incompleto, lectura v1 sin escritura automática, valores vacíos/inválidos,
 coma/punto, finitud, cilindrada y actualización, conservación al cambiar ciclo,
 cambios pendientes de todos los campos, teclado, adaptación de ancho y regresiones
@@ -278,12 +351,12 @@ Revisión independiente puntual: detectó dependencia indebida de cilindrada res
 a compresión; corregida y cubierta por regresión. Autorrevisión del principal de
 la corrección y documentación. La integración OpenSpec global no se modifica.
 
-## Formato JSON versión 4
+## Formato JSON versión 5
 
 Conserva todos los campos de ficha de versión 2 (`name`, `cycle`, `manufacturer`,
 `model`, `notes`, `cylinder_count`, `bore_mm`, `stroke_mm`, `rod_length_mm`,
 `compression_ratio`) y añade `ports`, `crankcase_volume_bdc_cm3` y
-`two_stroke_reference`. La versión 4 añade `intake`; `format_version` es el entero 4. Cada fila de `ports`
+`two_stroke_reference`. La versión 4 añade `intake`; `format_version` actual es el entero 5. Cada fila de `ports`
 guarda `name`, `function` (`escape`, `transfer` o null), `top_mm`, `height_mm`,
 `width_mm`. La lista vacía representa ausencia de lumbreras. Dimensiones/cárter
 no informados son null; los textos opcionales, cadenas vacías. No se redondean
@@ -297,7 +370,7 @@ curvas ni resultados. Se mantienen guardado seguro y confirmación de sobrescrit
 Se leen versiones 1 y 2 conservando sus campos; se inicializan lumbreras vacías
 y volumen de cárter null. Se lee también v3 conservando lumbreras y cárter. En
 v1/v2/v3, `intake` se inicializa sin definir y con todas las dimensiones null.
-Abrir no reescribe: la conversión a v4 solo se persiste con Guardar/Guardar como.
+Abrir no reescribe: la conversión a v5 solo se persiste con Guardar/Guardar como.
 
 `intake` contiene `mode` (null o `piston_port`), `top_mm`, `height_mm`, `width_mm`,
 `skirt_mm` (números positivos finitos o null) y `reference`, obligatoria con valor
@@ -305,10 +378,19 @@ Abrir no reescribe: la conversión a v4 solo se persiste con Guardar/Guardar com
 lumbreras/cárter ni guarda resultados. Admite dimensiones con modalidad sin definir;
 una modalidad no admitida o referencia diferente se rechaza, sin perder la edición.
 
+v5 añade `ducts`, con `intake` y `exhaust` (listas ordenadas inicialmente vacías) y
+`reference`: `ordered-circular-inner-axial-linear-2t-v1`. Cada fila guarda `name`,
+`length_mm`, `start_diameter_mm` y `end_diameter_mm`, todas claves obligatorias;
+los números ausentes son null. La referencia fija documenta diámetros interiores,
+longitud axial, sección circular, variación lineal y los sentidos indicados arriba.
+Se rechaza otra referencia para no reinterpretar dimensiones. No se guardan tipo,
+áreas, volúmenes ni perfil. Se leen v1–v4 con ambos recorridos vacíos, conservando
+cada dato anterior; abrir no escribe hasta Guardar/Guardar como explícito.
+
 ## OpenSpec y estado
 
-Cambio activo: [configuracion-2t](openspec/changes/configuracion-2t/),
-con [registro de tareas](openspec/changes/configuracion-2t/tasks.md).
+Cambio activo: [conductos-admision-escape](openspec/changes/conductos-admision-escape/),
+con [registro de tareas](openspec/changes/conductos-admision-escape/tasks.md).
 Entregas 1 y 2 publicadas en `040e789` y `7ef0628`, respectivamente: pertenencia
 a origin/main comprobada tras fetch. No se recrearon esos commits ni se acepta
 retrospectivamente el recorrido manual.
@@ -321,13 +403,13 @@ para preservar prompts y configuración global. No se ejecutó init/update ni se
 reinstalaron herramientas. Comandos documentales ejecutados:
 
 ```powershell
-openspec instructions apply --change configuracion-2t --json
-openspec validate configuracion-2t --strict --no-interactive
+openspec instructions apply --change conductos-admision-escape --json
+openspec validate conductos-admision-escape --strict --no-interactive
 ```
 
 Validación estricta aprobada. Ningún cambio se archiva ni se sincroniza por esta
-entrega. El tramo termina en lumbreras, registro de cárter y admisión por falda.
-No se comienza entrega 4 ni simulador.
+entrega. El tramo termina en conductos geométricos editables y persistentes.
+No se comienza entrega 5 ni simulador.
 Se preservan la captura previa y el registro histórico de base-escritorio.
 
 ## Recorrido manual existente: base-escritorio
