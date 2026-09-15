@@ -163,7 +163,7 @@ def run_adaptive(profile, monitor, model=None, trace=lambda row: None):
             y = start+[0.]*(SIZE-12)
             independent = [0.]*SIZE
             snapshot = stepper.evaluate(angle, y, heat)[1]
-            rows = [sample(angle, y, snapshot)]
+            rows = [sample(angle, y, snapshot, rpm=model.case.rpm, initial_angle=model.case.initial_angle_deg)]
             pmax, fs = snapshot[0][2][0], 0.
             for event in targets(begin, end, model.events):
                 while angle < event:
@@ -184,7 +184,7 @@ def run_adaptive(profile, monitor, model=None, trace=lambda row: None):
                         y, angle, snapshot = candidate, next_angle, next_snapshot
                         pmax = max(pmax, snapshot[0][2][0])
                         if (angle-begin)*2 == round((angle-begin)*2):
-                            rows.append(sample(angle, y, snapshot))
+                            rows.append(sample(angle, y, snapshot, rpm=model.case.rpm, initial_angle=model.case.initial_angle_deg))
             discrete, independent_balance = audit(start, y, y), audit(start, y, independent)
             summary = dict(cycle=cycle, state=y[:12], Y=[n[2] for n in snapshot[0]],
                            W_C_J=y[WORK+2], W_K_J=y[WORK+1], p_max_Pa=pmax,

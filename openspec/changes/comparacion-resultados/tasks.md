@@ -112,3 +112,141 @@ Entrega 6 **En curso: comparación y CSV implementados**. Barridos e importació
 de mediciones pendientes y no autorizados en este tramo. No quedan comprobaciones
 técnicas pendientes del tramo; aceptación manual no atribuida. Entrega 5 intacta.
 Commit propio y publicación a cargo de la usuaria; sin archivar ni iniciar entrega 7.
+
+
+## Tramo RPM autorizado después de b9fbee4d
+Las exclusiones de barrido anteriores describen el primer tramo; esta nueva orden
+lo autoriza dentro del mismo cambio. Historia y aceptaciones anteriores intactas.
+- [x] 8. Comprobar continuidad y documentar RPM/barrido/contratos acotados.
+- [x] 9. Parametrizar punto, secuencia independiente e índice validado sin cambiar física/JSON v5.
+- [x] 10. Integrar lista/progreso/cancelación/reapertura/tabla/puntos/CSV y procedencia.
+- [x] 11. Pruebas focalizadas y revisión puntual del estado final.
+- [x] 12. Barrido GUI B autorizado y contraste C condicional, máximo cinco cálculos/300 s.
+- [x] 13. Windows 150 %, captura real, registrar evidencia y commit propio sin publicar.
+Aceptación manual del tramo no atribuida. Entrega 6 En curso, importación pendiente.
+
+
+### Evidencia del tramo RPM — 15/09/2026
+
+Inicio main limpio en **b9fbee4dde043da4389115e2f892e1286cbfccad**, referencia local
+origin/main alineada. Sin sustituir trabajo, fetch/push, credenciales, configuración
+global, dependencias ni integración automática. Se amplía el mismo cambio.
+
+Implementación: punto 2500–3500; lista exacta 2–5; proceso único secuencial con
+copia independiente y receta inicial nueva por punto; índice por avance/parada.
+El escenario se reconstruye, las RPM llegan a Model.rate, dV/dt, energía/marcador,
+dt y muestras. El único dato temporal que estaba fijo en muestras fue parametrizado;
+no se cambiaron leyes, tolerancias, dominio, perfiles, bandas ni JSON v5.
+Lector v3, lectores históricos v1/v2, integridad de serie, tabla/puntos/consulta,
+CSV y protección A/B de iguales condiciones comprobados. Referencia preservada.
+
+#### Pruebas automatizadas y revisión
+
+Suite `python -m unittest discover -s tests -q`: **172/172**, 16,950 s.
+Después del ajuste de cierre, selección focalizada de `test_sweep`,
+`test_comparison`, `test_reference_results`, `test_project_simulation` y
+`test_simulation_view`: **52/52**, 12,497 s. Incluye **17 controles nuevos** de RPM,
+plan exacto, tipos/rangos, propagación analítica, p/T/Y inicial independiente,
+v3/tiempo–ángulo, históricos, A/B igual/distinto RPM, copia única, interrupción
+intermedia, cancelación antes/durante/entre, ausencia de reintentos, rutas/series
+ajenas/hashes/identidad, CSV con vacíos, reapertura/dirty, proceso único, reloj
+por punto, destino existente/carrera y cierre protegido sin abrir otro diálogo.
+Dobles identificados para secuencia/fallos/cancelación y diagnósticos de estado
+inicial, nunca soluciones físicas aceptadas fabricadas. Se conservaron regresiones
+existentes de arranque/cancelación breve de procesos; no cálculos completos extras.
+
+Una revisión independiente puntual de solo lectura ejecutó 14+10 tests entonces
+existentes y detectó dos defectos: posible apropiación del índice de una carpeta
+existente tras fallo de arranque y falta de tiempos persistidos del punto individual.
+Corregidos mediante preflight de destino, identidad confirmada por el proceso,
+tiempos v3 y pruebas de regresión. No segunda revisión general. Autorrevisión del
+principal de correcciones/diff, lectura real/CSV y capturas. OpenSpec estricto
+aprobado, sin init/update ni archivo de cambios.
+
+#### Cinco ejecuciones reales autorizadas, sin repetición
+
+`python tests/verify_sweep_windows.py --output results/simulacion-2t/barrido-20260915`.
+GUI B2500/B3000/B3500, copia de proyecto **PRUEBA SINTÉTICA — barrido 8:1 sin guardar**,
+geometría exacta de referencia. Se editó después a 8,2 en el editor: todos los
+puntos conservaron 8:1 y dirty de la copia, con aviso de configuración anterior.
+No hubo segundo proceso por doble inicio. Los tres B convergieron con controles,
+y B3000 reprodujo **exactamente ciclos, muestras y RHS** de referencia. Solo entonces
+se ejecutaron C2500/C3500 desde receta original, perfil C/100 Pa por consola.
+No otras RPM/bandas ni estudios; todos los puntos terminaron por tres ciclos
+consecutivos de convergencia y balances aprobados.
+
+| Punto | Ciclos | Integración s | Pico proceso MiB | RHS | W_C J/ciclo | W_K J/ciclo | pmax Pa abs. | Peor balance independiente % |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| B2500 | 10 | 10.218 | 24.902 | 230188 | 16.209291803 | -3.130805795 | 1306559.767536 | 0.000664958 |
+| B3000 | 10 | 10.531 | 37.898 | 228171 | 16.490507512 | -3.365130648 | 1331530.846071 | 0.000445966 |
+| B3500 | 9 | 9.156 | 43.820 | 205521 | 16.417492892 | -3.404531689 | 1347664.437989 | 0.000364325 |
+| C2500 | 10 | 20.172 | 24.758 | 444499 | 16.209260861 | -3.130806445 | 1306558.969862 | 0.000149986 |
+| C3500 | 9 | 18.250 | 24.730 | 398857 | 16.417489833 | -3.404531709 | 1347669.132164 | 0.000109784 |
+
+Pico de proceso B incluye el máximo acumulado del único hijo secuencial, no memoria
+independiente aislada de cada punto. Integración total **68,327 s**, cinco ejecuciones
+(<300 s). Protocolo hasta registrar contrastes **73,235 s**. Serie B: integración
+**29,905 s**, proceso/validaciones/índice **31,156 s**, percibido GUI **32,125 s**.
+No se ocultaron arranque ni escritura dentro del tiempo de integración.
+
+| Punto | Preparación s | Escritura de datos s | Total del punto hasta registro s |
+| --- | ---: | ---: | ---: |
+| B2500 | 0.016 | 0.188 | 10.516 |
+| B3000 | 0.016 | 0.156 | 10.703 |
+| B3500 | 0.016 | 0.172 | 9.344 |
+| C2500 | 0.016 | 0.172 | 20.547 |
+| C3500 | 0.016 | 0.171 | 18.531 |
+
+El total de serie/interfaz también incluye cierre de metadatos/validaciones; los
+instantes medidos por punto se definen en design.md. Consola conserva sus tiempos
+en manifiesto v3 y en C-2500.log/C-3500.log. UI conserva total percibido en índice.
+
+#### Contrastes B/C extremos
+
+Sensibilidad usa sus umbrales existentes: trabajo/pmax/curva/masas por enlace ≤1 %
+relativo; cada Y ≤0,005 absoluto. Se consultó `tolerances_passed` de la comparación
+B/C (sin usar el gate A/B de geometrías ni afirmar tendencia de tres perfiles).
+Las diferencias siguientes son fracciones relativas, **no porcentajes**, salvo Y
+que es diferencia absoluta. Ambos extremos aprobados.
+
+| RPM | ΔW_C relativa | Δpmax relativa | Δcurva relativa | Máx ΔY absoluta | Máx Δmasa enlace relativa |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 2500 | 1.90890447e-06 | 6.10515311e-07 | 6.9912548e-07 | 1.0675316e-06 | 4.26974359e-07 |
+| 3500 | 1.86311393e-07 | 3.48318053e-06 | 6.26950758e-08 | 5.0475628e-07 | 1.32192449e-07 |
+
+2500 rpm, ΔY I/K/C/E: 7.59824577e-07, 1.0675316e-06, 9.46644797e-07, 7.01468326e-07.
+Δmasas relativas exterior-I/I-K/K-C1/K-C2/C-E/E-exterior: 2.18932853e-07, 2.07252451e-07, 4.01039335e-07, 4.01039335e-07, 4.26974359e-07, 3.82217306e-07.
+
+3500 rpm, ΔY I/K/C/E: 2.76500931e-07, 5.0475628e-07, 4.60770586e-07, 3.84830541e-07.
+Δmasas relativas exterior-I/I-K/K-C1/K-C2/C-E/E-exterior: 7.82214412e-08, 7.31080404e-08, 2.58636617e-08, 2.58636617e-08, 3.68729798e-08, 1.32192449e-07.
+
+Evidencia original del protocolo en `results/simulacion-2t/barrido-20260915/protocol.json`;
+`gui-sweep/series.json`, sus tres directorios point-NN, C-2500/C-3500 e inputs/logs.
+No se alteraron evidencias históricas. No calibración experimental ni comprobación
+de precisión/convergencia de todo el intervalo o dominio geométrico.
+
+#### Windows e inspección visual, separadas de aceptación manual
+
+Escritorio Default desbloqueado, Qt Windows, DPR **1,5** efectivo (125 % del equipo
+× QT_SCALE_FACTOR=1.2 solo del proceso). Barrido iniciado con botón real, navegación,
+resultado persistido, reapertura sin proceso/proyecto original, consulta de las
+721 muestras de punto convergido, CSV, foco Tab y ancho compacto comprobados por
+automatización visible. CSV real: tres filas; valores numéricos completos, RPM,
+tiempos, estados y run_id/series_id coinciden exactamente con los resultados leídos.
+
+Inspección inicial encontró exceso de altura del diálogo y contraste insuficiente
+en selección. Se separaron gráficos por pestañas y corrigió la selección. Capturas
+finales reabriendo resultados, **sin nuevas integraciones ni exportaciones**:
+`python tests/verify_sweep_windows.py --output results/simulacion-2t/barrido-20260915 --reopen --suffix=-final`.
+Capturas reales inspeccionadas en `docs/images/`:
+- `motorsim-barrido-resumen-150-final.png`.
+- `motorsim-barrido-trabajo-150-final.png`.
+- `motorsim-barrido-presion-150-final.png`.
+- `motorsim-barrido-compacto-150-final.png`.
+Primeras capturas conservadas fuera del commit en `results/simulacion-2t/barrido-20260915/capturas-previas/`.
+
+**Tramo implementado y comprobado; aceptación manual de la usuaria no atribuida.**
+Entrega 6 **En curso**: comparación, CSV y barrido acotado implementados; importación
+de mediciones pendiente y no iniciada. Entrega 5 conserva su aceptación manual
+pendiente separada. Commit propio sin push; publicación a cargo de la usuaria.
+Sin archivar ni iniciar entrega 7/configuración 4T.

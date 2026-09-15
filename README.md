@@ -25,8 +25,8 @@ sintonía, combustión predictiva ni validación experimental.
 
 ## Comparar resultados guardados y exportar CSV
 
-La entrega 6 está **En curso**: comparación y CSV implementados; barridos e
-importación de mediciones pendientes y fuera de este tramo. Entrega 5 y su
+La entrega 6 está **En curso**: comparación, CSV y barrido RPM acotado implementados
+y comprobados. Importación de mediciones pendiente y fuera de este tramo. Entrega 5 y su
 aceptación manual pendiente conservan su estado.
 
 Desde **Simulación 2T → Comparar resultados…**, abrí los `manifest.json` de
@@ -76,6 +76,89 @@ Capturas finales sin nueva exportación: añadir `--no-export --suffix=-final`.
 El script exige los resultados locales existentes y no los vuelve a calcular;
 para nuevas capturas se requiere otro sufijo que no exista.
 
+## RPM editable y barrido corto — entrega 6
+
+En **Simulación 2T → Proyecto actual**, elegí **Punto individual** (3000 rpm inicial)
+o **Barrido corto**. RPM enteras 2500–3500; inicio/final/incremento deben producir
+2–5 puntos distintos ascendentes y llegar exactamente al final. La lista visible
+inicial es **2500, 3000, 3500 rpm**. Entradas inválidas se explican, sin ajustar
+valores. Es un límite de producto, no certificación física ni mecánica del rango.
+Perfil B/100 Pa y demás condiciones permanecen fijos; referencia S2T-0D-01 sigue 3000.
+
+**Ejecutar** captura una sola geometría/lista, incluso cambios válidos sin guardar.
+Cada punto integra desde la receta inicial original, sin estado heredado. Un único
+proceso ejecuta secuencialmente; edición posterior no cambia puntos pendientes.
+Avance indica punto/total, RPM, ciclos y tiempos reales, sin porcentaje de convergencia.
+Fallo, falta de convergencia, presupuesto o Cancelar detienen la serie, conservan
+resultados/diagnóstico y dejan los restantes no ejecutados; no hay reintentos.
+Límites: 30 ciclos/60 s por punto, hasta 300 s de integración para cinco puntos,
+y presupuestos vigentes de memoria/RHS/pasos/rechazos/dominio. Cerrar protege edición
+y cancela el proceso antes de salir.
+
+**Ver barrido… / Abrir barrido…** consulta `series.json`, sin proyecto original ni
+cálculo. Tabla RPM/estado/ciclos/tiempo/W_C/W_K/pmax; selección muestra el motivo.
+Fallidos/no ejecutados llevan magnitudes aceptadas vacías. **Consultar punto convergido**
+reutiliza sus curvas y parámetros individuales. **Trabajo / RPM** y **Presión / RPM**
+muestran puntos originales sin líneas, ajuste, extrapolación ni óptimos. Aviso de
+configuración anterior conserva procedencia. No son una curva de rendimiento completa.
+
+**Exportar CSV…** escribe `serie.csv` en carpeta nueva: series_id/point_index/run_id,
+rpm/state/cycles, integration_seconds/setup_seconds/writing_seconds/wall_seconds,
+W_C_J_per_cycle/W_K_J_per_cycle/p_max_absolute_Pa/reason. Incluye no ejecutados,
+con vacíos para datos ausentes. Valores sin redondear, UTF-8/coma/punto decimal;
+reutiliza escritura exclusiva y no cambia exportación ni protección A/B de igual RPM/perfil.
+Resultados viejos a 3000 y nuevos equivalentes pueden compararse.
+
+Contrato v3: `operating_point.rpm` entero, escenario de receta de referencia con
+régimen variable, reconstrucción estricta y validación tiempo–ángulo con RPM
+reales. Serie v1: copia común, lista, estado/motivo, rutas internas fijas, run_id,
+hashes y vínculo series_id/point_index; rechaza cruces de series y rutas externas.
+Lectura v1/v2 y JSON **v5 de proyectos intactos**; opciones de ejecución viven en
+resultados. Inicio/escritura/integración/total se registran por punto. Escritura
+mide datos, hashes y manifiesto inicial; cierre del registro de tiempos/validaciones
+se incluye en el total de serie y en el tiempo percibido por la interfaz.
+[Contrato detallado](openspec/changes/comparacion-resultados/design.md).
+
+Comprobación real autorizada del 15/09/2026: **cinco ejecuciones**, todas convergidas
+con balances aprobados. Tres B desde GUI y dos C de consola, geometría sintética
+exacta de referencia 8:1. B3000 reproduce exactamente ciclos, muestras y RHS de
+la referencia. Contrastes B/C extremos aprobados, incluidas cuatro fracciones
+frescas y seis masas por enlace; no acreditan tendencia de tres perfiles ni dominio general.
+Integración total **68,327 s**; protocolo hasta registrar contrastes **73,235 s**.
+Barrido B: integración **29,905 s**, proceso de serie **31,156 s**, percibido GUI
+**32,125 s**. Resultados y CSV local en `results/simulacion-2t/barrido-20260915/`.
+Tabla, tiempos y contrastes completos en [tasks.md](openspec/changes/comparacion-resultados/tasks.md).
+
+**172/172 pruebas de suite aprobadas (16,950 s)**; tras el ajuste de cierre,
+**52/52 pruebas pertinentes aprobadas (ver registro de tareas)**. Incluyen dobles
+para fallos/cancelaciones y regresiones existentes; no campañas físicas adicionales.
+Revisión independiente puntual: dos defectos detectados y corregidos con regresiones
+(destino existente/propiedad de serie y tiempos individuales). OpenSpec estricto válido.
+Windows al **150 %** mediante automatización de ventanas reales, navegación/foco,
+reapertura independiente/CSV y posterior inspección de capturas. Ajustados altura
+excesiva y contraste seleccionado; recaptura solo reabre evidencia existente.
+[Captura del barrido](docs/images/motorsim-barrido-resumen-150-final.png),
+[trabajo](docs/images/motorsim-barrido-trabajo-150-final.png),
+[presión](docs/images/motorsim-barrido-presion-150-final.png) y
+[ancho compacto/foco](docs/images/motorsim-barrido-compacto-150-final.png).
+No se atribuye aceptación manual de la usuaria, calibración ni validación experimental.
+Entrega 6 **En curso**, importación pendiente; entrega 5 conserva aceptación manual pendiente.
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_sweep.py -v
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_comparison.py -v
+openspec validate comparacion-resultados --strict --no-interactive
+# Consulta/captura existente: nunca calcula; elegir un sufijo nuevo.
+.\.venv\Scripts\python.exe tests/verify_sweep_windows.py --output results/simulacion-2t/barrido-20260915 --reopen --suffix=-otra
+```
+
+El protocolo ya ejecutado fue `python tests/verify_sweep_windows.py --output
+results/simulacion-2t/barrido-20260915`; sin `--reopen` inicia el barrido y C
+condicionales y exige carpeta nueva. No volver a ejecutarlo para consultar.
+Consola de punto desde una copia de entradas validadas: `python -m
+motorsim.reference_run --project-input copia.json --output carpeta-nueva`;
+serie: `--sweep-input solicitud.json` con common_inputs/rpms. No modifica el proyecto.
+
 ## Simulación 2T — referencia o geometría del proyecto
 
 Abrir MotorSim desde la raíz:
@@ -89,7 +172,8 @@ En **Simulación 2T**, elegí el origen de la próxima ejecución:
 
 - **Caso de referencia S2T-0D-01**: conserva el caso sintético, no medido, independiente del editor.
 - **Proyecto actual, con condiciones de referencia**: toma la geometría actual,
-  incluidos cambios válidos sin guardar. Ensayo 0D a 3000 rpm, perfil B y banda
+  incluidos cambios válidos sin guardar. Ensayo 0D a RPM enteras 2500–3500
+  (inicial 3000), perfil B y banda
   exterior de 100 Pa; Parámetros muestra todas las condiciones efectivas de solo
   lectura. Son supuestos de referencia, no mediciones ni calibración del motor.
 
@@ -122,8 +206,8 @@ no conservan curvas anteriores como éxito nuevo. No calcula potencia al eje ni 
 
 Cada ejecución guarda una carpeta nueva en `%LOCALAPPDATA%\MotorSim\Resultados`.
 **Abrir resultado** selecciona su `manifest.json` y recupera datos sin simular.
-El manifiesto versión 1 (referencia, compatible con archivos anteriores) o versión 2
-(proyecto, con copia v5, procedencia y mapeo de lumbreras) vincula entradas, resumen
+El manifiesto versión 1 (referencia), versión 2 (proyecto histórico a 3000) o
+versión 3 (proyecto con RPM explícitas y tiempos separados) vincula entradas, resumen
 y muestras con identificador, unidades, versión del modelo y hashes. Se reconstruye
 el contrato esperado y se comprueba la geometría/estado de las muestras antes de
 mostrar datos; no necesita que exista el proyecto original. Un archivo

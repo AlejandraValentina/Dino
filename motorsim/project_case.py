@@ -13,6 +13,13 @@ from .simulation import Model
 from .simulation_case import SyntheticCase
 
 SCENARIO_ID = 'S2T-0D-01-reference-conditions-v1'
+RPM_SCENARIO_ID = 'S2T-0D-reference-recipe-variable-rpm-v1'
+
+
+def validate_rpm(rpm):
+    if type(rpm) is not int or not 2500 <= rpm <= 3500:
+        raise ProjectError('Régimen: debe ser un entero entre 2500 y 3500 rpm.')
+    return rpm
 
 
 class ProjectCase(SyntheticCase):
@@ -22,6 +29,11 @@ class ProjectCase(SyntheticCase):
         data.update(scenario_identifier=SCENARIO_ID, reference_conditions=True,
                     geometry_provenance='not specified')
         return data
+
+
+class RpmProjectCase(ProjectCase):
+    def manifest(self):
+        return {**super().manifest(), 'scenario_identifier': RPM_SCENARIO_ID}
 
 
 def execution_errors(project):
@@ -109,7 +121,9 @@ def canonical_ports(project):
     return escape+transfers
 
 
-def build_project_case(project):
+def build_project_case(project, *, rpm=None):
+    if rpm is not None:
+        validate_rpm(rpm)
     errors = execution_errors(project)
     if errors:
         raise ProjectError('\n'.join(errors))
@@ -124,7 +138,8 @@ def build_project_case(project):
         for segment in physics['ducts'][route]:
             segment.pop('name')
     identity = hashlib.sha256(json.dumps(physics, sort_keys=True).encode()).hexdigest()[:16]
-    case = ProjectCase(identifier='PROJECT-0D-'+identity, project_geometry=canonical)
+    case = (ProjectCase(identifier='PROJECT-0D-'+identity, project_geometry=canonical) if rpm is None else
+            RpmProjectCase(identifier='PROJECT-0D-'+identity, project_geometry=canonical, rpm=rpm))
     mapping = [dict(link_index=link, model_port_index=index, source_row=row+1,
                     function=p.function, name=p.name, dimensions={k:getattr(p,k) for k in PORT_FIELDS})
                for index, ((row,p),link) in enumerate(zip(ordered, (4,2,3)))]

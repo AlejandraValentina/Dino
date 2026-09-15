@@ -17,3 +17,12 @@ Ninguna consolidada. Núcleo, contratos de resultados y JSON v5 se conservan.
 Python estándar y Qt Widgets, sin nuevas dependencias. Sin solver nuevo, condiciones
 editables, barridos, importación experimental, sesión persistida, archivo o entrega 7.
 Entrega 6 En curso; publicación del commit propio a cargo de la usuaria.
+
+
+## Ampliación autorizada posterior a b9fbee4d
+La exclusión inicial de régimen/barrido queda limitada al tramo A/B ya registrado.
+Este mismo cambio incorpora ahora punto entero 2500–3500 rpm y barrido secuencial
+2–5 puntos, copia única/arranques independientes, resultados v3 e índice local,
+tabla/puntos/CSV. Referencia fija, condiciones restantes y JSON v5 intactos.
+Comprobación real limitada a B2500/3000/3500 y, si aprueban, C2500/C3500, sin
+campañas extra. Importación experimental pendiente, entrega 6 En curso.

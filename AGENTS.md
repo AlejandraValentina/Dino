@@ -10,15 +10,15 @@ Entregas 1 y 2 completadas y aceptadas por la usuaria; 3 y 4 comprobadas técnic
 sin aceptación manual atribuida. Se preserva el trabajo existente y se comprueba Git.
 Entrega 5 implementada para su alcance 0D acotado, aceptación manual pendiente
 y separada; preservar 5dda9860 y evidencias sin repetir comprobaciones históricas.
-Entrega 6 autorizada ahora solo para comparar dos resultados guardados y exportar
-CSV, reutilizando el lector estricto. Sin calcular de nuevo, modificar núcleo,
-condiciones, JSON v5 o proyectos. Exigir convergencia/balances, modelo/configuración,
-condiciones, perfil y variante iguales; geometría y procedencia pueden diferir.
-Comparación A/B, diferencias geométricas/descriptivas separadas, curvas con ejes
-comunes y fase documentada, CSV fiel a datos cargados en carpeta nueva.
-Usar resultados existentes 8 y 8,2 con perfil B; no confundir ejecución C con B.
-No repetir A/B/C, bandas ni simulaciones para probar la vista. Entrega 6 En curso:
-barridos e importación experimental pendientes, no especificarlos ni implementarlos.
+Entrega 6: preservar b9fbee4d y la comparación/CSV existente. El tramo actual de
+`comparacion-resultados` autoriza RPM enteras 2500–3500 y barrido secuencial de
+2–5 puntos, copia única, arranque inicial independiente, perfil B/banda 100 Pa.
+Referencia fija a 3000; mismas leyes, dominio, contornos, receta y criterios.
+Resultados v3 e índice de serie local, lectura histórica y comparación A/B a
+igual régimen; JSON v5 intacto. Solo el protocolo real autorizado: GUI B a
+2500/3000/3500; si todos convergen, consola C a 2500/3500; máximo cinco cálculos
+y 300 s de integración total, sin campañas adicionales. Importación pendiente.
+Entrega 6 En curso; sin aceptación manual atribuida. Commit propio sin publicar.
 Revisión puntual, pruebas pertinentes y commit propio;
 autenticación fuera de esta tarea, sin nuevos intentos ni configuración global.
 No iniciar entrega 7.

@@ -122,6 +122,18 @@ def compare_results(a,b):
 
 
 def export_csv(folder, comparison):
+    summary=[['magnitude','unit','run_id_A','run_id_B','value_A','value_B',
+              'difference_B_minus_A','relative_difference_percent']]
+    summary.extend([r['magnitude'],r['unit'],*comparison['run_ids'],r['a'],r['b'],
+                    r['difference'],r['relative_percent']] for r in comparison['metrics'])
+    columns=['angle_cycle_deg','angle_original_deg','pressure_absolute_Pa','volume_m3']
+    curves=[['configuration','run_id','sample_index',*columns]]
+    for label,run_id,rows in zip(('A','B'),comparison['run_ids'],comparison['curves']):
+        curves.extend([label,run_id,i,*[row[k] for k in columns]] for i,row in enumerate(rows))
+    return write_csv_files(folder, [('resumen.csv',summary),('curvas.csv',curves)])
+
+
+def write_csv_files(folder, files):
     """Carpeta exclusiva. Ante error retirar solo lo creado, nunca las fuentes."""
     folder=Path(folder)
     created=[]
@@ -129,22 +141,11 @@ def export_csv(folder, comparison):
     try:
         folder.mkdir(exist_ok=False)
         owned=True
-        for name in ('resumen.csv','curvas.csv'):
+        for name, rows in files:
             path=folder/name
             with path.open('x',encoding='utf-8',newline='') as stream:
                 created.append(path)
-                writer=csv.writer(stream)
-                if name=='resumen.csv':
-                    writer.writerow(['magnitude','unit','run_id_A','run_id_B','value_A','value_B',
-                                     'difference_B_minus_A','relative_difference_percent'])
-                    for row in comparison['metrics']:
-                        writer.writerow([row['magnitude'],row['unit'],*comparison['run_ids'],row['a'],row['b'],
-                                         row['difference'],row['relative_percent']])
-                else:
-                    columns=['angle_cycle_deg','angle_original_deg','pressure_absolute_Pa','volume_m3']
-                    writer.writerow(['configuration','run_id','sample_index',*columns])
-                    for label,run_id,rows in zip(('A','B'),comparison['run_ids'],comparison['curves']):
-                        for i,row in enumerate(rows):writer.writerow([label,run_id,i,*[row[k] for k in columns]])
+                csv.writer(stream).writerows(rows)
     except (OSError,ValueError,csv.Error) as exc:
         cleanup=[]
         for path in created:

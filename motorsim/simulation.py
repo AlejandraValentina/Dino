@@ -276,9 +276,9 @@ def convergence(previous, current, previous_curve, curve):
                 p_curve_relative=pressure, passed=passed)
 
 
-def sample(angle, y, snapshot):
+def sample(angle, y, snapshot, *, rpm=3000, initial_angle=180):
     nodes, volumes, flows = snapshot
-    return dict(angle_deg=angle, time_s=(angle-180)/18000, state=y[:12],
+    return dict(angle_deg=angle, time_s=(angle-initial_angle)/(6*rpm), state=y[:12],
                 p_T_Y=nodes, V_m3=volumes, flows_kg_s_W_kg_s=flows,
                 W_C_J=y[WORK+2], W_K_J=y[WORK+1], Q_J=y[HEAT], converted_kg=y[BURN])
 
@@ -305,7 +305,7 @@ def run_resolution(step_deg, monitor, model=None):
             y = start + [0.] * (SIZE-12)
             independent = [0.] * SIZE
             _, snapshot = model.evaluate(angle, y, heat)
-            current_samples = [sample(angle, y, snapshot)]
+            current_samples = [sample(angle, y, snapshot, rpm=model.case.rpm, initial_angle=model.case.initial_angle_deg)]
             max_pressure = snapshot[0][2][0]
             fresh_start = 0.
             events = sorted({begin+i*.5 for i in range(1, 721)} |
@@ -354,7 +354,7 @@ def run_resolution(step_deg, monitor, model=None):
                 accepted += 1
                 max_pressure = max(max_pressure, snapshot[0][2][0])
                 if (angle-begin)*2 == round((angle-begin)*2):
-                    current_samples.append(sample(angle, y, snapshot))
+                    current_samples.append(sample(angle, y, snapshot, rpm=model.case.rpm, initial_angle=model.case.initial_angle_deg))
             discrete = audit(start, y, y)
             independent_balance = audit(start, y, independent)
             summary = dict(cycle=cycle, state=y[:12], Y=[n[2] for n in snapshot[0]],

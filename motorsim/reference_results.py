@@ -5,6 +5,8 @@ import hashlib
 import json
 import math
 import os
+import re
+import time
 from pathlib import Path
 import uuid
 
@@ -13,7 +15,7 @@ from .simulation import CV, Model, balances_ok
 from .simulation_case import SyntheticCase
 from .prototype import write_json
 from .project import Project
-from .project_case import build_project_case, SCENARIO_ID
+from .project_case import build_project_case, SCENARIO_ID, RPM_SCENARIO_ID, validate_rpm
 
 PROFILE = PROFILES[1]
 BAND_PA = 100
@@ -34,7 +36,7 @@ def reference_inputs():
         model_version=MODEL_VERSION, initial_state=model.initial_state()[:12])))
 
 
-def project_inputs(project, origin, profile=PROFILE):
+def project_inputs(project, origin, profile=PROFILE, *, rpm=None, series_context=None):
     if profile not in (PROFILE, PROFILES[2]):
         raise ResultError('Solo perfiles B o C de comprobación.')
     _require(isinstance(origin, dict) and set(origin) == {'kind', 'project_name', 'source_path', 'dirty'},
@@ -43,13 +45,24 @@ def project_inputs(project, origin, profile=PROFILE):
              and type(origin['dirty']) is bool
              and (origin['source_path'] is None or isinstance(origin['source_path'], str)),
              'Identificación del proyecto inválida.')
-    case, mapping = build_project_case(project)
+    case, mapping = build_project_case(project, rpm=rpm)
     model = Model(case, external_band_pa=BAND_PA)
+    extra = {}
+    if rpm is not None:
+        extra['operating_point'] = dict(rpm=validate_rpm(rpm))
+    if series_context is not None:
+        _require(rpm is not None and isinstance(series_context, dict)
+                 and set(series_context) == {'series_id', 'point_index'}
+                 and isinstance(series_context['series_id'], str)
+                 and re.fullmatch('[0-9a-f]{32}', series_context['series_id']) is not None
+                 and type(series_context['point_index']) is int and 0 <= series_context['point_index'] < 5,
+                 'Vínculo de serie inválido.')
+        extra['series_context'] = series_context
     return json.loads(json.dumps(dict(case=case.manifest(), profile=asdict(profile),
         origin=origin, project_snapshot=project.to_dict(), port_mapping=mapping,
-        scenario_identifier=SCENARIO_ID,
+        scenario_identifier=RPM_SCENARIO_ID if rpm is not None else SCENARIO_ID,
         variant=dict(external_links=[0, 5], delta_p_Pa=BAND_PA, calibrated=False),
-        model_version=MODEL_VERSION, initial_state=model.initial_state()[:12])))
+        model_version=MODEL_VERSION, initial_state=model.initial_state()[:12], **extra)))
 
 
 def validated_model(inputs):
@@ -60,8 +73,12 @@ def validated_model(inputs):
         project = Project.from_dict(inputs['project_snapshot'])
         profile = next((p for p in (PROFILE, PROFILES[2]) if asdict(p) == inputs['profile']), None)
         _require(profile is not None, 'Perfil no admitido.')
-        expected = project_inputs(project, inputs['origin'], profile)
-        case, _ = build_project_case(project)
+        rpm = None
+        if 'operating_point' in inputs:
+            _require(isinstance(inputs['operating_point'], dict) and set(inputs['operating_point']) == {'rpm'}, 'Punto operativo inválido.')
+            rpm = validate_rpm(inputs['operating_point']['rpm'])
+        expected = project_inputs(project, inputs['origin'], profile, rpm=rpm, series_context=inputs.get('series_context'))
+        case, _ = build_project_case(project, rpm=rpm)
         model = Model(case, external_band_pa=BAND_PA)
     _require(json.dumps(inputs, sort_keys=True) == json.dumps(expected, sort_keys=True),
              'Entradas no corresponden al modelo y escenario declarados.')
@@ -73,8 +90,9 @@ def new_output_path():
     return root/(datetime.now().strftime('%Y%m%d-%H%M%S-')+uuid.uuid4().hex[:10])
 
 
-def save_result(folder, result, status, inputs, environment):
+def save_result(folder, result, status, inputs, environment, *, timing_context=None):
     """El llamador crea una carpeta exclusiva; manifiesto escrito al final."""
+    writing_started = time.monotonic()
     run_id = uuid.uuid4().hex
     compact = {k: v for k, v in result.items() if k not in ('last_two_cycles', 'partial')}
     partial = result.get('partial')
@@ -86,8 +104,18 @@ def save_result(folder, result, status, inputs, environment):
     for name, payload in zip(FILES, payloads):
         write_json(folder/name, dict(run_id=run_id, **payload))
         hashes[name] = hashlib.sha256((folder/name).read_bytes()).hexdigest()
-    write_json(folder/'manifest.json', dict(format='motorsim-reference-result', version=2 if 'origin' in inputs else 1,
-               model_version=MODEL_VERSION, run_id=run_id, units=UNITS, files=hashes))
+    manifest = dict(format='motorsim-reference-result', version=3 if 'operating_point' in inputs else (2 if 'origin' in inputs else 1),
+               model_version=MODEL_VERSION, run_id=run_id, units=UNITS, files=hashes)
+    write_json(folder/'manifest.json', manifest)
+    timings=None
+    if timing_context is not None:
+        timings=dict(setup_seconds=timing_context['setup_seconds'],writing_seconds=time.monotonic()-writing_started,
+                     integration_seconds=result['seconds'],wall_seconds=time.monotonic()-timing_context['started'])
+        if manifest['version']==3:
+            manifest['timings']=timings
+            write_json(folder/'manifest.json',manifest)
+    return timings
+
 
 
 def _require(condition, text):
@@ -211,7 +239,7 @@ def load_result(path):
             return raw, value
         _require(path.name == 'manifest.json', 'Elegí manifest.json del resultado.')
         _, manifest = read('manifest.json')
-        _require(manifest['format'] == 'motorsim-reference-result' and type(manifest['version']) is int and manifest['version'] in (1, 2)
+        _require(manifest['format'] == 'motorsim-reference-result' and type(manifest['version']) is int and manifest['version'] in (1, 2, 3)
                  and manifest['model_version'] == MODEL_VERSION and manifest['units'] == UNITS,
                  'Formato, modelo o unidades no admitidos.')
         _require(set(manifest['files']) == set(FILES), 'Archivos vinculados incorrectos.')
@@ -222,7 +250,8 @@ def load_result(path):
                      and value['run_id'] == manifest['run_id'], 'Archivos de ejecuciones distintas o alterados.')
             payloads.append(value)
         case, summary, samples = payloads
-        _require(('origin' in case['inputs']) == (manifest['version'] == 2), 'Origen/versión contradictorios.')
+        _require(('origin' in case['inputs']) == (manifest['version'] >= 2)
+                 and ('operating_point' in case['inputs']) == (manifest['version'] == 3), 'Origen/versión contradictorios.')
         model, profile = validated_model(case['inputs'])
         status, result = summary['status'], summary['result']
         _require(status in ('converged', 'cancelled', 'not_converged', 'error'), 'Finalización desconocida.')
@@ -230,6 +259,12 @@ def load_result(path):
         _number(result['seconds'], 0)
         _number(result['peak_process_MiB'], 0)
         _require(result['profile'] == asdict(profile), 'Perfil incorrecto.')
+        if 'timings' in manifest:
+            timing=manifest['timings']
+            required={'setup_seconds','writing_seconds','integration_seconds','wall_seconds'}
+            _require(isinstance(timing,dict) and set(timing) in (required,required|{'interface_wall_seconds'}), 'Tiempos separados inválidos.')
+            for value in timing.values():_number(value,0)
+            _require(timing['integration_seconds']==result['seconds'],'Tiempo de integración contradictorio.')
         cycles = result['cycles']
         _require(isinstance(cycles, list) and len(cycles) <= 30, 'Cantidad de ciclos incorrecta.')
         for i, cycle in enumerate(cycles, 1):
