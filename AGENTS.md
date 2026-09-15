@@ -7,11 +7,13 @@ modificar archivos. `base-escritorio` es la entrega inicial; su límite de nombr
 tipo y archivos pertenece a esa entrega. El cambio autorizado actual es
 `simulacion-2t`: proposal.md, design.md, specs/simulacion-2t/spec.md y tasks.md.
 Entregas 1 y 2 completadas y aceptadas por la usuaria; 3 y 4 comprobadas técnicamente
-sin aceptación manual atribuida. Se preservan commits locales sin publicar.
-Entrega 5 autorizada **solo para definición documental del primer modelo/caso y
-su viabilidad futura**. Solver, integración Qt, formato JSON y campañas no están
-autorizados. Las aproximaciones propuestas requieren aprobación antes del núcleo.
-No iniciar entrega 6; no repetir pruebas previas por esta tarea documental.
+sin aceptación manual atribuida. Se preserva el trabajo existente y se comprueba Git.
+Entrega 5: modelo/caso/protocolo de `simulacion-2t/design.md` aprobados expresamente
+para implementar y ejecutar únicamente el prototipo de consola de viabilidad.
+Biblioteca estándar, controles elementales antes del caso y tres resoluciones
+con los límites previos. Sin integración Qt, cambios JSON, ondas ni barridos.
+Realizar revisión puntual y pruebas afectadas; commit propio y un push normal,
+sin reintentos de autenticación ni configuración global. No iniciar entrega 6.
 No alterar retrospectivamente requisitos ni verificaciones de entregas anteriores.
 
 La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md) define el orden, los objetivos y

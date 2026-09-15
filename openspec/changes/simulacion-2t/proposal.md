@@ -1,4 +1,10 @@
 ## Why
+Actualización del 15/09/2026: la usuaria aprobó el modelo, caso y protocolo y
+autorizó implementar/ejecutar el prototipo de consola, conservando sus límites.
+El alcance documental original siguiente queda como antecedente. La ampliación
+afecta solo núcleo estándar, caso sintético separado, pruebas y evidencia;
+no Qt, JSON v5, dependencias, ondas, barridos ni entrega 6.
+
 Definir el primer caso 2T y su prueba de viabilidad antes del núcleo. La entrega 5
 está En curso: definición del primer caso; hoy solo se autoriza documentación.
 Se preservan el editor de conductos, JSON v5 y commit 545685b aunque no esté publicado.

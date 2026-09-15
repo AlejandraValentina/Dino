@@ -18,6 +18,11 @@ class PortResult:
     never_opens: bool = False
 
 
+def uncovered_area(width, height, distance):
+    """Área rectangular en mm²; distancia descubierta firmada en mm."""
+    return width * max(0, min(height, distance))
+
+
 def port_results(port: Port, stroke, rod, errors=None) -> PortResult:
     result = PortResult()
     errors = errors or {}
@@ -54,7 +59,7 @@ def port_results(port: Port, stroke, rod, errors=None) -> PortResult:
         maximum = width * uncovered
         if uncovered > 0 and maximum == 0:
             raise ProjectError("Área fuera del rango de cálculo; las dimensiones se conservan.")
-        areas = tuple(width * max(0, min(height, piston_position(stroke, rod, angle) - top))
+        areas = tuple(uncovered_area(width, height, piston_position(stroke, rod, angle) - top)
                       for angle in range(361))
         if not all(math.isfinite(area) for area in (*areas, maximum)):
             raise ProjectError("Área fuera del rango de cálculo; las dimensiones se conservan.")

@@ -21,7 +21,7 @@ Prioridad propuesta: datos generales para 2T y 4T desde el editor común; primer
 
 Seguimiento de la copia local comprobada el 15/09/2026. Las entregas 1 y 2 están
 autorizadas y aceptadas. Entrega 3 autorizada para lumbreras,
-cárter y admisión por falda recta; decisión de modalidad inicial resuelta. Entrega 4 autorizada el 15/09/2026; entrega 5 autorizada solo para definición del primer caso, sin solver. Desde la 6 requieren nueva autorización expresa. La usuaria comunicó
+cárter y admisión por falda recta; decisión de modalidad inicial resuelta. Entrega 4 autorizada el 15/09/2026; entrega 5 autorizada para el prototipo de consola, con modelo/caso/protocolo aprobados. No incluye integración Qt, ondas ni barridos. Desde la 6 requieren nueva autorización expresa. La usuaria comunicó
 la realización del recorrido manual, incluido uso sin Internet, y aceptó ambas
 entregas el 14/09/2026; su evidencia se registra separada en los cambios enlazados.
 
@@ -31,7 +31,7 @@ entregas el 14/09/2026; su evidencia se registra separada en los cambios enlazad
 | 2. Geometría y cinemática | Completada | [geometria-cinematica](../openspec/changes/geometria-cinematica/tasks.md) | Comprobaciones acreditadas; aceptada por la usuaria. |
 | 3. Configuración específica 2T | Completada | [configuracion-2t](../openspec/changes/configuracion-2t/tasks.md) | Lumbreras/cárter y admisión por falda comprobados; 72 pruebas finales y captura Windows. Sin aceptación manual de la usuaria ni validez predictiva. |
 | 4. Admisión y escape | Completada | [conductos-admision-escape](../openspec/changes/conductos-admision-escape/tasks.md) | Editor, orden, perfiles y JSON v5 comprobados; 85 pruebas finales y captura Windows/150 %. Sin aceptación manual de la usuaria. |
-| 5. Primer caso de simulación 2T | En curso: definición del primer caso | [simulacion-2t](../openspec/changes/simulacion-2t/tasks.md) | Modelo 0D/caso/protocolo propuestos; reducción sin ondas pendiente de aprobación. Solver no autorizado ni implementado. |
+| 5. Primer caso de simulación 2T | En curso: prototipo ejecutado, viabilidad no acreditada | [simulacion-2t](../openspec/changes/simulacion-2t/tasks.md) | Modelo 0D aprobado para la prueba; tres resoluciones agotaron 30 ciclos por incumplir el balance independiente. Coste medido, 100 pruebas finales aprobadas. Sin integración Qt, aceptación manual ni validez experimental. |
 | 6. Barridos, comparación y contraste experimental | Pendiente | — | No autorizada. |
 | 7. Configuración específica 4T | Pendiente | — | No autorizada. |
 | 8. Primer caso de simulación 4T | Pendiente | — | No autorizada. |

@@ -4,7 +4,8 @@ Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La última
 [conductos-admision-escape](openspec/changes/conductos-admision-escape/specs/conductos-admision-escape/spec.md)
 añade recorridos geométricos de conductos circulares de admisión y escape 2T.
 La ficha, posición del pistón, volúmenes y curvas geométricas existentes se conservan.
-No contiene simulación física ni estimaciones de rendimiento.
+El editor no ejecuta simulación ni estimaciones de rendimiento. El prototipo
+experimental de consola descrito abajo está separado de la aplicación gráfica.
 
 Estado de las entregas 1 y 2: **Completadas**. La usuaria comunicó el 14/09/2026
 que realizó las comprobaciones manuales pendientes, incluido el uso sin Internet,
@@ -15,10 +16,74 @@ pruebas automatizadas e inspección visual del agente. Sin archivar. La entrega 
 está **Completada** para la configuración geométrica admitida: lumbreras, cárter
 y admisión por falda comprobados. Esto no es aceptación manual de la usuaria
 ni validación predictiva. La entrega 4 está **Completada** para el editor geométrico autorizado el 15/09/2026.
-La entrega 5 está **En curso: definición del primer caso**; solo documentación
-en [simulacion-2t](openspec/changes/simulacion-2t/design.md). Modelo, caso y protocolo
-propuestos requieren aprobación antes de implementar el núcleo. Sin solver ni
-resultados de simulación; la reducción sin ondas no está aprobada.
+La entrega 5 está **En curso: prototipo ejecutado, viabilidad no acreditada**.
+La usuaria aprobó el modelo 0D, caso y protocolo de
+[simulacion-2t](openspec/changes/simulacion-2t/design.md) para esta prueba de consola.
+No hay integración Qt ni cambios en JSON v5. Sin ondas, inercia de conductos,
+sintonía, combustión predictiva ni validación experimental.
+
+## Prototipo de viabilidad 2T — entrega 5 abierta
+
+Biblioteca estándar, cuatro volúmenes abiertos (I/K/C/E), flujo reversible,
+trabajos de cilindro y cárter separados y energía prescrita por carga fresca.
+`motorsim/simulation_case.py` contiene S2T-0D-01 y todos sus parámetros sintéticos;
+no se cargan en proyectos de la usuaria. Reutiliza la geometría y áreas del editor.
+
+Desde la raíz del repositorio, comando comprobado:
+
+```powershell
+.\.venv\Scripts\python.exe -m motorsim.prototype --output results/simulacion-2t/viabilidad-20260915
+```
+
+Ese directorio ya contiene la ejecución del 15/09/2026 y no se sobrescribe. Para
+repetirla, omitir `--output`: se crea un directorio nuevo con fecha/hora. No hay
+dependencias adicionales, Qt ni cambios globales. Ctrl+C solicita cancelación.
+Cada resolución arranca de los mismos estados a 3000 rpm; máximo 30 ciclos/60 s,
+serie 180 s, proceso 512 MiB. El programa sale con resultado no satisfactorio
+cuando no se acredita viabilidad; no reintenta ni prolonga presupuestos.
+
+**Resultado de la única serie ejecutada:** 30 ciclos en cada resolución, sin
+convergencia según el criterio completo. Los estados se estabilizan, pero la
+auditoría independiente por trapecios en cada paso aceptado incumple el 0,1 %.
+La sensibilidad queda sin acreditar porque exige las tres corridas convergidas.
+No se ajustaron método, parámetros ni tolerancias después de observar el fallo.
+
+| Paso máximo | Tiempo de cálculo | Pico residente del proceso | W cilindro, último ciclo | p máxima | Máximo residuo independiente normalizado |
+| --- | --- | --- | --- | --- | --- |
+| 0,5° | 5,094 s | 24,70 MiB | 16,63469 J | 1,335403 MPa | 11,3369 % |
+| 0,25° | 10,016 s | 28,53 MiB | 16,54472 J | 1,332999 MPa | 5,8870 % |
+| 0,125° | 19,125 s | 33,43 MiB | 16,48338 J | 1,331369 MPa | 3,0091 % |
+
+Valores diagnósticos **no aceptados como resultado convergido**. No son potencia
+al eje ni predicción experimental. Serie: 34,719 s incluyendo escritura entre
+resoluciones; Intel Core i5-10400 2,90 GHz, 12 procesadores lógicos, Windows
+10.0.19045 AMD64, Python 3.11.0. Memoria = pico residente medido por Windows del
+proceso completo, incluido runtime y resultados anteriores de esa misma serie.
+
+Salidas locales en `results/simulacion-2t/viabilidad-20260915/`: `case.json`,
+`environment.json`, `summary.json`, resúmenes por resolución/ciclo y CSV con las
+últimas dos vueltas (1442 filas por resolución, nodos comunes de 0,5°). Incluyen
+p/ángulo, P-V, m/U/F/T/Y/V de los cuatro volúmenes, flujos firmados, trabajo,
+calor, conversión y balances. Son resultados separados del formato de proyectos
+y están excluidos de Git; el caso, código, pruebas y esta evidencia sí se registran.
+
+**Pruebas automatizadas:** los seis controles elementales aprobaron antes del
+motor integrado. Quince controles nuevos cubren también retorno, cancelación
+real programada (<1 s), límites, auditoría con defecto inducido y salida sin Qt.
+Suite final: **100/100 aprobadas en 8,547 s**, incluidos widgets `offscreen` y
+regresiones de persistencia. Una suite aprobada no acredita la viabilidad física.
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p 'test_simulation_*.py' -v
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+Revisión puntual independiente de solo lectura: corregida la tendencia exigida
+por debajo de los pisos numéricos documentados, antes de la serie. Autorrevisión
+del principal de la corrección y evidencia. No se repitió inspección visual de
+Windows ni se atribuye aceptación manual. El primer impedimento es el balance
+independiente, ya fallido desde la primera vuelta. Una decisión posterior sobre
+ese impedimento y la futura integración quedan fuera de esta ejecución acotada.
 
 ## Interfaz y uso
 
@@ -392,7 +457,7 @@ cada dato anterior; abrir no escribe hasta Guardar/Guardar como explícito.
 
 ## OpenSpec y estado
 
-Cambio activo documental: [simulacion-2t](openspec/changes/simulacion-2t/),
+Cambio activo: [simulacion-2t](openspec/changes/simulacion-2t/),
 con [registro de tareas](openspec/changes/simulacion-2t/tasks.md). Las evidencias
 de implementación anteriores se conservan en sus respectivos cambios.
 Entregas 1 y 2 publicadas en `040e789` y `7ef0628`, respectivamente: pertenencia
@@ -412,9 +477,8 @@ openspec validate simulacion-2t --strict --no-interactive
 ```
 
 Validación estricta aprobada. Ningún cambio se archiva ni se sincroniza por esta
-tarea. Esta definición no modifica código ni JSON v5 y no repite las pruebas de
-las entregas anteriores. El prototipo requiere nueva autorización; no se inicia
-la entrega 6. Commit de entrega 4 conservado; autenticación pendiente sin reintentos.
+tarea. El prototipo de consola fue autorizado y ejecutado; el JSON v5 permanece
+intacto. Entrega 5 abierta, sin iniciar la 6. Los commits anteriores se preservan.
 Se preservan la captura previa y el registro histórico de base-escritorio.
 
 ## Recorrido manual existente: base-escritorio

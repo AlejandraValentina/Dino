@@ -3,7 +3,7 @@ from decimal import Decimal, localcontext
 import math
 
 from .kinematics import piston_position
-from .ports import PortResult, crossing_angle
+from .ports import PortResult, crossing_angle, uncovered_area
 from .project import NUMBER_LABELS, ProjectError, validate_number
 
 
@@ -56,7 +56,7 @@ def intake_results(intake, stroke, rod, errors=None):
         maximum = width * uncovered
         if uncovered > 0 and maximum == 0:
             raise ProjectError('Área fuera del rango de cálculo; las dimensiones se conservan.')
-        areas = tuple(width * max(0, min(height, d - piston_position(stroke, rod, angle)))
+        areas = tuple(uncovered_area(width, height, d - piston_position(stroke, rod, angle))
                       for angle in range(361))
         if not all(math.isfinite(value) for value in (*areas, maximum)):
             raise ProjectError('Área fuera del rango de cálculo; las dimensiones se conservan.')

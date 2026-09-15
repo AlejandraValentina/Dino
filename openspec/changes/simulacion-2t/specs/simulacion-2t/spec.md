@@ -1,5 +1,13 @@
 ## ADDED Requirements
 
+Actualización de autorización, 15/09/2026: la usuaria aprobó explícitamente modelo,
+caso, aproximaciones y protocolo y autorizó implementación/ejecución del prototipo.
+Las restricciones de la tarea documental original conservadas abajo describen
+esa etapa histórica; los requisitos condicionales del prototipo pasan a estar
+activos sin modificar sus criterios. La orden actual permite un commit propio
+y un push normal; ante fallo de autenticación no se reintenta. Permanecen excluidos
+Qt, formato de proyectos, ondas, barridos, archivo del cambio y entrega 6.
+
 ### Requirement: Definición documental y límite de autorización
 Esta tarea MUST entregar un solo modelo recomendado, caso sintético y experimento
 acotado en design.md, diferenciando datos, parámetros, derivados y aproximaciones.

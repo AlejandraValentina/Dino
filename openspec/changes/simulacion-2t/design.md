@@ -1,5 +1,9 @@
 ## Context y estado de autorización
-Propuesta física para aprobación, no implementación ni resultado calculado del motor.
+Modelo, caso, aproximaciones y protocolo aprobados expresamente por la usuaria
+el 15/09/2026 para implementar y ejecutar el prototipo de consola. Se conserva
+debajo la definición y sus tolerancias previas; las menciones a aprobación futura
+describen su estado documental original. No se autoriza integración Qt, JSON,
+ondas, barridos ni entrega 6. Evidencia de ejecución en tasks.md.
 Se recomienda **modelo 0D de cuatro volúmenes homogéneos con restricciones
 cuasiestacionarias reversibles**. Solo monocilíndrico 2T atmosférico de encendido por
 chispa, admisión al cárter por falda recta, un régimen y una condición sintética.
@@ -220,7 +224,7 @@ fuerza un retorno de transferencia comprobable. No se garantiza convergencia.
 El circuito, Cd, régimen, contornos, estados, q_f/ángulos y opciones físicas no
 existen en JSON v5: quedan aquí, sin nuevo formato, fixture de proyecto ni controles.
 
-## Prueba de viabilidad futura, todavía no autorizada
+## Prueba de viabilidad — protocolo previo ahora autorizado
 Un prototipo pequeño de biblioteca estándar, sin Qt ni importar solver antiguo.
 Propuesta numérica única: RK4 explícito en tiempo sobre m/U y F advectada, con
 acumuladores de flujo/calor/trabajo y paso máximo expresado en grados. Durante
@@ -309,7 +313,7 @@ Comprobar cancelación y presupuesto al menos cada 0.5 s; emitir avance por vuel
 y como máximo cada 1 s entre avances; cancelación sale en <=1 s. No reintentos
 indefinidos. Un benchmark aislado del orificio no acredita coste del ciclo acoplado.
 
-## Aprobaciones necesarias antes del núcleo
+## Aprobaciones previas — obtenidas por orden explícita del 15/09/2026
 1. Reducir explícitamente el primer caso a depósitos 0D sin ondas/inercia ni sintonía,
    incluida pérdida concentrada A_min/Cd y transferencia sin almacenamiento.
 2. Aceptar gas caloríficamente perfecto, mezcla perfecta, paredes adiabáticas y
