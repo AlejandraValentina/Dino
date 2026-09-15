@@ -5,12 +5,13 @@
 Leer README.md y el cambio solicitado dentro de `openspec/changes/` antes de
 modificar archivos. `base-escritorio` es la entrega inicial; su límite de nombre,
 tipo y archivos pertenece a esa entrega. El cambio autorizado actual es
-`conductos-admision-escape`: proposal.md, design.md,
-specs/conductos-admision-escape/spec.md y tasks.md. Entregas 1 y 2 completadas y
-aceptadas por la usuaria; entrega 3 comprobada técnicamente sin aceptación manual
-atribuida. Cambios anteriores sin archivar. Entrega 4 autorizada únicamente como
-editor geométrico de conductos circulares 2T de admisión/escape. No iniciar
-entrega 5 ni simulación física.
+`simulacion-2t`: proposal.md, design.md, specs/simulacion-2t/spec.md y tasks.md.
+Entregas 1 y 2 completadas y aceptadas por la usuaria; 3 y 4 comprobadas técnicamente
+sin aceptación manual atribuida. Se preservan commits locales sin publicar.
+Entrega 5 autorizada **solo para definición documental del primer modelo/caso y
+su viabilidad futura**. Solver, integración Qt, formato JSON y campañas no están
+autorizados. Las aproximaciones propuestas requieren aprobación antes del núcleo.
+No iniciar entrega 6; no repetir pruebas previas por esta tarea documental.
 No alterar retrospectivamente requisitos ni verificaciones de entregas anteriores.
 
 La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md) define el orden, los objetivos y

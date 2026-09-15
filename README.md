@@ -1,7 +1,7 @@
 # MotorSim
 
-Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La entrega
-actual [conductos-admision-escape](openspec/changes/conductos-admision-escape/specs/conductos-admision-escape/spec.md)
+Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La última entrega implementada
+[conductos-admision-escape](openspec/changes/conductos-admision-escape/specs/conductos-admision-escape/spec.md)
 añade recorridos geométricos de conductos circulares de admisión y escape 2T.
 La ficha, posición del pistón, volúmenes y curvas geométricas existentes se conservan.
 No contiene simulación física ni estimaciones de rendimiento.
@@ -15,7 +15,10 @@ pruebas automatizadas e inspección visual del agente. Sin archivar. La entrega 
 está **Completada** para la configuración geométrica admitida: lumbreras, cárter
 y admisión por falda comprobados. Esto no es aceptación manual de la usuaria
 ni validación predictiva. La entrega 4 está **Completada** para el editor geométrico autorizado el 15/09/2026.
-No se inicia la entrega 5.
+La entrega 5 está **En curso: definición del primer caso**; solo documentación
+en [simulacion-2t](openspec/changes/simulacion-2t/design.md). Modelo, caso y protocolo
+propuestos requieren aprobación antes de implementar el núcleo. Sin solver ni
+resultados de simulación; la reducción sin ondas no está aprobada.
 
 ## Interfaz y uso
 
@@ -389,8 +392,9 @@ cada dato anterior; abrir no escribe hasta Guardar/Guardar como explícito.
 
 ## OpenSpec y estado
 
-Cambio activo: [conductos-admision-escape](openspec/changes/conductos-admision-escape/),
-con [registro de tareas](openspec/changes/conductos-admision-escape/tasks.md).
+Cambio activo documental: [simulacion-2t](openspec/changes/simulacion-2t/),
+con [registro de tareas](openspec/changes/simulacion-2t/tasks.md). Las evidencias
+de implementación anteriores se conservan en sus respectivos cambios.
 Entregas 1 y 2 publicadas en `040e789` y `7ef0628`, respectivamente: pertenencia
 a origin/main comprobada tras fetch. No se recrearon esos commits ni se acepta
 retrospectivamente el recorrido manual.
@@ -403,13 +407,14 @@ para preservar prompts y configuración global. No se ejecutó init/update ni se
 reinstalaron herramientas. Comandos documentales ejecutados:
 
 ```powershell
-openspec instructions apply --change conductos-admision-escape --json
-openspec validate conductos-admision-escape --strict --no-interactive
+openspec instructions apply --change simulacion-2t --json
+openspec validate simulacion-2t --strict --no-interactive
 ```
 
 Validación estricta aprobada. Ningún cambio se archiva ni se sincroniza por esta
-entrega. El tramo termina en conductos geométricos editables y persistentes.
-No se comienza entrega 5 ni simulador.
+tarea. Esta definición no modifica código ni JSON v5 y no repite las pruebas de
+las entregas anteriores. El prototipo requiere nueva autorización; no se inicia
+la entrega 6. Commit de entrega 4 conservado; autenticación pendiente sin reintentos.
 Se preservan la captura previa y el registro histórico de base-escritorio.
 
 ## Recorrido manual existente: base-escritorio
