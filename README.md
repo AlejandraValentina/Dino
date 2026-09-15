@@ -23,6 +23,59 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
+## Comparar resultados guardados y exportar CSV
+
+La entrega 6 está **En curso**: comparación y CSV implementados; barridos e
+importación de mediciones pendientes y fuera de este tramo. Entrega 5 y su
+aceptación manual pendiente conservan su estado.
+
+Desde **Simulación 2T → Comparar resultados…**, abrí los `manifest.json` de
+A (base) y B (modificada). El lector existente valida ambos. La vista identifica
+ejecuciones, origen, régimen, modelo, variante, perfil y estado. Solo habilita
+tabla, curvas y exportación si convergencia/balances, configuración física,
+condiciones, perfil y variante son compatibles; explica las diferencias que
+impiden comparar. Un archivo ilegible conserva la selección anterior.
+
+**Resumen** muestra trabajos C/K separados, presión máxima y cuatro fracciones
+frescas, valores A/B y B−A. Porcentaje de trabajos/presión respecto de abs(A),
+no definido con A=0; para Y solo diferencia absoluta. **Entradas utilizadas**
+separa modificaciones geométricas de descripciones. **Curvas superpuestas** usa
+A azul continua y B naranja discontinua, ejes comunes y fase 180–540° por vueltas
+completas. P-V conserva orden temporal. No usa datos del editor ni ejecuta el motor.
+
+**Exportar CSV** pide una carpeta nueva y escribe `resumen.csv` y `curvas.csv`.
+UTF-8 sin BOM, separador coma, punto decimal y escape CSV estándar; valores cargados
+sin redondear, identificadores de ejecución y unidades en ambos archivos. Resumen:
+magnitude/unit/run_id_A/run_id_B/value_A/value_B/difference_B_minus_A/relative_difference_percent.
+Porcentaje vacío si no definido o no aplicable a Y. Curvas en formato largo A/B:
+configuration/run_id/sample_index/angle_cycle_deg/angle_original_deg/pressure_absolute_Pa/volume_m3.
+No sobrescribe destinos ni modifica fuentes. No persiste sesión ni cambia JSON v5.
+
+Comprobación del 15/09/2026 con resultados **existentes**, compresión 8 y 8,2,
+ambos perfil B/100 Pa a 3000 rpm: única diferencia geométrica, compresión;
+ΔW_C=+0,141045430 J/ciclo (+0,855313 %), ΔW_K=−0,000116778 J/ciclo,
+Δpmax=+35396,429084 Pa (+2,658326 %). Son diferencias del modelo 0D con energía
+prescrita, sin ondas ni validación experimental; no significan «motor mejor».
+
+**10/10 pruebas pertinentes aprobadas en 2,066 s**, revisión independiente puntual
+sin defectos reproducibles y OpenSpec estricto válido. Windows/150 % comprobado
+mediante automatización visible e inspección de capturas, no aceptación manual.
+Exportación verificada: 7 magnitudes y 1442 muestras, archivos fuente intactos y
+ningún proceso de cálculo iniciado. [Captura real](docs/images/motorsim-comparacion-resumen-150-final.png)
+y [curvas reales](docs/images/motorsim-comparacion-curvas-inferior-150-final.png).
+CSV locales: `results/simulacion-2t/comparacion-20260915/resumen.csv` y `curvas.csv`.
+Evidencia detallada en [tasks.md](openspec/changes/comparacion-resultados/tasks.md).
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_comparison.py -v
+openspec validate comparacion-resultados --strict --no-interactive
+```
+
+Recorrido visible ya ejecutado: `python tests/verify_comparison_windows.py --output results/simulacion-2t/comparacion-20260915`.
+Capturas finales sin nueva exportación: añadir `--no-export --suffix=-final`.
+El script exige los resultados locales existentes y no los vuelve a calcular;
+para nuevas capturas se requiere otro sufijo que no exista.
+
 ## Simulación 2T — referencia o geometría del proyecto
 
 Abrir MotorSim desde la raíz:

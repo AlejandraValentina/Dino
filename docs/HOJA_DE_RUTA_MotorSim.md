@@ -21,7 +21,7 @@ Prioridad propuesta: datos generales para 2T y 4T desde el editor común; primer
 
 Seguimiento de la copia local comprobada el 15/09/2026. Las entregas 1 y 2 están
 autorizadas y aceptadas. Entrega 3 autorizada para lumbreras,
-cárter y admisión por falda recta; decisión de modalidad inicial resuelta. Entrega 4 autorizada el 15/09/2026; entrega 5 ampliada expresamente a Qt y geometría del editor bajo condiciones de referencia, sin ondas ni barridos. Desde la 6 requieren nueva autorización expresa. La usuaria comunicó
+cárter y admisión por falda recta; decisión de modalidad inicial resuelta. Entrega 4 autorizada el 15/09/2026; entrega 5 ampliada expresamente a Qt y geometría del editor bajo condiciones de referencia, sin ondas ni barridos. Entrega 6 autorizada solo para comparación de resultados guardados y CSV; barridos e importación pendientes. Desde la 7 requieren nueva autorización expresa. La usuaria comunicó
 la realización del recorrido manual, incluido uso sin Internet, y aceptó ambas
 entregas el 14/09/2026; su evidencia se registra separada en los cambios enlazados.
 
@@ -32,7 +32,7 @@ entregas el 14/09/2026; su evidencia se registra separada en los cambios enlazad
 | 3. Configuración específica 2T | Completada | [configuracion-2t](../openspec/changes/configuracion-2t/tasks.md) | Lumbreras/cárter y admisión por falda comprobados; 72 pruebas finales y captura Windows. Sin aceptación manual de la usuaria ni validez predictiva. |
 | 4. Admisión y escape | Completada | [conductos-admision-escape](../openspec/changes/conductos-admision-escape/tasks.md) | Editor, orden, perfiles y JSON v5 comprobados; 85 pruebas finales y captura Windows/150 %. Sin aceptación manual de la usuaria. |
 | 5. Primer caso de simulación 2T | Completada para el alcance acotado implementado | [simulacion-2t](../openspec/changes/simulacion-2t/tasks.md) | Editor admitido → comprobar → ejecutar B/100 Pa a 3000 rpm → consultar/guardar/reabrir con procedencia. Referencia preservada; A/B/C autorizados convergen y contraste B/C aprobado. 146 pruebas, revisión puntual y captura Windows/150 %. Aceptación manual pendiente, separada de implementación; sin calibración ni validez general. |
-| 6. Barridos, comparación y contraste experimental | Pendiente | — | No autorizada. |
+| 6. Barridos, comparación y contraste experimental | En curso | [comparacion-resultados](../openspec/changes/comparacion-resultados/tasks.md) | Comparación de dos resultados guardados y CSV implementados/comprobados, sin calcular de nuevo. Windows/150 %, 10 pruebas y revisión puntual. Barridos e importación de mediciones pendientes, fuera de este tramo. Sin aceptación manual atribuida. |
 | 7. Configuración específica 4T | Pendiente | — | No autorizada. |
 | 8. Primer caso de simulación 4T | Pendiente | — | No autorizada. |
 

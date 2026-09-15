@@ -5,28 +5,23 @@
 Leer README.md y el cambio solicitado dentro de `openspec/changes/` antes de
 modificar archivos. `base-escritorio` es la entrega inicial; su límite de nombre,
 tipo y archivos pertenece a esa entrega. El cambio autorizado actual es
-`simulacion-2t`: proposal.md, design.md, specs/simulacion-2t/spec.md y tasks.md.
+`comparacion-resultados`: proposal.md, design.md, specs/comparacion-resultados/spec.md y tasks.md.
 Entregas 1 y 2 completadas y aceptadas por la usuaria; 3 y 4 comprobadas técnicamente
 sin aceptación manual atribuida. Se preserva el trabajo existente y se comprueba Git.
-Entrega 5: modelo/caso/protocolo de `simulacion-2t/design.md` aprobados expresamente
-para implementar y ejecutar únicamente el prototipo de consola de viabilidad.
-Etapa actual autorizada: conectar geometría del editor al escenario 0D existente,
-manteniendo también S2T-0D-01 intacto. Preservar 379cf7f, ley original y evidencias.
-Proyecto 2T monocilíndrico, una lumbrera de escape/dos transferencias, admisión por
-falda y conductos completos/continuos; cierre durante todo el aporte. Copia de
-edición válida sin guardar, validación previa conjunta y repetida en el hijo.
-Condiciones fijas de referencia: 3000 rpm, perfil B, banda exterior 100 Pa; no son
-mediciones ni calibración. Núcleo sin Qt, JSON de proyectos v5 y física intactos.
-Resultados separados con procedencia/copia/mapeo y aviso de configuración anterior.
-Tres comprobaciones completas autorizadas: geometría exacta de referencia desde
-editor B/100 Pa; solo compresión 8→8,2 desde editor B/100 Pa; misma geometría C/100 Pa
-solo consola. 60 s/30 ciclos y restantes límites por cálculo; total hasta 180 s.
-No otras bandas, series, ondas, barridos ni edición de condiciones. Tras acreditar
-el recorrido, entrega 5 implementada para este alcance acotado; aceptación manual
-separada, sin atribuirla. No es acreditación de todo el dominio ni calibración.
+Entrega 5 implementada para su alcance 0D acotado, aceptación manual pendiente
+y separada; preservar 5dda9860 y evidencias sin repetir comprobaciones históricas.
+Entrega 6 autorizada ahora solo para comparar dos resultados guardados y exportar
+CSV, reutilizando el lector estricto. Sin calcular de nuevo, modificar núcleo,
+condiciones, JSON v5 o proyectos. Exigir convergencia/balances, modelo/configuración,
+condiciones, perfil y variante iguales; geometría y procedencia pueden diferir.
+Comparación A/B, diferencias geométricas/descriptivas separadas, curvas con ejes
+comunes y fase documentada, CSV fiel a datos cargados en carpeta nueva.
+Usar resultados existentes 8 y 8,2 con perfil B; no confundir ejecución C con B.
+No repetir A/B/C, bandas ni simulaciones para probar la vista. Entrega 6 En curso:
+barridos e importación experimental pendientes, no especificarlos ni implementarlos.
 Revisión puntual, pruebas pertinentes y commit propio;
 autenticación fuera de esta tarea, sin nuevos intentos ni configuración global.
-No iniciar entrega 6.
+No iniciar entrega 7.
 No alterar retrospectivamente requisitos ni verificaciones de entregas anteriores.
 
 La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md) define el orden, los objetivos y

@@ -15,6 +15,7 @@ from .prototype import memory_mib
 from .reference_results import ResultError, load_result, new_output_path, reference_inputs, project_inputs
 from .project import Project, ProjectError
 from .project_case import configuration_key
+from .comparison_view import ComparisonDialog
 
 
 class PressurePlot(QWidget):
@@ -116,7 +117,13 @@ class SimulationView(QScrollArea):
         self.open_button = QPushButton('&Abrir resultado…')
         self.details_button = QPushButton('&Parámetros…')
         self.check_button = QPushButton('Compro&bar entradas')
-        layout.addWidget(self.check_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.compare_button = QPushButton('Comparar resultados…')
+        self.comparison_dialog = None
+        preparation = QHBoxLayout()
+        preparation.addWidget(self.check_button)
+        preparation.addWidget(self.compare_button)
+        preparation.addStretch()
+        layout.addLayout(preparation)
         for button in (self.run_button, self.cancel_button, self.open_button, self.details_button):
             actions.addWidget(button)
         actions.addStretch()
@@ -144,9 +151,17 @@ class SimulationView(QScrollArea):
         self.open_button.clicked.connect(self.open_result)
         self.details_button.clicked.connect(self.show_details)
         self.check_button.clicked.connect(self.check_inputs)
+        self.compare_button.clicked.connect(self.show_comparison)
         self.origin_combo.currentIndexChanged.connect(self._origin_changed)
         self._describe_inputs()
         self._arrange()
+
+    def show_comparison(self):
+        if self.comparison_dialog is None:
+            self.comparison_dialog = ComparisonDialog(self)
+        self.comparison_dialog.show()
+        self.comparison_dialog.raise_()
+        self.comparison_dialog.activateWindow()
 
     def _capture(self):
         if self.origin_combo.currentIndex() == 0:
