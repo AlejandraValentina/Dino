@@ -13,6 +13,7 @@ import time
 
 from .simulation import CV, Model, StopCalculation, run_resolution, sensitivity
 from .simulation_case import SyntheticCase
+from .adaptive import PROFILES, run_adaptive
 
 
 def memory_mib():
@@ -127,9 +128,14 @@ def main(argv=None):
         metadata = environment()
         write_json(output/'environment.json', metadata)
         print(f'S2T-0D-01 sintético, 0D sin ondas. Resultados: {output.resolve()}', flush=True)
-        for step in (.5, .25, .125):
+        for profile in PROFILES:
+            step = profile.max_step_deg
             monitor = Monitor(step, started, lambda: cancelled)
-            result = run_resolution(step, monitor, model)
+            with (output/f'profile-{profile.name}-attempts.csv').open('w', newline='', encoding='utf-8') as stream:
+                writer = csv.DictWriter(stream, fieldnames=[
+                    'angle_deg', 'proposed_deg', 'substep_deg', 'error', 'worst', 'accepted', 'cause', 'rhs'])
+                writer.writeheader()
+                result = run_adaptive(profile, monitor, model, trace=writer.writerow)
             monitor.peak_mib = max(monitor.peak_mib, memory_mib())
             result['peak_process_MiB'] = monitor.peak_mib
             runs.append(result)
@@ -144,7 +150,7 @@ def main(argv=None):
             if cancelled or time.monotonic()-started >= 180:
                 break
         comparison = sensitivity(runs)
-        summary = dict(case=case.identifier, resolutions=[
+        summary = dict(case=case.identifier, method='RK4 step doubling, accepted two half steps, no extrapolation', resolutions=[
             {k: v for k, v in r.items() if k not in ('cycles', 'last_two_cycles', 'partial')}
             | {'completed_cycles': len(r['cycles']), 'last_cycle': r['cycles'][-1] if r['cycles'] else None}
             for r in runs], sensitivity=comparison, viability_passed=comparison['passed'],

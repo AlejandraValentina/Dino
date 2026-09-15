@@ -323,7 +323,7 @@ indefinidos. Un benchmark aislado del orificio no acredita coste del ciclo acopl
    la implementación y ejecución del prototipo. La integración a interfaz y cambios
    de archivo siguen sin autorizarse por esta definición.
 
-## Diagnóstico localizado posterior — decisión numérica pendiente
+## Diagnóstico localizado anterior — evidencia del método fijo
 
 La orden posterior autoriza diagnóstico y corrección de defectos demostrados,
 sin cambiar el método para forzar aceptación. La vuelta reconstruida reproduce
@@ -355,6 +355,60 @@ más intentos/pasos si se necesita reducirlo. No se ha medido ese coste ni proba
 que alcance precisión o presupuesto; si alcanza el mínimo de 0,001° o cualquier
 tope debe detenerse con diagnóstico. No se propone anular caudales, recortar
 estados o alterar Cd/energía/contornos. No se ejecutó otra serie oficial.
+
+## Decisión numérica y ensayo adaptativo autorizado — 15/09/2026
+
+La orden posterior aprueba implementar RK4 por duplicación de paso y el ensayo
+acotado siguiente. Sustituye únicamente la decisión numérica pendiente anterior;
+se conservan su diagnóstico, las decisiones físicas y la aceptación original.
+
+Para cada propuesta h: desde copias del mismo estado, una rama RK4(h) y otra
+RK4(h/2) seguida de RK4(h/2). Para cada m/U/F de los cuatro CV:
+e_j=abs(y_dos_medios_j-y_completo_j)/15;
+s_j=atol_j+rtol*max(abs(y_inicio_j),abs(y_dos_medios_j)); E=max(e_j/s_j).
+Aceptar solo E<=1 y controles físicos aplicables; conservar exclusivamente los
+dos medios pasos, sin extrapolar el estado. El divisor 15 es el estimador de
+orden cuatro autorizado, no cota garantizada cerca de inversiones de flujo.
+
+| Perfil | h máximo propuesto | rtol | atol m/F [kg] | atol U [J] |
+| --- | --- | --- | --- | --- |
+| A | 0,5° | 1e-6 | 1e-12 | 1e-6 |
+| B | 0,25° | 3e-7 | 3e-13 | 3e-7 |
+| C | 0,125° | 1e-7 | 1e-13 | 1e-7 |
+
+Son tolerancias nuevas **locales**, no cambios de balances, repetibilidad,
+convergencia o sensibilidad. Factor del controlador=min(2,max(0.2,0.9*E**(-1/5)));
+E=0 permite factor 2; estimador no finito rechaza y reduce por 0,2. Un rechazo
+siempre reduce, con ocho consecutivos como máximo; etapa no física conserva
+reducción por dos. Dominio T/p y demás presupuestos previos siguen vigentes.
+
+Mínimo 0,001° **por medio paso realmente ejecutado**: propuesta h>=0,002°.
+No imponer un mínimo al paso rechazado y continuar como si hubiera aprobado.
+Acortar para no atravesar eventos/nodos de salida ni dejar un resto menor al
+mínimo; si no se puede, detener con causa. Coincidencias de eventos calculados
+y nodos solo se unifican al nivel de redondeo de máquina, no por tolerancia física.
+
+Las ramas no comparten inventarios ni acumuladores mutables. F_s se captura una
+vez en el estado aceptado al inicio del aporte; F_C sigue analítica en todas las
+etapas y la conversión por diferencia de primitiva en cada recorrido. Acumular
+solo la rama aceptada; auditar por trapecios sus dos intervalos reales, incluido
+el estado intermedio. Las etapas internas no son muestras aceptadas. Contar todos
+los RHS ejecutados, incluidos intentos descartados (12 nominales, sin reutilización).
+La implementación actual evalúa además derivadas al validar/obtener tres extremos
+por intento y un inicio por ciclo: se cuentan también contra el límite de RHS,
+distinguiendo etapas y extremos (15 evaluaciones por intento completo, más inicios).
+Registrar h propuesto y medios pasos efectivos, sus extremos/causas de rechazo,
+mínimo/máximo/media, coste, estados, flujos, balances y resultados originales.
+
+Antes de la serie, repetir el intervalo diagnosticado 300–300,5° desde su estado
+registrado, comparar p/m/U/F/Y y masas por sentido, y comprobar retorno físico,
+rechazo por error con estados positivos, descarte, eventos y controles elementales.
+Si no reduce la deriva o agota un límite, detener sin serie formal. En otro caso,
+una sola serie A/B/C desde los estados originales, sin arranque caliente:
+30 ciclos/60 s por perfil, 180 s total, 512 MiB, 2 millones RHS y límites previos.
+Convergencia completa permite parar antes; no reajustar perfiles tras ver resultados.
+La comparación incluye Y_E y sigue requiriendo la convergencia de los tres perfiles.
+Entrega 5 abierta, sin Qt/JSON, nuevas campañas, autenticación o archivo del cambio.
 
 ## Fuentes primarias consultadas — 15/09/2026
 [1] [MIT, Control volume form of the conservation laws](https://web.mit.edu/16.unified/www/FALL/thermodynamics/notes/node19.html):

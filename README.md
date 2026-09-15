@@ -22,7 +22,75 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 No hay integración Qt ni cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
-## Prototipo de viabilidad 2T — entrega 5 abierta
+## Ensayo adaptativo RK4 — entrega 5 abierta
+
+Implementado el control autorizado A/B/C: un paso frente a dos medios pasos,
+error por componente dividido por 15, norma separada m/U/F y conservación de
+los dos medios pasos sin extrapolación. F_C sigue analítica; el auditor usa ambos
+subpasos aceptados, no etapas RK4. Los perfiles completos están en design.md y
+en cada resumen de resultados. Las tolerancias físicas y de aceptación no cambian.
+
+**Tres conclusiones:** el controlador cumple sus controles comprobados; reduce
+la deriva local diagnosticada; **el caso completo no acredita viabilidad**.
+La deriva local Y_E pasó de −1,5287985e-4 a −1,1022007e-5 / −6,9086296e-6 /
+−4,0367728e-6 con A/B/C. No se anulan caudales; el retorno físico está probado.
+
+Se ejecutó una única serie adaptativa desde los estados originales:
+
+| Perfil | Ciclos completos | Parada / convergencia completa | Cálculo | Pico residente | RHS reales |
+| --- | --- | --- | --- | --- | --- |
+| A | 18 + parcial | 60 s / No | 60,000 s | 26,21 MiB | 1331603 |
+| B | 11 + parcial | 60 s / No | 60,000 s | 34,26 MiB | 1347150 |
+| C | 7 + parcial | 180 s de serie / No | 57,015 s | 41,83 MiB | 1286967 |
+
+Ninguna vuelta aprobó todos los balances. Máximo residuo independiente normalizado
+de la última vuelta completa: A=0,0094742, B=0,0057632, C=0,0035273, frente a
+0,001 permitido. Persisten residuos en I/E; K/C cumplen. Los estados de la última
+vuelta cumplen las diferencias de repetibilidad, pero no la aceptación compuesta.
+La sensibilidad formal no se acredita. Comparación diagnóstica B/C a igual fase,
+en distintas vueltas finales: Delta Y_E=0,00183896 (<0,005); eso no sustituye
+la convergencia ni el resto de los criterios.
+
+Son pasos adaptativos, no resoluciones uniformes. Medios pasos aceptados
+mínimo/media/máximo: A=0,00100122/0,03856653/0,08879962°;
+B=0,00100019/0,02373340/0,04898667°; C=0,00100019/0,01477479/0,02828730°.
+El mínimo de 0,001° se respetó en cada medio paso. Resúmenes y tasks.md incluyen
+rechazos por causa, balances de cada CV/global, trabajo, presión y todas las Y.
+
+Comando ejecutado desde `E:\dino\Dino`:
+
+```powershell
+.\.venv\Scripts\python.exe -m motorsim.prototype --output results/simulacion-2t/adaptativo-20260915
+```
+
+El destino ya existe y se conserva. Omitir `--output` genera un directorio nuevo
+si se desea repetir explícitamente; esta tarea no ejecutó otra serie. El comando
+actual utiliza A/B/C. Evidencia local y serie anterior preservadas mediante SHA-256.
+`profile-*-attempts.csv` registra cada propuesta, sus medios pasos, error/causa y
+RHS acumulados. Los otros archivos mantienen el formato simple de resultados,
+separado de JSON v5. Todo resultado voluminoso está excluido de Git.
+
+Serie: 180,110 s totales registrados, incluidos 0,110 s finales de cierre/escritura
+después de parar el cálculo por el presupuesto global. Intel i5-10400, Windows
+10.0.19045 AMD64, Python 3.11.0; sin Qt cargado. No se extendió el cálculo ni se
+ajustaron perfiles para conseguir aceptación.
+
+**Pruebas finales:** 10/10 adaptativas en 0,138 s y 21/21 controles existentes en
+0,396 s. Incluyen cancelación real <1 s, mínimo, eventos, ambas mitades en auditoría,
+descarte, retorno, calor analítico y presupuesto de evaluaciones. Revisión
+independiente detectó tres evaluaciones de extremos no contadas por intento;
+se corrigió antes de la serie y se agregó regresión. Se contabilizan las 12 etapas,
+los tres extremos y los inicios de ciclo. Autorrevisión de la corrección y evidencia.
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_adaptive.py -v
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p 'test_simulation_*.py' -q
+```
+
+Sin nuevos recorridos visuales ni aceptación manual. La entrega permanece abierta
+por viabilidad pendiente y futura integración; no se inicia otro ensayo ni entrega.
+
+## Prototipo de viabilidad 2T — evidencia histórica del método fijo
 
 Biblioteca estándar, cuatro volúmenes abiertos (I/K/C/E), flujo reversible,
 trabajos de cilindro y cárter separados y energía prescrita por carga fresca.
@@ -35,8 +103,8 @@ Desde la raíz del repositorio, comando comprobado:
 .\.venv\Scripts\python.exe -m motorsim.prototype --output results/simulacion-2t/viabilidad-20260915
 ```
 
-Ese directorio ya contiene la ejecución del 15/09/2026 y no se sobrescribe. Para
-repetirla, omitir `--output`: se crea un directorio nuevo con fecha/hora. No hay
+Ese directorio contiene la ejecución fija de 5482160 y no se sobrescribe. El
+comando de la versión actual ejecuta el ensayo adaptativo descrito arriba. No hay
 dependencias adicionales, Qt ni cambios globales. Ctrl+C solicita cancelación.
 Cada resolución arranca de los mismos estados a 3000 rpm; máximo 30 ciclos/60 s,
 serie 180 s, proceso 512 MiB. El programa sale con resultado no satisfactorio
@@ -85,7 +153,7 @@ Windows ni se atribuye aceptación manual. El primer impedimento es el balance
 independiente, ya fallido desde la primera vuelta. Una decisión posterior sobre
 ese impedimento y la futura integración quedan fuera de esta ejecución acotada.
 
-**Diagnóstico localizado posterior:** la cuadratura aprobó controles con integrales
+**Diagnóstico histórico de 783970d, anterior a la autorización adaptativa:** la cuadratura aprobó controles con integrales
 prescritas, reversión de flujo y pasos no uniformes. Se reconstruyó únicamente la
 vuelta 30 de 0,5° desde el estado guardado, reproduciendo exactamente su estado
 final y auditoría: 728 pasos, 16 no uniformes, 0,020 s físicos; 0,219 s de cálculo

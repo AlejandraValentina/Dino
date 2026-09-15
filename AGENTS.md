@@ -12,11 +12,11 @@ Entrega 5: modelo/caso/protocolo de `simulacion-2t/design.md` aprobados expresam
 para implementar y ejecutar únicamente el prototipo de consola de viabilidad.
 Biblioteca estándar, controles elementales antes del caso y tres resoluciones
 con los límites previos. Sin integración Qt, cambios JSON, ondas ni barridos.
-Etapa actual: diagnóstico localizado del fallo de viabilidad y corrección solo
-de defectos demostrados. Preservar 54821600 y sus resultados; no modificar método,
-parámetros, tolerancias o presupuestos para lograr aceptación. Si la causa es una
-limitación numérica, entregar diagnóstico y una propuesta mínima pendiente de
-decisión, sin otra serie. Revisión puntual, pruebas pertinentes y commit propio;
+Etapa actual: RK4 adaptativo por duplicación de paso autorizado con perfiles A/B/C
+fijados por la usuaria. Preservar 783970d y evidencias previas. Comprobar primero
+el intervalo diagnosticado; ejecutar una serie solo si reduce el defecto local
+sin agotar límites. Sin cambiar física, aceptación, mínimos o presupuestos.
+Revisión puntual, pruebas pertinentes y commit propio;
 autenticación fuera de esta tarea, sin nuevos intentos ni configuración global.
 No iniciar entrega 6.
 No alterar retrospectivamente requisitos ni verificaciones de entregas anteriores.

@@ -31,7 +31,7 @@ entregas el 14/09/2026; su evidencia se registra separada en los cambios enlazad
 | 2. Geometría y cinemática | Completada | [geometria-cinematica](../openspec/changes/geometria-cinematica/tasks.md) | Comprobaciones acreditadas; aceptada por la usuaria. |
 | 3. Configuración específica 2T | Completada | [configuracion-2t](../openspec/changes/configuracion-2t/tasks.md) | Lumbreras/cárter y admisión por falda comprobados; 72 pruebas finales y captura Windows. Sin aceptación manual de la usuaria ni validez predictiva. |
 | 4. Admisión y escape | Completada | [conductos-admision-escape](../openspec/changes/conductos-admision-escape/tasks.md) | Editor, orden, perfiles y JSON v5 comprobados; 85 pruebas finales y captura Windows/150 %. Sin aceptación manual de la usuaria. |
-| 5. Primer caso de simulación 2T | En curso: decisión numérica pendiente | [simulacion-2t](../openspec/changes/simulacion-2t/tasks.md) | Prototipo ejecutado, viabilidad no acreditada. Diagnóstico localizado demuestra retornos numéricos RK4 y alteración de Y; auditoría correcta. Propuesta adaptativa sin implementar; sin otra serie oficial, integración Qt ni aceptación manual. |
+| 5. Primer caso de simulación 2T | En curso: ensayo adaptativo ejecutado, viabilidad no acreditada | [simulacion-2t](../openspec/changes/simulacion-2t/tasks.md) | Controlador A/B/C comprobado; reduce deriva local, pero balances independientes fallan y se agotan presupuestos. Sin integración Qt, aceptación manual ni nuevos ensayos autorizados. |
 | 6. Barridos, comparación y contraste experimental | Pendiente | — | No autorizada. |
 | 7. Configuración específica 4T | Pendiente | — | No autorizada. |
 | 8. Primer caso de simulación 4T | Pendiente | — | No autorizada. |

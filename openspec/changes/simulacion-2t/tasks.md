@@ -14,6 +14,8 @@
 - [x] 9. Tras autorización, implementar y comprobar balances/enlaces/energía con referencias elementales independientes.
 - [x] 10. Tras autorización, ejecutar el caso completo y comparación de resolución, medir coste y registrar convergencia/fallo.
 - [x] 11. Diagnosticar localmente el rechazo preservando la serie; comprobar cuadratura, reconstruir una vuelta e identificar si requiere corrección o decisión numérica.
+- [x] 12. Implementar la duplicación adaptativa autorizada con perfiles A/B/C y comprobar el intervalo local, retorno físico y controles del integrador.
+- [x] 13. Ejecutar una serie A/B/C acotada desde los estados originales, registrar coste/precisión y detener sin extender presupuestos.
 
 No se detallan aquí integración Qt, nuevos archivos ni entregas posteriores: no
 están autorizados. Aprobar documentos no marca tareas 7–10 automáticamente.
@@ -262,3 +264,148 @@ su fallo. No se realizó una escalera ni un nuevo barrido de casos/resoluciones.
 - Entrega 5 **En curso: decisión numérica pendiente**. Se prepara commit documental,
   de pruebas e instrumento localizado; no hay reintento de publicación, archivo de
   cambio, integración Qt ni avance a otra entrega.
+
+## Evidencia del ensayo adaptativo autorizado — 15/09/2026
+
+Esta evidencia corresponde a las tareas 12/13 y no modifica los resultados
+históricos anteriores. Inicio en `main`, `783970d90d8470d1f552dbdf11b7781133ea6915`,
+árbol limpio e igual a la referencia local `origin/main`. Commit y directorios
+originales conservados; sus SHA256 se comprobaron antes y después del ensayo.
+Sin push, consulta de credenciales ni cambios de configuración global.
+
+### Implementación y regresión local
+
+`motorsim/adaptive.py` conserva los dos medios pasos, sin Richardson; compara
+individualmente los doce componentes m/U/F con el estimador /15 y los perfiles
+fijos de design.md. Control proporcional 0,9 y exponente 1/5, factor 0,2–2,
+tratamiento explícito de cero/no finitos y reducción en cada rechazo. Cada rama
+mantiene sus acumuladores; F_s se captura fuera de los intentos, F_C continúa
+analítica. Auditoría independiente en ambos medios pasos aceptados, incluido el
+punto intermedio. Eventos y exportación común a 0,5° no sustituyen esos pasos.
+Se cuentan también las evaluaciones de extremos que calculan RHS: normalmente
+15 por intento (12 etapas y 3 extremos), más el inicio de cada ciclo; un intento
+interrumpido puede costar menos. El presupuesto cuenta todas esas evaluaciones.
+El mínimo 0,001° se exige a cada medio paso, sin tolerancia física artificial.
+
+Intervalo 300–300,5° desde el estado literal de la evidencia anterior, sin
+alterarlo ni alimentar la serie formal con él. Resultado local:
+
+| Método | Cambio Y_E | RHS reales | Tiempo s |
+| --- | ---: | ---: | ---: |
+| Fijo histórico 0,5° | −0,000152879850 | 4 etapas históricas | — |
+| A | −0,000011022007 | 121 | 0,006279 |
+| B | −0,000006908630 | 136 | 0,006230 |
+| C | −0,000004036773 | 196 | 0,008000 |
+
+La deriva disminuye aproximadamente 13,9/22,1/37,9 veces; no desaparece.
+Todos completan el intervalo sin agotar límites. El ensayo separado con presión
+inicial de E inferior al reservorio admite entrada física; no se anulan flujos
+ni se impone Y. Comparación local completa, con presión, m/U/F/Y y masa en ambos
+sentidos: `results/simulacion-2t/adaptativo-local-20260915/comparison.json`.
+`summary-final.json` contiene el conteo corregido; sustituye al conteo inicial
+de `summary.json`, que se conserva con sus hashes de las fuentes originales.
+
+### Única serie formal y coste
+
+Comando ejecutado una vez:
+`.\.venv\Scripts\python.exe -m motorsim.prototype --output results/simulacion-2t/adaptativo-20260915`.
+Cada perfil parte del caso original S2T-0D-01; no hay continuación entre perfiles.
+Python 3.11.0, Windows 10.0.19045 AMD64, Intel i5-10400 a 2,9 GHz, 12 CPU lógicas;
+Qt no cargado. Parámetros y entorno completos en `case.json`/`environment.json`.
+
+| Perfil | Convergencia completa | Ciclos completos (+ parcial) | Parada | s | Pico MiB |
+| --- | --- | ---: | --- | ---: | ---: |
+| A | No | 18 (+19) | 60 s por ejecución | 60,000 | 26,207 |
+| B | No | 11 (+12) | 60 s por ejecución | 60,000 | 34,262 |
+| C | No | 7 (+8) | 180 s globales | 57,015 | 41,828 |
+
+La serie registra 180,110 s incluyendo cierre/escritura final: la integración
+se detuvo al alcanzar el tope global, sin extenderla para acabar el ciclo.
+Ninguna ejecución llegó a 30 ciclos, 512 MiB o dos millones de RHS. No se lanzó
+otra serie ni se modificaron tolerancias para intentar obtener un resultado favorable.
+
+| Perfil | Intentos | Medios pasos aceptados | Rechazos error / físico / no finito | RHS totales (etapas + extremos) |
+| --- | ---: | ---: | --- | --- |
+| A | 88773 | 177290 | 127 / 1 / 0 | 1331603 (1065268 + 266335) |
+| B | 89810 | 179444 | 86 / 2 / 0 | 1347150 (1077712 + 269438) |
+| C | 85798 | 171476 | 59 / 1 / 0 | 1286967 (1029568 + 257399) |
+
+| Perfil | Máximo propuesto autorizado ° | Medio paso mínimo ° | Media ° | Máximo real ° |
+| --- | ---: | ---: | ---: | ---: |
+| A | 0,5 | 0,0010012213 | 0,0385665329 | 0,0887996161 |
+| B | 0,25 | 0,0010001903 | 0,0237333965 | 0,0489866740 |
+| C | 0,125 | 0,0010001870 | 0,0147747914 | 0,0282873044 |
+
+Los CSV `profile-*-attempts.csv` registran propuesta, medio paso, error, causa y
+RHS acumulados de cada intento. Se comprobó sobre ellos E <= 1 y medio paso
+>= 0,001° en todos los aceptados, y dos medios pasos por intento aceptado.
+
+### Resultados del último ciclo completo de cada perfil
+
+| Perfil | W indicado C J | W cárter J | p máxima C Pa | Y_I | Y_K | Y_C | Y_E |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| A | 16,4349633 | −3,3651205 | 1330075,43 | 0,98550943 | 0,97634931 | 0,56160010 | 0,37569610 |
+| B | 16,4807541 | −3,3653063 | 1331281,86 | 0,98573406 | 0,97699551 | 0,56206279 | 0,37779044 |
+| C | 16,5977916 | −3,3661354 | 1334390,39 | 0,98667551 | 0,97865857 | 0,56316336 | 0,37962940 |
+
+Residuos independientes normalizados (magnitudes adimensionales; límite 0,001):
+
+| Perfil / volumen | Masa | Energía | Fresca |
+| --- | ---: | ---: | ---: |
+| A / I | 7,892706e-3 | 7,819416e-3 | 7,867605e-3 |
+| A / K | 7,766539e-7 | 1,030596e-6 | 6,605787e-7 |
+| A / C | 8,333321e-7 | 6,320002e-7 | 4,184468e-7 |
+| A / E | 8,099840e-3 | 7,203279e-3 | 7,813646e-4 |
+| A / global | 7,462293e-3 | 9,474212e-3 | 5,022387e-3 |
+| B / I | 4,546109e-3 | 4,505227e-3 | 4,531906e-3 |
+| B / K | 3,206877e-7 | 4,393231e-7 | 2,657957e-7 |
+| B / C | 4,317189e-8 | 3,332466e-8 | 3,719211e-8 |
+| B / E | 5,228243e-3 | 4,653139e-3 | 5,215051e-4 |
+| B / global | 4,466760e-3 | 5,763218e-3 | 2,903093e-3 |
+| C / I | 2,744366e-3 | 2,721198e-3 | 2,736371e-3 |
+| C / K | 2,129934e-7 | 2,639108e-7 | 1,951430e-7 |
+| C / C | 8,590239e-8 | 6,499510e-8 | 4,440851e-8 |
+| C / E | 3,241316e-3 | 2,890752e-3 | 3,309921e-4 |
+| C / global | 2,712801e-3 | 3,527325e-3 | 1,748217e-3 |
+
+Fallan I (los tres balances), E (masa/energía) y global (los tres), aunque los
+balances discretos máximos son 8,393e-15 / 1,095e-14 / 4,326e-15. El peor
+independiente es energía global: 0,947421 % / 0,576322 % / 0,352732 %, superior
+al 0,1 % en los tres perfiles. Ningún ciclo satisfizo la aceptación completa.
+
+Comparación diagnóstica a igual fase, pero ciclos distintos (18/11/7):
+
+| Par | Diferencia relativa W | Diferencia relativa p máxima | Diferencia curva p | Diferencias absolutas Y_I / Y_K / Y_C / Y_E |
+| --- | ---: | ---: | ---: | --- |
+| A–B | 0,00277844 | 0,00090621 | 0,00103254 | 0,00022463 / 0,00064620 / 0,00046269 / 0,00209434 |
+| B–C | 0,00705139 | 0,00232955 | 0,00264597 | 0,00094145 / 0,00166306 / 0,00110058 / 0,00183896 |
+
+No acredita sensibilidad: no existen soluciones completamente convergidas y
+varias diferencias crecen entre el primer y segundo par. `comparison-diagnostic.json`
+incluye los seis enlaces y marca explícitamente esa limitación. Los archivos
+`step-*-summary.json` conservan también los estados/balances del ciclo parcial;
+`step-*-last-two.csv` y `step-*-partial.csv` separan ciclos completos y parcial.
+Todos los resultados nuevos están bajo directorios ignorados de `results/simulacion-2t/`.
+
+### Comprobación final y cierre de este ensayo
+
+- Suite final, tras corregir el conteo y ejecutar la serie:
+  `.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_adaptive.py -v`:
+  **10/10 aprobadas, 0,138 s**; y
+  `.\.venv\Scripts\python.exe -m unittest discover -s tests -p 'test_simulation_*.py' -q`:
+  **21/21 aprobadas, 0,396 s**. Incluyen retorno físico, rechazo local con estado
+  positivo, ramas/acumuladores, eventos/calor, mínimo real, RHS/presupuesto,
+  auditoría del punto intermedio y cancelación observable.
+- Una revisión puntual independiente de solo lectura encontró un subconteo de
+  RHS en evaluaciones de extremos. Corregido antes de la serie, con prueba que
+  contrasta las llamadas reales a Model.evaluate. Autorrevisión del principal
+  de la corrección, documentación y trazas; sin otra campaña de revisión.
+- `openspec validate simulacion-2t --strict --no-interactive`: aprobado en el
+  estado documental final. `git diff --check`: sin errores de espacios.
+- **Controlador:** los controles ejecutados acreditan el comportamiento
+  especificado, dentro del alcance probado; el estimador no es una cota garantizada.
+- **Defecto local:** reducido, no eliminado; no se impuso invariancia artificial.
+- **Viabilidad completa:** no acreditada dentro del protocolo; balances y coste
+  impiden cerrar. La entrega 5 sigue abierta, sin validación experimental,
+  integración Qt, cambios de JSON, inspección de interfaz, archivo ni otra etapa.
+  Commit propio del ensayo; publicación no intentada por instrucción expresa.
