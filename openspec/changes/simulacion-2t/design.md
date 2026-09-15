@@ -511,6 +511,65 @@ LOCALAPPDATA/MotorSim/Resultados (alternativa de usuario en otros sistemas); nun
 .venv ni una ruta E: codificada. `--output` permite una carpeta nueva explícita.
 Cambiar proyecto o 2T/4T no modifica, reasigna ni borra los resultados del caso.
 
+## Conexión del editor autorizada — 15/09/2026
+
+Extiende el tramo gráfico anterior: segundo origen «Geometría del proyecto ·
+ensayo 0D a 3000 rpm», sin modificar S2T-0D-01 ni ecuaciones. GUI usa B/100 Pa;
+los restantes valores de SyntheticCase son condiciones de referencia, no medición
+ni calibración del motor. No se conoce la procedencia de la geometría del usuario.
+No hay edición de condiciones ni selector de solver. Conductos conservan solo
+volumen agregado y sección limitante; no hay propagación ni sintonía.
+
+El editor recopila todos sus borradores (no disco): error numérico bloquea y se
+informa junto con ausencias/incompatibilidades; ningún None sustituto por error
+sale hacia el cálculo. Un proyecto guardable puede no ser ejecutable. Preflight
+exige 2T/1 cilindro, mecanismo/compresión y cárter completos, falda completa en su
+dominio, exactamente 1 escape y 2 transferencias efectivos, conductos completos
+y continuos. Intersección analítica de intervalos abiertos de eventos con 350–390°,
+incluidos desplazamientos de 360°, verifica cierre en todo el aporte; no decide
+desde muestreo de curvas. La comprobación se repite antes del cálculo en el hijo.
+
+`project_case` construye un caso independiente heredando solo las condiciones
+fijas. Canoniza escape primero y transferencias por (top, height, width), asignados
+a enlaces 4, 2 y 3 respectivamente (índices desde cero, seis enlaces sin cambios).
+Con geometrías idénticas el intercambio de transferencias es numéricamente neutro;
+se conserva fila original, nombre, función y dimensiones en el mapeo. Identidad
+del motor PROJECT-0D + hash de geometría sin nombres; escenario independiente
+`S2T-0D-01-reference-conditions-v1`. No muta SyntheticCase ni precarga lumbreras.
+Model recibe la geometría canonizada y deriva inventarios iniciales desde sus
+volúmenes y p/T/Y fijos; no se copian m/U/F del motor de referencia.
+
+Una copia JSON independiente se envía por archivo temporal exclusivo como argumento
+QProcess, se valida en el hijo y queda en case.json. Se retira el temporal al acabar;
+el directorio del resultado sigue siendo exclusivo. Cambios posteriores no alteran
+las entradas del proceso ni su identidad. El resultado abierto mantiene siempre
+su procedencia aunque cambie el selector de la próxima ejecución. Si cambian las
+entradas o archivo activo, aviso de configuración anterior sin borrar/recalcular.
+
+Resultados de proyecto: mismo formato/nombres/unidades/model_version, versión 2.
+`inputs` incorpora `origin` (kind=project, project_name, source_path o null, dirty),
+`project_snapshot` v5 completo, `port_mapping`, `scenario_identifier`; conserva
+case/variant/profile/model_version/initial_state. Referencia sigue escribiendo y
+leyendo versión 1, origen implícito reference, exactamente reference_inputs().
+El lector v2 reconstruye entradas esperadas desde la copia validada y condiciones
+fijas; compara contrato íntegro, no confía en parámetros arbitrarios. Además de
+hashes/dominio/unidades/estado/convergencia, verifica volúmenes y flujos de las
+muestras contra Model evaluado en esos estados, sin integrar de nuevo. Reabrir no
+depende de la existencia del proyecto original. B se usa en GUI; C solo se admite
+en contrato para la comprobación de consola autorizada mediante --profile-c-check.
+
+Protocolo nuevo, separado de la serie histórica: pruebas de adaptación/contrato/Qt
+antes de A (editor, geometría exacta de referencia, B/100), B (copia, solo compresión
+8→8,2, editor B/100) y C (misma geometría, consola C/100). Topes previos intactos:
+60 s, 30 ciclos, 512 MiB, 2 millones RHS, mínimo 0,001°, ocho rechazos y dominio;
+hasta 180 s para estos tres cálculos completos. Comparación A/referencia numérica,
+no tiempo. Contraste B/C utiliza las magnitudes/pisos existentes, 1 % relativo
+y 0,005 absoluto para Y, sin atribuir tendencia de tres perfiles. Ninguna otra banda,
+barrido, búsqueda o tolerancia nueva. Fallos se informan sin reparación automática.
+Windows visible/captura y pruebas automáticas se distinguen de aceptación manual.
+Tras acreditar el recorrido se registra implementación del alcance acotado,
+sin archivar ni iniciar otra entrega; la publicación pertenece a la usuaria.
+
 ## Fuentes primarias consultadas — 15/09/2026
 [1] [MIT, Control volume form of the conservation laws](https://web.mit.edu/16.unified/www/FALL/thermodynamics/notes/node19.html):
 balances abiertos y transporte de entalpía; justifica signos, no coeficientes del caso.

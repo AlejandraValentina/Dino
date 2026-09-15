@@ -51,7 +51,7 @@ class WindowTests(unittest.TestCase):
     def test_initial_window_and_edit(self):
         self.assertEqual(self.snapshot(), (Project(), None, False))
         self.assertEqual([self.window.cycle_combo.itemText(i) for i in range(2)], ["2T", "4T"])
-        self.assertEqual("Simulación: caso de referencia", self.window.notice.text())
+        self.assertEqual("Simulación 2T · modelo 0D", self.window.notice.text())
         self.assertIn("Sin archivo", self.window.file_label.text())
         self.edit()
         self.assertTrue(self.window.dirty)

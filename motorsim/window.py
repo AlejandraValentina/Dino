@@ -13,7 +13,9 @@ from PySide6.QtWidgets import (
     QTabWidget, QToolBar, QVBoxLayout, QWidget,
 )
 
-from .project import NUMERIC_FIELDS, Project, ProjectError, displacements, parse_number
+from .project import (NUMERIC_FIELDS, PORT_FIELDS, INTAKE_FIELDS, DUCT_FIELDS, Project,
+                      Port, Intake, Ducts, DuctSegment, ProjectError, displacements, parse_number)
+from .project_case import execution_errors
 from .storage import load_project, save_project
 from .geometry_view import GeometryView
 from .ports_view import PortsView
@@ -96,7 +98,7 @@ class MainWindow(QMainWindow):
         self.file_label = _FilePathLabel()
         self.state_label = QLabel()
         self.state_label.setObjectName("projectState")
-        self.notice = QLabel("Simulación: caso de referencia")
+        self.notice = QLabel("Simulación 2T · modelo 0D")
         self.notice.setObjectName("availability")
 
         menu = self.menuBar().addMenu("&Archivo")
@@ -275,7 +277,7 @@ class MainWindow(QMainWindow):
         self.ducts_view = DuctsView()
         self.tabs.addTab(self.ducts_view, "&Conductos")
         self.ducts_view.changed.connect(self._edited)
-        self.simulation_view = SimulationView()
+        self.simulation_view = SimulationView(self.execution_snapshot)
         self.tabs.addTab(self.simulation_view, "&Simulación 2T")
         self.simulation_view.idle.connect(self._simulation_idle)
         self.setCentralWidget(self.tabs)
@@ -357,6 +359,36 @@ class MainWindow(QMainWindow):
             **{field: parse_number(edit.text(), field) for field, edit in self.numeric_edits.items()},
         )
 
+    def execution_snapshot(self):
+        """Leer todos los borradores; nunca sustituir texto inválido al ejecutar."""
+        errors = []
+        def number(text, key, context=''):
+            try:
+                return parse_number(text, key)
+            except ProjectError as exc:
+                errors.append(context+str(exc))
+                return None  # Solo para reunir errores: la copia no sale si hay alguno.
+        ports = tuple(Port(d['name'], d['function'], **{
+            k:number(d[k], k, f'Lumbrera {i+1}: ') for k in PORT_FIELDS})
+            for i, d in enumerate(self.ports_view.drafts))
+        intake = self.ports_view.intake
+        ducts = Ducts(**{route:tuple(DuctSegment(d['name'], **{
+            k:number(d[k], k, f'Conducto {"admisión" if route == "intake" else "escape"}, tramo {i+1}: ')
+            for k in DUCT_FIELDS}) for i, d in enumerate(rows))
+            for route, rows in self.ducts_view.drafts.items()})
+        project = Project(name=self.name_edit.text(), cycle=self.cycle_combo.currentText(),
+            manufacturer=self.text_edits['manufacturer'].text(), model=self.text_edits['model'].text(),
+            notes=self.notes_edit.toPlainText(), ports=ports, ducts=ducts,
+            intake=Intake(mode=intake.mode_combo.currentData(), **{
+                k:number(intake.edits[k].text(), k, 'Admisión: ') for k in INTAKE_FIELDS}),
+            crankcase_volume_bdc_cm3=number(self.ports_view.crankcase_edit.text(), 'crankcase_volume_bdc_cm3'),
+            **{k:number(edit.text(), k) for k, edit in self.numeric_edits.items()})
+        errors.extend(execution_errors(project))
+        if errors:
+            raise ProjectError('\n'.join(dict.fromkeys(errors)))
+        return project, dict(kind='project', project_name=project.name,
+                             source_path=str(self.path) if self.path else None, dirty=self.dirty)
+
     def _edited(self) -> None:
         self.dirty = True
         self._update_geometry()
@@ -369,6 +401,7 @@ class MainWindow(QMainWindow):
         self.state_label.setProperty("pending", self.dirty)
         self.state_label.style().unpolish(self.state_label)
         self.state_label.style().polish(self.state_label)
+        self.simulation_view.project_changed()
 
     def _activate(self, project: Project, path: Path | None) -> None:
         blocked = [widget.blockSignals(True) for widget in self._edit_widgets]

@@ -10,13 +10,20 @@ Entregas 1 y 2 completadas y aceptadas por la usuaria; 3 y 4 comprobadas técnic
 sin aceptación manual atribuida. Se preserva el trabajo existente y se comprueba Git.
 Entrega 5: modelo/caso/protocolo de `simulacion-2t/design.md` aprobados expresamente
 para implementar y ejecutar únicamente el prototipo de consola de viabilidad.
-Etapa actual autorizada: primer tramo de integración Qt del caso de referencia
-S2T-0D-01, 3000 rpm, banda exterior 100 Pa y perfil B, en QProcess asíncrono.
-Preservar 0cb0c754, ley original y evidencias. Núcleo sin Qt; ejecución individual,
-cancelación cooperativa Windows, consulta/reapertura y gráficos de datos calculados.
-No usar entradas del editor ni cambiar JSON v5, física, aceptación o presupuestos.
-No repetir A/B/C ni bandas. La viabilidad previa corresponde a la variante candidata,
-sin calibración. Entrega 5 abierta: uso con entradas del editor todavía fuera del tramo.
+Etapa actual autorizada: conectar geometría del editor al escenario 0D existente,
+manteniendo también S2T-0D-01 intacto. Preservar 379cf7f, ley original y evidencias.
+Proyecto 2T monocilíndrico, una lumbrera de escape/dos transferencias, admisión por
+falda y conductos completos/continuos; cierre durante todo el aporte. Copia de
+edición válida sin guardar, validación previa conjunta y repetida en el hijo.
+Condiciones fijas de referencia: 3000 rpm, perfil B, banda exterior 100 Pa; no son
+mediciones ni calibración. Núcleo sin Qt, JSON de proyectos v5 y física intactos.
+Resultados separados con procedencia/copia/mapeo y aviso de configuración anterior.
+Tres comprobaciones completas autorizadas: geometría exacta de referencia desde
+editor B/100 Pa; solo compresión 8→8,2 desde editor B/100 Pa; misma geometría C/100 Pa
+solo consola. 60 s/30 ciclos y restantes límites por cálculo; total hasta 180 s.
+No otras bandas, series, ondas, barridos ni edición de condiciones. Tras acreditar
+el recorrido, entrega 5 implementada para este alcance acotado; aceptación manual
+separada, sin atribuirla. No es acreditación de todo el dominio ni calibración.
 Revisión puntual, pruebas pertinentes y commit propio;
 autenticación fuera de esta tarea, sin nuevos intentos ni configuración global.
 No iniciar entrega 6.

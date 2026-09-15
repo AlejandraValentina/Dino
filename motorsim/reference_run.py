@@ -1,4 +1,4 @@
-"""Una ejecución fija de S2T-0D-01: python -m motorsim.reference_run."""
+"""Ejecución individual de referencia o copia de proyecto, sin Qt."""
 import argparse
 import csv
 from dataclasses import asdict
@@ -9,21 +9,24 @@ import signal
 import threading
 import time
 
-from .adaptive import run_adaptive
+from .adaptive import run_adaptive, PROFILES
 from .simulation import Model
 from .prototype import Monitor, environment, memory_mib
-from .reference_results import BAND_PA, PROFILE, new_output_path, reference_inputs, save_result
+from .reference_results import (BAND_PA, PROFILE, new_output_path, reference_inputs, save_result,
+                                validated_model, project_inputs)
+from .project import Project
 
 
 def emit(data):
     print(json.dumps(data, ensure_ascii=True, allow_nan=False), flush=True)
 
 
-def execute(folder, cancelled, report=emit):
+def execute(folder, cancelled, report=emit, *, inputs=None):
+    inputs = reference_inputs() if inputs is None else inputs
+    model, profile = validated_model(inputs)
     folder.mkdir(parents=True, exist_ok=False)
-    inputs = reference_inputs()
     started = time.monotonic()
-    monitor = Monitor(PROFILE.max_step_deg, started, cancelled.is_set, emit=lambda *a, **k: None)
+    monitor = Monitor(profile.max_step_deg, started, cancelled.is_set, emit=lambda *a, **k: None)
     last = started-1
     def progress(cycle, angle, rhs, completed=False):
         nonlocal last
@@ -38,7 +41,7 @@ def execute(folder, cancelled, report=emit):
             writer = csv.DictWriter(stream, fieldnames=[
                 'angle_deg', 'proposed_deg', 'substep_deg', 'error', 'worst', 'accepted', 'cause', 'rhs'])
             writer.writeheader()
-            result = run_adaptive(PROFILE, progress, Model(external_band_pa=BAND_PA), trace=writer.writerow)
+            result = run_adaptive(profile, progress, model, trace=writer.writerow)
         status = 'converged' if result['converged'] else 'not_converged'
         if cancelled.is_set():
             status = 'cancelled'
@@ -46,7 +49,7 @@ def execute(folder, cancelled, report=emit):
             result['stop'] = 'cancelación solicitada'
     except Exception as exc:
         status = 'error'
-        result = dict(profile=asdict(PROFILE), converged=False, cycles=[], last_two_cycles=[],
+        result = dict(profile=asdict(profile), converged=False, cycles=[], last_two_cycles=[],
                       partial=None, seconds=time.monotonic()-started, stop=f'{type(exc).__name__}: {exc}')
     result['peak_process_MiB'] = max(monitor.peak_mib, memory_mib())
     save_result(folder, result, status, inputs, environment())
@@ -58,6 +61,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--control-stdin', action='store_true', help='Control cooperativo por pipe: cancel + salto de línea.')
+    parser.add_argument('--project-input', type=Path, help='Copia de entradas efectivas, comprobada nuevamente en el hijo.')
+    parser.add_argument('--profile-c-check', action='store_true', help='Contraste de consola C/100 Pa; solo con copia de proyecto.')
     args = parser.parse_args(argv)
     cancelled = threading.Event()
     def control():
@@ -78,8 +83,20 @@ def main(argv=None):
         threading.Thread(target=control, daemon=True).start()
     previous = signal.signal(signal.SIGINT, lambda *a: cancelled.set())
     try:
-        return execute(args.output or new_output_path(), cancelled)
-    except (OSError, ValueError) as exc:
+        inputs = None
+        if args.profile_c_check and not args.project_input:
+            raise ValueError('El contraste C requiere --project-input.')
+        if args.project_input:
+            if args.project_input.stat().st_size > 16*1024*1024:
+                raise ValueError('Copia de entradas demasiado grande.')
+            inputs = json.loads(args.project_input.read_text(encoding='utf-8'))
+            validated_model(inputs)
+            if 'origin' not in inputs:
+                raise ValueError('Se requiere una copia de proyecto.')
+            if args.profile_c_check:
+                inputs = project_inputs(Project.from_dict(inputs['project_snapshot']), inputs['origin'], PROFILES[2])
+        return execute(args.output or new_output_path(), cancelled, inputs=inputs)
+    except (OSError, ValueError, KeyError, TypeError, ArithmeticError, RuntimeError) as exc:
         emit(dict(event='error', message=str(exc)))
         return 2
     finally:

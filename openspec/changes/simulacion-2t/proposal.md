@@ -1,4 +1,11 @@
 ## Why
+Ampliación autorizada del 15/09/2026: conectar geometría válida del editor al
+escenario de referencia existente, conservando el caso fijo. Copia independiente,
+prevalidación y resultados trazables; JSON v5, física y presupuestos intactos.
+El alcance vigente se precisa en la ampliación de spec/design y tareas 20–23.
+Las restricciones de las etapas siguientes son antecedentes, no una prohibición
+de esta integración expresamente autorizada. Sin condiciones editables ni entrega 6.
+
 Actualización del 15/09/2026: la usuaria aprobó el modelo, caso y protocolo y
 autorizó implementar/ejecutar el prototipo de consola, conservando sus límites.
 El alcance documental original siguiente queda como antecedente. La ampliación

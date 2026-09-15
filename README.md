@@ -4,8 +4,8 @@ Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La última
 [conductos-admision-escape](openspec/changes/conductos-admision-escape/specs/conductos-admision-escape/spec.md)
 añade recorridos geométricos de conductos circulares de admisión y escape 2T.
 La ficha, posición del pistón, volúmenes y curvas geométricas existentes se conservan.
-La pestaña Simulación 2T ejecuta únicamente el caso sintético de referencia.
-No utiliza los datos del proyecto abierto ni simula motores editados.
+La pestaña Simulación 2T admite el caso sintético de referencia y geometría del
+proyecto bajo las mismas condiciones de referencia, dentro del dominio 0D definido.
 
 Estado de las entregas 1 y 2: **Completadas**. La usuaria comunicó el 14/09/2026
 que realizó las comprobaciones manuales pendientes, incluido el uso sin Internet,
@@ -16,13 +16,14 @@ pruebas automatizadas e inspección visual del agente. Sin archivar. La entrega 
 está **Completada** para la configuración geométrica admitida: lumbreras, cárter
 y admisión por falda comprobados. Esto no es aceptación manual de la usuaria
 ni validación predictiva. La entrega 4 está **Completada** para el editor geométrico autorizado el 15/09/2026.
-La entrega 5 está **En curso: caso fijo integrado; entradas del editor pendientes**.
+La entrega 5 está **implementada para este alcance 0D acotado**; evidencia de cierre abajo.
+Aceptación manual de la usuaria pendiente y separada; no se atribuye validación experimental.
 La usuaria aprobó el modelo 0D, caso y protocolo de
 [simulacion-2t](openspec/changes/simulacion-2t/design.md) para esta prueba de consola.
-La integración Qt está limitada al caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
+La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
-## Simulación 2T — caso de referencia desde la aplicación
+## Simulación 2T — referencia o geometría del proyecto
 
 Abrir MotorSim desde la raíz:
 
@@ -31,10 +32,29 @@ cd E:\dino\Dino
 .\.venv\Scripts\python.exe -m motorsim
 ```
 
-En **Simulación 2T**, Ejecutar calcula S2T-0D-01 a 3000 rpm con banda exterior
-de 100 Pa y perfil B. El caso es sintético, no medido; Parámetros muestra su
-definición completa de solo lectura. No toma datos del proyecto, no lo reemplaza
-ni marca cambios por calcular. Cambiar a otro proyecto o a 4T no reasigna los resultados.
+En **Simulación 2T**, elegí el origen de la próxima ejecución:
+
+- **Caso de referencia S2T-0D-01**: conserva el caso sintético, no medido, independiente del editor.
+- **Proyecto actual, con condiciones de referencia**: toma la geometría actual,
+  incluidos cambios válidos sin guardar. Ensayo 0D a 3000 rpm, perfil B y banda
+  exterior de 100 Pa; Parámetros muestra todas las condiciones efectivas de solo
+  lectura. Son supuestos de referencia, no mediciones ni calibración del motor.
+
+**Comprobar entradas** reúne ausencias e incompatibilidades. El proyecto debe ser
+2T monocilíndrico, con dimensiones/compresión y volumen de cárter completos,
+admisión por falda válida, exactamente un escape y dos transferencias efectivos,
+ambos conductos completos/continuos y cilindro cerrado durante todo el aporte
+350–390°. Nombre conserva su validación; fabricante/modelo/observaciones son opcionales.
+Un proyecto puede guardarse incompleto sin ser ejecutable. El texto numérico inválido
+bloquea la ejecución; no se usa el último valor válido ni se completa desde la referencia.
+
+Ejecutar no guarda ni modifica el proyecto o sus cambios pendientes. Captura una
+copia independiente, identifica la geometría por función de lumbreras y conserva
+nombre, ruta y condición de guardado. Editar/abrir otro proyecto no reasigna el
+resultado: se señala «El resultado corresponde a una configuración anterior».
+El selector prepara el próximo cálculo; un resultado abierto sigue mostrando su
+propia procedencia. No se garantiza convergencia para toda geometría admitida.
+Los conductos representan almacenamiento/restricciones, sin propagación ni sintonía.
 
 El cálculo usa un proceso Python separado, con avance real y Cancelar cooperativo
 en Windows. Solo admite uno activo. Cerrar mantiene Guardar/Descartar/Cancelar
@@ -49,8 +69,11 @@ no conservan curvas anteriores como éxito nuevo. No calcula potencia al eje ni 
 
 Cada ejecución guarda una carpeta nueva en `%LOCALAPPDATA%\MotorSim\Resultados`.
 **Abrir resultado** selecciona su `manifest.json` y recupera datos sin simular.
-El manifiesto versión 1 vincula entradas, resumen y muestras con identificador,
-unidades, versión del modelo y hashes; se validan antes de mostrar datos. Un archivo
+El manifiesto versión 1 (referencia, compatible con archivos anteriores) o versión 2
+(proyecto, con copia v5, procedencia y mapeo de lumbreras) vincula entradas, resumen
+y muestras con identificador, unidades, versión del modelo y hashes. Se reconstruye
+el contrato esperado y se comprueba la geometría/estado de las muestras antes de
+mostrar datos; no necesita que exista el proyecto original. Un archivo
 ilegible no sustituye el resultado válido anterior. Los diagnósticos no aceptados
 pueden reabrirse, con estado/motivo y sin curvas de éxito. Son archivos separados
 del JSON v5 de proyectos; detalles del formato en el diseño existente.
@@ -65,7 +88,51 @@ Acepta `--output` con una carpeta nueva; nunca sobrescribe una existente. Ctrl+C
 cancela en consola. La interfaz usa el canal stdin cooperativo, no SIGINT de Windows.
 `regularized_trial` sigue separado y no se conecta al botón.
 
-**Comprobación real del 15/09/2026:** consola e interfaz completaron diez ciclos,
+### Conexión del editor comprobada — 15/09/2026
+
+Recorrido acreditado: cargar/editar motor admitido → comprobar entradas → ejecutar
+→ consultar → guardar resultados automáticamente → reabrir con procedencia.
+**146/146 pruebas automatizadas aprobadas en 12,167 s**, OpenSpec estricto aprobado
+y una revisión independiente puntual sin defectos reproducibles. Autorrevisión
+del principal de diff, resultados y capturas. Las pruebas Qt de suite son sin pantalla.
+
+| Ejecución autorizada | Perfil / compresión | Ciclos convergidos | Tiempo s | Pico cálculo MiB | Trabajo J/ciclo |
+| --- | --- | ---: | ---: | ---: | ---: |
+| A, editor con geometría exacta de referencia | B / 8:1 | 10 | 10,625 | 24,602 | 16,490508 |
+| B, copia con única modificación sin guardar | B / 8,2:1 | 9 | 9,500 | 25,008 | 16,631553 |
+| C, contraste de consola de la misma copia | C / 8,2:1 | 9 | 18,953 | 24,938 | 16,631548 |
+
+A coincide exactamente con ciclos, muestras y RHS de la referencia preservada.
+La cámara cambia de 18,321768 a 17,812830 cm³. B/C aprueba los umbrales existentes
+(1 % relativo y 0,005 absoluto para Y), sin acreditar tendencia de tres perfiles
+ni todo el dominio. Total de integración: **39,078 s**; hasta el registro del
+contraste: 42,828 s. Todos los balances finales aprobados; detalle y artefactos en
+[tasks.md](openspec/changes/simulacion-2t/tasks.md#conexión-del-editor--evidencia-del-15092026).
+
+**Inspección visual Windows:** automatización con ventanas visibles al 150 %
+efectivo, no aceptación manual. Se cargaron archivos de prueba, se editó 8→8,2,
+se ejecutó desde el botón, se reabrió el resultado y se comprobó conservación del
+proyecto, navegación, foco y ancho compacto sin desplazamiento horizontal.
+Capturas reales inspeccionadas; no son imágenes generadas. Escalado solo del proceso.
+
+![Proyecto de prueba y resultado real](docs/images/motorsim-proyecto-0d-resultado-150.png)
+
+[Curvas reales](docs/images/motorsim-proyecto-0d-curvas-150.png) ·
+[Ventana compacta](docs/images/motorsim-proyecto-0d-compacto-150.png).
+
+Pruebas afectadas: `python -m unittest discover -s tests -p test_project_simulation.py -v`
+con el Python del entorno virtual. El recorrido ya ejecutado fue
+`python tests/verify_project_simulation_windows.py --output results/simulacion-2t/editor-20260915 --scale 1.2 --suffix=-150`.
+Para **reabrir sin nuevos cálculos**, usar el mismo comando añadiendo
+`--reopen results/simulacion-2t/editor-20260915/B/manifest.json` y un `--suffix` nuevo.
+El contraste C se limita a consola, con `motorsim.reference_run --project-input`
+sobre la copia de entradas efectivas y `--profile-c-check`; no es una opción de GUI.
+Los artefactos numéricos permanecen locales en `results/simulacion-2t/editor-20260915/`.
+Sin nuevos parámetros editables, ondas, barridos, publicación ni entrega 6.
+
+### Evidencia preservada del primer tramo fijo
+
+**Comprobación histórica del primer tramo fijo, 15/09/2026:** consola e interfaz completaron diez ciclos,
 con 228171 RHS cada una. Resultados por ciclo, balances, trabajo, presión y muestras
 consola/interfaz coinciden exactamente; los ciclos/RHS también coinciden con B/100 Pa
 del ensayo previo (no C). Consola: 11,719 s y 24,598 MiB; interfaz: 10,719 s y
@@ -85,7 +152,7 @@ también los gráficos apilados. No se cambiaron políticas ni escalado global.
 
 Comandos de pruebas de integración (sin pantalla, distintos de esa inspección):
 
-Suite final: **134/134 aprobadas en 13,032 s**; OpenSpec estricto válido. La revisión
+Suite del primer tramo fijo: **134/134 aprobadas en 13,032 s**; OpenSpec estricto válido. La revisión
 puntual independiente detectó dos defectos de validación de resultados, corregidos
 con regresiones; autorrevisión del principal de las correcciones y la evidencia.
 
@@ -96,9 +163,9 @@ con regresiones; autorrevisión del principal de las correcciones y la evidencia
 ```
 
 Viabilidad numérica: evidencia previa de la variante. Integración gráfica del
-caso fijo: comprobada en este tramo. Aceptación manual: no atribuida. Ejecución
-de motores editados: todavía fuera del alcance; la entrega 5 sigue abierta.
-No se repitieron A/B/C ni bandas. Resultados locales de comprobación en
+caso fijo: comprobada en ese tramo. Aceptación manual: no atribuida. En esa etapa,
+los motores editados seguían fuera del alcance y la entrega 5 continuaba abierta.
+Entonces no se repitieron A/B/C ni bandas. Resultados locales de comprobación en
 `results/simulacion-2t/integracion-consola-20260915/`, `integracion-ui-20260915/`
 y `integracion-cancelacion-visible-20260915/`; evidencia detallada en tasks.md.
 
@@ -322,7 +389,7 @@ Las nuevas pruebas se ejecutan con el comando `test_simulation_*.py` anterior.
 Suite pertinente final: **21/21 aprobadas en 0,275 s** (seis nuevas pruebas de
 cuadratura/descarte y quince controles existentes del prototipo); OpenSpec válido.
 Revisión independiente puntual sin hallazgos bloqueantes; sin aceptación manual,
-integración Qt ni entrega 6. El estado sigue **En curso, decisión numérica pendiente**.
+integración Qt ni entrega 6. El estado de esa etapa era **En curso, decisión numérica pendiente**.
 
 ## Interfaz y uso
 
@@ -332,7 +399,7 @@ organizan en dos columnas o se apilan al reducir el ancho; el desplazamiento
 vertical permite acceder al formulario completo. Fondo oscuro liso, acentos
 azules, Segoe UI, foco visible y navegación por Tab. El selector compacto 2T/4T
 conserva los datos comunes. Una sola barra inferior muestra ruta, estado de
-guardado y «Simulación: caso de referencia». La ruta completa está en su ayuda emergente.
+guardado y «Simulación 2T · modelo 0D». La ruta completa está en su ayuda emergente.
 
 Nombre obligatorio al guardar; fabricante, modelo y observaciones opcionales.
 Cilindros, diámetro, carrera, biela entre centros y compresión pueden quedar

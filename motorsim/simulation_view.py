@@ -1,17 +1,20 @@
-"""Pestaña del caso de referencia; QProcess asíncrono, independiente del editor."""
+"""Simulación de referencia o copia del editor mediante QProcess asíncrono."""
 import json
 import math
 from pathlib import Path
 import sys
+import tempfile
 import time
 
 from PySide6.QtCore import QPointF, QProcess, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog, QGridLayout,
-    QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QScrollArea, QVBoxLayout, QWidget)
+    QComboBox, QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
 from .prototype import memory_mib
-from .reference_results import ResultError, load_result, new_output_path, reference_inputs
+from .reference_results import ResultError, load_result, new_output_path, reference_inputs, project_inputs
+from .project import Project, ProjectError
+from .project_case import configuration_key
 
 
 class PressurePlot(QWidget):
@@ -71,7 +74,7 @@ class PressurePlot(QWidget):
 class SimulationView(QScrollArea):
     idle = Signal()
 
-    def __init__(self):
+    def __init__(self, project_snapshot=None):
         super().__init__()
         self.setWidgetResizable(True)
         self.setFrameShape(QScrollArea.Shape.NoFrame)
@@ -85,6 +88,8 @@ class SimulationView(QScrollArea):
         self._started = 0.
         self.completed_cycles = 0
         self.inputs = reference_inputs()
+        self.project_snapshot = project_snapshot
+        self._request_path = None
         body = QWidget()
         layout = QVBoxLayout(body)
         layout.setContentsMargins(24, 16, 24, 16)
@@ -96,18 +101,22 @@ class SimulationView(QScrollArea):
             widget.setObjectName(style)
             layout.addWidget(widget)
             return widget
-        label('Caso de referencia S2T-0D-01', 'pageTitle')
-        label('Caso sintético, no motor medido. Ejecuta el caso de referencia. No utiliza los datos del proyecto abierto.')
-        case = self.inputs['case']
-        geometry = case['project_geometry']
-        label(f"{case['rpm']:g} rpm · {geometry['bore_mm']:g} × {geometry['stroke_mm']:g} mm · "
-              f"Compresión {geometry['compression_ratio']:g}:1 · Banda {self.inputs['variant']['delta_p_Pa']} Pa · "
-              f"Perfil {self.inputs['profile']['name']}", 'sectionTitle')
+        self.origin_combo = QComboBox()
+        self.origin_combo.addItems(['Caso de referencia S2T-0D-01', 'Proyecto actual, con condiciones de referencia'])
+        self.origin_combo.setAccessibleName('Origen de la próxima ejecución')
+        layout.addWidget(self.origin_combo)
+        self.title_label = label('', 'pageTitle')
+        self.description_label = label('')
+        self.parameters_label = label('', 'sectionTitle')
+        self.identity_label = label('')
+        self.stale_label = label('', 'fieldError')
         actions = QHBoxLayout()
         self.run_button = QPushButton('&Ejecutar')
         self.cancel_button = QPushButton('&Cancelar')
         self.open_button = QPushButton('&Abrir resultado…')
         self.details_button = QPushButton('&Parámetros…')
+        self.check_button = QPushButton('Compro&bar entradas')
+        layout.addWidget(self.check_button, alignment=Qt.AlignmentFlag.AlignLeft)
         for button in (self.run_button, self.cancel_button, self.open_button, self.details_button):
             actions.addWidget(button)
         actions.addStretch()
@@ -124,7 +133,7 @@ class SimulationView(QScrollArea):
         self.path_label = label('Cada ejecución se guarda en una carpeta nueva de MotorSim/Resultados.', 'unit')
         self.path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.memory_label = label('', 'unit')
-        label('Modelo 0D con energía prescrita; sin ondas de escape ni validación experimental.', 'unit')
+        label('Modelo 0D con energía prescrita, sin validación experimental. Conductos: almacenamiento y restricciones, sin propagación de ondas ni acreditación de sintonía.', 'unit')
         layout.addStretch()
         self.setWidget(body)
         self.timer = QTimer(self)
@@ -134,7 +143,68 @@ class SimulationView(QScrollArea):
         self.cancel_button.clicked.connect(self.cancel)
         self.open_button.clicked.connect(self.open_result)
         self.details_button.clicked.connect(self.show_details)
+        self.check_button.clicked.connect(self.check_inputs)
+        self.origin_combo.currentIndexChanged.connect(self._origin_changed)
+        self._describe_inputs()
         self._arrange()
+
+    def _capture(self):
+        if self.origin_combo.currentIndex() == 0:
+            return reference_inputs()
+        if self.project_snapshot is None:
+            raise ProjectError('No hay editor de proyecto disponible.')
+        project, origin = self.project_snapshot()
+        return project_inputs(project, origin)
+
+    def check_inputs(self):
+        try:
+            inputs = self._capture()
+        except (ProjectError, ResultError) as exc:
+            self.error_label.setText(str(exc))
+            return
+        self.error_label.setText('Entradas admitidas para este modelo. La convergencia no está garantizada.')
+        if self.result is None and not self.active:
+            self.inputs = inputs
+            self._describe_inputs()
+
+    def _origin_changed(self):
+        # La selección prepara la próxima ejecución; no cambia la procedencia de evidencia abierta.
+        if self.result is None and not self.active:
+            try:
+                self.inputs = self._capture()
+                self.error_label.clear()
+                self._describe_inputs()
+            except (ProjectError, ResultError) as exc:
+                self.error_label.setText(str(exc))
+                self.title_label.setText('Geometría del proyecto · ensayo 0D a 3000 rpm')
+                self.description_label.setText('Las condiciones son supuestos de referencia, no mediciones ni una calibración del motor ingresado.')
+                self.parameters_label.clear()
+                self.identity_label.clear()
+
+    def _describe_inputs(self):
+        origin = self.inputs.get('origin')
+        self.title_label.setText('Geometría del proyecto · ensayo 0D a 3000 rpm' if origin else 'Caso de referencia S2T-0D-01')
+        self.description_label.setText('Las condiciones son supuestos de referencia, no mediciones ni una calibración del motor ingresado.'
+            if origin else 'Caso sintético, no motor medido. No utiliza los datos del proyecto abierto.')
+        case = self.inputs['case']
+        geometry = case['project_geometry']
+        self.parameters_label.setText(f"{case['rpm']:g} rpm · {geometry['bore_mm']:g} × {geometry['stroke_mm']:g} mm · "
+            f"Compresión {geometry['compression_ratio']:g}:1 · Banda {self.inputs['variant']['delta_p_Pa']} Pa · Perfil {self.inputs['profile']['name']}")
+        self.identity_label.setText((f"Proyecto utilizado: {origin['project_name']} · "
+            + ('con cambios sin guardar' if origin['dirty'] else 'sin cambios pendientes')
+            + f"\nArchivo al ejecutar: {origin['source_path'] or 'sin archivo asociado'}") if origin else '')
+        self.project_changed()
+
+    def project_changed(self):
+        stale = False
+        if self.inputs.get('origin') and (self.active or self.result is not None):
+            try:
+                current, origin = self.project_snapshot()
+                stale = (configuration_key(current) != configuration_key(Project.from_dict(self.inputs['project_snapshot']))
+                         or origin['source_path'] != self.inputs['origin']['source_path'])
+            except (ProjectError, TypeError):
+                stale = True
+        self.stale_label.setText('El resultado corresponde a una configuración anterior' if stale else '')
 
     @property
     def active(self):
@@ -153,6 +223,13 @@ class SimulationView(QScrollArea):
             self._arrange()
 
     def show_details(self):
+        if self.result is None and not self.active:
+            try:
+                self.inputs = self._capture()
+                self._describe_inputs()
+            except (ProjectError, ResultError) as exc:
+                self.error_label.setText(str(exc))
+                return
         dialog = QDialog(self)
         dialog.setWindowTitle('Parámetros efectivos · solo lectura')
         dialog.resize(680, 540)
@@ -169,7 +246,23 @@ class SimulationView(QScrollArea):
     def start(self, checked=False, *, output=None):
         if self.active:
             return
-        self.output = Path(output) if output is not None else new_output_path()
+        try:
+            inputs = self._capture()
+            target = Path(output) if output is not None else new_output_path()
+            request = None
+            if 'origin' in inputs:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', prefix='motorsim-input-',
+                        suffix='.json', dir=target.parent, delete=False) as stream:
+                    request = Path(stream.name)
+                    json.dump(inputs, stream, ensure_ascii=False, allow_nan=False)
+        except (OSError, ProjectError, ResultError) as exc:
+            self.error_label.setText(str(exc))
+            return
+        self.inputs = inputs
+        self._request_path = request
+        self._describe_inputs()
+        self.output = target
         self.result = None
         self.angle_plot.set_rows([])
         self.pv_plot.set_rows([])
@@ -186,6 +279,8 @@ class SimulationView(QScrollArea):
         self.run_button.setEnabled(False)
         self.open_button.setEnabled(False)
         self.cancel_button.setEnabled(True)
+        self.origin_combo.setEnabled(False)
+        self.check_button.setEnabled(False)
         process = QProcess(self)
         self.process = process
         process.setWorkingDirectory(str(Path(__file__).resolve().parent.parent))
@@ -193,13 +288,17 @@ class SimulationView(QScrollArea):
         if executable.name.lower() == 'pythonw.exe':
             executable = executable.with_name('python.exe')
         process.setProgram(str(executable))
-        process.setArguments(['-u', '-m', 'motorsim.reference_run', '--output', str(self.output), '--control-stdin'])
+        arguments = ['-u', '-m', 'motorsim.reference_run', '--output', str(self.output), '--control-stdin']
+        if request:
+            arguments += ['--project-input', str(request)]
+        process.setArguments(arguments)
         process.readyReadStandardOutput.connect(self._read_progress)
         process.readyReadStandardError.connect(self._read_error)
         process.finished.connect(self._finished)
         process.errorOccurred.connect(self._process_error)
         self.timer.start()
         process.start()
+        self.project_changed()
 
     def _read_error(self):
         if self.process:
@@ -218,6 +317,8 @@ class SimulationView(QScrollArea):
                     if type(count) is int and 0 <= count <= 30 and math.isfinite(seconds) and seconds >= 0:
                         self.completed_cycles = count
                         self.progress_label.setText(f'Ciclos completos: {count} · Integración: {seconds:.1f} s · RHS: {data["rhs"]}')
+                elif data.get('event') == 'error':
+                    self._stderr += str(data.get('message', '')).encode('utf-8')
             except (ValueError, KeyError, TypeError):
                 self.error_label.setText('Se recibió un mensaje de avance ilegible.')
         self._buffer = self._buffer[-8192:]
@@ -254,6 +355,12 @@ class SimulationView(QScrollArea):
         self._read_progress()
         self._read_error()
         if self.cancel_requested:
+            try:
+                result = load_result(self.output/'manifest.json')
+                if result['status'] == 'cancelled':
+                    self._display(result)
+            except ResultError:
+                pass  # Puede no existir un manifiesto si hubo parada forzada.
             self._finish_cleanup('Cancelado')
             self.summary_label.setText('Diagnóstico no aceptado. La ejecución fue cancelada.')
             return
@@ -279,10 +386,20 @@ class SimulationView(QScrollArea):
         self.run_button.setEnabled(True)
         self.open_button.setEnabled(True)
         self.cancel_button.setEnabled(False)
+        self.origin_combo.setEnabled(True)
+        self.check_button.setEnabled(True)
+        if self._request_path:
+            try:
+                self._request_path.unlink(missing_ok=True)
+            except OSError as exc:
+                self.error_label.setText(f'No se pudo retirar la copia temporal {self._request_path}: {exc}')
+            self._request_path = None
         self.idle.emit()
 
     def _display(self, result):
         self.result = result
+        self.inputs = result['inputs']
+        self._describe_inputs()
         state = result['status']
         r = result['result']
         self.state_label.setText(dict(converged='Convergencia numérica alcanzada', cancelled='Cancelado',
@@ -311,7 +428,7 @@ class SimulationView(QScrollArea):
         if self.active:
             return
         if path is None:
-            name, _ = QFileDialog.getOpenFileName(self, 'Abrir resultado del caso de referencia',
+            name, _ = QFileDialog.getOpenFileName(self, 'Abrir resultado de simulación 2T',
                 str(new_output_path().parent), 'Manifiesto (manifest.json)')
             if not name:
                 return

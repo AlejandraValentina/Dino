@@ -1,5 +1,58 @@
 ## ADDED Requirements
 
+Ampliación autorizada del 15/09/2026: los siguientes requisitos de proyecto
+extienden el tramo fijo, sin modificar retrospectivamente sus pruebas/criterios.
+
+### Requirement: Ejecutar geometría del proyecto bajo condiciones de referencia
+MUST conservar el modo S2T-0D-01 y añadir proyecto actual a 3000 rpm, perfil B,
+banda exterior 100 Pa y restantes condiciones fijas del escenario. MUST copiar
+edición válida sin guardar, sin sustituirla por disco ni modificar el proyecto.
+MUST validar conjuntamente en GUI y nuevamente en proceso: 2T monocilíndrico,
+geometría completa/compatible, cárter PMI, admisión por falda efectiva, exactamente
+un escape y dos transferencias completos/efectivos, conductos completos/continuos,
+cilindro cerrado en todo 350–390° mediante eventos, incluido 360°. MUST bloquear
+texto inválido, distinguir guardable de ejecutable y asignar enlaces por función
+independientemente del orden/nombre de filas. MUST recalcular inventarios con
+volúmenes propios y p/T/Y fijos, sin cambiar ecuaciones o rellenar datos ausentes.
+
+#### Scenario: Copia válida con cambios pendientes
+- **WHEN** se ejecuta un motor admitido modificado sin guardar
+- **THEN** la copia alimenta el hijo y resultado, conserva dirty/archivo y no cambia aunque se edite o abra otro motor durante el cálculo.
+
+#### Scenario: Configuración incompatible
+- **WHEN** faltan datos, existe texto inválido o no se cumple el dominio
+- **THEN** se muestran juntos campos/incompatibilidades y no se inicia el cálculo ni se recurre al caso fijo.
+
+### Requirement: Resultados de proyecto trazables y compatibles
+MUST conservar JSON v5 de proyectos y lectura de resultados fijos antiguos.
+MUST registrar origen, identidad/ruta/dirty al ejecutar, copia, correspondencia
+de lumbreras, escenario, parámetros efectivos, versión/perfil/variante y resultados.
+MUST distinguir identidad del motor de S2T-0D-01, sin atribuir procedencia medida
+o sintética desconocida. MUST validar coherencia de entradas/modelo/unidades/
+muestras/resumen/estado al abrir sin necesitar el archivo original del proyecto.
+MUST reutilizar un solo proceso, cancelación, protección de cierre, estados reales,
+gráficos y reapertura. Condiciones de referencia MUST identificarse como supuestos,
+no mediciones/calibración; conductos representan almacenamiento/restricciones, no ondas.
+
+#### Scenario: Edición posterior a la ejecución
+- **WHEN** cambian las entradas utilizadas o se abre otro proyecto
+- **THEN** se conserva la evidencia y se indica «El resultado corresponde a una configuración anterior», sin reasignar, borrar o recalcular automáticamente.
+
+### Requirement: Comprobación y cierre acotado del editor
+MUST probar adaptación, datos inválidos/ausentes, orden, propagación de dimensiones,
+eventos/inventarios, conservación, reapertura y regresiones antes de tres cálculos
+completos: A geometría de referencia vía editor B/100; B solo compresión 8→8,2 vía
+editor B/100; C misma modificación, consola C/100. MUST usar límites previos,
+60 s/30 ciclos por cálculo y hasta 180 s total, sin otras series/bandas.
+MUST comparar referencia/A y soluciones B/C convergidas con umbrales existentes,
+sin atribuir tendencia de tres perfiles o validez general. MUST comprobar Windows
+con captura real, revisión puntual y registro en tareas/README/hoja; commit propio
+sin publicación, archivo ni entrega 6.
+
+#### Scenario: Cierre del tramo implementado
+- **WHEN** editar, comprobar, ejecutar, consultar, guardar y reabrir con procedencia quedan acreditados
+- **THEN** entrega 5 se registra implementada para el alcance acotado, con aceptación manual separada y sin añadir ondas/condiciones editables como requisitos nuevos.
+
 Actualización posterior: la orden de integración gráfica autoriza el caso fijo
 S2T-0D-01 B/100 Pa mediante ejecución individual separada, sin motores del editor.
 Las exclusiones de Qt y autorizaciones de push de etapas anteriores conservadas

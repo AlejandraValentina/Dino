@@ -114,7 +114,16 @@ class ReferenceResultTests(unittest.TestCase):
         with self.assertRaises(ResultError):
             _cycle(cycle, 1)
         cycle['p_max_Pa'] = 100000
-        rows=json.loads(json.dumps([sample(180+i*.5,y,snapshot) for i in range(721)]))
+        rows=[]
+        for i in range(721):
+            angle=180+i*.5
+            state=[]
+            for (pressure, temperature, fresh), volume in zip(model.case.initial_pty, model.geometry(angle)[0]):
+                mass=pressure*volume/(model.case.gas_r*temperature)
+                state.extend((mass, mass*model.cv*temperature, mass*fresh))
+            state += [0.] * (len(y)-12)
+            rows.append(sample(angle,state,model.evaluate(angle,state)[1]))
+        rows=json.loads(json.dumps(rows))
         with self.assertRaisesRegex(ResultError, 'inferior a las muestras'):
             _samples(rows, True, cycle)
 

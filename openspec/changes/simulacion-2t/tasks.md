@@ -23,8 +23,14 @@
 - [x] 18. Comprobar consola/interfaz/referencia B, errores/reapertura y Windows visible al 150 %, con captura real.
 - [x] 19. Registrar pruebas finales, revisión puntual, estado y commit propio del tramo gráfico.
 
-La orden posterior autoriza tareas 16–19 para el caso fijo, no para motores del
+La orden de ese tramo autorizó tareas 16–19 para el caso fijo, no para motores del
 editor ni otras entregas. Aprobar documentos no acredita implementación o pruebas.
+
+## Geometría del editor autorizada — 15/09/2026
+- [x] 20. Adaptar copia del editor, validación conjunta/del hijo, topología por función y geometría/inventarios sin cambiar física ni JSON v5.
+- [x] 21. Integrar dos orígenes, procedencia/resultado v2 y aviso de configuración anterior; comprobar entradas, archivos y cancelación antes de ejecuciones completas.
+- [x] 22. Ejecutar únicamente A/B desde editor y C de contraste de consola, dentro de presupuestos; registrar igualdad con referencia, cambio de cámara y contraste B/C.
+- [x] 23. Comprobar recorrido Windows/captura, pruebas finales y revisión puntual; actualizar estado y crear commit propio sin publicar ni archivar.
 
 ## Evidencia de esta definición — 15/09/2026
 Inicio main 545685b, árbol limpio y un commit por delante de origin/main.
@@ -705,3 +711,127 @@ del caso fijo: comprobada ahora. Aceptación manual de la usuaria: no atribuida.
 Uso con motores editados: pendiente de definición y comprobación, fuera del tramo.
 Entrega 5 sigue En curso. No se archiva ni comienza entrega 6. Commit propio;
 la publicación queda a cargo de la usuaria, sin reintentar autenticación.
+
+## Conexión del editor — evidencia del 15/09/2026
+
+Inicio de este tramo: main en 379cf7fab0e085a39031246306508fa662b88c79, limpio y
+alineado con la referencia origin/main disponible. Commit e historia preservados;
+sin fetch/push, credenciales ni cambios globales. La orden amplía exclusivamente
+el caso admitido con entradas del editor. Los estados históricos anteriores
+permanecen como evidencia de sus respectivas etapas, no como pendientes actuales.
+
+### Implementación y controles previos
+
+`project_case.py` adapta la copia v5 al mismo Model y condiciones de SyntheticCase,
+sin mutarlo ni modificar sus ecuaciones. Preflight conjunto y repetido en hijo:
+dominio monocilíndrico 2T, falda, lumbreras/continuidad y cierre analítico 350–390°.
+Lumbreras por función, escape→enlace 4, transferencias canonizadas→2/3; mapeo con
+filas originales conservado. Volúmenes/áreas/eventos e inventarios iniciales se
+derivan de la geometría capturada; metadata no determina topología.
+
+GUI conserva ejecución/cancelación/cierre y añade dos orígenes, comprobación,
+copia independiente sin guardar, detalle efectivo y aviso de configuración
+anterior. Captura inválida bloquea antes de crear QProcess, reúne errores de
+ficha, lumbreras, admisión y conductos. No sustituye texto inválido por valores
+anteriores ni cambia dirty/JSON. Resultado v2 conserva procedencia y copia, con
+reconstrucción estricta del contrato; muestras verificadas contra volúmenes/flujos
+del modelo. Resultado v1 preservado y reabierto sin integrar. C solo consola.
+
+Antes de A/B/C: **12 pruebas nuevas de adaptación/Qt + 6 de lector + 7 de ejecución
+asíncrona aprobadas**. Cubren edición válida con coma/sin guardar, copia inmutable,
+ausencias/múltiples errores, dominio/cierre, todas las dimensiones de ficha,
+lumbreras, falda y tramos, orden/nombres, inventarios iniciales, referencia intacta,
+contrato alterado coherente pero muestras de otra geometría, procedencia/reapertura
+sin archivo original, aviso al editar/abrir otro proyecto y cancelación real breve.
+Regresiones previas comprueban cancelación/cierre/arranque/archivos/errores. Ninguna
+de estas pruebas es otra ejecución completa o campaña física.
+Se actualizó un fixture antiguo de muestras estáticas a volúmenes/estados
+coherentes con cada ángulo para mantener su prueba de máximo inferior a muestras
+con la validación geométrica nueva; no se relajó el lector.
+
+### Tres ejecuciones completas autorizadas
+
+```powershell
+.\.venv\Scripts\python.exe tests/verify_project_simulation_windows.py --output results/simulacion-2t/editor-20260915 --scale 1.2 --suffix=-150
+```
+
+El recorrido crea únicamente archivos propios de prueba, carga A/B mediante
+Abrir del editor y acciona Comprobar entradas/Ejecutar. A tiene geometría exacta
+de referencia. B carga una copia y cambia solo compresión 8→8,2 sin guardar.
+C usa en consola la copia efectiva de B, --project-input request-C.json y
+--profile-c-check, idénticas condiciones salvo el perfil autorizado. QProcess
+del motor y consola no cargaron PySide6 (`qt_loaded=false` en los tres entornos).
+
+| Ejecución | Perfil / banda | Ciclos / parada | Integración s | Pico cálculo MiB | RHS |
+| --- | --- | --- | ---: | ---: | ---: |
+| A, geometría de referencia por editor | B / 100 Pa | 10 / tres ciclos convergidos | 10,625 | 24,602 | 228171 |
+| B, solo compresión 8,2 por editor | B / 100 Pa | 9 / tres ciclos convergidos | 9,500 | 25,008 | 205937 |
+| C, misma geometría modificada por consola | C / 100 Pa | 9 / tres ciclos convergidos | 18,953 | 24,938 | 398518 |
+
+Integración total **39,078 s**; pared hasta escribir contraste **42,828 s**,
+incluidos arranque/reapertura y escritura, antes de capturas. Sin ampliar 60 s,
+30 ciclos, memoria/RHS/paso/rechazos/dominio ni el tope global de 180 s. No hubo
+otras bandas, barridos, búsquedas o repeticiones de cálculos completos.
+
+A coincide **exactamente** en todos los ciclos, muestras y RHS con
+`integracion-ui-20260915`, referencia B/100 preservada. No se exige igualdad de
+tiempo/memoria. Cámara A=18,32176835573567 cm³; B=17,81283034585413 cm³.
+Copias B/C idénticas; procedencia B conserva nombre/ruta de PRUEBA y dirty=true,
+sin reescribir el proyecto guardado con compresión 8.
+
+| Último ciclo | A | B | C |
+| --- | ---: | ---: | ---: |
+| W_C J/ciclo | 16,49050751206088 | 16,63155294204956 | 16,63154753895948 |
+| W_K J/ciclo, diagnóstico | -3,3651306484080394 | -3,3652474266840153 | -3,3652476358359698 |
+| p máxima Pa absolutos | 1331530,846070603 | 1366927,2751548453 | 1366927,1375845007 |
+| Y_I | 0,9855942761818735 | 0,9858254226456079 | 0,985826021439556 |
+| Y_K | 0,9771350157648919 | 0,9775046102019959 | 0,9775055462136528 |
+| Y_C | 0,5621858698264297 | 0,5627356966320124 | 0,5627364649506077 |
+| Y_E | 0,38108950299160227 | 0,3819618593595342 | 0,38196250068608123 |
+| Peor balance independiente, % | 0,000445966 | 0,000454996 | 0,000296730 |
+
+Todos los balances discretos/independientes y convergencia compuesta aprobados.
+Contraste **B/C de compresión 8,2**, soluciones convergidas de ciclo 9: diferencias
+normalizadas W=3,2486984813e-7; pmax=1,0064204655e-7; curva=1,1580874646e-7;
+máxima de seis enlaces=1,8967979819e-7 (límite existente 0,01 con pisos vigentes).
+Diferencias absolutas Y_I/K/C/E=5,9879394809e-7 / 9,3601165696e-7 /
+7,6831859530e-7 / 6,4132654704e-7 (límite 0,005). Contraste aprobado, no evidencia
+de tendencia con tres perfiles ni de validez/calibración de todo el dominio.
+
+Artefactos locales nuevos preservados en `results/simulacion-2t/editor-20260915/`:
+A/B/C con manifest/case/summary/samples/attempts, proyectos de prueba A/B,
+request-C.json, console-C.log y protocol.json con valores/métricas sin redondear.
+No se incluyen proyectos personales ni se sobrescribe evidencia previa. Los
+resultados numéricos siguen ignorados por Git; se versionan código/documentación
+y las capturas reales, sin .venv ni cachés.
+
+### Windows, pruebas finales y cierre
+
+Escritorio Default accesible. Automatización con ventanas reales, al 150 % efectivo
+(base 125 %, QT_SCALE_FACTOR=1.2 solo en proceso). Proyecto y estado pendiente
+conservados tras ejecutar y reabrir, doble inicio rechazado, navegación entre
+secciones, foco por Tab y ancho compacto sin desplazamiento horizontal comprobados.
+Inspección de capturas por el principal: identidad de PRUEBA/compresión 8,2/dirty,
+estado convergido/coste/trabajos/balances legibles; presión-ángulo continua y P-V
+con unidades, ruta y limitación visibles al desplazar. Título Windows preservado.
+No se cambió escalado ni política global. Pico de interfaz observado 104,3 MiB,
+separado de los 25,008 MiB del cálculo B.
+
+- `docs/images/motorsim-proyecto-0d-resultado-150.png`: proyecto y resultado real B.
+- `docs/images/motorsim-proyecto-0d-curvas-150.png`: gráficas calculadas y diagnóstico.
+- `docs/images/motorsim-proyecto-0d-compacto-150.png`: ancho compacto/foco visible.
+
+Suite final `.\.venv\Scripts\python.exe -m unittest discover -s tests -q`:
+**146/146 aprobadas en 12,167 s**. Las pruebas Qt de suite son sin pantalla,
+distintas del recorrido visible. OpenSpec estricto aprobado. Revisión independiente
+puntual de solo lectura sin defectos reproducibles; ejecutó únicamente los 12
+tests nuevos (1,531 s), sin cálculos completos. Autorrevisión del principal del
+diff final, mediciones y capturas; no se abrió otra campaña de revisión.
+
+**Entrega 5 implementada para este alcance acotado**: editar motor admitido,
+comprobar, ejecutar, consultar, guardar y reabrir con procedencia acreditados.
+Aceptación manual de la usuaria pendiente y separada; no se atribuye. No hay
+otros criterios técnicos pendientes de este tramo. Condiciones editables, ondas,
+barridos y modelos ampliados no son requisitos nuevos de cierre. Sin archivo del
+cambio ni entrega 6. Commit propio; publicación a cargo de la usuaria, sin intentar
+autenticación ni modificar configuración global.

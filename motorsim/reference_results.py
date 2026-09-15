@@ -1,4 +1,4 @@
-"""Contrato pequeño de resultados del caso fijo; biblioteca estándar, sin Qt."""
+"""Resultados de referencia o proyecto bajo condiciones fijas; sin Qt."""
 from dataclasses import asdict
 from datetime import datetime
 import hashlib
@@ -12,6 +12,8 @@ from .adaptive import PROFILES
 from .simulation import CV, Model, balances_ok
 from .simulation_case import SyntheticCase
 from .prototype import write_json
+from .project import Project
+from .project_case import build_project_case, SCENARIO_ID
 
 PROFILE = PROFILES[1]
 BAND_PA = 100
@@ -32,6 +34,40 @@ def reference_inputs():
         model_version=MODEL_VERSION, initial_state=model.initial_state()[:12])))
 
 
+def project_inputs(project, origin, profile=PROFILE):
+    if profile not in (PROFILE, PROFILES[2]):
+        raise ResultError('Solo perfiles B o C de comprobación.')
+    _require(isinstance(origin, dict) and set(origin) == {'kind', 'project_name', 'source_path', 'dirty'},
+             'Procedencia incompleta.')
+    _require(origin['kind'] == 'project' and origin['project_name'] == project.name
+             and type(origin['dirty']) is bool
+             and (origin['source_path'] is None or isinstance(origin['source_path'], str)),
+             'Identificación del proyecto inválida.')
+    case, mapping = build_project_case(project)
+    model = Model(case, external_band_pa=BAND_PA)
+    return json.loads(json.dumps(dict(case=case.manifest(), profile=asdict(profile),
+        origin=origin, project_snapshot=project.to_dict(), port_mapping=mapping,
+        scenario_identifier=SCENARIO_ID,
+        variant=dict(external_links=[0, 5], delta_p_Pa=BAND_PA, calibrated=False),
+        model_version=MODEL_VERSION, initial_state=model.initial_state()[:12])))
+
+
+def validated_model(inputs):
+    """Reconstruir todo el contrato; ningún parámetro libre llega al núcleo."""
+    if 'origin' not in inputs:
+        expected, model, profile = reference_inputs(), Model(external_band_pa=BAND_PA), PROFILE
+    else:
+        project = Project.from_dict(inputs['project_snapshot'])
+        profile = next((p for p in (PROFILE, PROFILES[2]) if asdict(p) == inputs['profile']), None)
+        _require(profile is not None, 'Perfil no admitido.')
+        expected = project_inputs(project, inputs['origin'], profile)
+        case, _ = build_project_case(project)
+        model = Model(case, external_band_pa=BAND_PA)
+    _require(json.dumps(inputs, sort_keys=True) == json.dumps(expected, sort_keys=True),
+             'Entradas no corresponden al modelo y escenario declarados.')
+    return model, profile
+
+
 def new_output_path():
     root = Path(os.environ.get('LOCALAPPDATA', str(Path.home()/'.local/share')))/'MotorSim'/'Resultados'
     return root/(datetime.now().strftime('%Y%m%d-%H%M%S-')+uuid.uuid4().hex[:10])
@@ -50,7 +86,7 @@ def save_result(folder, result, status, inputs, environment):
     for name, payload in zip(FILES, payloads):
         write_json(folder/name, dict(run_id=run_id, **payload))
         hashes[name] = hashlib.sha256((folder/name).read_bytes()).hexdigest()
-    write_json(folder/'manifest.json', dict(format='motorsim-reference-result', version=1,
+    write_json(folder/'manifest.json', dict(format='motorsim-reference-result', version=2 if 'origin' in inputs else 1,
                model_version=MODEL_VERSION, run_id=run_id, units=UNITS, files=hashes))
 
 
@@ -117,8 +153,9 @@ def _cycle(cycle, index):
             _require(conv[key] <= limit, 'Convergencia fuera de criterio.')
 
 
-def _samples(rows, complete, cycle=None):
-    case = SyntheticCase()
+def _samples(rows, complete, cycle=None, model=None):
+    model = model or Model(external_band_pa=BAND_PA)
+    case = model.case
     _require(isinstance(rows, list) and len(rows) <= 721, 'Muestras incorrectas.')
     if complete:
         _require(len(rows) == 721, 'Ciclo de muestras incompleto.')
@@ -134,6 +171,12 @@ def _samples(rows, complete, cycle=None):
                      'Estado físico fuera de dominio.')
         for flow in row['flows_kg_s_W_kg_s']:
             _vector(flow, 3)
+        _, (_, volumes, flows) = model.evaluate(row['angle_deg'], row['state'])
+        _require(all(math.isclose(a, b, rel_tol=1e-10, abs_tol=1e-20)
+                     for a, b in zip(row['V_m3'], volumes)), 'Volúmenes ajenos a la geometría declarada.')
+        _require(all(math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-12)
+                     for stored, actual in zip(row['flows_kg_s_W_kg_s'], flows)
+                     for a, b in zip(stored, actual)), 'Flujos ajenos al estado/modelo declarado.')
         for j in range(4):
             m, u, f = row['state'][3*j:3*j+3]
             volume = row['V_m3'][j]
@@ -168,7 +211,7 @@ def load_result(path):
             return raw, value
         _require(path.name == 'manifest.json', 'Elegí manifest.json del resultado.')
         _, manifest = read('manifest.json')
-        _require(manifest['format'] == 'motorsim-reference-result' and type(manifest['version']) is int and manifest['version'] == 1
+        _require(manifest['format'] == 'motorsim-reference-result' and type(manifest['version']) is int and manifest['version'] in (1, 2)
                  and manifest['model_version'] == MODEL_VERSION and manifest['units'] == UNITS,
                  'Formato, modelo o unidades no admitidos.')
         _require(set(manifest['files']) == set(FILES), 'Archivos vinculados incorrectos.')
@@ -179,14 +222,14 @@ def load_result(path):
                      and value['run_id'] == manifest['run_id'], 'Archivos de ejecuciones distintas o alterados.')
             payloads.append(value)
         case, summary, samples = payloads
-        _require(json.dumps(case['inputs'], sort_keys=True) == json.dumps(reference_inputs(), sort_keys=True),
-                 'Entradas no corresponden al caso fijo admitido.')
+        _require(('origin' in case['inputs']) == (manifest['version'] == 2), 'Origen/versión contradictorios.')
+        model, profile = validated_model(case['inputs'])
         status, result = summary['status'], summary['result']
         _require(status in ('converged', 'cancelled', 'not_converged', 'error'), 'Finalización desconocida.')
         _require(isinstance(result['stop'], str) and bool(result['stop']) and len(result['stop']) <= 4096, 'Motivo ilegible.')
         _number(result['seconds'], 0)
         _number(result['peak_process_MiB'], 0)
-        _require(result['profile'] == asdict(PROFILE), 'Perfil incorrecto.')
+        _require(result['profile'] == asdict(profile), 'Perfil incorrecto.')
         cycles = result['cycles']
         _require(isinstance(cycles, list) and len(cycles) <= 30, 'Cantidad de ciclos incorrecta.')
         for i, cycle in enumerate(cycles, 1):
@@ -197,9 +240,9 @@ def load_result(path):
                      'Faltan tres ciclos de convergencia completa.')
         _require(len(samples['cycles']) == min(2, len(cycles)), 'Faltan muestras de los últimos ciclos.')
         for rows, cycle in zip(samples['cycles'], cycles[-2:]):
-            _samples(rows, True, cycle)
-        _samples(samples['partial'], False)
+            _samples(rows, True, cycle, model)
+        _samples(samples['partial'], False, model=model)
         return dict(manifest=manifest, inputs=case['inputs'], status=status, result=result,
                     samples=samples, path=path.resolve())
-    except (OSError, ValueError, KeyError, TypeError, IndexError, OverflowError, RecursionError) as exc:
+    except (OSError, ValueError, KeyError, TypeError, IndexError, ArithmeticError, RecursionError, RuntimeError) as exc:
         raise ResultError(f'Resultado ilegible: {exc}') from exc
