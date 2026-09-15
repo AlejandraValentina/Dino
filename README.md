@@ -16,13 +16,69 @@ pruebas automatizadas e inspección visual del agente. Sin archivar. La entrega 
 está **Completada** para la configuración geométrica admitida: lumbreras, cárter
 y admisión por falda comprobados. Esto no es aceptación manual de la usuaria
 ni validación predictiva. La entrega 4 está **Completada** para el editor geométrico autorizado el 15/09/2026.
-La entrega 5 está **En curso: prototipo ejecutado, viabilidad no acreditada**.
+La entrega 5 está **En curso: variante candidata comprobada, integración pendiente**.
 La usuaria aprobó el modelo 0D, caso y protocolo de
 [simulacion-2t](openspec/changes/simulacion-2t/design.md) para esta prueba de consola.
 No hay integración Qt ni cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
-## Ensayo adaptativo RK4 — entrega 5 abierta
+## Variante exterior regularizada — entrega 5 abierta
+
+La variante autorizada modifica únicamente las restricciones de los dos extremos
+exteriores dentro de una banda fija de presión. No cambia interiores, geometría,
+Cd, gas, calor, contornos, estados iniciales ni perfiles adaptativos. Conserva la
+ley original ejecutable. Es una **ley candidata sin calibración física**, distinta
+del modelo original; no se presenta como corrección equivalente de su física.
+
+Controles locales aprobados: cero, signos/donantes, transporte conjunto de
+masa/entalpía/fresca, pendientes laterales finitas, empalme y ley exterior a la banda
+intacta. La descarga diagnosticada 300–300,5° con 100/50 Pa conservó Y_E al nivel
+de redondeo, sin imponerla. El llenado separado admitió retorno físico.
+
+Se ejecutaron A/B/C a 100 Pa y, solo tras su aprobación, C a 50 Pa. Todos convergieron
+en diez ciclos, con tres ciclos consecutivos de aceptación completa. No se activó
+ninguna condición que obligara a omitir perfiles; no hubo reinicios ni otras bandas.
+
+| Banda / perfil | Tiempo s | RHS reales | Pico MiB | Mayor residuo independiente, ciclo 10 |
+| --- | ---: | ---: | ---: | ---: |
+| 100 Pa / A | 6,500 | 135053 | 24,820 | 0,001323 % |
+| 100 Pa / B | 10,735 | 228171 | 28,668 | 0,000446 % |
+| 100 Pa / C | 21,609 | 442738 | 33,223 | 0,000304 % |
+| 50 Pa / C | 21,312 | 446069 | 37,520 | 0,000305 % |
+
+Todos por debajo del 0,1 % independiente. Serie principal: 39,282 s; total con
+comparación adicional y escritura: 60,719 s. Presupuestos originales respetados.
+Sensibilidad temporal aprobada, incluida tendencia decreciente. Dependencia de
+banda aprobada: diferencia relativa de trabajo 9,7553e-6; máxima diferencia
+absoluta de Y, en E, 4,0564e-5 (<0,005). Esto acredita **viabilidad numérica del
+caso con esta variante**, no calibración ni validez experimental. La entrega sigue
+abierta: la posterior integración no está incluida en esta orden.
+
+Comando realmente ejecutado desde `E:\dino\Dino`:
+
+```powershell
+.\.venv\Scripts\python.exe -m motorsim.regularized_trial --output results/simulacion-2t/regularizado-20260915
+```
+
+Ese destino se conserva y el comando no lo sobrescribe. Sin `--output` crea otro
+directorio si se autoriza una ejecución posterior. La ley original sigue en
+`python -m motorsim.prototype`. Evidencias locales nuevas en
+`results/simulacion-2t/regularizado-local-20260915/`; series anteriores conservadas
+y comprobadas por SHA256. Parámetros, balances por CV/global, pasos/rechazos y
+comparaciones completos en [tasks.md](openspec/changes/simulacion-2t/tasks.md).
+
+Pruebas finales: **36 aprobadas** (5 de regularización, 10 adaptativas y 21 previas).
+Revisión independiente puntual sin defectos concretos; autorrevisión de evidencia
+y diff. Python 3.11.0, Windows 10.0.19045, Intel i5-10400; sin Qt cargado ni nuevos
+recorridos visuales o aceptación manual. No se modifican proyectos JSON.
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_regularization.py -v
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_adaptive.py -q
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p 'test_simulation_*.py' -q
+```
+
+## Ensayo adaptativo RK4 — evidencia histórica con ley original
 
 Implementado el control autorizado A/B/C: un paso frente a dos medios pasos,
 error por componente dividido por 15, norma separada m/U/F y conservación de

@@ -12,10 +12,12 @@ Entrega 5: modelo/caso/protocolo de `simulacion-2t/design.md` aprobados expresam
 para implementar y ejecutar únicamente el prototipo de consola de viabilidad.
 Biblioteca estándar, controles elementales antes del caso y tres resoluciones
 con los límites previos. Sin integración Qt, cambios JSON, ondas ni barridos.
-Etapa actual: RK4 adaptativo por duplicación de paso autorizado con perfiles A/B/C
-fijados por la usuaria. Preservar 783970d y evidencias previas. Comprobar primero
-el intervalo diagnosticado; ejecutar una serie solo si reduce el defecto local
-sin agotar límites. Sin cambiar física, aceptación, mínimos o presupuestos.
+Etapa actual: variante candidata autorizada en los dos enlaces exteriores,
+regularización fija de 100 Pa (comparación local de 50 Pa). Preservar 8d924949,
+ley original y evidencias previas. RK4 A/B/C, interiores y aceptación intactos.
+Tras controles locales, ejecutar A a 100 Pa; si no converge, detener. Solo tras
+A convergido continuar B/C, y solo tras aprobar la serie comparar C a 50 Pa.
+Sin ampliar mínimos/presupuestos ni presentar la variante como calibrada.
 Revisión puntual, pruebas pertinentes y commit propio;
 autenticación fuera de esta tarea, sin nuevos intentos ni configuración global.
 No iniciar entrega 6.

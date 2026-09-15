@@ -24,7 +24,7 @@ class InvalidStage(ValueError):
     pass
 
 
-def restriction(left, right, area, cd, gas_r=287, gamma=1.35):
+def restriction(left, right, area, cd, gas_r=287, gamma=1.35, *, stable=False):
     """Una evaluación: (masa, entalpía, fresca)/s, signo izquierda→derecha.
 
     Extremos (p absoluta, T, Y). El donante cambia para las tres magnitudes.
@@ -38,11 +38,27 @@ def restriction(left, right, area, cd, gas_r=287, gamma=1.35):
     critical = (2 / (gamma + 1)) ** (gamma / (gamma - 1))
     if beta <= critical:
         phi = math.sqrt(gamma) * (2 / (gamma + 1)) ** ((gamma + 1) / (2 * (gamma - 1)))
+    elif stable:
+        log_beta = math.log1p((receiver[0]-p)/p)
+        phi = math.sqrt(2 * gamma / (gamma - 1) * math.exp(2/gamma*log_beta)
+                        * -math.expm1((gamma-1)/gamma*log_beta))
     else:
         phi = math.sqrt(2 * gamma / (gamma - 1) *
                         (beta ** (2 / gamma) - beta ** ((gamma + 1) / gamma)))
     mass = sign * cd * area * p / math.sqrt(gas_r * temperature) * phi
     return mass, mass * (gamma * gas_r / (gamma - 1)) * temperature, mass * fresh
+
+
+def regularized_restriction(left, right, area, cd, delta_p, gas_r=287, gamma=1.35):
+    """Variante candidata exterior; banda fija en Pa, no calibración física."""
+    if delta_p not in (50, 100):
+        raise ValueError('Solo bandas autorizadas de 50 o 100 Pa.')
+    z = abs(left[0]-right[0])/delta_p
+    if z >= 1:
+        return restriction(left, right, area, cd, gas_r, gamma)
+    flow = restriction(left, right, area, cd, gas_r, gamma, stable=True)
+    factor = math.sqrt(z)*(1.5-.5*z)
+    return tuple(value*factor for value in flow)
 
 
 def add_transport(derivative, left, right, transport):
@@ -79,7 +95,10 @@ def rk4(t, state, dt, rhs, project=lambda t, y: y):
 
 
 class Model:
-    def __init__(self, case=None):
+    def __init__(self, case=None, *, external_band_pa=None):
+        if external_band_pa not in (None, 50, 100):
+            raise ValueError('Solo ley original o bandas de 50/100 Pa.')
+        self.external_band_pa = external_band_pa
         self.case = case or SyntheticCase()
         p = self.case.project_geometry
         p.validate()
@@ -165,7 +184,11 @@ class Model:
         dy = [0.] * SIZE
         flows = []
         for j, ((left, right), area, cd, ends) in enumerate(zip(endpoints, areas, self.case.discharge_coefficients, ENDS)):
-            transport = restriction(left, right, area, cd, self.case.gas_r, self.case.gamma)
+            if j in (0, 5) and self.external_band_pa is not None:
+                transport = regularized_restriction(left, right, area, cd, self.external_band_pa,
+                                                   self.case.gas_r, self.case.gamma)
+            else:
+                transport = restriction(left, right, area, cd, self.case.gas_r, self.case.gamma)
             flows.append(transport)
             add_transport(dy, *ends, transport)
             dy[12+3*j:15+3*j] = transport

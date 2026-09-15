@@ -16,6 +16,8 @@
 - [x] 11. Diagnosticar localmente el rechazo preservando la serie; comprobar cuadratura, reconstruir una vuelta e identificar si requiere corrección o decisión numérica.
 - [x] 12. Implementar la duplicación adaptativa autorizada con perfiles A/B/C y comprobar el intervalo local, retorno físico y controles del integrador.
 - [x] 13. Ejecutar una serie A/B/C acotada desde los estados originales, registrar coste/precisión y detener sin extender presupuestos.
+- [x] 14. Implementar la variante exterior autorizada de 100/50 Pa, conservar ley original y comprobar transporte, empalme y diagnóstico local con retorno físico.
+- [x] 15. Ejecutar el ensayo integrado condicional autorizado y registrar resultados, omisiones, coste, revisión y commit propio.
 
 No se detallan aquí integración Qt, nuevos archivos ni entregas posteriores: no
 están autorizados. Aprobar documentos no marca tareas 7–10 automáticamente.
@@ -409,3 +411,165 @@ Todos los resultados nuevos están bajo directorios ignorados de `results/simula
   impiden cerrar. La entrega 5 sigue abierta, sin validación experimental,
   integración Qt, cambios de JSON, inspección de interfaz, archivo ni otra etapa.
   Commit propio del ensayo; publicación no intentada por instrucción expresa.
+
+## Variante exterior regularizada — evidencia del 15/09/2026
+
+Inicio: `main` limpio en `8d9249496152898e7b0bc92dd5b906d67e1c9c3b`, igual a la
+referencia local `origin/main`. No se infiere publicación pendiente desde informes
+anteriores; no se consultó autenticación ni se hizo push. Se conservaron todos
+los directorios anteriores: hashes SHA256 comprobados antes/después e inventariados
+en `results/simulacion-2t/regularizado-local-20260915/summary.json`.
+
+### Implementación y controles locales
+
+Variante candidata exclusiva de los enlaces exteriores 0/5, con banda fija de
+100 Pa o 50 Pa. Fórmula/identidad estable y autorización en design.md. El mismo
+caudal firmado transporta entalpía/fresca según donante; no hay zona muerta ni
+presión/composición impuesta. Interiores y opción original permanecen intactos.
+El controlador, sus perfiles, auditoría y criterios originales no se modificaron.
+
+Cinco pruebas nuevas comprueban cero/área cero, sentidos/donantes, transporte,
+pendientes laterales finitas cerca de cero (contraste con límite analítico),
+continuidad y pendientes en ambos bordes, igualdad exacta fuera de la banda,
+ámbito exterior, descarga/llenado y parada condicional mediante un A simulado fallido.
+Con T distintas las pendientes laterales de cero son distintas: no se afirma C1 allí.
+
+Intervalo 300–300,5°: perfil A, mismo estado inicial exacto que el registro original
+(igualdad de los doce componentes comprobada contra la evidencia guardada).
+Los ensayos de llenado son separados y cambian explícitamente la presión inicial
+de E a 99986 Pa; no se usaron para iniciar el motor formal.
+
+| Banda Pa / caso | p_E final Pa | m_E final kg | U_E final J | F_E final kg | Delta Y_E | Masa sale / entra kg | RHS |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| 100 / descarga | 100001.33273520 | 6.859646831308e-05 | 29.9203287876 | 3.023136743386e-05 | 5.551115123e-17 | 6.094887995e-09 / 0.000000000e+00 | 46 |
+| 100 / llenado | 99998.50333283 | 6.860932198777e-05 | 29.9194822324 | 3.023405353131e-05 | -4.341518419e-05 | 0.000000000e+00 / 6.758786693e-09 | 46 |
+| 50 / descarga | 100000.53084418 | 6.859606085928e-05 | 29.9200888624 | 3.023118786360e-05 | 0.000000000e+00 | 6.502341802e-09 / 0.000000000e+00 | 61 |
+| 50 / llenado | 99999.38166092 | 6.860979677576e-05 | 29.9197450276 | 3.023405353131e-05 | -4.646467156e-05 | 0.000000000e+00 / 7.233574680e-09 | 46 |
+
+Descarga inicial: p_E=100013,328016 Pa, Y_E=0,4407131763092831.
+La deriva fija histórica era −1,5287985e-4; con adaptación original A, −1,1022007e-5.
+Con ambas bandas queda al nivel de redondeo (5,55e-17 / 0), sin fijar Y; la masa
+de retorno en esa descarga es cero calculado, no recortado. El llenado conserva
+el retorno físico y mezcla residual del reservorio. Todos los intervalos terminan
+sin límites: 0,006372 / 0,004082 / 0,003306 / 0,003620 s en el orden de la tabla;
+pico de proceso local 36,38 MiB. Estados, transportes RK/independientes y cada
+intento quedan en el resumen local. El éxito local habilitó el ensayo integrado.
+
+### Ejecución integrada única con condiciones de parada
+
+Comando ejecutado desde la raíz:
+
+```powershell
+.\.venv\Scripts\python.exe -m motorsim.regularized_trial --output results/simulacion-2t/regularizado-20260915
+```
+
+A a 100 Pa convergió; se habilitaron B/C. A/B/C aprobaron convergencia y
+sensibilidad; solo entonces se ejecutó C a 50 Pa con 60 s separados. Ningún
+ensayo autorizado se omitió por parada. No hubo otras bandas, perfiles ni reinicios.
+Todos partieron de los mismos estados originales, con captura analítica de F_C.
+
+| Banda / perfil | Ciclos | Convergencia completa / parada | s | Pico MiB | RHS reales |
+| --- | ---: | --- | ---: | ---: | ---: |
+| 100 / A | 10 | Sí / tres ciclos consecutivos | 6.500 | 24.820 | 135053 |
+| 100 / B | 10 | Sí / tres ciclos consecutivos | 10.735 | 28.668 | 228171 |
+| 100 / C | 10 | Sí / tres ciclos consecutivos | 21.609 | 33.223 | 442738 |
+| 50 / C | 10 | Sí / tres ciclos consecutivos | 21.312 | 37.520 | 446069 |
+
+Serie principal: 39.282 s incluyendo salidas entre perfiles;
+total con comparación adicional: 60.719 s. Cada ejecución <60 s,
+serie principal <180 s, proceso <512 MiB y RHS <2 millones por ejecución.
+Equipo: Intel i5-10400 a 2,9 GHz, 12 CPU lógicas, Windows 10.0.19045 AMD64,
+Python 3.11.0, Qt no cargado. Entorno y parámetros efectivos guardados.
+
+| Banda / perfil | Medios pasos aceptados | Rechazos error / físico / no finito | RHS etapas / extremos | Paso mínimo / media / máximo grados |
+| --- | ---: | --- | --- | --- |
+| 100 / A | 17662 | 169 / 7 / 0 | 108040 / 27013 | 0.001426757 / 0.203827426 / 0.250000000 |
+| 100 / B | 30050 | 182 / 9 / 0 | 182536 / 45635 | 0.002348157 / 0.119800333 / 0.125000000 |
+| 100 / C | 58788 | 120 / 2 / 0 | 354184 / 88554 | 0.001167298 / 0.061236987 / 0.062500000 |
+| 50 / C | 59160 | 157 / 1 / 0 | 356848 / 89221 | 0.001166432 / 0.060851927 / 0.062500000 |
+
+Las trazas se comprobaron: cada intento aceptado tiene E<=1, dos medios pasos
+y mínimo real >=0,001°. Sin reutilización oculta de RHS ni ajuste de tolerancias.
+
+### Balances y resultados del ciclo 10
+
+| Banda / perfil | W_C J | W_K J | p_max C Pa | Y_I / Y_K / Y_C / Y_E |
+| --- | ---: | ---: | ---: | --- |
+| 100 / A | 16.490611131 | -3.365129402 | 1331523.577278 | 0.985592715 / 0.977132500 / 0.562183783 / 0.381087335 |
+| 100 / B | 16.490507512 | -3.365130648 | 1331530.846071 | 0.985594276 / 0.977135016 / 0.562185870 / 0.381089503 |
+| 100 / C | 16.490501910 | -3.365130603 | 1331532.407998 | 0.985594642 / 0.977135572 / 0.562186303 / 0.381089919 |
+| 50 / C | 16.490662782 | -3.365110671 | 1331536.775280 | 0.985593956 / 0.977136021 / 0.562191817 / 0.381049355 |
+
+Residuos independientes normalizados m/U/F por CV y global (límite 0,001):
+
+| Banda / perfil / CV | Masa | Energía | Fresca |
+| --- | ---: | ---: | ---: |
+| 100 / A / I | 1.43509702e-07 | 2.14456833e-07 | 1.20198327e-07 |
+| 100 / A / K | 6.28985652e-06 | 1.08173059e-05 | 3.75689261e-06 |
+| 100 / A / C | 1.32253253e-05 | 1.18321823e-05 | 3.75765317e-06 |
+| 100 / A / E | 2.73298688e-06 | 3.98457942e-06 | 4.45378679e-06 |
+| 100 / A / global | 8.37222521e-08 | 1.64179601e-06 | 5.00454631e-07 |
+| 100 / B / I | 5.64239679e-08 | 8.77363824e-08 | 4.62173138e-08 |
+| 100 / B / K | 1.65470043e-06 | 2.94414138e-06 | 9.20761396e-07 |
+| 100 / B / C | 4.45965662e-06 | 4.00305735e-06 | 1.07130566e-06 |
+| 100 / B / E | 1.97155391e-06 | 2.34300271e-06 | 1.41927904e-06 |
+| 100 / B / global | 1.06595022e-07 | 3.07298252e-07 | 2.72206599e-07 |
+| 100 / C / I | 2.87861436e-08 | 4.12490682e-08 | 2.49034837e-08 |
+| 100 / C / K | 1.40585011e-06 | 2.31155369e-06 | 9.25992184e-07 |
+| 100 / C / C | 3.04123401e-06 | 2.17852791e-06 | 1.54591061e-06 |
+| 100 / C / E | 4.15564550e-07 | 7.22571644e-07 | 1.22346145e-08 |
+| 100 / C / global | 7.68602145e-08 | 1.33712003e-07 | 1.67401115e-08 |
+| 50 / C / I | 3.58443616e-07 | 3.79748951e-07 | 3.50032477e-07 |
+| 50 / C / K | 1.11538478e-06 | 1.97807971e-06 | 6.40200053e-07 |
+| 50 / C / C | 3.04577218e-06 | 2.17455925e-06 | 1.55843933e-06 |
+| 50 / C / E | 1.45732100e-07 | 4.40844144e-07 | 1.05555868e-07 |
+| 50 / C / global | 1.38587487e-07 | 2.80285321e-07 | 1.02809776e-08 |
+
+En las cuatro ejecuciones los ciclos 8/9/10 cumplen balances y convergencia
+compuesta, con F_s y Q positivos. Máximo discreto normalizado del ciclo 10:
+3.763349e-15 / 3.010670e-15 / 2.911096e-14 / 2.900381e-14.
+No se sustituyó el auditor por acumuladores del integrador; sus flujos corresponden
+a la variante evaluada sobre ambos extremos aceptados de cada medio paso.
+
+### Sensibilidad temporal y dependencia de banda
+
+Sensibilidad A/B/C a 100 Pa: aprobada, incluidos umbrales y tendencia decreciente.
+Dependencia 100→50 Pa con C: aprobada contra los umbrales existentes; dos soluciones
+convergidas. No es refinamiento temporal ni validación experimental.
+
+| Comparación | Delta W relativo | Delta p_max relativo | Norma curva relativa | Delta Y_I / Y_K / Y_C / Y_E | Mayor delta relativo de enlace |
+| --- | ---: | ---: | ---: | --- | ---: |
+| A-B / 100 Pa | 6.28356710e-06 | 5.45896786e-06 | 2.27614210e-06 | 1.56144941e-06 / 2.51617122e-06 / 2.08714131e-06 / 2.16810076e-06 | 1.68318942e-06 |
+| B-C / 100 Pa | 3.39713219e-07 | 1.17303025e-06 | 1.21651802e-07 | 3.65846219e-07 / 5.56657581e-07 / 4.33666712e-07 / 4.15580255e-07 | 1.69873290e-07 |
+| C / 100-50 Pa | 9.75531647e-06 | 3.27988024e-06 | 4.12295253e-06 | 6.86472038e-07 / 4.48583540e-07 / 5.51385773e-06 / 4.05638046e-05 | 1.78734606e-06 |
+
+Evidencia completa en `results/simulacion-2t/regularizado-20260915/`: entorno,
+resumen global y carpetas `band-100-profile-A/B/C`, `band-50-profile-C`, cada una
+con caso/variante/perfil, resúmenes por ciclo, últimos dos ciclos CSV e intentos.
+No hubo ciclo parcial. No se sobrescribieron resultados originales; salidas
+voluminosas ignoradas por Git. La ley original sigue ejecutable mediante
+`python -m motorsim.prototype`, sin ejecutar otra serie original en esta tarea.
+
+### Pruebas finales, revisión y pendientes
+
+Pruebas automatizadas del estado final, posteriores al ensayo:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_regularization.py -v
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_adaptive.py -q
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p 'test_simulation_*.py' -q
+```
+
+5/5 en 0,123 s; 10/10 en 0,128 s; 21/21 en 0,258 s: **36 pruebas aprobadas**.
+`openspec validate simulacion-2t --strict --no-interactive`: aprobado.
+`git diff --check`: sin errores de espacios en el diff final.
+Una revisión puntual independiente de solo lectura, antes del ensayo, no encontró
+defectos concretos. Autorrevisión del principal de diff, trazas y preservación de
+fuentes. Sin campaña adicional, inspección de interfaz ni aceptación manual atribuida.
+
+**Resultado:** viabilidad numérica acreditada para esta variante candidata y este
+caso acotado. No se extrapola al modelo original, que conserva su resultado fallido,
+ni a calibración física, validación experimental, ondas o sintonía. La entrega 5
+sigue abierta por posterior integración, fuera de esta orden. No se integra Qt,
+cambia JSON, archiva ni empieza otra entrega. Commit propio; publicación por la
+usuaria, sin intentar autenticación.

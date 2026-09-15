@@ -410,6 +410,47 @@ Convergencia completa permite parar antes; no reajustar perfiles tras ver result
 La comparación incluye Y_E y sigue requiriendo la convergencia de los tres perfiles.
 Entrega 5 abierta, sin Qt/JSON, nuevas campañas, autenticación o archivo del cambio.
 
+## Variante exterior regularizada autorizada — 15/09/2026
+
+La nueva orden autoriza expresamente modificar la ley de los enlaces exterior→I
+y E→exterior, conservando ejecutable la ley original. No es equivalencia exacta
+ni calibración física. Interiores, áreas, Cd, propiedades, calor, contornos y
+estados iniciales permanecen iguales. RK4 adaptativo y perfiles anteriores intactos.
+
+Con dp=p_izquierda-p_derecha y z=abs(dp)/delta_p: caudal cero si dp=0;
+si 0<z<1 multiplicar q_original por sqrt(z)*(1,5-0,5*z); si z>=1 usar
+exactamente la evaluación original. Transportar masa, entalpía y fresca con el
+mismo factor y donante. Sin zona muerta, recorte de estados ni bloqueo de retorno.
+Dentro de la banda, evaluar la diferencia compresible como
+exp(2/gamma*log_beta)*(-expm1((gamma-1)/gamma*log_beta)), donde
+log_beta=log1p((p_receptor-p_donante)/p_donante). Es una identidad algebraica
+que evita restar potencias casi iguales. Fuera de la banda y en la opción original
+se conserva la evaluación previa. Se prueban pendientes laterales finitas cerca
+de cero; distintas temperaturas pueden dar pendientes distintas, sin afirmar C1
+en la igualdad. En el borde, el factor vale uno y su derivada vale cero.
+
+Bandas fijas: principal 100 Pa en ambos exteriores; única alternativa 50 Pa.
+Son parámetros del ensayo, no mediciones ni tolerancias. No varían con el paso
+ni se reajustan después de ver resultados. El auditor usa los flujos de esta
+variante evaluados en ambos extremos de cada medio paso aceptado, con trapecios
+independientes; no toma el libro RK para fabricar cierre.
+
+Antes del caso: cero/área, signos/donantes, pendientes y empalme, interiores
+intactos, coherencia de transporte; intervalo original 300–300,5° con ambas bandas
+y llenado separado. Si falla o no reduce claramente el defecto, no ejecutar serie.
+Tras aprobar: A a 100 Pa desde el estado original; sin convergencia completa,
+detener sin B/C. Con A aprobado, continuar B/C desde estados originales; detener
+también ante fallo de un perfil. Solo con A/B/C y sensibilidad aprobados ejecutar
+C a 50 Pa, con sus 60 s separados. Comparar ambas soluciones convergidas mediante
+las magnitudes/pisos y umbrales existentes (1 %; Y absoluta 0,005), identificando
+dependencia de la banda, no tendencia de refinamiento temporal con dos bandas.
+No se infiere validación experimental.
+
+Se mantienen 30 ciclos, 60 s/ejecución, 180 s/serie principal, 512 MiB, 2 millones
+de RHS, mínimo real 0,001°, ocho rechazos consecutivos y dominio físico previos.
+Progreso y cancelación observables. Conservar evidencias en directorios nuevos;
+no reintentos de serie, otras bandas, Qt/JSON, autenticación, archivo u otra entrega.
+
 ## Fuentes primarias consultadas — 15/09/2026
 [1] [MIT, Control volume form of the conservation laws](https://web.mit.edu/16.unified/www/FALL/thermodynamics/notes/node19.html):
 balances abiertos y transporte de entalpía; justifica signos, no coeficientes del caso.

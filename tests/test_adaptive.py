@@ -17,8 +17,8 @@ SEED = [3.4862426380387404e-05, 8.62974636055665, 3.476407127646083e-05,
         6.860256320107736e-05, 29.92391776725271, 3.0234053531305144e-05]
 
 
-def run_interval(profile, reverse=False):
-    model = Model()
+def run_interval(profile, reverse=False, model=None):
+    model = model or Model()
     state = SEED.copy()+[0.]*(SIZE-12)
     if reverse:
         # Prueba distinta y explícita: entrada físicamente permitida, no ajuste del caso.
