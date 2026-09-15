@@ -323,6 +323,39 @@ indefinidos. Un benchmark aislado del orificio no acredita coste del ciclo acopl
    la implementación y ejecución del prototipo. La integración a interfaz y cambios
    de archivo siguen sin autorizarse por esta definición.
 
+## Diagnóstico localizado posterior — decisión numérica pendiente
+
+La orden posterior autoriza diagnóstico y corrección de defectos demostrados,
+sin cambiar el método para forzar aceptación. La vuelta reconstruida reproduce
+exactamente la evidencia de 54821600: RK4 de paso fijo atraviesa el equilibrio
+de presión dentro de sus etapas en los enlaces exteriores I/E. Con E cerrado
+al cilindro, sin calor/trabajo y p_E>p_res, el modelo continuo conserva Y_E durante
+la descarga; la trayectoria numérica cambia Y_E por retornos entre etapas.
+No se encontró un defecto de signos, donante, unidades o cuadratura. Evidencia,
+intervalos y controles en tasks.md; las tolerancias anteriores permanecen intactas.
+
+De la ley ya aprobada, cerca de equilibrio q es proporcional a
+sign(Delta p)*sqrt(abs(Delta p)); su pendiente no está acotada al acercarse a cero.
+Esto explica por qué un paso fijo que conserva inventarios algebraicamente puede
+introducir retornos numéricos. Las etapas intermedias RK4 no son una salida densa
+independiente: dos de ellas comparten tiempo pero tienen estados distintos.
+Reutilizar sus pesos en la auditoría ocultaría la discrepancia sin corregir Y.
+
+**Única modificación propuesta, no implementada:** conservar RK4 y añadir control
+local mediante comparación de un paso y dos medios pasos; aceptar la trayectoria
+de los medios pasos solo cuando el indicador de error lo permita, o reducir el
+paso. Incluir m/U/F y transportes, mantener F_C analítica, alineación con eventos,
+auditoría independiente sobre pasos aceptados y todos los topes actuales.
+La diferencia sería un indicador, sin extrapolación que presuponga suavidad en
+la inversión de flujo. Las tolerancias de ese control local requieren fijación
+y aprobación antes de ejecutarlo; no reemplazan ni relajan las de aceptación.
+
+Coste directo sin reutilización: 12 evaluaciones RHS por intento frente a 4,
+más intentos/pasos si se necesita reducirlo. No se ha medido ese coste ni probado
+que alcance precisión o presupuesto; si alcanza el mínimo de 0,001° o cualquier
+tope debe detenerse con diagnóstico. No se propone anular caudales, recortar
+estados o alterar Cd/energía/contornos. No se ejecutó otra serie oficial.
+
 ## Fuentes primarias consultadas — 15/09/2026
 [1] [MIT, Control volume form of the conservation laws](https://web.mit.edu/16.unified/www/FALL/thermodynamics/notes/node19.html):
 balances abiertos y transporte de entalpía; justifica signos, no coeficientes del caso.

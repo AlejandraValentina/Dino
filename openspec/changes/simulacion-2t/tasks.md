@@ -13,6 +13,7 @@
 - [x] 8. Obtener autorización de implementación/ejecución del prototipo acotado; no se infiere de esta definición.
 - [x] 9. Tras autorización, implementar y comprobar balances/enlaces/energía con referencias elementales independientes.
 - [x] 10. Tras autorización, ejecutar el caso completo y comparación de resolución, medir coste y registrar convergencia/fallo.
+- [x] 11. Diagnosticar localmente el rechazo preservando la serie; comprobar cuadratura, reconstruir una vuelta e identificar si requiere corrección o decisión numérica.
 
 No se detallan aquí integración Qt, nuevos archivos ni entregas posteriores: no
 están autorizados. Aprobar documentos no marca tareas 7–10 automáticamente.
@@ -121,3 +122,143 @@ Máximos normalizados entre los cuatro CV y el balance global de esa vuelta:
 - Código, caso, pruebas y documentación se preparan en commit propio. Se permite
   un único push normal según la orden actual; su resultado se comunica en la entrega,
   sin buscar credenciales, cambiar remotos/configuración ni reescribir historial.
+
+## Diagnóstico localizado posterior — 15/09/2026
+
+Inicio en `54821600bd46b034cd15f8d88ae8b5be066c48c7`, rama main, árbol limpio,
+un commit por delante de la referencia origin/main. Commit y archivos de
+`results/simulacion-2t/viabilidad-20260915/` preservados; se compararon SHA-256
+antes/después y se registraron en el diagnóstico. No se hizo push ni se tocó
+autenticación. La orden actual autoriza diagnóstico y correcciones demostradas,
+no cambios silenciosos de método, modelo, tolerancias o presupuestos.
+
+### Condición que falla, sin cambiar la aceptación
+
+Se leyeron los 30 resúmenes existentes por resolución. Las métricas de
+repetibilidad alcanzan tres vueltas seguidas desde la vuelta 8 / 9 / 9 para
+0,5° / 0,25° / 0,125°, respectivamente. Esto **no es convergencia completa**:
+`balances_passed=False` en las 30 vueltas de cada una, por auditoría independiente
+>0,001; `convergence.passed` sigue False y el contador compuesto permanece en cero.
+Ni el calor positivo ni la repetibilidad sustituyen ese requisito.
+
+En la última vuelta, máximos entre resoluciones: diferencia relativa m=3,35e-6,
+U=3,17e-7, Y absoluta=1,27e-6, W relativa=5,70e-6 y curva p relativa=2,13e-6;
+todos cumplen sus respectivos límites de repetibilidad. Los balances siguen
+rechazados según la tabla original de esta tarea, que no se modifica.
+
+Sensibilidad diagnóstica entre finas: W=0,0037073 relativo, p máxima=0,0012242,
+curva=0,0014002, máximo por enlace de masa=0,0033007 (todos <0,01), pero
+**Delta Y_E=0,0089694048 >0,005**; Y_I/K/C=0,00168946 / 0,00077414 / 0,00050642.
+La diferencia gruesa Y_E=0,0168160 es mayor, pero la tendencia favorable no
+satisface el límite fino. Comparaciones diagnósticas, no acreditación formal:
+faltan las tres resoluciones convergidas. No se forzó esa condición al calcularlas.
+
+### Cuadratura, tiempos y trazabilidad
+
+- Antes del replay, cinco pruebas de flujos prescritos aprobaron: constante,
+  lineal con inversión y distintos donantes, integral cuadrática y su error
+  de trapecio conocido, eventos no uniformes, extremos repetidos de duración
+  cero y conversión grados/18000 a segundos. Un signo de transporte incorrecto
+  inducido sigue siendo rechazado. No se usan valores esperados del propio auditor.
+- Una sexta prueba fuerza el descarte de un intento calculado y comprueba que
+  ni el libro RK4 ni el auditor incorporan ese intento. Se acepta solo el medio
+  paso posterior, con el mismo inventario/libro que su cálculo separado.
+- El auditor original evalúa extremos de **todos los pasos aceptados**. Cambiar
+  solo la información usada, reconstruyendo desde el CSV de 0,5°, da máximos
+  0,113440 / 0,058788 / 0,029994, frente a 0,113369 / 0,058870 / 0,030091 del
+  auditor de pasos aceptados. La escasez de nodos CSV no explica el rechazo.
+  No se interpoló una salida ni se sustituyó el auditor por pesos RK4.
+- Replay de **una única vuelta**, la 30 de 0,5°, desde el estado guardado al final
+  de la 29, a los ángulos originales 10620–10980°. No es un arranque formal ni
+  un mecanismo de checkpoint. Reproduce **exactamente** estado final y auditoría
+  originales: 728 pasos aceptados, 16 no uniformes junto a eventos, cero rechazos,
+  duración física total 0,020000000000000167 s. Pasos contiguos, ningún tramo omitido.
+- Los cuatro tiempos de etapa y el extremo coinciden con el paso registrado:
+  discrepancia angular cero. Pesos [1,2,2,1]/6 frente al incremento del libro:
+  diferencias máximas masa/F=6,78e-21 kg, entalpía=3,56e-15 J. **Esto verifica la
+  implementación RK4, no es la segunda auditoría independiente.**
+- Cero signos de flujo incorrectos. Donante/entalpía/Y de cada etapa y extremo
+  concuerdan: diferencias máximas h relativa=5,68e-16, Y absoluta=1,12e-16.
+  Los estados y flujos registrados son contemporáneos. Los 721 nodos de cada
+  vuelta CSV son estrictamente crecientes; la frontera compartida entre vueltas
+  no agrega un intervalo temporal. La auditoría no se construye desde ese CSV.
+
+### Causa demostrada y descomposición
+
+La discrepancia principal procede de los enlaces exteriores: I cuando la falda
+está cerrada (180–270° y 450–540° en esta vuelta), E cuando el escape del cilindro
+está cerrado (270–450°). El registro local contiene los seis enlaces por bandas
+de 30°. Dos bandas aisladas, sin calor ni trabajo en el CV, permiten comparar
+directamente inventario y entrada neta (signo positivo hacia el CV):
+
+| CV / intervalo | Magnitud | Delta inventario | Integral RK4 neta | Trapecios independientes netos |
+| --- | --- | --- | --- | --- |
+| I / 180–210° | masa kg | +1,668394e-7 | +1,668394e-7 | −5,955713e-6 |
+| I / 180–210° | energía J | +3,604604e-5 | +3,604604e-5 | −2,049855 |
+| I / 180–210° | fresca kg | +2,043372e-7 | +2,043372e-7 | −5,906428e-6 |
+| E / 300–330° | masa kg | +8,499085e-8 | +8,499085e-8 | −1,751367e-6 |
+| E / 300–330° | energía J | +4,836327e-6 | +4,836327e-6 | −1,030669 |
+| E / 300–330° | fresca kg | −5,856707e-7 | −5,856707e-7 | −7,638749e-7 |
+
+En toda la vuelta, diferencia RK−trapecio del enlace exterior I: +3,762690e-5 kg,
++12,605984 J, +3,754939e-5 kg fresca. En enlace E→exterior: −1,116628e-5 kg,
+−6,268392 J, −1,060118e-6 kg fresca. Signos de enlace fijos según el diseño.
+La demostración no atribuye el error al calor prescrito del cilindro.
+
+A 200–200,5°, I: Delta p de etapas = +90,4507 / −100,0414 / +287,2195 /
+−588,5336 Pa; extremo aceptado +90,4572 Pa. Caudal exterior→I = −0,00357975 /
++0,00382914 / −0,00637686 / +0,00926221 kg/s; extremo −0,00358001.
+A 300–300,5°, E: Delta p = +13,3280 / −15,3785 / +43,2213 / −90,0630 Pa;
+extremo +13,3283 Pa. Caudal E→exterior = +0,00105017 / −0,00116345 /
++0,00189106 / −0,00281439 kg/s; extremo +0,00105020.
+
+Las etapas de entrada a E transportan h=553500 J/kg e Y=0 del reservorio;
+las de salida usan T/Y de E. La elección es correcta para esos estados auxiliares,
+pero el paso fijo provoca retornos numéricos que alteran el resultado aceptado.
+Las etapas 2/3 comparten tiempo; no son muestras sucesivas de una trayectoria densa.
+
+**Error de trayectoria demostrado:** E aislado del cilindro, sin calor/trabajo,
+p inicialmente superior al exterior, debe descargar hacia equilibrio conservando
+Y. Sin embargo, el paso de 0,5° eleva ligeramente p y reduce Y_E. El mismo intervalo
+de 0,5° se comprobó con dos discretizaciones, desde exactamente el mismo estado:
+
+| Diagnóstico 300–300,5° | Pasos | p_E final −100000 [Pa] | Cambio Y_E (referencia: cero) |
+| --- | --- | --- | --- |
+| RK4 0,5° | 1 | +13,328288 | −0,00015287985 |
+| RK4 0,125° | 4 | +0,885767 | −0,00002690636 |
+
+Refinar **la integración** reduce el defecto de trayectoria, no lo elimina ni
+acredita la serie. Refinar solo la salida de auditoría prácticamente no cambia
+su fallo. No se realizó una escalera ni un nuevo barrido de casos/resoluciones.
+
+### Resultado, coste y parada
+
+- No se encontró defecto de implementación o cuadratura que corregir. El núcleo,
+  parámetros, método, tolerancias y aceptación compuesta permanecen idénticos a
+  54821600. Se añaden controles de diagnóstico, no una corrección física disfrazada.
+  No hay serie oficial posterior: la repetición autorizada estaba condicionada a
+  una corrección demostrada. Los resultados anteriores siguen no acreditados.
+- **Única propuesta pendiente:** control local RK4 por comparación de un paso
+  con dos medios pasos, detallado en design.md, sin implementarlo. 12 RHS frente
+  a 4 por intento, más pasos/rechazos cuando se refine; tolerancias locales por
+  fijar/aprobar. No garantiza coste/precisión ni autoriza superar mínimos/topes.
+- Replay: 0,219 s, 40,77 MiB, 2912 RHS, una vuelta. Intervalo adicional: cinco
+  pasos en total, 20 RHS; su `seconds=0.0` significa inferior a la resolución
+  del reloj utilizado, **no coste físico nulo**. El proceso que cargó la traza y
+  ejecutó ese intervalo duró 0,793 s (herramienta), pico 60,13 MiB. Equipo/versiones
+  iguales a la evidencia inicial. Sin exceder los presupuestos del protocolo.
+- Archivos nuevos locales: `results/simulacion-2t/diagnostico-20260915/`,
+  `diagnosis.json`, `accepted-steps.json`, `closed-interval.json`, `trace-checks.json`.
+  Script reproducible de diagnóstico fijo en `tests/diagnose_simulation_balance.py`;
+  no telemetría general ni salida sobrescrita. Los resultados quedan excluidos de Git.
+- Suite pertinente final: `.\.venv\Scripts\python.exe -m unittest discover -s tests
+  -p 'test_simulation_*.py' -v`: **21/21 aprobadas en 0,275 s**. Incluye seis controles
+  nuevos y quince previos. No se repite Qt/persistencia: producción e interfaz no
+  cambiaron. OpenSpec estricto aprobado. Sin nueva inspección visual ni aceptación manual.
+- Revisión puntual independiente de solo lectura: sin hallazgos bloqueantes;
+  confirmó evidencia de error de trayectoria y precisó cómo informar el reloj del
+  ensayo corto. Autorrevisión del principal de la instrumentación, comprobación
+  posterior de pesos/tiempos/donantes, documentación y preservación de resultados.
+- Entrega 5 **En curso: decisión numérica pendiente**. Se prepara commit documental,
+  de pruebas e instrumento localizado; no hay reintento de publicación, archivo de
+  cambio, integración Qt ni avance a otra entrega.

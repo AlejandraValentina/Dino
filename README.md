@@ -42,7 +42,7 @@ Cada resolución arranca de los mismos estados a 3000 rpm; máximo 30 ciclos/60 
 serie 180 s, proceso 512 MiB. El programa sale con resultado no satisfactorio
 cuando no se acredita viabilidad; no reintenta ni prolonga presupuestos.
 
-**Resultado de la única serie ejecutada:** 30 ciclos en cada resolución, sin
+**Resultado de la única serie oficial ejecutada:** 30 ciclos en cada resolución, sin
 convergencia según el criterio completo. Los estados se estabilizan, pero la
 auditoría independiente por trapecios en cada paso aceptado incumple el 0,1 %.
 La sensibilidad queda sin acreditar porque exige las tres corridas convergidas.
@@ -84,6 +84,41 @@ del principal de la corrección y evidencia. No se repitió inspección visual d
 Windows ni se atribuye aceptación manual. El primer impedimento es el balance
 independiente, ya fallido desde la primera vuelta. Una decisión posterior sobre
 ese impedimento y la futura integración quedan fuera de esta ejecución acotada.
+
+**Diagnóstico localizado posterior:** la cuadratura aprobó controles con integrales
+prescritas, reversión de flujo y pasos no uniformes. Se reconstruyó únicamente la
+vuelta 30 de 0,5° desde el estado guardado, reproduciendo exactamente su estado
+final y auditoría: 728 pasos, 16 no uniformes, 0,020 s físicos; 0,219 s de cálculo
+y 40,77 MiB de pico residente. La evidencia original permanece intacta.
+
+Se demostraron retornos numéricos entre etapas RK4 en I–exterior y E–exterior
+cerca del equilibrio. En E cerrado al cilindro, 300–300,5°, la presión relativa
+de las etapas fue +13,33 / −15,38 / +43,22 / −90,06 Pa; el estado aceptado volvió
+a +13,33 Pa. Y_E cayó 0,00015288, aunque la descarga homogénea aislada debe
+conservarla. Un diagnóstico del mismo intervalo con cuatro pasos de 0,125° redujo
+la caída a 0,00002691, sin eliminarla. Es error de trayectoria, no solo de salida.
+
+Repetibilidad de los estados: sí; balances: no; convergencia completa: no.
+Además, la diferencia final Y_E entre las dos resoluciones finas originales es
+**0,0089694 > 0,005**, pese a que trabajo/presión cumplen sus límites de diferencia.
+La sensibilidad sigue rechazada; no se ignora ese marcador.
+
+No se corrigió código de producción: no se encontró un defecto del auditor o de
+implementación. La única propuesta es control local adaptativo por comparación
+de un paso RK4 con dos medios pasos, pendiente de decisión y tolerancias locales;
+no se implementó ni se repitió la serie oficial. Coste básico propuesto: 12 RHS
+frente a 4 por intento, sin garantía de coste o precisión final. Detalles en el
+[diseño existente](openspec/changes/simulacion-2t/design.md).
+
+Artefactos locales: `results/simulacion-2t/diagnostico-20260915/`, con SHA-256 de los
+archivos originales, descomposición por enlace/intervalo, etapas y ensayo corto.
+Script acotado: `python -m tests.diagnose_simulation_balance` desde la raíz y con
+el Python del entorno virtual; exige evidencia original y destino inexistente.
+Las nuevas pruebas se ejecutan con el comando `test_simulation_*.py` anterior.
+Suite pertinente final: **21/21 aprobadas en 0,275 s** (seis nuevas pruebas de
+cuadratura/descarte y quince controles existentes del prototipo); OpenSpec válido.
+Revisión independiente puntual sin hallazgos bloqueantes; sin aceptación manual,
+integración Qt ni entrega 6. El estado sigue **En curso, decisión numérica pendiente**.
 
 ## Interfaz y uso
 
