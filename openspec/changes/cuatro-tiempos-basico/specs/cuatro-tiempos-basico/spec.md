@@ -36,3 +36,14 @@ El sistema SHALL registrar pruebas rápidas, ejecuciones numéricas, inspección
 #### Scenario: Cierre del bloque
 - **WHEN** se entrega el trabajo
 - **THEN** informa evidencia, pendientes y commits locales, sin publicar ni archivar.
+
+### Requirement: Aceptación numérica R2 explícita y trazable
+El sistema SHALL preservar R1 y datos originales; evaluar R2 según la dispersión,
+escalas y puertas definidas en la revisión R2 de design.md, sin confundir estabilidad
+práctica con monotonía ni validación experimental.
+#### Scenario: Reevaluación y continuación autorizada
+- **WHEN** A/B/C conservados cumplen R2 y luego C50 cumple la comprobación de banda
+- **THEN** habilita la integración 4T y continúa el protocolo con presupuesto acumulado.
+#### Scenario: Datos incompletos o balances fallidos
+- **WHEN** falta evidencia obligatoria o falla una condición conservada
+- **THEN** no aprueba R2 aunque las diferencias entre perfiles sean pequeñas.

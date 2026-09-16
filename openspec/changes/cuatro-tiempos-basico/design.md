@@ -590,3 +590,22 @@ las condiciones permiten continuar con el resto del bloque autorizado.
 
 Si se completa el recorrido definido, detenete ahí.
 No archives cambios, no empaquetes todavía y no comiences otra ampliación física.
+## Revisión de aceptación R2 — autorización posterior a b862900
+R1 permanece histórica: convergencia, balances y tolerancias aprobados; tendencia
+estricta fallida en pmax/Y_I. R2 no cambia ecuaciones, perfiles ni tolerancias principales.
+Reutiliza A100/B100/C100 intactos y exige estados válidos, convergencia completa,
+balances, aporte positivo y presupuestos. Conserva métricas A/B y B/C originales.
+Acepta tendencia original O estabilidad práctica en TODAS las magnitudes:
+dispersión max−min A/B/C normalizada ≤1e-4 para trabajo, pmax, curva y cada enlace;
+dispersión absoluta de cada Y ≤5e-5. Escala trabajo=max(abs(W_A/B/C),1 J),
+enlace=max(abs(m_A/B/C),1e-7 kg), presión=max(pmax_A/B/C,100000 Pa).
+Curva: máximo de dispersiones por nodo de la misma fase, sin interpolar.
+1e-4 equivale a 0,01 %, cien veces menor que la tolerancia principal; es una
+aceptación práctica explícita, no error exacto, redondeo ni validación experimental.
+Separar pmax monitorizado de máximo muestreado y comparar variaciones entre ciclos
+finales para no atribuir exclusivamente al paso el residuo periódico.
+R2 se persiste separada, con identidades/hashes comprobados. Si aprueba, C50 desde
+arranque original, contraste C100/C50 con tolerancias originales sin tendencia.
+Si banda aprueba, continuar integración y ocho ejecuciones integradas originales.
+Presupuesto acumulado conserva 51,125 s ya consumidos; máximo conjunto 720 s.
+Sin nuevas bandas/perfiles, sin repetir A/B/C, sin publicar/archivar/empaquetar.

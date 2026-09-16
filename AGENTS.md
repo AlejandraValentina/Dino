@@ -14,6 +14,10 @@ La prohibición anterior de iniciar 7 queda sustituida por esta autorización.
 Perfiles/tolerancias/física fijados por la orden; máximo 12 ejecuciones previstas,
 720 s de integración conjuntos, 60 s por punto. No lanzar etapas dependientes
 si falla su condición previa; continuar las independientes. Un único cambio.
+Continuación R2 autorizada: vía de estabilidad práctica definida en design.md;
+preservar R1 fallida, af11976/b862900 y evidencia. Reutilizar A/B/C sin integrar.
+Continuar C50 e integración/protocolo si sus condiciones aprueban, sin reiniciar
+los 51,125 s consumidos del presupuesto conjunto.
 Commits locales lógicos sin publicar, sin autenticación/configuración global.
 No archivar, empaquetar ni ampliar física fuera del bloque.
 No alterar retrospectivamente requisitos ni verificaciones de entregas anteriores.
