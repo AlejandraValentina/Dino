@@ -37,6 +37,9 @@ class RpmProjectCase(ProjectCase):
 
 
 def execution_errors(project):
+    if project.cycle=='4T':
+        from .four_stroke import execution_errors as four_errors
+        return four_errors(project)
     errors = []
     try:
         project.validate()
@@ -122,6 +125,9 @@ def canonical_ports(project):
 
 
 def build_project_case(project, *, rpm=None):
+    if project.cycle=='4T':
+        from .four_stroke import build_project_case as build_four
+        return build_four(project,3000 if rpm is None else rpm)
     if rpm is not None:
         validate_rpm(rpm)
     errors = execution_errors(project)
@@ -157,5 +163,9 @@ def build_project_case(project, *, rpm=None):
 def configuration_key(project):
     """Comparación independiente del orden visual, incluyendo identificación capturada."""
     data = project.to_dict()
+    if project.cycle=='4T':
+        for key in ('ports','intake','ducts','crankcase_volume_bdc_cm3'):data.pop(key)
+        return json.dumps(data,sort_keys=True)
+    data.pop('four_stroke')
     data['ports'] = sorted(data['ports'], key=lambda p: json.dumps(p, sort_keys=True))
     return json.dumps(data, sort_keys=True)

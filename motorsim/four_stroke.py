@@ -1,5 +1,7 @@
 """S4T-0D-01: tres volúmenes reales, distribución prescrita, sin Qt."""
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
+import hashlib
+import json
 import math
 from .project import FOUR_DUCT_REFERENCE, Project, FourStroke, Valve, Ducts, DuctSegment
 from .simulation import Model, FOUR_LAYOUT
@@ -98,3 +100,33 @@ class FourStrokeModel(Model):
         return ((self.duct_volumes[0],self.clearance+self.ap*x*.001,self.duct_volumes[1]),
                 (0.,dv,0.), (self.throats[0],area(p.four_stroke.intake,angle)*1e-6,
                             area(p.four_stroke.exhaust,angle)*1e-6,self.throats[1]))
+
+
+SCENARIO_4T = 'S4T-0D-reference-recipe-variable-rpm-v1'
+
+class FourStrokeProjectCase(FourStrokeCase):
+    def manifest(self):
+        data=super().manifest();data.pop('synthetic_not_experimental')
+        return dict(data,reference_conditions=True,scenario_identifier=SCENARIO_4T,
+                    geometry_provenance='not specified')
+
+
+def build_project_case(project, rpm=3000):
+    from .project import Intake, ProjectError
+    from .project_case import validate_rpm
+    validate_rpm(rpm)
+    issues=execution_errors(project)
+    if issues:raise ProjectError('\n'.join(issues))
+    canonical=replace(project,ports=(),intake=Intake(),ducts=Ducts(),crankcase_volume_bdc_cm3=None)
+    data=canonical.to_dict()
+    for key in ('name','manufacturer','model','notes'):data.pop(key)
+    for route in ('intake','exhaust'):
+        for piece in data['four_stroke']['ducts'][route]:piece.pop('name')
+    identity=hashlib.sha256(json.dumps(data,sort_keys=True).encode()).hexdigest()[:16]
+    case=FourStrokeProjectCase(identifier='PROJECT-4T-'+identity,project_geometry=canonical,rpm=rpm)
+    try:
+        model=FourStrokeModel(case);model.evaluate(0,model.initial_state())
+    except (ValueError,ArithmeticError,RuntimeError) as exc:
+        raise ProjectError('Geometría 4T fuera del dominio numérico: '+str(exc)) from exc
+    return case,[dict(link_index=i,role=role,dimensions=asdict(getattr(canonical.four_stroke,role)))
+                 for i,role in ((1,'intake'),(2,'exhaust'))]

@@ -21,6 +21,14 @@ DEFINITIONS = {
 }
 TITLES = {'W_C_J': WORK, 'p_max_Pa': PRESSURE}
 CANONICAL = {'W_C_J': 'J/ciclo', 'p_max_Pa': 'Pa abs.'}
+DEFINITIONS.update(W_C_4T_J='Un cilindro 4T; integral p dV del ciclo completo de 720°, incluido intercambio de gases; sin pérdidas mecánicas.',
+    p_max_2T_Pa=DEFINITIONS['p_max_Pa']+' Ciclo 2T de 360° declarado.',
+    p_max_4T_Pa=DEFINITIONS['p_max_Pa']+' Ciclo 4T de 720° declarado.')
+TITLES.update(W_C_J=WORK+' · 2T / 360°',W_C_4T_J=WORK+' · 4T / 720°',
+              p_max_2T_Pa=PRESSURE+' · 2T',p_max_4T_Pa=PRESSURE+' · 4T')
+CANONICAL.update(W_C_4T_J='J/ciclo',p_max_2T_Pa='Pa abs.',p_max_4T_Pa='Pa abs.')
+CYCLES={'W_C_J':'2T','W_C_4T_J':'4T','p_max_2T_Pa':'2T','p_max_4T_Pa':'4T','p_max_Pa':None}
+SIM_KEYS={k:('W_C_J' if k.startswith('W_C') else 'p_max_Pa') for k in DEFINITIONS}
 TEXT_FIELDS = ('name', 'source', 'engine', 'configuration', 'conditions', 'notes')
 RULES = dict(encoding='UTF-8, BOM optional', delimiter=',', decimal='.', columns=['rpm','value'],
              rpm_matching='exact; no interpolation', bar_to_pa=100000)
@@ -35,7 +43,7 @@ class ExternalDataError(ValueError):
 def declarations(magnitude, unit, definition, provenance='No determinada', **texts):
     if magnitude not in DEFINITIONS or definition != DEFINITIONS[magnitude]:
         raise ExternalDataError('Magnitud/definición incompatible: declarala explícitamente antes de importar.')
-    units = ('J/ciclo',) if magnitude=='W_C_J' else ('Pa','bar')
+    units = ('J/ciclo',) if SIM_KEYS[magnitude]=='W_C_J' else ('Pa','bar')
     if unit not in units:
         raise ExternalDataError('Unidad incompatible; solo J/ciclo o presión absoluta en Pa/bar según magnitud.')
     if provenance not in PROVENANCES:
@@ -90,7 +98,7 @@ def parse_csv(raw,metadata):
             if rpm<=0:raise ExternalDataError(f'Fila {line}, columna rpm: debe ser positiva.')
             if rpm in seen:raise ExternalDataError(f'Fila {line}, columna rpm: régimen duplicado {rpm}.')
             seen.add(rpm)
-            if metadata['magnitude']=='p_max_Pa' and value<=0:
+            if SIM_KEYS[metadata['magnitude']]=='p_max_Pa' and value<=0:
                 raise ExternalDataError(f'Fila {line}, columna value: presión absoluta estrictamente positiva.')
             with localcontext() as context:
                 context.prec=800
@@ -123,7 +131,7 @@ def save_import(folder,prepared):
     """Carpeta exclusiva, CSV original exacto; metadatos escritos al final."""
     prepared=prepare_import(prepared['raw'],prepared['metadata'])
     folder=Path(folder);created=[];owned=False
-    manifest=dict(format='motorsim-external-rpm',version=1,dataset_id=uuid.uuid4().hex,
+    manifest=dict(format='motorsim-external-rpm',version=1 if prepared['metadata']['magnitude'] in ('W_C_J','p_max_Pa') else 2,dataset_id=uuid.uuid4().hex,
         metadata=prepared['metadata'],rules=RULES,csv_file='original.csv',
         csv_sha256=hashlib.sha256(prepared['raw']).hexdigest())
     try:
@@ -150,10 +158,12 @@ def load_import(path):
         if path.name!='metadata.json' or path.stat().st_size>128*1024:raise ExternalDataError('Elegí metadata.json de tamaño admitido.')
         manifest=json.loads(path.read_text(encoding='utf-8'))
         if (not isinstance(manifest,dict) or set(manifest)!={'format','version','dataset_id','metadata','rules','csv_file','csv_sha256'}
-                or manifest['format']!='motorsim-external-rpm' or type(manifest['version']) is not int or manifest['version']!=1
+                or manifest['format']!='motorsim-external-rpm' or type(manifest['version']) is not int or manifest['version'] not in (1,2)
                 or not isinstance(manifest['dataset_id'],str) or re.fullmatch('[0-9a-f]{32}',manifest['dataset_id']) is None
                 or manifest['rules']!=RULES or manifest['csv_file']!='original.csv'):
             raise ExternalDataError('Formato, identidad o reglas no admitidos.')
+        if manifest['version'] != (1 if manifest['metadata']['magnitude'] in ('W_C_J','p_max_Pa') else 2):
+            raise ExternalDataError('Versión y definición de ciclo no corresponden.')
         source=(path.parent/'original.csv').resolve()
         if not source.is_relative_to(path.parent.resolve()):raise ExternalDataError('CSV externo a la carpeta de importación.')
         raw=read_csv(source)
@@ -166,6 +176,10 @@ def load_import(path):
 def contrast(external,sweep):
     """Solo datos del lector de importación y load_sweep; nunca el editor."""
     metadata=validate_declarations(external['metadata'])
+    cycle=CYCLES[metadata['magnitude']]
+    actual=sweep['index']['common_inputs']['case']['project_geometry']['cycle']
+    if cycle is None or cycle!=actual:
+        raise ExternalDataError('Ciclo no declarado o incompatible: no se equiparan trabajo 360°/720° ni presiones de ciclos no declarados.')
     values={row['rpm']:row for row in external['rows']}
     simulated={Decimal(p['rpm']):(p,r) for p,r in zip(sweep['index']['points'],sweep['results'])}
     rows=[]
@@ -174,7 +188,7 @@ def contrast(external,sweep):
         for rpm in sorted(values.keys()|simulated.keys()):
             ext=values.get(rpm);point,result=simulated.get(rpm,(None,None))
             accepted=point is not None and point['state']=='converged'
-            sim=Decimal(str(result['result']['cycles'][-1][metadata['magnitude']])) if accepted else None
+            sim=Decimal(str(result['result']['cycles'][-1][SIM_KEYS[metadata['magnitude']]])) if accepted else None
             ev=ext['value'] if ext else None
             difference=sim-ev if sim is not None and ev is not None else None
             relative=100*difference/abs(ev) if difference is not None and ev!=0 else None

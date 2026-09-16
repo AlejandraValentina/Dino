@@ -64,6 +64,7 @@ def execute(folder, cancelled, report=emit, *, inputs=None):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--cycle',choices=('2T','4T'),default='2T',help='Ciclo del caso fijo de referencia.')
     parser.add_argument('--control-stdin', action='store_true', help='Control cooperativo por pipe: cancel + salto de línea.')
     parser.add_argument('--project-input', type=Path, help='Copia de entradas efectivas, comprobada nuevamente en el hijo.')
     parser.add_argument('--profile-c-check', action='store_true', help='Contraste de consola C/100 Pa; solo con copia de proyecto.')
@@ -88,7 +89,7 @@ def main(argv=None):
         threading.Thread(target=control, daemon=True).start()
     previous = signal.signal(signal.SIGINT, lambda *a: cancelled.set())
     try:
-        inputs = None
+        inputs = reference_inputs(args.cycle)
         if args.sweep_input:
             if args.project_input or args.profile_c_check:raise ValueError('El barrido usa solo perfil B y una copia común.')
             if args.sweep_input.stat().st_size>2*1024*1024:raise ValueError('Copia de barrido demasiado grande.')

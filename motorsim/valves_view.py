@@ -21,7 +21,7 @@ class ValvesView(QScrollArea):
                       '0° PMS intercambio · 180° PMI · 360° PMS compresión · 540° PMI · 720° PMS intercambio.\n'
                       'Área: cortina cilíndrica limitada por garganta anular; no medida ni CAD.')
         note.setWordWrap(True); layout.addWidget(note)
-        gate = QLabel('Cálculo 4T no habilitado: pendiente la aprobación de refinamiento A/B/C. La configuración geométrica sí está disponible.')
+        gate = QLabel('Modelo 0D disponible en Simulación: alzada idealizada, energía prescrita, sin ondas ni validación experimental.')
         gate.setWordWrap(True); layout.addWidget(gate)
         self.grid = QGridLayout(); layout.addLayout(self.grid)
         self.groups = []; self.edits = {}; self.outputs = {}; self.plots = {}

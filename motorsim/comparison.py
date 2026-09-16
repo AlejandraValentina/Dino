@@ -2,7 +2,7 @@
 import csv
 from pathlib import Path
 
-from .project import NUMERIC_FIELDS, PORT_FIELDS, INTAKE_FIELDS, DUCT_FIELDS
+from .project import NUMERIC_FIELDS, VALVE_FIELDS, PORT_FIELDS, INTAKE_FIELDS, DUCT_FIELDS
 from .reference_results import validated_model
 
 
@@ -61,21 +61,26 @@ def geometry_fields(result):
         physical[(section, title, unit)] = value
     for key, title in NUMERIC_FIELDS.items():
         field('Ficha', title, 'cil.' if key == 'cylinder_count' else (':1' if key == 'compression_ratio' else 'mm'), getattr(project,key))
-    field('Cárter', 'Volumen libre en PMI', 'cm³', project.crankcase_volume_bdc_cm3)
-    field('Admisión', 'Modalidad', '', project.intake.mode)
-    field('Admisión', 'Referencia', '', project.intake.reference)
-    for key, title in INTAKE_FIELDS.items():field('Admisión',title,'mm',getattr(project.intake,key))
-    # El adaptador ya asigna escape/transferencias por función, no por fila/nombre.
-    # Desempate nominal solo para descripciones de transferencias geométricamente idénticas.
-    ports = sorted(project.ports, key=lambda p:(p.function,p.top_mm,p.height_mm,p.width_mm,p.name))
-    counts = {}
-    for port in ports:
-        counts[port.function] = counts.get(port.function,0)+1
-        section = f'{"Escape" if port.function == "escape" else "Transferencia"} {counts[port.function]}'
-        for key,title in PORT_FIELDS.items():field(section,title,'mm',getattr(port,key))
-        descriptive[(section,'Nombre','')] = port.name
+    if project.cycle=='4T':
+        for role,title in (('intake','Válvula admisión'),('exhaust','Válvula escape')):
+            for key,caption in VALVE_FIELDS.items():
+                field(title,caption,'°' if key.endswith('_deg') else 'mm',getattr(getattr(project.four_stroke,role),key))
+    else:
+        field('Cárter', 'Volumen libre en PMI', 'cm³', project.crankcase_volume_bdc_cm3)
+        field('Admisión', 'Modalidad', '', project.intake.mode)
+        field('Admisión', 'Referencia', '', project.intake.reference)
+        for key, title in INTAKE_FIELDS.items():field('Admisión',title,'mm',getattr(project.intake,key))
+        # El adaptador ya asigna escape/transferencias por función, no por fila/nombre.
+        # Desempate nominal solo para descripciones de transferencias geométricamente idénticas.
+        ports = sorted(project.ports, key=lambda p:(p.function,p.top_mm,p.height_mm,p.width_mm,p.name))
+        counts = {}
+        for port in ports:
+            counts[port.function] = counts.get(port.function,0)+1
+            section = f'{"Escape" if port.function == "escape" else "Transferencia"} {counts[port.function]}'
+            for key,title in PORT_FIELDS.items():field(section,title,'mm',getattr(port,key))
+            descriptive[(section,'Nombre','')] = port.name
     for route,title in (('intake','Conducto admisión'),('exhaust','Conducto escape')):
-        for index,segment in enumerate(getattr(project.ducts,route),1):
+        for index,segment in enumerate(getattr(project.four_stroke.ducts if project.cycle=='4T' else project.ducts,route),1):
             section=f'{title} · tramo {index}'
             for key,caption in DUCT_FIELDS.items():field(section,caption,'mm',getattr(segment,key))
             descriptive[(section,'Nombre','')]=segment.name
@@ -95,8 +100,10 @@ def input_differences(a,b):
 
 def aligned_curve(result):
     cycle=result['result']['cycles'][-1]['cycle']
-    return [dict(angle_cycle_deg=row['angle_deg']-360*(cycle-1),angle_original_deg=row['angle_deg'],
-                 pressure_absolute_Pa=row['p_T_Y'][2][0],volume_m3=row['V_m3'][2])
+    four=result['inputs']['case']['project_geometry']['cycle']=='4T'
+    period,ci=(720,1) if four else (360,2)
+    return [dict(angle_cycle_deg=row['angle_deg']-period*(cycle-1),angle_original_deg=row['angle_deg'],
+                 pressure_absolute_Pa=row['p_T_Y'][ci][0],volume_m3=row['V_m3'][ci])
             for row in result['samples']['cycles'][-1]]
 
 
@@ -107,13 +114,16 @@ def compare_results(a,b):
     differences=input_differences(a,b)
     left,right=(r['result']['cycles'][-1] for r in (a,b))
     metrics=[]
+    four=a['inputs']['case']['project_geometry']['cycle']=='4T'
     for key,title,unit in (('W_C_J','Trabajo indicado del cilindro','J/ciclo'),
                             ('W_K_J','Trabajo del cárter (separado)','J/ciclo'),
                             ('p_max_Pa','Presión máxima del cilindro','Pa abs.')):
+        if key=='W_K_J' and a['inputs']['case']['project_geometry']['cycle']=='4T':continue
+        if four and key=='W_C_J':unit='J/720°'
         av,bv=left[key],right[key]
         metrics.append(dict(magnitude=key,title=title,unit=unit,a=av,b=bv,difference=bv-av,
                             relative_percent=100*(bv-av)/abs(av) if av!=0 else None))
-    for i,cv in enumerate(('I','K','C','E')):
+    for i,cv in enumerate(('I','C','E') if a['inputs']['case']['project_geometry']['cycle']=='4T' else ('I','K','C','E')):
         av,bv=left['Y'][i],right['Y'][i]
         metrics.append(dict(magnitude='Y_'+cv,title='Fracción fresca '+cv,unit='1',a=av,b=bv,
                             difference=bv-av,relative_percent=None))

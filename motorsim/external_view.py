@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog,
     QFormLayout, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QMessageBox, QPlainTextEdit,
     QPushButton, QScrollArea, QTableWidget, QTableWidgetItem, QTabWidget, QVBoxLayout, QWidget)
 
-from .external_data import (CANONICAL, DEFINITIONS, PROVENANCES, TITLES, ExternalDataError,
+from .external_data import (CANONICAL, DEFINITIONS, PROVENANCES, TITLES, SIM_KEYS, ExternalDataError,
     declarations, prepare_import, read_csv, save_import, load_import, contrast, export_contrast)
 from .comparison import ComparisonError, geometry_fields
 from .reference_results import ResultError
@@ -61,7 +61,7 @@ def describe_sources(external,sweep):
             f"Gas R: {case['gas_r']} J/(kg K) · Gamma: {case['gamma']}",
             f"Aporte prescrito: inicio {case['heat_start_deg']}°, duración {case['heat_duration_deg']}°, {case['fresh_energy_j_kg']} J/kg fresco",
             'Coeficientes de descarga (orden de enlaces): '+', '.join(map(str,case['discharge_coefficients']))])
-        for title,names,states in (('Inicial',('I','K','C','E'),case['initial_pty']),
+        for title,names,states in (('Inicial',case['cv_order'],case['initial_pty']),
                                    ('Contorno',('admisión','escape'),case['reservoirs_pty'])):
             lines.extend(f'{title} {name}: p={p} Pa absolutos, T={t} K, Y={y}' for name,(p,t,y) in zip(names,states))
         lines.extend(['','Geometría de la copia utilizada'])
@@ -79,7 +79,8 @@ class ImportDialog(QDialog):
         scroll=QScrollArea();scroll.setWidgetResizable(True);self.tabs.addTab(scroll,'Declaración')
         body=QWidget();form=QFormLayout(body);scroll.setWidget(body)
         self.magnitude=QComboBox();self.magnitude.addItem('Elegí magnitud…',None)
-        for key,title in TITLES.items():self.magnitude.addItem(title,key)
+        for key,title in TITLES.items():
+            if key!='p_max_Pa':self.magnitude.addItem(title,key)
         self.unit=QComboBox();self.unit.addItem('Elegí unidad…',None)
         self.provenance=QComboBox();self.provenance.addItems(PROVENANCES)
         form.addRow('Magnitud',self.magnitude);form.addRow('Unidad original',self.unit)
@@ -114,7 +115,7 @@ class ImportDialog(QDialog):
     def magnitude_changed(self):
         self.unit.clear();self.unit.addItem('Elegí unidad…',None)
         key=self.magnitude.currentData()
-        for unit in (('J/ciclo',) if key=='W_C_J' else ('Pa','bar') if key=='p_max_Pa' else ()):
+        for unit in (('J/ciclo',) if SIM_KEYS.get(key)=='W_C_J' else ('Pa','bar') if SIM_KEYS.get(key)=='p_max_Pa' else ()):
             self.unit.addItem(unit,unit)
         self.confirm_definition.setChecked(False)
         self.confirm_definition.setToolTip(DEFINITIONS.get(key,''));self.invalidate()
@@ -236,7 +237,10 @@ class ExternalDialog(QDialog):
         self.status.setText('Contraste descriptivo. Equivalencia de condiciones no acreditada. Seleccioná un barrido guardado.')
         fill(self.table,[[r['rpm'],r['value'],None,None,None,'solo externo'] for r in self.external['rows']])
         if self.sweep:
-            self.data=contrast(self.external,self.sweep);index=self.sweep['index']
+            try:self.data=contrast(self.external,self.sweep)
+            except ExternalDataError as exc:
+                self.status.setText(str(exc));self.details.setPlainText(describe_sources(self.external,self.sweep));return
+            index=self.sweep['index']
             self.status.setText(f"{self.data['notice']}\nBarrido {index['series_id']} · {index['common_inputs']['origin']['project_name']}\n"
                 f"{self.data['simulated_count']} puntos solicitados en el barrido · {self.data['matches']} coincidencias convergidas")
             fill(self.table,[[r['rpm'],r['external'],r['simulated'],r['difference'],

@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog, QGridLayo
 from .prototype import memory_mib, write_json
 from .reference_results import ResultError, load_result, new_output_path, reference_inputs, project_inputs
 from .project import Project, ProjectError
+from .simulation import TWO_LAYOUT, FOUR_LAYOUT
 from .project_case import configuration_key, validate_rpm
 from .sweep import plan_rpms, load_sweep, write_index
 from .sweep_view import SweepDialog
@@ -25,15 +26,17 @@ class PressurePlot(QWidget):
     def __init__(self, pv=False):
         super().__init__()
         self.pv, self.points = pv, []
+        self.layout = TWO_LAYOUT
         self.setMinimumHeight(270)
         self.setMinimumWidth(260)
         self.setAccessibleName('Presión-volumen en orden temporal' if pv else 'Presión absoluta frente al ángulo continuo')
 
-    def set_rows(self, rows):
+    def set_rows(self, rows, layout=TWO_LAYOUT):
+        self.layout=layout
         # No ordenar V ni aplicar módulo a ángulos: preservar la trayectoria.
-        origin = rows[0]['angle_deg']-180 if rows else 0
-        self.points = [(r['V_m3'][2]*1e6 if self.pv else r['angle_deg']-origin,
-                        r['p_T_Y'][2][0]/1000) for r in rows]
+        origin = rows[0]['angle_deg']-(0 if layout.period==720 else 180) if rows else 0
+        self.points = [(r['V_m3'][layout.cylinder]*1e6 if self.pv else r['angle_deg']-origin,
+                        r['p_T_Y'][layout.cylinder][0]/1000) for r in rows]
         self.update()
 
     def paintEvent(self, event):
@@ -42,7 +45,7 @@ class PressurePlot(QWidget):
         p.setPen(QColor('#b4d9f5'))
         fm = p.fontMetrics()
         line = fm.height()+5
-        title = 'Presión–volumen · orden temporal' if self.pv else 'Presión–ángulo · PMI → PMS → PMI'
+        title = 'Presión–volumen · orden temporal' if self.pv else f'Presión–ángulo · ciclo {self.layout.period}°'
         p.drawText(QRectF(8, 4, self.width()-16, line), title)
         p.drawText(QRectF(8, line+4, self.width()-16, line), 'Presión absoluta [kPa]')
         if not self.points:
@@ -50,7 +53,7 @@ class PressurePlot(QWidget):
                        'Sin ciclo convergido para mostrar.')
             return
         xs, ys = zip(*self.points)
-        lo, hi = (0., max(xs)*1.05) if self.pv else (180., 540.)
+        lo, hi = (0., max(xs)*1.05) if self.pv else ((0.,720.) if self.layout.period==720 else (180.,540.))
         top = max(ys)*1.05
         margin = max(55, fm.horizontalAdvance(f'{top:.0f}')+12)
         box = QRectF(margin, 2*line+12, max(1, self.width()-margin-24), max(1, self.height()-5*line-20))
@@ -63,7 +66,7 @@ class PressurePlot(QWidget):
             x = box.left()+box.width()*fraction
             caption = f'{lo+(hi-lo)*fraction:.0f}'
             if not self.pv:
-                caption += '\n'+('PMS' if fraction == .5 else 'PMI')
+                caption += '\n'+('PMS' if self.layout.period==720 or fraction == .5 else 'PMI')
             p.drawText(QRectF(x-28, box.bottom()+5, 56, line*2), Qt.AlignmentFlag.AlignHCenter, caption)
         path = QPainterPath()
         for i, (x, y) in enumerate(self.points):
@@ -114,7 +117,7 @@ class SimulationView(QScrollArea):
             layout.addWidget(widget)
             return widget
         self.origin_combo = QComboBox()
-        self.origin_combo.addItems(['Caso de referencia S2T-0D-01', 'Proyecto actual, con condiciones de referencia'])
+        self.origin_combo.addItems(['Caso de referencia S2T-0D-01', 'Proyecto actual, con condiciones de referencia', 'Caso de referencia S4T-0D-01'])
         self.origin_combo.setAccessibleName('Origen de la próxima ejecución')
         layout.addWidget(self.origin_combo)
         self.options = QWidget()
@@ -170,7 +173,7 @@ class SimulationView(QScrollArea):
         self.path_label = label('Cada ejecución se guarda en una carpeta nueva de MotorSim/Resultados.', 'unit')
         self.path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.memory_label = label('', 'unit')
-        label('Modelo 0D con energía prescrita, sin validación experimental. Conductos: almacenamiento y restricciones, sin propagación de ondas ni acreditación de sintonía.', 'unit')
+        label('Modelo 0D con alzada idealizada (4T) y energía prescrita, sin validación experimental. Conductos: almacenamiento y restricciones, sin propagación de ondas ni acreditación de sintonía.', 'unit')
         layout.addStretch()
         self.setWidget(body)
         self.timer = QTimer(self)
@@ -243,8 +246,8 @@ class SimulationView(QScrollArea):
         self.comparison_dialog.activateWindow()
 
     def _capture(self):
-        if self.origin_combo.currentIndex() == 0:
-            return reference_inputs()
+        if self.origin_combo.currentIndex() != 1:
+            return reference_inputs('4T' if self.origin_combo.currentIndex()==2 else '2T')
         if self.project_snapshot is None:
             raise ProjectError('No hay editor de proyecto disponible.')
         project, origin = self.project_snapshot()
@@ -278,12 +281,12 @@ class SimulationView(QScrollArea):
 
     def _describe_inputs(self):
         origin = self.inputs.get('origin')
-        self.title_label.setText('Geometría del proyecto · ensayo 0D' if origin else 'Caso de referencia S2T-0D-01')
+        self.title_label.setText('Geometría del proyecto · ensayo 0D' if origin else 'Caso de referencia '+self.inputs['case']['identifier'])
         self.description_label.setText('Las condiciones son supuestos de referencia, no mediciones ni una calibración del motor ingresado.'
             if origin else 'Caso sintético, no motor medido. No utiliza los datos del proyecto abierto.')
         case = self.inputs['case']
         geometry = case['project_geometry']
-        regime = f"{case['rpm']:g} rpm"
+        regime = f"{geometry['cycle']} · {case['rpm']:g} rpm"
         if self.active and self._running_sweep:regime='Barrido '+', '.join(map(str,self._captured_rpms))+' rpm'
         elif self.sweep and self.result is None:regime='Barrido '+', '.join(map(str,self.sweep['index']['rpms']))+' rpm'
         self.parameters_label.setText(f"{regime} · {geometry['bore_mm']:g} × {geometry['stroke_mm']:g} mm · "
@@ -404,7 +407,7 @@ class SimulationView(QScrollArea):
         if executable.name.lower() == 'pythonw.exe':
             executable = executable.with_name('python.exe')
         process.setProgram(str(executable))
-        arguments = ['-u', '-m', 'motorsim.reference_run', '--output', str(self.output), '--control-stdin']
+        arguments = ['-u', '-m', 'motorsim.reference_run', '--output', str(self.output), '--control-stdin', '--cycle', self.inputs['case']['project_geometry']['cycle']]
         if request:
             arguments += ['--sweep-input' if running_sweep else '--project-input', str(request)]
         process.setArguments(arguments)
@@ -519,7 +522,7 @@ class SimulationView(QScrollArea):
             result = load_result(self.output/'manifest.json')
             if result['status'] == 'converged' and code != 0:
                 raise ResultError('Código de salida incompatible con el resultado.')
-            if result['manifest']['version']==3 and self._finished_manifest==result['path'] and 'timings' in result['manifest']:
+            if result['manifest']['version']>=3 and self._finished_manifest==result['path'] and 'timings' in result['manifest']:
                 result['manifest']['timings']['interface_wall_seconds']=time.monotonic()-self._started
                 write_json(result['path'],result['manifest'])
             self._display(result)
@@ -572,13 +575,16 @@ class SimulationView(QScrollArea):
             cycle = r['cycles'][-1]
             worst = max(v for b in cycle['independent'].values() for v in b['normalized_m_u_f'])
             self.summary_label.setText(
-                f'Último ciclo completo: {cycle["cycle"]} · Trabajo indicado: {cycle["W_C_J"]:.6f} J/ciclo\n'
-                f'Cárter (diagnóstico): {cycle["W_K_J"]:.6f} J/ciclo · Presión máxima: {cycle["p_max_Pa"]/1000:.3f} kPa abs.\n'
+                f'Último ciclo completo: {cycle["cycle"]} · Trabajo indicado: {cycle["W_C_J"]:.6f} J/ciclo\n'+
+                (f'Cárter (diagnóstico): {cycle["W_K_J"]:.6f} J/ciclo · ' if 'W_K_J' in cycle else 'Ciclo 720° · ')+
+                f'Presión máxima: {cycle["p_max_Pa"]/1000:.3f} kPa abs.\n'+
                 f'Balances aprobados · Mayor residuo independiente: {100*worst:.6f} % (límite 0,1 %)\n'
                 f'Parada: {r["stop"]}. Esta ejecución individual no comprueba sensibilidad.')
+            layout=FOUR_LAYOUT if self.inputs['case']['project_geometry']['cycle']=='4T' else TWO_LAYOUT
+            self.summary_label.setText(self.summary_label.text()+'\nFracciones frescas: '+', '.join(f'{name}={y:.8f}' for name,y in zip(layout.cv,cycle['Y'])))
             rows = result['samples']['cycles'][-1]
-            self.angle_plot.set_rows(rows)
-            self.pv_plot.set_rows(rows)
+            self.angle_plot.set_rows(rows,layout)
+            self.pv_plot.set_rows(rows,layout)
         else:
             self.summary_label.setText(f'Diagnóstico no aceptado. Motivo: {r["stop"]}.\n'
                                        'Los datos parciales se conservan en la carpeta; no se presentan como ciclo aceptado.')
@@ -587,7 +593,7 @@ class SimulationView(QScrollArea):
         if self.active:
             return
         if path is None:
-            name, _ = QFileDialog.getOpenFileName(self, 'Abrir resultado de simulación 2T',
+            name, _ = QFileDialog.getOpenFileName(self, 'Abrir resultado de simulación',
                 str(new_output_path().parent), 'Manifiesto (manifest.json)')
             if not name:
                 return

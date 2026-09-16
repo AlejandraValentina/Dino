@@ -23,6 +23,9 @@ def export_sweep_csv(folder, sweep):
             len(result['result']['cycles']) if result else None,
             *[timing.get(k) for k in ('integration_seconds','setup_seconds','writing_seconds','wall_seconds')],
             *[cycle.get(k) for k in ('W_C_J','W_K_J','p_max_Pa')],point['reason']])
+    if index['common_inputs']['case']['project_geometry']['cycle']=='4T':
+        for row in rows:del row[11]
+        rows[0][10]='W_C_J_per_720deg_cycle'
     return write_csv_files(folder,[('serie.csv',rows)])
 
 
@@ -102,6 +105,11 @@ class SweepDialog(QDialog):
             f"{STATES[index['state']]} · {index['reason']}\nIntegración total: {index['integration_seconds']:.3f} s · "
             f"Proceso de serie: {index['wall_seconds']:.3f} s"+
             (f" · Tiempo percibido: {index['interface_wall_seconds']:.3f} s" if 'interface_wall_seconds' in index else ''))
+        self.table.setColumnHidden(5,index['common_inputs']['case']['project_geometry']['cycle']=='4T')
+        four=index['common_inputs']['case']['project_geometry']['cycle']=='4T'
+        self.identity.setText(self.identity.text()+('\n4T · ciclo completo 720°' if four else '\n2T · ciclo completo 360°'))
+        self.table.horizontalHeaderItem(4).setText('W_C [J/720°]' if four else 'W_C [J/ciclo]')
+        self.plots[0].title='Trabajo indicado del cilindro [J/720°]' if four else 'Trabajo indicado del cilindro [J/ciclo]'
         self.table.setRowCount(len(index['points']))
         for i,(point,result) in enumerate(zip(index['points'],sweep['results'])):
             cycle=result['result']['cycles'][-1] if point['state']=='converged' else {}

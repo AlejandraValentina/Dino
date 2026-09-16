@@ -13,8 +13,8 @@ from PySide6.QtWidgets import (
     QTabWidget, QStackedWidget, QToolBar, QVBoxLayout, QWidget,
 )
 
-from .project import (NUMERIC_FIELDS, PORT_FIELDS, INTAKE_FIELDS, DUCT_FIELDS, Project,
-                      Port, Intake, FourStroke, Ducts, DuctSegment, ProjectError, displacements, parse_number)
+from .project import (NUMERIC_FIELDS, PORT_FIELDS, INTAKE_FIELDS, DUCT_FIELDS, VALVE_FIELDS, Project,
+                      Port, Intake, FourStroke, Valve, Ducts, DuctSegment, ProjectError, displacements, parse_number)
 from .project_case import execution_errors
 from .storage import load_project, save_project
 from .geometry_view import GeometryView
@@ -99,7 +99,7 @@ class MainWindow(QMainWindow):
         self.file_label = _FilePathLabel()
         self.state_label = QLabel()
         self.state_label.setObjectName("projectState")
-        self.notice = QLabel("Simulación 2T · modelo 0D")
+        self.notice = QLabel("Simulación · modelo 0D")
         self.notice.setObjectName("availability")
 
         menu = self.menuBar().addMenu("&Archivo")
@@ -286,7 +286,7 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.valves_view, "Configuración &4T")
         self.ducts_view.changed.connect(self._edited)
         self.simulation_view = SimulationView(self.execution_snapshot)
-        self.tabs.addTab(self.simulation_view, "&Simulación 2T")
+        self.tabs.addTab(self.simulation_view, "&Simulación")
         self.simulation_view.idle.connect(self._simulation_idle)
         self.setCentralWidget(self.tabs)
         self._arrange_groups()
@@ -381,6 +381,19 @@ class MainWindow(QMainWindow):
             except ProjectError as exc:
                 errors.append(context+str(exc))
                 return None  # Solo para reunir errores: la copia no sale si hay alguno.
+        if self.cycle_combo.currentText()=='4T':
+            valves={role:Valve(**{k:number(edit.text(),k,role+': ') for k,edit in fields.items()})
+                    for role,fields in self.valves_view.edits.items()}
+            from .project import FOUR_DUCT_REFERENCE
+            ducts4=Ducts(**{role:tuple(DuctSegment(d['name'],**{k:number(d[k],k,role+': ') for k in DUCT_FIELDS})
+                    for d in rows) for role,rows in self.ducts4_view.drafts.items()},reference=FOUR_DUCT_REFERENCE)
+            project=Project(name=self.name_edit.text(),cycle='4T',
+                manufacturer=self.text_edits['manufacturer'].text(),model=self.text_edits['model'].text(),
+                notes=self.notes_edit.toPlainText(),four_stroke=FourStroke(**valves,ducts=ducts4),
+                **{k:number(edit.text(),k) for k,edit in self.numeric_edits.items()})
+            errors.extend(execution_errors(project))
+            if errors:raise ProjectError('\n'.join(dict.fromkeys(errors)))
+            return project,dict(kind='project',project_name=project.name,source_path=str(self.path) if self.path else None,dirty=self.dirty)
         ports = tuple(Port(d['name'], d['function'], **{
             k:number(d[k], k, f'Lumbrera {i+1}: ') for k in PORT_FIELDS})
             for i, d in enumerate(self.ports_view.drafts))

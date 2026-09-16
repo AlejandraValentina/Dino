@@ -102,7 +102,7 @@ def tick():
                 desktop=name.value,solver_started=False,save_close_reopen=True,
                 cycle_data_independent=True,invalid_save_protected=True,close_cancel_protected=True,
                 keyboard=True,compact_width=700,captures=captures,
-                solver_gate='Refinamiento no aprobado; resultado/comparación/barrido 4T no habilitados.')
+                solver_gate='Solo configuración: este recorrido no evalúa el solver ni su aceptación numérica.')
             (args.output/'recorrido.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
             start.assert_not_called();w.dirty=False;w.close();app.quit();return
         phase+=1

@@ -57,8 +57,8 @@ class ProjectAdapterTests(unittest.TestCase):
         self.assertEqual(profile.name, 'B')
 
     def test_missing_and_invalid_aggregate(self):
-        errors = '\n'.join(execution_errors(Project(cycle='4T')))
-        for word in ('2T', 'cilindros', 'Diámetro', 'Carrera', 'biela', 'compresión', 'cárter', 'Admisión', 'Lumbreras', 'Conducto'):
+        errors = '\n'.join(execution_errors(Project(cycle='2T')))
+        for word in ('cilindros', 'Diámetro', 'Carrera', 'biela', 'compresión', 'cárter', 'Admisión', 'Lumbreras', 'Conducto'):
             self.assertIn(word.lower(), errors.lower())
         for project in (replace(self.project, cylinder_count=2), replace(self.project, rod_length_mm=28),
                         replace(self.project, intake=Intake()), replace(self.project, ports=self.project.ports*2),

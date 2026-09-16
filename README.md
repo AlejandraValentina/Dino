@@ -4,7 +4,7 @@ Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La entrega
 [conductos-admision-escape](openspec/changes/conductos-admision-escape/specs/conductos-admision-escape/spec.md)
 añade recorridos geométricos de conductos circulares de admisión y escape 2T.
 La ficha, posición del pistón, volúmenes y curvas geométricas existentes se conservan.
-La pestaña Simulación 2T admite el caso sintético de referencia y geometría del
+La pestaña Simulación admite los casos sintéticos 2T/4T y geometría del
 proyecto bajo las mismas condiciones de referencia, dentro del dominio 0D definido.
 
 Estado de las entregas 1 y 2: **Completadas**. La usuaria comunicó el 14/09/2026
@@ -23,28 +23,36 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
-## Bloque 4T básico — estado comprobado el 16/09/2026
+## Bloque 4T básico — comprobado el 16/09/2026
 
 Cambio vigente: [cuatro-tiempos-basico](openspec/changes/cuatro-tiempos-basico/tasks.md).
-**Entrega 7 implementada y comprobada técnicamente. Entrega 8 en curso, bloqueada
-por el criterio de refinamiento numérico; no habilitada en la interfaz.** No se
-atribuye aceptación manual ni validación experimental. Entrega 6 conserva sus
-herramientas y el pendiente de contraste con mediciones reales.
+**Entregas 7 y 8 completadas técnicamente para el alcance autorizado.** Aceptación
+manual de la usuaria y validación experimental pendientes, separadas de pruebas e
+inspección automatizada. Entrega 6 conserva el pendiente de mediciones reales.
 
-Seleccionar **4T** en Ficha habilita **Configuración 4T**, con una válvula de
-admisión y otra de escape. Entradas D/d/s/H en mm, apertura y duración en grados;
-coma o punto decimal, ausencia null, errores de texto visibles que impiden guardar.
-Se permiten conjuntos incompletos o geométricamente incompatibles para corregirlos,
-pero se retiran sus curvas y cruce. Cierre y máximo se muestran con ángulo continuo
-y fase módulo 720°. Ley seno cuadrado idealizada; área de cortina cilíndrica limitada
-por garganta anular, no área efectiva medida ni geometría CAD. Eventos y cruce son
-analíticos; las gráficas solo los representan. Fases: 0° PMS intercambio, 180° PMI,
-360° PMS compresión, 540° PMI y 720° siguiente PMS intercambio.
+En **Ficha → 4T**, completar datos comunes; **Configuración 4T** registra una
+válvula de admisión y otra de escape: asiento/garganta/vástago/alzada en mm y
+apertura/duración en grados. Ley seno cuadrado, cortina limitada por garganta
+anular, eventos y cruce analíticos de 720°. **Conductos** conserva recorridos
+independientes 2T/4T. Alternar no pierde datos ni borradores; las ausencias no se
+completan con ejemplos. No hay simulación multicilíndrica ni alzada medida.
 
-**Conductos** reutiliza el editor por tramos para el ciclo seleccionado. Sus
-recorridos 2T y 4T son independientes, incluidos borradores inválidos. Alternar
-ciclo conserva lumbreras, falda, válvulas y conductos, sin copiar datos de ejemplo.
-Los controles de archivo y protección de cambios se conservan.
+En **Simulación**, elegir referencia **S4T-0D-01** o **Proyecto actual, con condiciones
+de referencia** → Comprobar entradas → Ejecutar. El proyecto exige geometría,
+válvulas/distribución y conductos 4T compatibles, sin exigir cárter, falda o lumbreras
+2T. Captura datos válidos sin guardar y su procedencia; ejecuta un único hijo
+asíncrono con cancelación y cierre cooperativos. Resultados de 1441 muestras/ciclo,
+presión absoluta 0–720°, P-V temporal, trabajo completo J/720°, pmax y Y de I/C/E;
+sin trabajo de cárter ficticio. Abrir resultado conserva las mismas entradas.
+Editar después señala resultado anterior; un punto no acredita el estudio R2.
+
+Comparar resultados admite dos 4T compatibles, diferencias geométricas/distribución,
+curvas y CSV. Barrido: 2–5 puntos exactos entre 2500–3500 rpm, B/100 Pa, geometría
+común, arranque independiente, ejecución secuencial y parada al primer fallo.
+Los datos externos declaran 2T/360° o 4T/720° antes del contraste, sin interpolar.
+Importaciones históricas se conservan; presión antigua sin ciclo declarado puede
+abrirse pero no contrastarse cuantitativamente hasta volver a declararla/importarla.
+No se agregaron mediciones ni magnitudes de potencia al eje.
 
 ### Proyecto JSON v6 (formato actual)
 
@@ -63,82 +71,60 @@ aun si el antiguo selector dice 4T, permanecen en `ducts` 2T. Abrir nunca reescr
 solo Guardar/Guardar como persiste v6. Los resultados y barridos 2T v1/v2/v3
 anteriores siguen leyéndose y validándose, sin alterar archivos ni hashes.
 
-### Núcleo 4T y condición pendiente
+### Aceptación numérica R1 y R2
 
-Consola sin Qt, tres volúmenes **I/C/E**, nueve estados m/U/F y cuatro enlaces.
-Reutiliza flujos reversibles, transporte de entalpía, auditorías y RK4 adaptativo.
-R=287, gamma=1,35; Cd exterior=0,80, válvulas=0,70; banda exterior 100 Pa.
-Calor prescrito 350–390° una vez por 720°, 800000 J/kg de fresca capturada al inicio,
-con cilindro cerrado y conversión analítica. W_C integra p dV durante los 720°;
-no existe W_K. Sin ondas, inercia, química predictiva, fricción, par ni potencia.
+**R1 histórica: convergencia, balances y tolerancias aprobados; tendencia estricta
+fallida en pmax y Y_I.** A100/B100/C100 originales y hashes permanecen intactos.
+La autorización posterior introdujo R2: tendencia original O dispersión práctica
+A/B/C ≤1e-4 normalizada para trabajo/pmax/curva/cada enlace y ≤5e-5 absoluta para
+cada Y, manteniendo validez física, convergencia, balances, aporte y presupuestos.
+1e-4 es 0,01 %, no redondeo de máquina ni error exacto.
 
-Caso **S4T-0D-01**, sintético, inicializado desde p/T/Y y volúmenes reales;
-3000 rpm, sin arranque caliente. Resultados del último ciclo completo:
+**R2 aprobada por estabilidad práctica**, no por monotonía. Dispersiones:
+W 1,879e-7, pmax 8,662e-7, curva 9,314e-8, máximo enlace 1,339e-7 y Y 1,793e-8.
+C conserva pmax monitorizado 2618464,733 Pa, distinto del máximo muestreado
+2618462,460 Pa. Variaciones de los ciclos finales superan algunas diferencias
+entre perfiles: no se atribuyen exclusivamente a discretización temporal.
+**C/50 Pa aprobó frente a C/100 Pa** las tolerancias originales de banda,
+sin exigir tendencia con dos bandas. Esto habilitó la integración autorizada.
 
-| Perfil / banda | Ciclos / convergencia | W_C J/720° | pmax Pa abs. | Peor balance independiente | Integración s | Pico proceso MiB | RHS reales |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| A / 100 Pa | 7 / sí | 50,52603396 | 2618462,697 | 0,00108361 % | 7,438 | 28,438 | 160711 |
-| B / 100 Pa | 7 / sí | 50,52602476 | 2618462,464 | 0,00007683 % | 14,406 | 45,656 | 304466 |
-| C / 100 Pa | 7 / sí | 50,52602447 | 2618464,733 | 0,00002600 % | 29,281 | 52,371 | 607098 |
+Protocolo completo: **12 ejecuciones, 249,015 s de integración de 720 s**, incluidos
+los 51,125 s históricos; sin repetir A/B/C. Los once puntos 4T convergieron en siete
+ciclos y la regresión 2T en diez. Balances discretos e independientes aprobados.
+Barrido B2500/3000/3500 y compresión 8→8,2 ejecutados desde GUI; C de extremos y
+compresión por consola aprobaron contrastes B/C. GUI3000 reproduce exactamente
+B100 original; regresión 2T reproduce ciclos y muestras de su propia referencia.
+Tiempos, residuos, hashes y contrastes detallados en las tareas existentes.
 
-**3 ejecuciones, 51,125 s de integración**, del presupuesto conjunto de 720 s.
-Picos del proceso de consola compartido, que conservó los resultados precedentes
-para el contraste. Las tres cumplen los balances y tres ciclos consecutivos de
-convergencia desde el quinto, con 1441 muestras por ciclo.
+Modelo 0D I/C/E, nueve estados, cuatro enlaces, alzada idealizada, energía prescrita
+350–390° por 720°, sin ondas ni validación experimental. No acredita ley sin
+regularizar, orden de convergencia, calibración, error exacto o capacidad predictiva.
+Evidencia local: `results/simulacion-2t/cuatro-tiempos-20260916/R2/`; la raíz conserva R1.
+Resultados reabribles 4T usan contrato v4; el **proyecto sigue JSON v6**.
 
-Tolerancias de sensibilidad aprobadas, **tendencia de refinamiento no aprobada**:
+### Pruebas, Windows y comandos
 
-| Magnitud | Discrepancia A/B | Discrepancia B/C |
-| --- | ---: | ---: |
-| pmax relativa | 8,8979e−8 | 8,6623e−7 |
-| Y_I absoluta | 1,0768e−8 | 1,7935e−8 |
+**219 pruebas automatizadas aprobadas (23,423 s)**; los controles de proceso,
+fallos y cancelación usan dobles, sin campañas completas ocultas. Lectores de
+resultados 2T v1/v2/v3 y barrido histórico comprobados. Revisión independiente
+puntual: corregidas finitud/coherencia en R2 y capturas inicialmente ocultas;
+pruebas afectadas incluidas en la suite final. OpenSpec estricto aprobado.
 
-C detecta un máximo entre las muestras comunes: su pmax es 2618464,733 Pa;
-el máximo de su salida cada 0,5° es 2618462,460 Pa. Eso explica la falta de
-monotonía del estimador de pmax, pero **no permite cambiar la regla vigente**.
-También crece la discrepancia de Y_I, sin un piso de tendencia autorizado.
-La revisión puntual no identificó un defecto de implementación que justifique
-repetir. Relajar tendencia, añadir pisos o cambiar la estimación requiere otra
-decisión numérica expresa; no se hizo.
+Windows al **150 % efectivo**: ejecución automatizada y reapertura visible,
+inspección de capturas reales, sin aceptación manual atribuida. Datos rotulados
+**EJEMPLO SINTÉTICO**. [Resultado](docs/images/motorsim-4t-resultado-r2-150.png),
+[curvas](docs/images/motorsim-4t-curvas-r2-150.png),
+[comparación](docs/images/motorsim-4t-comparacion-r2-150.png),
+[curvas comparadas](docs/images/motorsim-4t-comparacion-curvas-r2-150.png),
+[barrido](docs/images/motorsim-4t-barrido-r2-150.png) y
+[trabajo por RPM](docs/images/motorsim-4t-barrido-trabajo-r2-150.png).
+Se conservan también las cinco capturas geométricas de entrega 7 y su registro
+`windows-150/recorrido.json` (guardar/cerrar/reabrir, alternancia, inválidos y teclado).
+Las capturas nuevas se obtuvieron reabriendo resultados: cero cálculos al recapturar.
 
-Por esa condición **no se ejecutó C/50 Pa**, ni barrido 4T, extremos C,
-compresión 8,2 o nueva regresión completa 2T. No se conectó el solver 4T a Qt,
-ni se habilitaron resultados/comparación/barridos/importación externos 4T.
-La pestaña **Simulación 2T** conserva su alcance y rotulación. Los JSON del
-protocolo 4T son diagnósticos de consola, no resultados aceptados reabribles
-por el lector de la aplicación. Se conservan íntegros en
-`results/simulacion-2t/cuatro-tiempos-20260916/` (directorio local ignorado por Git).
-Las cuatro etapas dependientes y sus capturas siguen pendientes, no se sustituyen
-con demostraciones ni curvas antiguas.
-
-### Comprobaciones y comandos
-
-**203 pruebas automatizadas aprobadas, 18,506 s**. Incluyen geometría analítica,
-periodicidades, norma de nueve componentes, balances cerrados/abiertos, calor,
-trabajo, v6/v1–v5, edición/guardado/errores, comparación/lectura histórica y proceso.
-Las pruebas de inicio/cancelación/cierre usan un hijo doble sin integración;
-la suite no contiene campañas completas ocultas. Revisión independiente de solo
-lectura: sin defectos reproducibles; igualdad exacta de estado inicial y RHS 2T
-contra 6cbed360 en diez ángulos. Esto es regresión puntual, no la ejecución completa
-2T dependiente aún pendiente. OpenSpec estricto aprobado; sus artefactos documentales
-completos no significan que entrega 8 esté terminada.
-
-Windows al **150 % efectivo**, escritorio desbloqueado: automatización visible e
-inspección real de cinco capturas; guardar/cerrar/reabrir, datos independientes,
-texto inválido y cancelación protegidos, teclado y ancho compacto sin scroll horizontal.
-Datos rotulados **EJEMPLO SINTÉTICO**, con cruce de prueba 700/240 y 500/240°.
-Capturas: [editor](docs/images/motorsim-4t-editor-150.png),
-[alzada/cruce](docs/images/motorsim-4t-alzada-cruce-150.png),
-[área/cruce](docs/images/motorsim-4t-area-cruce-150.png),
-[conductos](docs/images/motorsim-4t-conductos-150.png),
-[compacto](docs/images/motorsim-4t-compacto-150.png).
-Registro local: `results/simulacion-2t/cuatro-tiempos-20260916/windows-150/recorrido.json`.
-**Aceptación manual de la usuaria pendiente**, separada de estas comprobaciones;
-no reabre ni reemplaza la aceptación histórica de entregas 1 y 2.
-
-Versiones comprobadas: Python 3.11.0, PySide6 6.11.2, Node.js 24.19.0 y OpenSpec 1.3.1.
-Sin dependencias nuevas ni modificación de integración/prompts globales. Desde
-PowerShell, instalación en entorno del proyecto (si aún falta) y ejecución:
+Versiones: Python 3.11.0, PySide6 6.11.2, Node.js 24.19.0, OpenSpec 1.3.1.
+Sin nuevas dependencias ni cambios de integración/prompts globales. Instalación
+solo si falta el entorno; en el existente basta el último comando:
 
 ```powershell
 cd E:\dino\Dino
@@ -147,25 +133,22 @@ py -3.11 -m venv .venv
 .\.venv\Scripts\python.exe -m motorsim
 ```
 
-En el entorno existente no hace falta recrear `.venv`. Pruebas rápidas y documentos:
-
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -p 'test*.py'
 openspec validate cuatro-tiempos-basico --strict --no-interactive
+# Releer protocolo y recapturar resultados existentes: no integran.
+.\.venv\Scripts\python.exe tests/verify_four_stroke_protocol.py --root results/simulacion-2t/cuatro-tiempos-20260916/R2
+.\.venv\Scripts\python.exe tests/verify_four_stroke_run_windows.py --root results/simulacion-2t/cuatro-tiempos-20260916/R2
 ```
 
-Recorrido visible sin iniciar el solver (destino nuevo; factor Qt solo del proceso):
-
-```powershell
-.\.venv\Scripts\python.exe tests/verify_four_stroke_windows.py --output results/simulacion-2t/cuatro-tiempos-otra-comprobacion --suffix -otra
-```
-
-Las secciones siguientes conservan evidencia y contratos de las entregas anteriores;
-el formato vigente del proyecto y el estado del bloque 4T son los descritos arriba.
+Pendientes: aceptación manual del bloque por la usuaria y contraste experimental
+con datos reales adecuados. Publicación a cargo de la usuaria. Sin archivar,
+empaquetar ni iniciar otra ampliación. Las secciones siguientes conservan evidencia
+anterior; el estado vigente del bloque 4T es el descrito arriba.
 
 ## Datos externos por RPM — importación y contraste descriptivo
 
-Desde **Simulación 2T → Datos externos…**:
+Desde **Simulación → Datos externos…**:
 seleccionar CSV → declarar magnitud, unidad y procedencia → revisar vista previa →
 confirmar y guardar en carpeta nueva → seleccionar el `series.json` de un barrido
 guardado. No utiliza el proyecto abierto ni calcula puntos nuevos. Cancelar o

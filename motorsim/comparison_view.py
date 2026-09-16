@@ -38,7 +38,7 @@ class ComparisonPlot(QWidget):
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         fm=p.fontMetrics();line=fm.height()+4
         p.setPen(QColor('#c7d9ef'))
-        p.drawText(QRectF(8,0,self.width()-16,line),'Presión–volumen' if self.pv else 'Presión–ángulo · PMI → PMS → PMI')
+        p.drawText(QRectF(8,0,self.width()-16,line),'Presión–volumen' if self.pv else 'Presión–ángulo de ciclo')
         p.drawText(QRectF(8,line,self.width()-16,line),'Presión absoluta [kPa]')
         styles=(('A','#69baf0',Qt.PenStyle.SolidLine),('B','#ffb36b',Qt.PenStyle.DashLine))
         for i,(name,color,style) in enumerate(styles):
@@ -52,7 +52,7 @@ class ComparisonPlot(QWidget):
             return
         xs=[x for rows in self.series for x,y in rows]
         ys=[y for rows in self.series for x,y in rows]
-        lo,hi=(0,max(xs)*1.05) if self.pv else (180,540)
+        lo,hi=(0,max(xs)*1.05) if self.pv else (min(xs),max(xs))
         top=max(ys)*1.05
         margin=max(55,fm.horizontalAdvance(f'{top:.0f}')+12)
         box=QRectF(margin,3*line+8,max(1,self.width()-margin-25),max(1,self.height()-6*line-22))
@@ -62,7 +62,7 @@ class ComparisonPlot(QWidget):
             y=box.bottom()-box.height()*f;x=box.left()+box.width()*f
             p.drawText(QRectF(0,y-line/2,margin-7,line),Qt.AlignmentFlag.AlignRight,f'{top*f:.0f}')
             caption=f'{lo+(hi-lo)*f:.0f}'
-            if not self.pv:caption+='\n'+('PMS' if f==.5 else 'PMI')
+            if not self.pv:caption+='\n'+('PMS' if lo==0 or f==.5 else 'PMI')
             p.drawText(QRectF(x-30,box.bottom()+4,60,2*line),Qt.AlignmentFlag.AlignHCenter,caption)
         for rows,(_,color,style) in zip(self.series,styles):
             path=QPainterPath()
