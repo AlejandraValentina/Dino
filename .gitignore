@@ -1,4 +1,8 @@
 .venv/
+.venv-build/
+/build/windows/
+/dist/
+/results/distribucion-windows/
 __pycache__/
 *.py[cod]
 /results/simulacion-2t/

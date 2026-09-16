@@ -1,0 +1,43 @@
+MotorSim 0.1.0-rc1 — candidata Windows x64
+
+Extraé la carpeta completa y abrí MotorSim.exe. Conservá MotorSimWorker.exe y
+_internal junto a la aplicación. No hace falta instalar Python ni usar consola.
+
+Archivo → Nuevo / Abrir / Guardar / Guardar como. Los proyectos JSON pueden
+quedar incompletos; texto numérico inválido impide guardar. Se aceptan coma o
+punto en el editor. Cambiar 2T/4T conserva sus configuraciones independientes.
+
+Ejemplos: Archivo → Abrir, elegí EJEMPLO_SINTETICO_2T.json o
+EJEMPLO_SINTETICO_4T.json en la carpeta Ejemplos del paquete. No son motores
+medidos. Usá Guardar como para conservar tu propia copia en otra ubicación.
+
+Simulación: elegí referencia 2T/4T o Proyecto actual con condiciones de referencia.
+Comprobar entradas informa ausencias/incompatibilidades. Ejecutar usa una copia
+de los datos válidos, incluidos cambios sin guardar. No rellena dimensiones.
+Cancelar detiene el cálculo; cerrar durante un cálculo también lo cancela.
+Una ejecución fallida/cancelada conserva diagnóstico, no un resultado aceptado.
+
+Barrido del proyecto: 2500–3500 rpm, 2–5 puntos exactos, perfil B/100 Pa,
+secuencial y con parada al primer fallo. Cada punto comienza independientemente.
+Reabrir: Abrir resultado → manifest.json; Abrir barrido → series.json.
+Los resultados quedan en %LOCALAPPDATA%\MotorSim\Resultados, fuera del paquete.
+Editar el proyecto no modifica resultados; se señala configuración anterior.
+
+Comparar resultados: seleccionar A y B compatibles, revisar entradas, resumen
+y curvas; Exportar CSV crea una carpeta nueva. No compara ciclos 2T con 4T.
+Datos externos: importar CSV UTF-8 rpm,value; declarar magnitud, ciclo, unidad
+y procedencia; revisar antes de confirmar. Contraste con RPM exactas, sin interpolar.
+Proyectos, importaciones y exportaciones se guardan donde elijas.
+
+Límites: monocilíndrico, modelo 0D, energía prescrita, alzada idealizada en 4T,
+sin ondas, calibración ni validación experimental. No predice potencia al eje,
+par ni sintonía. Límites por punto: 30 ciclos, 60 s y 512 MiB del cálculo.
+Un resultado individual no repite el estudio de aceptación numérica.
+
+Acerca de identifica la versión y el commit fuente sin Internet. JSON v6 y
+versiones físicas no cambian por empaquetar. Diagnóstico técnico local en
+%LOCALAPPDATA%\MotorSim\Diagnostico si ocurre una excepción inesperada.
+No se recopilan ni envían datos. No hay actualización automática.
+Ejecutable no firmado; no desactives protecciones del equipo para abrirlo.
+Esta candidata no implica aceptación manual ni validación experimental.
+Avisos de dependencias y licencias: carpeta Licencias y AVISOS.txt.

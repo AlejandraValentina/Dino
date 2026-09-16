@@ -20,6 +20,7 @@ from .sweep import plan_rpms, load_sweep, write_index
 from .sweep_view import SweepDialog
 from .comparison_view import ComparisonDialog
 from .external_view import ExternalDialog
+from .runtime import worker_command, diagnostic
 
 
 class PressurePlot(QWidget):
@@ -354,6 +355,7 @@ class SimulationView(QScrollArea):
             return
         try:
             inputs = self._capture()
+            executable,prefix,working_directory=worker_command()
             rpms = self._rpms() if 'origin' in inputs else [3000]
             running_sweep = len(rpms)>1
             target = Path(output) if output is not None else new_output_path()
@@ -402,12 +404,9 @@ class SimulationView(QScrollArea):
         self.sweep_button.setEnabled(False)
         process = QProcess(self)
         self.process = process
-        process.setWorkingDirectory(str(Path(__file__).resolve().parent.parent))
-        executable = Path(sys.executable)
-        if executable.name.lower() == 'pythonw.exe':
-            executable = executable.with_name('python.exe')
-        process.setProgram(str(executable))
-        arguments = ['-u', '-m', 'motorsim.reference_run', '--output', str(self.output), '--control-stdin', '--cycle', self.inputs['case']['project_geometry']['cycle']]
+        process.setWorkingDirectory(working_directory)
+        process.setProgram(executable)
+        arguments = [*prefix, '--output', str(self.output), '--control-stdin', '--cycle', self.inputs['case']['project_geometry']['cycle']]
         if request:
             arguments += ['--sweep-input' if running_sweep else '--project-input', str(request)]
         process.setArguments(arguments)
@@ -475,8 +474,16 @@ class SimulationView(QScrollArea):
 
     def _process_error(self, error):
         if error == QProcess.ProcessError.FailedToStart:
-            self.error_label.setText('No se pudo iniciar Python: '+self.process.errorString())
+            self.error_label.setText('No se pudo iniciar el auxiliar de cálculo: '+self.process.errorString())
+            self._save_error_diagnostic()
             self._finish_cleanup('Error de ejecución')
+
+    def _save_error_diagnostic(self):
+        try:
+            path=diagnostic(self.error_label.text()+'\n'+self._stderr.decode('utf-8',errors='replace'))
+            self.error_label.setText(self.error_label.text()+f'\nDiagnóstico: {path}')
+        except OSError as exc:
+            self.error_label.setText(self.error_label.text()+f'\nNo se pudo guardar diagnóstico: {exc}')
 
     def _finished(self, code, exit_status):
         self._read_progress()
@@ -504,6 +511,7 @@ class SimulationView(QScrollArea):
                 self.project_changed()
             except (ResultError,OSError) as exc:
                 self.error_label.setText(str(exc)+' '+self._stderr.decode('utf-8',errors='replace')[:2000])
+                self._save_error_diagnostic()
                 self._finish_cleanup('Cancelado / índice incompleto' if self.cancel_requested else 'Error de barrido')
             return
         if self.cancel_requested:
@@ -529,6 +537,7 @@ class SimulationView(QScrollArea):
             self._finish_cleanup()
         except (ResultError,OSError) as exc:
             self.error_label.setText(str(exc)+' '+self._stderr.decode('utf-8', errors='replace')[:2000])
+            self._save_error_diagnostic()
             self._finish_cleanup('Error de ejecución o resultado ilegible')
 
     def _finish_cleanup(self, state=None):

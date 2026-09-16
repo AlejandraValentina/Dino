@@ -23,9 +23,48 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
+## Candidata Windows 0.1.0-rc1
+
+Cambio activo: [distribucion-windows](openspec/changes/distribucion-windows/tasks.md).
+Paquete Windows x64 **onedir**: extraer la carpeta completa y abrir `MotorSim.exe`.
+`MotorSimWorker.exe` y `_internal` deben permanecer juntos. No requiere activar
+un entorno ni instalar Python. `LEEME.txt`, `Ejemplos/` y `Licencias/` acompañan
+la carpeta. Los ejemplos se generan desde las referencias y son sintéticos.
+No firmado, sin instalador, actualizador, asociación global ni funciones físicas nuevas.
+
+**Construcción** (Windows x64, Python 3.11.0; entorno operativo conservado):
+
+```powershell
+cd E:\dino\Dino
+.\.venv\Scripts\python.exe -m venv .venv-build
+.\.venv-build\Scripts\python.exe -m pip install -r packaging/requirements-build.txt
+.\.venv-build\Scripts\python.exe packaging/build_windows.py
+```
+
+El comando final exige Git limpio, versiones fijadas y destino nuevo. No borra
+construcciones ni datos. Produce carpeta, ZIP y SHA256 en `dist/`, identificados por
+versión y commit. `build.json` incluido registra fuente, arquitectura, runtime y
+herramientas; Acerca de muestra versión/commit sin Git ni Internet. La versión de
+producto es independiente de JSON v6, modelos y contratos de resultados.
+Receta [PyInstaller onedir](https://pyinstaller.org/en/stable/spec-files.html), con
+GUI windowed y auxiliar console conectado por QProcess sin shell.
+
+Resultados: `%LOCALAPPDATA%\MotorSim\Resultados`; errores inesperados:
+`%LOCALAPPDATA%\MotorSim\Diagnostico`. Proyectos/exportaciones/importaciones
+respetan el destino elegido. Mover o sustituir el paquete no migra esos datos.
+No se escriben en `_internal` ni se envían a ningún servicio.
+
+Comprobación inicial: 224 pruebas automatizadas aprobadas (36,193 s), revisión
+independiente puntual sin defectos reproducibles. Paquete de prueba abre fuera del
+repositorio, con cwd distinto, sin PYTHONPATH/VIRTUAL_ENV y PATH solo de Windows;
+edición/guardado/inválidos/alternancia/v1 comprobados por automatización externa.
+La construcción final y su protocolo numérico se registran al concluir en tasks.md.
+Equipo sin Python instalado, offline aislado, aceptación manual y validación
+experimental siguen pendientes mientras no exista evidencia específica.
+
 ## Bloque 4T básico — comprobado el 16/09/2026
 
-Cambio vigente: [cuatro-tiempos-basico](openspec/changes/cuatro-tiempos-basico/tasks.md).
+Cambio funcional conservado: [cuatro-tiempos-basico](openspec/changes/cuatro-tiempos-basico/tasks.md).
 **Entregas 7 y 8 completadas técnicamente para el alcance autorizado.** Aceptación
 manual de la usuaria y validación experimental pendientes, separadas de pruebas e
 inspección automatizada. Entrega 6 conserva el pendiente de mediciones reales.
@@ -142,8 +181,8 @@ openspec validate cuatro-tiempos-basico --strict --no-interactive
 ```
 
 Pendientes: aceptación manual del bloque por la usuaria y contraste experimental
-con datos reales adecuados. Publicación a cargo de la usuaria. Sin archivar,
-empaquetar ni iniciar otra ampliación. Las secciones siguientes conservan evidencia
+con datos reales adecuados. Publicación a cargo de la usuaria. Sin archivar ni iniciar otra ampliación física;
+el empaquetado se autoriza por el cambio distribucion-windows. Las secciones siguientes conservan evidencia
 anterior; el estado vigente del bloque 4T es el descrito arriba.
 
 ## Datos externos por RPM — importación y contraste descriptivo

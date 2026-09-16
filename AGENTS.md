@@ -6,6 +6,14 @@ Leer README.md y el cambio solicitado dentro de `openspec/changes/` antes de
 modificar archivos. `base-escritorio` es la entrega inicial; su límite de nombre,
 tipo y archivos pertenece a esa entrega. El cambio autorizado actual es
 `cuatro-tiempos-basico`: proposal.md, design.md, specs/cuatro-tiempos-basico/spec.md y tasks.md.
+Continuación autorizada: `distribucion-windows` es ahora el cambio activo.
+Leer sus proposal/design/spec/tasks. Preparar candidata 0.1.0-rc1 Windows x64
+PyInstaller onedir con GUI y worker, probar el ZIP extraído y registrar evidencia.
+Esta orden sustituye exclusivamente la prohibición de empaquetar: sin ampliar física,
+publicar, etiquetar o archivar. Preservar 18194d7/da27ee25 y evidencia anterior.
+Tres puntos completos de regresión (2T B3000 y barrido 4T B2500/3000), cancelaciones
+breves y máximo conjunto 300 s de integración; no repetir campañas científicas.
+Los presupuestos R2 siguientes son históricos, no el presupuesto de distribución.
 Bloque autorizado de entregas 7 y 8: configuración 4T, JSON v6, modelo de tres
 volúmenes I/C/E, ejecución e integración condicionadas a los criterios numéricos.
 Preservar 6cbed360 y toda evidencia anterior. Entrega 6 conserva herramientas
@@ -19,7 +27,7 @@ preservar R1 fallida, af11976/b862900 y evidencia. Reutilizar A/B/C sin integrar
 Continuar C50 e integración/protocolo si sus condiciones aprueban, sin reiniciar
 los 51,125 s consumidos del presupuesto conjunto.
 Commits locales lógicos sin publicar, sin autenticación/configuración global.
-No archivar, empaquetar ni ampliar física fuera del bloque.
+No archivar ni ampliar física fuera del bloque autorizado; empaquetado según la continuación anterior.
 No alterar retrospectivamente requisitos ni verificaciones de entregas anteriores.
 
 La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md) define el orden, los objetivos y

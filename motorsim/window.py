@@ -22,6 +22,7 @@ from .ports_view import PortsView
 from .ducts_view import DuctsView
 from .valves_view import ValvesView
 from .simulation_view import SimulationView
+from .runtime import APP_VERSION, build_info, resource
 
 
 class _FilePathLabel(QLabel):
@@ -123,6 +124,9 @@ class MainWindow(QMainWindow):
         self._build_toolbar()
         self._build_workspace()
         self._build_statusbar()
+        help_menu=self.menuBar().addMenu('A&yuda')
+        help_menu.addAction('Guía breve…',self.show_help)
+        help_menu.addAction('Acerca de MotorSim…',self.show_about)
 
         self.name_edit.textChanged.connect(self._edited)
         self.cycle_combo.currentTextChanged.connect(self._edited)
@@ -130,6 +134,19 @@ class MainWindow(QMainWindow):
             edit.textChanged.connect(self._edited)
         self.notes_edit.textChanged.connect(self._edited)
         self._activate(Project(), None)
+
+    def show_help(self):
+        dialog=QDialog(self);dialog.setWindowTitle('MotorSim — Guía breve');dialog.resize(650,450)
+        layout=QVBoxLayout(dialog);text=QPlainTextEdit();text.setReadOnly(True)
+        text.setPlainText(resource('ayuda.txt').read_text(encoding='utf-8'));layout.addWidget(text)
+        dialog.exec()
+
+    def show_about(self):
+        info=build_info()
+        QMessageBox.about(self,'Acerca de MotorSim',f'MotorSim {APP_VERSION}\nCandidata Windows x64\n'
+            f'Fuente: {info["source_commit"]}\nProyecto JSON v6; resultados 2T v1–v3 / 4T v4.\n'
+            'Modelos 0D 2T/360° y 4T/720°, energía prescrita; sin ondas ni validación experimental.\n'
+            'Ejecutable no firmado. Ayuda y avisos de dependencias incluidos en la carpeta.')
 
     @staticmethod
     def _label(text: str, style: str = "") -> QLabel:
