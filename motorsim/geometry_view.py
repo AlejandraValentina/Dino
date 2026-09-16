@@ -137,8 +137,9 @@ class GeometryView(QScrollArea):
         self.mechanism = Mechanism()
         self.position_plot = GeometryPlot("Posición desde PMS", "mm")
         self.volume_plot = GeometryPlot("Volumen del cilindro", "cm³")
-        self.details = QWidget()
-        info = QVBoxLayout(self.details)
+        from .ui import Panel
+        self.details = Panel('DERIVADOS Y POSICIÓN')
+        info = self.details.content
         info.setContentsMargins(12, 12, 12, 12)
         self.project_label = QLabel()
         self.project_label.setTextFormat(Qt.TextFormat.PlainText)
@@ -166,8 +167,9 @@ class GeometryView(QScrollArea):
         self._wide = None
         self._arrange()
 
-    def attach_editor(self,editor):
+    def attach_editor(self,editor,derived=None):
         self.editor=editor;self.body.layout().removeItem(self.grid)
+        if derived is not None:self.details.content.insertWidget(1,derived)
         self.visual=QWidget();self.visual.setLayout(self.grid)
         self.combined=QGridLayout();self.combined.setSpacing(22)
         self.body.layout().insertLayout(2,self.combined);self._wide=None;self._arrange()
@@ -179,7 +181,9 @@ class GeometryView(QScrollArea):
             self.combined.addWidget(self.visual,0 if self.editor_wide else 1,1 if self.editor_wide else 0)
             self.combined.setColumnStretch(0,2 if self.editor_wide else 1)
             self.combined.setColumnStretch(1,3 if self.editor_wide else 0)
-        wide = (self.visual.width() if self.editor is not None else self.viewport().width()) >= max(850, self.fontMetrics().horizontalAdvance("M")*62)
+        available=self.viewport().width()-48
+        if self.editor is not None and self.editor_wide:available=(available-22)*3/5
+        wide = available >= max(600, self.fontMetrics().horizontalAdvance("M")*42)
         if wide == self._wide:
             return
         self._wide = wide
@@ -210,8 +214,8 @@ class GeometryView(QScrollArea):
         def value(v):
             return "—" if v is None else f"{v:.2f}" if abs(v)<1e6 else f"{v:.3e}"
         summary = (f"Cámara / mínimo: {value(self.data.chamber)} cm³\n"
-                   f"Volumen máximo: {value(self.data.maximum)} cm³\n"
-                   f"Cilindrada por cilindro: {value(self.data.displacement)} cm³")
+                   f"Volumen máximo: {value(self.data.maximum)} cm³")
+        if self.editor is None:summary += f"\nCilindrada por cilindro: {value(self.data.displacement)} cm³"
         if self.data.errors.get("chamber"):
             summary += "\n" + self.data.errors["chamber"]
         summary += "\nPMS: 0° / 360°" + (" / 720° · PMI: 180° / 540°" if cycle == "4T" else " · PMI: 180°")

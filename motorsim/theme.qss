@@ -83,5 +83,19 @@ QTreeWidget#navigation { border: none; border-right: 1px solid #26344a; padding:
 QTreeWidget#navigation::item { padding: 8px 6px; border-left: 2px solid transparent; }
 QTreeWidget#navigation::item:selected { background: #1b3850; border-left-color: #69baf0; color: #d9efff; }
 QTreeWidget#navigation::item:focus { border: 1px solid #8bcfff; }
-QLabel#pageTitle { font-size: 18pt; }
+QLabel#pageTitle { font-size: 24pt; font-weight: 600; color: #edf4ff; }
 QTabBar::tab { padding: 7px 12px; }
+
+/* Superficies de trabajo: entrada, estado y consulta. */
+QFrame#panel { background: #111e31; border: 1px solid #293d56; border-radius: 7px; }
+QLabel#panelTitle { color: #8fbada; font-size: 9pt; font-weight: 600; padding-bottom: 4px; }
+QLabel#subtitle { color: #b2c5dc; font-size: 11pt; }
+QPushButton#primaryAction { background: #258bd0; color: #f2f9ff; border-color: #58b8f5; font-weight: 600; }
+QPushButton#primaryAction:hover { background: #327fb2; }
+QPushButton#primaryAction:disabled { background: #172338; color: #8396ae; border-color: #34455c; }
+QPushButton#primaryAction:focus { border: 2px solid #d5efff; }
+QTreeWidget#navigation { background: #101c2e; padding: 10px 6px; }
+QTreeWidget#navigation::item { padding: 7px 8px; border-left: 3px solid transparent; }
+QTreeWidget#navigation::item:hover { background: #1b3048; }
+QTreeWidget#navigation::item:selected { background: #204761; border-left: 3px solid #7dd2ff; color: #ffffff; font-weight: 600; }
+QTreeWidget#navigation::item:focus { border: 1px solid #b4e1ff; border-left: 3px solid #7dd2ff; }

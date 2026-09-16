@@ -23,6 +23,14 @@ del ciclo activo y sus conductos. Cambiar de sección conserva los borradores.
 Resultados permite abrir resultados/barridos y consultar sus puntos. Comparar
 y Datos externos están integrados en la navegación; no ejecutan simulaciones.
 
+Los paneles se apilan al reducir el ancho. En cada motor, el contexto resume
+eventos, conductos y observaciones del ciclo activo. Simulación separa preparación,
+progreso y resultado; este último conserva su procedencia aunque cambie el proyecto.
+Comparar distingue la base A y alternativa B y muestra su compatibilidad.
+Datos externos sigue cuatro pasos: importar/abrir datos, seleccionar barrido,
+consultar contraste y exportar. Exportar se habilita al existir un contraste válido.
+Las advertencias describen límites del modelo, no validación experimental.
+
 Simulación: elegí referencia 2T/4T o Proyecto actual con condiciones de referencia.
 Comprobar entradas informa ausencias/incompatibilidades. Ejecutar usa una copia
 de los datos válidos, incluidos cambios sin guardar. No rellena dimensiones.

@@ -75,6 +75,9 @@ class ComparisonPlot(QWidget):
                    'Volumen [cm³] · orden temporal' if self.pv else 'Ángulo de ciclo [°]')
 
 
+from .ui import Header, Panel
+
+
 class ComparisonDialog(QDialog):
     def reject(self):
         if self.isWindow():super().reject()
@@ -91,19 +94,21 @@ class ComparisonDialog(QDialog):
         layout.addWidget(scroll)
         body=QWidget();content=QVBoxLayout(body);content.setContentsMargins(16,12,16,12);content.setSpacing(12)
         scroll.setWidget(body);self.scroll=scroll
+        content.addWidget(Header('Comparar','Seleccioná la configuración base A y la alternativa B.','La compatibilidad se comprueba antes de mostrar diferencias.'))
         self.cards_grid=QGridLayout();self.cards=[];self.info=[];self.select_buttons=[]
         for i,title in enumerate(('A · configuración base','B · configuración modificada')):
-            card=QGroupBox(title);box=QVBoxLayout(card)
+            card=Panel(title);box=card.content
             button=QPushButton(f'Abrir resultado {"AB"[i]}…')
             button.clicked.connect(lambda checked=False,index=i:self.select_result(index))
             box.addWidget(button,alignment=Qt.AlignmentFlag.AlignLeft)
-            info=label('Sin selección');box.addWidget(info)
+            info=label('No hay resultado seleccionado. Abrí un manifest.json guardado.');box.addWidget(info)
             self.cards.append(card);self.info.append(info);self.select_buttons.append(button)
         content.addLayout(self.cards_grid)
         self.compatibility_label=label('Seleccioná A y B para comprobar compatibilidad.','sectionTitle')
-        content.addWidget(self.compatibility_label)
+        compatibility=Panel('COMPATIBILIDAD');compatibility.content.addWidget(self.compatibility_label);content.addWidget(compatibility)
         self.error_label=label('','fieldError');self.error_label.hide();content.addWidget(self.error_label)
-        self.tabs=QTabWidget();content.addWidget(self.tabs)
+        self.empty=Panel('SIN COMPARACIÓN');self.empty.content.addWidget(label('Cargá ambos resultados. Si son compatibles, aquí se mostrarán magnitudes, diferencias de entradas y curvas superpuestas.','unit'));content.addWidget(self.empty)
+        self.tabs=QTabWidget();content.addWidget(self.tabs);self.tabs.hide()
         summary=QWidget();summary_layout=QVBoxLayout(summary)
         summary_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.table=QTableWidget(0,6)
@@ -172,6 +177,7 @@ class ComparisonDialog(QDialog):
 
     def _refresh(self):
         self.comparison=None;self.export_button.setEnabled(False)
+        self.tabs.setVisible(all(self.results));self.empty.setVisible(not all(self.results))
         self.table.setRowCount(0);self.differences.clear()
         self.angle_plot.set_curves([]);self.pv_plot.set_curves([])
         if not all(self.results):return

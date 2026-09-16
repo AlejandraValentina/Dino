@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication,QPushButton
+from PySide6.QtWidgets import QApplication,QPushButton,QToolButton
 from motorsim.window import MainWindow
 from motorsim.simulation_case import geometry
 from motorsim.four_stroke import geometry as geometry4
@@ -75,7 +75,7 @@ class WorkspaceTests(unittest.TestCase):
         result=v.result;inputs=v.inputs.copy();w.navigation.go('results')
         self.assertIs(v.result_panel.parentWidget(),w.result_workspace.detail)
         w._activate(geometry4(),None);self.assertIs(v.result,result);self.assertEqual(v.inputs,inputs)
-        w.navigation.go('simulation');self.assertIs(v.result_panel.parentWidget(),v.widget())
+        w.navigation.go('simulation');self.assertIs(v.result_panel.parentWidget(),v.run_workspace)
         self.assertEqual(path.read_bytes(),original)
     def test_analysis_embedded_and_does_not_launch_worker(self):
         w=self.w
@@ -87,6 +87,25 @@ class WorkspaceTests(unittest.TestCase):
             w.navigation.go(key);QTest.keyClick(page,Qt.Key.Key_Escape)
             self.assertTrue(page.isVisible())
         self.assertFalse(w.external_page.sweep_button.isEnabled());self.assertFalse(w.external_page.export_button.isEnabled())
+    def test_refined_placeholders_and_preparation_are_not_results(self):
+        w=self.w;w._activate(geometry(),None);v=w.simulation_view
+        v.origin_combo.setCurrentIndex(1);w.navigation.go('simulation')
+        self.assertIsNone(v.result);self.assertTrue(v.identity_label.isHidden())
+        self.assertIn('No hay resultado',v.result_status_label.text())
+        self.assertTrue(w.comparison_page.tabs.isHidden())
+        self.assertFalse(w.external_page.export_button.isEnabled())
+        for key in ('open','save'):
+            button=next(b for b in w.summary_page.findChildren(QToolButton) if b.defaultAction() is w.actions[key])
+            self.assertEqual(button.toolButtonStyle(),Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+    def test_refined_columns_stack_without_losing_controls(self):
+        from motorsim.ui import Columns
+        w=self.w;w._activate(geometry(),None)
+        w.resize(900,650);self.app.processEvents()
+        for columns in w.summary_page.findChildren(Columns):self.assertFalse(columns.wide)
+        for key in ('summary','motor2','simulation','external'):
+            w.navigation.go(key);self.app.processEvents()
+            page=w.navigation.pages[key]
+            self.assertEqual(page.horizontalScrollBar().maximum(),0,key)
     def test_embedded_csv_preview_confirmation_and_cancel(self):
         w=self.w;w.navigation.go('external');page=w.external_page
         path=Path(self.tmp.name)/'synthetic.csv';path.write_text('rpm,value\n2500,52\n3000,50\n')

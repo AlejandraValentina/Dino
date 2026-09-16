@@ -23,7 +23,26 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
-## Ejemplos precargados — candidata 0.1.0-rc4
+## Refinamiento visual — rc4 actual
+
+`refinamiento-ui-final` conserva la navegación permanente por proyecto,
+configuración, cálculo y análisis. Las ocho vistas usan encabezados claros y
+paneles de entrada, estado y consulta: Resumen operativo; Geometría con derivados
+junto al esquema; motores con contexto del ciclo; Simulación con preparación y
+resultado separados; Resultados con fuente y pestañas; Comparar con A/B y
+compatibilidad; Datos externos con importación, barrido, contraste y exportación.
+Los paneles se apilan en anchos reducidos. Física, worker, JSON v6, CSV y reglas
+de ejecución/comparación permanecen intactos.
+
+247 pruebas aprobadas; OpenSpec estricto y revisión independiente puntual sin
+defectos identificados. Inspección de ventanas Qt Windows reales al 100/125/150 %,
+incluidos estados vacíos e históricos. Evidencia y límites en
+[tasks.md](openspec/changes/refinamiento-ui-final/tasks.md). El monitor disponible
+es 1440×900: la captura de ancho 1920 no acredita un escritorio físico Full HD.
+Aceptación manual final pendiente. La nueva rc4 se identifica por commit y conserva
+los paquetes anteriores. Construcción y recorrido del EXE se registran al obtenerlos.
+
+## Ejemplos precargados — rc4 anterior conservada
 
 Archivo → Cargar ejemplo ofrece **2T referencia**, **2T compresión 8.2**,
 **4T referencia** y **4T compresión 8.2**. Todos llevan

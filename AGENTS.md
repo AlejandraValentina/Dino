@@ -2,6 +2,12 @@
 
 ## Lectura y autoridad
 
+Orden actual: `refinamiento-ui-final`, solo presentación/flujo en ocho workspaces.
+Preservar física, worker, formatos, reglas y todas las candidatas/evidencias.
+La nueva rc4 se distingue por commit, sin sobrescribir la rc4 de ejemplos ni rc3.
+Pruebas UI, históricos y un punto/cancelación breve del paquete; sin campañas.
+Una revisión independiente puntual; commits locales, sin publicar ni archivar.
+
 Orden actual: `ejemplos-precargados` añade cuatro proyectos sintéticos desde las
 referencias canónicas y su carga protegida; candidata rc4 conservando rc3.
 Sin cambios físicos/formatos ni campañas. Se permite usar resultados existentes

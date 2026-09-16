@@ -21,6 +21,7 @@ from .sweep_view import SweepDialog
 from .comparison_view import ComparisonDialog
 from .external_view import ExternalDialog
 from .runtime import worker_command, diagnostic
+from .ui import Header, Panel, Columns
 
 
 class PressurePlot(QWidget):
@@ -110,41 +111,45 @@ class SimulationView(QScrollArea):
         body=QWidget();layout=QVBoxLayout(body);layout.setContentsMargins(20,16,20,16);layout.setSpacing(12)
         def label(text='',style=''):
             w=QLabel(text);w.setTextFormat(Qt.TextFormat.PlainText);w.setWordWrap(True);w.setObjectName(style);return w
-        layout.addWidget(label('Simulación','pageTitle'))
+        layout.addWidget(Header('Simulación','Prepará las entradas y seguí el cálculo del caso seleccionado.','Modelo 0D · Energía prescrita · Sin ondas ni validación experimental.'))
+        preparation=Panel('01 · PREPARACIÓN');self.run_workspace=QWidget();run_layout=QVBoxLayout(self.run_workspace);run_layout.setContentsMargins(0,0,0,0);run_layout.setSpacing(16)
+        self.columns=Columns(preparation,self.run_workspace,950,(2,3));layout.addWidget(self.columns)
         self.title_label=label('','sectionTitle');self.description_label=label('','unit');self.parameters_label=label()
-        for w in (self.title_label,self.description_label,self.parameters_label):layout.addWidget(w)
-        layout.addWidget(label('Modelo 0D · Energía prescrita · Sin ondas','unit'))
-        layout.addWidget(label('Configuración del cálculo','sectionTitle'))
+        for w in (self.title_label,self.description_label,self.parameters_label):preparation.content.addWidget(w)
+        preparation.content.addWidget(label('Origen de las entradas','panelTitle'))
         self.origin_combo=QComboBox();self.origin_combo.addItems(['Caso de referencia S2T-0D-01','Proyecto actual, con condiciones de referencia','Caso de referencia S4T-0D-01'])
-        self.origin_combo.setAccessibleName('Origen de la próxima ejecución');layout.addWidget(self.origin_combo)
+        self.origin_combo.setAccessibleName('Origen de la próxima ejecución');preparation.content.addWidget(self.origin_combo)
+        self.origin_combo.setMinimumWidth(0)
+        self.origin_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon);self.origin_combo.setMinimumContentsLength(16)
         self.options=QWidget();form=QFormLayout(self.options);form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
         self.mode_combo=QComboBox();self.mode_combo.addItems(['Punto individual','Barrido corto']);form.addRow('Ejecución',self.mode_combo)
         self.rpm_edit=QLineEdit('3000');self.start_rpm_edit,self.end_rpm_edit,self.step_rpm_edit=QLineEdit('2500'),QLineEdit('3500'),QLineEdit('500')
         for title,edit in [('Punto [rpm]',self.rpm_edit),('Inicio [rpm]',self.start_rpm_edit),('Final [rpm]',self.end_rpm_edit),('Incremento [rpm]',self.step_rpm_edit)]:
             edit.setMaximumWidth(150);edit.setAccessibleName(title);form.addRow(title,edit)
-        self.plan_label=label();form.addRow(self.plan_label);layout.addWidget(self.options);self.options.hide()
+        self.plan_label=label();form.addRow(self.plan_label);preparation.content.addWidget(self.options);self.options.hide()
         self.run_button=QPushButton('&Ejecutar');self.cancel_button=QPushButton('&Cancelar');self.cancel_button.setEnabled(False)
         self.check_button=QPushButton('Compro&bar entradas');self.details_button=QPushButton('&Detalles')
+        self.run_button.setObjectName('primaryAction')
         actions=QGridLayout()
-        for i,w in enumerate((self.check_button,self.run_button,self.cancel_button,self.details_button)):actions.addWidget(w,i//2,i%2)
-        layout.addLayout(actions)
-        layout.addWidget(label('Progreso','sectionTitle'))
+        for i,w in enumerate((self.check_button,self.details_button,self.run_button,self.cancel_button)):actions.addWidget(w,i//2,i%2)
+        preparation.content.addWidget(label('Validación y ejecución','panelTitle'));preparation.content.addLayout(actions)
+        preparation.content.addStretch()
+        progress=Panel('02 · ESTADO DEL CÁLCULO');run_layout.addWidget(progress)
         self.state_label=label('Listo para ejecutar','sectionTitle');self.progress_label=label('Ciclos completos: 0 · Tiempo: 0,0 s','unit')
         self.error_label=label('','fieldError')
-        for w in (self.state_label,self.progress_label):layout.addWidget(w)
-        self.message_host=QVBoxLayout();self.message_host.addWidget(self.error_label);layout.addLayout(self.message_host)
+        for w in (self.state_label,self.progress_label):progress.content.addWidget(w)
+        self.message_host=QVBoxLayout();self.message_host.addWidget(self.error_label);preparation.content.addLayout(self.message_host)
         self.open_button=QPushButton('&Abrir resultado…');self.open_sweep_button=QPushButton('Abrir barrido…');self.sweep_button=QPushButton('Ver barrido…');self.sweep_button.setEnabled(False)
         self.compare_button=QPushButton('Comparar resultados…');self.external_button=QPushButton('Datos externos…')
         self.compare_button.hide();self.external_button.hide();self.comparison_dialog=None;self.external_dialog=None
         self.external_button.clicked.connect(self.show_external)
-        self.result_panel=QWidget();result_layout=QVBoxLayout(self.result_panel);result_layout.setContentsMargins(0,0,0,0)
-        result_layout.addWidget(label('Resultado actual','sectionTitle'))
-        self.result_status_label=label('Sin resultado cargado','unit');result_layout.addWidget(self.result_status_label)
+        self.result_panel=Panel('RESULTADO ACTUAL');result_layout=self.result_panel.content
+        self.result_status_label=label('No hay resultado abierto','sectionTitle');result_layout.addWidget(self.result_status_label)
         self.identity_label=label();self.stale_label=label('','fieldError')
         result_layout.addWidget(self.identity_label);result_layout.addWidget(self.stale_label)
         self.result_tabs=QTabWidget();result_layout.addWidget(self.result_tabs)
         summary=QWidget();summary_layout=QVBoxLayout(summary)
-        self.summary_label=label('Abrí un resultado guardado o ejecutá un caso admitido.');self.summary_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.summary_label=label('Abrí un resultado o un barrido en Resultados para consultar datos, o ejecutá un caso admitido.');self.summary_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.memory_label=label('','unit');self.path_label=label('Cada ejecución se guarda en una carpeta nueva de MotorSim/Resultados.','unit')
         for w in (self.summary_label,self.memory_label,self.path_label):summary_layout.addWidget(w)
         summary_layout.addStretch();self.result_tabs.addTab(summary,'Resumen')
@@ -152,7 +157,7 @@ class SimulationView(QScrollArea):
         self.result_tabs.addTab(plots,'Curvas')
         self.parameters_text=QPlainTextEdit();self.parameters_text.setReadOnly(True);self.result_tabs.addTab(self.parameters_text,'Parámetros')
         self.balances_text=QPlainTextEdit();self.balances_text.setReadOnly(True);self.result_tabs.addTab(self.balances_text,'Balances')
-        self.result_host=QVBoxLayout();self.result_host.addWidget(self.result_panel);layout.addLayout(self.result_host)
+        self.result_host=QVBoxLayout();self.result_host.addWidget(self.result_panel);run_layout.addLayout(self.result_host)
         layout.addStretch();self.setWidget(body)
         self.timer = QTimer(self)
         self.timer.setInterval(200)
@@ -286,6 +291,7 @@ class SimulationView(QScrollArea):
         self.identity_label.setText((f"Proyecto utilizado: {origin['project_name']} · "
             + ('con cambios sin guardar' if origin['dirty'] else 'sin cambios pendientes')
             + f"\nArchivo al ejecutar: {origin['source_path'] or 'sin archivo asociado'}") if origin else '')
+        self.identity_label.setVisible(bool(origin) and (self.result is not None or self.active or self.sweep is not None))
         self.parameters_text.setPlainText(json.dumps(self.inputs,ensure_ascii=False,indent=2))
         self.project_changed()
 
@@ -303,6 +309,7 @@ class SimulationView(QScrollArea):
             except (ProjectError, TypeError):
                 stale = True
         self.stale_label.setText('El resultado corresponde a una configuración anterior' if stale else '')
+        self.stale_label.setVisible(stale)
         if self.sweep_dialog:self.sweep_dialog.stale_label.setText(self.stale_label.text())
 
     @property

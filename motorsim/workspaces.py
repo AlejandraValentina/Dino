@@ -1,9 +1,11 @@
 """Composición por tareas. No contiene validadores, persistencia ni cálculo físico."""
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,
     QTreeWidget,QTreeWidgetItem,QStackedWidget,QScrollArea,QTabWidget,QPushButton,
-    QPlainTextEdit,QSizePolicy)
+    QPlainTextEdit,QSizePolicy,QMenu,QToolButton)
 from .project import ProjectError
+from .ui import Header, Panel, Columns
 
 
 def label(text='',style=''):
@@ -31,6 +33,8 @@ class Navigation(QWidget):
     def add_page(self,group,key,title,page):
         if group not in self.groups:
             node=QTreeWidgetItem(self.tree,[group]);node.setFlags(Qt.ItemFlag.ItemIsEnabled)
+            font=self.tree.font();font.setPointSize(8);font.setBold(True)
+            node.setFont(0,font);node.setForeground(0,QColor('#839bb7'))
             node.setExpanded(True);self.groups[group]=node
         item=QTreeWidgetItem(self.groups[group],[title]);item.setData(0,Qt.ItemDataRole.UserRole,key)
         item.setToolTip(0,title);self.items[key]=item;self.pages[key]=page;self.stack.addWidget(page)
@@ -57,22 +61,37 @@ class SummaryPage(QScrollArea):
     def __init__(self,owner):
         super().__init__();self.owner=owner;self.setWidgetResizable(True);self.setFrameShape(QScrollArea.Shape.NoFrame)
         body=QWidget();box=QVBoxLayout(body);box.setContentsMargins(24,20,24,20);box.setSpacing(16)
-        box.addWidget(label('Resumen del proyecto','pageTitle'))
+        box.addWidget(Header('Resumen','Identidad, geometría y preparación del proyecto.'))
         self.tabs=QTabWidget();box.addWidget(self.tabs)
-        summary=QWidget();layout=QVBoxLayout(summary);layout.setSpacing(18)
-        self.identity=label('','sectionTitle');layout.addWidget(self.identity)
-        self.facts=label();self.facts.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse);layout.addWidget(self.facts)
-        self.file=label('','unit');layout.addWidget(self.file)
-        self.ready=label('','sectionTitle');layout.addWidget(self.ready)
-        self.attention=QVBoxLayout();layout.addLayout(self.attention);layout.addStretch()
+        summary=QWidget();layout=QVBoxLayout(summary);layout.setContentsMargins(0,14,0,0);layout.setSpacing(16)
+        identity=Panel('PROYECTO ACTIVO');geometry=Panel('GEOMETRÍA ESENCIAL')
+        self.identity=label('','sectionTitle');identity.content.addWidget(self.identity)
+        self.file=label('','unit');identity.content.addWidget(self.file);identity.content.addStretch()
+        self.facts=label();self.facts.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse);geometry.content.addWidget(self.facts);geometry.content.addStretch()
+        layout.addWidget(Columns(identity,geometry,800,(3,2)))
+        preparation=Panel('PREPARACIÓN');actions=Panel('CONTINUAR')
+        self.ready=label('','sectionTitle');preparation.content.addWidget(self.ready)
+        self.attention=QVBoxLayout();preparation.content.addLayout(self.attention)
+        preparation.content.addWidget(label('Revisá los datos antes de ejecutar. Las condiciones de cálculo se definen en Simulación.','unit'))
+        actions.content.addWidget(label('Abrí un proyecto, guardá tu trabajo o empezá con un ejemplo sintético.','unit'))
+        row=QGridLayout();actions.content.addLayout(row)
+        for i,key in enumerate(('open','save')):
+            button=QToolButton();button.setDefaultAction(owner.actions[key]);button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon);row.addWidget(button,0,i)
+        example=QToolButton();example.setText('Cargar ejemplo');menu=QMenu(example)
+        menu.addActions(list(owner.example_actions.values()));example.setMenu(menu)
+        example.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup);row.addWidget(example,1,0,1,2)
+        self.simulate_button=QPushButton('Ir a simulación →');self.simulate_button.setObjectName('primaryAction')
+        self.simulate_button.clicked.connect(lambda:owner.navigation.go('simulation'));actions.content.addWidget(self.simulate_button)
+        layout.addWidget(Columns(preparation,actions,800,(3,2)))
+        layout.addStretch()
         self.tabs.addTab(summary,'Resumen');self.tabs.addTab(owner.general_group,'Datos del proyecto')
         box.addStretch();self.setWidget(body);self.issue_routes={}
     def refresh(self):
         w=self.owner;cycle=w.cycle_combo.currentText();name=w.name_edit.text() or 'Sin nombre'
         self.identity.setText(name+' · '+cycle+'\nFabricante / modelo: '+' / '.join(x.text() or '—' for x in w.text_edits.values()))
         def value(key):return w.numeric_edits[key].text() or '—'
-        self.facts.setText(f'Cilindros: {value("cylinder_count")}    ·    Diámetro × carrera: {value("bore_mm")} × {value("stroke_mm")} mm\n'
-            f'Cilindrada: {w.total_volume_label.text()} cm³    ·    Compresión: {value("compression_ratio")}:1')
+        self.facts.setText(f'Cilindros: {value("cylinder_count")}\nDiámetro × carrera: {value("bore_mm")} × {value("stroke_mm")} mm\n'
+            f'Compresión: {value("compression_ratio")}:1\nCilindrada por cilindro: {w.volume_label.text()} cm³\nCilindrada total: {w.total_volume_label.text()} cm³')
         self.file.setText(w.state_label.text()+'\n'+(str(w.path) if w.path else 'Sin archivo asociado'))
         try:
             w.execution_snapshot()
@@ -100,40 +119,47 @@ class SummaryPage(QScrollArea):
             page.errors.setText('\n'.join(self.issue_routes.get(page.key,[])))
 
 
-class MotorPage(QWidget):
+class MotorPage(QScrollArea):
     def __init__(self,cycle,sections):
         super().__init__();self.key='motor2' if cycle=='2T' else 'motor4'
-        box=QVBoxLayout(self);box.setContentsMargins(18,12,18,12)
-        box.addWidget(label('Motor '+cycle+' · Configuración admitida','pageTitle'))
-        self.tabs=QTabWidget();box.addWidget(self.tabs,1)
+        self.setWidgetResizable(True);self.setFrameShape(QScrollArea.Shape.NoFrame)
+        body=QWidget();self.setWidget(body);box=QVBoxLayout(body);box.setContentsMargins(20,18,20,18);box.setSpacing(16)
+        box.addWidget(Header('Motor '+cycle,'Configuración admitida · '+('Lumbreras, admisión y cárter; conductos del motor.' if cycle=='2T' else 'Válvulas, distribución y conductos del motor.'),'Geometría idealizada · Sin validación experimental.'))
+        self.tabs=QTabWidget();self.tabs.setMinimumHeight(440)
         for title,widget in sections:
             for heading in widget.findChildren(QLabel,'pageTitle'):heading.hide()
             self.tabs.addTab(widget,title)
-        self.overview=label('','unit');box.addWidget(self.overview)
-        self.context=QPlainTextEdit();self.context.setReadOnly(True);self.context.setMaximumHeight(155);self.context.hide()
+        context_panel=Panel('CONTEXTO DEL MOTOR')
+        self.overview=label('','unit');self.overview.hide()
+        self.context=QPlainTextEdit();self.context.setReadOnly(True);self.context.setMinimumHeight(240)
+        context_panel.content.addWidget(self.context)
         self.errors=label('','fieldError');self.errors.hide()
-        self.context_button=QPushButton('Contexto y observaciones');self.context_button.setCheckable(True)
-        self.context_button.toggled.connect(self.context.setVisible);box.addWidget(self.context_button);box.addWidget(self.context)
+        self.context_button=QPushButton('Contexto y observaciones');self.context_button.hide()
+        self.context_state=label('','sectionTitle');context_panel.content.insertWidget(1,self.context_state)
+        box.addWidget(Columns(self.tabs,context_panel,1080,(3,1)),1)
     def refresh_context(self,text):
         self.overview.setText('\n'.join(text.splitlines()[:2]))
         self.context.setPlainText(text+'\n\nEjecutabilidad\n'+(self.errors.text() or 'Sin observaciones en esta sección.'))
         count=len(self.errors.text().splitlines()) if self.errors.text() else 0
         self.context_button.setText('Contexto y observaciones'+(f' · {count} por revisar' if count else ''))
+        self.context_state.setText(f'{count} observaciones por revisar' if count else 'Sin observaciones en esta sección')
 
 
 class ResultWorkspace(QWidget):
     def __init__(self,simulation):
         super().__init__();self.simulation=simulation;layout=QVBoxLayout(self);layout.setContentsMargins(18,12,18,12)
-        layout.addWidget(label('Resultados','pageTitle'))
-        actions=QGridLayout();layout.addLayout(actions)
-        for i,button in enumerate((simulation.open_button,simulation.open_sweep_button,simulation.sweep_button)):actions.addWidget(button,i//2,i%2)
+        layout.addWidget(Header('Resultados','Consultá una ejecución o los puntos de un barrido guardado.','Los archivos conservan su procedencia; consultarlos no ejecuta cálculos.'))
+        source=Panel('FUENTE DE DATOS');actions=QGridLayout();source.content.addLayout(actions);layout.addWidget(source)
+        for i,button in enumerate((simulation.open_button,simulation.open_sweep_button,simulation.sweep_button)):
+            actions.addWidget(button,i//2,i%2)
+        simulation.open_button.setObjectName('primaryAction')
         self.message_host=QVBoxLayout();layout.addLayout(self.message_host)
         self.tabs=QTabWidget();layout.addWidget(self.tabs,1)
         self.detail=QWidget();self.detail_layout=QVBoxLayout(self.detail);self.detail_layout.setContentsMargins(0,0,0,0)
         self.tabs.addTab(scroll(self.detail),'Resultado actual')
         self.series=QWidget();self.series_layout=QVBoxLayout(self.series);self.series_layout.setContentsMargins(0,0,0,0)
         self.tabs.addTab(scroll(self.series),'Barrido cargado')
-        self.empty=label('Abrí un barrido guardado para consultar sus puntos.','unit');self.series_layout.addWidget(self.empty)
+        self.empty=Panel('NO HAY BARRIDO ABIERTO');self.empty.content.addWidget(label('Abrí un barrido guardado. Podrás seleccionar un punto convergido y consultar sus curvas, entradas y balances.','unit'));self.series_layout.addWidget(self.empty)
     def show_series(self,dialog):
         self.empty.hide()
         dialog.setWindowFlags(Qt.WindowType.Widget);self.series_layout.addWidget(dialog)
@@ -156,7 +182,7 @@ def refresh_motor_context(owner):
         w.motor2_page.refresh_context('Borrador con entradas inválidas · revisar campos\n'+w.ports_view.input_error.text())
         w.motor4_page.refresh_context('Borrador con entradas inválidas · revisar campos\n'+w.valves_view.crossing.text())
         return
-    two=['Cárter PMI: '+(str(project.crankcase_volume_bdc_cm3) if project.crankcase_volume_bdc_cm3 is not None else '—')+' cm³']
+    two=[f'Lumbreras: {len(project.ports)}', 'Cárter PMI: '+(str(project.crankcase_volume_bdc_cm3) if project.crankcase_volume_bdc_cm3 is not None else '—')+' cm³']
     for p in project.ports:
         r=port_results(p,project.stroke_mm,project.rod_length_mm)
         two.append(f'{p.function or "Sin función"} · {p.name or "Sin nombre"}: '+

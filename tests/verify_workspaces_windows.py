@@ -23,6 +23,8 @@ def capture(name):
     path=args.output/(name+'.png');assert w.grab().save(str(path));captures.append(str(path));print('CAPTURE',path,flush=True)
 def run():
     try:
+        for key in ('summary','simulation','results','compare','external'):
+            w.navigation.go(key);capture(key+'-vacio')
         w._activate(replace(geometry(),name='PRUEBA SINTÉTICA 2T — no medida'),None)
         w.navigation.go('summary');capture('resumen-2t')
         w.navigation.go('motor2');capture('motor-2t')

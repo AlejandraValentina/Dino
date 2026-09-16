@@ -272,8 +272,9 @@ class MainWindow(QMainWindow):
             row.addWidget(result, 1)
             row.addWidget(self._label("cm³", "unit"))
             results.addRow(self._label(title), row)
-        geometry.addLayout(results)
-        geometry.addWidget(self._label("Cilindrada total: todos los cilindros comparten geometría.", "unit"))
+        self.geometry_derived=QWidget();derived=QVBoxLayout(self.geometry_derived);derived.setContentsMargins(0,0,0,0)
+        derived.addLayout(results)
+        derived.addWidget(self._label("Cilindrada total: todos los cilindros comparten geometría.", "unit"))
         self.geometry_view = GeometryView()
         self.ports_view = PortsView();self.ports_view.changed.connect(self._edited)
         self.ducts_view = DuctsView();self.ducts4_view = DuctsView('4T')
@@ -289,7 +290,7 @@ class MainWindow(QMainWindow):
         self.motor2_page=MotorPage('2T',[('Lumbreras',self.ports_view),('Admisión y cárter',scroll(intake_body)),('Conductos',self.ducts_view)])
         self.motor4_page=MotorPage('4T',[('Válvulas y distribución',self.valves_view),('Conductos',self.ducts4_view)])
         self.duct_stack=self.ducts_view  # Alias de navegación interna; los editores siguen separados por ciclo.
-        self.geometry_view.attach_editor(self.geometry_group)
+        self.geometry_view.attach_editor(self.geometry_group,self.geometry_derived)
         self.geometry_page=self.geometry_view
         self.summary_page=SummaryPage(self);self.workspace_scroll=self.summary_page
         self.result_workspace=ResultWorkspace(self.simulation_view)

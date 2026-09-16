@@ -12,6 +12,7 @@ from .external_data import (CANONICAL, DEFINITIONS, PROVENANCES, TITLES, SIM_KEY
 from .comparison import ComparisonError, geometry_fields
 from .reference_results import ResultError
 from .sweep import load_sweep
+from .ui import Header, Panel, Columns
 
 
 def label(text=''):
@@ -194,21 +195,32 @@ class ExternalDialog(QDialog):
         if embedded:self.setWindowFlags(Qt.WindowType.Widget)
         self.external=None;self.sweep=None;self.data=None
         self.setWindowTitle('Datos externos · contraste descriptivo');self.resize(1060,630)
-        layout=QVBoxLayout(self)
-        actions=QGridLayout();layout.addLayout(actions)
+        layout=QVBoxLayout(self);layout.setContentsMargins(20,18,20,18);layout.setSpacing(16)
+        self.header=Header('Datos externos','Importá un CSV y contrastalo con un barrido simulado.','Contraste descriptivo · No es validación experimental.')
+        layout.addWidget(self.header)
+        imported=Panel('01 · IMPORTACIÓN');series=Panel('02 · BARRIDO SIMULADO')
         self.import_button=QPushButton('Importar CSV…');self.open_button=QPushButton('Abrir importación…')
+        self.import_button.setObjectName('primaryAction')
         self.sweep_button=QPushButton('Seleccionar barrido…');self.export_button=QPushButton('Exportar contraste…')
-        for i,button in enumerate((self.import_button,self.open_button,self.sweep_button,self.export_button)):actions.addWidget(button,i//2,i%2)
+        imported.content.addWidget(self.import_button);imported.content.addWidget(self.open_button)
+        series.content.addWidget(self.sweep_button)
         self.import_button.clicked.connect(self.import_csv);self.open_button.clicked.connect(self.open_import)
         self.sweep_button.clicked.connect(self.open_sweep);self.export_button.clicked.connect(self.export)
-        self.identity=label('Importá un CSV o abrí una importación confirmada.');layout.addWidget(self.identity)
-        self.status=label('Contraste descriptivo. Equivalencia de condiciones no acreditada.');layout.addWidget(self.status)
-        self.tabs=QTabWidget();layout.addWidget(self.tabs)
+        self.identity=label('Sin datos importados. Empezá con un CSV o una importación confirmada.');imported.content.addWidget(self.identity)
+        self.sweep_info=label('Sin barrido seleccionado. Primero cargá los datos externos.');series.content.addWidget(self.sweep_info)
+        layout.addWidget(Columns(imported,series,800))
+        self.contrast_panel=Panel('03 · CONTRASTE');layout.addWidget(self.contrast_panel)
+        self.status=label('No hay contraste disponible. Importá los datos y seleccioná un barrido guardado.');self.contrast_panel.content.addWidget(self.status)
+        self.tabs=QTabWidget();self.contrast_panel.content.addWidget(self.tabs)
         self.table=table(['RPM','Externo','Simulado','Simulado − externo','Relativa %','Estado'])
         self.tabs.addTab(self.table,'Tabla');self.plot=ExternalPlot();self.tabs.addTab(self.plot,'Puntos / RPM')
         self.details=QPlainTextEdit();self.details.setReadOnly(True);self.tabs.addTab(self.details,'Procedencia y condiciones')
-        self.error=label();self.error.setObjectName('fieldError');layout.addWidget(self.error)
-        layout.addWidget(label('Sin interpolación ni cálculos nuevos. Coincidir en RPM y unidades no acredita mismo motor ni condiciones. No es validación experimental ni calibración.'))
+        exported=Panel('04 · EXPORTACIÓN');layout.addWidget(exported)
+        exported.content.addWidget(self.export_button,alignment=Qt.AlignmentFlag.AlignLeft)
+        exported.content.addWidget(label('Disponible cuando el contraste sea compatible. Se crea una carpeta nueva con los datos del contraste.'))
+        self.error=label();self.error.setObjectName('fieldError');exported.content.addWidget(self.error)
+        methodology=Panel('ALCANCE DEL CONTRASTE');layout.addWidget(methodology)
+        methodology.content.addWidget(label('Sin interpolación ni cálculos nuevos. Coincidir en RPM y unidades no acredita mismo motor ni condiciones. Equivalencia no acreditada; no es calibración ni validación experimental.'))
         self.refresh()
 
     def import_csv(self,checked=False,*,path=None):
@@ -222,7 +234,7 @@ class ExternalDialog(QDialog):
             self.import_dialog=dialog;dialog.setWindowFlags(Qt.WindowType.Widget)
             for i in range(self.layout().count()):
                 widget=self.layout().itemAt(i).widget()
-                if widget:widget.hide()
+                if widget and widget is not self.header:widget.hide()
             self.layout().addWidget(dialog);dialog.show()
             dialog.finished.connect(lambda code:self._import_finished(dialog))
             return
@@ -256,17 +268,21 @@ class ExternalDialog(QDialog):
         self.data=None;self.export_button.setEnabled(False)
         self.sweep_button.setEnabled(self.external is not None)
         self.tabs.setVisible(self.external is not None)
+        if self.sweep:
+            index=self.sweep['index']
+            self.sweep_info.setText(str(self.sweep.get('path','Ruta no informada'))+'\nRPM disponibles: '+', '.join(str(p['rpm']) for p in index['points']))
+        else:self.sweep_info.setText('Sin barrido seleccionado. '+('Seleccioná una serie guardada para contrastar RPM coincidentes.' if self.external else 'Primero cargá los datos externos.'))
         if not self.external:return
         meta=self.external['metadata'];self.plot.set_data(self.external,None)
         self.identity.setText(f"{meta['name']} · {meta['provenance']}\n{TITLES[meta['magnitude']]} · {meta['canonical_unit']} · {len(self.external['rows'])} puntos externos")
-        self.status.setText('Contraste descriptivo. Equivalencia de condiciones no acreditada. Seleccioná un barrido guardado.')
+        self.status.setText('Datos externos cargados. Seleccioná un barrido guardado para consultar coincidencias.')
         fill(self.table,[[r['rpm'],r['value'],None,None,None,'solo externo'] for r in self.external['rows']])
         if self.sweep:
             try:self.data=contrast(self.external,self.sweep)
             except ExternalDataError as exc:
                 self.status.setText(str(exc));self.details.setPlainText(describe_sources(self.external,self.sweep));return
             index=self.sweep['index']
-            self.status.setText(f"{self.data['notice']}\nBarrido {index['series_id']} · {index['common_inputs']['origin']['project_name']}\n"
+            self.status.setText(f"Barrido {index['series_id']} · {index['common_inputs']['origin']['project_name']}\n"
                 f"{self.data['simulated_count']} puntos solicitados en el barrido · {self.data['matches']} coincidencias convergidas")
             fill(self.table,[[r['rpm'],r['external'],r['simulated'],r['difference'],
                 format(r['relative_percent'],'.8g') if r['relative_percent'] is not None else None,r['state']] for r in self.data['rows']])
