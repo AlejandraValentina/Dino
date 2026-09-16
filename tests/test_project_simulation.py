@@ -175,6 +175,9 @@ class ProjectAdapterTests(unittest.TestCase):
             with self.assertRaisesRegex(ResultError,'Flujos'):load_result(path)
 
 
+from process_double import DiagnosticProcess
+
+
 class ProjectSimulationWindowTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -231,7 +234,8 @@ class ProjectSimulationWindowTests(unittest.TestCase):
             self.assertIn('configuración anterior',self.view.stale_label.text())
             self.assertIn('PRUEBA',self.view.identity_label.text())
 
-    def test_real_child_uses_snapshot_then_cooperative_cancel(self):
+    @patch('motorsim.simulation_view.QProcess', DiagnosticProcess)
+    def test_double_child_uses_snapshot_then_cooperative_cancel(self):
         with tempfile.TemporaryDirectory() as d:
             self.window.numeric_edits['compression_ratio'].setText('8.2')
             self.view.start(output=Path(d)/'run')

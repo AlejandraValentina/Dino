@@ -16,6 +16,7 @@ from motorsim.window import MainWindow
 from motorsim.simulation_view import PressurePlot
 from motorsim.reference_results import load_result
 from test_reference_results import diagnostic, edit_payload
+from process_double import DiagnosticProcess
 
 
 class SimulationViewTests(unittest.TestCase):
@@ -46,7 +47,8 @@ class SimulationViewTests(unittest.TestCase):
         self.window.deleteLater()
         QTest.qWait(10)
 
-    def test_real_start_progress_double_click_and_cooperative_cancel(self):
+    @patch('motorsim.simulation_view.QProcess', DiagnosticProcess)
+    def test_process_double_start_progress_single_process_and_cancel(self):
         self.view.start(output=self.root/'run')
         process = self.view.process
         self.view.start(output=self.root/'duplicate')
@@ -63,7 +65,8 @@ class SimulationViewTests(unittest.TestCase):
         self.assertEqual(load_result(self.root/'run/manifest.json')['status'], 'cancelled')
         self.assertFalse(self.window.dirty)
 
-    def test_editor_close_protection_then_real_cancel(self):
+    @patch('motorsim.simulation_view.QProcess', DiagnosticProcess)
+    def test_editor_close_protection_then_double_cancel(self):
         self.window.name_edit.setText('Proyecto propio')
         self.view.start(output=self.root/'close')
         with patch.object(self.window, '_ask_changes', return_value='cancel'):

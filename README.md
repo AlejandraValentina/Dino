@@ -1,6 +1,6 @@
 # MotorSim
 
-Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La última entrega implementada
+Editor de proyectos y ficha del motor en Python + PySide6/Qt Widgets. La entrega geométrica 2T previa
 [conductos-admision-escape](openspec/changes/conductos-admision-escape/specs/conductos-admision-escape/spec.md)
 añade recorridos geométricos de conductos circulares de admisión y escape 2T.
 La ficha, posición del pistón, volúmenes y curvas geométricas existentes se conservan.
@@ -22,6 +22,146 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 [simulacion-2t](openspec/changes/simulacion-2t/design.md) para esta prueba de consola.
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
+
+## Bloque 4T básico — estado comprobado el 16/09/2026
+
+Cambio vigente: [cuatro-tiempos-basico](openspec/changes/cuatro-tiempos-basico/tasks.md).
+**Entrega 7 implementada y comprobada técnicamente. Entrega 8 en curso, bloqueada
+por el criterio de refinamiento numérico; no habilitada en la interfaz.** No se
+atribuye aceptación manual ni validación experimental. Entrega 6 conserva sus
+herramientas y el pendiente de contraste con mediciones reales.
+
+Seleccionar **4T** en Ficha habilita **Configuración 4T**, con una válvula de
+admisión y otra de escape. Entradas D/d/s/H en mm, apertura y duración en grados;
+coma o punto decimal, ausencia null, errores de texto visibles que impiden guardar.
+Se permiten conjuntos incompletos o geométricamente incompatibles para corregirlos,
+pero se retiran sus curvas y cruce. Cierre y máximo se muestran con ángulo continuo
+y fase módulo 720°. Ley seno cuadrado idealizada; área de cortina cilíndrica limitada
+por garganta anular, no área efectiva medida ni geometría CAD. Eventos y cruce son
+analíticos; las gráficas solo los representan. Fases: 0° PMS intercambio, 180° PMI,
+360° PMS compresión, 540° PMI y 720° siguiente PMS intercambio.
+
+**Conductos** reutiliza el editor por tramos para el ciclo seleccionado. Sus
+recorridos 2T y 4T son independientes, incluidos borradores inválidos. Alternar
+ciclo conserva lumbreras, falda, válvulas y conductos, sin copiar datos de ejemplo.
+Los controles de archivo y protección de cambios se conservan.
+
+### Proyecto JSON v6 (formato actual)
+
+Conserva v5 y añade `four_stroke`, obligatorio en v6, con `intake`, `exhaust`,
+`ducts` y `reference`. Cada válvula contiene `seat_mm`, `throat_mm`, `stem_mm`,
+`lift_mm`, `opening_deg`, `duration_deg`: números finitos o null. D/d/H > 0;
+s ≥ 0, apertura [0,720), duración (0,720). La compatibilidad 0 ≤ s < d ≤ D
+se exige para calcular, sin impedir conservar medidas incompatibles para corregir.
+Referencia de válvulas: `sin-squared-cylindrical-curtain-annular-cap-720-v1`.
+`four_stroke.ducts` usa las mismas listas/campos de tramos, con referencia
+`ordered-circular-inner-axial-linear-4t-v1`. El `ducts` raíz conserva su referencia
+2T histórica. No se guardan curvas derivadas ni se redondean entradas.
+
+Migración directa: se leen v1–v5 con la configuración nueva vacía. Sus conductos,
+aun si el antiguo selector dice 4T, permanecen en `ducts` 2T. Abrir nunca reescribe;
+solo Guardar/Guardar como persiste v6. Los resultados y barridos 2T v1/v2/v3
+anteriores siguen leyéndose y validándose, sin alterar archivos ni hashes.
+
+### Núcleo 4T y condición pendiente
+
+Consola sin Qt, tres volúmenes **I/C/E**, nueve estados m/U/F y cuatro enlaces.
+Reutiliza flujos reversibles, transporte de entalpía, auditorías y RK4 adaptativo.
+R=287, gamma=1,35; Cd exterior=0,80, válvulas=0,70; banda exterior 100 Pa.
+Calor prescrito 350–390° una vez por 720°, 800000 J/kg de fresca capturada al inicio,
+con cilindro cerrado y conversión analítica. W_C integra p dV durante los 720°;
+no existe W_K. Sin ondas, inercia, química predictiva, fricción, par ni potencia.
+
+Caso **S4T-0D-01**, sintético, inicializado desde p/T/Y y volúmenes reales;
+3000 rpm, sin arranque caliente. Resultados del último ciclo completo:
+
+| Perfil / banda | Ciclos / convergencia | W_C J/720° | pmax Pa abs. | Peor balance independiente | Integración s | Pico proceso MiB | RHS reales |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| A / 100 Pa | 7 / sí | 50,52603396 | 2618462,697 | 0,00108361 % | 7,438 | 28,438 | 160711 |
+| B / 100 Pa | 7 / sí | 50,52602476 | 2618462,464 | 0,00007683 % | 14,406 | 45,656 | 304466 |
+| C / 100 Pa | 7 / sí | 50,52602447 | 2618464,733 | 0,00002600 % | 29,281 | 52,371 | 607098 |
+
+**3 ejecuciones, 51,125 s de integración**, del presupuesto conjunto de 720 s.
+Picos del proceso de consola compartido, que conservó los resultados precedentes
+para el contraste. Las tres cumplen los balances y tres ciclos consecutivos de
+convergencia desde el quinto, con 1441 muestras por ciclo.
+
+Tolerancias de sensibilidad aprobadas, **tendencia de refinamiento no aprobada**:
+
+| Magnitud | Discrepancia A/B | Discrepancia B/C |
+| --- | ---: | ---: |
+| pmax relativa | 8,8979e−8 | 8,6623e−7 |
+| Y_I absoluta | 1,0768e−8 | 1,7935e−8 |
+
+C detecta un máximo entre las muestras comunes: su pmax es 2618464,733 Pa;
+el máximo de su salida cada 0,5° es 2618462,460 Pa. Eso explica la falta de
+monotonía del estimador de pmax, pero **no permite cambiar la regla vigente**.
+También crece la discrepancia de Y_I, sin un piso de tendencia autorizado.
+La revisión puntual no identificó un defecto de implementación que justifique
+repetir. Relajar tendencia, añadir pisos o cambiar la estimación requiere otra
+decisión numérica expresa; no se hizo.
+
+Por esa condición **no se ejecutó C/50 Pa**, ni barrido 4T, extremos C,
+compresión 8,2 o nueva regresión completa 2T. No se conectó el solver 4T a Qt,
+ni se habilitaron resultados/comparación/barridos/importación externos 4T.
+La pestaña **Simulación 2T** conserva su alcance y rotulación. Los JSON del
+protocolo 4T son diagnósticos de consola, no resultados aceptados reabribles
+por el lector de la aplicación. Se conservan íntegros en
+`results/simulacion-2t/cuatro-tiempos-20260916/` (directorio local ignorado por Git).
+Las cuatro etapas dependientes y sus capturas siguen pendientes, no se sustituyen
+con demostraciones ni curvas antiguas.
+
+### Comprobaciones y comandos
+
+**203 pruebas automatizadas aprobadas, 18,506 s**. Incluyen geometría analítica,
+periodicidades, norma de nueve componentes, balances cerrados/abiertos, calor,
+trabajo, v6/v1–v5, edición/guardado/errores, comparación/lectura histórica y proceso.
+Las pruebas de inicio/cancelación/cierre usan un hijo doble sin integración;
+la suite no contiene campañas completas ocultas. Revisión independiente de solo
+lectura: sin defectos reproducibles; igualdad exacta de estado inicial y RHS 2T
+contra 6cbed360 en diez ángulos. Esto es regresión puntual, no la ejecución completa
+2T dependiente aún pendiente. OpenSpec estricto aprobado; sus artefactos documentales
+completos no significan que entrega 8 esté terminada.
+
+Windows al **150 % efectivo**, escritorio desbloqueado: automatización visible e
+inspección real de cinco capturas; guardar/cerrar/reabrir, datos independientes,
+texto inválido y cancelación protegidos, teclado y ancho compacto sin scroll horizontal.
+Datos rotulados **EJEMPLO SINTÉTICO**, con cruce de prueba 700/240 y 500/240°.
+Capturas: [editor](docs/images/motorsim-4t-editor-150.png),
+[alzada/cruce](docs/images/motorsim-4t-alzada-cruce-150.png),
+[área/cruce](docs/images/motorsim-4t-area-cruce-150.png),
+[conductos](docs/images/motorsim-4t-conductos-150.png),
+[compacto](docs/images/motorsim-4t-compacto-150.png).
+Registro local: `results/simulacion-2t/cuatro-tiempos-20260916/windows-150/recorrido.json`.
+**Aceptación manual de la usuaria pendiente**, separada de estas comprobaciones;
+no reabre ni reemplaza la aceptación histórica de entregas 1 y 2.
+
+Versiones comprobadas: Python 3.11.0, PySide6 6.11.2, Node.js 24.19.0 y OpenSpec 1.3.1.
+Sin dependencias nuevas ni modificación de integración/prompts globales. Desde
+PowerShell, instalación en entorno del proyecto (si aún falta) y ejecución:
+
+```powershell
+cd E:\dino\Dino
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m motorsim
+```
+
+En el entorno existente no hace falta recrear `.venv`. Pruebas rápidas y documentos:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p 'test*.py'
+openspec validate cuatro-tiempos-basico --strict --no-interactive
+```
+
+Recorrido visible sin iniciar el solver (destino nuevo; factor Qt solo del proceso):
+
+```powershell
+.\.venv\Scripts\python.exe tests/verify_four_stroke_windows.py --output results/simulacion-2t/cuatro-tiempos-otra-comprobacion --suffix -otra
+```
+
+Las secciones siguientes conservan evidencia y contratos de las entregas anteriores;
+el formato vigente del proyecto y el estado del bloque 4T son los descritos arriba.
 
 ## Datos externos por RPM — importación y contraste descriptivo
 
@@ -974,12 +1114,12 @@ Revisión independiente puntual: detectó dependencia indebida de cilindrada res
 a compresión; corregida y cubierta por regresión. Autorrevisión del principal de
 la corrección y documentación. La integración OpenSpec global no se modifica.
 
-## Formato JSON versión 5
+## Formato JSON versión 5 — antecedente conservado
 
 Conserva todos los campos de ficha de versión 2 (`name`, `cycle`, `manufacturer`,
 `model`, `notes`, `cylinder_count`, `bore_mm`, `stroke_mm`, `rod_length_mm`,
 `compression_ratio`) y añade `ports`, `crankcase_volume_bdc_cm3` y
-`two_stroke_reference`. La versión 4 añade `intake`; `format_version` actual es el entero 5. Cada fila de `ports`
+`two_stroke_reference`. La versión 4 añade `intake`; `format_version` era el entero 5 en esa entrega. Cada fila de `ports`
 guarda `name`, `function` (`escape`, `transfer` o null), `top_mm`, `height_mm`,
 `width_mm`. La lista vacía representa ausencia de lumbreras. Dimensiones/cárter
 no informados son null; los textos opcionales, cadenas vacías. No se redondean
@@ -1012,7 +1152,7 @@ cada dato anterior; abrir no escribe hasta Guardar/Guardar como explícito.
 
 ## OpenSpec y estado
 
-Cambio activo: [simulacion-2t](openspec/changes/simulacion-2t/),
+Cambio histórico de esta sección: [simulacion-2t](openspec/changes/simulacion-2t/),
 con [registro de tareas](openspec/changes/simulacion-2t/tasks.md). Las evidencias
 de implementación anteriores se conservan en sus respectivos cambios.
 Entregas 1 y 2 publicadas en `040e789` y `7ef0628`, respectivamente: pertenencia

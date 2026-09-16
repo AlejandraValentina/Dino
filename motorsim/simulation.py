@@ -1,5 +1,6 @@
 """Prototipo 0D fijo. SI, RK4 explícito, sin Qt ni persistencia de proyectos."""
 from bisect import bisect_right
+from dataclasses import dataclass
 from collections import deque
 import math
 import time
@@ -14,6 +15,33 @@ CV = ('I', 'K', 'C', 'E')
 # None representa un reservorio; no hay enlaces con almacenamiento propio.
 ENDS = ((None, 0), (0, 1), (1, 2), (1, 2), (2, 3), (3, None))
 SIZE, WORK, HEAT, BURN, ABS_M, ABS_H = 48, 30, 34, 35, 36, 42
+
+
+@dataclass(frozen=True)
+class Layout:
+    cv: tuple = CV
+    ends: tuple = ENDS
+    cylinder: int = 2
+    period: int = 360
+
+    @property
+    def physical(self): return 3*len(self.cv)
+    @property
+    def work(self): return self.physical+3*len(self.ends)
+    @property
+    def heat(self): return self.work+len(self.cv)
+    @property
+    def burn(self): return self.heat+1
+    @property
+    def abs_m(self): return self.burn+1
+    @property
+    def abs_h(self): return self.abs_m+len(self.ends)
+    @property
+    def size(self): return self.abs_h+len(self.ends)
+
+
+TWO_LAYOUT = Layout()
+FOUR_LAYOUT = Layout(('I', 'C', 'E'), ((None, 0), (0, 1), (1, 2), (2, None)), 1, 720)
 
 
 class StopCalculation(RuntimeError):
@@ -95,6 +123,7 @@ def rk4(t, state, dt, rhs, project=lambda t, y: y):
 
 
 class Model:
+    layout = TWO_LAYOUT
     def __init__(self, case=None, *, external_band_pa=None):
         if external_band_pa not in (None, 50, 100):
             raise ValueError('Solo ley original o bandas de 50/100 Pa.')
@@ -153,22 +182,23 @@ class Model:
         for (pressure, temperature, fresh), volume in zip(self.case.initial_pty, volumes):
             mass = pressure*volume / (self.case.gas_r*temperature)
             y.extend((mass, mass*self.cv*temperature, mass*fresh))
-        return y + [0.] * (SIZE-12)
+        return y + [0.] * (self.layout.size-self.layout.physical)
 
     def analytic(self, angle, y, heat):
         if heat is None:
             return y
         start, fresh = heat
         result = y.copy()
-        result[8] = fresh * (1-burn_fraction(angle, start, self.case.heat_duration_deg))
+        result[3*self.layout.cylinder+2] = fresh * (1-burn_fraction(angle, start, self.case.heat_duration_deg))
         return result
 
     def evaluate(self, angle, y, heat=None):
+        layout = self.layout
         volumes, dvs, areas = self.geometry(angle)
         nodes = []
         for i, volume in enumerate(volumes):
             mass, energy, fresh = y[3*i:3*i+3]
-            where = f'{CV[i]} a {angle:.9f} grados'
+            where = f'{layout.cv[i]} a {angle:.9f} grados'
             if not all(math.isfinite(v) for v in (mass, energy, fresh, volume)) or min(mass, energy, volume) <= 0:
                 raise InvalidStage(f'{where}: masa/energía/volumen no positivo o no finito')
             if not 0 <= fresh <= mass:
@@ -178,77 +208,77 @@ class Model:
             if not (100 <= temperature <= 4000 and 1000 <= pressure <= 2e7):
                 raise StopCalculation(f'{where}: fuera del dominio T={temperature} K, p={pressure} Pa')
             nodes.append((pressure, temperature, fresh/mass))
-        endpoints = ((self.case.reservoirs_pty[0], nodes[0]), (nodes[0], nodes[1]),
-                     (nodes[1], nodes[2]), (nodes[1], nodes[2]), (nodes[2], nodes[3]),
-                     (nodes[3], self.case.reservoirs_pty[1]))
-        dy = [0.] * SIZE
+        endpoints = tuple((self.case.reservoirs_pty[0] if left is None else nodes[left],
+                           self.case.reservoirs_pty[1] if right is None else nodes[right])
+                          for left, right in layout.ends)
+        dy = [0.] * layout.size
         flows = []
-        for j, ((left, right), area, cd, ends) in enumerate(zip(endpoints, areas, self.case.discharge_coefficients, ENDS)):
-            if j in (0, 5) and self.external_band_pa is not None:
+        for j, ((left, right), area, cd, ends) in enumerate(zip(endpoints, areas, self.case.discharge_coefficients, layout.ends)):
+            if j in (0, len(layout.ends)-1) and self.external_band_pa is not None:
                 transport = regularized_restriction(left, right, area, cd, self.external_band_pa,
                                                    self.case.gas_r, self.case.gamma)
             else:
                 transport = restriction(left, right, area, cd, self.case.gas_r, self.case.gamma)
             flows.append(transport)
             add_transport(dy, *ends, transport)
-            dy[12+3*j:15+3*j] = transport
-            dy[ABS_M+j], dy[ABS_H+j] = abs(transport[0]), abs(transport[1])
-        for i in range(4):
-            dy[WORK+i] = nodes[i][0]*dvs[i]
-            dy[3*i+1] -= dy[WORK+i]
+            dy[layout.physical+3*j:layout.physical+3*j+3] = transport
+            dy[layout.abs_m+j], dy[layout.abs_h+j] = abs(transport[0]), abs(transport[1])
+        for i in range(len(layout.cv)):
+            dy[layout.work+i] = nodes[i][0]*dvs[i]
+            dy[3*i+1] -= dy[layout.work+i]
         if heat is not None:
             start, fresh = heat
-            if areas[2] or areas[3] or areas[4]:
+            if any(areas[j] for j, ends in enumerate(layout.ends) if layout.cylinder in ends):
                 raise StopCalculation('Ventanas del cilindro abiertas durante aporte cerrado')
-            dy[BURN] = fresh * burn_rate(angle, start, self.case.heat_duration_deg) * self.rate
-            dy[HEAT] = self.case.fresh_energy_j_kg * dy[BURN]
-            dy[7] += dy[HEAT]
+            dy[layout.burn] = fresh * burn_rate(angle, start, self.case.heat_duration_deg) * self.rate
+            dy[layout.heat] = self.case.fresh_energy_j_kg * dy[layout.burn]
+            dy[3*layout.cylinder+1] += dy[layout.heat]
             # F_C se evalúa analíticamente, incluida cada etapa RK4.
-            dy[8] = 0.
+            dy[3*layout.cylinder+2] = 0.
         return dy, (nodes, volumes, flows)
 
 
-def independent_increment(left, right, dt, q_exact, b_exact):
+def independent_increment(left, right, dt, q_exact, b_exact, layout=TWO_LAYOUT):
     """Trapecios en extremos aceptados, no pesos/etapas RK ni diferencias de estado.
 
     Flujo evaluado en salida refinada de cada paso. Trabajo = p_media * Delta V.
     Fuente prescrita integrada por su primitiva, independientemente del RK4 de U.
     """
-    result = [0.] * SIZE
+    result = [0.] * layout.size
     ln, lv, lf = left
     rn, rv, rf = right
     for j, (a, b) in enumerate(zip(lf, rf)):
         for k in range(3):
-            result[12+3*j+k] = dt * (a[k]+b[k]) / 2
-        result[ABS_M+j] = dt*(abs(a[0])+abs(b[0]))/2
-        result[ABS_H+j] = dt*(abs(a[1])+abs(b[1]))/2
-    for i in range(4):
-        result[WORK+i] = (ln[i][0]+rn[i][0]) / 2 * (rv[i]-lv[i])
-    result[HEAT], result[BURN] = q_exact, b_exact
+            result[layout.physical+3*j+k] = dt * (a[k]+b[k]) / 2
+        result[layout.abs_m+j] = dt*(abs(a[0])+abs(b[0]))/2
+        result[layout.abs_h+j] = dt*(abs(a[1])+abs(b[1]))/2
+    for i in range(len(layout.cv)):
+        result[layout.work+i] = (ln[i][0]+rn[i][0]) / 2 * (rv[i]-lv[i])
+    result[layout.heat], result[layout.burn] = q_exact, b_exact
     return result
 
 
-def audit(start, end, ledger):
+def audit(start, end, ledger, layout=TWO_LAYOUT):
     """Balances por inventarios y libro de enlaces; global usa solo contornos."""
     records = {}
-    for key, members in [*((name, (i,)) for i, name in enumerate(CV)), ('global', tuple(range(4)))]:
+    for key, members in [*((name, (i,)) for i, name in enumerate(layout.cv)), ('global', tuple(range(len(layout.cv))))]:
         transfer = [0., 0., 0.]
         abs_mass = abs_h = 0.
-        for j, (left, right) in enumerate(ENDS):
+        for j, (left, right) in enumerate(layout.ends):
             sign = int(right in members) - int(left in members)
             if sign:
                 for k in range(3):
-                    transfer[k] += sign * ledger[12+3*j+k]
-                abs_mass += ledger[ABS_M+j]
-                abs_h += ledger[ABS_H+j]
-        work = sum(ledger[WORK+i] for i in members)
-        q = ledger[HEAT] if 2 in members else 0.
-        burnt = ledger[BURN] if 2 in members else 0.
+                    transfer[k] += sign * ledger[layout.physical+3*j+k]
+                abs_mass += ledger[layout.abs_m+j]
+                abs_h += ledger[layout.abs_h+j]
+        work = sum(ledger[layout.work+i] for i in members)
+        q = ledger[layout.heat] if layout.cylinder in members else 0.
+        burnt = ledger[layout.burn] if layout.cylinder in members else 0.
         delta = [sum(end[3*i+k]-start[3*i+k] for i in members) for k in range(3)]
         residual = (delta[0]-transfer[0], delta[1]-(transfer[1]+q-work), delta[2]-(transfer[2]-burnt))
         mass_scale = max(sum(start[3*i] for i in members), abs_mass, 1e-9)
         energy_scale = max(sum(start[3*i+1] for i in members),
-                           abs_h+abs(q)+sum(abs(ledger[WORK+i]) for i in members), 1.)
+                           abs_h+abs(q)+sum(abs(ledger[layout.work+i]) for i in members), 1.)
         normalized = [abs(residual[0])/mass_scale, abs(residual[1])/energy_scale, abs(residual[2])/mass_scale]
         records[key] = dict(residual_kg_j_kg=list(residual), normalized_m_u_f=normalized)
     return records
@@ -264,9 +294,9 @@ def convergence(previous, current, previous_curve, curve):
     if previous is None:
         return {'passed': False}
     m = max(abs(current['state'][3*i]-previous['state'][3*i]) /
-            max(abs(current['state'][3*i]), abs(previous['state'][3*i]), 1e-9) for i in range(4))
+            max(abs(current['state'][3*i]), abs(previous['state'][3*i]), 1e-9) for i in range(len(current["Y"])))
     u = max(abs(current['state'][3*i+1]-previous['state'][3*i+1]) /
-            max(abs(current['state'][3*i+1]), abs(previous['state'][3*i+1]), 1.) for i in range(4))
+            max(abs(current['state'][3*i+1]), abs(previous['state'][3*i+1]), 1.) for i in range(len(current["Y"])))
     fresh = max(abs(a-b) for a, b in zip(current['Y'], previous['Y']))
     work = abs(current['W_C_J']-previous['W_C_J'])/max(abs(current['W_C_J']), abs(previous['W_C_J']), 1.)
     pressure = max(abs(a-b) for a, b in zip(curve, previous_curve))/max(current['p_max_Pa'], previous['p_max_Pa'], 100000.)
@@ -276,11 +306,14 @@ def convergence(previous, current, previous_curve, curve):
                 p_curve_relative=pressure, passed=passed)
 
 
-def sample(angle, y, snapshot, *, rpm=3000, initial_angle=180):
+def sample(angle, y, snapshot, *, rpm=3000, initial_angle=180, layout=TWO_LAYOUT):
     nodes, volumes, flows = snapshot
-    return dict(angle_deg=angle, time_s=(angle-initial_angle)/(6*rpm), state=y[:12],
-                p_T_Y=nodes, V_m3=volumes, flows_kg_s_W_kg_s=flows,
-                W_C_J=y[WORK+2], W_K_J=y[WORK+1], Q_J=y[HEAT], converted_kg=y[BURN])
+    result = dict(angle_deg=angle, time_s=(angle-initial_angle)/(6*rpm), state=y[:layout.physical],
+                  p_T_Y=nodes, V_m3=volumes, flows_kg_s_W_kg_s=flows,
+                  W_C_J=y[layout.work+layout.cylinder], Q_J=y[layout.heat], converted_kg=y[layout.burn])
+    if 'K' in layout.cv:
+        result['W_K_J'] = y[layout.work+layout.cv.index('K')]
+    return result
 
 
 def run_resolution(step_deg, monitor, model=None):
@@ -384,11 +417,11 @@ def run_resolution(step_deg, monitor, model=None):
                 final_angle_deg=angle)
 
 
-def sensitivity(runs):
+def sensitivity(runs, cylinder=2):
     if len(runs) != 3 or not all(r['converged'] for r in runs):
         return dict(passed=False, reason='Requiere las tres resoluciones convergidas.')
     a, b, c = [r['cycles'][-1] for r in runs]
-    ca, cb, cc = [[s['p_T_Y'][2][0] for s in r['last_two_cycles'][-1]] for r in runs]
+    ca, cb, cc = [[s['p_T_Y'][cylinder][0] for s in r['last_two_cycles'][-1]] for r in runs]
     coarse, fine = {}, {}
     for key, floor in (('W_C_J', 1.), ('p_max_Pa', c['p_max_Pa'])):
         scale = max(abs(c[key]), abs(b[key]), floor) if key == 'W_C_J' else floor
