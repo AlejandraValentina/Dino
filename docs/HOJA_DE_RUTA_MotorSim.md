@@ -22,8 +22,9 @@ Prioridad propuesta: datos generales para 2T y 4T desde el editor común; primer
 Reorganización UX autorizada: [reorganizacion-ui-final](../openspec/changes/reorganizacion-ui-final/tasks.md).
 Navegación por tareas, configuración contextual y análisis embebido implementados;
 sin ampliar capacidades ni modificar las entregas científicas. Pruebas, revisión
-puntual e inspección Windows registradas; candidata rc3 en preparación, conserva
-rc1/rc2. Aceptación manual final y verificaciones de distribución pendientes.
+puntual e inspección Windows registradas; candidata rc3 construida desde `16097c4`
+y comprobada por automatización del EXE, conserva rc1/rc2. 238 pruebas aprobadas.
+Aceptación manual final, equipo sin Python y offline aislado pendientes.
 
 Seguimiento de la copia local comprobada el 16/09/2026. Las entregas 1 y 2 están
 autorizadas y aceptadas. Entrega 3 autorizada para lumbreras,

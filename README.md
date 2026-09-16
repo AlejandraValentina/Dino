@@ -49,7 +49,30 @@ Resultados históricos y CSV explícitamente sintético, sin recalcular campaña
 Evidencia y pendientes detallados en [tasks.md](openspec/changes/reorganizacion-ui-final/tasks.md).
 
 rc3 distingue este rediseño de la rc2 existente; ambas candidatas anteriores se
-conservan. Construcción y recorrido del EXE pendientes en este commit fuente.
+conservan. **Construida desde `16097c43628fb523107aa8c661d7ea459db92432`, limpio**,
+con Python 3.11.0, PySide6 6.11.2 y PyInstaller 6.22.3 sin actualizar dependencias.
+ZIP: `dist/MotorSim-0.1.0-rc3-windows-x64-16097c43.zip`, 43.396.296 bytes;
+carpeta 104.887.479 bytes. SHA256:
+`da355109e4126ab58e62b2016ab55b68e828622b69563ff0f52da9a7e7577ae2`.
+Reconstrucción: `.\.venv-build\Scripts\python.exe packaging/build_windows.py`
+desde un commit limpio, conservando la receta fijada; no sobrescribe destinos.
+
+EXE extraído comprobado mediante teclado/UIA en Windows real al 150 %: guardar/
+reabrir, navegación 4T, resultado/barrido histórico y consulta de punto, comparación
+y exportación CSV, importación sintética/contraste y exportación, un punto 2T
+B100/3000 convergido y cancelación cooperativa. El punto conserva exactamente
+entradas, ciclos y muestras numéricas frente a rc2 (identificador de ejecución,
+reloj y memoria separados). Integración 13,469 s + cancelación 0,250 s; sin campañas.
+Capturas del EXE y evidencia: `E:\MotorSim distribucion\Comprobación final rc3`.
+La automatización del recorrido se adaptó a teclado real: UIA Select por sí solo
+no cambia la página actual de QTreeWidget. No requirió cambios del paquete.
+
+Abrir la extracción comprobada:
+
+```powershell
+& 'E:\MotorSim distribucion\Candidata final á 0.1.0-rc3\MotorSim\MotorSim.exe'
+```
+
 Aceptación manual final, equipo sin Python, offline aislado y validación
 experimental siguen separados y pendientes. No se archiva ni publica.
 

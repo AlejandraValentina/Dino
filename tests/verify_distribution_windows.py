@@ -25,7 +25,7 @@ parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--exe',type=Path,required=True)
 parser.add_argument('--work',type=Path,required=True)
 parser.add_argument('--resume-two',type=Path,help='Resultado 2T ya ejecutado: continuar solo 4T, sin repetirlo')
-parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis'],required=True)
+parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis','uxseries'],required=True)
 args=parser.parse_args();exe=args.exe.resolve();work=args.work.resolve();work.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from motorsim.reference_results import load_result
@@ -73,7 +73,13 @@ def button(w,name):
     b=control(w,'Button',name);b.set_focus();send_keys('{SPACE}');time.sleep(.2)
 def tab(w,name):control(w,'TabItem',name).select();time.sleep(.2)
 
-def navigate(name):control(main,'TreeItem',name).select();time.sleep(.2)
+def navigate(name):
+    # Navegación por teclado, incluidos los encabezados no seleccionables.
+    steps={'Datos externos':0,'Comparar':1,'Resultados':2,'Simulación':4,
+           'Motor 2T':6,'Motor 4T':6,'Geometría':7,'Resumen':9}
+    control(main,'Tree').set_focus();send_keys('{END}')
+    if steps[name]:send_keys('{UP '+str(steps[name])+'}')
+    time.sleep(.2)
 def combo(w,name,index):
     if name in ('Tipo de motor','Ejecución'):
         c=[x for x in w.descendants() if x.element_info.control_type=='ComboBox'][0 if name=='Tipo de motor' else 1]
@@ -184,6 +190,13 @@ try:
         result=finish_calculation(first);assert result['status']=='cancelled'
         (work/'ux-cancel.json').write_text(json.dumps(dict(path=str(first/'manifest.json')),indent=2),encoding='utf-8')
         note('Cancelación cooperativa; sin hijo activo ni resultado aceptado')
+    elif args.stage=='uxseries':
+        source=Path(__file__).resolve().parents[1]/'results/simulacion-2t/cuatro-tiempos-20260916/R2/gui-sweep'
+        navigate('Resultados');button(main,'Abrir barrido…');file_dialog('Abrir barrido',source/'series.json')
+        button(main,'Consultar punto convergido')
+        assert '2500 rpm' in texts(main) and 'Trabajo indicado' in texts(main)
+        screenshot(main,'rc3-punto-historico-150')
+        assert not worker_paths();note('Barrido histórico embebido y consulta de su primer punto sin cálculo')
     elif args.stage=='uxanalysis':
         source=Path(__file__).resolve().parents[1]/'results/simulacion-2t/cuatro-tiempos-20260916/R2'
         navigate('Resultados');button(main,'Abrir resultado…');file_dialog('Abrir resultado',source/'gui-compression/manifest.json')
