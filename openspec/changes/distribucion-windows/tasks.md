@@ -136,3 +136,52 @@ real aislado. No existe entorno limpio/aislado disponible; no se desconectó red
 se cambiaron políticas. Aceptación manual y validación experimental siguen separadas.
 Se entrega ZIP candidato con recorrido acreditado y estas limitaciones, no cierre
 completo de todas las comprobaciones. Sin publicar, etiquetar, archivar ni ampliar física.
+
+
+## Hardening rc1 → rc2 autorizado — registro posterior
+- [x] Preservar rc1/f46613e y d6f0c63, comprobar árbol inicialmente limpio.
+- [x] Inspeccionar evidencia de parada y consumir única reproducción focalizada.
+- [x] Corregir tiempos futuros compatibles; regresiones con reloj controlado.
+- [x] Conservar diagnóstico local de parada forzada, sin relajar límite.
+- [x] Suite completa, revisión independiente y OpenSpec finales.
+- [ ] Commit fuente limpio y build rc2; conservar ZIP rc1.
+- [ ] Extraer rc2 fuera del repo y comprobar recorridos Windows/150 %.
+- [ ] Solo un punto completo 2T y uno 4T B100/3000; contraste exacto y tiempos.
+- [ ] Identificar artefactos y commit de evidencia; separar pendientes externos.
+
+Diagnóstico histórico **F — evidencia insuficiente**, no resuelto por inferencia.
+Prueba original: etapa process de verify_distribution_windows.py, lectura externa
+EnumProcessModules/GetModuleFileNameEx de GUI PID7736 y worker PID7052, luego Cancelar.
+Ambos procedían de la carpeta rc1 extraída. Caso admitido: entradas de case.json
+idénticas a reference_inputs(), S2T-0D-01/B/100 Pa/3000 rpm, no caso fuera de dominio.
+Última fila attempts.csv: inicio 222,39608961371155°, paso 0,1039103862884474°,
+aceptado, error 0,0013333369482184684, RHS3048, primer ciclo (ninguno completo).
+La fila describe un paso hasta 222,5°, no acredita el estado final en el instante
+exacto de terminación. No se conserva vector de estado final ni summary/manifest.
+Sí existe case.json con run_id: el worker alcanzó la etapa de escritura del resultado.
+La GUI registró solicitud de cancelación y, al vencer QTimer(3000), el mismo QProcess
+seguía asociado: _kill_if_active llamó kill. Esa es la condición exacta de protección;
+no es un límite de presión, dominio físico ni tolerancia numérica.
+Faltan traza del worker durante esos tres segundos y tiempos de escritura/IPC;
+no se puede distinguir demora de escritura, scheduling o fallo interno con lo guardado.
+
+Única reproducción focalizada: misma rc1, referencia y etapa process, en
+`E:/MotorSim distribucion/Hardening rc1 reproducción única`. Cancelación cooperativa,
+1,922 s de integración, manifiesto cancelled, sin huérfanos ni consola adicional.
+No reprodujo la parada forzada. No se repetirá este diagnóstico ni se declarará causa
+B/C/D/E sin evidencia. La rc2 conserva ahora stderr/progreso/salida/PID/programa en
+el diagnóstico local si actúa el mismo límite; no es telemetría ni cambia la protección.
+
+Tiempos: el lector existente valida timings opcionales en v1–v4. Se elimina solo
+la restricción de escritura >=3 para resultados nuevos y tiempo percibido de la
+GUI. Abrir históricos no escribe; no se asignan tiempos retroactivos. JSON motor v6
+y versiones de resultados/modelos intactos. Candidata se incrementa a 0.1.0-rc2.
+Regresión específica: 9 pruebas aprobadas en 3,176 s, sin integración.
+Revisión independiente review_rc2_hardening: sin defectos reproducibles introducidos;
+9 pruebas en 1,761 s, sin integración y sin acreditar aún el paquete.
+
+Suite final: **228 aprobadas, 22,262 s**. Primera pasada: 227/228 y timeout
+en prueba controlada de hijo sleep; módulo aislado 7/7, 4,833 s. Se ordenó kill
+antes del diagnóstico para no supeditar la parada a la escritura del log; ningún
+plazo de producto ni prueba se amplió. Revisión informada del cambio puntual.
+OpenSpec estricto aprobado. Sin integraciones físicas en estas pruebas.

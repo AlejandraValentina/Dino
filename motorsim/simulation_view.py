@@ -471,6 +471,7 @@ class SimulationView(QScrollArea):
             self.forced = True
             self.error_label.setText('El cálculo no respondió a la cancelación; se detuvo el proceso.')
             process.kill()
+            self._save_error_diagnostic()
 
     def _process_error(self, error):
         if error == QProcess.ProcessError.FailedToStart:
@@ -480,7 +481,9 @@ class SimulationView(QScrollArea):
 
     def _save_error_diagnostic(self):
         try:
-            path=diagnostic(self.error_label.text()+'\n'+self._stderr.decode('utf-8',errors='replace'))
+            path=diagnostic(self.error_label.text()+'\n'+self._stderr.decode('utf-8',errors='replace')
+                +f'\nSalida: {self.output}\nProgreso: {self.progress_label.text()}'
+                +(f'\nPID: {self.process.processId()}\nPrograma: {self.process.program()}' if self.process else ''))
             self.error_label.setText(self.error_label.text()+f'\nDiagnóstico: {path}')
         except OSError as exc:
             self.error_label.setText(self.error_label.text()+f'\nNo se pudo guardar diagnóstico: {exc}')
@@ -518,9 +521,12 @@ class SimulationView(QScrollArea):
             try:
                 result = load_result(self.output/'manifest.json')
                 if result['status'] == 'cancelled':
+                    self._record_timing(result)
                     self._display(result)
-            except ResultError:
-                pass  # Puede no existir un manifiesto si hubo parada forzada.
+            except (ResultError, OSError) as exc:
+                # Puede faltar el manifiesto tras una parada forzada o fallar su escritura.
+                self.error_label.setText(self.error_label.text()+' '+str(exc))
+                self._save_error_diagnostic()
             self._finish_cleanup('Cancelado')
             self.summary_label.setText('Diagnóstico no aceptado. La ejecución fue cancelada.')
             return
@@ -530,15 +536,19 @@ class SimulationView(QScrollArea):
             result = load_result(self.output/'manifest.json')
             if result['status'] == 'converged' and code != 0:
                 raise ResultError('Código de salida incompatible con el resultado.')
-            if result['manifest']['version']>=3 and self._finished_manifest==result['path'] and 'timings' in result['manifest']:
-                result['manifest']['timings']['interface_wall_seconds']=time.monotonic()-self._started
-                write_json(result['path'],result['manifest'])
+            self._record_timing(result)
             self._display(result)
             self._finish_cleanup()
         except (ResultError,OSError) as exc:
             self.error_label.setText(str(exc)+' '+self._stderr.decode('utf-8', errors='replace')[:2000])
             self._save_error_diagnostic()
             self._finish_cleanup('Error de ejecución o resultado ilegible')
+
+    def _record_timing(self, result):
+        # Solo el resultado recién confirmado por el worker; abrir históricos no escribe.
+        if self._finished_manifest == result['path'] and 'timings' in result['manifest']:
+            result['manifest']['timings']['interface_wall_seconds'] = time.monotonic()-self._started
+            write_json(result['path'], result['manifest'])
 
     def _finish_cleanup(self, state=None):
         process, self.process = self.process, None

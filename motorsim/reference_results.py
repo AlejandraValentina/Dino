@@ -126,9 +126,9 @@ def save_result(folder, result, status, inputs, environment, *, timing_context=N
     if timing_context is not None:
         timings=dict(setup_seconds=timing_context['setup_seconds'],writing_seconds=time.monotonic()-writing_started,
                      integration_seconds=result['seconds'],wall_seconds=time.monotonic()-timing_context['started'])
-        if manifest['version']>=3:
-            manifest['timings']=timings
-            write_json(folder/'manifest.json',manifest)
+        # Campo opcional ya admitido por el lector v1–v4; solo nuevas escrituras.
+        manifest['timings']=timings
+        write_json(folder/'manifest.json',manifest)
     return timings
 
 

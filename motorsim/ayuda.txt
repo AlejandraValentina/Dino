@@ -1,4 +1,4 @@
-MotorSim 0.1.0-rc1 — candidata Windows x64
+MotorSim 0.1.0-rc2 — candidata Windows x64
 
 Extraé la carpeta completa y abrí MotorSim.exe. Conservá MotorSimWorker.exe y
 _internal junto a la aplicación. No hace falta instalar Python ni usar consola.

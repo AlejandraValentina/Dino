@@ -24,3 +24,11 @@ cualquier repetición justificada por defecto de empaquetado. No repetir estudio
 Si no hay equipo limpio u offline aislado, registrar esos pendientes sin impedir ZIP
 candidato; nunca desconectar sesión ni alterar políticas. Manual/experimental separados.
 Commit fuente antes de construir paquete final; evidencia posterior en otro commit.
+
+## Hardening autorizado posterior a rc1
+Preservar binarios y evidencia rc1. Los nuevos resultados v1–v4 registran el campo
+opcional timings ya admitido por el lector; no cambia versión ni física y abrir
+históricos no escribe. GUI añade tiempo percibido solo al resultado confirmado
+de su ejecución. Parada forzada conserva diagnóstico local con el mecanismo existente.
+rc2 desde commit limpio; una reproducción focalizada (consumida) y solo un punto
+B100/3000 por ciclo desde paquete final. Sin nuevas campañas ni archivo del cambio.

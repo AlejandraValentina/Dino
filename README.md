@@ -23,7 +23,23 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
-## Candidata Windows 0.1.0-rc1
+## Hardening Windows 0.1.0-rc2
+
+Continuación en el mismo cambio distribucion-windows. Conserva la rc1 siguiente
+como referencia histórica. rc2 registra tiempos opcionales en los resultados
+nuevos 2T v1 mediante el contrato existente; no modifica proyectos JSON v6,
+modelos, física ni archivos anteriores. La GUI añade tiempo percibido solo al
+resultado recién confirmado por su worker, nunca por abrir un histórico.
+La parada de seguridad mantiene 3 segundos y conserva diagnóstico local adicional.
+
+El incidente rc1 se clasifica **F: evidencia insuficiente**: referencia admitida,
+cancelación durante inspección de módulos; una única reproducción terminó
+cooperativamente. Faltan traza del worker durante el retraso original y sus tiempos
+de escritura/IPC. No se declara resuelto ni se amplía el dominio para evitarlo.
+Construcción y protocolo final rc2 se registran en tasks.md al obtener evidencia.
+Se conserva la misma receta y versiones de herramientas que figuran abajo.
+
+## Referencia histórica: candidata Windows 0.1.0-rc1
 
 Cambio activo: [distribucion-windows](openspec/changes/distribucion-windows/tasks.md).
 Paquete Windows x64 **onedir**: extraer la carpeta completa y abrir `MotorSim.exe`.

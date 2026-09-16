@@ -43,6 +43,10 @@ offline aislado; aceptación manual separada. Evidencia mediante
 [distribucion-windows](../openspec/changes/distribucion-windows/tasks.md). No cambia
 el estado técnico funcional ni elimina pendientes manuales o experimentales.
 
+Hardening autorizado de la candidata: rc2 en comprobación por tiempos futuros y
+diagnóstico local. La parada rc1 conserva clasificación F (evidencia insuficiente);
+única reproducción cooperativa. Sin modificar física ni estados de las entregas.
+
 Estados: **Pendiente**, todavía no iniciada; **En curso**, iniciada e incompleta;
 **Por verificar**, implementación preparada con comprobaciones pendientes;
 **Completada**, comportamiento y comprobaciones de cierre acreditados.

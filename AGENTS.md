@@ -14,6 +14,10 @@ publicar, etiquetar o archivar. Preservar 18194d7/da27ee25 y evidencia anterior.
 Tres puntos completos de regresión (2T B3000 y barrido 4T B2500/3000), cancelaciones
 breves y máximo conjunto 300 s de integración; no repetir campañas científicas.
 Los presupuestos R2 siguientes son históricos, no el presupuesto de distribución.
+Hardening autorizado: preservar rc1/f46613e y d6f0c63; corregir tiempos futuros y
+defectos concretos de distribución. Si cambia código, construir rc2 limpia. Máximo
+una reproducción focalizada de parada y un punto B100/3000 por ciclo 2T/4T;
+sin campañas. Clasificar causa sin inventar evidencia; revisión independiente puntual.
 Bloque autorizado de entregas 7 y 8: configuración 4T, JSON v6, modelo de tres
 volúmenes I/C/E, ejecución e integración condicionadas a los criterios numéricos.
 Preservar 6cbed360 y toda evidencia anterior. Entrega 6 conserva herramientas

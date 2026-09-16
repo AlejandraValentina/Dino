@@ -25,7 +25,7 @@ parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--exe',type=Path,required=True)
 parser.add_argument('--work',type=Path,required=True)
 parser.add_argument('--resume-two',type=Path,help='Resultado 2T ya ejecutado: continuar solo 4T, sin repetirlo')
-parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process'],required=True)
+parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening'],required=True)
 args=parser.parse_args();exe=args.exe.resolve();work=args.work.resolve();work.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from motorsim.reference_results import load_result
@@ -211,6 +211,18 @@ try:
         paths=dict(two_stroke=str(first/'manifest.json'),four_stroke=str(second/'series.json'))
         (work/'numerical.json').write_text(json.dumps(paths,indent=2),encoding='utf-8')
         note('Barrido GUI 4T B2500/3000 convergido')
+    elif args.stage=='hardening':
+        if result_folders():raise RuntimeError('Protocolo nuevo: no repetir puntos existentes.')
+        tab(main,'Simulación');first=start_calculation();two=finish_calculation(first)
+        assert two['status']=='converged' and 'interface_wall_seconds' in two['manifest']['timings']
+        screenshot(main,'rc2-2t-150')
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json');tab(main,'Simulación')
+        combo(main,'Origen de la próxima ejecución',1)
+        second=start_calculation();four=finish_calculation(second)
+        assert four['status']=='converged' and 'interface_wall_seconds' in four['manifest']['timings']
+        screenshot(main,'rc2-4t-150')
+        (work/'hardening-numerical.json').write_text(json.dumps(dict(two_stroke=str(first/'manifest.json'),four_stroke=str(second/'manifest.json')),indent=2),encoding='utf-8')
+        note('Dos únicos puntos completos rc2 B100/3000, 2T y proyecto 4T, con tiempos persistidos')
     elif args.stage=='cancel':
         tab(main,'Simulación');first=start_calculation()
         wait(lambda:'RHS:' in texts(main));button(main,'Cancelar')
@@ -268,7 +280,7 @@ try:
         tab(main,'Ficha');control(main,'Edit',suffix='.bore_mm').set_edit_text('54')
     elif args.stage=='about':
         control(main,'MenuItem','Ayuda').click_input();control(main,'MenuItem','Acerca de MotorSim…').click_input()
-        d=window('Acerca de MotorSim');assert '0.1.0-rc1' in texts(d) and 'f46613e' in texts(d)
+        d=window('Acerca de MotorSim');info=json.loads((exe.parent/'build.json').read_text(encoding='utf-8'));assert info['app_version'] in texts(d) and info['source_commit'] in texts(d)
         screenshot(d,'paquete-acerca');button(d,'Aceptar');note('Acerca de identifica versión/commit sin Git')
         control(main,'MenuItem','Ayuda').click_input();control(main,'MenuItem','Guía breve…').click_input()
         d=window('MotorSim — Guía breve');assert any('Cancelar' in x.window_text() for x in d.descendants())
