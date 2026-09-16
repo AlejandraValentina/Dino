@@ -130,6 +130,8 @@ def build_project_case(project, *, rpm=None):
     ordered = canonical_ports(project)
     canonical = replace(project, ports=tuple(p for _, p in ordered))
     physics = canonical.to_dict()
+    physics.pop('four_stroke')
+    physics['format_version'] = 5
     for key in ('name', 'manufacturer', 'model', 'notes'):
         physics.pop(key)
     for port in physics['ports']:

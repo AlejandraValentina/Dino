@@ -38,7 +38,9 @@ class SyntheticCase:
     fresh_energy_j_kg: float = 800000
 
     def manifest(self):
-        return {**asdict(self), 'synthetic_not_experimental': True,
+        data = asdict(self)
+        data['project_geometry'].pop('four_stroke')
+        return {**data, 'synthetic_not_experimental': True,
                 'units': 'SI en estados; geometría mm y cm3 según nombres',
                 'cv_order': ['I', 'K', 'C', 'E'],
                 'link_order': ['exterior-I', 'I-K', 'K-C1', 'K-C2', 'C-E', 'E-exterior'],

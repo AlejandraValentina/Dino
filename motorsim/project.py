@@ -26,7 +26,12 @@ INTAKE_REFERENCE = "straight-skirt-peripheral-tdc-developed-v1"
 DUCT_FIELDS = {"length_mm": "Longitud axial", "start_diameter_mm": "Diámetro interior inicial",
                "end_diameter_mm": "Diámetro interior final"}
 DUCT_REFERENCE = "ordered-circular-inner-axial-linear-2t-v1"
-NUMBER_LABELS = {**NUMERIC_FIELDS, **INTAKE_FIELDS, **DUCT_FIELDS,
+FOUR_DUCT_REFERENCE = "ordered-circular-inner-axial-linear-4t-v1"
+VALVE_FIELDS = {"seat_mm": "Diámetro de asiento D", "throat_mm": "Diámetro de garganta d",
+                "stem_mm": "Diámetro del vástago s", "lift_mm": "Alzada máxima H",
+                "opening_deg": "Apertura", "duration_deg": "Duración"}
+VALVE_REFERENCE = "sin-squared-cylindrical-curtain-annular-cap-720-v1"
+NUMBER_LABELS = {**NUMERIC_FIELDS, **INTAKE_FIELDS, **DUCT_FIELDS, **VALVE_FIELDS,
                  "crankcase_volume_bdc_cm3": "Volumen libre del cárter en PMI"}
 TWO_STROKE_REFERENCE = "rectangular-peripheral-tdc-developed-bdc-v1"
 
@@ -44,6 +49,12 @@ def validate_number(value: object, field: str) -> None:
     except OverflowError:
         valid = False
     minimum = 1 if field == "compression_ratio" else 0
+    if field in ("stem_mm", "opening_deg"):
+        if not valid or value < 0 or (field == "opening_deg" and value >= 720):
+            raise ProjectError(f"{label}: valor finito >= 0" + (" y < 720." if field == "opening_deg" else "."))
+        return
+    if field == "duration_deg" and valid and value >= 720:
+        raise ProjectError("Duración: debe ser menor que 720°.")
     if not valid or value <= minimum:
         raise ProjectError(f"{label}: debe ser un número finito mayor que {minimum}.")
 
@@ -165,7 +176,7 @@ class Ducts:
     reference: str = DUCT_REFERENCE
 
     def validate(self):
-        if self.reference != DUCT_REFERENCE:
+        if self.reference not in (DUCT_REFERENCE, FOUR_DUCT_REFERENCE):
             raise ProjectError("Referencia de conductos no admitida.")
         for route in (self.intake, self.exhaust):
             if not isinstance(route, tuple) or any(not isinstance(s, DuctSegment) for s in route):
@@ -191,6 +202,57 @@ class Ducts:
 
 
 @dataclass(frozen=True)
+class Valve:
+    seat_mm: float | None = None
+    throat_mm: float | None = None
+    stem_mm: float | None = None
+    lift_mm: float | None = None
+    opening_deg: float | None = None
+    duration_deg: float | None = None
+
+    def validate(self):
+        for key in VALVE_FIELDS:
+            validate_number(getattr(self, key), key)
+
+    @classmethod
+    def from_dict(cls, data):
+        if not isinstance(data, dict) or set(data) != set(VALVE_FIELDS):
+            raise ProjectError("Campos de válvula inválidos.")
+        result = cls(**data)
+        result.validate()
+        return result
+
+
+@dataclass(frozen=True)
+class FourStroke:
+    intake: Valve = field(default_factory=Valve)
+    exhaust: Valve = field(default_factory=Valve)
+    ducts: Ducts = field(default_factory=lambda: Ducts(reference=FOUR_DUCT_REFERENCE))
+    reference: str = VALVE_REFERENCE
+
+    def validate(self):
+        if self.reference != VALVE_REFERENCE:
+            raise ProjectError("Referencia de válvulas no admitida.")
+        if not isinstance(self.intake, Valve) or not isinstance(self.exhaust, Valve) or not isinstance(self.ducts, Ducts):
+            raise ProjectError("Configuración 4T inválida.")
+        if self.ducts.reference != FOUR_DUCT_REFERENCE:
+            raise ProjectError("Los conductos 4T requieren su referencia independiente.")
+        self.intake.validate(); self.exhaust.validate(); self.ducts.validate()
+
+    def to_dict(self):
+        return {**asdict(self), "ducts": self.ducts.to_dict()}
+
+    @classmethod
+    def from_dict(cls, data):
+        if not isinstance(data, dict) or set(data) != set(cls.__dataclass_fields__):
+            raise ProjectError("Campos de configuración 4T inválidos.")
+        result = cls(Valve.from_dict(data['intake']), Valve.from_dict(data['exhaust']),
+                     Ducts.from_dict(data['ducts']), data['reference'])
+        result.validate()
+        return result
+
+
+@dataclass(frozen=True)
 class Project:
     name: str = "Sin título"
     cycle: str = "2T"
@@ -206,6 +268,8 @@ class Project:
     crankcase_volume_bdc_cm3: float | None = None
     intake: Intake = field(default_factory=Intake)
     ducts: Ducts = field(default_factory=Ducts)
+
+    four_stroke: FourStroke = field(default_factory=FourStroke)
 
     def validate(self) -> None:
         if not isinstance(self.name, str) or not self.name.strip():
@@ -229,10 +293,15 @@ class Project:
         if not isinstance(self.ducts, Ducts):
             raise ProjectError("Datos de conductos inválidos.")
         self.ducts.validate()
+        if self.ducts.reference != DUCT_REFERENCE:
+            raise ProjectError("Los conductos históricos requieren referencia 2T.")
+        if not isinstance(self.four_stroke, FourStroke):
+            raise ProjectError("Configuración 4T inválida.")
+        self.four_stroke.validate()
 
     def to_dict(self) -> dict:
         self.validate()
-        return {"format_version": 5, **asdict(self), "ducts": self.ducts.to_dict(), "ports": [asdict(port) for port in self.ports],
+        return {"format_version": 6, **asdict(self), "four_stroke": self.four_stroke.to_dict(), "ducts": self.ducts.to_dict(), "ports": [asdict(port) for port in self.ports],
                 "two_stroke_reference": TWO_STROKE_REFERENCE}
 
     @classmethod
@@ -242,12 +311,14 @@ class Project:
         if not {"format_version", "name", "cycle"} <= data.keys():
             raise ProjectError("Faltan campos obligatorios: format_version, name o cycle.")
         version = data["format_version"]
-        if type(version) is not int or version not in (1, 2, 3, 4, 5):
-            raise ProjectError("La versión del archivo debe ser el entero 1, 2, 3, 4 o 5.")
+        if type(version) is not int or version not in (1, 2, 3, 4, 5, 6):
+            raise ProjectError("La versión del archivo debe ser el entero 1, 2, 3, 4, 5 o 6.")
         if version == 1:
             project = cls(data["name"], data["cycle"])
         else:
             fields = set(cls.__dataclass_fields__)
+            if version < 6:
+                fields -= {"four_stroke"}
             if version < 5:
                 fields -= {"ducts"}
             if version < 4:
@@ -265,7 +336,9 @@ class Project:
                 values["ports"] = tuple(Port.from_dict(port) for port in data["ports"])
             if version >= 4:
                 values["intake"] = Intake.from_dict(data["intake"])
-            if version == 5:
+            if version >= 6:
+                values["four_stroke"] = FourStroke.from_dict(data["four_stroke"])
+            if version >= 5:
                 values["ducts"] = Ducts.from_dict(data["ducts"])
             project = cls(**values)
         project.validate()

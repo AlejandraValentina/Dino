@@ -101,10 +101,10 @@ class IntakeTests(unittest.TestCase):
                               crankcase_volume_bdc_cm3=250.125)
                     save_project(path,p); self.assertEqual(load_project(path),p)
                     data=json.loads(path.read_text(encoding='utf-8'))
-                    self.assertEqual(data['format_version'],5)
+                    self.assertEqual(data['format_version'],6)
                     self.assertEqual(set(data['intake']),set(Intake.__dataclass_fields__))
             for version in (1,2,3):
-                data=p.to_dict();data.pop('ducts');data.pop('intake');data['format_version']=version
+                data=p.to_dict();data.pop('four_stroke');data.pop('ducts');data.pop('intake');data['format_version']=version
                 if version<3:
                     for key in ('ports','crankcase_volume_bdc_cm3','two_stroke_reference'):data.pop(key)
                 if version==1:data={k:data[k] for k in ('format_version','name','cycle')}
@@ -116,7 +116,7 @@ class IntakeTests(unittest.TestCase):
                         self.assertEqual(getattr(old,key),value)
                 if version==3:self.assertEqual(old.ports,p.ports)
                 save_project(path,old)
-                self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['format_version'],5)
+                self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['format_version'],6)
 
     def test_malformed_intake_rejected(self):
         data=Project(intake=self.intake).to_dict();valid=data['intake']

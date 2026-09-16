@@ -44,8 +44,12 @@ def validate_request(request):
 
 
 def point_inputs(common, series_id, index, rpm):
-    return project_inputs(Project.from_dict(common['project_snapshot']),common['origin'],rpm=rpm,
-                          series_context=dict(series_id=series_id,point_index=index))
+    result = project_inputs(Project.from_dict(common['project_snapshot']),common['origin'],rpm=rpm,
+                            series_context=dict(series_id=series_id,point_index=index))
+    if common['project_snapshot'].get('format_version') == 5:
+        result['project_snapshot'].pop('four_stroke')
+        result['project_snapshot']['format_version'] = 5
+    return result
 
 
 def write_index(folder, index):

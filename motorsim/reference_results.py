@@ -78,6 +78,9 @@ def validated_model(inputs):
             _require(isinstance(inputs['operating_point'], dict) and set(inputs['operating_point']) == {'rpm'}, 'Punto operativo inválido.')
             rpm = validate_rpm(inputs['operating_point']['rpm'])
         expected = project_inputs(project, inputs['origin'], profile, rpm=rpm, series_context=inputs.get('series_context'))
+        if inputs['project_snapshot'].get('format_version') == 5:
+            expected['project_snapshot'].pop('four_stroke')
+            expected['project_snapshot']['format_version'] = 5
         case, _ = build_project_case(project, rpm=rpm)
         model = Model(case, external_band_pa=BAND_PA)
     _require(json.dumps(inputs, sort_keys=True) == json.dumps(expected, sort_keys=True),

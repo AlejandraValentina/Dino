@@ -62,7 +62,7 @@ class CharacteristicsTests(unittest.TestCase):
             self.assertEqual(project, Project('Antiguo', '4T'))
             self.assertEqual(path.read_bytes(), original)
             save_project(path, project)
-            self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['format_version'], 5)
+            self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['format_version'], 6)
 
     def test_complete_and_incomplete_persistence(self):
         complete = Project('Prueba', '4T', 'Marca á', 'Modelo', 4, 80.123456789,

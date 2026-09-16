@@ -5,7 +5,7 @@ from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import (QComboBox, QFormLayout, QGridLayout, QHBoxLayout,
                                QLabel, QLineEdit, QListWidget, QPushButton,
                                QScrollArea, QVBoxLayout, QWidget)
-from .project import Ducts, DuctSegment, DUCT_FIELDS, ProjectError, parse_number
+from .project import DUCT_REFERENCE, FOUR_DUCT_REFERENCE, Ducts, DuctSegment, DUCT_FIELDS, ProjectError, parse_number
 from .ducts import RouteGeometry, route_geometry, format_geometry
 
 
@@ -67,14 +67,15 @@ class DuctProfile(QWidget):
 class DuctsView(QScrollArea):
     changed = Signal()
 
-    def __init__(self):
+    def __init__(self, supported_cycle="2T"):
         super().__init__()
         self.setWidgetResizable(True)
         self.setFrameShape(QScrollArea.Shape.NoFrame)
         self.drafts = {'intake': [], 'exhaust': []}
         self.selected_rows = {'intake': -1, 'exhaust': -1}
         self.route = 'intake'
-        self.cycle = '2T'
+        self.supported_cycle = supported_cycle
+        self.cycle = supported_cycle
         body = QWidget(); layout = QVBoxLayout(body)
         layout.setContentsMargins(24,16,24,16)
         title = QLabel('Conductos'); title.setObjectName('pageTitle'); layout.addWidget(title)
@@ -216,19 +217,19 @@ class DuctsView(QScrollArea):
                     label='Admisión' if route=='intake' else 'Escape'
                     raise ProjectError(f'{label}, tramo {i+1}: {exc}') from exc
             values[route]=tuple(segments)
-        return Ducts(**values)
+        return Ducts(**values, reference=FOUR_DUCT_REFERENCE if self.supported_cycle=="4T" else DUCT_REFERENCE)
 
     def set_cycle(self,cycle):
-        self.cycle=cycle;self.panel.setVisible(cycle=='2T')
-        self.availability.setText('Un recorrido por sistema · Cilindro de referencia 2T' if cycle=='2T' else
+        self.cycle=cycle;self.panel.setVisible(cycle==self.supported_cycle)
+        self.availability.setText(f'Un recorrido por sistema · Cilindro de referencia {self.supported_cycle}' if cycle==self.supported_cycle else
                                   'Conductos específicos 2T no disponibles en 4T. Datos conservados.')
         self.refresh()
 
     def refresh(self):
-        self.direction.setText('Entrada exterior → ventana de admisión al cárter' if self.route=='intake' else
+        self.direction.setText(('Entrada exterior → válvula de admisión' if self.supported_cycle=='4T' else 'Entrada exterior → ventana de admisión al cárter') if self.route=='intake' else
                                'Salida del cilindro → extremo exterior del escape')
         self.profile.data=RouteGeometry();self.piece_results.clear();self.totals.clear();self.joints.clear();self.input_error.clear()
-        if self.cycle!='2T':
+        if self.cycle!=self.supported_cycle:
             self.profile.update();return
         pieces,errors=[],[]
         for draft in self.drafts[self.route]:

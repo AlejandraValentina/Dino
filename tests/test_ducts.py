@@ -88,7 +88,7 @@ class DuctTests(unittest.TestCase):
                           ports=(Port('Escape','escape',32,10,20),),crankcase_volume_bdc_cm3=250)
                 save_project(path,p);self.assertEqual(load_project(path),p)
                 data=json.loads(path.read_text(encoding='utf-8'))
-                self.assertEqual(data['format_version'],5)
+                self.assertEqual(data['format_version'],6)
                 self.assertEqual(set(data['ducts']),{'intake','exhaust','reference'})
                 self.assertEqual(set(data['ducts']['intake'][0]),{'name',*DUCT_FIELDS})
                 self.assertIsNone(data['ducts']['intake'][2]['length_mm'])
@@ -102,7 +102,7 @@ class DuctTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             path=Path(folder)/'anterior.json'
             for version in (1,2,3,4):
-                data=p.to_dict();data.pop('ducts');data['format_version']=version
+                data=p.to_dict();data.pop('four_stroke');data.pop('ducts');data['format_version']=version
                 if version<4:data.pop('intake')
                 if version<3:
                     for key in ('ports','crankcase_volume_bdc_cm3','two_stroke_reference'):data.pop(key)
@@ -117,7 +117,7 @@ class DuctTests(unittest.TestCase):
                 if version==4:self.assertEqual(loaded.intake,p.intake)
                 save_project(path,loaded)
                 self.assertEqual(load_project(path),loaded)
-                self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['format_version'],5)
+                self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['format_version'],6)
 
     def test_malformed_v5_rejected(self):
         data=Project(ducts=Ducts((self.tube,),())).to_dict();valid=data['ducts']

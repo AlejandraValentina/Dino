@@ -10,16 +10,17 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QComboBox, QDialog, QFileDialog, QFormLayout, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
     QMainWindow, QMessageBox, QPlainTextEdit, QScrollArea, QSizePolicy,
-    QTabWidget, QToolBar, QVBoxLayout, QWidget,
+    QTabWidget, QStackedWidget, QToolBar, QVBoxLayout, QWidget,
 )
 
 from .project import (NUMERIC_FIELDS, PORT_FIELDS, INTAKE_FIELDS, DUCT_FIELDS, Project,
-                      Port, Intake, Ducts, DuctSegment, ProjectError, displacements, parse_number)
+                      Port, Intake, FourStroke, Ducts, DuctSegment, ProjectError, displacements, parse_number)
 from .project_case import execution_errors
 from .storage import load_project, save_project
 from .geometry_view import GeometryView
 from .ports_view import PortsView
 from .ducts_view import DuctsView
+from .valves_view import ValvesView
 from .simulation_view import SimulationView
 
 
@@ -275,7 +276,14 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.ports_view, "Configuración &2T")
         self.ports_view.changed.connect(self._edited)
         self.ducts_view = DuctsView()
-        self.tabs.addTab(self.ducts_view, "&Conductos")
+        self.ducts4_view = DuctsView('4T')
+        self.ducts4_view.changed.connect(self._edited)
+        self.duct_stack = QStackedWidget()
+        self.duct_stack.addWidget(self.ducts_view); self.duct_stack.addWidget(self.ducts4_view)
+        self.tabs.addTab(self.duct_stack, "&Conductos")
+        self.valves_view = ValvesView()
+        self.valves_view.changed.connect(self._edited)
+        self.tabs.addTab(self.valves_view, "Configuración &4T")
         self.ducts_view.changed.connect(self._edited)
         self.simulation_view = SimulationView(self.execution_snapshot)
         self.tabs.addTab(self.simulation_view, "&Simulación 2T")
@@ -304,7 +312,11 @@ class MainWindow(QMainWindow):
             self._arrange_groups()
 
     def _update_geometry(self) -> None:
-        self.ducts_view.set_cycle(self.cycle_combo.currentText())
+        cycle = self.cycle_combo.currentText()
+        self.duct_stack.setCurrentIndex(0 if cycle == '2T' else 1)
+        self.ducts_view.set_cycle('2T')
+        self.ducts4_view.set_cycle('4T')
+        self.valves_view.setEnabled(cycle == '4T')
         parsed = {}
         for field, edit in self.numeric_edits.items():
             try:
@@ -353,6 +365,7 @@ class MainWindow(QMainWindow):
         return Project(
             ports=ports, crankcase_volume_bdc_cm3=crankcase, intake=intake,
             ducts=self.ducts_view.snapshot(),
+            four_stroke=FourStroke(**self.valves_view.snapshot(), ducts=self.ducts4_view.snapshot()),
             name=self.name_edit.text(), cycle=self.cycle_combo.currentText(),
             manufacturer=self.text_edits["manufacturer"].text(),
             model=self.text_edits["model"].text(), notes=self.notes_edit.toPlainText(),
@@ -379,6 +392,7 @@ class MainWindow(QMainWindow):
         project = Project(name=self.name_edit.text(), cycle=self.cycle_combo.currentText(),
             manufacturer=self.text_edits['manufacturer'].text(), model=self.text_edits['model'].text(),
             notes=self.notes_edit.toPlainText(), ports=ports, ducts=ducts,
+            four_stroke=FourStroke(**self.valves_view.snapshot(), ducts=self.ducts4_view.snapshot()),
             intake=Intake(mode=intake.mode_combo.currentData(), **{
                 k:number(intake.edits[k].text(), k, 'Admisión: ') for k in INTAKE_FIELDS}),
             crankcase_volume_bdc_cm3=number(self.ports_view.crankcase_edit.text(), 'crankcase_volume_bdc_cm3'),
@@ -419,6 +433,8 @@ class MainWindow(QMainWindow):
                 widget.blockSignals(was_blocked)
         self.ports_view.load(project)
         self.ducts_view.load(project.ducts)
+        self.ducts4_view.load(project.four_stroke.ducts)
+        self.valves_view.load(project.four_stroke)
         self.path = path
         self.dirty = False
         self._update_geometry()

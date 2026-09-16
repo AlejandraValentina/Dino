@@ -5,23 +5,17 @@
 Leer README.md y el cambio solicitado dentro de `openspec/changes/` antes de
 modificar archivos. `base-escritorio` es la entrega inicial; su límite de nombre,
 tipo y archivos pertenece a esa entrega. El cambio autorizado actual es
-`comparacion-resultados`: proposal.md, design.md, specs/comparacion-resultados/spec.md y tasks.md.
-Entregas 1 y 2 completadas y aceptadas por la usuaria; 3 y 4 comprobadas técnicamente
-sin aceptación manual atribuida. Se preserva el trabajo existente y se comprueba Git.
-Entrega 5 implementada para su alcance 0D acotado, aceptación manual pendiente
-y separada; preservar 5dda9860 y evidencias sin repetir comprobaciones históricas.
-Entrega 6: preservar a72b47f4 y sus evidencias. El tramo actual de
-`comparacion-resultados` autoriza CSV externo rpm,value, declaración explícita
-(trabajo indicado completo 2T o pmax absoluto), procedencia, copia persistente,
-reapertura y contraste descriptivo con barrido guardado por RPM exactas.
-No simulaciones nuevas, física, calibración, ampliación del solver ni JSON v5.
-Usar el barrido local existente y CSV rotulado EJEMPLO SINTÉTICO para Windows/150 %.
-Pruebas de parser/aritmética/Qt sin ejecutar el motor. Mediciones reales y validación
-experimental pendientes; no fabricarlas ni buscarlas. Una revisión puntual y
-commit propio sin publicar. Mantener separada la aceptación manual pendiente.
-Revisión puntual, pruebas pertinentes y commit propio;
-autenticación fuera de esta tarea, sin nuevos intentos ni configuración global.
-No iniciar entrega 7.
+`cuatro-tiempos-basico`: proposal.md, design.md, specs/cuatro-tiempos-basico/spec.md y tasks.md.
+Bloque autorizado de entregas 7 y 8: configuración 4T, JSON v6, modelo de tres
+volúmenes I/C/E, ejecución e integración condicionadas a los criterios numéricos.
+Preservar 6cbed360 y toda evidencia anterior. Entrega 6 conserva herramientas
+implementadas y mediciones/validación experimental pendientes, sin bloquear 4T.
+La prohibición anterior de iniciar 7 queda sustituida por esta autorización.
+Perfiles/tolerancias/física fijados por la orden; máximo 12 ejecuciones previstas,
+720 s de integración conjuntos, 60 s por punto. No lanzar etapas dependientes
+si falla su condición previa; continuar las independientes. Un único cambio.
+Commits locales lógicos sin publicar, sin autenticación/configuración global.
+No archivar, empaquetar ni ampliar física fuera del bloque.
 No alterar retrospectivamente requisitos ni verificaciones de entregas anteriores.
 
 La [hoja de ruta](docs/HOJA_DE_RUTA_MotorSim.md) define el orden, los objetivos y

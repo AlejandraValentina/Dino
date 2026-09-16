@@ -166,7 +166,7 @@ class WindowTests(unittest.TestCase):
         for edit in self.window.numeric_edits.values():
             self.assertEqual(edit.text(), "")
         self.assertTrue(self.window.save())
-        self.assertIn('"format_version": 5', self.path.read_text(encoding="utf-8"))
+        self.assertIn('"format_version": 6', self.path.read_text(encoding="utf-8"))
 
     def test_responsive_groups(self):
         self.window.resize(1100, 760)
@@ -239,7 +239,7 @@ class WindowTests(unittest.TestCase):
 
     def configure_ducts(self):
         v=self.window.ducts_view
-        self.window.tabs.setCurrentWidget(v)
+        self.window.tabs.setCurrentWidget(self.window.duct_stack)
         for name,values in (('Tubo sintético',('100','20','20')),('Cono sintético',('100','20','40'))):
             v.add_segment();v.name_edit.setText(name)
             for key,value in zip(v.edits,values):v.edits[key].setText(value)
@@ -285,7 +285,8 @@ class WindowTests(unittest.TestCase):
         v.route_combo.setCurrentIndex(0);v.list.setCurrentRow(0)
         self.assertFalse(self.window.dirty)
         self.window.cycle_combo.setCurrentText('4T')
-        self.assertFalse(v.profile.data.profile);self.assertTrue(v.panel.isHidden())
+        self.assertIs(self.window.duct_stack.currentWidget(),self.window.ducts4_view)
+        self.assertFalse(self.window.ducts4_view.drafts['intake'])
         self.assertEqual(self.window.project().ducts,original.ducts)
         self.assertTrue(self.window.save());self.assertTrue(self.window.close())
         reopened=MainWindow()
