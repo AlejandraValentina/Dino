@@ -65,9 +65,13 @@ class RpmPlot(QWidget):
 
 
 class SweepDialog(QDialog):
+    def reject(self):
+        if self.isWindow():super().reject()
+
     def __init__(self,parent,show_point):
         super().__init__(parent)
         self.show_point=show_point;self.sweep=None
+        self.controller=parent
         self.setWindowTitle('Barrido de RPM · resultados guardados');self.resize(1020,580)
         layout=QVBoxLayout(self)
         self.identity=QLabel();self.identity.setWordWrap(True);self.identity.setTextFormat(Qt.TextFormat.PlainText)
@@ -100,7 +104,7 @@ class SweepDialog(QDialog):
 
     def set_sweep(self,sweep):
         self.sweep=sweep;index=sweep['index'];origin=index['common_inputs']['origin']
-        self.stale_label.setText(self.parent().stale_label.text())
+        self.stale_label.setText(self.controller.stale_label.text())
         self.identity.setText(f"{origin['project_name']} · Serie {index['series_id']}\n"
             f"{STATES[index['state']]} · {index['reason']}\nIntegración total: {index['integration_seconds']:.3f} s · "
             f"Proceso de serie: {index['wall_seconds']:.3f} s"+
@@ -132,7 +136,8 @@ class SweepDialog(QDialog):
     def open_point(self):
         i=self.table.currentRow()
         if self.sweep and i>=0 and self.sweep['index']['points'][i]['state']=='converged':
-            self.show_point(self.sweep['results'][i]);self.hide()
+            self.show_point(self.sweep['results'][i])
+            if self.isWindow():self.hide()
 
     def export(self,checked=False,*,folder=None):
         if not self.sweep:return

@@ -19,6 +19,12 @@ Prioridad propuesta: datos generales para 2T y 4T desde el editor común; primer
 
 ## Estado de avance
 
+Reorganización UX autorizada: [reorganizacion-ui-final](../openspec/changes/reorganizacion-ui-final/tasks.md).
+Navegación por tareas, configuración contextual y análisis embebido implementados;
+sin ampliar capacidades ni modificar las entregas científicas. Pruebas, revisión
+puntual e inspección Windows registradas; candidata rc3 en preparación, conserva
+rc1/rc2. Aceptación manual final y verificaciones de distribución pendientes.
+
 Seguimiento de la copia local comprobada el 16/09/2026. Las entregas 1 y 2 están
 autorizadas y aceptadas. Entrega 3 autorizada para lumbreras,
 cárter y admisión por falda recta; decisión de modalidad inicial resuelta. Entrega 4 autorizada el 15/09/2026; entrega 5 ampliada expresamente a Qt y geometría del editor bajo condiciones de referencia, sin ondas ni barridos. Entrega 6 ampliada a punto RPM 2500–3500 y barrido secuencial 2–5 puntos, conservando comparación/CSV; importación externa y contraste descriptivo autorizados el 16/09/2026, sin nuevos cálculos. Contraste con mediciones reales pendiente. Entregas 7 y 8 autorizadas conjuntamente el 16/09/2026 mediante `cuatro-tiempos-basico`, con puertas numéricas previas a la integración. La usuaria comunicó

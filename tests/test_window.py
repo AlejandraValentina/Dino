@@ -51,14 +51,15 @@ class WindowTests(unittest.TestCase):
     def test_initial_window_and_edit(self):
         self.assertEqual(self.snapshot(), (Project(), None, False))
         self.assertEqual([self.window.cycle_combo.itemText(i) for i in range(2)], ["2T", "4T"])
-        self.assertEqual("Simulación · modelo 0D", self.window.notice.text())
+        self.assertIn("2T · Inactivo", self.window.notice.text())
         self.assertIn("Sin archivo", self.window.file_label.text())
         self.edit()
         self.assertTrue(self.window.dirty)
-        self.assertEqual("MotorSim", self.window.windowTitle())
+        self.assertIn("MotorSim — Motor editado · 4T · Cambios pendientes", self.window.windowTitle())
         self.assertEqual(self.window.state_label.text(), "Cambios pendientes")
 
     def test_cycle_keyboard_and_reopen(self):
+        self.window.summary_page.tabs.setCurrentIndex(1)
         combo = self.window.cycle_combo
         self.window.name_edit.setFocus()
         QTest.keyClick(self.window.name_edit, Qt.Key.Key_Tab)
@@ -169,12 +170,13 @@ class WindowTests(unittest.TestCase):
         self.assertIn('"format_version": 6', self.path.read_text(encoding="utf-8"))
 
     def test_responsive_groups(self):
+        self.window.navigation.go("geometry")
         self.window.resize(1100, 760)
         self.app.processEvents()
-        self.assertTrue(self.window._wide_layout)
+        self.assertTrue(self.window.geometry_view.editor_wide)
         self.window.resize(640, 480)
         self.app.processEvents()
-        self.assertFalse(self.window._wide_layout)
+        self.assertFalse(self.window.geometry_view.editor_wide)
         self.assertEqual(self.window.workspace_scroll.horizontalScrollBar().maximum(), 0)
 
     def test_kinematics_updates_clears_and_preserves_json(self):
@@ -285,7 +287,7 @@ class WindowTests(unittest.TestCase):
         v.route_combo.setCurrentIndex(0);v.list.setCurrentRow(0)
         self.assertFalse(self.window.dirty)
         self.window.cycle_combo.setCurrentText('4T')
-        self.assertIs(self.window.duct_stack.currentWidget(),self.window.ducts4_view)
+        self.assertIs(self.window.motor4_page.tabs.widget(1),self.window.ducts4_view)
         self.assertFalse(self.window.ducts4_view.drafts['intake'])
         self.assertEqual(self.window.project().ducts,original.ducts)
         self.assertTrue(self.window.save());self.assertTrue(self.window.close())
@@ -475,6 +477,7 @@ class WindowTests(unittest.TestCase):
         self.assertFalse(self.window.dirty)
         v=self.window.ports_view.intake
         self.window.tabs.setCurrentWidget(self.window.ports_view)
+        self.window.motor2_page.tabs.setCurrentIndex(1)
         v.mode_combo.setFocus()
         QTest.keyClick(v.mode_combo,Qt.Key.Key_Down)
         self.assertEqual(v.mode_combo.currentData(),'piston_port')

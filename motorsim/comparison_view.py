@@ -76,8 +76,12 @@ class ComparisonPlot(QWidget):
 
 
 class ComparisonDialog(QDialog):
-    def __init__(self,parent=None):
+    def reject(self):
+        if self.isWindow():super().reject()
+
+    def __init__(self,parent=None,*,embedded=False):
         super().__init__(parent)
+        if embedded:self.setWindowFlags(Qt.WindowType.Widget)
         self.setWindowTitle('MotorSim — Comparar resultados')
         self.resize(1040,780)
         self.results=[None,None]
@@ -122,6 +126,7 @@ class ComparisonDialog(QDialog):
         self.export_button.clicked.connect(self.export)
         actions.addWidget(self.export_button);actions.addStretch()
         close=QPushButton('Cerrar');close.clicked.connect(self.close);actions.addWidget(close)
+        close.setVisible(not embedded)
         content.addLayout(actions)
         content.addWidget(label('Modelo 0D con energía prescrita, sin ondas ni validación experimental. La diferencia no acredita un motor mejor ni potencia al eje.','unit'))
         self._arrange()

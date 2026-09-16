@@ -73,6 +73,7 @@ class GeometryPlot(QWidget):
 class Mechanism(QWidget):
     def __init__(self):
         super().__init__()
+        self.editor=None
         self.data = Geometry(360)
         self.angle = 0
         self.setMinimumHeight(225)
@@ -120,6 +121,7 @@ class GeometryView(QScrollArea):
         super().__init__()
         self.setWidgetResizable(True)
         self.setFrameShape(QScrollArea.Shape.NoFrame)
+        self.editor=None
         self.data = Geometry(360)
         self.body = QWidget()
         layout = QVBoxLayout(self.body)
@@ -164,8 +166,20 @@ class GeometryView(QScrollArea):
         self._wide = None
         self._arrange()
 
+    def attach_editor(self,editor):
+        self.editor=editor;self.body.layout().removeItem(self.grid)
+        self.visual=QWidget();self.visual.setLayout(self.grid)
+        self.combined=QGridLayout();self.combined.setSpacing(22)
+        self.body.layout().insertLayout(2,self.combined);self._wide=None;self._arrange()
+
     def _arrange(self):
-        wide = self.viewport().width() >= max(850, self.fontMetrics().horizontalAdvance("M")*62)
+        if self.editor is not None:
+            self.editor_wide=self.viewport().width()>=850
+            self.combined.addWidget(self.editor,0,0,Qt.AlignmentFlag.AlignTop)
+            self.combined.addWidget(self.visual,0 if self.editor_wide else 1,1 if self.editor_wide else 0)
+            self.combined.setColumnStretch(0,2 if self.editor_wide else 1)
+            self.combined.setColumnStretch(1,3 if self.editor_wide else 0)
+        wide = (self.visual.width() if self.editor is not None else self.viewport().width()) >= max(850, self.fontMetrics().horizontalAdvance("M")*62)
         if wide == self._wide:
             return
         self._wide = wide

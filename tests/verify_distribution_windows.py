@@ -25,7 +25,7 @@ parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--exe',type=Path,required=True)
 parser.add_argument('--work',type=Path,required=True)
 parser.add_argument('--resume-two',type=Path,help='Resultado 2T ya ejecutado: continuar solo 4T, sin repetirlo')
-parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen'],required=True)
+parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis'],required=True)
 args=parser.parse_args();exe=args.exe.resolve();work=args.work.resolve();work.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from motorsim.reference_results import load_result
@@ -72,6 +72,8 @@ def button(w,name):
     # Invoke se bloquea en algunos diálogos modales Qt; teclado conserva el flujo real.
     b=control(w,'Button',name);b.set_focus();send_keys('{SPACE}');time.sleep(.2)
 def tab(w,name):control(w,'TabItem',name).select();time.sleep(.2)
+
+def navigate(name):control(main,'TreeItem',name).select();time.sleep(.2)
 def combo(w,name,index):
     if name in ('Tipo de motor','Ejecución'):
         c=[x for x in w.descendants() if x.element_info.control_type=='ComboBox'][0 if name=='Tipo de motor' else 1]
@@ -156,7 +158,56 @@ def finish_calculation(folder,series=False):
 try:
     main=window('MotorSim');front(main)
     note('GUI EXE directo, cwd distinto, PATH sistema, sin PYTHONPATH/VIRTUAL_ENV; factor Qt 1.5')
-    if args.stage=='editor':
+    if args.stage=='uxeditor':
+        navigate('Resumen');tab(main,'Datos del proyecto')
+        control(main,'Edit',suffix='.project_name').set_edit_text('PRUEBA SINTÉTICA UX á')
+        button(main,'Guardar');file_dialog('Guardar proyecto como',work/'Proyecto UX á.json')
+        original=(work/'Proyecto UX á.json').read_bytes()
+        button(main,'Nuevo');open_project(work/'Proyecto UX á.json')
+        assert (work/'Proyecto UX á.json').read_bytes()==original
+        navigate('Resumen');tab(main,'Datos del proyecto')
+        assert control(main,'Edit',suffix='.project_name').get_value()=='PRUEBA SINTÉTICA UX á'
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json')
+        navigate('Motor 4T');navigate('Geometría');navigate('Resumen');tab(main,'Resumen')
+        screenshot(main,'rc3-resumen-150');note('Guardar/Nuevo/reabrir Unicode; navegación 4T y geometría conservada')
+    elif args.stage=='uxpoint':
+        if result_folders():raise RuntimeError('No repetir el único punto UX autorizado.')
+        navigate('Simulación');first=start_calculation()
+        navigate('Resumen');navigate('Simulación')
+        result=finish_calculation(first);assert result['status']=='converged'
+        (work/'ux-point.json').write_text(json.dumps(dict(path=str(first/'manifest.json')),indent=2),encoding='utf-8')
+        navigate('Resultados');screenshot(main,'rc3-punto-150');note('Único punto 2T B100/3000 convergido; navegar conserva worker')
+    elif args.stage=='uxcancel':
+        if (work/'ux-cancel.json').exists():raise RuntimeError('Cancelación UX ya registrada.')
+        navigate('Simulación');first=start_calculation()
+        wait(lambda:'RHS:' in texts(main));button(main,'Cancelar')
+        result=finish_calculation(first);assert result['status']=='cancelled'
+        (work/'ux-cancel.json').write_text(json.dumps(dict(path=str(first/'manifest.json')),indent=2),encoding='utf-8')
+        note('Cancelación cooperativa; sin hijo activo ni resultado aceptado')
+    elif args.stage=='uxanalysis':
+        source=Path(__file__).resolve().parents[1]/'results/simulacion-2t/cuatro-tiempos-20260916/R2'
+        navigate('Resultados');button(main,'Abrir resultado…');file_dialog('Abrir resultado',source/'gui-compression/manifest.json')
+        assert 'Trabajo indicado' in texts(main)
+        navigate('Comparar');button(main,'Abrir resultado A…');file_dialog('Abrir resultado A',source/'gui-sweep/point-02/manifest.json')
+        button(main,'Abrir resultado B…');file_dialog('Abrir resultado B',source/'gui-compression/manifest.json')
+        assert 'Compatibles' in texts(main);screenshot(main,'rc3-comparacion-150')
+        button(main,'Exportar CSV…');file_dialog('Crear carpeta nueva',work/'CSV comparación UX')
+        assert (work/'CSV comparación UX/resumen.csv').exists()
+        navigate('Datos externos')
+        csv=work/'PRUEBA SINTÉTICA.csv';csv.write_text('rpm,value\n2500,52\n3000,50\n',encoding='utf-8')
+        button(main,'Importar CSV…');file_dialog('Seleccionar CSV externo',csv)
+        cs=[x for x in main.descendants() if x.element_info.control_type=='ComboBox']
+        select_combo(cs[0],2);select_combo(cs[1],1);select_combo(cs[2],3)
+        control(main,'CheckBox','Declaro que los datos cumplen esta definición completa').click_input()
+        button(main,'Revisar vista previa');button(main,'Confirmar y guardar…')
+        file_dialog('Carpeta nueva para la importación',work/'Importación UX')
+        button(main,'Seleccionar barrido…');file_dialog('Seleccionar barrido guardado',source/'gui-sweep/series.json')
+        assert '2 coincidencias convergidas' in texts(main)
+        button(main,'Exportar contraste…');file_dialog('Carpeta nueva para contraste.csv',work/'Contraste UX')
+        assert (work/'Contraste UX/contraste.csv').exists()
+        tab(main,'Puntos / RPM');screenshot(main,'rc3-externos-150')
+        assert not worker_paths();note('Resultado, comparación/CSV e importación/contraste embebidos sin worker')
+    elif args.stage=='editor':
         control(main,'Edit',suffix='.project_name').set_edit_text('PRUEBA SINTÉTICA — cigüeñal á')
         button(main,'Guardar');file_dialog('Guardar proyecto como',work/'incompleto á.json')
         saved=json.loads((work/'incompleto á.json').read_text(encoding='utf-8'));assert saved['bore_mm'] is None

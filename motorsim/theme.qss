@@ -77,3 +77,11 @@ QSlider::handle:horizontal { background: #69baf0; border: 1px solid #b4d9f5; wid
 QSlider::handle:horizontal:focus { background: #d5efff; border-color: #ffffff; }
 
 QLabel#sectionTitle { font-size: 12pt; font-weight: 600; color: #b4d9f5; }
+
+/* Navegación por tareas: siempre accesible, sin pestañas globales. */
+QTreeWidget#navigation { border: none; border-right: 1px solid #26344a; padding: 12px 4px; background: #101a2b; }
+QTreeWidget#navigation::item { padding: 8px 6px; border-left: 2px solid transparent; }
+QTreeWidget#navigation::item:selected { background: #1b3850; border-left-color: #69baf0; color: #d9efff; }
+QTreeWidget#navigation::item:focus { border: 1px solid #8bcfff; }
+QLabel#pageTitle { font-size: 18pt; }
+QTabBar::tab { padding: 7px 12px; }

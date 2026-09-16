@@ -4,7 +4,7 @@ from decimal import Decimal, localcontext
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog, QFileDialog,
-    QFormLayout, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QMessageBox, QPlainTextEdit,
+    QFormLayout, QGridLayout, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QMessageBox, QPlainTextEdit,
     QPushButton, QScrollArea, QTableWidget, QTableWidgetItem, QTabWidget, QVBoxLayout, QWidget)
 
 from .external_data import (CANONICAL, DEFINITIONS, PROVENANCES, TITLES, SIM_KEYS, ExternalDataError,
@@ -186,14 +186,19 @@ class ExternalPlot(QWidget):
 
 
 class ExternalDialog(QDialog):
-    def __init__(self,parent=None):
-        super().__init__(parent);self.external=None;self.sweep=None;self.data=None
+    def reject(self):
+        if not self.embedded:super().reject()
+
+    def __init__(self,parent=None,*,embedded=False):
+        super().__init__(parent);self.embedded=embedded
+        if embedded:self.setWindowFlags(Qt.WindowType.Widget)
+        self.external=None;self.sweep=None;self.data=None
         self.setWindowTitle('Datos externos · contraste descriptivo');self.resize(1060,630)
         layout=QVBoxLayout(self)
-        actions=QHBoxLayout();layout.addLayout(actions)
+        actions=QGridLayout();layout.addLayout(actions)
         self.import_button=QPushButton('Importar CSV…');self.open_button=QPushButton('Abrir importación…')
         self.sweep_button=QPushButton('Seleccionar barrido…');self.export_button=QPushButton('Exportar contraste…')
-        for button in (self.import_button,self.open_button,self.sweep_button,self.export_button):actions.addWidget(button)
+        for i,button in enumerate((self.import_button,self.open_button,self.sweep_button,self.export_button)):actions.addWidget(button,i//2,i%2)
         self.import_button.clicked.connect(self.import_csv);self.open_button.clicked.connect(self.open_import)
         self.sweep_button.clicked.connect(self.open_sweep);self.export_button.clicked.connect(self.export)
         self.identity=label('Importá un CSV o abrí una importación confirmada.');layout.addWidget(self.identity)
@@ -212,8 +217,26 @@ class ExternalDialog(QDialog):
         try:raw=read_csv(path)
         except ExternalDataError as exc:self.error.setText(str(exc));return
         dialog=ImportDialog(raw,self)
+        if self.embedded:
+            self.import_button.setEnabled(False);self.open_button.setEnabled(False);self.sweep_button.setEnabled(False);self.export_button.setEnabled(False)
+            self.import_dialog=dialog;dialog.setWindowFlags(Qt.WindowType.Widget)
+            for i in range(self.layout().count()):
+                widget=self.layout().itemAt(i).widget()
+                if widget:widget.hide()
+            self.layout().addWidget(dialog);dialog.show()
+            dialog.finished.connect(lambda code:self._import_finished(dialog))
+            return
         if dialog.exec()==QDialog.DialogCode.Accepted and dialog.imported:
             self.external=dialog.imported;self.error.clear();self.refresh()
+
+    def _import_finished(self,dialog):
+        self.import_button.setEnabled(True);self.open_button.setEnabled(True)
+        if dialog.imported:self.external=dialog.imported;self.error.clear()
+        dialog.hide();self.layout().removeWidget(dialog);dialog.deleteLater()
+        for i in range(self.layout().count()):
+            widget=self.layout().itemAt(i).widget()
+            if widget:widget.show()
+        self.refresh()
 
     def open_import(self,checked=False,*,path=None):
         if path is None:path,_=QFileDialog.getOpenFileName(self,'Abrir importación','','Metadatos (metadata.json)')
@@ -231,6 +254,8 @@ class ExternalDialog(QDialog):
 
     def refresh(self):
         self.data=None;self.export_button.setEnabled(False)
+        self.sweep_button.setEnabled(self.external is not None)
+        self.tabs.setVisible(self.external is not None)
         if not self.external:return
         meta=self.external['metadata'];self.plot.set_data(self.external,None)
         self.identity.setText(f"{meta['name']} · {meta['provenance']}\n{TITLES[meta['magnitude']]} · {meta['canonical_unit']} · {len(self.external['rows'])} puntos externos")

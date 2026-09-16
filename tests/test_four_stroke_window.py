@@ -50,7 +50,7 @@ class FourStrokeWindowTests(unittest.TestCase):
         w._activate(original,None)
         w.ducts_view.edits['length_mm'].setText('texto inválido')
         w.cycle_combo.setCurrentText('4T')
-        self.assertIs(w.duct_stack.currentWidget(),w.ducts4_view)
+        self.assertIs(w.motor4_page.tabs.widget(1),w.ducts4_view)
         w.ducts4_view.edits['length_mm'].setText('123,456')
         w.valves_view.edits['intake']['seat_mm'].setText('24,5')
         self.assertEqual(w.numeric_edits['bore_mm'].text(),'54')

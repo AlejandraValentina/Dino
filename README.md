@@ -23,7 +23,37 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
-## Hardening Windows 0.1.0-rc2
+## Navegación por tareas — candidata 0.1.0-rc3
+
+`reorganizacion-ui-final` reorganiza la interfaz existente, sin modificar física,
+solver, worker, límites, JSON v6 ni contratos/CSV. La columna permanente separa
+Resumen, Geometría, Motor 2T/4T, Simulación, Resultados, Comparar y Datos externos.
+Solo se muestra el motor del ciclo activo. Resumen → Datos del proyecto conserva
+la edición común; Geometría reúne formulario y gráficos. Cada motor agrupa sus
+editores y conductos. Resultados reutiliza el panel actual y permite consultar
+puntos de barridos; comparación e importación se integran sin ventanas separadas.
+Archivo conserva todas sus acciones; la barra rápida muestra Nuevo/Abrir/Guardar.
+
+Pruebas automáticas: 238 aprobadas; cobertura anterior conservada, regresiones de navegación,
+borradores/ciclo, ejecutabilidad, teclado/Escape, cálculo activo, resultados
+independientes e importación embebida. Comando: `.\.venv\Scripts\python.exe -m unittest discover -s tests`.
+Validación: `openspec validate reorganizacion-ui-final --strict --no-interactive`.
+Revisión independiente puntual y correcciones comprobadas; sin nueva física.
+
+Inspección Windows automatizada con capturas nativas Qt, realmente revisadas,
+en `E:\MotorSim distribucion\UX final`: 100 %, 125 % y 150 %, anchos lógicos
+900/1092/1366/1920 según caso. El escritorio disponible es 1440×900: el ancho
+1920 se capturó mediante QWidget.grab; Windows limitó su altura a 881. Esto no
+acredita un escritorio físico 1920×1080. Las vistas compactas usan scroll local.
+Resultados históricos y CSV explícitamente sintético, sin recalcular campañas.
+Evidencia y pendientes detallados en [tasks.md](openspec/changes/reorganizacion-ui-final/tasks.md).
+
+rc3 distingue este rediseño de la rc2 existente; ambas candidatas anteriores se
+conservan. Construcción y recorrido del EXE pendientes en este commit fuente.
+Aceptación manual final, equipo sin Python, offline aislado y validación
+experimental siguen separados y pendientes. No se archiva ni publica.
+
+## Hardening Windows 0.1.0-rc2 (evidencia anterior conservada)
 
 Continuación en el mismo cambio distribucion-windows. Conserva la rc1 siguiente
 como referencia histórica. rc2 registra tiempos opcionales en los resultados

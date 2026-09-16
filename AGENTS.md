@@ -2,6 +2,12 @@
 
 ## Lectura y autoridad
 
+Orden actual: `reorganizacion-ui-final` autoriza únicamente arquitectura visual UX,
+reutilizar editores/controladores, navegación por tareas y análisis embebido.
+Preservar física, contratos, worker, candidatos rc1/rc2 y evidencia. Leer el cambio.
+Pruebas UI y paquete final con un punto/cancelación breve, sin campañas científicas.
+Revisión puntual independiente, commits locales sin publicar ni archivar.
+
 Leer README.md y el cambio solicitado dentro de `openspec/changes/` antes de
 modificar archivos. `base-escritorio` es la entrega inicial; su límite de nombre,
 tipo y archivos pertenece a esa entrega. El cambio autorizado actual es

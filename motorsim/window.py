@@ -23,6 +23,9 @@ from .ducts_view import DuctsView
 from .valves_view import ValvesView
 from .simulation_view import SimulationView
 from .runtime import APP_VERSION, build_info, resource
+from .workspaces import Navigation, SummaryPage, MotorPage, ResultWorkspace, scroll, refresh_motor_context
+from .comparison_view import ComparisonDialog
+from .external_view import ExternalDialog
 
 
 class _FilePathLabel(QLabel):
@@ -162,7 +165,7 @@ class MainWindow(QMainWindow):
         self.file_toolbar.setContextMenuPolicy(Qt.ContextMenuPolicy.PreventContextMenu)
         self.file_toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.file_toolbar.setIconSize(QSize(16, 16))
-        for key in ("new", "open", "save", "save_as"):
+        for key in ("new", "open", "save"):
             self.actions[key].setIcon(self._action_icon(key))
             self.file_toolbar.addAction(self.actions[key])
             if key == "open":
@@ -199,21 +202,6 @@ class MainWindow(QMainWindow):
         return QIcon(pixmap)
 
     def _build_workspace(self) -> None:
-        self.workspace_scroll = QScrollArea()
-        self.workspace_scroll.setWidgetResizable(True)
-        self.workspace_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        central = QWidget()
-        outer = QVBoxLayout(central)
-        outer.setContentsMargins(24, 24, 24, 24)
-        self.form = QWidget()
-        self.form.setMaximumWidth(1120)
-        content = QVBoxLayout(self.form)
-        content.setContentsMargins(0, 0, 0, 0)
-        content.setSpacing(22)
-        content.addWidget(self._label("Motor", "pageTitle"))
-        self.groups_grid = QGridLayout()
-        self.groups_grid.setHorizontalSpacing(28)
-        self.groups_grid.setVerticalSpacing(24)
         self.general_group = QGroupBox("Datos generales")
         general = QVBoxLayout(self.general_group)
         general.setContentsMargins(18, 28, 18, 18)
@@ -227,7 +215,7 @@ class MainWindow(QMainWindow):
             caption.setBuddy(edit)
             general.addWidget(caption)
             general.addWidget(edit)
-        self.geometry_group = QGroupBox("Geometría")
+        self.geometry_group = QGroupBox("Datos básicos")
         geometry = QVBoxLayout(self.geometry_group)
         geometry.setContentsMargins(18, 28, 18, 18)
         geometry.setSpacing(18)
@@ -277,60 +265,79 @@ class MainWindow(QMainWindow):
             results.addRow(self._label(title), row)
         geometry.addLayout(results)
         geometry.addWidget(self._label("Cilindrada total: todos los cilindros comparten geometría.", "unit"))
-        content.addLayout(self.groups_grid)
-        row = QHBoxLayout()
-        row.addStretch()
-        row.addWidget(self.form, 1)
-        row.addStretch()
-        outer.addLayout(row)
-        outer.addStretch()
-        self.workspace_scroll.setWidget(central)
-        self.tabs = QTabWidget()
-        self.tabs.addTab(self.workspace_scroll, "&Ficha")
         self.geometry_view = GeometryView()
-        self.tabs.addTab(self.geometry_view, "&Geometría")
-        self.ports_view = PortsView()
-        self.tabs.addTab(self.ports_view, "Configuración &2T")
-        self.ports_view.changed.connect(self._edited)
-        self.ducts_view = DuctsView()
-        self.ducts4_view = DuctsView('4T')
-        self.ducts4_view.changed.connect(self._edited)
-        self.duct_stack = QStackedWidget()
-        self.duct_stack.addWidget(self.ducts_view); self.duct_stack.addWidget(self.ducts4_view)
-        self.tabs.addTab(self.duct_stack, "&Conductos")
-        self.valves_view = ValvesView()
-        self.valves_view.changed.connect(self._edited)
-        self.tabs.addTab(self.valves_view, "Configuración &4T")
-        self.ducts_view.changed.connect(self._edited)
+        self.ports_view = PortsView();self.ports_view.changed.connect(self._edited)
+        self.ducts_view = DuctsView();self.ducts4_view = DuctsView('4T')
+        self.ducts_view.changed.connect(self._edited);self.ducts4_view.changed.connect(self._edited)
+        self.valves_view = ValvesView();self.valves_view.changed.connect(self._edited)
         self.simulation_view = SimulationView(self.execution_snapshot)
-        self.tabs.addTab(self.simulation_view, "&Simulación")
         self.simulation_view.idle.connect(self._simulation_idle)
-        self.setCentralWidget(self.tabs)
-        self._arrange_groups()
+        self.navigation=Navigation();self.tabs=self.navigation
+        self.simulation_view.workspace_router=self._navigate_analysis
+        intake_body=QWidget();intake_layout=QVBoxLayout(intake_body)
+        for widget in (self.ports_view.crank_widget,self.ports_view.crankcase_error,self.ports_view.intake):intake_layout.addWidget(widget)
+        intake_layout.addStretch()
+        self.motor2_page=MotorPage('2T',[('Lumbreras',self.ports_view),('Admisión y cárter',scroll(intake_body)),('Conductos',self.ducts_view)])
+        self.motor4_page=MotorPage('4T',[('Válvulas y distribución',self.valves_view),('Conductos',self.ducts4_view)])
+        self.duct_stack=self.ducts_view  # Alias de navegación interna; los editores siguen separados por ciclo.
+        self.geometry_view.attach_editor(self.geometry_group)
+        self.geometry_page=self.geometry_view
+        self.summary_page=SummaryPage(self);self.workspace_scroll=self.summary_page
+        self.result_workspace=ResultWorkspace(self.simulation_view)
+        self.comparison_page=ComparisonDialog(self,embedded=True)
+        self.external_page=ExternalDialog(self,embedded=True)
+        self.simulation_view.comparison_dialog=self.comparison_page
+        self.simulation_view.external_dialog=self.external_page
+        for group,key,title,page in (
+            ('PROYECTO','summary','Resumen',self.summary_page),
+            ('CONFIGURACIÓN','geometry','Geometría',self.geometry_page),
+            ('CONFIGURACIÓN','motor2','Motor 2T',self.motor2_page),
+            ('CONFIGURACIÓN','motor4','Motor 4T',self.motor4_page),
+            ('CÁLCULO','simulation','Simulación',self.simulation_view),
+            ('ANÁLISIS','results','Resultados',self.result_workspace),
+            ('ANÁLISIS','compare','Comparar',self.comparison_page),
+            ('ANÁLISIS','external','Datos externos',scroll(self.external_page))):
+            self.navigation.add_page(group,key,title,page)
+        self.navigation.aliases={self.geometry_view:('geometry',None),self.ports_view:('motor2',lambda:self.motor2_page.tabs.setCurrentIndex(0)),
+            self.ducts_view:('motor2',lambda:(self.motor2_page.tabs.setCurrentIndex(2) if self.cycle_combo.currentText()=='2T' else self.motor4_page.tabs.setCurrentIndex(1))),
+            self.valves_view:('motor4',lambda:self.motor4_page.tabs.setCurrentIndex(0)),self.simulation_view:('simulation',None)}
+        self.navigation.selected.connect(self._workspace_selected)
+        self.setCentralWidget(self.navigation);self.navigation.go('summary')
+        self.ui_status_timer=QTimer(self);self.ui_status_timer.setInterval(250)
+        self.ui_status_timer.timeout.connect(self._calculation_status);self.ui_status_timer.start()
         for previous, following in zip(self._edit_widgets, self._edit_widgets[1:]):
             QWidget.setTabOrder(previous, following)
 
-    def _arrange_groups(self) -> None:
-        wide = self.width() >= max(880, self.fontMetrics().horizontalAdvance("M") * 65)
-        if wide == self._wide_layout:
-            return
-        self._wide_layout = wide
-        self.groups_grid.removeWidget(self.general_group)
-        self.groups_grid.removeWidget(self.geometry_group)
-        self.groups_grid.addWidget(self.general_group, 0, 0, Qt.AlignmentFlag.AlignTop)
-        self.groups_grid.addWidget(self.geometry_group, 0 if wide else 1, 1 if wide else 0,
-                                   Qt.AlignmentFlag.AlignTop)
-        self.groups_grid.setColumnStretch(0, 1)
-        self.groups_grid.setColumnStretch(1, 1 if wide else 0)
+    def _workspace_selected(self,key):
+        view=self.simulation_view
+        if key=='results':
+            self.result_workspace.detail_layout.addWidget(view.result_panel)
+            self.result_workspace.message_host.addWidget(view.error_label)
+        elif key=='simulation':
+            view.result_host.addWidget(view.result_panel)
+            view.message_host.addWidget(view.error_label)
+        view.result_panel.show();view._arrange()
 
-    def resizeEvent(self, event) -> None:
+    def _navigate_analysis(self,key):
+        self.navigation.go('results' if key=='sweep' else key)
+        if key=='sweep':self.result_workspace.show_series(self.simulation_view.sweep_dialog)
+        if key=='results':self.result_workspace.show_result()
+
+    def _calculation_status(self):
+        view=self.simulation_view
+        state='Calculando' if view.active else ('Error' if view.state_label.text().startswith('Error') else 'Inactivo')
+        self.notice.setText(f'{self.cycle_combo.currentText()} · {state} · {APP_VERSION}')
+
+    def _arrange_groups(self):
+        if hasattr(self,'geometry_view'):self.geometry_view._arrange()
+
+    def resizeEvent(self,event):
         super().resizeEvent(event)
-        if hasattr(self, "groups_grid"):
-            self._arrange_groups()
+        self._arrange_groups()
 
     def _update_geometry(self) -> None:
         cycle = self.cycle_combo.currentText()
-        self.duct_stack.setCurrentIndex(0 if cycle == '2T' else 1)
+        self.navigation.set_cycle(cycle)
         self.ducts_view.set_cycle('2T')
         self.ducts4_view.set_cycle('4T')
         self.valves_view.setEnabled(cycle == '4T')
@@ -446,6 +453,10 @@ class MainWindow(QMainWindow):
         self.state_label.style().unpolish(self.state_label)
         self.state_label.style().polish(self.state_label)
         self.simulation_view.project_changed()
+        self.setWindowTitle(f'MotorSim — {self.name_edit.text() or "Sin nombre"} · {self.cycle_combo.currentText()} · {self.state_label.text()}')
+        self._calculation_status()
+        self.summary_page.refresh()
+        refresh_motor_context(self)
 
     def _activate(self, project: Project, path: Path | None) -> None:
         blocked = [widget.blockSignals(True) for widget in self._edit_widgets]
