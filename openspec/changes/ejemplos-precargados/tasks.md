@@ -1,4 +1,22 @@
 ## Implementación
+### Continuación: JSON físicos (16/09/2026)
+- [x] Generar cuatro proyectos v6 desde definiciones canónicas en examples/projects.
+- [x] Generador determinista y empaquetado que copia/verifica los cuatro originales.
+- [x] Validación, igualdad completa con referencias, diferencia única, round-trip y ejecutabilidad sin solver: 10 pruebas pertinentes aprobadas en 2,681 s.
+- [x] Apertura real 2T/4T, geometría, configuración, conductos, listo y Guardar como sin alterar originales.
+- [ ] Revisión puntual, OpenSpec, documentación, commit y paquete identificado.
+
+El estado y evidencia anteriores siguientes se conservan como históricos.
+Continuación: Windows automatizado con EXE rc4 d6c4e19b, Archivo/Abrir para
+los dos JSON físicos del repositorio; geometría, lumbreras/válvulas y conductos,
+Listo para simular y Comprobar entradas aprobados. Guardar como crea copias
+equivalentes y conserva los bytes originales. Sin worker. Seis capturas en
+`E:\MotorSim distribucion\JSON físicos repositorio`, inspección visual del principal;
+no aceptación manual de la usuaria. Revisión independiente puntual de
+review_rc2_hardening sin defectos identificados; dos pruebas de datos aprobadas
+sin escribir en el repositorio ni ejecutar solver. OpenSpec estricto aprobado.
+Pruebas finales pertinentes: 11 aprobadas en 31,498 s; incluye preservación de
+archivos ajenos y rechazo de una definición inválida antes de cualquier escritura.
 - [x] Comprobar main limpio, rc3 y referencias canónicas; preservar evidencia.
 - [x] Definición común de cuatro ejemplos e identificación sintética.
 - [x] Menú de carga protegida, proyecto editable sin ruta, origen de simulación real.

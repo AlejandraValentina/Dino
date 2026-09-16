@@ -19,3 +19,16 @@ def example_project(key):
     return replace(project, name=f'{NOTICE} · {title.upper()}',
         notes=f'{NOTICE}. Sin calibración ni validación experimental.',
         compression_ratio=8.2 if key.endswith('-compression') else project.compression_ratio)
+
+
+# Archivos de demostración: una variante difiere en un único valor, incluso
+# al comparar el JSON completo. La identificación del menú previo se conserva.
+PROJECT_FILES = {key: filename.replace(f'_{key[:2].upper()}.json',
+    f'_{key[:2].upper()}_REFERENCIA.json') for key, (_, filename) in EXAMPLES.items()}
+
+
+def example_file_project(key):
+    project = example_project(key)
+    return replace(project, name=f'EJEMPLO SINTÉTICO {project.cycle} — REFERENCIA',
+        notes='EJEMPLO SINTÉTICO — NO MEDIDO.\n'
+              'Caso de demostración de MotorSim. No representa validación experimental.')

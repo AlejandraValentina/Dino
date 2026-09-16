@@ -17,7 +17,8 @@ import zipfile
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from motorsim.runtime import APP_VERSION
-from motorsim.examples import EXAMPLES, example_project
+from motorsim.examples import PROJECT_FILES, example_file_project
+from motorsim.storage import load_project
 from motorsim.project_case import execution_errors
 from motorsim.reference_results import MODEL_VERSION,FOUR_MODEL_VERSION
 
@@ -59,10 +60,12 @@ def main():
     shutil.copy2(ROOT/'motorsim/ayuda.txt',bundle/'LEEME.txt')
     shutil.copy2(ROOT/'packaging/AVISOS.txt',bundle/'AVISOS.txt')
     examples=bundle/'Ejemplos';examples.mkdir()
-    for key,(_,filename) in EXAMPLES.items():
-        project=example_project(key)
+    for key,filename in PROJECT_FILES.items():
+        source=ROOT/'examples/projects'/filename
+        project=load_project(source)
+        if project!=example_file_project(key):raise RuntimeError('Regenerá el ejemplo canónico: '+filename)
         if execution_errors(project):raise RuntimeError('Ejemplo incompatible: '+str(execution_errors(project)))
-        (examples/filename).write_text(json.dumps(project.to_dict(),ensure_ascii=False,indent=2),encoding='utf-8')
+        shutil.copy2(source,examples/filename)
     licenses=bundle/'Licencias';shutil.copytree(ROOT/'packaging/licenses',licenses/'Qt')
     shutil.copy2(Path(sys.base_prefix)/'LICENSE.txt',licenses/'Python-LICENSE.txt')
     for name in ('PySide6','PySide6_Essentials','PySide6_Addons','shiboken6','pyinstaller'):

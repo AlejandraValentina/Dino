@@ -1,4 +1,19 @@
 ## ADDED Requirements
+### Requirement: Archivos físicos de demostración
+La continuación SHALL versionar cuatro JSON v6 en examples/projects con nombres
+EJEMPLO_SINTETICO_2T_REFERENCIA.json, EJEMPLO_SINTETICO_2T_COMPRESION_8_2.json,
+EJEMPLO_SINTETICO_4T_REFERENCIA.json y EJEMPLO_SINTETICO_4T_COMPRESION_8_2.json.
+SHALL derivarlos de S2T-0D-01 y S4T-0D-01 mediante el modelo real, con nombre
+“EJEMPLO SINTÉTICO 2T — REFERENCIA” o “EJEMPLO SINTÉTICO 4T — REFERENCIA” y
+observaciones explícitas NO MEDIDO/sin validación experimental. Cada variante
+SHALL diferir únicamente en compression_ratio, incluso en sus metadatos.
+El generador SHALL validar todos los proyectos y su ejecutabilidad antes de
+sobrescribir únicamente esos cuatro destinos, sin solver. La próxima candidata
+SHALL incluirlos bajo Ejemplos, idénticos al repositorio y sin dependencia runtime
+del repositorio. El menú previo mantiene su identificación y carga protegida.
+#### Scenario: Apertura y copia de un archivo físico
+- **WHEN** se abre cualquiera desde Archivo → Abrir y se guarda una copia
+- **THEN** conserva todos los campos y no modifica el original.
 ### Requirement: Ejemplos canónicos identificados
 El sistema SHALL ofrecer 2T referencia, 2T compresión8.2, 4T referencia y 4T
 compresión8.2, derivados de las referencias canónicas. SHALL identificar nombre

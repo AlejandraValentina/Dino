@@ -26,7 +26,8 @@ parser.add_argument('--exe',type=Path,required=True)
 parser.add_argument('--work',type=Path,required=True)
 parser.add_argument('--resume-two',type=Path,help='Resultado 2T ya ejecutado: continuar solo 4T, sin repetirlo')
 parser.add_argument('--scale',default='1.5',choices=['1','1.25','1.5'])
-parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis','uxseries','examples','uxvisual'],required=True)
+parser.add_argument('--projects-root',type=Path,help='Carpeta de JSON físicos; por defecto Ejemplos del paquete')
+parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis','uxseries','examples','uxvisual','physical-examples'],required=True)
 args=parser.parse_args();exe=args.exe.resolve();work=args.work.resolve();work.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from motorsim.reference_results import load_result
@@ -165,13 +166,34 @@ def finish_calculation(folder,series=False):
 try:
     main=window('MotorSim');front(main)
     note('GUI EXE directo, cwd distinto, PATH sistema, sin PYTHONPATH/VIRTUAL_ENV; factor Qt '+args.scale)
-    if args.stage=='uxvisual':
+    if args.stage=='physical-examples':
+        from motorsim.examples import PROJECT_FILES,example_file_project
+        from motorsim.storage import load_project
+        directory=args.projects_root or exe.parent/'Ejemplos'
+        for cycle in ('2t','4t'):
+            key=cycle+'-reference';original=directory/PROJECT_FILES[key];before=original.read_bytes()
+            main.set_focus();send_keys('^o');file_dialog('Abrir proyecto',original)
+            navigate('Resumen');assert 'Listo para simular' in texts(main)
+            navigate('Geometría');assert control(main,'Edit',suffix='.bore_mm').get_value()=='54'
+            navigate('Motor '+cycle.upper());screenshot(main,'json-'+cycle+'-configuracion');tab(main,'Conductos')
+            screenshot(main,'json-'+cycle+'-conductos')
+            navigate('Simulación')
+            select_combo(control(main,'ComboBox'),1);button(main,'Comprobar entradas')
+            assert 'Entradas admitidas para este modelo' in texts(main) and not worker_paths()
+            navigate('Resumen');screenshot(main,'json-'+cycle+'-listo')
+            target=work/(cycle+' copia á.json')
+            main.set_focus();send_keys('^+s');file_dialog('Guardar proyecto como',target)
+            assert load_project(target)==example_file_project(key)
+            assert original.read_bytes()==before
+            note(cycle.upper()+': Archivo/Abrir, geometría, conductos, listo, entradas y Guardar como sin modificar original')
+        assert not worker_paths()
+    elif args.stage=='uxvisual':
         from pywinauto import mouse
         source=Path(__file__).resolve().parents[1]/'results/simulacion-2t/cuatro-tiempos-20260916/R2'
-        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_2T.json')
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_2T_REFERENCIA.json')
         for name in ('Resumen','Geometría','Motor 2T','Simulación'):
             navigate(name);screenshot(main,'rc4-'+name+'-'+args.scale)
-        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json')
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T_REFERENCIA.json')
         navigate('Motor 4T');screenshot(main,'rc4-Motor 4T-'+args.scale)
         navigate('Resultados');button(main,'Abrir resultado…');file_dialog('Abrir resultado',source/'gui-sweep/point-02/manifest.json')
         screenshot(main,'rc4-Resultados-'+args.scale)
@@ -225,7 +247,7 @@ try:
         assert (work/'Proyecto UX á.json').read_bytes()==original
         navigate('Resumen');tab(main,'Datos del proyecto')
         assert control(main,'Edit',suffix='.project_name').get_value()=='PRUEBA SINTÉTICA UX á'
-        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json')
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T_REFERENCIA.json')
         navigate('Motor 4T');navigate('Geometría');navigate('Resumen');tab(main,'Resumen')
         screenshot(main,'rc3-resumen-150');note('Guardar/Nuevo/reabrir Unicode; navegación 4T y geometría conservada')
     elif args.stage=='uxpoint':
@@ -285,16 +307,16 @@ try:
         assert control(main,'Edit',suffix='.bore_mm').get_value()=='inválido'
         button(main,'Nuevo');button(window('Cambios pendientes'),'Descartar')
         note('Inválidos no guardados, Nuevo protegido por Cancelar/Descartar')
-        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json')
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T_REFERENCIA.json')
         combo(main,'Tipo de motor',0);combo(main,'Tipo de motor',1)
         save_as(work/'alternancia 4T.json')
-        assert json.loads((work/'alternancia 4T.json').read_text(encoding='utf-8'))==json.loads((exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json').read_text(encoding='utf-8'))
+        assert json.loads((work/'alternancia 4T.json').read_text(encoding='utf-8'))==json.loads((exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T_REFERENCIA.json').read_text(encoding='utf-8'))
         note('Abrir ejemplo y alternar 2T/4T sin pérdida')
         old=work/'antiguo v1.json';old.write_text(json.dumps(dict(format_version=1,name='ANTIGUO á',cycle='2T')),encoding='utf-8')
         open_project(old);save_as(work/'antiguo convertido.json')
         assert json.loads((work/'antiguo convertido.json').read_text(encoding='utf-8'))['format_version']==6
         assert json.loads(old.read_text())['format_version']==1
-        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json')
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T_REFERENCIA.json')
         note('Lectura v1 sin reescritura, conversión explícita v6')
         screenshot(main,'paquete-editor-150')
         front(main,1000,740)
@@ -316,7 +338,7 @@ try:
             first=start_calculation();two=finish_calculation(first)
         assert two['status']=='converged';note('Referencia 2T convergida')
         if not args.resume_two:screenshot(main,'paquete-2t-150')
-        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json')
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T_REFERENCIA.json')
         tab(main,'Simulación');combo(main,'Origen de la próxima ejecución',1)
         # La segunda combo es modo de ejecución; selección por nombre accesible de formulario.
         combo(main,'Ejecución',1)
@@ -332,7 +354,7 @@ try:
         tab(main,'Simulación');first=start_calculation();two=finish_calculation(first)
         assert two['status']=='converged' and 'interface_wall_seconds' in two['manifest']['timings']
         screenshot(main,'rc2-2t-150')
-        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json');tab(main,'Simulación')
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T_REFERENCIA.json');tab(main,'Simulación')
         combo(main,'Origen de la próxima ejecución',1)
         second=start_calculation();four=finish_calculation(second)
         assert four['status']=='converged' and 'interface_wall_seconds' in four['manifest']['timings']
@@ -395,7 +417,7 @@ try:
             raise RuntimeError('Cancelación forzada: registrar cota de tiempo y conservar evidencia; no repetir automáticamente')
         note('GUI/worker cargan python311.dll del paquete; worker sin Qt y sin consola visible durante ejecución')
     elif args.stage=='provenance':
-        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json');tab(main,'Simulación')
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T_REFERENCIA.json');tab(main,'Simulación')
         n=json.loads((work/'numerical.json').read_text())
         button(main,'Abrir resultado…');file_dialog('Abrir resultado',Path(n['four_stroke']).parent/'point-02/manifest.json')
         assert 'configuración anterior' not in texts(main)

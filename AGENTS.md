@@ -2,6 +2,10 @@
 
 ## Lectura y autoridad
 
+Continuación actual de `ejemplos-precargados`: cuatro JSON físicos v6 versionados
+en examples/projects, generador canónico, carga real y próxima candidata con
+los mismos archivos. Sin solver ni campañas; conservar menús y paquetes previos.
+
 Orden actual: `refinamiento-ui-final`, solo presentación/flujo en ocho workspaces.
 Preservar física, worker, formatos, reglas y todas las candidatas/evidencias.
 La nueva rc4 se distingue por commit, sin sobrescribir la rc4 de ejemplos ni rc3.

@@ -23,6 +23,26 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
+## Proyectos de ejemplo
+
+Los cuatro JSON físicos están en `examples/projects/`: referencias 2T/4T y sus
+variantes COMPRESION_8_2. Abrilos mediante **Archivo → Abrir** y usá **Guardar como**
+para conservar el original. Son proyectos sintéticos, no motores medidos ni
+validados experimentalmente. Referencia frente a 8.2 permite preparar una
+comparación; no contiene resultados precalculados. Cada pareja difiere únicamente
+en `compression_ratio`; conserva el mismo nombre y observaciones deliberadamente.
+
+- [2T referencia](examples/projects/EJEMPLO_SINTETICO_2T_REFERENCIA.json)
+- [2T compresión 8.2](examples/projects/EJEMPLO_SINTETICO_2T_COMPRESION_8_2.json)
+- [4T referencia](examples/projects/EJEMPLO_SINTETICO_4T_REFERENCIA.json)
+- [4T compresión 8.2](examples/projects/EJEMPLO_SINTETICO_4T_COMPRESION_8_2.json)
+
+Regenerar: `.\.venv\Scripts\python.exe tools/generate_example_projects.py`.
+Comprobar: `.\.venv\Scripts\python.exe -m unittest discover -s tests -p "test_example*.py"`.
+La receta de Windows incluye los mismos archivos bajo `MotorSim/Ejemplos/`;
+su apertura no depende del repositorio. El menú Cargar ejemplo previo se conserva
+con su identificación propia y carga como copia nueva sin ruta.
+
 ## Refinamiento visual — rc4 actual
 
 `refinamiento-ui-final` conserva la navegación permanente por proyecto,
