@@ -39,8 +39,28 @@ defectos identificados. Inspección de ventanas Qt Windows reales al 100/125/150
 incluidos estados vacíos e históricos. Evidencia y límites en
 [tasks.md](openspec/changes/refinamiento-ui-final/tasks.md). El monitor disponible
 es 1440×900: la captura de ancho 1920 no acredita un escritorio físico Full HD.
-Aceptación manual final pendiente. La nueva rc4 se identifica por commit y conserva
-los paquetes anteriores. Construcción y recorrido del EXE se registran al obtenerlos.
+Aceptación manual final pendiente. Fuente de la nueva rc4:
+`d6c4e19b03692ba22301045ed2206da5081b5ac9`, árbol limpio al construir.
+Python 3.11.0, PySide6 6.11.2, PyInstaller 6.22.3; sin nuevas dependencias.
+Recorrido automatizado del EXE aprobado: guardar/reabrir, cuatro ejemplos y
+protección de cambios, punto 2T convergido, cancelación cooperativa, resultados,
+barrido histórico, comparación y CSV/importación/contraste. Ocho vistas del EXE
+inspeccionadas al 100 % y recorrido operativo al 150 %. No es aceptación manual.
+
+Abrir la candidata comprobada:
+```powershell
+& 'E:\MotorSim distribucion\Candidata refinada á 0.1.0-rc4\MotorSim\MotorSim.exe'
+```
+ZIP: `dist/MotorSim-0.1.0-rc4-windows-x64-d6c4e19b.zip`, 43.407.420 bytes.
+SHA256: `e4dee7c4469e0d80b7b8ec57ae19d30de86b14851976b35da16fe711d90278c9`.
+Capturas reales y registros: `E:\MotorSim distribucion\Comprobación refinamiento rc4`;
+por ejemplo `rc4-Resumen-1.png` y `rc4-Datos externos-1.png`.
+Las rc3 y rc4 anterior conservan sus hashes. Equipo sin Python/offline aislado y
+pantalla física Full HD siguen por verificar; sin archivo ni validación experimental.
+
+Reproducir pruebas: `.\.venv\Scripts\python.exe -m unittest discover -s tests`;
+`openspec validate refinamiento-ui-final --strict --no-interactive`.
+Construir desde fuente limpia: `.\.venv-build\Scripts\python.exe packaging/build_windows.py`.
 
 ## Ejemplos precargados — rc4 anterior conservada
 

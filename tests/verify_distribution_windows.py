@@ -25,7 +25,8 @@ parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--exe',type=Path,required=True)
 parser.add_argument('--work',type=Path,required=True)
 parser.add_argument('--resume-two',type=Path,help='Resultado 2T ya ejecutado: continuar solo 4T, sin repetirlo')
-parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis','uxseries','examples'],required=True)
+parser.add_argument('--scale',default='1.5',choices=['1','1.25','1.5'])
+parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis','uxseries','examples','uxvisual'],required=True)
 args=parser.parse_args();exe=args.exe.resolve();work=args.work.resolve();work.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from motorsim.reference_results import load_result
@@ -35,7 +36,7 @@ env=os.environ.copy()
 for key in ('PYTHONPATH','PYTHONHOME','VIRTUAL_ENV','QT_PLUGIN_PATH','QT_QPA_PLATFORM_PLUGIN_PATH'):
     env.pop(key,None)
 env.update(PATH=os.environ['SystemRoot']+'\\System32;'+os.environ['SystemRoot'],
-    QT_SCALE_FACTOR='1.5',QT_QPA_PLATFORM='windows',LOCALAPPDATA=str(work/'Datos'))
+    QT_SCALE_FACTOR=args.scale,QT_QPA_PLATFORM='windows',LOCALAPPDATA=str(work/'Datos'))
 cwd=work/'Directorio distinto';cwd.mkdir(exist_ok=True)
 process=subprocess.Popen([str(exe)],cwd=cwd,env=env)
 checks=[];workers=[];screens=[]
@@ -163,8 +164,28 @@ def finish_calculation(folder,series=False):
 
 try:
     main=window('MotorSim');front(main)
-    note('GUI EXE directo, cwd distinto, PATH sistema, sin PYTHONPATH/VIRTUAL_ENV; factor Qt 1.5')
-    if args.stage=='examples':
+    note('GUI EXE directo, cwd distinto, PATH sistema, sin PYTHONPATH/VIRTUAL_ENV; factor Qt '+args.scale)
+    if args.stage=='uxvisual':
+        from pywinauto import mouse
+        source=Path(__file__).resolve().parents[1]/'results/simulacion-2t/cuatro-tiempos-20260916/R2'
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_2T.json')
+        for name in ('Resumen','Geometría','Motor 2T','Simulación'):
+            navigate(name);screenshot(main,'rc4-'+name+'-'+args.scale)
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json')
+        navigate('Motor 4T');screenshot(main,'rc4-Motor 4T-'+args.scale)
+        navigate('Resultados');button(main,'Abrir resultado…');file_dialog('Abrir resultado',source/'gui-sweep/point-02/manifest.json')
+        screenshot(main,'rc4-Resultados-'+args.scale)
+        navigate('Comparar');button(main,'Abrir resultado A…');file_dialog('Abrir resultado A',source/'gui-sweep/point-02/manifest.json')
+        button(main,'Abrir resultado B…');file_dialog('Abrir resultado B',source/'gui-compression/manifest.json')
+        screenshot(main,'rc4-Comparar-'+args.scale)
+        navigate('Datos externos');button(main,'Abrir importación…');file_dialog('Abrir importación',work/'Importación UX/metadata.json')
+        button(main,'Seleccionar barrido…');file_dialog('Seleccionar barrido guardado',source/'gui-sweep/series.json')
+        screenshot(main,'rc4-Datos externos-'+args.scale)
+        # Recorrido del contenido inferior real, sin editar ni ejecutar.
+        mouse.scroll(coords=(1200,650),wheel_dist=-12);time.sleep(.3)
+        screenshot(main,'rc4-Contraste inferior-'+args.scale)
+        assert not worker_paths();note('Ocho vistas y desplazamiento del contraste: capturas de escritorio, sin worker')
+    elif args.stage=='examples':
         from motorsim.examples import example_project
         def example(title):
             main.set_focus();send_keys('%a');send_keys('e')
@@ -443,7 +464,7 @@ try:
         if args.stage=='provenance':button(window('Cambios pendientes'),'Descartar')
         process.wait(timeout=10)
     (work/(args.stage+'-evidence.json')).write_text(json.dumps(dict(stage=args.stage,exe=str(exe),
-        cwd=str(cwd),pid=process.pid,workers=workers,qt_scale_factor='1.5',checks=checks,
+        cwd=str(cwd),pid=process.pid,workers=workers,qt_scale_factor=args.scale,checks=checks,
         screenshots=screens,automated=True,manual_acceptance=False),ensure_ascii=False,indent=2),encoding='utf-8')
 except Exception as exc:
     (work/(args.stage+'-failure.txt')).write_text(repr(exc),encoding='utf-8')

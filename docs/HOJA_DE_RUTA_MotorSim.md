@@ -22,7 +22,9 @@ Prioridad propuesta: datos generales para 2T y 4T desde el editor común; primer
 `refinamiento-ui-final`: presentación de las ocho vistas y paneles adaptables,
 sin ampliar capacidades físicas. 247 pruebas, inspección Windows en tres escalas
 y revisión independiente puntual registradas en sus tareas; aceptación manual
-final pendiente. La candidata rc4 refinada conserva los paquetes anteriores.
+final pendiente. La candidata rc4 refinada desde `d6c4e19b` conserva los paquetes
+anteriores y aprobó el recorrido automatizado del EXE (un punto y cancelación
+breve, históricos y CSV). No acredita validación experimental ni aceptación manual.
 
 `ejemplos-precargados`: cuatro proyectos sintéticos derivados de los casos canónicos
 2T/4T y variantes de compresión 8.2, carga protegida y candidata rc4 construida
