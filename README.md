@@ -42,7 +42,31 @@ no depende de archivos externos, red, repositorio ni carpeta actual.
 Pruebas y evidencia en [ejemplos-precargados/tasks.md](openspec/changes/ejemplos-precargados/tasks.md).
 Comandos: `.\.venv\Scripts\python.exe -m unittest discover -s tests` y
 `openspec validate ejemplos-precargados --strict --no-interactive`.
-rc4 se prepara desde commit limpio, preservando rc3. Sin aceptación manual ni archivo.
+**rc4 construida y comprobada**, fuente limpia
+`4e7e559f61d7b19349e0eb37258340c78097451f`. Python 3.11.0, PySide6 6.11.2 y
+PyInstaller 6.22.3, sin actualizar dependencias. 245 pruebas aprobadas y 7 pruebas
+específicas repetidas tras el ajuste de la cabecera; OpenSpec estricto y revisión
+independiente puntual sin defectos identificados.
+
+Windows automatizado del EXE al 150 %: cuatro ejemplos, guardado de referencias,
+Cancelar/Descartar, navegación, estado pendiente/sin ruta, comprobación de entradas
+8.2 y consulta explícita de un resultado histórico. Captura real inspeccionada y
+evidencia en `E:\MotorSim distribucion\Comprobación final rc4`. Cero integraciones
+nuevas; comparación por fixtures, sin campañas ni aceptación manual atribuida.
+Los cuatro recursos se comprobaron idénticos a las definiciones y al ZIP original.
+
+ZIP: `dist/MotorSim-0.1.0-rc4-windows-x64-4e7e559f.zip`, 43.396.571 bytes;
+carpeta 104.894.037 bytes. SHA256:
+`17bcefc76b6275ca36c19068882cc026b878e8db55b7f5099f219ced305841a4`.
+Reconstrucción: `.\.venv-build\Scripts\python.exe packaging/build_windows.py`
+desde commit limpio con entorno fijado. Abrir la extracción comprobada:
+
+```powershell
+& 'E:\MotorSim distribucion\Candidata final á 0.1.0-rc4\MotorSim\MotorSim.exe'
+```
+
+rc3 conservada con hash intacto. Aceptación manual final y pendientes anteriores
+de distribución/validación experimental permanecen abiertos. Sin publicar ni archivar.
 
 ## Navegación por tareas — candidata 0.1.0-rc3 (conservada)
 

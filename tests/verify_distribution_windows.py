@@ -167,9 +167,10 @@ try:
     if args.stage=='examples':
         from motorsim.examples import example_project
         def example(title):
-            control(main,'MenuItem','Archivo').click_input()
-            control(main,'MenuItem','Cargar ejemplo').click_input()
-            control(main,'MenuItem',title).click_input();time.sleep(.3)
+            main.set_focus();send_keys('%a');send_keys('e')
+            control(main,'MenuItem',title)  # Opciones del menú realmente expuestas.
+            index=['2T referencia','2T compresión 8.2','4T referencia','4T compresión 8.2'].index(title)
+            send_keys('{HOME}'+('{DOWN '+str(index)+'}' if index else '')+'{ENTER}');time.sleep(.3)
         example('2T referencia')
         assert 'Cambios pendientes' in main.window_text() and 'Sin archivo asociado' in texts(main)
         button(main,'Guardar');file_dialog('Guardar proyecto como',work/'Ejemplo 2T á.json')
