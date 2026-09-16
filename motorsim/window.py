@@ -26,6 +26,7 @@ from .runtime import APP_VERSION, build_info, resource
 from .workspaces import Navigation, SummaryPage, MotorPage, ResultWorkspace, scroll, refresh_motor_context
 from .comparison_view import ComparisonDialog
 from .external_view import ExternalDialog
+from .examples import EXAMPLES, example_project
 
 
 class _FilePathLabel(QLabel):
@@ -123,6 +124,14 @@ class MainWindow(QMainWindow):
             self.actions[key] = action
             if key in ("open", "save_as"):
                 menu.addSeparator()
+
+        examples_menu = menu.addMenu('Cargar &ejemplo')
+        menu.insertMenu(self.actions['exit'], examples_menu)
+        self.example_actions = {}
+        for key, (title, _) in EXAMPLES.items():
+            action = examples_menu.addAction(title)
+            action.triggered.connect(lambda checked=False, key=key: self.load_example(key))
+            self.example_actions[key] = action
 
         self._build_toolbar()
         self._build_workspace()
@@ -510,6 +519,19 @@ class MainWindow(QMainWindow):
     def new_project(self) -> None:
         if self._can_leave():
             self._activate(Project(), None)
+
+    def load_example(self, key: str) -> None:
+        if not self._can_leave():
+            return
+        self._activate(example_project(key), None)
+        self.dirty = True
+        self._refresh_status()
+        if self.simulation_view.origin_combo.currentIndex() == 1:
+            self.simulation_view._origin_changed()
+        else:
+            self.simulation_view.origin_combo.setCurrentIndex(1)
+        self.navigation.go('summary')
+        self.summary_page.tabs.setCurrentIndex(0)
 
     def _choose_file(self, saving: bool) -> Path | None:
         dialog = QFileDialog(self, "Guardar proyecto como" if saving else "Abrir proyecto")

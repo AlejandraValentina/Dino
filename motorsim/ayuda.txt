@@ -1,4 +1,4 @@
-MotorSim 0.1.0-rc3 — candidata Windows x64
+MotorSim 0.1.0-rc4 — candidata Windows x64
 
 Extraé la carpeta completa y abrí MotorSim.exe. Conservá MotorSimWorker.exe y
 _internal junto a la aplicación. No hace falta instalar Python ni usar consola.
@@ -7,9 +7,13 @@ Archivo → Nuevo / Abrir / Guardar / Guardar como. Los proyectos JSON pueden
 quedar incompletos; texto numérico inválido impide guardar. Se aceptan coma o
 punto en el editor. Cambiar 2T/4T conserva sus configuraciones independientes.
 
-Ejemplos: Archivo → Abrir, elegí EJEMPLO_SINTETICO_2T.json o
-EJEMPLO_SINTETICO_4T.json en la carpeta Ejemplos del paquete. No son motores
-medidos. Usá Guardar como para conservar tu propia copia en otra ubicación.
+Ejemplos: Archivo → Cargar ejemplo ofrece 2T referencia, 2T compresión 8.2,
+4T referencia y 4T compresión 8.2. Todos son EJEMPLO SINTÉTICO — NO MEDIDO,
+sin calibración ni validación experimental. La variante cambia solo compresión.
+Se cargan como proyectos editables con cambios pendientes y sin archivo asociado;
+Guardar solicita un destino. Se respetan Guardar/Descartar/Cancelar del proyecto
+anterior. La próxima simulación queda en Proyecto actual y usa lo cargado.
+Los mismos cuatro JSON se incluyen en Ejemplos, sin resultados precalculados.
 
 La navegación izquierda separa proyecto, configuración, cálculo y análisis.
 Resumen muestra los datos y dirige a las secciones que requieren atención.

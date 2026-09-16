@@ -1,6 +1,5 @@
 """Construcción onedir identificada; sin borrar productos ni datos anteriores."""
 import argparse
-from dataclasses import replace
 from datetime import datetime,timezone
 import hashlib
 from importlib import metadata
@@ -18,8 +17,7 @@ import zipfile
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from motorsim.runtime import APP_VERSION
-from motorsim.simulation_case import geometry as geometry2
-from motorsim.four_stroke import geometry as geometry4
+from motorsim.examples import EXAMPLES, example_project
 from motorsim.project_case import execution_errors
 from motorsim.reference_results import MODEL_VERSION,FOUR_MODEL_VERSION
 
@@ -61,10 +59,10 @@ def main():
     shutil.copy2(ROOT/'motorsim/ayuda.txt',bundle/'LEEME.txt')
     shutil.copy2(ROOT/'packaging/AVISOS.txt',bundle/'AVISOS.txt')
     examples=bundle/'Ejemplos';examples.mkdir()
-    for cycle,factory in [('2T',geometry2),('4T',geometry4)]:
-        project=replace(factory(),name=f'EJEMPLO SINTÉTICO {cycle} — no medido')
+    for key,(_,filename) in EXAMPLES.items():
+        project=example_project(key)
         if execution_errors(project):raise RuntimeError('Ejemplo incompatible: '+str(execution_errors(project)))
-        (examples/f'EJEMPLO_SINTETICO_{cycle}.json').write_text(json.dumps(project.to_dict(),ensure_ascii=False,indent=2),encoding='utf-8')
+        (examples/filename).write_text(json.dumps(project.to_dict(),ensure_ascii=False,indent=2),encoding='utf-8')
     licenses=bundle/'Licencias';shutil.copytree(ROOT/'packaging/licenses',licenses/'Qt')
     shutil.copy2(Path(sys.base_prefix)/'LICENSE.txt',licenses/'Python-LICENSE.txt')
     for name in ('PySide6','PySide6_Essentials','PySide6_Addons','shiboken6','pyinstaller'):

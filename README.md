@@ -23,7 +23,28 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
-## Navegación por tareas — candidata 0.1.0-rc3
+## Ejemplos precargados — candidata 0.1.0-rc4
+
+Archivo → Cargar ejemplo ofrece **2T referencia**, **2T compresión 8.2**,
+**4T referencia** y **4T compresión 8.2**. Todos llevan
+**EJEMPLO SINTÉTICO — NO MEDIDO** en nombre y observaciones: no son motores
+calibrados ni validados experimentalmente. Se generan desde las mismas definiciones
+canónicas acreditadas; las variantes solo cambian compresión de 8.0 a 8.2.
+
+Cargar crea una copia editable, sin archivo asociado y con cambios pendientes.
+Guardar solicita destino; el paquete no se sobrescribe. Si había cambios, se usa
+la confirmación habitual Guardar/Descartar/Cancelar. La próxima simulación queda
+en Proyecto actual y utiliza los valores cargados. No carga resultados como recién
+calculados; los resultados ya abiertos conservan su identidad y procedencia.
+Los mismos cuatro JSON se incluyen en la carpeta Ejemplos, pero la acción del menú
+no depende de archivos externos, red, repositorio ni carpeta actual.
+
+Pruebas y evidencia en [ejemplos-precargados/tasks.md](openspec/changes/ejemplos-precargados/tasks.md).
+Comandos: `.\.venv\Scripts\python.exe -m unittest discover -s tests` y
+`openspec validate ejemplos-precargados --strict --no-interactive`.
+rc4 se prepara desde commit limpio, preservando rc3. Sin aceptación manual ni archivo.
+
+## Navegación por tareas — candidata 0.1.0-rc3 (conservada)
 
 `reorganizacion-ui-final` reorganiza la interfaz existente, sin modificar física,
 solver, worker, límites, JSON v6 ni contratos/CSV. La columna permanente separa

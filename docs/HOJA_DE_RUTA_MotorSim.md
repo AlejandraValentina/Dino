@@ -19,6 +19,10 @@ Prioridad propuesta: datos generales para 2T y 4T desde el editor común; primer
 
 ## Estado de avance
 
+`ejemplos-precargados`: cuatro proyectos sintéticos derivados de los casos canónicos
+2T/4T y variantes de compresión 8.2, carga protegida y candidata rc4. Sin ampliar
+capacidades físicas ni cerrar aceptación manual; evidencia en sus tareas OpenSpec.
+
 Reorganización UX autorizada: [reorganizacion-ui-final](../openspec/changes/reorganizacion-ui-final/tasks.md).
 Navegación por tareas, configuración contextual y análisis embebido implementados;
 sin ampliar capacidades ni modificar las entregas científicas. Pruebas, revisión

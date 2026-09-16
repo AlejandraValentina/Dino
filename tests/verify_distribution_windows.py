@@ -25,7 +25,7 @@ parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--exe',type=Path,required=True)
 parser.add_argument('--work',type=Path,required=True)
 parser.add_argument('--resume-two',type=Path,help='Resultado 2T ya ejecutado: continuar solo 4T, sin repetirlo')
-parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis','uxseries'],required=True)
+parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis','uxseries','examples'],required=True)
 args=parser.parse_args();exe=args.exe.resolve();work=args.work.resolve();work.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from motorsim.reference_results import load_result
@@ -164,7 +164,37 @@ def finish_calculation(folder,series=False):
 try:
     main=window('MotorSim');front(main)
     note('GUI EXE directo, cwd distinto, PATH sistema, sin PYTHONPATH/VIRTUAL_ENV; factor Qt 1.5')
-    if args.stage=='uxeditor':
+    if args.stage=='examples':
+        from motorsim.examples import example_project
+        def example(title):
+            control(main,'MenuItem','Archivo').click_input()
+            control(main,'MenuItem','Cargar ejemplo').click_input()
+            control(main,'MenuItem',title).click_input();time.sleep(.3)
+        example('2T referencia')
+        assert 'Cambios pendientes' in main.window_text() and 'Sin archivo asociado' in texts(main)
+        button(main,'Guardar');file_dialog('Guardar proyecto como',work/'Ejemplo 2T á.json')
+        assert json.loads((work/'Ejemplo 2T á.json').read_text(encoding='utf-8'))==example_project('2t-reference').to_dict()
+        example('4T compresión 8.2')
+        assert 'Cambios pendientes' in main.window_text() and 'Sin archivo asociado' in texts(main)
+        navigate('Motor 4T');navigate('Resumen');screenshot(main,'rc4-ejemplo-4t-150')
+        navigate('Simulación');button(main,'Comprobar entradas')
+        assert '8.2:1' in texts(main)
+        navigate('Resultados')
+        historical=work/'Historico/manifest.json'
+        button(main,'Abrir resultado…');file_dialog('Abrir resultado',historical)
+        assert 'Trabajo indicado' in texts(main) and not worker_paths()
+        note('Carga canónica 2T/4T8.2, Guardar como, dirty/ruta, comprobación de entradas y resultado existente sin integrar')
+        navigate('Resumen');example('2T compresión 8.2')
+        button(window('Cambios pendientes'),'Cancelar')
+        assert '4T COMPRESIÓN 8.2' in main.window_text()
+        example('2T compresión 8.2');button(window('Cambios pendientes'),'Descartar')
+        assert '2T COMPRESIÓN 8.2' in main.window_text()
+        example('4T referencia');button(window('Cambios pendientes'),'Descartar')
+        assert '4T REFERENCIA' in main.window_text()
+        button(main,'Guardar');file_dialog('Guardar proyecto como',work/'Ejemplo 4T á.json')
+        assert json.loads((work/'Ejemplo 4T á.json').read_text(encoding='utf-8'))==example_project('4t-reference').to_dict()
+        note('Cuatro opciones accesibles, Cancelar/Descartar, referencias guardadas equivalentes y sin tocar recursos incluidos')
+    elif args.stage=='uxeditor':
         navigate('Resumen');tab(main,'Datos del proyecto')
         control(main,'Edit',suffix='.project_name').set_edit_text('PRUEBA SINTÉTICA UX á')
         button(main,'Guardar');file_dialog('Guardar proyecto como',work/'Proyecto UX á.json')

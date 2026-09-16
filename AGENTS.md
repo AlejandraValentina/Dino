@@ -2,6 +2,11 @@
 
 ## Lectura y autoridad
 
+Orden actual: `ejemplos-precargados` añade cuatro proyectos sintéticos desde las
+referencias canónicas y su carga protegida; candidata rc4 conservando rc3.
+Sin cambios físicos/formatos ni campañas. Se permite usar resultados existentes
+para comprobar el paquete. Revisión puntual y commits locales, sin publicar/archivar.
+
 Orden actual: `reorganizacion-ui-final` autoriza únicamente arquitectura visual UX,
 reutilizar editores/controladores, navegación por tareas y análisis embebido.
 Preservar física, contratos, worker, candidatos rc1/rc2 y evidencia. Leer el cambio.
