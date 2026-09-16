@@ -97,3 +97,64 @@ no ejecutados, reutilizando exportación exclusiva sin alterar CSV A/B.
 #### Scenario: Serie interrumpida
 - **WHEN** se reabre y exporta una serie con punto no convergido
 - **THEN** se muestran/exportan causa y estado sin ceros como magnitudes aceptadas, ni curvas inventadas.
+
+
+### Requirement: CSV externo explícito y validación completa
+MUST importar una curva UTF-8/BOM opcional, coma, punto decimal, dos columnas
+rpm,value y al menos una fila. RPM MUST ser positivas finitas y únicas, sin
+restricción 2500–3500; valores MUST ser finitos. MUST exigir magnitud/unidad y
+definición: W_C J/ciclo de un cilindro 2T integral p dV de 360° con intercambio de
+gases sin descontar cárter/pérdidas, o pmax absoluta Pa/bar (factor 100000).
+Trabajo MUST admitir signo/cero; presión MUST ser positiva. MUST NOT admitir
+manométrica, potencia/par al eje, trabajo parcial, otras unidades o inferencias.
+MUST conservar originales y ordenar solo copia. Error MUST indicar fila/columna
+y rechazar todo sin sustituir selección válida, sin eliminar/mediar/rellenar filas.
+
+#### Scenario: RPM casi iguales o duplicadas
+- **WHEN** el CSV tiene RPM duplicadas o distintas más allá de la precisión binaria
+- **THEN** se rechazan duplicados numéricos y se preserva la distinción decimal exacta de los demás, sin forzar coincidencias.
+
+### Requirement: Procedencia, revisión y persistencia de importación
+MUST ofrecer nombre, procedencia inicial No determinada (también Medición declarada,
+Simulación externa, Ejemplo sintético), fuente, motor/configuración, condiciones y
+observaciones con No informado permitido. MUST NOT inventar ni copiar condiciones
+sintéticas como ensayo. Medición declarada MUST identificarse como declaración sin
+autenticación/metrología. Flujo MUST seleccionar CSV, declarar, revisar, confirmar;
+cancelación MUST preservar selección. Confirmación MUST guardar carpeta nueva con
+CSV original y metadatos/identificador/reglas/unidades/procedencia; reapertura MUST
+validar correspondencia/estructura/metadatos sin requerir CSV fuente. MUST NOT
+sobrescribir ni anunciar éxito ante fallo; originales, proyectos y barridos intactos.
+
+#### Scenario: Cancelación y origen ausente
+- **WHEN** se cancela una nueva importación o se reabre una confirmada sin su CSV fuente
+- **THEN** la cancelación conserva el conjunto anterior y la reapertura utiliza y valida su copia local.
+
+### Requirement: Contraste descriptivo por coincidencia exacta
+MUST usar load_sweep sin proyecto actual ni cálculo. MUST mostrar ambas identidades,
+procedencias, geometría/condiciones guardadas, magnitud/unidades, puntos disponibles
+y coincidentes. Solo RPM exactas con simulación convergida MUST generar diferencias
+simulado−externo y 100*diferencia/abs(externo), relativa indefinida con externo cero.
+MUST usar W_C/pmax del resumen validado y conservar estados/no parejas sin ceros
+inventados. MUST NOT habilitar diferencias con definición incompatible, interpolar,
+redondear RPM, extrapolar, completar simulando ni cambiar gate A/B. MUST identificar
+contraste descriptivo y Equivalencia de condiciones no acreditada ante información
+faltante; MUST NOT certificar validación/calibración ni adoptar tolerancias del solver
+como umbrales experimentales ni exigir sus parámetros a datos externos.
+
+#### Scenario: Punto fallido y base cero
+- **WHEN** un punto del barrido no converge o una base externa coincidente vale cero
+- **THEN** se conserva el diagnóstico sin resultado simulado aceptado y la relativa a cero queda sin definir.
+
+### Requirement: Consulta gráfica y exportación externas sin motor
+MUST ofrecer Datos externos, formulario compacto/ayuda, tabla y gráfico por RPM,
+con distinción simulado/procedencia externa y externos sin pareja. MUST dibujar
+solo datos cargados sin líneas a través de fallos, ajuste/suavizado ni búsqueda de
+coincidencias favorables. CSV MUST incluir RPM/magnitud/unidad canónica/valores/
+diferencias/relativa/estados y referencias con procedencia, en carpeta nueva.
+Importar/consultar/exportar MUST NOT cambiar proyecto/dirty/resultados ni iniciar
+QProcess. Pruebas MUST usar CSV claramente sintético y barrido real existente,
+sin sustituirlo por convergencia fabricada ni nuevas ejecuciones.
+
+#### Scenario: Ejemplo sintético exportado
+- **WHEN** se contrasta y exporta un CSV de ejemplo sintético
+- **THEN** vista y exportación conservan esa procedencia sin presentarlo como medición o validación experimental.

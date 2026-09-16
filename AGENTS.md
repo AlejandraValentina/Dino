@@ -10,15 +10,15 @@ Entregas 1 y 2 completadas y aceptadas por la usuaria; 3 y 4 comprobadas técnic
 sin aceptación manual atribuida. Se preserva el trabajo existente y se comprueba Git.
 Entrega 5 implementada para su alcance 0D acotado, aceptación manual pendiente
 y separada; preservar 5dda9860 y evidencias sin repetir comprobaciones históricas.
-Entrega 6: preservar b9fbee4d y la comparación/CSV existente. El tramo actual de
-`comparacion-resultados` autoriza RPM enteras 2500–3500 y barrido secuencial de
-2–5 puntos, copia única, arranque inicial independiente, perfil B/banda 100 Pa.
-Referencia fija a 3000; mismas leyes, dominio, contornos, receta y criterios.
-Resultados v3 e índice de serie local, lectura histórica y comparación A/B a
-igual régimen; JSON v5 intacto. Solo el protocolo real autorizado: GUI B a
-2500/3000/3500; si todos convergen, consola C a 2500/3500; máximo cinco cálculos
-y 300 s de integración total, sin campañas adicionales. Importación pendiente.
-Entrega 6 En curso; sin aceptación manual atribuida. Commit propio sin publicar.
+Entrega 6: preservar a72b47f4 y sus evidencias. El tramo actual de
+`comparacion-resultados` autoriza CSV externo rpm,value, declaración explícita
+(trabajo indicado completo 2T o pmax absoluto), procedencia, copia persistente,
+reapertura y contraste descriptivo con barrido guardado por RPM exactas.
+No simulaciones nuevas, física, calibración, ampliación del solver ni JSON v5.
+Usar el barrido local existente y CSV rotulado EJEMPLO SINTÉTICO para Windows/150 %.
+Pruebas de parser/aritmética/Qt sin ejecutar el motor. Mediciones reales y validación
+experimental pendientes; no fabricarlas ni buscarlas. Una revisión puntual y
+commit propio sin publicar. Mantener separada la aceptación manual pendiente.
 Revisión puntual, pruebas pertinentes y commit propio;
 autenticación fuera de esta tarea, sin nuevos intentos ni configuración global.
 No iniciar entrega 7.

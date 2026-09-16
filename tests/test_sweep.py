@@ -117,12 +117,16 @@ class RpmTests(unittest.TestCase):
 
     def test_individual_records_separate_times_with_controlled_runner(self):
         from motorsim.reference_run import execute
+        from itertools import count
         model,profile=validated_model(inputs())
         result=dict(profile=asdict(profile),cycles=[],converged=False,seconds=0.,
                     stop='doble sin integración',last_two_cycles=[],partial=None)
         with tempfile.TemporaryDirectory() as d,patch('motorsim.reference_run.run_adaptive',return_value=result):
             messages=[];folder=Path(d)/'point'
-            execute(folder,threading.Event(),messages.append,inputs=inputs())
+            # El reloj Windows puede registrar 0 s para una escritura diminuta.
+            # Un reloj controlado prueba la separación sin depender de su resolución.
+            with patch('motorsim.reference_results.time.monotonic',side_effect=count(100,.01)):
+                execute(folder,threading.Event(),messages.append,inputs=inputs())
             loaded=load_result(folder/'manifest.json')
             timing=loaded['manifest']['timings']
             self.assertEqual(timing,messages[-1]['timings'])

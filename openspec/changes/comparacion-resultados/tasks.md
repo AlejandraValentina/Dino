@@ -250,3 +250,135 @@ Entrega 6 **En curso**: comparación, CSV y barrido acotado implementados; impor
 de mediciones pendiente y no iniciada. Entrega 5 conserva su aceptación manual
 pendiente separada. Commit propio sin push; publicación a cargo de la usuaria.
 Sin archivar ni iniciar entrega 7/configuración 4T.
+
+
+## Tramo datos externos — autorizado 16/09/2026
+- [x] 14. Comprobar continuidad a72b47f4 y documentar importación en el mismo cambio.
+- [x] 15. Parser/definiciones/procedencia y copia persistente validada, sin simulaciones.
+- [x] 16. Vista previa/confirmación, contraste exacto, tabla/puntos/CSV sin alterar fuentes.
+- [x] 17. Pruebas pertinentes y una revisión puntual; corregir defectos concretos.
+- [x] 18. Windows 150 % con barrido existente/CSV sintético, capturas y evidencia.
+- [x] 19. README/hoja/tareas actualizados y commit propio sin publicar.
+Mediciones reales y validación experimental pendientes; no inferirlas de fixtures.
+
+
+### Evidencia del tramo externo — 16/09/2026
+
+Git main limpio al iniciar, HEAD **a72b47f43bce2665eb95e4d8b4277543d4d0a6d2**,
+remoto origin existente conservado. Sin sincronizar/remplazar trabajo ni push,
+credenciales, globales o dependencias. Se amplía comparacion-resultados, sin otro
+roadmap/cambio/informe. Núcleo/criterios/referencia/resultados históricos y JSON v5
+intactos; **cero simulaciones nuevas**.
+
+#### Implementación y archivos de prueba
+
+external_data.py valida CSV/definición/procedencia, usa Decimal para RPM exactas,
+convierte bar sin perder originales y persiste copia literal/metadatos en carpeta
+exclusiva con correspondencia por hash y revalidación. Metadatos desconocidos se
+muestran No informado, procedencia inicial No determinada. external_view.py exige
+declaración/definición/vista previa/confirmación, conserva selección ante errores y
+cancelaciones; consulta independiente del editor con load_sweep, tabla y puntos
+sin interpolación ni líneas, detalles legibles separados y CSV exclusivo mediante
+utilidad existente. Identifica contraste descriptivo, no equivalencia acreditada,
+no validación/calibración. Comparación A/B conserva sus protecciones.
+
+Archivos versionados, todos **EJEMPLO SINTÉTICO**, no mediciones:
+- `examples/EJEMPLO_SINTETICO_trabajo.csv`: 2500/3000/3500 y 10/20/−2 J/ciclo.
+- `examples/EJEMPLO_SINTETICO_presion_bar.csv`: incluye 13.5 bar y RPM fuera de rango.
+- `examples/EJEMPLO_SINTETICO_contraste.csv`: cinco filas desordenadas, 2000/2500/3000/
+  3500/4000 con 5/10/20/−2/25 J/ciclo para consulta visible. Valores de prueba
+  independientes definidos manualmente, **no derivados del barrido ni medidos**.
+
+#### Pruebas automatizadas
+
+Estado final: **50/50 aprobadas en 6,477 s**, selección `test_external_data` (17),
+`test_comparison` (10), `test_sweep` (17) y `test_reference_results` (6). Ejecución
+mediante unittest.TestSuite/loadTestsFromName con tests en sys.path y guardas
+sobre adaptive.run_adaptive, reference_run.run_adaptive y simulation.run_resolution
+que lanzan AssertionError si se intenta integrar. Los dobles controlados del test
+de registro sustituyen al runner; no se ejecutó el motor ni la suite general con
+procesos de cálculo. Qt sin pantalla separado de inspección Windows.
+
+Pruebas nuevas: UTF-8/BOM, columnas/encabezados, falta de filas, fila/columna en
+vacíos/NaN/inf/expresiones/miles/desbordamientos, signo/cero del trabajo y positividad
+de presión, 13.5 bar = **1350000 Pa**, definición/unidades desconocidas/manométrica/
+trabajo parcial, RPM desordenadas/fuera del rango/duplicadas/equivalentes y distinción
+decimal más fina que float. Aritmética independiente 10/20/−2 frente a fixtures
+11/18/−1: diferencias **1/−2/1**, relativas **10/−10/50 %**. Son fixtures en memoria,
+no convergencia física fabricada. Base cero sin relativa, ausencias/fallos sin
+ceros, ausencia de interpolación. Metadatos/procedencia desconocidos, copia exacta,
+reapertura sin fuente, rechazo de hash/ruta/reglas/identidad/unidad alterados,
+escritura fallida/destino existente, CSV fiel con procedencia y vacíos, cancelación,
+vista previa invalidada al editar, conjunto anterior preservado y proyecto/dirty
+intactos. Guardas QProcess.start en pruebas de interfaz y recorrido visible.
+
+La primera selección final detectó un supuesto frágil en un test **existente**:
+una escritura diminuta puede registrar 0 s por resolución del reloj Windows.
+`test_sweep.test_individual_records_separate_times_with_controlled_runner` ahora
+inyecta reloj controlado para probar separación de tiempos, sin tocar aplicación,
+requisitos ni evidencia histórica. Selección pertinente repetida y aprobada.
+
+Una revisión independiente puntual de solo lectura no encontró defectos
+reproducibles; ejecutó 17+10 pruebas, sin motor ni atribuir comprobación visual.
+Autorrevisión del principal de diff, exportación y capturas. No otra campaña de
+revisión. OpenSpec estricto aprobado; sin init/update ni archivo.
+
+#### Windows al 150 % y contraste sintético descriptivo
+
+El escritorio actual tiene escala base 100 % (dos monitores). El primer intento
+con el factor anterior 1,2 se detuvo en la comprobación de DPR antes de importar;
+no se acreditó 150 % por ese intento. Factor Qt **1,5 solo del proceso**, DPR 1,5
+comprobado, escritorio Default accesible, sin cambiar Windows ni esperar desbloqueo.
+
+Comandos efectivamente ejecutados desde raíz:
+```powershell
+.\.venv\Scripts\python.exe tests/verify_external_windows.py --output results/simulacion-2t/externos-20260916-150
+.\.venv\Scripts\python.exe tests/verify_external_windows.py --output results/simulacion-2t/externos-20260916-150 --reopen --suffix=-final
+```
+
+Automatización **con ventanas visibles**, no aceptación manual. Selección del CSV
+por botón, declaración Ejemplo sintético/definición completa, vista previa, confirmar
+y guardar copia, seleccionar barrido real existente, consultar tabla/gráfico,
+exportar, reabrir copia confirmada, navegar pestañas y foco Tab/ancho compacto.
+Se inspeccionaron capturas y se sustituyó el volcado técnico por texto legible de
+procedencia, configuración y condiciones (solo visual); recaptura por reapertura,
+sin nueva importación/exportación ni cálculo.
+
+Serie reutilizada: **98302bb90b6d457cb614e7e8392465e2**, en
+`results/simulacion-2t/barrido-20260915/gui-sweep/series.json`.
+Importación confirmada: **7d792c0be0f049b5a41cbdd599157abd**, nombre
+**EJEMPLO SINTÉTICO — control de importación**, procedencia Ejemplo sintético,
+fuente «Valores de prueba definidos independientemente; no derivados del barrido
+ni medidos». Motor/configuración/condiciones No informado.
+Cinco puntos externos, tres coincidencias exactas convergidas, dos sin pareja.
+
+| RPM | Externo sintético J/ciclo | Simulado guardado J/ciclo | Simulado − externo J/ciclo | Relativa % | Estado |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 2000 | 5 | — | — | — | Solo externo |
+| 2500 | 10 | 16.209291803030894 | 6.209291803030894 | 62.09291803030894 | Coincidente |
+| 3000 | 20 | 16.49050751206088 | -3.50949248793912 | -17.5474624396956 | Coincidente |
+| 3500 | -2 | 16.41749289193312 | 18.41749289193312 | 920.874644596656 | Coincidente |
+| 4000 | 25 | — | — | — | Solo externo |
+
+Estos números verifican importación/aritmética/consulta, **no error experimental**
+ni validez de la física. No se buscaron coincidencias favorables ni ajustaron parámetros.
+CSV real exportado cotejado valor por valor con Decimal; conserva unidades,
+procedencia/ids y vacíos. Hashes del CSV fuente y todos los JSON del barrido iguales
+antes/después. Proyecto propio con dirty intacto. Guarda QProcess.start confirmó
+cero procesos de cálculo. Evidencia local ignorada en Git:
+`results/simulacion-2t/externos-20260916-150/importacion/{original.csv,metadata.json}`,
+`exportacion/contraste.csv` y `recorrido.json`.
+
+Capturas reales inspeccionadas/versionadas en docs/images:
+- `motorsim-datos-externos-vista-previa-150.png`.
+- `motorsim-datos-externos-tabla-150-final.png`.
+- `motorsim-datos-externos-puntos-150-final.png`.
+- `motorsim-datos-externos-procedencia-150-final.png`.
+- `motorsim-datos-externos-compacto-150-final.png`.
+Capturas previas conservadas en la carpeta local de evidencia `capturas-previas/`.
+
+**Importación y contraste descriptivo implementados y comprobados con archivos de
+prueba. Contraste con mediciones reales pendiente mientras no haya datos adecuados.
+Validación experimental del modelo no realizada.** Aceptación manual no atribuida.
+Entrega 6 En curso; criterios originales de hoja de ruta conservados. Commit propio
+sin publicar; publicación a cargo de la usuaria. Sin archivar ni iniciar entrega 7.

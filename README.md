@@ -23,10 +23,121 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
+## Datos externos por RPM — importación y contraste descriptivo
+
+Desde **Simulación 2T → Datos externos…**:
+seleccionar CSV → declarar magnitud, unidad y procedencia → revisar vista previa →
+confirmar y guardar en carpeta nueva → seleccionar el `series.json` de un barrido
+guardado. No utiliza el proyecto abierto ni calcula puntos nuevos. Cancelar o
+rechazar un archivo conserva el conjunto válido anterior; modificar declaraciones
+obliga a revisar otra vez antes de confirmar.
+
+Formato de una curva por archivo: **UTF-8 con BOM opcional**, separador **coma**,
+**punto decimal sin miles**, encabezado exacto y al menos una fila:
+
+```csv
+rpm,value
+2500,10
+3000,20
+3500,-2
+```
+
+Este bloque es **EJEMPLO SINTÉTICO**, no medición ni resultado físico aceptado.
+[Plantilla de trabajo](examples/EJEMPLO_SINTETICO_trabajo.csv),
+[plantilla de presión en bar](examples/EJEMPLO_SINTETICO_presion_bar.csv) y
+[CSV sintético usado en Windows](examples/EJEMPLO_SINTETICO_contraste.csv).
+No se deducen unidades ni significado del nombre de archivo. Se admiten notación
+científica decimal y espacios exteriores en valores; no fórmulas/expresiones.
+Límites de lectura: 16 MiB, 100000 puntos, 80 caracteres por número y representación
+finita sin desbordamiento/subdesbordamiento a cero. Errores indican fila/columna y
+rechazan el conjunto completo, sin descartar filas, promediar ni rellenar datos.
+RPM positivas finitas, sin duplicados numéricos; **pueden estar fuera de 2500–3500**,
+lo que no amplía el solver. La copia para consulta se ordena por RPM; el CSV original
+se conserva literalmente, incluidos BOM, orden y valores originales.
+
+Magnitudes explícitas, con ayuda contextual y confirmación de definición:
+
+- **Trabajo indicado del cilindro, J/ciclo**: un cilindro 2T, integral p dV de
+  la vuelta completa de 360°, incluido intercambio de gases, sin descontar
+  trabajo del cárter ni pérdidas mecánicas. Admite positivo, negativo y cero.
+- **Presión máxima absoluta del cilindro**, unidad original **Pa o bar**;
+  bar × 100000 → **Pa absolutos**. Exige valor positivo. No acepta presión
+  manométrica como absoluta ni confunde presión máxima con potencia máxima.
+
+Fuera de alcance: potencia/par al eje, trabajo de un intervalo parcial, unidades
+no definidas, Excel/PDF/imágenes y formatos propietarios. No se convierte potencia
+al freno en trabajo indicado a partir de RPM.
+
+Procedencia inicial **No determinada**; opciones **Medición declarada**,
+**Simulación externa** y **Ejemplo sintético**. La declaración de medición no
+verifica autenticidad ni trazabilidad metrológica. Nombre, fuente/referencia,
+motor/configuración, condiciones y observaciones pueden quedar **No informado**.
+No se inventan instrumentos, fecha, incertidumbre, ambiente ni calibración;
+las condiciones guardadas del simulador se muestran por separado.
+
+El contraste usa solo RPM **exactamente iguales**, conservadas como decimales:
+no redondea para emparejar, interpola, extrapola ni completa calculando. Toma
+**W_C o pmax del resumen validado**, no del gráfico. Diferencia = simulado − externo;
+relativa = 100 × diferencia / abs(externo), no definida con base cero. Conserva
+puntos sin pareja y estados fallidos/no ejecutados con magnitudes ausentes vacías.
+Tabla y gráfico distinguen cuadrados azules simulados y círculos naranjas externos
+con su procedencia; círculos vacíos sin diferencia calculada. No hay líneas ni ajustes.
+La tabla abrevia solo la visualización de relativa; el CSV conserva su cálculo.
+
+Siempre se identifica **contraste descriptivo** y **Equivalencia de condiciones
+no acreditada**: coincidir en RPM/unidades no acredita motor ni ensayo equivalentes.
+No aplica tolerancias del solver a mediciones ni declara validación/calibración.
+Comparación A/B entre simulaciones mantiene sus protecciones de RPM/condiciones/perfil.
+
+Confirmar crea carpeta exclusiva con **original.csv** y **metadata.json** (formato
+motorsim-external-rpm v1): identificador, magnitud/definición, unidades, procedencia,
+metadatos, reglas y hash del CSV. **Abrir importación…** revalida todo y funciona sin
+el CSV fuente. Los originales, el barrido y JSON v5 quedan intactos. Sin catálogo
+ni historial automático. **Exportar contraste…** crea **contraste.csv** en carpeta
+nueva con RPM, magnitud/unidad canónica, valores, diferencias/relativa, estado,
+identificadores dataset/serie/punto, fuente/procedencia, unidad/valor originales,
+configuración/condiciones, definición y motivos. No sobrescribe ni anuncia éxito
+parcial ante error. Un ejemplo sintético conserva esa procedencia al exportarse.
+
+**Comprobación del 16/09/2026:** 50/50 pruebas pertinentes aprobadas (6,477 s),
+con integradores bloqueados: 17 nuevas de importación, 10 A/B, 17 RPM/serie y 6 de
+lectura. Revisión independiente puntual sin defectos reproducibles; OpenSpec
+estricto aprobado. No se ejecutó el motor. Un test histórico de tiempos se hizo
+determinista ante escrituras más rápidas que la resolución del reloj de Windows.
+
+Windows **150 % efectivo** (base actual 100 %, factor Qt 1,5 solo del proceso):
+automatización visible e inspección de capturas, **no aceptación manual**. Cinco
+puntos externos sintéticos independientes, tres coincidencias con el barrido
+existente y dos sin pareja (2000/4000). CSV exportado cotejado valor por valor;
+hashes de fuentes y proyecto/dirty intactos, QProcess de cálculo bloqueado.
+[Tabla real](docs/images/motorsim-datos-externos-tabla-150-final.png),
+[gráfico](docs/images/motorsim-datos-externos-puntos-150-final.png),
+[vista previa](docs/images/motorsim-datos-externos-vista-previa-150.png),
+[procedencia](docs/images/motorsim-datos-externos-procedencia-150-final.png) y
+[ancho compacto/foco](docs/images/motorsim-datos-externos-compacto-150-final.png).
+Copia confirmada y exportación local: `results/simulacion-2t/externos-20260916-150/`
+(`importacion/metadata.json`, `importacion/original.csv`, `exportacion/contraste.csv`).
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_external_data.py -v
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_comparison.py -v
+openspec validate comparacion-resultados --strict --no-interactive
+# Solo reapertura/captura existente, sin importar/exportar otra vez ni calcular:
+.\.venv\Scripts\python.exe tests/verify_external_windows.py --output results/simulacion-2t/externos-20260916-150 --reopen --suffix=-otra
+```
+
+Recorrido original: el mismo comando sin `--reopen --suffix=-otra`, con destino
+nuevo. Exige barrido local existente; nunca lo sustituye ni ejecuta. `--scale`
+ajusta solo Qt del proceso y comprueba DPR=1,5. Evidencia en las tareas existentes.
+**Importación y contraste descriptivo implementados y comprobados con archivos de
+prueba. Contraste con mediciones reales pendiente; validación experimental no
+realizada.** Entrega 6 **En curso**, sin archivar ni iniciar entrega 7.
+
 ## Comparar resultados guardados y exportar CSV
 
 La entrega 6 está **En curso**: comparación, CSV y barrido RPM acotado implementados
-y comprobados. Importación de mediciones pendiente y fuera de este tramo. Entrega 5 y su
+y comprobados. Importador externo y contraste descriptivo también implementados;
+contraste con mediciones reales pendiente. Entrega 5 y su
 aceptación manual pendiente conservan su estado.
 
 Desde **Simulación 2T → Comparar resultados…**, abrí los `manifest.json` de
@@ -142,7 +253,8 @@ excesiva y contraste seleccionado; recaptura solo reabre evidencia existente.
 [presión](docs/images/motorsim-barrido-presion-150-final.png) y
 [ancho compacto/foco](docs/images/motorsim-barrido-compacto-150-final.png).
 No se atribuye aceptación manual de la usuaria, calibración ni validación experimental.
-Entrega 6 **En curso**, importación pendiente; entrega 5 conserva aceptación manual pendiente.
+Entrega 6 **En curso**; el tramo externo siguiente incorpora el importador, con
+contraste real pendiente. Entrega 5 conserva aceptación manual pendiente.
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -p test_sweep.py -v

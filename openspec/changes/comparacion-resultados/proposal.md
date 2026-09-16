@@ -26,3 +26,11 @@ Este mismo cambio incorpora ahora punto entero 2500–3500 rpm y barrido secuenc
 tabla/puntos/CSV. Referencia fija, condiciones restantes y JSON v5 intactos.
 Comprobación real limitada a B2500/3000/3500 y, si aprueban, C2500/C3500, sin
 campañas extra. Importación experimental pendiente, entrega 6 En curso.
+
+
+## Ampliación autorizada posterior a a72b47f4
+Importación CSV por RPM y contraste descriptivo con barrido existente, sin calcular.
+Magnitudes explícitas: trabajo indicado completo de un cilindro 2T o pmax absoluta
+(Pa/bar). Procedencia declarada, copia original/metadatos, lectura validada, tabla,
+puntos y CSV fiel. Implementar con pruebas sintéticas no equivale a contrastar
+mediciones reales ni validar experimentalmente; esas comprobaciones siguen pendientes.

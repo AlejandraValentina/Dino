@@ -99,3 +99,62 @@ sin ejecutar puede carecer de tiempos; el lector no los inventa. El índice de
 serie conserva los tiempos del punto; nunca modifica manifiestos hijos.
 La interfaz exige destino inexistente y el identificador sweep_started confirmado
 por el hijo antes de actualizar el índice: un fallo no puede apropiarse de otra serie.
+
+
+## Datos externos: ampliación autorizada del 16/09/2026
+El tramo anterior conserva su evidencia. Ahora se permite importar sin cálculos
+nuevos, física, ampliación de RPM, calibración ni JSON v5. Dos módulos pequeños:
+external_data (CSV/contrato/aritmética) y external_view (declaración/consulta Qt).
+Acceso Datos externos junto a comparación/barrido. No lee el editor ni inicia procesos.
+
+CSV de una curva: UTF-8 con BOM opcional, encabezado exacto rpm,value, coma y punto
+decimal, sin miles ni expresiones. Al menos una fila, exactamente dos columnas,
+RPM positivas finitas sin duplicados numéricos. Trabajo admite negativo/cero;
+presión absoluta positiva. Validación completa con fila/columna, sin omitir filas.
+Se permite notación científica decimal y espacios exteriores en valores, nunca
+inferir delimitador/unidad por nombre. Límites de archivo 16 MiB/100000 filas y
+80 caracteres por número, representable finito sin desbordamiento/subdesbordamiento
+a cero. RPM externas no están restringidas a 2500–3500. Decimal conserva identidad
+exacta de RPM, incluso cuando convertir a float las haría coincidir; copia ordenada
+para consulta, CSV original sin cambios. Conversión bar*100000 con valores originales.
+
+Magnitud/unidad y definición deben declararse antes de vista previa. Trabajo:
+integral p dV de 360°, un cilindro 2T, intercambio de gases incluido, sin descontar
+cárter/pérdidas mecánicas. Presión: máximo absoluto del cilindro, no manométrico ni
+potencia. No se aceptan trabajo parcial ni potencia/par al eje ni conversiones de
+freno a indicado. Ayuda contextual y confirmación explícita de definición completa.
+Procedencia inicial No determinada; otras: Medición declarada, Simulación externa,
+Ejemplo sintético. Medición es declaración, no prueba de autenticidad/metrología.
+Nombre/fuente/motor/configuración/condiciones/observaciones pueden ser No informado.
+Nunca copiar condiciones del solver hacia estos campos.
+
+Vista previa no sustituye la selección confirmada. Modificar declaraciones invalida
+vista previa/confirmación. Cancelar archivo/declaración/destino no cambia selección.
+Confirmar exige carpeta nueva y guarda bytes CSV en original.csv y metadata.json
+al final, formato motorsim-external-rpm versión 1, dataset_id UUID hex, metadata,
+rules exactas y csv_sha256. Lector revalida reglas/definición/unidades/identidad,
+ruta interna fija/hash y vuelve a analizar CSV. No requiere origen. Utiliza
+write_json existente en carpeta exclusiva, limpieza solo de archivos propios ante
+fallo; no éxito parcial. No catálogo ni modificación de manifiestos del barrido.
+
+load_sweep valida barrido independiente del editor. Contraste une RPM exactamente
+iguales, sin redondeo/interpolación/extrapolación. Valor simulado procede del resumen
+W_C_J o p_max_Pa del último ciclo convergido. Diferencia simulado−externo; relativa
+100*diferencia/abs(externo), ausente con base cero. Unión de RPM conserva externos
+sin pareja y puntos simulados no convergidos/no ejecutados, magnitudes ausentes
+vacías. Se muestran estado y causa. Protecciones A/B sin cambios; este modo distinto
+no exige perfiles numéricos ni parámetros sintéticos al dato externo.
+
+Siempre se identifica contraste descriptivo y Equivalencia de condiciones no
+acreditada: metadatos completos tampoco certifican equivalencia. Detalles muestran
+ambas procedencias/identidades, geometría y condiciones guardadas del barrido.
+Tabla canónica y puntos sin líneas (no se atraviesan fallos): cuadrados azules
+simulados, círculos naranjas externos con leyenda de procedencia; huecos si no se
+calculan diferencias. No filtros favorables, máximos ajustados ni umbrales experimentales.
+
+contraste.csv usa write_csv_files existente, carpeta exclusiva, UTF-8/coma/punto.
+Incluye RPM/magnitud/unidad, externo/simulado/diferencia/relativa/estado, dataset_id,
+procedencia/fuente, series_id/run_id, unidad/valor originales, motor/configuración/
+condiciones/definición/aviso/motivo. Ausencias vacías. Ninguna procedencia sintética
+se renombra Medición; no se modifican las fuentes. Pruebas numéricas independientes
+sin solver y recorrido Windows 150 % con barrido existente y CSV sintético rotulado.

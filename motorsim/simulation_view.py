@@ -18,6 +18,7 @@ from .project_case import configuration_key, validate_rpm
 from .sweep import plan_rpms, load_sweep, write_index
 from .sweep_view import SweepDialog
 from .comparison_view import ComparisonDialog
+from .external_view import ExternalDialog
 
 
 class PressurePlot(QWidget):
@@ -147,6 +148,10 @@ class SimulationView(QScrollArea):
         self.open_sweep_button=QPushButton('Abrir barrido…')
         preparation.addWidget(self.sweep_button);preparation.addWidget(self.open_sweep_button)
         self.sweep_button.setEnabled(False)
+        self.external_button=QPushButton('Datos externos…')
+        self.external_dialog=None
+        self.external_button.clicked.connect(self.show_external)
+        preparation.addWidget(self.external_button)
         preparation.addStretch()
         layout.addLayout(preparation)
         for button in (self.run_button, self.cancel_button, self.open_button, self.details_button):
@@ -225,6 +230,10 @@ class SimulationView(QScrollArea):
         self.progress_label.setText(f"Integración de la serie: {loaded['index']['integration_seconds']:.3f} s")
         self.path_label.setText(str(loaded['path']));self.sweep_button.setEnabled(True)
         self.show_sweep()
+
+    def show_external(self):
+        if self.external_dialog is None:self.external_dialog=ExternalDialog(self)
+        self.external_dialog.show();self.external_dialog.raise_();self.external_dialog.activateWindow()
 
     def show_comparison(self):
         if self.comparison_dialog is None:
