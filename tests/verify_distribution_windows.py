@@ -24,7 +24,8 @@ from pywinauto.keyboard import send_keys
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--exe',type=Path,required=True)
 parser.add_argument('--work',type=Path,required=True)
-parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing'],required=True)
+parser.add_argument('--resume-two',type=Path,help='Resultado 2T ya ejecutado: continuar solo 4T, sin repetirlo')
+parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process'],required=True)
 args=parser.parse_args();exe=args.exe.resolve();work=args.work.resolve();work.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from motorsim.reference_results import load_result
@@ -62,9 +63,12 @@ def front(w,width=1350,height=800):
     except Exception:pass
 def control(w,kind,name=None,suffix=None):
     return wait(lambda:next((x for x in w.descendants() if x.element_info.control_type==kind
-        and (name is None or x.window_text()==name)
+        and (name is None or x.window_text()==name or x.element_info.name==name)
         and (suffix is None or x.element_info.automation_id.endswith(suffix))),None))
 def button(w,name):
+    if name=='Cerrar':
+        win32gui.PostMessage(w.handle,win32con.WM_CLOSE,0,0)
+        wait(lambda:not win32gui.IsWindowVisible(w.handle));return
     # Invoke se bloquea en algunos diálogos modales Qt; teclado conserva el flujo real.
     b=control(w,'Button',name);b.set_focus();send_keys('{SPACE}');time.sleep(.2)
 def tab(w,name):control(w,'TabItem',name).select();time.sleep(.2)
@@ -72,7 +76,16 @@ def combo(w,name,index):
     if name in ('Tipo de motor','Ejecución'):
         c=[x for x in w.descendants() if x.element_info.control_type=='ComboBox'][0 if name=='Tipo de motor' else 1]
     else:c=control(w,'ComboBox',name)
-    c.set_focus();send_keys('{HOME}'+('{DOWN}'*index)+'{TAB}');time.sleep(.2)
+    select_combo(c,index)
+
+def select_combo(c,index):
+    c.click_input();time.sleep(.2)
+    items=[]
+    for h,_ in windows():
+        items.extend(x for x in UIAWrapper(UIAElementInfo(h)).descendants() if x.element_info.control_type=='ListItem')
+    assert len(items)>index, 'No aparece la lista del selector'
+    expected=items[index].window_text();items[index].click_input();time.sleep(.2)
+    assert c.selected_text()==expected, (c.selected_text(),expected)
 def texts(w):return '\n'.join(x.window_text() for x in w.descendants() if x.element_info.control_type=='Text')
 def file_dialog(fragment,path):
     d=window(fragment)
@@ -83,6 +96,7 @@ def file_dialog(fragment,path):
         # Campo de nombre enfocado al abrir el diálogo nativo Windows.
         send_keys('^a');send_keys(str(path),with_spaces=True)
     send_keys('{ENTER}');time.sleep(.5)
+    wait(lambda:not win32gui.IsWindowVisible(d.handle))
 def open_project(path):button(main,'Abrir');file_dialog('Abrir proyecto',path)
 def save_as(path):button(main,'Guardar como');file_dialog('Guardar proyecto como',path)
 def screenshot(w,name):
@@ -177,9 +191,15 @@ try:
         if (work/'numerical.json').exists():raise RuntimeError('No repetir los puntos registrados.')
         ledger=work/'budget.json'
         if ledger.exists():assert json.loads(ledger.read_text())['seconds']+180<=300
-        tab(main,'Simulación');first=start_calculation();two=finish_calculation(first)
+        tab(main,'Simulación')
+        if args.resume_two:
+            first=args.resume_two.resolve().parent;two=load_result(first/'manifest.json')
+            assert any(Path(r['path'])==first/'manifest.json' for r in json.loads(ledger.read_text())['runs'])
+            note('2T previamente completado, no se repite')
+        else:
+            first=start_calculation();two=finish_calculation(first)
         assert two['status']=='converged';note('Referencia 2T convergida')
-        screenshot(main,'paquete-2t-150')
+        if not args.resume_two:screenshot(main,'paquete-2t-150')
         open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json')
         tab(main,'Simulación');combo(main,'Origen de la próxima ejecución',1)
         # La segunda combo es modo de ejecución; selección por nombre accesible de formulario.
@@ -205,6 +225,75 @@ try:
         tab(main,'Simulación');button(main,'Ejecutar')
         assert 'Falta el auxiliar' in texts(main) and not worker_paths()
         note('Auxiliar ausente: error útil, botón disponible y sin cálculo ficticio')
+    elif args.stage=='process':
+        import win32api
+        def consoles():
+            found=[]
+            def visit(h,_):
+                if win32gui.IsWindowVisible(h) and win32gui.GetClassName(h)=='ConsoleWindowClass':found.append(h)
+            win32gui.EnumWindows(visit,None);return set(found)
+        before=consoles();tab(main,'Simulación');folder=start_calculation();actual=worker_paths();assert len(actual)==1
+        loaded={}
+        for pid in (process.pid,actual[0][0]):
+            h=win32api.OpenProcess(0x410,False,pid)
+            try:loaded[str(pid)]=[win32process.GetModuleFileNameEx(h,m) for m in win32process.EnumProcessModules(h)]
+            finally:h.Close()
+        assert consoles()==before
+        for modules in loaded.values():
+            runtime=[p for p in modules if Path(p).name.lower()=='python311.dll']
+            assert len(runtime)==1 and Path(runtime[0]).resolve()==exe.parent/'_internal/python311.dll'
+        assert not any('Qt6' in p for p in loaded[str(actual[0][0])])
+        (work/'process-modules.json').write_text(json.dumps(loaded,ensure_ascii=False,indent=2),encoding='utf-8')
+        button(main,'Cancelar');wait(lambda:not worker_paths())
+        if (folder/'manifest.json').exists():
+            account(folder);assert load_result(folder/'manifest.json')['status']=='cancelled'
+        else:
+            # No ocultar una cancelación forzada ni declarar tiempo no medido.
+            raise RuntimeError('Cancelación forzada: registrar cota de tiempo y conservar evidencia; no repetir automáticamente')
+        note('GUI/worker cargan python311.dll del paquete; worker sin Qt y sin consola visible durante ejecución')
+    elif args.stage=='provenance':
+        open_project(exe.parent/'Ejemplos/EJEMPLO_SINTETICO_4T.json');tab(main,'Simulación')
+        n=json.loads((work/'numerical.json').read_text())
+        button(main,'Abrir resultado…');file_dialog('Abrir resultado',Path(n['four_stroke']).parent/'point-02/manifest.json')
+        assert 'configuración anterior' not in texts(main)
+        tab(main,'Ficha');control(main,'Edit',suffix='.bore_mm').set_edit_text('55')
+        tab(main,'Simulación');assert 'configuración anterior' in texts(main)
+        note('Procedencia preservada y aviso de configuración anterior tras editar')
+        button(main,'Abrir resultado…');file_dialog('Abrir resultado',Path(n['two_stroke']))
+        assert 'Convergencia numérica alcanzada' in texts(main)
+        note('Lector de resultado referencia 2T v1 del paquete')
+        front(main,1000,740);control(main,'TabItem','Ficha').set_focus();send_keys('{END}')
+        time.sleep(.2);assert control(main,'TabItem','Simulación').is_selected()
+        note('Pestaña final accesible por teclado en ventana compacta al 150 %')
+        tab(main,'Ficha');control(main,'Edit',suffix='.bore_mm').set_edit_text('54')
+    elif args.stage=='about':
+        control(main,'MenuItem','Ayuda').click_input();control(main,'MenuItem','Acerca de MotorSim…').click_input()
+        d=window('Acerca de MotorSim');assert '0.1.0-rc1' in texts(d) and 'f46613e' in texts(d)
+        screenshot(d,'paquete-acerca');button(d,'Aceptar');note('Acerca de identifica versión/commit sin Git')
+        control(main,'MenuItem','Ayuda').click_input();control(main,'MenuItem','Guía breve…').click_input()
+        d=window('MotorSim — Guía breve');assert any('Cancelar' in x.window_text() for x in d.descendants())
+        button(d,'Cerrar');note('Ayuda incluida accesible')
+    elif args.stage=='external':
+        tab(main,'Simulación');button(main,'Datos externos…');d=window('Datos externos');front(d)
+        csv=work/'PRUEBA SINTÉTICA importación.csv';csv.write_text('rpm,value\n2500,52\n3000,50\n',encoding='utf-8')
+        button(d,'Importar CSV…');file_dialog('Seleccionar CSV externo',csv)
+        imp=window('Importar CSV ·');front(imp)
+        cs=[x for x in imp.descendants() if x.element_info.control_type=='ComboBox']
+        select_combo(cs[0],2);select_combo(cs[1],1);select_combo(cs[2],3)
+        control(imp,'CheckBox','Declaro que los datos cumplen esta definición completa').click_input()
+        edits=[x for x in imp.descendants() if x.element_info.control_type=='Edit']
+        edits[0].set_edit_text('PRUEBA SINTÉTICA — no medida')
+        button(imp,'Revisar vista previa');assert control(imp,'Button','Confirmar y guardar…').is_enabled()
+        button(imp,'Confirmar y guardar…');file_dialog('Carpeta nueva para la importación',work/'Importación sintética á')
+        wait(lambda:not win32gui.IsWindowVisible(imp.handle))
+        button(d,'Seleccionar barrido…');file_dialog('Seleccionar barrido guardado',work/'Historicos/gui-sweep/series.json')
+        assert '2 coincidencias convergidas' in texts(d)
+        screenshot(d,'paquete-importacion-150')
+        button(d,'Exportar contraste…');file_dialog('Carpeta nueva para contraste.csv',work/'Contraste sintético á')
+        assert (work/'Contraste sintético á/contraste.csv').exists()
+        button(d,'Abrir importación…');file_dialog('Abrir importación',work/'Importación sintética á/metadata.json')
+        assert 'PRUEBA SINTÉTICA' in texts(d);button(d,'Cerrar')
+        note('Importar CSV declarado sintético, vista previa, guardar/reabrir, contraste y exportación sin cálculo')
     elif args.stage=='history':
         tab(main,'Simulación')
         source=Path(__file__).resolve().parents[1]/'results/simulacion-2t/cuatro-tiempos-20260916/R2'
@@ -228,7 +317,9 @@ try:
         assert (work/'CSV barrido á/serie.csv').exists();button(dialog,'Cerrar')
         note('Barrido histórico reabierto y exportado')
     if process.poll() is None:
-        win32gui.PostMessage(main.handle,win32con.WM_CLOSE,0,0);process.wait(timeout=10)
+        win32gui.PostMessage(main.handle,win32con.WM_CLOSE,0,0)
+        if args.stage=='provenance':button(window('Cambios pendientes'),'Descartar')
+        process.wait(timeout=10)
     (work/(args.stage+'-evidence.json')).write_text(json.dumps(dict(stage=args.stage,exe=str(exe),
         cwd=str(cwd),pid=process.pid,workers=workers,qt_scale_factor='1.5',checks=checks,
         screenshots=screens,automated=True,manual_acceptance=False),ensure_ascii=False,indent=2),encoding='utf-8')

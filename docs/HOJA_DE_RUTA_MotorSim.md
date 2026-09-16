@@ -36,7 +36,10 @@ entregas el 14/09/2026; su evidencia se registra separada en los cambios enlazad
 | 7. Configuración específica 4T | Completada para el alcance geométrico | [cuatro-tiempos-basico](../openspec/changes/cuatro-tiempos-basico/tasks.md) | Válvulas idealizadas, eventos/cruce analíticos, conductos independientes y JSON v6; pruebas y Windows/150 % comprobados. Sin aceptación manual atribuida. |
 | 8. Primer caso de simulación 4T | Completada para el alcance 0D autorizado | [cuatro-tiempos-basico](../openspec/changes/cuatro-tiempos-basico/tasks.md) | R1 histórica fallida en tendencia preservada; R2 aprobada por estabilidad práctica y C50/banda aprobada. Editor, ejecución, resultados, comparación y barrido 4T comprobados; 12 ejecuciones/249,015 s, contrastes B/C y regresión 2T exacta. Windows/150 % y 219 pruebas. Aceptación manual y validación experimental pendientes y separadas. |
 
-Candidata de distribución Windows **0.1.0-rc1**, en preparación/comprobación mediante
+Candidata de distribución Windows **0.1.0-rc1** construida desde `f46613e`, ZIP
+extraído comprobado en Windows 10 x64/150 %, tres puntos numéricamente iguales
+a sus referencias. **Por verificar**: desglose temporal 2T, equipo sin Python y
+offline aislado; aceptación manual separada. Evidencia mediante
 [distribucion-windows](../openspec/changes/distribucion-windows/tasks.md). No cambia
 el estado técnico funcional ni elimina pendientes manuales o experimentales.
 

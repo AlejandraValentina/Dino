@@ -54,13 +54,54 @@ Resultados: `%LOCALAPPDATA%\MotorSim\Resultados`; errores inesperados:
 respetan el destino elegido. Mover o sustituir el paquete no migra esos datos.
 No se escriben en `_internal` ni se envían a ningún servicio.
 
-Comprobación inicial: 224 pruebas automatizadas aprobadas (36,193 s), revisión
-independiente puntual sin defectos reproducibles. Paquete de prueba abre fuera del
-repositorio, con cwd distinto, sin PYTHONPATH/VIRTUAL_ENV y PATH solo de Windows;
-edición/guardado/inválidos/alternancia/v1 comprobados por automatización externa.
-La construcción final y su protocolo numérico se registran al concluir en tasks.md.
-Equipo sin Python instalado, offline aislado, aceptación manual y validación
-experimental siguen pendientes mientras no exista evidencia específica.
+**Candidata construida y probada:** fuente limpia
+`f46613e4ae9a82dc394db8b6509e782c2121cc3c`, Windows 10 19045 x64,
+Python 3.11.0, PySide6 6.11.2, PyInstaller 6.22.3. Dependencias completas en
+`packaging/requirements-build.txt` y `build.json`. El commit posterior registra
+solo evidencia/documentación y automatización externa; no modifica el binario.
+
+- Ejecutable construido: `E:\dino\Dino\dist\MotorSim-0.1.0-rc1-windows-x64-f46613e4\MotorSim\MotorSim.exe`.
+- ZIP: `E:\dino\Dino\dist\MotorSim-0.1.0-rc1-windows-x64-f46613e4.zip`.
+- ZIP: **43.376.903 bytes**; carpeta: **104.867.240 bytes**; ejecutable no firmado.
+- SHA-256: `19eeec5047c9f9f5eab22d7938b9680539e5660649659cb209060ec8b4486d6b`.
+
+Apertura del ZIP extraído que se comprobó:
+
+```powershell
+& 'E:\MotorSim distribucion\Candidata final á 0.1.0-rc1\MotorSim\MotorSim.exe'
+```
+
+**Pruebas automatizadas:** 224 aprobadas (36,193 s) y revisión independiente
+puntual sin defectos reproducibles. El EXE extraído se probó mediante UIA/teclado:
+edición, JSON incompleto/inválido/antiguo, alternancia, protección, ayuda, lectores,
+comparación, importación sintética y CSV. Tres puntos convergieron con igualdad
+numérica exacta respecto de las referencias: 2T B3000 (10 ciclos), 4T B2500/B3000
+(7 ciclos cada uno). Sin repetir puntos ni cambiar física/tolerancias.
+Dos cancelaciones cooperativas (botón/cierre) pasaron sin huérfanos. Una tercera
+comprobación de módulos activó la parada de seguridad a los 3 s: cancelado, sin
+resultado aceptado ni manifiesto final; causa del retraso no determinada.
+
+GUI/worker y sus DLL Python se verificaron dentro del paquete; worker sin Qt,
+sin consola visible durante la comprobación, cwd ajeno, PATH solo Windows y sin
+PYTHONPATH/VIRTUAL_ENV. La automatización externa usa Python, la aplicación no
+utiliza ese intérprete. La extracción mantiene los hashes de los 160 archivos
+originales; sin entornos, repositorio, resultados históricos ni herramientas UIA.
+
+**Inspección visual:** capturas reales del EXE a escala Qt efectiva 150 %, formulario
+adaptable y ventana compacta 1000×740; navegación por teclado a la pestaña final.
+Capturas y evidencia: `E:\MotorSim distribucion\Comprobación final rc1`.
+Se inspeccionaron editor, compacto, barrido, importación y Acerca de. No es
+aceptación manual de la usuaria.
+
+**Por verificar:** equipo Windows sin Python instalado y ejecución offline aislada;
+no se dispone de ese entorno y no se alteró la red. También falta el desglose temporal
+del punto 2T: su contrato v1 no conserva preparación/escritura/tiempo percibido.
+Se conserva la integración medida, sin inventar valores ni repetir el punto para
+suplir el registro. 4T sí registra tiempos separados. Presupuesto contabilizado:
+53,829 s de 300 (43,829 medidos y 10 s de cota conservadora de la parada forzada).
+La candidata es utilizable en los recorridos acreditados; el bloque conserva
+comprobaciones pendientes. Aceptación manual y validación experimental no realizadas.
+Detalle y referencias originales en [tasks.md](openspec/changes/distribucion-windows/tasks.md).
 
 ## Bloque 4T básico — comprobado el 16/09/2026
 
