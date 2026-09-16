@@ -4,7 +4,7 @@
 - [x] Generador determinista y empaquetado que copia/verifica los cuatro originales.
 - [x] Validación, igualdad completa con referencias, diferencia única, round-trip y ejecutabilidad sin solver: 10 pruebas pertinentes aprobadas en 2,681 s.
 - [x] Apertura real 2T/4T, geometría, configuración, conductos, listo y Guardar como sin alterar originales.
-- [ ] Revisión puntual, OpenSpec, documentación, commit y paquete identificado.
+- [x] Revisión puntual, OpenSpec, documentación, commit y paquete identificado.
 
 El estado y evidencia anteriores siguientes se conservan como históricos.
 Continuación: Windows automatizado con EXE rc4 d6c4e19b, Archivo/Abrir para
@@ -17,6 +17,31 @@ review_rc2_hardening sin defectos identificados; dos pruebas de datos aprobadas
 sin escribir en el repositorio ni ejecutar solver. OpenSpec estricto aprobado.
 Pruebas finales pertinentes: 11 aprobadas en 31,498 s; incluye preservación de
 archivos ajenos y rechazo de una definición inválida antes de cualquier escritura.
+
+Fuente de esta continuación: `8d6f41dc08f113e3c60503420b7a798b2d9721c4`.
+Después del commit apareció una eliminación ajena de `redme.txt` en la copia
+principal. El primer intento de build se detuvo por árbol no limpio; sin modificar
+ni registrar esa eliminación. Construcción final desde worktree limpio aislado
+`E:\dino\build-json-8d6f41d`, reutilizando .venv-build mediante junction, sin instalar
+dependencias. Log `build/windows/physical-examples-build-isolated.log` en la copia
+principal. Python3.11.0/PySide6 6.11.2/PyInstaller6.22.3, sin física/solver nuevos.
+ZIP copiado a `dist/MotorSim-0.1.0-rc4-windows-x64-8d6f41dc.zip`, 43.408.653 bytes;
+SHA256 `cb4a68fe7322f04b9cf804515a4f2ea05dab8dea84fbf94dcd8af8eaf05a8c6d`.
+Extracción `E:\MotorSim distribucion\Candidata JSON físicos rc4\MotorSim`;
+los cuatro JSON bajo Ejemplos coinciden byte por byte con repositorio y ZIP.
+Paquetes anteriores conservados. Build.json identifica fuente limpia, no trial.
+
+Recorrido final con `tests/verify_distribution_windows.py --stage physical-examples
+--scale 1 --exe "E:\MotorSim distribucion\Candidata JSON físicos rc4\MotorSim\MotorSim.exe"
+--work "E:\MotorSim distribucion\JSON físicos paquete"`: aprobado. Archivo/Abrir
+2T/4T desde el paquete, geometría, configuración y conductos, Listo para simular,
+Comprobar entradas y Guardar como; copias iguales, bytes originales intactos.
+EXE con PATH de sistema y cwd externo, archivos autónomos sin rutas absolutas
+en JSON. No se eliminó/renombró el repositorio para comprobarlo. Cero workers.
+Registro `physical-examples-evidence.json` y seis capturas reales en esa carpeta;
+inspección visual del principal de configuración/estado, separada de las pruebas
+automáticas y de aceptación manual pendiente. OpenSpec estricto vuelto a aprobar.
+Commit posterior registra esta evidencia; sin publicar ni archivar.
 - [x] Comprobar main limpio, rc3 y referencias canónicas; preservar evidencia.
 - [x] Definición común de cuatro ejemplos e identificación sintética.
 - [x] Menú de carga protegida, proyecto editable sin ruta, origen de simulación real.

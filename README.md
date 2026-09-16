@@ -43,7 +43,16 @@ La receta de Windows incluye los mismos archivos bajo `MotorSim/Ejemplos/`;
 su apertura no depende del repositorio. El menú Cargar ejemplo previo se conserva
 con su identificación propia y carga como copia nueva sin ruta.
 
-## Refinamiento visual — rc4 actual
+Candidata con archivos físicos: fuente `8d6f41dc08f113e3c60503420b7a798b2d9721c4`;
+ZIP `dist/MotorSim-0.1.0-rc4-windows-x64-8d6f41dc.zip`. Los cuatro archivos están
+en `MotorSim/Ejemplos/`, idénticos a los versionados. Carpeta comprobada:
+`E:\MotorSim distribucion\Candidata JSON físicos rc4\MotorSim\Ejemplos`.
+Abrir `MotorSim.exe` en la carpeta superior. 11 pruebas pertinentes, OpenSpec
+estricto y revisión independiente aprobados. Apertura 2T/4T, entradas y Guardar
+como comprobados por automatización visible del EXE; originales intactos, sin solver.
+Capturas: `E:\MotorSim distribucion\JSON físicos paquete`. No es aceptación manual.
+
+## Refinamiento visual — rc4 previa conservada
 
 `refinamiento-ui-final` conserva la navegación permanente por proyecto,
 configuración, cálculo y análisis. Las ocho vistas usan encabezados claros y
