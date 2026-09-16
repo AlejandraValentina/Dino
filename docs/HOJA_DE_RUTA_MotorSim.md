@@ -43,9 +43,12 @@ offline aislado; aceptación manual separada. Evidencia mediante
 [distribucion-windows](../openspec/changes/distribucion-windows/tasks.md). No cambia
 el estado técnico funcional ni elimina pendientes manuales o experimentales.
 
-Hardening autorizado de la candidata: rc2 en comprobación por tiempos futuros y
-diagnóstico local. La parada rc1 conserva clasificación F (evidencia insuficiente);
-única reproducción cooperativa. Sin modificar física ni estados de las entregas.
+Hardening: **0.1.0-rc2 construida desde 580c3f8e y comprobada**, tiempos futuros
+2T corregidos, 228 pruebas y dos puntos completos numéricamente exactos.
+**Cierre técnico parcial / Por verificar**: parada histórica rc1 clasificada F
+(evidencia insuficiente; única reproducción cooperativa), sin Python/offline reales
+pendientes. Aceptación manual y validación experimental separadas. Sin modificar
+física ni estados de las entregas; candidata rc1 preservada.
 
 Estados: **Pendiente**, todavía no iniciada; **En curso**, iniciada e incompleta;
 **Por verificar**, implementación preparada con comprobaciones pendientes;

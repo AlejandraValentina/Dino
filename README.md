@@ -36,8 +36,49 @@ El incidente rc1 se clasifica **F: evidencia insuficiente**: referencia admitida
 cancelación durante inspección de módulos; una única reproducción terminó
 cooperativamente. Faltan traza del worker durante el retraso original y sus tiempos
 de escritura/IPC. No se declara resuelto ni se amplía el dominio para evitarlo.
-Construcción y protocolo final rc2 se registran en tasks.md al obtener evidencia.
-Se conserva la misma receta y versiones de herramientas que figuran abajo.
+**rc2 construida y comprobada** desde fuente limpia
+`580c3f8e6bf816aaeef9f20f17a9b74a7d481df8`. Windows 10 19045 x64,
+Python 3.11.0, PySide6 6.11.2, PyInstaller 6.22.3; dependencias fijadas sin actualizar.
+
+- Carpeta: `E:\dino\Dino\dist\MotorSim-0.1.0-rc2-windows-x64-580c3f8e\MotorSim`.
+- Ejecutable: `MotorSim.exe` dentro de esa carpeta, junto al worker y `_internal`.
+- ZIP: `E:\dino\Dino\dist\MotorSim-0.1.0-rc2-windows-x64-580c3f8e.zip`.
+- ZIP **43.376.832 bytes**, carpeta **104.867.659 bytes**, no firmado.
+- SHA256: `9686135082d2854e1ed7aa653cf21645317f2474bcede8d52f44085fe68a1b35`.
+
+Reconstrucción comprobada: `.\.venv-build\Scripts\python.exe packaging/build_windows.py`
+desde la raíz limpia con el entorno fijado abajo. Rechaza destinos existentes.
+Abrir la extracción realmente comprobada:
+
+```powershell
+& 'E:\MotorSim distribucion\Candidata final á 0.1.0-rc2\MotorSim\MotorSim.exe'
+```
+
+**Pruebas:** 228 aprobadas; OpenSpec estricto y revisión independiente puntual.
+Un único punto completo 2T y otro 4T B100/3000 desde rc2: 10/7 ciclos, igualdad
+exacta con referencias, balances aprobados. Integración 13,843/14,609 s; escritura
+0,157/0,234 s; preparación 0,000/0,000 s a la resolución del reloj; total de punto
+14,125/14,937 s; percibido 14,890/15,406 s. Preparación no incluye todo el arranque
+del proceso, que sí está incluido en el tiempo percibido; cero medido no significa
+costo nulo. No se reconstruyeron tiempos históricos.
+
+**Windows automatizado:** EXE directo, ruta Unicode externa al repo, cwd distinto,
+PATH solo Windows, sin variables Python de desarrollo. Módulos cargados acreditan
+GUI/worker y Python DLL dentro del paquete; worker sin Qt ni consola visible.
+Editor/guardado/alternancia, cancelación breve cooperativa (0,235 s), cierre sin
+huérfanos, reapertura, comparación, barrido histórico, datos externos sintéticos/CSV,
+auxiliar ausente y resultado corrupto comprobados. Error de permisos y FailedToStart
+cubiertos por pruebas controladas, sin alterar permisos reales del equipo.
+Inspección de capturas reales al 150 %, sin otra revisión estética.
+Evidencia: `E:\MotorSim distribucion\Comprobación final rc2`; captura de tiempos:
+`rc2-tiempos-final-150.png`. La automatización usa Python para controlar ventanas,
+pero GUI y cálculo se ejecutan con los binarios y runtime incluidos.
+
+**Cierre técnico parcial:** tiempos futuros corregidos y distribución rc2 probada;
+causa del incidente rc1 aún **F**, no resuelta. No se identificaron otros defectos
+reproducibles en el alcance comprobado. Equipo sin Python, offline aislado,
+aceptación manual y validación experimental siguen pendientes y separados.
+No se alteró la red ni se publicaron artefactos. Detalle en tasks.md.
 
 ## Referencia histórica: candidata Windows 0.1.0-rc1
 

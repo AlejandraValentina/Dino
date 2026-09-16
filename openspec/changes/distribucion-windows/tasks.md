@@ -144,10 +144,10 @@ completo de todas las comprobaciones. Sin publicar, etiquetar, archivar ni ampli
 - [x] Corregir tiempos futuros compatibles; regresiones con reloj controlado.
 - [x] Conservar diagnóstico local de parada forzada, sin relajar límite.
 - [x] Suite completa, revisión independiente y OpenSpec finales.
-- [ ] Commit fuente limpio y build rc2; conservar ZIP rc1.
-- [ ] Extraer rc2 fuera del repo y comprobar recorridos Windows/150 %.
-- [ ] Solo un punto completo 2T y uno 4T B100/3000; contraste exacto y tiempos.
-- [ ] Identificar artefactos y commit de evidencia; separar pendientes externos.
+- [x] Commit fuente limpio y build rc2; conservar ZIP rc1.
+- [x] Extraer rc2 fuera del repo y comprobar recorridos Windows/150 %.
+- [x] Solo un punto completo 2T y uno 4T B100/3000; contraste exacto y tiempos.
+- [x] Identificar artefactos y commit de evidencia; separar pendientes externos.
 
 Diagnóstico histórico **F — evidencia insuficiente**, no resuelto por inferencia.
 Prueba original: etapa process de verify_distribution_windows.py, lectura externa
@@ -185,3 +185,80 @@ en prueba controlada de hijo sleep; módulo aislado 7/7, 4,833 s. Se ordenó kil
 antes del diagnóstico para no supeditar la parada a la escritura del log; ningún
 plazo de producto ni prueba se amplió. Revisión informada del cambio puntual.
 OpenSpec estricto aprobado. Sin integraciones físicas en estas pruebas.
+
+
+### Paquete rc2 y comprobación final — 16/09/2026
+Fuente limpia **580c3f8e6bf816aaeef9f20f17a9b74a7d481df8**, build UTC
+20260916T143214Z; mismo comando/entorno fijado, sin actualizar herramientas.
+Carpeta `E:/dino/Dino/dist/MotorSim-0.1.0-rc2-windows-x64-580c3f8e/MotorSim`,
+entrada MotorSim.exe; ZIP hermano `MotorSim-0.1.0-rc2-windows-x64-580c3f8e.zip`.
+ZIP 43.376.832 bytes; carpeta 104.867.659 bytes; SHA256
+`9686135082d2854e1ed7aa653cf21645317f2474bcede8d52f44085fe68a1b35`.
+Authenticode NotSigned. Windows 10 19045 AMD64; no se acredita otro Windows.
+El hash de rc1 sigue siendo 19eeec5047c9f9f5eab22d7938b9680539e5660649659cb209060ec8b4486d6b, sin sobrescribir ZIP ni evidencia.
+
+Extracción nueva: `E:/MotorSim distribucion/Candidata final á 0.1.0-rc2/MotorSim`.
+Evidencia: `E:/MotorSim distribucion/Comprobación final rc2`.
+GUI/worker directos desde esa carpeta, cwd ajeno y entorno limitado al proceso;
+sin PYTHONPATH/VIRTUAL_ENV, PATH Windows. process-modules.json confirma Python DLL
+local en ambos y ausencia de Qt en worker, durante los puntos autorizados, sin
+consola visible. Los 160 archivos extraídos conservan hashes de ZIP tras las pruebas.
+Sin entornos, tests ni históricos dentro del ZIP. Ayuda/Acerca de muestran rc2/fuente.
+
+- editor-evidence.json: edición, incompleto, inválido, guardar/guardar como, nombre
+  Unicode, protección, alternancia comprobada, v1 sin reescritura/conversión explícita.
+- history-evidence.json: reabrir 4T, comparar/exportar CSV, abrir barrido previo y CSV,
+  sin nuevo barrido numérico.
+- external-evidence.json: importación declarada sintética/no medida, vista previa,
+  persistencia/reapertura y contraste/CSV, sin cálculos ni atribuir mediciones.
+- reopen-evidence.json: reabrir 2T v1 nuevo muestra tiempos, bytes de manifiesto
+  intactos; corrupto artificial rechazado conservando el resultado válido.
+- cancel-once-evidence.json: control breve del recorrido Windows final, Cancelar
+  cooperativo, 0,235 s, sin huérfanos, no resultado aceptado. No fue otra reproducción
+  de la inspección de módulos rc1. Cierre final de cada recorrido sin procesos activos.
+- Auxiliar ausente/missing-evidence.json: copia de control sin worker, mensaje útil
+  sin cálculo. Permiso denegado y FailedToStart cubiertos por regresión controlada;
+  no se modificaron ACL, políticas o configuraciones del equipo para simularlos.
+- about-evidence.json: rc2/commit y guía breve incluidos.
+- Capturas reales Windows con QT_SCALE_FACTOR=1.5: rc2-2t-150.png, rc2-4t-150.png,
+  paquete-editor-150.png, paquete-compacto-150.png, paquete-comparacion-150.png,
+  paquete-importacion-150.png, paquete-acerca.png, rc2-tiempos-final-150.png.
+  Inspección focal de resultado y desglose temporal; sin nueva revisión estética.
+  Automatización externa no acredita aceptación manual de la usuaria.
+
+### Dos únicos puntos completos de hardening
+hardening-numerical.json y numerical-comparison.json registran referencias/archivos.
+
+| B/100 Pa, 3000 rpm | Ciclos | Integración s | Preparación s | Escritura s | Total punto s | Percibido s |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2T referencia | 10 | 13,843 | 0,000 | 0,157 | 14,125 | 14,890 |
+| 4T proyecto S4T exacto | 7 | 14,609 | 0,000 | 0,234 | 14,937 | 15,406 |
+
+Preparación corresponde al intervalo existente del worker (resolución de reloj);
+no es todo el arranque del proceso, incluido en percibido. Cero no afirma costo nulo.
+2T: W_C=16,49050751206088 J, pmax=1331530,846070603 Pa, RHS228171,
+pico26,637 MiB. 4T: W_C=50,52602475854359 J, pmax=2618462,4643861516 Pa,
+RHS304466, pico29,977 MiB. Ambos balances aprobados.
+Comparación exacta de estados/ciclos, trabajos, presión, muestras, condiciones,
+RHS/pasos/rechazos contra integracion-ui-20260915 y R2/gui-sweep/point-02.
+2T entradas completas iguales; 4T solo difiere nombre/ruta del proyecto y contexto
+de serie (ahora punto individual). No se exceptúan diferencias físicas ni se
+comparan reloj/memoria por igualdad. Contratos v1/v4 y motor v6 intactos.
+Sin A/B/C, otras bandas, barridos completos nuevos ni repetición de puntos.
+
+Integración de esta orden: reproducción única rc1 1,922 s + puntos rc2 28,452 s +
+cancelación breve final 0,235 s = **30,609 s**. Si se suma el registro histórico
+53,829 s (incluida su cota), acumulado **84,438 s de 300**; no se reinicia presupuesto.
+
+### Estado de cierre
+- [x] Desglose temporal futuro 2T corregido y acreditado sin inventar históricos.
+- [x] Paquete rc2 reconstruido/probado; no otros defectos reproducibles identificados.
+- [ ] Causa original de parada rc1: **F**, faltan traza y tiempos IPC/escritura
+  originales; única reproducción no la repitió. No se declara resuelto.
+Se detiene este diagnóstico en el límite autorizado, sin nuevos intentos.
+El pendiente temporal histórico rc1 sigue sin marcar: no hay datos para rellenarlo;
+la corrección hacia adelante se acredita arriba. Cierre técnico total no declarado.
+Equipo sin Python instalado y offline real: sin entorno aislado autorizado disponible;
+no se alteró equipo/red. Aceptación manual y validación experimental separadas.
+La evidencia posterior se registra en otro commit, sin modificar el código empaquetado.
+Sin push, tag, release, archivo OpenSpec ni cambios de credenciales/configuración global.

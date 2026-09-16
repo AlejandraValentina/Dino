@@ -25,7 +25,7 @@ parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--exe',type=Path,required=True)
 parser.add_argument('--work',type=Path,required=True)
 parser.add_argument('--resume-two',type=Path,help='Resultado 2T ya ejecutado: continuar solo 4T, sin repetirlo')
-parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening'],required=True)
+parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen'],required=True)
 args=parser.parse_args();exe=args.exe.resolve();work=args.work.resolve();work.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from motorsim.reference_results import load_result
@@ -223,16 +223,31 @@ try:
         screenshot(main,'rc2-4t-150')
         (work/'hardening-numerical.json').write_text(json.dumps(dict(two_stroke=str(first/'manifest.json'),four_stroke=str(second/'manifest.json')),indent=2),encoding='utf-8')
         note('Dos únicos puntos completos rc2 B100/3000, 2T y proyecto 4T, con tiempos persistidos')
-    elif args.stage=='cancel':
+    elif args.stage in ('cancel','cancel-once'):
         tab(main,'Simulación');first=start_calculation()
         wait(lambda:'RHS:' in texts(main));button(main,'Cancelar')
         result=finish_calculation(first);assert result['status']=='cancelled'
         note('Cancelación cooperativa; diagnóstico no aceptado, sin hijo activo')
-        second=start_calculation();wait(lambda:'RHS:' in texts(main))
-        win32gui.PostMessage(main.handle,win32con.WM_CLOSE,0,0)
-        process.wait(timeout=10);wait(lambda:not worker_paths());account(second)
-        assert load_result(second/'manifest.json')['status']=='cancelled'
-        note('Cierre durante cálculo sin huérfanos')
+        if args.stage=='cancel':
+            second=start_calculation();wait(lambda:'RHS:' in texts(main))
+            win32gui.PostMessage(main.handle,win32con.WM_CLOSE,0,0)
+            process.wait(timeout=10);wait(lambda:not worker_paths());account(second)
+            assert load_result(second/'manifest.json')['status']=='cancelled'
+            note('Cierre durante cálculo sin huérfanos')
+    elif args.stage=='reopen':
+        tab(main,'Simulación');n=json.loads((work/'hardening-numerical.json').read_text())
+        path=Path(n['two_stroke']);original=path.read_bytes()
+        button(main,'Abrir resultado…');file_dialog('Abrir resultado',path)
+        assert 'Preparación:' in texts(main) and 'Percibido:' in texts(main)
+        assert path.read_bytes()==original
+        from pywinauto import mouse
+        mouse.scroll(coords=(950,550),wheel_dist=-4);time.sleep(.2)
+        screenshot(main,'rc2-tiempos-150')
+        broken=work/'Control corrupto';broken.mkdir();(broken/'manifest.json').write_text('{incorrecto',encoding='utf-8')
+        button(main,'Abrir resultado…');file_dialog('Abrir resultado',broken/'manifest.json')
+        assert 'Se conserva el resultado previamente abierto' in texts(main)
+        assert 'Convergencia numérica alcanzada' in texts(main)
+        assert not worker_paths();note('Reabrir v1 con tiempos sin escritura; corrupto rechazado conservando resultado')
     elif args.stage=='missing':
         tab(main,'Simulación');button(main,'Ejecutar')
         assert 'Falta el auxiliar' in texts(main) and not worker_paths()
