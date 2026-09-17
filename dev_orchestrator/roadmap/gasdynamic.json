@@ -36,20 +36,26 @@
     {
       "id": "P1",
       "title": "1D mathematical contract",
-      "objective": "Declaración futura: 1D mathematical contract. Sin implementación ni autorización de ejecución.",
+      "objective": "1D mathematical contract: ecuaciones, método, interfaces y T01–T12; sin solver ni P2.",
       "depends_on": [
         "P0"
       ],
-      "allowed_paths": [],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
       "forbidden_paths": [
         "motorsim/",
         "packaging/"
       ],
       "required_checks": [
-        "phase_not_implemented"
+        "p1_tests",
+        "p1_contract",
+        "contract_complete",
+        "p0_accepted",
+        "scope_preserved"
       ],
       "gate_policy": "default",
-      "max_repair_attempts": 3,
+      "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": "P2"
     },

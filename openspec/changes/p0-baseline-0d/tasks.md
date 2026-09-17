@@ -85,3 +85,10 @@ review y freeze), no todo runs/ automáticamente. Copia y hashes comprobados.
 El finalizador ejecutado produjo PASS/WAITING_HUMAN_APPROVAL; aceptación manual
 pendiente. No cambios de producción, limiter, formatos, física o tolerancias;
 sin ampliar dominio público, sin candidata, sin archivo y sin iniciar P1.
+
+## Aceptación posterior — 17/09/2026
+La usuaria acepta expresamente P0: **P0_HUMAN_ACCEPTED**. Registro vinculado
+por hashes en docs/gasdynamic/p0_human_acceptance.json, sin modificar baseline
+ni evidencia original. No cambia la clasificación NUMERICALLY_VERIFIED_BASELINE.
+Autoriza únicamente P1 contractual; no P2. La ampliación pública 2T de d2932da
+fue una autorización separada posterior a la fotografía congelada de P0.

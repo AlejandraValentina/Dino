@@ -2,6 +2,14 @@
 
 ## Lectura y autoridad
 
+Orden vigente: `p1-contrato-gas1d`. Registrar P0_HUMAN_ACCEPTED sin modificar
+baseline congelado; ejecutar solo P1 contractual por dev_orchestrator, con cero
+reparaciones automáticas y revisión independiente de solo lectura. Sin solver,
+UI, JSON de producto, paquetes ni P2. P2–P9 permanecen deshabilitadas. El rango
+público 2T 2500–15000 aprobado en d2932da se conserva; no confundirlo con el
+estado histórico de P0. Documentos normativos: docs/gasdynamic y cambio P1.
+Las órdenes siguientes son históricas y no sustituyen esta autorización.
+
 Orden actual: `positividad-transporte-2t`, candidato conservativo de especie por
 etapa RK4, microcasos, campaña baja y regresión histórica; alta RPM solo tras gate.
 Mantener física, tolerancias, mínimo, donor, dominio público y candidatas. Integrar
