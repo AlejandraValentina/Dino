@@ -1,0 +1,21 @@
+{
+  "files_changed": [
+    "dev_orchestrator/p0_finalize.py",
+    "dev_orchestrator/p0_plots.py",
+    "dev_orchestrator/phases/P0.json",
+    "dev_orchestrator/roadmap/gasdynamic.json",
+    "docs/baselines/0d_2t_baseline_v1.json",
+    "docs/baselines/0d_2t_baseline_v1.md",
+    "tests/test_p0_baseline.py"
+  ],
+  "scope_violations": [],
+  "note": "Corrección puntual revisada del cierre y fuentes gráficas después de campaña. Sin cambios en checks, producción ni nuevas integraciones.",
+  "source_sha256": {
+    "dev_orchestrator/p0_campaign.py": "23eba4067c6dc96ac979747e2be6a4bdf9578001ca64a4a730b06ea97d85298c",
+    "dev_orchestrator/p0_finalize.py": "ba09adade91fca87f2be68e20b5da7963594ead54d7829ead62c2911e0e45c04",
+    "dev_orchestrator/p0_plots.py": "d608fa57f55ec4fc53af551dc46da5e10ee4d238d2b140dfe45b6539e5fb87d2",
+    "dev_orchestrator/phases/P0.json": "968fdd59c92d021408adea9281dad940c562a4c5ebd7a7e1afa66164a3fb383c",
+    "dev_orchestrator/roadmap/gasdynamic.json": "c88d9c8d08b87505397603c0745c31bff35f22184b7d4ab98a3185aaae0d22d2",
+    "tests/test_p0_baseline.py": "1deaa33e96dd187e92ee9a7a69b0ab784426a0c2d958c6b554e85839991bd76d"
+  }
+}

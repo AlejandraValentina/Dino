@@ -6,9 +6,10 @@ Conserva evidencia inicial y verifica vínculo SHA256, artefactos y scope Git.
 import argparse
 from datetime import datetime,timezone
 import json
+import hashlib
 from pathlib import Path
 from .contracts import read_json,validate_named,load_phase,inside
-from .git_state import snapshot,compare
+from .git_state import snapshot,compare,git
 from .evidence.build_report import build_report,artifacts
 from .gates.evaluate import evaluate
 from .p0_campaign import ROOT,sha,main_gate,MAIN_RPMS,production_hashes
@@ -54,11 +55,23 @@ def rollback_close(run_dir,created):
         (run_dir/name).write_bytes((run_dir/'artifacts'/('pre-review-'+name)).read_bytes())
 
 
+def closure_scope(original,phase):
+    # La corrección revisada de herramientas no autoriza cambiar checks o ciencia.
+    if {k:v for k,v in original.items() if k!='allowed_paths'} != {k:v for k,v in phase.items() if k!='allowed_paths'}:
+        raise ValueError('El cierre no puede modificar criterios de ejecución')
+    permitted={'dev_orchestrator/p0_finalize.py','dev_orchestrator/p0_plots.py',
+               'tests/test_p0_baseline.py','dev_orchestrator/phases/P0.json',
+               'dev_orchestrator/roadmap/gasdynamic.json'}
+    if not set(original['allowed_paths'])<=set(phase['allowed_paths']) or set(phase['allowed_paths'])-set(original['allowed_paths'])-permitted:
+        raise ValueError('Ampliación no autorizada del alcance de cierre')
+
+
 def baseline_document(campaign):
     return dict(status='NUMERICALLY_VERIFIED_BASELINE',human_acceptance='WAITING_HUMAN_APPROVAL',
         solver_source_commit=campaign['git_commit'],model=campaign['model'],case=campaign['case'],
         profile=campaign['profile'],regularization_Pa=campaign['regularization_Pa'],
         minimum_half_step_deg=campaign['minimum_half_step_deg'],public_domains=campaign['public_domains'],
+        per_point_limits=dict(seconds=60,cycles=30,rhs_evaluations=2000000,peak_rss_MiB=512),
         production_sha256=campaign['source_sha256'],campaign_run_id=campaign['run_id'],
         main=campaign['rows'],historical_regression=campaign['regressions'],stress=campaign['stress'],
         stress_state=campaign['stress_state'],statistics_main=campaign['statistics_main'],
@@ -76,6 +89,12 @@ def finalize(run_dir,review_path):
     if (run_dir/'artifacts/p0-finalized.json').exists(): raise ValueError('P0 ya finalizado; no sobrescribir')
     envelope=read_json(review_path); data,review=validate_review(envelope,run_dir/'evidence.json')
     phase=load_phase(ROOT,'P0',read_json(ROOT/'dev_orchestrator/config.json'))[1]
+    original=json.loads(git(ROOT,'show',data['git_commit']+':dev_orchestrator/phases/P0.json'))
+    if hashlib.sha256(json.dumps(original,sort_keys=True).encode()).hexdigest()!=data['phase_definition_sha256']:
+        raise ValueError('Contrato original P0 no coincide con evidencia')
+    closure_scope(original,phase)
+    if any(sha(inside(ROOT,name))!=value for name,value in envelope.get('reviewed_source_sha256',{}).items()):
+        raise ValueError('La fuente cambió después de la revisión')
     campaign=read_json(run_dir/'artifacts/campaign.json')
     inventory=read_json(run_dir/'artifacts/inventory.json')
     intact=all(sha(inside(run_dir,name))==value for name,value in inventory.items())
@@ -98,6 +117,8 @@ def finalize(run_dir,review_path):
     created=[]
     if label=='P0_PASS_BASELINE_FROZEN':
         baseline=baseline_document(campaign)
+        baseline['command_wall_seconds']={command['id']:command['duration_seconds'] for command in data['commands']}
+        baseline['timing_note']='wall_total es el checkpoint final de campaña previo al inventario; command_wall_seconds incluye el cierre del subprocess. Integraciones excluyen serialización.'
         destination.mkdir(parents=True,exist_ok=True)
         text=('\n'.join(['# Baseline 0D 2T v1','', '**NUMERICALLY_VERIFIED_BASELINE** — aceptación humana pendiente.',
             f"Commit fuente: `{campaign['git_commit']}`. Run: `{campaign['run_id']}`.",
@@ -119,15 +140,24 @@ def finalize(run_dir,review_path):
             # Solo archivos nuevos creados por esta operación, nunca documentos previos.
             for path in created: path.unlink()
             raise
-        data['files_changed'],data['scope_violations'],data['preexisting_touched']=compare(before,snapshot(ROOT),phase)
-        if data['scope_violations']:
-            data.update(gate='BLOCKED',gate_reasons=['scope_violation'],execution_status='COMPLETED');label='BLOCKED_SCOPE_VIOLATION'
-    write_json(run_dir/'artifacts/p0-decision.json',dict(state=label,gate=data['gate'],execution_status=data['execution_status'],stress=campaign['stress_state'],next_phase_executed=False))
-    additional=['artifacts/pre-review-evidence.json','artifacts/pre-review-summary.md','artifacts/independent-review.json','artifacts/p0-decision.json']
-    if label=='P0_PASS_BASELINE_FROZEN': additional += ['artifacts/0d_2t_baseline_v1.json','artifacts/0d_2t_baseline_v1.md']
-    data['artifacts']+=artifacts(run_dir,additional)
-    data['finished_at']=datetime.now(timezone.utc).isoformat()
     try:
+        if created:
+            data['files_changed'],data['scope_violations'],data['preexisting_touched']=compare(before,snapshot(ROOT),phase)
+            if data['scope_violations']:
+                data.update(gate='BLOCKED',gate_reasons=['scope_violation'],execution_status='COMPLETED');label='BLOCKED_SCOPE_VIOLATION'
+        write_json(run_dir/'artifacts/p0-decision.json',dict(state=label,gate=data['gate'],execution_status=data['execution_status'],stress=campaign['stress_state'],next_phase_executed=False))
+        write_json(run_dir/'artifacts/phase-at-execution.json',original)
+        write_json(run_dir/'artifacts/phase-at-closure.json',phase)
+        write_json(run_dir/'artifacts/closure-scope.json',dict(files_changed=data['files_changed'],scope_violations=data['scope_violations'],
+            note='Corrección puntual revisada del cierre y fuentes gráficas después de campaña. Sin cambios en checks, producción ni nuevas integraciones.',
+            source_sha256=envelope.get('reviewed_source_sha256',{})))
+        additional=['artifacts/pre-review-evidence.json','artifacts/pre-review-summary.md','artifacts/independent-review.json','artifacts/p0-decision.json',
+            'artifacts/phase-at-execution.json','artifacts/phase-at-closure.json','artifacts/closure-scope.json']
+        if label=='P0_PASS_BASELINE_FROZEN': additional += ['artifacts/0d_2t_baseline_v1.json','artifacts/0d_2t_baseline_v1.md']
+        for name in ('diagnostic-plots-readable.png','closure-fix-tests.log'):
+            if (run_dir/'artifacts'/name).exists(): additional.append('artifacts/'+name)
+        data['artifacts']+=artifacts(run_dir,additional)
+        data['finished_at']=datetime.now(timezone.utc).isoformat()
         build_report(run_dir,data)
         marker=run_dir/'artifacts/p0-finalized.tmp'
         write_json(marker,dict(evidence_sha256=sha(run_dir/'evidence.json'),state=label))

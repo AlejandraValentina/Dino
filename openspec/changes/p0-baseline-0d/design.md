@@ -29,3 +29,12 @@ La expresión dominio continuo significa malla2500:500:15000 comprobada, NO
 una prueba matemática de todos los RPM reales intermedios. Gráficos diagnósticos
 si26PASS, sin validación experimental, ondas ni escape sintonizado predictivo.
 Stress separado y no vinculante para gate principal; públicos2500–3500 intactos.
+
+## Cierre comprobado
+Tras terminar la campaña se corrigió una ruta de error del finalizador y la
+fuente de los gráficos. El alcance del cierre declara únicamente esos archivos
+P0 y sus tests/configuración, permitidos por la orden. El finalizador contrasta
+la definición original del commit de ejecución: solo admite esa ampliación de
+paths; ningún cambio de checks o criterios. Ambas definiciones y hashes quedan
+en evidencia. No se altera ni se vuelve a ejecutar la campaña para cerrar.
+Freeze numérico PASS, con aceptación humana pendiente; detalles medidos en tasks.md.

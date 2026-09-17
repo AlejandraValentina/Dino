@@ -8,7 +8,12 @@
       "allowed_paths": [
         "dev_orchestrator/runs/",
         "docs/baselines/0d_2t_baseline_v1.md",
-        "docs/baselines/0d_2t_baseline_v1.json"
+        "docs/baselines/0d_2t_baseline_v1.json",
+        "dev_orchestrator/p0_finalize.py",
+        "dev_orchestrator/p0_plots.py",
+        "tests/test_p0_baseline.py",
+        "dev_orchestrator/phases/P0.json",
+        "dev_orchestrator/roadmap/gasdynamic.json"
       ],
       "forbidden_paths": [
         "motorsim/",

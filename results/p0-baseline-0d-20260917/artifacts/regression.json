@@ -1,0 +1,205 @@
+[
+  {
+    "rpm": 2500,
+    "reference": "results/frontera-baja-2t-20260917/2500.json",
+    "reference_sha256": "973f6529ae5c974374de4ce447b76684ab636c77efbd3bc4a865f9dfb238fc3b",
+    "manifest_equal": true,
+    "fields": {
+      "profile": true,
+      "step_deg": true,
+      "cycles": true,
+      "controller": true,
+      "last_two_cycles": true,
+      "partial": true,
+      "stop": true,
+      "converged": true,
+      "final_angle_deg": true,
+      "attempts": true,
+      "accepted_steps": true,
+      "rejected_steps": true,
+      "rejections_by_cause": true,
+      "rhs_evaluations": true,
+      "actual_substep_deg": true,
+      "rk_stage_evaluations": true,
+      "endpoint_evaluations": true
+    },
+    "passed": true,
+    "ignored_fields": [
+      "seconds"
+    ]
+  },
+  {
+    "rpm": 3000,
+    "reference": "results/frontera-baja-2t-20260917/3000.json",
+    "reference_sha256": "f2a6665c5440bc72567dd102cc4bdfaa36b665600711bdf3f55f942c8937ef60",
+    "manifest_equal": true,
+    "fields": {
+      "profile": true,
+      "step_deg": true,
+      "cycles": true,
+      "controller": true,
+      "last_two_cycles": true,
+      "partial": true,
+      "stop": true,
+      "converged": true,
+      "final_angle_deg": true,
+      "attempts": true,
+      "accepted_steps": true,
+      "rejected_steps": true,
+      "rejections_by_cause": true,
+      "rhs_evaluations": true,
+      "actual_substep_deg": true,
+      "rk_stage_evaluations": true,
+      "endpoint_evaluations": true
+    },
+    "passed": true,
+    "ignored_fields": [
+      "seconds"
+    ]
+  },
+  {
+    "rpm": 5000,
+    "reference": "results/rendimiento-dominio-2t-20260917/5000.json",
+    "reference_sha256": "4fc9b0015b78e6506be4df9d0bc14213a8ae95071a678557b8ea4b6a1a016754",
+    "manifest_equal": true,
+    "fields": {
+      "profile": true,
+      "step_deg": true,
+      "cycles": true,
+      "controller": true,
+      "last_two_cycles": true,
+      "partial": true,
+      "stop": true,
+      "converged": true,
+      "final_angle_deg": true,
+      "attempts": true,
+      "accepted_steps": true,
+      "rejected_steps": true,
+      "rejections_by_cause": true,
+      "rhs_evaluations": true,
+      "actual_substep_deg": true,
+      "rk_stage_evaluations": true,
+      "endpoint_evaluations": true
+    },
+    "passed": true,
+    "ignored_fields": [
+      "seconds"
+    ]
+  },
+  {
+    "rpm": 8000,
+    "reference": "results/rendimiento-dominio-2t-20260917/8000.json",
+    "reference_sha256": "7374f2a0617c53458d6f9310f3232c1d3cdd3faace818a1d181f5f864346796f",
+    "manifest_equal": true,
+    "fields": {
+      "profile": true,
+      "step_deg": true,
+      "cycles": true,
+      "controller": true,
+      "last_two_cycles": true,
+      "partial": true,
+      "stop": true,
+      "converged": true,
+      "final_angle_deg": true,
+      "attempts": true,
+      "accepted_steps": true,
+      "rejected_steps": true,
+      "rejections_by_cause": true,
+      "rhs_evaluations": true,
+      "actual_substep_deg": true,
+      "rk_stage_evaluations": true,
+      "endpoint_evaluations": true
+    },
+    "passed": true,
+    "ignored_fields": [
+      "seconds"
+    ]
+  },
+  {
+    "rpm": 10000,
+    "reference": "results/rendimiento-dominio-2t-20260917/10000.json",
+    "reference_sha256": "823fb3598f79a6e11b67144a80e137b4190d6e169afbd2ce196d3969421cdcb3",
+    "manifest_equal": true,
+    "fields": {
+      "profile": true,
+      "step_deg": true,
+      "cycles": true,
+      "controller": true,
+      "last_two_cycles": true,
+      "partial": true,
+      "stop": true,
+      "converged": true,
+      "final_angle_deg": true,
+      "attempts": true,
+      "accepted_steps": true,
+      "rejected_steps": true,
+      "rejections_by_cause": true,
+      "rhs_evaluations": true,
+      "actual_substep_deg": true,
+      "rk_stage_evaluations": true,
+      "endpoint_evaluations": true
+    },
+    "passed": true,
+    "ignored_fields": [
+      "seconds"
+    ]
+  },
+  {
+    "rpm": 12000,
+    "reference": "results/rendimiento-dominio-2t-20260917/12000.json",
+    "reference_sha256": "c7e8e6470de239d6082b1e6e7431fa914e8de28a3a2c6629d017ab594e08009a",
+    "manifest_equal": true,
+    "fields": {
+      "profile": true,
+      "step_deg": true,
+      "cycles": true,
+      "controller": true,
+      "last_two_cycles": true,
+      "partial": true,
+      "stop": true,
+      "converged": true,
+      "final_angle_deg": true,
+      "attempts": true,
+      "accepted_steps": true,
+      "rejected_steps": true,
+      "rejections_by_cause": true,
+      "rhs_evaluations": true,
+      "actual_substep_deg": true,
+      "rk_stage_evaluations": true,
+      "endpoint_evaluations": true
+    },
+    "passed": true,
+    "ignored_fields": [
+      "seconds"
+    ]
+  },
+  {
+    "rpm": 15000,
+    "reference": "results/rendimiento-dominio-2t-20260917/15000.json",
+    "reference_sha256": "730106fb9aaf4610d37f835856cf4a572bfa261d0c46f3613c41984cf8e23ef0",
+    "manifest_equal": true,
+    "fields": {
+      "profile": true,
+      "step_deg": true,
+      "cycles": true,
+      "controller": true,
+      "last_two_cycles": true,
+      "partial": true,
+      "stop": true,
+      "converged": true,
+      "final_angle_deg": true,
+      "attempts": true,
+      "accepted_steps": true,
+      "rejected_steps": true,
+      "rejections_by_cause": true,
+      "rhs_evaluations": true,
+      "actual_substep_deg": true,
+      "rk_stage_evaluations": true,
+      "endpoint_evaluations": true
+    },
+    "passed": true,
+    "ignored_fields": [
+      "seconds"
+    ]
+  }
+]

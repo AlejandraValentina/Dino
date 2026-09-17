@@ -1,0 +1,3310 @@
+{
+  "commit": "43c23b4d14bc723b5732d132bfab484d1c85a725",
+  "dirty": true,
+  "changes": [
+    {
+      "status": " D",
+      "path": "redme.txt"
+    }
+  ],
+  "untracked": [],
+  "files": {
+    ".gitignore": {
+      "content": "ec1e43c16ae9a78d8a6f6766c9d2c7cc915b36340eeb3bd22df728204be4a6c4",
+      "index": [
+        "100644 6b6b6e580f8c00dc6fb2daf92ca492c37edf8fb5 0"
+      ],
+      "mode": 33206
+    },
+    "AGENTS.md": {
+      "content": "1209786f25da8970070c8ae4a82c0fa3a0f3558debc63168e6990ffdfdddbc7a",
+      "index": [
+        "100644 8630162a5c1efa476e49300d46931775d3d10cae 0"
+      ],
+      "mode": 33206
+    },
+    "README.md": {
+      "content": "537126c4767b17309b8eede93829126adbe5a615e1c61296481e09d7a9d31381",
+      "index": [
+        "100644 d259f00cc5935868464e234affd8fbcdbd8992ab 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/README.md": {
+      "content": "aad248dba18cfe4821638760c38a564d28204232b970674463a9a0e6f75c4c66",
+      "index": [
+        "100644 37561bf9fc77810a56c288ac40d593e09bedf5c4 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/__init__.py": {
+      "content": "64c1aae0793cb2c3838d2b33875219bae6568210cb6148a2ea6ce63b51406e76",
+      "index": [
+        "100644 0e3ff813c52c6987c40c0fbccd70018dc34b13e2 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/config.json": {
+      "content": "b835518165263841dec33fa40cbc0b3f418facb136a6442e19d18024f20df16d",
+      "index": [
+        "100644 c623fbd8ef3e17a971fe6cf7782c226b7274fa97 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/contracts.py": {
+      "content": "b80f72b2637e25002f28c7e418798b52ed442ac43f2e647f0bd533bc7bb55c91",
+      "index": [
+        "100644 5831cfa69cdc79ec3ca0495549f2203f7754b50c 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/evidence/__init__.py": {
+      "content": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "index": [
+        "100644 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/evidence/build_report.py": {
+      "content": "86d029c3a5770245f38b94e20461ceced34649d40c58a5f6ac44efc563ede903",
+      "index": [
+        "100644 4e2b023298c65049c3d34bf2f517695bc54c3be2 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/.gitattributes": {
+      "content": "3906484a87588989e4394c21e3045381f34cac728bd98ecf4d38cff508986512",
+      "index": [
+        "100644 6c5d3735b05cc8fe524c0285f6cb35a9a45d2195 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/README.md": {
+      "content": "d5b77c6acb8825eaafa0b7aae6db14877459603d840f530a6a23bd08877a933c",
+      "index": [
+        "100644 258b98e9c313597bf4bb0b6c8b536bd781db7967 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/dummy-pass/artifacts/dummy.json": {
+      "content": "12ac3a3df0a89fac27a7c0c3e74169d7bf609fd881df0be6f5fe26733b3b785b",
+      "index": [
+        "100644 e1cd379b9260e7b9ccebc034459bd53dc9e8e63e 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/dummy-pass/artifacts/payload.txt": {
+      "content": "f06280dd1e4b6ea525c8c24912c04868e83a6b0bf7f4284e298bb0d80226a7ca",
+      "index": [
+        "100644 9db75ceac700244a68a382d70a65660a48004c47 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/dummy-pass/evidence.json": {
+      "content": "447acac702bd1323e9a3fc731e7e2646edb70e580e57446a9c0a2bf479a857d7",
+      "index": [
+        "100644 1effe77223f72ffe37b1e982e84ed7d53c72ae59 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/dummy-pass/logs/1-dummy_test.stderr.log": {
+      "content": "15b4d29a7d3d63eca701880c345526f10e25228116e7ea2c396192f68574cbb6",
+      "index": [
+        "100644 45fca41fc5efe196e20044a951877bf1ad055d84 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/dummy-pass/logs/1-dummy_test.stdout.log": {
+      "content": "a65149954b8b6d9810eb9012cc7c263fbe9eb0103bccd61bd48c825a9e3697a1",
+      "index": [
+        "100644 38f80b3d068c6481bdfe0f617196a06fe71ae708 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/dummy-pass/summary.md": {
+      "content": "3ecdc6d06817caf839504cb2b5764c4a28a808c72e65147e61d573ec66c82e6a",
+      "index": [
+        "100644 6ab8f678d6a60c4a0e5598bb6dd13e74bd2927ef 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/verification/dev-orchestrator-motorsim-performance.log": {
+      "content": "56cb5efd661081ca11337fc9745444f4983f70dd8168c257323baa3bae9f354d",
+      "index": [
+        "100644 d354f56eb8e463454f87616b798cc7d0719c410f 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/verification/dev-orchestrator-motorsim-storage.log": {
+      "content": "e7811188913787275ea2c0b3cdffcb39f98c2576d2913183cc39981ac9e5321d",
+      "index": [
+        "100644 9673236f59c481956b8974f89fc95f318635fe60 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/verification/dev-orchestrator-review-fixes.log": {
+      "content": "fb549653b60af7b9dbfee17e1b533e17e054ca9ca6986666659100ba062c50e9",
+      "index": [
+        "100644 a5b747a82a58b97f6e9a2b80cd196a1bba7efefb 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/examples/verification/dev-orchestrator-tests-release.log": {
+      "content": "efdd5876418f84dedfe27d198f4f493c1edf3195ca28c6cd9a182ba1d2d24914",
+      "index": [
+        "100644 02a68335526bb678944937b74f2464f09b73b3d9 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/gates/__init__.py": {
+      "content": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "index": [
+        "100644 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/gates/evaluate.py": {
+      "content": "b13b35d3f8a5cf40a6c17fd5b360c2063d32af9d25015744bc675d357e57e324",
+      "index": [
+        "100644 e79f36fd82601419ef89c8e843e0faf0bcfec171 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/gates/policies.json": {
+      "content": "7dd3894d48880c4194317723e496cd3c5015ba05ac5c778ee7db2a8a5d6e6c48",
+      "index": [
+        "100644 dcc7291a40064e2fb0f19de979b156fa98928055 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/git_state.py": {
+      "content": "31e71f1cc0ee573184079608c62efa80ed623a30851060554e9f47427dbf49a1",
+      "index": [
+        "100644 996b749c6dbcf5a3b601891c9966e3282df5bf99 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/p0_campaign.py": {
+      "content": "23eba4067c6dc96ac979747e2be6a4bdf9578001ca64a4a730b06ea97d85298c",
+      "index": [
+        "100644 9e58015809d9a2c9561cc5904fb226981d748bc0 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/p0_finalize.py": {
+      "content": "77cd975c8d5b4d093cb6e5a78bef9dd17ed031b66e733487fa1909c6a8baff03",
+      "index": [
+        "100644 370c1a9286e9faddadffc65b6db33c10f939acdc 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/p0_plots.py": {
+      "content": "46537a76248599da8647ce2d1f90a42ba46dc42092c61ad06efdde35a061854a",
+      "index": [
+        "100644 664edec1a4d5391791bf2c8b128cafab80d7228d 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/phases/P0.json": {
+      "content": "7dd0130ca45ec9f85ae7e3e1725e31a5ab79d402cbfa31336ab2cef00962d6c1",
+      "index": [
+        "100644 d32e495f9e49274034dba1b53e28dd49d96ed9a6 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/phases/P1.json": {
+      "content": "bbb23db4f9a042384ac087893df8cba81398ca773e2f891cf6925dec6d6732d6",
+      "index": [
+        "100644 8e95e9383000b5f271378c8aff6f275c25f64dab 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/phases/P2.json": {
+      "content": "dd0c91c5c00e28ea194e4321cf82995b56c4ed85bc24cdff72118d247fc104ce",
+      "index": [
+        "100644 6c6e51f4ba0c7b532d383b022f836b4258736855 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/phases/P3.json": {
+      "content": "dd16a14f03aeb7e1f6a99e2e488af764625bc2ab2375d4452002fa28f38757c2",
+      "index": [
+        "100644 ea8bdf689eb11cc7560ad331486dfab3cafffb9e 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/phases/P4.json": {
+      "content": "52977cb7daa5a59f858bc5eab7550ae01ae2091b39d607f61d4da5a42b14d05d",
+      "index": [
+        "100644 3618d461481bff04d3378f86d6f824a7cc3529fc 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/phases/P5.json": {
+      "content": "752c03ef09c5f19a30c777f2725319546952ef5601a4ddcca51a6174468320b0",
+      "index": [
+        "100644 f65e1635d8e55d4b930bdd9dc47fa23e943fa8d2 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/phases/P6.json": {
+      "content": "2c937c50d79c1309f0b180ccfc9a9b5d3759a6b17a374bbe0c11adff8328adae",
+      "index": [
+        "100644 d19d9fbb11e0767dd0e337562a1855a1b869da5a 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/phases/P7.json": {
+      "content": "fe86b0a6ef80e89f6412560c42a75a65c7335bae67862a5ece872d706c569cfb",
+      "index": [
+        "100644 d9da495f2c847a2f48f537522fe5a751805dc7ca 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/phases/P8.json": {
+      "content": "fb51a8594b1b4ea1b34c5087b4e59bbafd00038ee36436573b2e025e085f0348",
+      "index": [
+        "100644 7b123811f1ef445f2fba29ab5c04f524a08f7972 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/phases/P9.json": {
+      "content": "b20b90ea2d88bc120ff3d1ee99de2bc174ec108d072876cc5653bae44c76bb3a",
+      "index": [
+        "100644 1111fdff7f0e832bbbb850f755d77c87a3befaad 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/phases/dummy.json": {
+      "content": "9b04009f79295368d6878adbb02519879063c535f51b9b8fb4873bfcbcc14924",
+      "index": [
+        "100644 af68599057fb1a299912cd24f4bac40724efc326 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/roadmap/gasdynamic.json": {
+      "content": "7f29f787f05b6962196a559a2f9f253313f0d3e4e8cbeba3f324f48e9560adf2",
+      "index": [
+        "100644 50ac7d64a42722c7d32560923e147e4f005b3acc 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/runners/__init__.py": {
+      "content": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "index": [
+        "100644 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/runners/process_host.py": {
+      "content": "2e091ab0edd44fa076521b856db466d82be05cb954fabffb20cbd26277b1661c",
+      "index": [
+        "100644 24773029e4caa33dae1b5265788c8479e70003f3 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/runners/process_tree.py": {
+      "content": "b1ac7a498a2d82c9bf14bd611d432e6ca2684c838d99981ae7ef771d2b87faa0",
+      "index": [
+        "100644 0041362f00e2eac2438b15f7c96cf090514c4856 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/runners/run_phase.py": {
+      "content": "6a783609dea6b6127fb9ccd22658dfa66b91891006e20b4f492055a2eb673ae3",
+      "index": [
+        "100644 e2ecd4325c95d5875b57c100529911660fc9069c 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/runners/run_review.py": {
+      "content": "1e5f95ee4887fc085c5a9c099cc12563074b530561fff4a21c1ab36b48ae020f",
+      "index": [
+        "100644 78bf9ef1ba603cb67ee1f8852a5eb644cd9b64f4 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/runners/run_tests.py": {
+      "content": "093d8ed6f4be9cc650a51c15292055410a909e4fde32efb8daecde6c5244fe74",
+      "index": [
+        "100644 a29ec57c0224ad758edbb3d621760cd16d455754 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/schemas/command-result.schema.json": {
+      "content": "c24897615ce9647f643cc0c1663cf27febcb2c168724a13b9c6b51595a202377",
+      "index": [
+        "100644 281e57042cf7a9853c41b5eb42043be5e17160eb 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/schemas/config.schema.json": {
+      "content": "09615ccee507473cc06d278772ce6adff3ae73129335980bb45463f9632be96b",
+      "index": [
+        "100644 49a1c60fa5a184b095833b6e9b38baa932d0cb03 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/schemas/evidence.schema.json": {
+      "content": "49a84351bce4a32d644ec74086246bd1c3322608537068bed49987a61f4ca89f",
+      "index": [
+        "100644 a82aa69539337daf528eed6ae8a3a1deb120708d 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/schemas/phase.schema.json": {
+      "content": "7c81e570e8274e44687d9af8d2d8606c59ec2672811d7527df9927406231c4c8",
+      "index": [
+        "100644 d948f06b6f59129c78a0275aae0a11e98747c4d6 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/schemas/review.schema.json": {
+      "content": "f7c4ca338a4e8eb374c32747af1ad683bb51a43bc800c8429f5b8d80473b006b",
+      "index": [
+        "100644 a36bd51ef61461a0fafbebdd7af291e9dc824bb0 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/schemas/roadmap.schema.json": {
+      "content": "63003a42895abe6554d928d959009ae95102d302000d978048f1c2c51cf27eeb",
+      "index": [
+        "100644 a0f9e2886fe000cb05ce5bb33b6bf7f2f46af3bd 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/tests/__init__.py": {
+      "content": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "index": [
+        "100644 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/tests/helpers.py": {
+      "content": "2beec1dc8eb2b32043a430fc3a0cbe039d49b860eefee3f89efb123bf32ecddb",
+      "index": [
+        "100644 c74f7aa7a86cf6d6a4b3a3797667e86c205998da 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/tests/smoke.py": {
+      "content": "fbac453ddf5627f67cb5b5e0695cce36e417cbe6cafee1e048a8e7b8a10495ae",
+      "index": [
+        "100644 08a8438cd094848347dc5246511c4ca421dc90c8 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/tests/test_contracts_gates.py": {
+      "content": "4d9b626e7c904d7ad0da07007ca6fea93fc8e42a346acdb37124150d1f1eb123",
+      "index": [
+        "100644 f74c49ab71a3b0a173ebdcb31d49be28151996ab 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/tests/test_dummy_phase.py": {
+      "content": "6a0ff929cd6b1366a62e3c77ac68d4eb3b73ac00dd6d1aaec625559afef9746a",
+      "index": [
+        "100644 1353d4405c39a18f24247e517e489ded7c2891a2 0"
+      ],
+      "mode": 33206
+    },
+    "dev_orchestrator/tests/test_process_isolation.py": {
+      "content": "f49a0375cb1ab2a8ce4b0909c7cc5db760692bffd4c69e553a3d12af367674de",
+      "index": [
+        "100644 6e3b3d2972602c07779b29c5c911acc01e2ef006 0"
+      ],
+      "mode": 33206
+    },
+    "docs/ALCANCE_INICIAL.md": {
+      "content": "b5ad7f8d84c180336a0eb557e013535048686681911daadab05301b2b3e647f7",
+      "index": [
+        "100644 b6845911e9c15a5d6e0b9a4243c0c6a3e7270b74 0"
+      ],
+      "mode": 33206
+    },
+    "docs/HOJA_DE_RUTA_MotorSim.md": {
+      "content": "e278af0ea2b567d69074729ed21ef76e9c3334ed4ec6dfc800b910782c497928",
+      "index": [
+        "100644 89b3164eca71be37b85f1bad18bfc2edf3492f56 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-4t-alzada-cruce-150.png": {
+      "content": "4f6958216d67382f9822a7c6848b9b876d6df17145d7ccf2ad68eaa940879cf0",
+      "index": [
+        "100644 d8fb861bb75db82cd556b9494490859337d06d35 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-4t-area-cruce-150.png": {
+      "content": "31b312866a5057bcc70f3e20efd108ea9422fbdb817f73f36b8dab488c59fa2f",
+      "index": [
+        "100644 710a8296a1a937737aebf52b3c73bd81ad9be27f 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-4t-barrido-r2-150.png": {
+      "content": "009718400e29c765bd106aa3d836cd16218e54cd76f6571b4700a7fae14571fd",
+      "index": [
+        "100644 5fa4548ff2ef49b63fd17779c9707e5d31a438d7 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-4t-barrido-trabajo-r2-150.png": {
+      "content": "b471ac1d0dc358a38a1891df197cd33cc2a9b479bee0b4a4b7e29b879bac41eb",
+      "index": [
+        "100644 445e873d73814fda44b3a9b8e4c6a46c7500ddd3 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-4t-compacto-150.png": {
+      "content": "334df1a9130b0904c8aa661f9321a0aa7a64d5023875c474db3ae51b5336e632",
+      "index": [
+        "100644 b765f15d57ec8646058ce5ef55a05bcf0d281bdc 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-4t-comparacion-curvas-r2-150.png": {
+      "content": "56a5430de59b24ae39b438a3feb92812a2053ee40f0d197c3ef2ced2dad09360",
+      "index": [
+        "100644 09d33fbb25994d6a6ac9bcc67022fc9418bb98ac 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-4t-comparacion-r2-150.png": {
+      "content": "345a790f75f3b49fcd134685209578803cc150cad50a144518a54dbb2930e43f",
+      "index": [
+        "100644 8a75e6d2d76556c8432f2a667773a34f6ef4cfd0 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-4t-conductos-150.png": {
+      "content": "bdbf77d1166f2b67effd08e46a477a3b3ba765ec603f90bc39421c676d73b6be",
+      "index": [
+        "100644 edd2da0293c0891e167a11458f4d36550f525ba5 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-4t-curvas-r2-150.png": {
+      "content": "fd11a198bc959299db3bea78e415317a018ab59fad19ae5b71c40ba118ebda0c",
+      "index": [
+        "100644 437c2c2a058890c4207d2b7e40e2d6089a959497 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-4t-editor-150.png": {
+      "content": "16581f4e26b6ad618117e613910c058c4b95e4891f6774e42f381591a4257bf1",
+      "index": [
+        "100644 1b549efa76f6a26cc769b2a6aa1d9c0f0c8f27d3 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-4t-resultado-r2-150.png": {
+      "content": "60755a92c89a1488ea172d7855104f025196bfb1dc8da6224e68810f762edea3",
+      "index": [
+        "100644 f9086c3ebbb08f384f203b88e9006b0a34069ee1 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-admision-2t.png": {
+      "content": "488e1a860f7e3dbddf2a394418fa860a3d8b70e106fb9e88c17072c21dd1b005",
+      "index": [
+        "100644 1890c8d628acdf22ddf957d90385f6602b4af58d 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-barrido-compacto-150-final.png": {
+      "content": "583b50abbf292355aa2d26664c10f5827e0e3b31e1bc2fe2f6940b0bc35174e1",
+      "index": [
+        "100644 9e045deb2ac87a7a2d87689cad6ce08f5c2bd1e7 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-barrido-presion-150-final.png": {
+      "content": "ba99ef10338b540d08405901ec65a39e7de25ffed606a0087b59b384156fb18a",
+      "index": [
+        "100644 fd70cf551da8f3e0f754a831b57091be608c5659 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-barrido-resumen-150-final.png": {
+      "content": "1948b186dfd51c53b18d4ee97217a9118c9793ccf934181088a37c154a90a0b7",
+      "index": [
+        "100644 1ea875dd6e7e82344c839be85456b775fc5e31a7 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-barrido-trabajo-150-final.png": {
+      "content": "9e9d0d44f0ed61f315216665b0049546afe69bdff4be988a8e0dedf7894361e9",
+      "index": [
+        "100644 ff963ac27ced4635d7088384cc224ddb52e931f7 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-comparacion-compacta-150-final.png": {
+      "content": "3d50d47e369aee93257f74828d08aa15cf1bdd5afec2a5a452b494a20c27f46b",
+      "index": [
+        "100644 17f6434f5d288423189af3ee35e5d1e82a355717 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-comparacion-curvas-150-final.png": {
+      "content": "349b1f02cfb4b4d8547491766c5361d2392429111905a8622273748c2c1c10d7",
+      "index": [
+        "100644 c10d885486e1342f4d1443267532142725ab1fd6 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-comparacion-curvas-inferior-150-final.png": {
+      "content": "a54f2b6f33826491584424bfe252cc1fbf1bbc0d6453fbaa14195c8b13c0de55",
+      "index": [
+        "100644 18a4dff385bad44f3ee308d8b45b43271cc2e876 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-comparacion-entradas-150-final.png": {
+      "content": "46d7d82665e5e97d7d3331badb3c4d8c829b7b33534a6ce48c613a0a07b5c684",
+      "index": [
+        "100644 16fbef9bb623bae7070d0ce6505cc0c50d49fdc4 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-comparacion-resumen-150-final.png": {
+      "content": "21db1112f5a38343ae9febfc0a6aba267bd618c635a50a6aacc3afb246505d86",
+      "index": [
+        "100644 2fe1c3528e378ef2d5ea5acfe9301dd5787d63e1 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-conductos.png": {
+      "content": "6905ab199d4384bb7f59f560e98baf3dac003fc1e77338c6ab4c3172021dfc9d",
+      "index": [
+        "100644 cb02f901e5f025261766e80a599a6061af2d6474 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-configuracion-2t.png": {
+      "content": "13bdeb2523c2e3eb9cf28049672e9ef8a6ad9d79b96309bd9d47a2bcc6fce0e2",
+      "index": [
+        "100644 59cfe0ac71ffbc07716161a06b78dad1ff2c1f7f 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-datos-externos-compacto-150-final.png": {
+      "content": "7d9f3ea2dff10b66408532d0dd235930c826fb7dd8ba36a292e14fd71118095d",
+      "index": [
+        "100644 7aea29ffc80df8698884339172899968c884bdb3 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-datos-externos-procedencia-150-final.png": {
+      "content": "cf8ead16531929dd636d5874639453a46d310b084d235b282f4d6d42acf7b161",
+      "index": [
+        "100644 4c5a3b6fae17ae3b0e78064966b35ed68fe3147a 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-datos-externos-puntos-150-final.png": {
+      "content": "1f82b44ffb89db09ed9dba763d1c6f122df7242664bbbf45834888c8f0315dc7",
+      "index": [
+        "100644 69c0d86106cb7acb36054040b09b70c274addde1 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-datos-externos-tabla-150-final.png": {
+      "content": "9237bff22872e09d37bf1d9c0c5193a398bf2f3608c3ebaddf6d6aa94807215f",
+      "index": [
+        "100644 e9517dc21d6861fc78bcadbe38ac0f8ee1e80845 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-datos-externos-vista-previa-150.png": {
+      "content": "ae4028dbcd062fc26d180bbd25537d6489af2ed25aa72f64ae9560b69954385c",
+      "index": [
+        "100644 190ba50d082375b4f068e0d94115d8f6e98151fd 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-escritorio.png": {
+      "content": "edae2b481a4f00c34f0644f4beb14a01d498751b131e9a4b914d4159ce67f968",
+      "index": [
+        "100644 59d09b7e65d2f3dbe0868b574432cc9cf6ca7716 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-ficha-verificacion.png": {
+      "content": "04c926297ef519263ec98e2a0a8ea485200d135e78e231fc81ef67cdbbba62e4",
+      "index": [
+        "100644 4c72d72cf7ea0788a62e6db62b0ca5418d23c711 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-geometria.png": {
+      "content": "6ffca26dd3908b11a8abadc9796262b99b123f83a849e74c3485c8d6b9b951d8",
+      "index": [
+        "100644 62107b179af1a41025399020f4ed5162256597d5 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-motor.png": {
+      "content": "5df5a0fe94deed1324f1e06283012f7cf50989a7ca3af3fb5281b10b8f94362b",
+      "index": [
+        "100644 549c00f804e13f4241c28cc89c5f215b4bd37c24 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-proyecto-0d-compacto-150.png": {
+      "content": "f6882bbbeea3c067e915936aa70195c2a0d12fba9a263799dbb219a932165d00",
+      "index": [
+        "100644 b761afc612caa17a402ed7f3b61daa8240f040a7 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-proyecto-0d-curvas-150.png": {
+      "content": "99998d45a271e45b8da8375cd467c17150208bda630026ee47bc589b7224c57b",
+      "index": [
+        "100644 b89fe6f651ed85f85d2ce06221f7acbeebbf8cbd 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-proyecto-0d-resultado-150.png": {
+      "content": "f9969b3c9ab352f4f5ced7dd3facde01266b42c1f190255deac4f1ebd80f073a",
+      "index": [
+        "100644 50b7cac41f26ff2e0c6cc06405adfbda1832d7e1 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-simulacion-150-ajustada.png": {
+      "content": "8708eea748bf21bf84a10ed7c3436821e7801db5e4b5219009a93699ac08fe87",
+      "index": [
+        "100644 0dea1692348058c56d62ddac56811025962b7ce6 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-simulacion-150-compacta-ajustada.png": {
+      "content": "2b436420ace67d69eafbfa792690175fb30912f78ef368daeeebe98c50bc3d6f",
+      "index": [
+        "100644 6f5b0ac5a0ca5084d3ae08079865d2e8c1304d62 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-simulacion-150-compacta-resultados-ajustada.png": {
+      "content": "4b6cdf04c3374905b7e220be6c685b7571e212ec2b49f4f69d3c90586c070323",
+      "index": [
+        "100644 4cd76e1c0f836d0698885c4a31d1c31ee1cb9444 0"
+      ],
+      "mode": 33206
+    },
+    "docs/images/motorsim-simulacion-150-resultados-ajustada.png": {
+      "content": "c0bb767191fa92ecd92b5a09d1568d666528f73637681be1c2893bf34f8424db",
+      "index": [
+        "100644 b6686fe18c440250d43c39df5b23aae77369f1bc 0"
+      ],
+      "mode": 33206
+    },
+    "examples/EJEMPLO_SINTETICO_contraste.csv": {
+      "content": "96b6e9c4bbd9a6edd86481404968b60bf115912a915e231d9147c68e3051d460",
+      "index": [
+        "100644 ffa079980451d88d952988c924736039885c77ee 0"
+      ],
+      "mode": 33206
+    },
+    "examples/EJEMPLO_SINTETICO_presion_bar.csv": {
+      "content": "24f40cd9278671294930f34709c3f88d2fa96b096b2cd435faafb45f3efe8fdf",
+      "index": [
+        "100644 7b6c09afbf6d5235e54377b00c628febbbab2b79 0"
+      ],
+      "mode": 33206
+    },
+    "examples/EJEMPLO_SINTETICO_trabajo.csv": {
+      "content": "5d446031ca1741486d9b40630a3ae8b8220887718baf8e46f41d26fd084ee260",
+      "index": [
+        "100644 7f86cff910126b6d0acdd14bd4f7439ebc7f0676 0"
+      ],
+      "mode": 33206
+    },
+    "examples/projects/EJEMPLO_SINTETICO_2T_COMPRESION_8_2.json": {
+      "content": "a75d72603c466c32375217b138e616f501665aeca6c3d7662e5a7b565a49ca0b",
+      "index": [
+        "100644 256f56de12ea30ceab4817ff09b361f8c214a9f4 0"
+      ],
+      "mode": 33206
+    },
+    "examples/projects/EJEMPLO_SINTETICO_2T_REFERENCIA.json": {
+      "content": "26e479b4dc47d4a0c0164b9b790c949491bf33c50cc2540ce06a1d5a8e1fec9a",
+      "index": [
+        "100644 ae8ec2b99d695c739f63072626b533c5bd5bc04c 0"
+      ],
+      "mode": 33206
+    },
+    "examples/projects/EJEMPLO_SINTETICO_4T_COMPRESION_8_2.json": {
+      "content": "51a0c0477f22bab65a37fdabcd61cb4b9e968512a55d8507cab8a67cbe13261a",
+      "index": [
+        "100644 d488dbdc8d71f15b6715a902c85d076098e77d85 0"
+      ],
+      "mode": 33206
+    },
+    "examples/projects/EJEMPLO_SINTETICO_4T_REFERENCIA.json": {
+      "content": "b6c83be9bb0f1265d04ff540ba1d04fe30b2ee987bf67c4496d597b62e68c372",
+      "index": [
+        "100644 eb85fc0694c8260ea785309bac7701334d69904f 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/__init__.py": {
+      "content": "dc7ec04e41fc98575e2ec9d1ae64fd3667a8075ebd91c2b480424108fab3b710",
+      "index": [
+        "100644 a45c76753bc0dda2f4b9922f4b0db5b5d1e099a9 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/__main__.py": {
+      "content": "cb8250f5d412b665f4f6843c997627d2df2750aee0f9e2551d557825d4202adf",
+      "index": [
+        "100644 361ad9dacd87741dc621ac8a278592557be74b60 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/adaptive.py": {
+      "content": "4b86241a01fef624acb8eae8c875d9892b22c1ae10132e1888edc0e7278be8cf",
+      "index": [
+        "100644 e2f47263ffa615321c27e37964a53ab70b55e55e 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/ayuda.txt": {
+      "content": "30e0397307d7265c8473e10cda4b77abf20265b26f9c8184f966435c34a50422",
+      "index": [
+        "100644 815aed66a2e406122fe8fe6fe3359c69e441c7b7 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/comparison.py": {
+      "content": "279448d241bd228f804bdd0fa87d4c0ca7c502b0b3a450b033ee57dd954db654",
+      "index": [
+        "100644 c0995074dc65d8bd174d5c496d2dba9dc1560112 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/comparison_view.py": {
+      "content": "63777005a041064da3da776c27c2c326ca7ade7f6f3c67a5b8fd9135b7f3ff6e",
+      "index": [
+        "100644 04fa325f26ef86f40cae419412884fa87abbb665 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/ducts.py": {
+      "content": "2f26ab0cefb97cd49377660a82c514a83715ed8b05918ae90c20b05df6ba1165",
+      "index": [
+        "100644 9e8c7d14bea33161e945ded1f2b65ed05b907fe4 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/ducts_view.py": {
+      "content": "18ac37c45b96883beb091ec88c3865de533eba4bd093a4e45a24a98ad6d52fce",
+      "index": [
+        "100644 2fd7b1c15e8b6a7ebf56afd031f22e7a33747553 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/examples.py": {
+      "content": "f1af57bd6ecda10194f52dfc90ddbc5a42981172a404fe1e88041c49b0bbb6fd",
+      "index": [
+        "100644 7583beca6bcc1b0a0c31f6a9a22ba1b82d340277 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/external_data.py": {
+      "content": "0ee6921717dfa1f121d72eeae842f0ac23580525d29b6ebc8ef82d413e99b282",
+      "index": [
+        "100644 eb717c766253ebad0603606fbd1aa96ac52bfa72 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/external_view.py": {
+      "content": "bd81c81d38415e9d575fc7eeb83e23415ac70e4aee2c0cb9a8887c9e3e5bdb7b",
+      "index": [
+        "100644 56c2c2c41c84f577f9c7baa73fe5a691efe271b9 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/four_stroke.py": {
+      "content": "f1f29170430e4990e2da88c3f70bad2e789b9f89d7ff70548c724de77e014bf9",
+      "index": [
+        "100644 b1fd8fb080e4518033c932adae7e001b705b1333 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/four_stroke_acceptance.py": {
+      "content": "4882e869e90ec01d837355456dac7ad79a29028c7f0f70f05e3d969621a0108c",
+      "index": [
+        "100644 08637ae965dcad2e93e6ebc8887dd09aa3b607c7 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/geometry_view.py": {
+      "content": "29a2128e8dbed5cb2c00be850ce7b09f2a591eacaea91e9539bb470e7712a3c3",
+      "index": [
+        "100644 ce8ec0ca7daefbf8fc9903add555d13ddd1cbe72 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/intake.py": {
+      "content": "319ebdfdf04d39ba4adfba086ccd094ddef79adbd992b406684780aee2f2fd5a",
+      "index": [
+        "100644 2bc40e9b7a5fa28afbecff011e6ed301e146da74 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/intake_view.py": {
+      "content": "fb962ba539423077366392891e0a75cd822deea9fb4349994982dbcacae2c1d1",
+      "index": [
+        "100644 18602e2f2e2ed29dce752def34f7380c71172fe8 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/kinematics.py": {
+      "content": "1784f2a8d3cc0e038f0c060e22af02f33db1bfaea9ce0c5988e7775983b4a931",
+      "index": [
+        "100644 d8636551c5c969d1605a7094d3071a92b2d1d72b 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/performance.py": {
+      "content": "676902cdb83e3e00e07d5e6d3162664b70c0e6fd4f0eb47f3e31cf810de7a0fe",
+      "index": [
+        "100644 87035cc68436022b6d20a2794bd8cc0a764ec1fa 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/performance_view.py": {
+      "content": "ce23aae143f12ad7a1854b0fa42d8cde686d9be2f749e80d5374fb72a6bebd6a",
+      "index": [
+        "100644 8496be79e9a628277e5441e4455df5d066dfba68 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/ports.py": {
+      "content": "85752de04c82b09d0c4e1646dfd6ed3f35caa1dc3e85a0a27e0e52cbe8935122",
+      "index": [
+        "100644 5e436fa6067b03327c1ae265f15cbb912904573c 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/ports_view.py": {
+      "content": "98df797ff401dd4c0ff2b695615fbd4504bfbdeab77b68c8517da7e730ca9c35",
+      "index": [
+        "100644 5389a844a048aa12d066585aba4154450c87fe22 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/project.py": {
+      "content": "93e2307c05f708aea4b060fd623c9dd4b342f5ef9d0a44d0c8041a1561e348d0",
+      "index": [
+        "100644 6667f56b93f46c735ab2f7c2ddcccac8682c6609 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/project_case.py": {
+      "content": "744e5235a4c5db2f2be1dee6db182533f46dddeade4cba44426717e821ad0180",
+      "index": [
+        "100644 deff7a099c6df2868bbf3c37eaa85f7ddd36255d 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/prototype.py": {
+      "content": "4bd559427c9c20aed9c8a694cc92516979e9b2ba618a6a8dc17eee728b098671",
+      "index": [
+        "100644 ea409350623c0fc7a77b3811fe17c8d1a9b3c85d 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/reference_results.py": {
+      "content": "0df5251b6a84ec37d648d23667d4f2112b5cc24035bde6c3e47ecc4a8babbcd4",
+      "index": [
+        "100644 3e08bb7e33e5e9a3203cbcb454f188ac6f8cb32a 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/reference_run.py": {
+      "content": "5298de649f739189c35b44f08b80ce4a87533c6951bcc3773c87ade088eccd46",
+      "index": [
+        "100644 a51b562b768f61377838185c8535894a0b5146f9 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/regularized_trial.py": {
+      "content": "420afd74415b85737b4e52225318c25ba689864916b3f1611fb43079fb696f04",
+      "index": [
+        "100644 664128abbd30ccb1c58a9196cc619528589de793 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/rpm_domain.py": {
+      "content": "116c8b805e4af393b6c52669a8c30b39dade6e8bbe2b3903bde10d1001ce56cc",
+      "index": [
+        "100644 c1011ede125916c218de635ffcdbadece3938621 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/runtime.py": {
+      "content": "6ecaab6fc9424a447732c3fbd01529631ca59b07ca7a73e2cfd08df4fc0e557c",
+      "index": [
+        "100644 8827146278a6e38e6d95fa199b675d9708e0994e 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/simulation.py": {
+      "content": "f88bd1d4ee09a8a086760d707d328d85ad89f52feb6856e54cc7b9cc6b9ff7eb",
+      "index": [
+        "100644 166af47f8052bb8bf878fa8c8f5f565b85e12ae6 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/simulation_case.py": {
+      "content": "cf05f89cba01952f6931bf1416a1294343c0cb559f1c1c61e3977ccf7060676e",
+      "index": [
+        "100644 f08fcfb8301c66b39115ed289df0dd9ff1881b97 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/simulation_view.py": {
+      "content": "3caab8d7d1ae6d289723ecb9c8ca3f2111f3e6555d394d2f9bc608e03ea7544f",
+      "index": [
+        "100644 fac1fe00f267d4d0c844bbda378e7826d2f7dce4 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/storage.py": {
+      "content": "655f5f0c5e0b36408e89bab791caac6952020e24bd44eed0a3871cf3e3d136d4",
+      "index": [
+        "100644 e64ba28641736afc281fea4604fdc84cd2cc6d61 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/sweep.py": {
+      "content": "ef2218f8b6d627835e810fa28d0c082c7b0e32c0d385345d7fb39a65011d4b1f",
+      "index": [
+        "100644 64f30ec2edd90a4d93da616ed783ba99125460f8 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/sweep_view.py": {
+      "content": "6eb31190bb23755e1362bbcdddae64f482df43b404665e81b1c93efeefb0d828",
+      "index": [
+        "100644 39642ed794273ab424543fc32448e93e1076381d 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/theme.qss": {
+      "content": "dd66aa0f3a211a2bced4113ab06cca2a30624a75975702c3abdcceb34ad9a532",
+      "index": [
+        "100644 b52930b8b3d3905029e019ae395562496a1b5220 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/ui.py": {
+      "content": "14001a7a8cbd3ddc2d428e34e4bc00db22e634aacd21f2ca628d73485087fc66",
+      "index": [
+        "100644 4e1fbec7df88c9983707f913e73d9211db3a935d 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/valves.py": {
+      "content": "3ddac3b54f4271a9e0d2ef2e5f17a611415d3195667d21dd6485890b76996871",
+      "index": [
+        "100644 792f4ad815cafb049784f993f95616602597dc5f 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/valves_view.py": {
+      "content": "c987d1b51d44c4b2e7a897625bdf71fc2b9b2c7dcba4cfb38113e00d272c1d79",
+      "index": [
+        "100644 1d16f45a3035901f4643dc37684cf1866607c43a 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/window.py": {
+      "content": "7be824b2cc7da9b1fb5d5b551c40626be4d043dac93599d5913c21a36c6b5314",
+      "index": [
+        "100644 7594697387f562264b665decedd48a338e3c17d7 0"
+      ],
+      "mode": 33206
+    },
+    "motorsim/workspaces.py": {
+      "content": "eb922914aedd8b5ff89e87f3cf5af1c7f889dc7e8de1069a7d8ae0b468cff46a",
+      "index": [
+        "100644 8b13b6ece6d23c05db2f9717b51331aa44b91d3a 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/base-escritorio/.openspec.yaml": {
+      "content": "721b2c20251c74c5e788a7759cf132d89a1dae28f9ffd03f56b54187be466bd6",
+      "index": [
+        "100644 a40cb63c10b1bfd77a4d5b08f3e01f76738d8143 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/base-escritorio/design.md": {
+      "content": "9b3bc4c42f4c99bd0c027e9ea80b14ef2d75e3546dde544e9e1d32dcc4ce2037",
+      "index": [
+        "100644 5352d6a4b2de02fd305c07cbc6fd406399cb6912 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/base-escritorio/proposal.md": {
+      "content": "ca315da449f5c2a47829ca1dd43f535a56a1029b2c18304c5972de1f8c80582a",
+      "index": [
+        "100644 1455a74b3cc885f807902e27b2b88b4408e23281 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/base-escritorio/specs/gestion-proyectos/spec.md": {
+      "content": "585061f829735f3c5e22f7563236512000b99837558a0cfab8d9731fbda24121",
+      "index": [
+        "100644 4d367e27832ff2739158c21d303590e5ab83efc2 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/base-escritorio/tasks.md": {
+      "content": "2bb2e8daf52907377f40dada03b1cea0db09fdae40f5c7c6d3ed3006d5484052",
+      "index": [
+        "100644 ddc3cffa52c66fb0ea6f17dda918d50d8a5dbc72 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/caracteristicas-motor/.openspec.yaml": {
+      "content": "99f4cb4cc789c6d4e665b552c7fc401530b10f538c6cf87d334842e868590303",
+      "index": [
+        "100644 a40cb63c10b1bfd77a4d5b08f3e01f76738d8143 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/caracteristicas-motor/design.md": {
+      "content": "2f93886617ae8caceee7b1c441138b961f06b56d6e7e5ed4ab68ce0174849259",
+      "index": [
+        "100644 aa849001cf88240d2cac7a491f390f7556a698c3 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/caracteristicas-motor/proposal.md": {
+      "content": "9edf75b010e94dc5539224118c0e8d1b2bb0a8a5ec6b91199118db1bc7f86fa6",
+      "index": [
+        "100644 2fc2b5e8a2f34ed9c633c8e5ad0015295bfab137 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/caracteristicas-motor/specs/ficha-motor/spec.md": {
+      "content": "c0aab0bbb2a1fae676b773e8603af0ae5f3a3ca1d141875622fc80c48321cbf1",
+      "index": [
+        "100644 555dea0f1901a2a8fc16c3d86650bb5e22b6b764 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/caracteristicas-motor/tasks.md": {
+      "content": "cfe98121e58802486331ab0018f7faa24b276440047309979c9cab1e82b80e6e",
+      "index": [
+        "100644 a457377ee8af8d3f894a2cf7915f50dc4a2ce87a 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/comparacion-resultados/design.md": {
+      "content": "aa9880160b7a24aa84238459d813f9b0af7d100307f270a4ee13262c5fe61980",
+      "index": [
+        "100644 b06091623b140bb07cd4541707d5bf6b9bac9c92 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/comparacion-resultados/proposal.md": {
+      "content": "63e21e06f2114aa17a7c96d211b8ccdc7be424ddf5480cc3435d6992b1d8cf26",
+      "index": [
+        "100644 b2870c6e5ad76ab1b90a72ed3f0ce7e18c0b8ab3 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/comparacion-resultados/specs/comparacion-resultados/spec.md": {
+      "content": "862a1279aa14d81dc8ac72af2a3d20bc6a3e68579810081cc727cfc72c61410f",
+      "index": [
+        "100644 559a45636d95b5e969a26ac8a91112c0fd56d97e 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/comparacion-resultados/tasks.md": {
+      "content": "5a850568129c24b0695d2b653acf5dd1fcfcd4b5f78732068067f3fe8fdcec24",
+      "index": [
+        "100644 14e479e2b508c9ae331bbf87be4306fb56b844bc 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/conductos-admision-escape/.openspec.yaml": {
+      "content": "aec6930af7d9001f90c1c3e6c907f9cc1d2a1cf2ac551e338867c41ece763b2c",
+      "index": [
+        "100644 96db9a43b670927e35c44f196854ffc84081fc1b 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/conductos-admision-escape/design.md": {
+      "content": "312c4f64332c5775ceff18ec57226b3cfec75e360a8f4cb01fc724e4e78a8d2a",
+      "index": [
+        "100644 fc05d8bc957aa2cea2e8ae096a3b231334a04b48 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/conductos-admision-escape/proposal.md": {
+      "content": "1029dc095bc158d380a11537d324ac49963310f19486580bd39d49a9bbf0b895",
+      "index": [
+        "100644 8e704bb58717bea24c68ed3dfc96dd91aa6687a5 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/conductos-admision-escape/specs/conductos-admision-escape/spec.md": {
+      "content": "775de0f5f06be3acfa4575434c05d0528d9919327fe3afc9dbb91bd388d92c03",
+      "index": [
+        "100644 b7e4d6f6058c098c8d6d1a4ae95022dd1f9fd736 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/conductos-admision-escape/tasks.md": {
+      "content": "12023db5e1f6dd7c5b5765650db5f2385ba3d2222318579027f0255538750585",
+      "index": [
+        "100644 c7e96e512c6879d0b5fa7fbb50c845b5a77caa0b 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/configuracion-2t/.openspec.yaml": {
+      "content": "721b2c20251c74c5e788a7759cf132d89a1dae28f9ffd03f56b54187be466bd6",
+      "index": [
+        "100644 a40cb63c10b1bfd77a4d5b08f3e01f76738d8143 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/configuracion-2t/design.md": {
+      "content": "ebf7b38d46806f53ee993868d8b2b029ef9e890c642f2bc0e46b2ab02fec3909",
+      "index": [
+        "100644 72fd08a6927540562cfcff6c6416c10ce2568006 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/configuracion-2t/proposal.md": {
+      "content": "1d1123a9b617aba04fba81a01446cea4af14d5af7f9f9536fa2812ed7e35d834",
+      "index": [
+        "100644 88b9494482868e231da15575378bda59b0fc025b 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/configuracion-2t/specs/configuracion-2t/spec.md": {
+      "content": "477d5589e6311226074692ff0d78dcb8f448bf9978b64fded9baa2302f7443fd",
+      "index": [
+        "100644 ea1601552e62ab5056994b190c517569a72d3f07 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/configuracion-2t/tasks.md": {
+      "content": "1475d29068b876125618ebe76ba0b13fb15015ef31f1303408060552be15769e",
+      "index": [
+        "100644 d65f06889d033d75ae14db03055f897a239f2eed 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/cuatro-tiempos-basico/design.md": {
+      "content": "e5dcb6cf95234d00838a43c2de344ed03e88d0259c165c5c9f1d841f380c4f6b",
+      "index": [
+        "100644 678727f059473b4fd10fbca36442dc7873f2aab3 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/cuatro-tiempos-basico/proposal.md": {
+      "content": "c2bf0f06309c41cad7310f391ebb68be590bf606229a5990b52da7a50d3743e4",
+      "index": [
+        "100644 b5e6e728b0a6b96e67a7b93a12c3423b329e62ce 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/cuatro-tiempos-basico/specs/cuatro-tiempos-basico/spec.md": {
+      "content": "ddb87fab36a45c239934a1b5cb298aa554cfaf3bf9f1b6d695045ce01c0ebd0e",
+      "index": [
+        "100644 6f34adb9b613c92cab0577b8183ffd6a84d97281 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/cuatro-tiempos-basico/tasks.md": {
+      "content": "afdb07fad626954bfccfd77e5ab70afa00f65d73acd5f5dd8f20a55827f808ec",
+      "index": [
+        "100644 d8d4a9e449540fea5faff2b2a1b2ce70ad354a19 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/distribucion-windows/design.md": {
+      "content": "a02ca8617104eb074f1fcb449a6a26a649cd48b9172ec64732aa4f893eb5ad03",
+      "index": [
+        "100644 1a244dd31a138e73c169988d2503d175bed598c4 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/distribucion-windows/proposal.md": {
+      "content": "7da7748daf759b30cc5f7cae6b02f69640f84a8c38032cc379dc23dae2a86cd1",
+      "index": [
+        "100644 1e9bfea5dcdf5f620e2d227720133914b32dd359 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/distribucion-windows/specs/distribucion-windows/spec.md": {
+      "content": "9a7852b2623828afaca259e4ed1eceea08d2da8d676617ab8f28586f48d67a88",
+      "index": [
+        "100644 bd1bdd0c47cd63fa6debb4a713e29eb37a1f7316 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/distribucion-windows/tasks.md": {
+      "content": "1e2613c2884f0c7d018fadfacdfc219d0a21f4179c5faab94af4b099557b33d8",
+      "index": [
+        "100644 fa25294c6aec32017cd520e817f2e1d43c16d198 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/ejemplos-precargados/design.md": {
+      "content": "fddab8d6b081049130d0cee900b3f671eb71c50928fbcebdb6100cec144adfd1",
+      "index": [
+        "100644 665cf3abcb4c4943bc94c0d4ea3ffe3fa1a83a8a 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/ejemplos-precargados/proposal.md": {
+      "content": "f34a50d497293d38e8ad81a1543d59c4adb24e83e2679b79014cec06c0c47687",
+      "index": [
+        "100644 4161e58a5f5c76cfc39620a58f2e9ac8cf8a9a00 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/ejemplos-precargados/specs/ejemplos-precargados/spec.md": {
+      "content": "9012f1dd3cd2236a99af86a2e1cb08cbe9ef79a3d82ced36a93c67be661a7382",
+      "index": [
+        "100644 c26dc8a44a416ecbfb8aa89de3321140e5188a14 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/ejemplos-precargados/tasks.md": {
+      "content": "18e4163cf3ac2d733b8523d7a82064375e2bd02b055bdcbce7c57736286329db",
+      "index": [
+        "100644 0a6e71706e1f22b0e1c9b6a4b5d6c28e363279fc 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/geometria-cinematica/.openspec.yaml": {
+      "content": "721b2c20251c74c5e788a7759cf132d89a1dae28f9ffd03f56b54187be466bd6",
+      "index": [
+        "100644 a40cb63c10b1bfd77a4d5b08f3e01f76738d8143 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/geometria-cinematica/design.md": {
+      "content": "c2a9912d8912bd0bda793871defd4ac1aa7ce0bb630c3e3da44113c4c3e9b18e",
+      "index": [
+        "100644 f29d7517195e96751e7b9521f702bbbbd223279b 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/geometria-cinematica/proposal.md": {
+      "content": "f09a5d0de33955d8dcc8a372dd782643746a3f6516837c79bcba45aed00dc6de",
+      "index": [
+        "100644 19ebc59bc617eaa6a40d0190ef3b9325e3fe8486 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/geometria-cinematica/specs/geometria-cinematica/spec.md": {
+      "content": "36163fec7aa234d41af49b26a30cfa58aff1cbf32ceba07f04baa4369bb82ca3",
+      "index": [
+        "100644 b49b16a1490fffb901bf6e430b6cee2832364585 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/geometria-cinematica/tasks.md": {
+      "content": "0631c05dacc2cb6baad24fc52abfb8e9b87f818d55d74372df98c42b590336ee",
+      "index": [
+        "100644 5ce626eff0cb723e79d720b7f69fdf202cfb85f3 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/implementacion-ui-cae-final/design.md": {
+      "content": "192e9c683a6b1979d1e66c4492a64452758a24fccb28f4cf2b525c320b334156",
+      "index": [
+        "100644 4a8a8a7c79629383f3640df5f0aa1d0f671a2f34 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/implementacion-ui-cae-final/proposal.md": {
+      "content": "b036c3c71b66fb4cbd976e6e725a54653d91e3df1369894157a98bcb27b9bcee",
+      "index": [
+        "100644 09a8a37a8e27b0c8d0eadf4418aef11119cec43c 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/implementacion-ui-cae-final/specs/implementacion-ui-cae-final/spec.md": {
+      "content": "d60ea0390aa256850c4d5c26a6c411205e335934a08c57cb776ebb75bba4b3ef",
+      "index": [
+        "100644 675f066089c86b07332fc5864b7ac6abfcba3a61 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/implementacion-ui-cae-final/tasks.md": {
+      "content": "d784254989ceb71e239028860f34c68b1f3cc29af087f81d12d88a4e3c96d56e",
+      "index": [
+        "100644 e0342b625369b0c13842a6109e9ac0db870bdd0f 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/p0-baseline-0d/design.md": {
+      "content": "a7de7908e93c6941dd1afc6166b120196dffe9f0d8ea41151e67720fb1dfc5af",
+      "index": [
+        "100644 0fe5f1a23999cd87f52ce5cda6001cf6b190c278 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/p0-baseline-0d/proposal.md": {
+      "content": "51035e32ba50cde75798aeb633a50003392ad49d55068c2407ed10818c00b5b0",
+      "index": [
+        "100644 ef0136acee41598732721bc183b813a3b791f9c8 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/p0-baseline-0d/specs/p0-baseline-0d/spec.md": {
+      "content": "64c4665e4a204aca9bff2b5bdf0716f8836cd3f17a205dd900eeb58a5fdd16d1",
+      "index": [
+        "100644 9abfc32f299534d8874da2a90a46c337d3836cf1 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/p0-baseline-0d/tasks.md": {
+      "content": "4cf6dbeaf2bffc800647cf817f72ab10f1c26b23c053bd7eaf79a5ac80487697",
+      "index": [
+        "100644 3670b6aff948d49ce405c9b4cbd2a074e0dc1127 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/positividad-transporte-2t/design.md": {
+      "content": "dee5136efefad649b5de6a2d1c33f50e2e58b72ca3585ac3ccc6bdc6186d2f94",
+      "index": [
+        "100644 860f29d76bfecd2a32bdf477276f81a4197016ef 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/positividad-transporte-2t/proposal.md": {
+      "content": "e85e0803c8b27523b36c886f2e4c9b678545ac5b7c53e04df22e689843449c65",
+      "index": [
+        "100644 4e40fa34281d41ec77928d0bf63cf6b11e1b6069 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/positividad-transporte-2t/specs/positividad-transporte-2t/spec.md": {
+      "content": "fd8f8a0c2e06eea6a83fe5049c163e0c46b0a6bc3f7c5ab762002ae38289fa88",
+      "index": [
+        "100644 fea64d0163829adc486aae52c1349a1e2a8ce72c 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/positividad-transporte-2t/tasks.md": {
+      "content": "ad915a6f55f3a39cab8f66b0acceafdf898d7e62a870474b9d832e53272ea1f8",
+      "index": [
+        "100644 f53815ad8863e5b37df7b637cf6c1737bc79f456 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/refinamiento-ui-final/design.md": {
+      "content": "39d739e27e4370a10efb19338d3ed1bddce9a5ac35a3ced1a01c17713a81bf01",
+      "index": [
+        "100644 d0ad5854da8a9ded3d4a4b96b82a55f16247c66c 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/refinamiento-ui-final/proposal.md": {
+      "content": "2abc03fdc51b86b8d3f09f3701c85be69150ad3d3c4cba471153e42efb8b98e7",
+      "index": [
+        "100644 764d1f36f162ace572dbb61c4ce54fe35774fd3c 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/refinamiento-ui-final/specs/refinamiento-ui-final/spec.md": {
+      "content": "161a58da404e06e3eed1f081582dd1ee126354e4b42739a6182ba80ac82e52d7",
+      "index": [
+        "100644 bf7c54c260df399938bb213a1bf87d58e0d990c4 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/refinamiento-ui-final/tasks.md": {
+      "content": "a63c167a344a093bbbc2394fc3c3383ff1aa1f402b06ded0f6a230626bc96e81",
+      "index": [
+        "100644 5e3a97e5ccdb096d0ac001a8e2a4d8d0be2e66e4 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/rendimiento-indicado/design.md": {
+      "content": "1c2ff7faf7b05e87cc59bdb32de67ff34ea91ff73a2f59f9f5ed408e0c2287cb",
+      "index": [
+        "100644 bd45850477a82c956e462bc558ae1e813b6b1f2b 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/rendimiento-indicado/proposal.md": {
+      "content": "2ca0e36e39f072757aff1e799b54c9d3b6233eec93613e711e4687541d9f0128",
+      "index": [
+        "100644 a360b8a5bd983038a5304b799c02adb39f4ecad7 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/rendimiento-indicado/specs/rendimiento-indicado/spec.md": {
+      "content": "a5b263e11849cb16c07bc819fad023f74bdc09e194be754321960c3ee6901587",
+      "index": [
+        "100644 aaa5439b02e72917fac5d87e9d98d27f0e0ff910 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/rendimiento-indicado/tasks.md": {
+      "content": "6c00045c29dee4badfd1dc98483cb99c64c7de20a90ef4614e770e4f0ddec327",
+      "index": [
+        "100644 d9eca1b7ed007efa713d0d1ad6266d8ae82693eb 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/reorganizacion-ui-final/design.md": {
+      "content": "653e176dbd9cac775cade9ed4fb65829740be2d3505bf2516bcbfde44a6de3aa",
+      "index": [
+        "100644 2e13d698c004008f69eb55d1b628df14aee0002c 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/reorganizacion-ui-final/proposal.md": {
+      "content": "e9046bafba5c312dcb5a4697bb4c8399df34d6ea9ddb42d3f615f31d1efd8573",
+      "index": [
+        "100644 1b106f55b2b64f40eed08076f181c8d91bd95fc5 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/reorganizacion-ui-final/specs/reorganizacion-ui-final/spec.md": {
+      "content": "3c7c5eacf8d0a927f9ddd96251d59745c129d9378e2061004750f03c7867b5cd",
+      "index": [
+        "100644 f90d43b45dd93e913c9604343a1a07d1ccc2f931 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/reorganizacion-ui-final/tasks.md": {
+      "content": "bfbf6276d5cd11161fe667b60d72c8a4a80d0b6ed3822565f2de2e36e28c3518",
+      "index": [
+        "100644 c236542757443f5c286022446faaf9ef5b4f5dff 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/simulacion-2t/.openspec.yaml": {
+      "content": "aec6930af7d9001f90c1c3e6c907f9cc1d2a1cf2ac551e338867c41ece763b2c",
+      "index": [
+        "100644 96db9a43b670927e35c44f196854ffc84081fc1b 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/simulacion-2t/design.md": {
+      "content": "fad4e859c3d50379fa6e575fb19ee7ce3be2014101cad7f86f6b026d600468aa",
+      "index": [
+        "100644 6f5216a15e64fa7d2c692300d7fdd7c834c1003e 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/simulacion-2t/proposal.md": {
+      "content": "c639671f8915502a4f4a2ad29e5bd06997c05ec339b7e6b06fd8c31f86c2eed5",
+      "index": [
+        "100644 38ce01072049ef08f7fbf312b49f41cce0f1a117 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/simulacion-2t/specs/simulacion-2t/spec.md": {
+      "content": "66a61b42214da2f42247980a7e22883f99e1b36e4921b548a7fd618a9110231c",
+      "index": [
+        "100644 e119280f7c67dea99d9615fdad23dcddcdec60ab 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/changes/simulacion-2t/tasks.md": {
+      "content": "7411f4411a8e40a2eceb200b53163a4ce644ce1cf6d74782d45d723383a4d727",
+      "index": [
+        "100644 364bc075046cd8bd5dba7073505a02cf70c0340e 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/config.yaml": {
+      "content": "d0e1c325d2e5b1d7cc74eb2101fec6022d4f110959ca6f4bfe83cd41be26b78f",
+      "index": [
+        "100644 c06b91eb2dddd7e5f81365aafe1808b2873cf513 0"
+      ],
+      "mode": 33206
+    },
+    "openspec/specs/.gitkeep": {
+      "content": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "index": [
+        "100644 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/AVISOS.txt": {
+      "content": "379f8c622d6e98edf409c8c0188480a9ee3fa591143844cadca7d207151b38c9",
+      "index": [
+        "100644 f896f12e20b63ccdccda8cee822e1407c76e662f 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/MotorSim.spec": {
+      "content": "3a313fc10c6d68f63eee3e763fee8078c6dcf1ea6209ab7d9a357648147031b7",
+      "index": [
+        "100644 11315c6d0185bfa48c8c164a89c8f4bc38456f52 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/build_windows.py": {
+      "content": "e26c34f8ddbc048d0604a0ced32c8c9a212ea354243b0a20584717b1d9d80eb2",
+      "index": [
+        "100644 c1980786869fe4a850b3c567e615da41103fffd7 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/gui_entry.py": {
+      "content": "a160c22640d4caa126be85a1a01df1f384dfcb2d1fa546f2d1e518862b0b2e0a",
+      "index": [
+        "100644 22945e4538452695c547e727b49beaa6ae92f42b 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/GPL-2.0-only.txt": {
+      "content": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "index": [
+        "100644 d159169d1050894d3ea3b98e1c965c4058208fe1 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/GPL-3.0-only.txt": {
+      "content": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "index": [
+        "100644 94a9ed024d3859793618152ea559a168bbcbb5e2 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/LGPL-3.0-only.txt": {
+      "content": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118",
+      "index": [
+        "100644 0a041280bd00a9d068f503b8ee7ce35214bd24a1 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/SOURCES.txt": {
+      "content": "e63c4f723e8fc66d0c542157f7eae875fc7eb0b22bc0029d14a59c5e0f2fee16",
+      "index": [
+        "100644 827370301167ccaeec4ead62b03e228c43cb36af 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-blake2.txt": {
+      "content": "5b0b1cf61ba3ec03ed13dc3f768886c4015f7ed9a629e7a207b1215c832c65ad",
+      "index": [
+        "100644 4028ed60f5ee7603851cdd481dca7d289fe90495 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-doubleconversion.txt": {
+      "content": "2e4864d28f8cb14fd0fa4ff7596543eba671a0a24cc9037c48517db9ea925837",
+      "index": [
+        "100644 4264a2f9d5b86b021b452437ccb237ae2f57b86b 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-easing.txt": {
+      "content": "38ecc9bfcbddee03ef17be00d65eca92cc217e9bc621a8c3ba348502a780f631",
+      "index": [
+        "100644 00f134cd8aea28a9ec76a1942ca5a23a9fc76dba 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-forkfd.txt": {
+      "content": "ee3274ab25be23b94cb7dd6bf28e0f04970ba0d6422d985c55ea787da5542cbe",
+      "index": [
+        "100644 698251a57f650e9be2e58626c549ef3760e2710e 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-md4.txt": {
+      "content": "7503544329f5f023688b0d82d2034a397444c53f8266d38b1aefec20e2fcf75d",
+      "index": [
+        "100644 0ece6e0755c615c7294ad69d384ed33b90e7f452 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-md5.txt": {
+      "content": "9f11351c847a06e3c9c782e54100acce1758c9b0364730b29b97eaa9c285fe9c",
+      "index": [
+        "100644 d64fd2286fb7dd7b00f6a8707ff6f353faf6dedd 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-pcre2-sljit.txt": {
+      "content": "d22a6f693dea022a1b02e41a02987f424dd02b174e54c6a4506afaa8a32f10ba",
+      "index": [
+        "100644 4f21a1cad55fa8069638a85f9f4243f90ad669d6 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-pcre2.txt": {
+      "content": "ad666177092dd0628c5cb548630d12a0af5ffd9c57b116a846487edb7902f05d",
+      "index": [
+        "100644 f638fba86a65da5cc3f62a3955d05aa1e9a6bbdb 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-qeventdispatcher-cf.txt": {
+      "content": "2b11059b3ca2db249f738ef9a3e8946cf5f3398454e970960f19d90a94672d9b",
+      "index": [
+        "100644 7410f8ed0c7433c07365e90f66f653b2a7162cde 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-rfc6234.txt": {
+      "content": "f7a8624727c7b4589b14ccf7e471db66afde71c90d5387347f20849304b55f9f",
+      "index": [
+        "100644 86815d706214a975d837aa32495c797a04e2a21a 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-sha1.txt": {
+      "content": "07ac6f06ec48ff4821eab84bb4a6d8d531e45902facfcf4969c55ac3a1bbc98d",
+      "index": [
+        "100644 403f1a83e39e06ca275c6d8ea491e17ccf719f6e 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-sha3-endian.txt": {
+      "content": "6148702399e8a137554802e5cf7f138c17b66704f796e31a5d657686d984ff1d",
+      "index": [
+        "100644 dd2f008eb8c5a0c7f3525c747293a88c18e8a9a3 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-sha3-keccak.txt": {
+      "content": "174829d54df6205706e66525cefab47b18dbdfb47dd5dccd9f7e889dc5799957",
+      "index": [
+        "100644 7c8a9366069c5e783b83b2e5d61aacc7a55c79b4 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-siphash.txt": {
+      "content": "e77f4220ac245cd51b54bc0478cb32e65950a5f0f6dddab1027c0f5c45e7f715",
+      "index": [
+        "100644 c367aea4a7ff148afd2e1ef093e459b18d0958e5 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-tika-mimetypes.txt": {
+      "content": "e54a2af6bdae21cb67b3bd0eae8b1cd3fabc0065d4fa930c4bad025fe42a85a7",
+      "index": [
+        "100644 476256b0b5527dc515c236205a3b8730b7c9d548 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-tinycbor.txt": {
+      "content": "00f41d98bbb8b1db45039a1f088690840857f971ad07d2082a97948e609a9b09",
+      "index": [
+        "100644 b5029383a0ded77b60918cd5066ecbf5b31f433c 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-tlexpected.txt": {
+      "content": "71c50d8905a96dc6a82e8dbbe8148627be95badb367f85731146ad5a1e020317",
+      "index": [
+        "100644 7c2dc53605fe7cc8c0b9c48d3fedcedc3eb8748b 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-unicode-character-database.txt": {
+      "content": "f5503f3c1275fede0807e94674d864523052b1bc88ca8ba4e2bba4230a759893",
+      "index": [
+        "100644 67035cf0963ecce931bc24df8120b0cbbd2ea1d9 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-unicode-cldr.txt": {
+      "content": "602eb29ce58c0ab5b09639b163213b2e5303f8ff1ea98e41ab2860f6dc80e29d",
+      "index": [
+        "100644 a4143175e83bdbc83a425ed72fd5e02be7161981 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtcore-attribution-zlib.txt": {
+      "content": "096cc789bb7c08b86889d732dad9bd12c78a5622d1c7abfaa9712c8d7be973f3",
+      "index": [
+        "100644 49248863aea00edd6674f1d011651ce8b0d4fad8 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-aglfn.txt": {
+      "content": "7a9164689189a7daa5ca2aeed7568fd3a8039dc548163113c15cbc3c2b3b285c",
+      "index": [
+        "100644 1b339c483822168628aa0e4e0988385610be07b5 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-android-native-style.txt": {
+      "content": "e6ba137b16414c36e2f103ed1fe4003944e1a80ae89c77aee8911070bd48877c",
+      "index": [
+        "100644 14ca42a3ac0274d4cdec78938e60f1ed69205be4 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-cocoa-platform-plugin.txt": {
+      "content": "ae13ca75082eda52e64e051ab59b8f49215e9410ec5fcf04f2d3f912f1b9c7e1",
+      "index": [
+        "100644 a920636dd621f69d171095779c066a81a9152e07 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-d3d12memoryallocator.txt": {
+      "content": "e7e42acd0dd82c9a01458fc54f4407edb2f6077f79713d1a2eed589f10a20476",
+      "index": [
+        "100644 2434670acfec8bf69e820e26774176de5094794e 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-dejayvu.txt": {
+      "content": "1e7078e309e8485d118db3f9d78245c87c91687e88a3e48f80ccb722bf4c38ef",
+      "index": [
+        "100644 731711a5349c78ea1fbe43ffb646b490a93d7a6c 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-emoji-segmenter.txt": {
+      "content": "5018a1d6fda2df227eaf4896628bce2f516f72a68588b5e67ed5e12a5010ba7f",
+      "index": [
+        "100644 7d80db94d6b4dec07d2bede83f80e49cb34c103a 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-freetype-bdf.txt": {
+      "content": "7397e2e4584a54a2b01649d461987eff2f792c8da2c3352ab84536765a0e3f77",
+      "index": [
+        "100644 6ea6407668556ac9e57fd19e632cd7e2d785a477 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-freetype-pcf.txt": {
+      "content": "2263541d7d37b52bd11fe15f21b878f7cbbb2fc37b3cad24896d90c17dfcd526",
+      "index": [
+        "100644 02b8f3ed72bf5d48a5f287de74903d8d81b6ddca 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-freetype-zlib.txt": {
+      "content": "4d980dd75ec898904fb16bbcf3d860c8d07bb196c74e986aad39107d858d21b6",
+      "index": [
+        "100644 1913eff39bdb0867a7f806922846aa4d258fa9c3 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-freetype.txt": {
+      "content": "540e3201882c7a1f7ee661aa621c07b9852e32a406f1861a3b944dace149a379",
+      "index": [
+        "100644 fa6d80fe0908e5c531ecac308332e568036b1c36 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-grayraster.txt": {
+      "content": "722b82468595f0b57afabb0ebb9307ef8c750d9989be67342acaf1e4fae2aac7",
+      "index": [
+        "100644 e00f23214f8552902f7b8ea03d7ccfd656e35383 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-harfbuzz-ng.txt": {
+      "content": "57823669254c1234b1e82a5b8c234cf703089ee51b7262c46dd43d2b889dd97f",
+      "index": [
+        "100644 dcedd2971a7a882851bf6913b2d1baa02186c92c 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-icc-srgb-color-profile.txt": {
+      "content": "5f3f3a8413e20b34c175d4e85664cbe95ba5ce1061dc86f4721e7863f4c431ca",
+      "index": [
+        "100644 b233ef7c0c7ccc7a9f1f158be8bcd798d407f862 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-libjpeg.txt": {
+      "content": "7e0e4db43c67e6b964e1bae1f144d4c9eba2754cbf9c8b63c9e77dc5518b1652",
+      "index": [
+        "100644 07731ed73df7034fad4189b0b4fbbf4142e2cdd3 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-libpng.txt": {
+      "content": "0f8557857f4e8ffed4b073a5e1ea080b031fc742467e2b4d44d5d294a688ff6d",
+      "index": [
+        "100644 dbf38545d55077c05c90b9311235fbbee071cf5e 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-md4c.txt": {
+      "content": "7f548e97382edf99ed69b7c4d5237dd0a4cc28c6990e42102adb372032551b02",
+      "index": [
+        "100644 fc99abb3a940d33e227377c718eaeaac6d5a5080 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-opengl-es2-headers.txt": {
+      "content": "dc7de143eac3ded484ebf3158a2967e6a7e897755d14afeba186d00e48bd1b2f",
+      "index": [
+        "100644 83f29d4a89b7da48fee2a1c8be9982b00f65238d 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-opengl-headers.txt": {
+      "content": "da21f169ad618d6011c9f9525aea75d96465f05a43a484d54af72c0ed23d30d4",
+      "index": [
+        "100644 6474ba98f9a554fdddecf7d3d550f36d43d641da 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-pixman.txt": {
+      "content": "9dcbaee85c023d338aeb87416bca98a35821c87657ed543c908d7a42b01dfc90",
+      "index": [
+        "100644 96610e3a3b192e80cfcb9329b3d53a39694f9010 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-rhi-miniengine-d3d12-mipmap.txt": {
+      "content": "39b46d05108fd96b8f57ca0f4d2413183ef34034a161b2015292eb70e1da43c5",
+      "index": [
+        "100644 2f60a5de2d41402158fd2e475122daa2c7e4647d 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-smooth-scaling-algorithm.txt": {
+      "content": "ad42a7460fac07858ee888631c41dde5d6b8e1c1d28986e1329b1aa0566b163b",
+      "index": [
+        "100644 d844c2d3e69783257549bb8a952c29ea772cc1b8 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-vulkan-xml-spec.txt": {
+      "content": "8501c480e588522207d5af07e202c6e5d85f4792bc9c71621fbf3eb8bd21a1ae",
+      "index": [
+        "100644 45e755431a7c684d3c0e27fe8a586115a8f1114e 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-vulkanmemoryallocator.txt": {
+      "content": "ef2e05d7ecf031db7177b3be746fe5771a8521e6408f39c6712eced5f0b5d9c2",
+      "index": [
+        "100644 cd2c1cb34cd9832bd340eac257692369c01b1bc7 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-webgradients.txt": {
+      "content": "7b92ffbaa5dd03ea8a0e858dd9e5bfaa36ec8feb23b9f5dd307959e717e7a444",
+      "index": [
+        "100644 ab30913f9447c6ec1ca4aadc35f792c5e99c7ab3 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-wintab.txt": {
+      "content": "365f5b70c664f75bf05c0fa2f6cc21ed4c54799b888296e6124703fffea7f48b",
+      "index": [
+        "100644 13ccc02e736b45b0d6e610b692cbe06b490dc739 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-xcb-xinput.txt": {
+      "content": "c81f1d54580c822088550085410b3ca51c82f46e24222caf3d9b55d6e8190937",
+      "index": [
+        "100644 477b78cfdadde0808c88027a729a563715430d98 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/licenses/qtgui-attribution-xserverhelper.txt": {
+      "content": "48a01ee1fe954c68e90cbc2eeb65d940178acff171559ab02201659c33fcd709",
+      "index": [
+        "100644 e995700e4a2fe4d460b3653a18e2721373da8609 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/requirements-build.txt": {
+      "content": "9992e3cc6fb9088fe526ef052c9bc2f3a6dd60f6e72a28496d310c988ecfd2ac",
+      "index": [
+        "100644 64887e2206448bb6b11ec3caa72440cd1b39a97b 0"
+      ],
+      "mode": 33206
+    },
+    "packaging/worker_entry.py": {
+      "content": "b2d15ed8a4bb18a127cbac6ba77965d43766492f79fcd5aa2bc4e8354fd2945d",
+      "index": [
+        "100644 589275a1a93a44c3de1c3f6cff6445245247fbed 0"
+      ],
+      "mode": 33206
+    },
+    "redme.txt": {
+      "content": "missing",
+      "index": [
+        "100644 8b137891791fe96927ad78e64b0aad7bded08bdc 0"
+      ],
+      "mode": null
+    },
+    "requirements.txt": {
+      "content": "385e039f43c455549f3e79039a7b68169284eac3f18a35e0db4fa5ebdec01e44",
+      "index": [
+        "100644 27c14d2ae5b5c3729a9bd3b301522d3d111cce96 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/1000-diagnostic.json": {
+      "content": "9523a059755a8e6c7c36322f18fca174ad1c8fa327628c857400279dff99417d",
+      "index": [
+        "100644 e010c65539d5babb0c89e7210507e93e124a1378 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/1000-observation.json": {
+      "content": "5d700de1f63da46460cfccadab8ac3725f06952f7a0a959b84310863ec420542",
+      "index": [
+        "100644 f744d843702027254b896ce7e0e4a67aa5c59182 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/1000.json": {
+      "content": "69348d53f082e0a295455265b2833c11e51fe19581895939805f5c42a778e0cc",
+      "index": [
+        "100644 701fb711a30ddf28422fa29ae69406031395a0cc 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/1500-diagnostic.json": {
+      "content": "25ca3119a368c71e5342d529a66bb13538a853bfe029a4c490cdac6506b4f5e5",
+      "index": [
+        "100644 0152ca83a229653a0db44f46a091fb2202f1448d 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/1500-observation.json": {
+      "content": "c33d97fcdb784d3fedbc023d3aa6120fb7fcf816c425477c4ba6d8a1504d6836",
+      "index": [
+        "100644 5750b92d4194776f216ee1ef018a2d5c97f24255 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/1500.json": {
+      "content": "b0786287bb632e9367124382258893faa501dda96146079ffd83facf1062407b",
+      "index": [
+        "100644 87e1d8eaadf2991c1a764e44d8bd99e63bb3827f 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/1750-diagnostic.json": {
+      "content": "6faec1cfd612db60bdbd516901165bad1d0d5adc9aa23ec2a799bb669affd669",
+      "index": [
+        "100644 066bbc8ca2e1cb9f0948e3da30c3686e77950dce 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/1750-observation.json": {
+      "content": "dfd884135eaf4f3e9f98f50c52d65670dc04ce53d811454663e2c72dd9f78ef4",
+      "index": [
+        "100644 ddce6af67a20c500fbd45918717173ae6de87a48 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/1750.json": {
+      "content": "7ba4f0af633923d25af9ae7a44cf485c7ff0d3d0a9e5cc9cc3dbffad8f09c7fb",
+      "index": [
+        "100644 773bc0d4fa7a99c71fb49457caec70c9307862b8 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/2000-diagnostic.json": {
+      "content": "cdcbd1f4d906bf69cd39d434812d10fc106e65b764b3d97762f60ad68f5d03e7",
+      "index": [
+        "100644 f11d8fb458afbf1e309085f9db28e06a8e001e7a 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/2000-observation.json": {
+      "content": "239260d3e26c9b5c2f54e8b924a16a86a09d88be76dfd78f6a08055449a0160c",
+      "index": [
+        "100644 506808143ea1a264c2bfe750a96fdc62f9ed0ce0 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/2000.json": {
+      "content": "3f770023353d3cc6cc619aa6afedf433857f86d1e57012a667d400bbbfc23906",
+      "index": [
+        "100644 ab53c15d45da26a9629a57d6ff18868c7cdeb7a1 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/2250-observation.json": {
+      "content": "23d1740efe9b1c1af3b44160a4f39c62ba2167626b3ba1156f77f02e5555ec12",
+      "index": [
+        "100644 2050f8373776f1455176926fc85f805e81194146 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/2250.json": {
+      "content": "1db8c8e334e86aff21167666ae9b1958f1c026fe8ddc4053d7805863771aaaf6",
+      "index": [
+        "100644 855d1c6a0ec2ea2fd5737e39462c54fc95f1ae62 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/2500-observation.json": {
+      "content": "d8757db684b7d42d44526ecdb42d99e8408c5ceda1b8b53eea016fa080497281",
+      "index": [
+        "100644 2007705dfddef6e5f83d10751fb1a746d5e8299e 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/2500.json": {
+      "content": "973f6529ae5c974374de4ce447b76684ab636c77efbd3bc4a865f9dfb238fc3b",
+      "index": [
+        "100644 066067bdbceb09d2aa18743acc1f3e418de6f396 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/2750-observation.json": {
+      "content": "b84ed97b0f6cedc03f31819521d5f731ed2fb2f6c480d5f182f45cf12e51232b",
+      "index": [
+        "100644 c379f98abe3e383c5db37a4c1dfc9b085de5e5f7 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/2750.json": {
+      "content": "f4e38ea4b9ea75ea38ffd7f71dbfefb27c0d2746b47157a71d34d96b2f0a3df6",
+      "index": [
+        "100644 d1663f7fef7c4cdbb3fd95e7a7d2bd55b46e4768 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/3000-observation.json": {
+      "content": "040a1e9e6b90587934764d56cf0033267c386fac8924ac80f2963b211adf686a",
+      "index": [
+        "100644 88be976ea8e55041da8c7c24528ecb773d9be61b 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/3000.json": {
+      "content": "f2a6665c5440bc72567dd102cc4bdfaa36b665600711bdf3f55f942c8937ef60",
+      "index": [
+        "100644 d024a438780e9c585306bdec74ef7fd306413c9d 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/campaign.json": {
+      "content": "a8f6ad1478ccbfae61ec7bffb6ba72ba12977a68b2204ccecdc13ee980f00741",
+      "index": [
+        "100644 017f798c2dec28bc66a7f39d0e2b272e6e668864 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/diagnostico-1000.md": {
+      "content": "52982f1b53b6236899aec207e2b4bcc959862b14db155328e70aa885848ae388",
+      "index": [
+        "100644 16ff99486fcb921d91079f676d6f6454dda8ba81 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/diagnostico-2000.md": {
+      "content": "232ea223dbae7c5f77c4b794287fe72a94a569ed2aa9307d57cba3146f92afad",
+      "index": [
+        "100644 89ea1607bfce846e4a2ed76547d8cfc233ee947d 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/evidence.json": {
+      "content": "c293759a29edc9e025520aad5d9967038bc16d68b6d2c0f6d7a6593c970ea4d1",
+      "index": [
+        "100644 9bcabab4bb6652b25be304464407985c53e4103a 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/frontera.md": {
+      "content": "b430b3b1527c1384d92cdf67b23caaa906a85b24dfd061c5a95f8e0d988f651a",
+      "index": [
+        "100644 efbf099fdc23d1f966a5dac4cd1253363d048ffb 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/tests-suite-repeat.log": {
+      "content": "3784a0cd9cf55cb9b1d58e0f0013370e1d7e6c848e0aa5d0f4f617d4dc9bf915",
+      "index": [
+        "100644 77962fa50273e16b15cbfad2e22be89835f8dcaf 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/tests-suite.log": {
+      "content": "bba647779dd923a3d89b4fbad7cae198db4adab6cac2a8af3d3d34366d33ad02",
+      "index": [
+        "100644 57e56b3fa8f9940e8abc4894881178f38fa11497 0"
+      ],
+      "mode": 33206
+    },
+    "results/frontera-baja-2t-20260917/tests-workspaces-repeat.log": {
+      "content": "f08cb975c6b5834db681b2f4e817d2e7f5fb453bf122b36c41a05b12eff4aafd",
+      "index": [
+        "100644 07b056a0e86f7366a2cec83a6bf7f8ad0793bd7a 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/1000-limiter.jsonl": {
+      "content": "1b84e6af90407b5e644fa11e76965a643f74a7ed8d7b5cf429ab20c2fc12d20c",
+      "index": [
+        "100644 8819a70ccec30fd8a7421070291a471047fed1f5 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/1000.json": {
+      "content": "582bdef1e6abb7a165850c6ebe9eb1d90cfd73b114e2eefa9d7d30c986437fad",
+      "index": [
+        "100644 c7373643c83cef727438c44e45674d5dbe91d390 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/1500-limiter.jsonl": {
+      "content": "6907c352f27ba19bd28f5061caec3586145c65687caa37d42565415edf4ffc2b",
+      "index": [
+        "100644 f6004e22e0ff1dbe31774d4f1c2a0a5f5958d49e 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/1500.json": {
+      "content": "2750e714c800bdcca28ecb62e24a9ec7db69112915d612f9dd561eeb673db654",
+      "index": [
+        "100644 a168a1466b2349fcf91577421f32703c5f69870e 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/1750-limiter.jsonl": {
+      "content": "68be8bd12c6e3ca017d6b977274a027f94b380043491c4742818b7a52f2148ce",
+      "index": [
+        "100644 5123c235008daecb708ac4309fb77371c2de33b5 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/1750.json": {
+      "content": "62bc20ae0ae5f7e1862c25a7180fd1c217b9863a7de708442d35177669e47a4e",
+      "index": [
+        "100644 21aa23b93f46b205ea939f7558df3734003c8bb9 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/2000-limiter.jsonl": {
+      "content": "b8ce58b8535b77213c4c9274a4bb8d848f0d9dcfc5c004e08960c4b01035cbc5",
+      "index": [
+        "100644 688d57631d81af295a14ac010e184bab30340163 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/2000.json": {
+      "content": "53758c9af2f78b307ce465d168b35626da1d82d80d53a0c93d36cc841a97e508",
+      "index": [
+        "100644 8f3016d841a0bfd7e1c02480ecd0693ab3df9139 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/2250-limiter.jsonl": {
+      "content": "1b22a0a9567ea57415054534204743ecd2bf83d5f7e485074d870076821943f0",
+      "index": [
+        "100644 f3c59e7e031153c1eb7cce251aae75a1cf771673 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/2250.json": {
+      "content": "25a14f73902d3bae69a8f95d2fdd3ebe28aaf366185709a7a35ec9862627df32",
+      "index": [
+        "100644 d60f8b307cf84cb9393b4de19d4b3269482b5074 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/2500-limiter.jsonl": {
+      "content": "88f3bf4685134f53ed981005306c052c434855ea0901891b7dcdf93771895b4f",
+      "index": [
+        "100644 26d673e0f35516e1a54879b26054a0625ab9ec0e 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/2500.json": {
+      "content": "d0deb83f8c8cdc1061caf41224cf9799c1119f099519855c51682bb2cbbb39fa",
+      "index": [
+        "100644 8ce15dd9f49943c9720016c1ee77a7b761073698 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/2750-limiter.jsonl": {
+      "content": "0e6553af59324164e6a3fab920b7e43eb28759adc92926da472e61aa13f366ae",
+      "index": [
+        "100644 b9f4569472491a543c1edacbf20a19f840295bae 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/2750.json": {
+      "content": "8d0476a52ebec278abb8dc43f7267efcc6d3694f4818b3fdeb55e3ed460d2a0b",
+      "index": [
+        "100644 e262b89d7142a33e2182524473d99b2432297b82 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/3000-baseline-limiter.jsonl": {
+      "content": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "index": [
+        "100644 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/3000-baseline.json": {
+      "content": "a2701904a5978e8a1a5e0bd4c429bfac3e64622c2e7674c12ae619863c115754",
+      "index": [
+        "100644 846a0cbf6779369b5948002e9d6d0504fdfffddb 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/3000-limiter.jsonl": {
+      "content": "ead249e62516609a0a48becc1804785599875dd6c3e7740207c3ed7eec9327d8",
+      "index": [
+        "100644 a3f3cb28367e2e67477ac2b3453b6671d77af589 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/3000.json": {
+      "content": "cb16e301b22f87d42102bdf63cae1b95e04d0e894b3e728188fc8587079d4d13",
+      "index": [
+        "100644 c965ecfe526d5f818839ac9c15043feab9b5571f 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/campaign.json": {
+      "content": "5912b8086b8708d043a71683ea8ff132943dbd5a96bd948ebe76bea2180035ef",
+      "index": [
+        "100644 56450ff2f7724bbf0a2ee5ce38058fa712362613 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/comparison.json": {
+      "content": "18860bc932118f4997988670720a3a184f8bf434cb89176646bc2caaa3bae33b",
+      "index": [
+        "100644 69f10380d62153b8ca13e2c81f8f95963a81b28a 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/decision.json": {
+      "content": "4557bde00421387aa2a2ebf0019ed337bbd2f1863df980329a65889000907b6d",
+      "index": [
+        "100644 2956d5c8c2284b54c1d3b4fb15a1710906bc366c 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/microcases.json": {
+      "content": "f50aacd978ff71a2571bb6fe8e91e901ac5d7f4d38047b7f102ed34d50a2fbd2",
+      "index": [
+        "100644 302b117d73a9a4c703592936bfd548c65f2cd1a3 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/positivity-campaign.log": {
+      "content": "1469c69e908b60242701b5ad5ce697f46c854b9ed688a0972e0bce349476efd1",
+      "index": [
+        "100644 4196f7aeaf431d550a0cd5b4562f7544ab00c9ca 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/positivity-openspec.log": {
+      "content": "c344be643e30238db8dbc11ede2684ebc0f2346114bf8c795ca2e222ee7fd4d0",
+      "index": [
+        "100644 4c863c12d63d74a6465ec32f972f337471392e6c 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/positivity-suite.log": {
+      "content": "c4426743fd57939565b712e169501310a98fcdda258c274591a715af32e339cb",
+      "index": [
+        "100644 578da891242e17eb259872bf946ae53060b48799 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/positivity-unit-final.log": {
+      "content": "6710a3dce49bfbce6b1bd6d7f23ff6582fb610bac622d68890962cf32a189afe",
+      "index": [
+        "100644 7ac34cf5cfe2581f8cf41a3ca783e7e8b1247856 0"
+      ],
+      "mode": 33206
+    },
+    "results/positividad-transporte-2t-20260917/summary.md": {
+      "content": "69abad4482eb1602fcda1e59c73f4dbc0364e28cf4ff121d38a00847c5481f9f",
+      "index": [
+        "100644 62fd1c7b5c84369b6f5d964d3832dd689e2b43b6 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/1000.json": {
+      "content": "69348d53f082e0a295455265b2833c11e51fe19581895939805f5c42a778e0cc",
+      "index": [
+        "100644 701fb711a30ddf28422fa29ae69406031395a0cc 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/10000.json": {
+      "content": "823fb3598f79a6e11b67144a80e137b4190d6e169afbd2ce196d3969421cdcb3",
+      "index": [
+        "100644 84158fff5166c3d148b4e3220143454361a9c8ed 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/12000.json": {
+      "content": "c7e8e6470de239d6082b1e6e7431fa914e8de28a3a2c6629d017ab594e08009a",
+      "index": [
+        "100644 660216252119f23df0fd622bc54a0ab79a8c291c 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/15000.json": {
+      "content": "730106fb9aaf4610d37f835856cf4a572bfa261d0c46f3613c41984cf8e23ef0",
+      "index": [
+        "100644 49df0e263203068c7259861eac4284901e1dfece 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/2000.json": {
+      "content": "3d780baaa7c878d5eff8e797537ccdb35b5a7c8726cd9759fe10592c23f87420",
+      "index": [
+        "100644 113ea091237de3e1590f23db17cf0a2f919d3e35 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/3000.json": {
+      "content": "5e26ff8d4e7de3df16e6d6f24f1ce86df78a810f01a50967b501d71a12cc71a4",
+      "index": [
+        "100644 e1a2a4b392aa0fabe9848bafe4c9002f59f6510d 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/5000.json": {
+      "content": "4fc9b0015b78e6506be4df9d0bc14213a8ae95071a678557b8ea4b6a1a016754",
+      "index": [
+        "100644 7a24a7f572119121c5177eaad9ca564126883893 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/8000.json": {
+      "content": "7374f2a0617c53458d6f9310f3232c1d3cdd3faace818a1d181f5f864346796f",
+      "index": [
+        "100644 bcf57db90e143116b8bb67250d850785d7b6a1a4 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/campaign.json": {
+      "content": "2bb75b4621bb02c37da866745d7c1b48c435489e9524d5f7903c43ff8030b25a",
+      "index": [
+        "100644 664fb97236165fc9853b900ac103df6e9ef3f799 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/tests-domain.log": {
+      "content": "cd0828d07e300acefc20da897debae1f190aafdc5290b02a673ec8f51b5075ab",
+      "index": [
+        "100644 bf7ce0d25463d3b2be8bd00478e46a44e1861138 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/tests-four-stroke.log": {
+      "content": "7905f1ad9f15b160647283c07d26aeba1b79492da85148ea960a02486537f55f",
+      "index": [
+        "100644 511f293303cffc0af3b3105f75e347f6a1856986 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/tests-performance.log": {
+      "content": "1a6c0c8bc281383cfe2a66adc9d33f3d9593b1756ebe01d9766e48654670bead",
+      "index": [
+        "100644 f60b44d16b8f5a10a9775516633fcccc665e070f 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/tests-project.log": {
+      "content": "3a4aab911e66fd94a8de02e16a2cdf02b390a186b17043c34d592b1601529e59",
+      "index": [
+        "100644 27a2d1760cea4335297afe9006d06449b6f559da 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-dominio-2t-20260917/tests-sweep.log": {
+      "content": "8c756d5da94c3d9e672be06f37f43a3c0ace5182eab867e495c90d24f15a2b0b",
+      "index": [
+        "100644 ad0349839bcf24ad27d150482f52bbb935534077 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/2T-04-plan-modificado.png": {
+      "content": "94bb339928a8b9abb111f4a1712e8411181a0c972cff885a02deb34eae7a4c44",
+      "index": [
+        "100644 34ba26598648babce674620722886b761761ad9b 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/2T-10-final-reabierto-controles.png": {
+      "content": "7436bbeeb149e582bb839aa0f03a0506945f99ea3610f72eb83d29b6e5ef2be5",
+      "index": [
+        "100644 bd7d701da3ad100cf7afdbbed9195c011d4f3587 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/2T-11-final-reabierto-curva.png": {
+      "content": "b144a026295b26753f6d298e2dfb578fec66bfff28d919c1430d0844cf146c0c",
+      "index": [
+        "100644 01b0b13a8b26ec48ba509a6e86da50cba6125c04 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/2T-inspection.json": {
+      "content": "6681452a6f12472d6545c9c3e2b3be5b161ab323a8181f6e0e84ad179c372b57",
+      "index": [
+        "100644 1dbab37db3fd4061c7b1ddd2ae145fc945083afc 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/2T-results-sha256.json": {
+      "content": "885f01d4816582a75e7a99f1cc57024e81e420717d7f05b3cbb774e8289eb880",
+      "index": [
+        "100644 b79864f44543cf3558ebc18d0243a361cabf3c2e 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/2T-windows.json": {
+      "content": "404a25005136cbc5a0c13b9d107f1488ab19a6e02f4119c8df58a13d41f1eb10",
+      "index": [
+        "100644 48f0d0e7f1d766e6f5fb25d02f291ecaccb7fd74 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/4T-04-plan-modificado.png": {
+      "content": "336c36a2a7097f52fd6e232a2b1d17a33c99229aafb7503a7e33abbc01a74943",
+      "index": [
+        "100644 105832f7810f96210e85502c195bf9a14311bb32 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/4T-10-final-reabierto-controles.png": {
+      "content": "c78714d1af7189a5a5ba96acbe3633ba5df9a42ac2057be7ebff57551e9754df",
+      "index": [
+        "100644 8e1276a7d8e455f9550e87dbec03766e19456673 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/4T-11-final-reabierto-curva.png": {
+      "content": "c872d0c26b21659fbbe11c2d143a43a8303b75470ce012ebeea5844c9be7921f",
+      "index": [
+        "100644 43a6427bf50cba97ea8bf2053025ab04a3847de8 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/4T-cancelado.png": {
+      "content": "f218f6b0d85b6afb644c0441ad266765cfdd1e327439a32cdce8ce6b1ce33095",
+      "index": [
+        "100644 07e03316230594caa416feb3dc8b6721d8cdc62c 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/4T-inspection.json": {
+      "content": "3679331392fca7004d6bc9f89aefd986bccfaae1f4e1bf0349287d0d6fcb452f",
+      "index": [
+        "100644 b6d8bb0bcfdca9af529837e6128b10d35c0b3bb6 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/4T-results-sha256.json": {
+      "content": "bf6d3f8b9ed1c585e4112486865882eaf4816c4e0f2d53304a03d16b04972175",
+      "index": [
+        "100644 7e2fd924c83a130478be6ba673d4557ce6602540 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/4T-windows.json": {
+      "content": "20705cc902d58a70d2b5e112be42455b22445e9d2e6f33e80968738f88086fc7",
+      "index": [
+        "100644 1fefb9736674fd6fbf7a6dd22c9c6eac2b28ea6c 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/evidence.json": {
+      "content": "7e749b3f1e75ba40a3dd3b6e9c1aad0bcece8d79eb66fba16aadb918e61f209d",
+      "index": [
+        "100644 4c45ad0ae72d8faef6b2cd0f68161048b88c7479 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/performance-iterative-suite-final.log": {
+      "content": "7de0b06e28f90340db35d8693414e5ce739b4f311c87cc552ed6888472d3b1ac",
+      "index": [
+        "100644 b9848c79086a35a6ecef1f899a6a537394f5826c 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/performance-iterative-suite-verified.log": {
+      "content": "48316b4bbfd454d6ca1ff6b858afe803072405e1548b95fe04985fd7ce6043b5",
+      "index": [
+        "100644 b174e8588b35fe7d60770af96857b34e4d574f9c 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/performance-iterative-suite.log": {
+      "content": "ac5a6867afe34f58439fe3a8b9f5da3de9fafcd51bcc33f0e06495b28fc5a5e4",
+      "index": [
+        "100644 dea4da72eea919afa54f876ae0bdbbed54cfd76c 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/performance-recalculate-review-fix.log": {
+      "content": "140d37ddd155af6306236133a8fe46f688f66444a3e012c52dc0556a339bd3e6",
+      "index": [
+        "100644 850a2f220b40d28f67b446113c7f0430c375eda5 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-iterativo-rc6-20260917/performance-recalculate-tests.log": {
+      "content": "47fb909369c319f8619c00035706689057b8b36de0774f21f50424e192e242d3",
+      "index": [
+        "100644 4783507533aaa28641a1097148ff8e262f912ac3 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/evidence.json": {
+      "content": "724a3ba86a6aa5e063a52c09b0eb8cde290cbe490a58b720e3b8f0c00f784f64",
+      "index": [
+        "100644 6d9e9528b67afdf7696e51a36fbd43b7ca8f9c7f 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/exe-evidence.json": {
+      "content": "85e15eb3fcc434b008ef2422c2d7224ad68e2053614dc7ae09fa448bd8d30c14",
+      "index": [
+        "100644 f511f6262247fb9a5a1d2d14e83680a27d2dfd5e 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/rc6-2T-combinado.png": {
+      "content": "579efa328c08049a7d4fe408e8839e9cd74b82cb14410c1624758c428853a6ba",
+      "index": [
+        "100644 2b12a3902e84097c737cfaee7a0726d2d6625617 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/rc6-2T-resultado.png": {
+      "content": "09bd92ebca4e339cdb84cb1db3c5355e1d903f4da8e5697f1faddbb757c946da",
+      "index": [
+        "100644 2655b6f0cb25a8a7d929ad6f77873cb5e2039771 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/rc6-2T-resumen.png": {
+      "content": "11dbbf4a206fe5023e238e0464bcf42ae07cb3dbe42c239d51044e3eb6602e59",
+      "index": [
+        "100644 6fa5cab79dd8db48d6a55127e6bbc4331c882b46 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/rc6-2T-tabla.png": {
+      "content": "443afe3a2c7a32a569540bfe6bc0ad89047e0cbbd14a644550772d47b9d5336c",
+      "index": [
+        "100644 e0828cf093979d7945da37e7a8eaf359386f4efa 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/rc6-4T-combinado.png": {
+      "content": "07e26173b6418113d30b7f699e913f92a3616e0c4a4629c51d987389e816f920",
+      "index": [
+        "100644 244f5c2f7c15cb92f5f7e610cc8afbbe8032ca71 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/rc6-4T-resultado.png": {
+      "content": "c5ab314405c0a16789ae5b637749888a8f2d68da4f8a04a31a18749864146c66",
+      "index": [
+        "100644 5b0a8f1c0be1eb9c462111084b9e8440f1be55f8 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/rc6-4T-resumen.png": {
+      "content": "1683e9244bb809e5e1262977664bbdccd5305f6099f47676954929d622e013db",
+      "index": [
+        "100644 536740226a77a420faddfaf42ac324391430f967 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/rc6-4T-tabla.png": {
+      "content": "ffb36061aa3588fe16d961f4d70f638043ab053578a233657900616b0bb3e66a",
+      "index": [
+        "100644 3d690ecfe707f9e478c2725a47e96d0c4ad81bc6 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/rc6-comparacion-derivados.png": {
+      "content": "00e782d5cb192cc1cfb6d8356a18ae97a5c6559f621cd328566bb8878368688b",
+      "index": [
+        "100644 38f5c743ed7c2361b7c7d7bde4a16f41b77c0c7e 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/rc6-comparacion-magnitudes.png": {
+      "content": "0938ac0af8262918e69eb4c2d1117a7428534d51eaedd40a52069d71ef297b30",
+      "index": [
+        "100644 d3ccc3bc4971b67b440c6d0c580f52a4defec9ae 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/rc6-comparacion.png": {
+      "content": "409790f828f80090b4e0fb3a5e42e11eb5182de63f26fb40450ad2810a7d3234",
+      "index": [
+        "100644 9d236029eeb6327419a91a10f8f022de959b7701 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/source-125-tabla.png": {
+      "content": "5e3fdd91dfec8cfffb8c55eba692a4e4a7940261c9c4ea8d94946a581c15678c",
+      "index": [
+        "100644 09861f85ab3651c237cdfa25027d93e61af83bed 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/source-150-combinado.png": {
+      "content": "70fedf774a73440d6592696a09ff3357a72042259bb97207a67ed3a0bc18d7c0",
+      "index": [
+        "100644 2e4ed472c466abf643bc9602fbba99a16428d3b6 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/tests.log": {
+      "content": "307d513295201af96a4f41ce5a9b1f989569755e282b72e331cd52040ab54dd6",
+      "index": [
+        "100644 be33a7bdaa92f7f6a512356ed3b88119508717ea 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/windows-100.json": {
+      "content": "b5c110e8d7fad8faf2d26078799d4d8b777b70ce928a612b0e1a2ae551a98670",
+      "index": [
+        "100644 0b6b297f2374bd6e62ae03ba9a92c1b30ee142e6 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/windows-125.json": {
+      "content": "257cd6ce0377a0e90bde7d54fbf4ff750e32fb63258fb77d34a678c9dafbcf32",
+      "index": [
+        "100644 c870457f74f0c5a7ffde420fd2376e1b027ba35e 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/windows-150.json": {
+      "content": "d8cdc6a31ba9498ebcae02bc3ff547441750bb16e81d2c5e31ba93b6ec0494b0",
+      "index": [
+        "100644 ea291f88e2c9ca4dc8533763ed48dcf67d0885c0 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-rc6-20260917/windows-release-125.json": {
+      "content": "cd7664b242767a5c54ddb401613892cda81aaf959547ec408eb63a0c54c8c73e",
+      "index": [
+        "100644 be0c51e52964450f242298a1764f99d8e50fbee6 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/2T-calculando.png": {
+      "content": "dc7fdc920a6078df07318ff4ea3b9d82257bd9d13edc465b45e8246309b23088",
+      "index": [
+        "100644 801b2361488851405ce04de7f98329a54336fbf9 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/2T-curva.png": {
+      "content": "95a95670a260c150a2e0697a1284b801d2baba008c2747ad040dbdb3b3e4db50",
+      "index": [
+        "100644 a4df08d000c8f5d02f91f05d26634052eabb01bf 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/2T-sin-calcular.png": {
+      "content": "1bd22cacef75d739955ba456467575f4bde88d2167b02e814e673464d01d0cf8",
+      "index": [
+        "100644 fed58cdbb0d6e9d7c9305114b60b86cb8eb9495d 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/2T-terminado.png": {
+      "content": "bd4fd538e73eab1a500a139418b2e7dc4f3a980f4ca883b7cd2dd291c4c8afc2",
+      "index": [
+        "100644 3702fefbf3b0b7e21baa44780db8fe740a226736 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/4T-calculando.png": {
+      "content": "d78e12c30b3e7806ae127d39b2c682944652da38914c59cca0477698f76a4bcf",
+      "index": [
+        "100644 3d6b74cfd2f372f9d68567e81456144e27b0a4ad 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/4T-curva.png": {
+      "content": "f6913114810377ea22b97cb2372a78a150e4c6f06367be3e86f3074981a76529",
+      "index": [
+        "100644 593d8df65e20e365adb795219b6f5a81336dcb00 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/4T-sin-calcular.png": {
+      "content": "c4863be408e8e328fb92c321c5f1cc8013e19ce62a5159011e64fc41c66d16c7",
+      "index": [
+        "100644 5ab307bed8cdd88cd7af2dc3b0fd83a5ff828b4e 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/4T-terminado.png": {
+      "content": "590e85ebbd81b3a481a669ff62d365e4123549b7c1f6a0cc17cc59749abc7333",
+      "index": [
+        "100644 e5da914abd5b9ffaed1fd0201d2ae43ff033d3c6 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/cancelacion-20260917.json": {
+      "content": "b44880b850402fb94900ff347f3854b6576bb574183ae1bb1d7c2e241eef9aee",
+      "index": [
+        "100644 c9fde62ed9a53481fec9ec4ffeadaba6c9b91386 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/cancelado.png": {
+      "content": "3ec39f1f16b229f0035d2eaf33a0640f92d43c9c6f444613238765bd2bddedcc",
+      "index": [
+        "100644 f5dd6a5989f4680cc27f514871fddf3b19414c0a 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/evidence.json": {
+      "content": "ab577a4531b23db1454536e409f77a6722687da9a7d76f58208ea9973f048068",
+      "index": [
+        "100644 0967ce7ac9404b8d96167f4b8040adfc79d64c27 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/harness-initial-failure.txt": {
+      "content": "f1ee76a966dbf6c1397d048288a8be7e249c69e92df7f642db38df65a343868a",
+      "index": [
+        "100644 bf687089ee857624060e75dd05e6d75e938bfc09 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/performance-ux-affected.log": {
+      "content": "86cca09e737e39dc8b128b9b1272653408f2dae70d85c86b1e9c29a816969175",
+      "index": [
+        "100644 e2b27af17a6353f1bbec430f89eee3a8b90ff545 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/performance-ux-tests.log": {
+      "content": "5780dff007a98b2c4b650bc2f9c15a65c6e3e7db6a6c4e8e30009c6ff402d772",
+      "index": [
+        "100644 9d5d8b82caea9b6a0be1daf195ea087a3082cde6 0"
+      ],
+      "mode": 33206
+    },
+    "results/rendimiento-ux-rc6-20260917/recorrido-20260917.json": {
+      "content": "93beea630e61641ac5d1cce3e6cb91c928466edcf49aa826c5ed7a1fcd4345a7",
+      "index": [
+        "100644 c7ef550c29fd569b5dd7f30bcefaad344c11268d 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/cae-examples-evidence.json": {
+      "content": "727184f2a283148706c130e4c6d86e9491af0bfc3ea416867b2dbc193a7e96ec",
+      "index": [
+        "100644 bdcfc39fd4401f3ecd247768cebfd32e3b0bc5f6 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/cae-points-evidence.json": {
+      "content": "e67f53ec699707e677c6e9cb24ce64d7f291b72917d322d8b71056c15eb16c10",
+      "index": [
+        "100644 2cc9c365c450a540ce4ed2f3e132f521331b09a7 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/exact-comparison.json": {
+      "content": "db4d9e11406cac82e37a2198cdc15464f5182b8f4ae120687f9aa91374695f3a",
+      "index": [
+        "100644 d0dd839f2f3c9ccca2dd5835cab3d61b91274a0c 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/package-integrity.json": {
+      "content": "e248289cb2efcab459f52cb6b7878f1175fe11831dede26d799dc139f2c4c78d",
+      "index": [
+        "100644 19b9a236726ce092c946534cbd2682f593efe052 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/preserved-packages.json": {
+      "content": "ed5da16a925eaf089e2f7d3fc4e8be41d2066da687577bdefe7d894deebc8819",
+      "index": [
+        "100644 5a19579d7173d0146d0622425fa8ecb51646c2b0 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/rc5-convergido-4T.png": {
+      "content": "7bb5358748b58ed7710aad46397bce0e20714684544e965a15ebd55e7827cd03",
+      "index": [
+        "100644 c05505b9619196aa0a8d6db9cce86ee106744431 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/rc5-ejecutando-2T.png": {
+      "content": "eacecf4f97378a0d5d98fd9c65c3e68fda484882c33e7269238bebc10d90b6b4",
+      "index": [
+        "100644 69278a2430397d35d33013aa16c4dd4fa954107a 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/rc5-resumen-4t-reference.png": {
+      "content": "27b919aea9bed89538ddb8af72c8a50a293ad84b5c081538f12321156f268f33",
+      "index": [
+        "100644 0c7702d46d92fca19b1f286f5d39728a174abb4d 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/uxanalysis-evidence.json": {
+      "content": "64c5d65a96b1c7e8800efa449035249c31569c9f6598e64d9446ff795f3d98ee",
+      "index": [
+        "100644 89e9dffa3c480b0a3e7b9787f15bcf1c1c63e5b7 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/uxcancel-evidence.json": {
+      "content": "f7f2793635200d4521d95aaa157878e70492d4810139bef3ea4065fd72e08a45",
+      "index": [
+        "100644 dfcd1704efd0b6f6683be355793df3f673244d9e 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/uxeditor-evidence.json": {
+      "content": "4465c9ef9a9bb11090123df57d9f5f17610bb4a0813f84f8e6ff52aac69312b1",
+      "index": [
+        "100644 f622de566fe56e7a8fd39f2b0764654b8eab53a3 0"
+      ],
+      "mode": 33206
+    },
+    "results/ui-cae-rc5-20260917/uxseries-evidence.json": {
+      "content": "9c7f7ee1869e003f9db3a073e4f0ec14287ea2f55e990edddc5139c92c7ea787",
+      "index": [
+        "100644 848962fd26d37878427c61a4b15881c8d25f270a 0"
+      ],
+      "mode": 33206
+    },
+    "tests/calculation_double.py": {
+      "content": "59630a395ed3cc640539fbf419f3fa87a403c36116e68b5fecf26f36032b994e",
+      "index": [
+        "100644 2857856e10b94fc16be4bd3c3d66999fa9f404fb 0"
+      ],
+      "mode": 33206
+    },
+    "tests/diagnose_simulation_balance.py": {
+      "content": "554cc07bdaa6d9f0d513312ebe7d941bc3294b379a085a1d8c7d91db782abec2",
+      "index": [
+        "100644 e52dadaffeedbdb980864df0ea1ba56f9ddc4ed1 0"
+      ],
+      "mode": 33206
+    },
+    "tests/process_double.py": {
+      "content": "96b756da6e98633a8ebcceed49d01750d09909f26016540af1c373041cdb1fff",
+      "index": [
+        "100644 117000125db2d3b35c4338cb0db30f54251b2ae7 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_adaptive.py": {
+      "content": "d3c7456602f4697d777197c4e4b98008a57a0bd6eec38f3d98bf58fd8a308d5c",
+      "index": [
+        "100644 e4bb05364aa36a6e6a41ca8293fcfff8f7562f9a 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_cae_ui.py": {
+      "content": "9108871f6dbc2582ad51c060018612ebf9b575b6eb945b37c1888a22caaabda7",
+      "index": [
+        "100644 e0aa9fc344783437cd212b4a2db44b83f94f3a72 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_characteristics.py": {
+      "content": "488bca72302ebb9023f6176d9fabf65a5e408d049b5fe2f53745e707da3623dc",
+      "index": [
+        "100644 4c902d3627be9559d9c915bb049d3113437344f5 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_comparison.py": {
+      "content": "ba74baf0b3522a415af7252f151b34588a0f6bc2c810716e9dfe1e882a92d269",
+      "index": [
+        "100644 c4a7d1129a8680b8497cf00049343c665bd1a22c 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_distribution.py": {
+      "content": "0fc7943628acc82e4b24040b9d6beff96abce4617938fe77b96b48a5a89d391d",
+      "index": [
+        "100644 209cf8427e51bbba4a490658d9410b3a820f3e60 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_ducts.py": {
+      "content": "77f05b07db6d0453878e89fbcb797db46efbd6ee08a8b8eaede4b7e79eeb21b0",
+      "index": [
+        "100644 1e302fd1ed86db548580f4334a543ff219548db1 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_example_projects.py": {
+      "content": "021d4c59fe13ee92958e156e88c5b4d96cd0dc3920c1df56806c9b1760a96a24",
+      "index": [
+        "100644 f8a5ea5673c5293e62e1e20caf5f3b0292fa506b 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_examples.py": {
+      "content": "e99e5e9909bd49f7661e5e1e604fec0d640b3ce83ee230ba782ce46ffb5550e7",
+      "index": [
+        "100644 595c52e413eb39eb0f0d3a9e069774512a468681 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_external_data.py": {
+      "content": "f7079bc8a7748031ae52a78e0b45a2dc33f00ecc136af107a1a712532c99f767",
+      "index": [
+        "100644 df61e01ae184dd5cd27de6050ed0e1a176826918 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_four_stroke.py": {
+      "content": "d7899d121b64a0f596cfe0ac3c817568f91a4659249a52424ecdf89a79a2349f",
+      "index": [
+        "100644 b88dc73f218cd1a81d3f9a2d428e636dbafd1088 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_four_stroke_acceptance.py": {
+      "content": "b63fd4693b75b79ba231c6d40dcf69679a993b52521d85c8fb7e7c2295da7742",
+      "index": [
+        "100644 2db8a2f42ba1485e3a272ff88a7031b3e73f8932 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_four_stroke_integration.py": {
+      "content": "1f63886c8af587650b51b26567b044df839cffdfe885cbfbd883f521f6ad32a3",
+      "index": [
+        "100644 28aec5d56934499e12127d3e9515880f433dac1e 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_four_stroke_window.py": {
+      "content": "30ea20085ddb2e1755324a5dd7761f8689c754e3407a52ea13737381071ecd00",
+      "index": [
+        "100644 e134147ce487e4c7ef77b969db51f6616ba941a3 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_intake.py": {
+      "content": "e04cbe32c9786bdf247c900996ebb616a03f196d5f3775e6ec220caa47ad4005",
+      "index": [
+        "100644 8746d408c592dcd60a5bbdd20e5375de2fe09213 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_kinematics.py": {
+      "content": "35d38847acd2628848a32aa279208ff7744989925bc1bab6486c5d6f84b2cf8b",
+      "index": [
+        "100644 feb886b49a65c0317646f659c47e7a88c2ff3ed0 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_low_rpm_diagnostics.py": {
+      "content": "a83140329ccb05ec593337845e376b1ac3b33247d1d404c959a425ea7c040552",
+      "index": [
+        "100644 c010406c0209c59f84b6f4307b2b27ff1c009497 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_p0_baseline.py": {
+      "content": "fb394d79ee6ab0797b127745aec9640e606cebd8376eb8882491f19791f4d501",
+      "index": [
+        "100644 2ea2a8ca802c048cdc67baee9efadf32d8dd9a24 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_performance.py": {
+      "content": "bb98749c7fc5ff60c2cfe240489a5a980fc71509c932b8db1e5c0a229dd811b1",
+      "index": [
+        "100644 427d13a77c1e50d224e4855615a125a6c98cc2ee 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_performance_recalculation.py": {
+      "content": "c8b0983f1160a96035c758edf614e8385a9789e69878f0408b5d5c1f525081f6",
+      "index": [
+        "100644 b6bafee9c2313d87565729724ef7656884daebbf 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_performance_session.py": {
+      "content": "d6dcb0c677e39e5cab567a7483c76a4b6b9679961f5e4606cd8b2b2d2142b7d0",
+      "index": [
+        "100644 83b8fb2caa8d1f65ab6c75588462558a78736616 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_ports.py": {
+      "content": "6610531476aa3dbf3ce10d94150dcb26d39656c72c5c77599a3650ee142bb3c6",
+      "index": [
+        "100644 167945150c430291790134a1823be0ea6fba754d 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_project.py": {
+      "content": "c15c86805c5fc56c62748e18a2188297c39be870769f5d4c5cccce7bdeb7a54c",
+      "index": [
+        "100644 d82976e79bcc26febb2db4ae3fb2d84372cfa0b1 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_project_simulation.py": {
+      "content": "ca570adce214204105627e36b3758c681774fd5a71bdba6176aef9f54ab163ba",
+      "index": [
+        "100644 68df9658876b8dbc2a22d7a70a6479213746ecda 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_reference_results.py": {
+      "content": "b2655ada97287e483b4a17edf93ebe09f767ca283b976a4112e72e9708da4e9e",
+      "index": [
+        "100644 2337f03c2cc19b7d1d6c4cbf95143ef0fdf70be2 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_regularization.py": {
+      "content": "1776aa4fed09f5d4a256a1933c8e2a29437163d19c832177b443883f6040efbb",
+      "index": [
+        "100644 4994ea8a651466b7772c5827d6d2a61ca78c622e 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_rpm_domain.py": {
+      "content": "ebd281c15e405265cfaaead8c47f96e792b3acbd4ba100d6851c88ffdb3047e4",
+      "index": [
+        "100644 a9f8c07f3b482b549f47b5621918e6deffe107c2 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_simulation_audit.py": {
+      "content": "e293bc4a248ab6ae3f741c87a4e6326f66be9ab80eebbb4c255941e8a96a833b",
+      "index": [
+        "100644 a126196500cfafd7953275d21e6418c9c9adbae3 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_simulation_elements.py": {
+      "content": "b36f295b3c592de8bfa9f0f7bb3e7fb105ddbfc862c16ac463e87da193a992ff",
+      "index": [
+        "100644 dc177f9997e5fc0631581bee326619ec387a48bb 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_simulation_protocol.py": {
+      "content": "6be7b2df0112c0073e38c1393e49f990f493649f99eee49d8fd0411539a018ad",
+      "index": [
+        "100644 1c3414f1ebf582fce2b8feaf30dd94d60236bf88 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_simulation_view.py": {
+      "content": "83266abc3b32d386a37cef2dcc5c8288a3438be5ca358a2219f2da6342008a31",
+      "index": [
+        "100644 a8062a8e90fb30e9d82c027921fb29f213105901 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_stage_species_candidate.py": {
+      "content": "31552a1a1b3ea3d28c6f61e1a60497b2a26aaafc0a5d304e72e8825a8948bc35",
+      "index": [
+        "100644 50d8930dc5493f311f858c0a1c56fba060b161f3 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_storage.py": {
+      "content": "fbd1a8fdc8e6555770076141226ea77af6481a531438f772704486af4be24543",
+      "index": [
+        "100644 ff8c62863b519f31d30011c9843f37b535522354 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_sweep.py": {
+      "content": "0d0febd7925feb2c171f23383f864dc15f81b19b58fae083477d28e2f1eeb952",
+      "index": [
+        "100644 9991756031241302ec5e12ca30e1805cef2312a5 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_window.py": {
+      "content": "449cf2eb154f5cebc332e1da055573cf898c07b4be887b1cc2022af4e5b28294",
+      "index": [
+        "100644 042990973ad2490e213cf04e22d289387be7c22b 0"
+      ],
+      "mode": 33206
+    },
+    "tests/test_workspaces.py": {
+      "content": "4f9b7ac559f1d2c12149e2ea1ca6813eceef367b226d3b0043a32d91bce1ddbe",
+      "index": [
+        "100644 4f6dd592849c9ae532454bafeec453605bfc27cd 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_comparison_windows.py": {
+      "content": "df4d0a29513d7140a3b70322f39df676596c06a760090df7eac1a8335e757cab",
+      "index": [
+        "100644 8e0c4b8a01833ac1fddf12261afcab569ea017be 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_distribution_windows.py": {
+      "content": "63a729d0ce165556fb939d2978e3413b437bbd4ad3246e3075ef0dc6f8038ab3",
+      "index": [
+        "100644 b4a4463f60d1298e3dc05b9a4a6ede0a37696eb6 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_external_windows.py": {
+      "content": "7a34de05706097b7cea941821dc21a3793c3f65bfb7fc7d4468b9339329e5014",
+      "index": [
+        "100644 dab74695c57d5c2741d4fe5e59dbb1103973e9ae 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_four_stroke_protocol.py": {
+      "content": "50403fbac886cff6b8981c68188dbec1cbe6c862071bbf3ab630d8b970fe84c7",
+      "index": [
+        "100644 7eab2be29b1933e9e5b6727770b0eec34e83b2dc 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_four_stroke_run_windows.py": {
+      "content": "091ac8e9b764ff9d4992d55ed45524515ed5202a9555007bc55beeae7d1b112b",
+      "index": [
+        "100644 6e029fdd924f24d26fd2297a674dd7e946a8f715 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_four_stroke_windows.py": {
+      "content": "840d9d7cdff2913a8e63c76608e6603f6bf75a8c234064473ed41857e7a31d55",
+      "index": [
+        "100644 ff11584ca0ef17cf110f90cea60614790693f155 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_performance_recalculation_windows.py": {
+      "content": "1658eac2f90e368480a4d1550b1c5ef79dcc87c0f5a28500f274aaed5e77aa15",
+      "index": [
+        "100644 37510b9ded81886fc8e7dc6b47a3a2338e16e4a7 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_performance_session_windows.py": {
+      "content": "50a10f616e2b3b6d033298dde854b3daab8fda29213cea82a7a7bbe5d9f5c44e",
+      "index": [
+        "100644 eb00a103fe387805261c5acd98b299534403cf16 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_performance_windows.py": {
+      "content": "202dbd87115bd490b919c8fbf424b455cbaade79d5c9dba6381575b61ab7bf49",
+      "index": [
+        "100644 62236c9c1f943e4214c8ddbcd98e2453ab9a64b1 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_project_simulation_windows.py": {
+      "content": "076c308e54bfebe184a0b5fea39452b8705791d3d681d4e50bb1426e98501774",
+      "index": [
+        "100644 ab0663579d65ae4fa8ef092fbbd381aa9400ebd6 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_reference_windows.py": {
+      "content": "7b38ecf8b658d280679121033c87f5c04fae6292bb81cdc4ec72e32b5d345023",
+      "index": [
+        "100644 773aa91dedcc6f8ac64de3cb1885681700ac9048 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_sweep_windows.py": {
+      "content": "c7d438b8ceb57dc3f6ade9a820e4ef02cd1d96d49bd2949fb8da4ac188407c9d",
+      "index": [
+        "100644 a7f32235a2f82bc0b374913cfce96479158a8298 0"
+      ],
+      "mode": 33206
+    },
+    "tests/verify_workspaces_windows.py": {
+      "content": "89ee8eda9e7dc7f80dd5483a34dcf19727705da75f62859c27c413ea31ec0e14",
+      "index": [
+        "100644 28745a6550fda11d828af08c98669a3bfe3fc43e 0"
+      ],
+      "mode": 33206
+    },
+    "tools/analyze_low_rpm.py": {
+      "content": "1f3deb61630d67de79617b794152d3736a248c8b6a98d921797e66d713f4c7d0",
+      "index": [
+        "100644 f89c3dcec2cade9ad68490e7b0da9c4039a70f3a 0"
+      ],
+      "mode": 33206
+    },
+    "tools/analyze_species_positivity.py": {
+      "content": "4169985ab80bb8648fd0cd551b4297b6b628f3618c40a6a4512fa51aa7a661ab",
+      "index": [
+        "100644 a459aa97e1185085571314e5ac591fb9bd5ff925 0"
+      ],
+      "mode": 33206
+    },
+    "tools/diagnose_low_rpm.py": {
+      "content": "fc9f8e0411c09cf73a945dc0765738f76446e97110e8ff17cd94d19648e41f97",
+      "index": [
+        "100644 5dfd7c5e40b30d3621798e31a492fdd82a9f4991 0"
+      ],
+      "mode": 33206
+    },
+    "tools/generate_example_projects.py": {
+      "content": "1113d07fa8ca15fce05cdcaf6a43ef24bcce3e78b0d083230bdd8b6d4d49c0b2",
+      "index": [
+        "100644 f7bd590471e3b339dcb4d1717136f8b99f755383 0"
+      ],
+      "mode": 33206
+    },
+    "tools/stage_species_candidate.py": {
+      "content": "8ec52c8587e7dfd53911df718ca0a991476c27afb231d9cf008a043b5ee7e764",
+      "index": [
+        "100644 225043d839d92d1df43784b3ded16f9117994352 0"
+      ],
+      "mode": 33206
+    },
+    "tools/verify_2t_rpm_domain.py": {
+      "content": "cd92abc2dc0cf7c870fb23db46d7bcc8f48227896ddf2d7e5bc3bdd46d8c1cfc",
+      "index": [
+        "100644 be69313f141c20227eb7b87865c2f9e660646838 0"
+      ],
+      "mode": 33206
+    },
+    "tools/verify_species_positivity.py": {
+      "content": "c43b43d44c5d04b7389c6ccfd9378eb70a92508255f48f63d4e31fe5e22d3bdd",
+      "index": [
+        "100644 e152fbd23e8b6e995efb2525417f85da1ccee11a 0"
+      ],
+      "mode": 33206
+    }
+  }
+}

@@ -1,6 +1,7 @@
 """Contratos P0 y evidencia histórica; sin nuevas integraciones en tests."""
 from copy import deepcopy
 import json
+import hashlib
 from pathlib import Path
 import tempfile
 import unittest
@@ -8,6 +9,7 @@ from unittest.mock import patch
 from dev_orchestrator import p0_campaign as p
 from dev_orchestrator.contracts import read_json,load_phase
 from dev_orchestrator.p0_finalize import validate_review,final_label,preflight_destinations,preserve,rollback_close
+from dev_orchestrator import p0_finalize as close
 
 
 class P0Tests(unittest.TestCase):
@@ -116,6 +118,38 @@ class P0Tests(unittest.TestCase):
             rollback_close(root,[owned,foreign])
             self.assertFalse(owned.exists());self.assertEqual(foreign.read_bytes(),b'concurrent change')
             self.assertEqual((root/'evidence.json').read_bytes(),b'original')
+
+    def test_post_creation_git_failure_rolls_back_and_allows_explicit_close_retry(self):
+        phase=read_json(p.ROOT/'dev_orchestrator/phases/P0.json')
+        source=read_json(p.ROOT/'dev_orchestrator/examples/dummy-pass/evidence.json')
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary).resolve();run=root/'dev_orchestrator/runs/test';(run/'artifacts').mkdir(parents=True)
+            (root/'dev_orchestrator/config.json').write_text('{}',encoding='utf-8')
+            source.update(phase_id='P0',run_id='test',artifacts=[],errors=[],scope_violations=[],
+                checks=[dict(id=k,passed=True,kind='infrastructure') for k in phase['required_checks']],
+                phase_definition_sha256=hashlib.sha256(json.dumps(phase,sort_keys=True).encode()).hexdigest())
+            evidence=run/'evidence.json';evidence.write_text(json.dumps(source),encoding='utf-8');original=evidence.read_bytes()
+            (run/'summary.md').write_text('original',encoding='utf-8')
+            campaign=dict(source_sha256={},git_commit='test',run_id='test',stress_state='HIGH_RPM_STRESS_20000_PASS',
+                rows=[dict(rpm=r,passed=True) for r in p.MAIN_RPMS],regressions=[dict(rpm=r,passed=True) for r in p.HISTORICAL_RPMS])
+            for name,value in [('campaign.json',campaign),('inventory.json',{}),('git-before.json',{})]:
+                (run/'artifacts'/name).write_text(json.dumps(value),encoding='utf-8')
+            review=run/'review.json';review.write_text(json.dumps(dict(run_id='test',evidence_sha256=p.sha(evidence),review=dict(status='PASS',findings=[],blocking_findings=[],scientific_change_required=False,kind='independent',notes='Test fixture, not a real review.'))),encoding='utf-8')
+            with patch.object(close,'ROOT',root),patch.object(close,'load_phase',return_value=({},phase)),patch.object(close,'git',return_value=json.dumps(phase).encode()),patch.object(close,'production_hashes',return_value={}),patch.object(close,'compare',return_value=([],[],[])),patch.object(close,'baseline_document',return_value=dict(interpretation='fixture',limitations=[])),patch('builtins.print'):
+                with patch.object(close,'snapshot',side_effect=[{},OSError('injected Git failure')]):
+                    with self.assertRaisesRegex(OSError,'injected'):close.finalize(run,review)
+                self.assertEqual(evidence.read_bytes(),original)
+                self.assertFalse((root/'docs/baselines/0d_2t_baseline_v1.json').exists())
+                self.assertFalse((run/'artifacts/p0-finalized.json').exists())
+                with patch.object(close,'snapshot',return_value={}): result=close.finalize(run,review)
+                self.assertEqual(result['gate'],'PASS');self.assertEqual(result['execution_status'],'WAITING_HUMAN_APPROVAL')
+
+    def test_closure_amendment_cannot_change_checks_or_authorize_production(self):
+        original=read_json(p.ROOT/'dev_orchestrator/phases/P0.json');changed=deepcopy(original)
+        changed['required_checks']=[]
+        with self.assertRaises(ValueError):close.closure_scope(original,changed)
+        changed=deepcopy(original);changed['allowed_paths'].append('motorsim/')
+        with self.assertRaises(ValueError):close.closure_scope(original,changed)
 
 
 if __name__=='__main__':unittest.main()

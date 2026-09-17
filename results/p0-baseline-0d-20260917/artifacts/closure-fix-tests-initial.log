@@ -1,0 +1,28 @@
+test_campaign_visits_all_and_does_not_stress_after_failure (tests.test_p0_baseline.P0Tests.test_campaign_visits_all_and_does_not_stress_after_failure) ... ok
+test_closure_amendment_cannot_change_checks_or_authorize_production (tests.test_p0_baseline.P0Tests.test_closure_amendment_cannot_change_checks_or_authorize_production) ... ok
+test_exact_historical_only_time_ignored (tests.test_p0_baseline.P0Tests.test_exact_historical_only_time_ignored) ... ok
+test_existing_contract_rejects_nonconverged_nonfinite_invariant_balance (tests.test_p0_baseline.P0Tests.test_existing_contract_rejects_nonconverged_nonfinite_invariant_balance) ... ok
+test_failed_close_restores_original_evidence_and_only_own_new_documents (tests.test_p0_baseline.P0Tests.test_failed_close_restores_original_evidence_and_only_own_new_documents) ... ok
+test_finalize_preflight_does_not_create_marker_and_preserves_backup (tests.test_p0_baseline.P0Tests.test_finalize_preflight_does_not_create_marker_and_preserves_backup) ... ok
+test_main_gate_no_skips_and_stress_not_controlling (tests.test_p0_baseline.P0Tests.test_main_gate_no_skips_and_stress_not_controlling) ... ok
+test_only_p0_enabled_without_repair_or_chaining (tests.test_p0_baseline.P0Tests.test_only_p0_enabled_without_repair_or_chaining) ... ok
+test_post_creation_git_failure_rolls_back_and_allows_explicit_close_retry (tests.test_p0_baseline.P0Tests.test_post_creation_git_failure_rolls_back_and_allows_explicit_close_retry) ... ERROR
+test_review_must_bind_evidence_and_be_independent (tests.test_p0_baseline.P0Tests.test_review_must_bind_evidence_and_be_independent) ... ok
+test_stress_failure_does_not_block_main (tests.test_p0_baseline.P0Tests.test_stress_failure_does_not_block_main) ... ok
+
+======================================================================
+ERROR: test_post_creation_git_failure_rolls_back_and_allows_explicit_close_retry (tests.test_p0_baseline.P0Tests.test_post_creation_git_failure_rolls_back_and_allows_explicit_close_retry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\dino\Dino\tests\test_p0_baseline.py", line 140, in test_post_creation_git_failure_rolls_back_and_allows_explicit_close_retry
+    with self.assertRaisesRegex(OSError,'injected'):close.finalize(run,review)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p0_finalize.py", line 87, in finalize
+    if run_dir.parent!=ROOT/'dev_orchestrator/runs': raise ValueError('Usar el run original, no copia de evidencia')
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Usar el run original, no copia de evidencia
+
+----------------------------------------------------------------------
+Ran 11 tests in 1.815s
+
+FAILED (errors=1)
