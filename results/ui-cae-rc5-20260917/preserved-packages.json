@@ -1,0 +1,26 @@
+{
+  "MotorSim-0.1.0-rc1-windows-x64-f46613e4.zip": {
+    "bytes": 43376903,
+    "sha256": "19eeec5047c9f9f5eab22d7938b9680539e5660649659cb209060ec8b4486d6b"
+  },
+  "MotorSim-0.1.0-rc2-windows-x64-580c3f8e.zip": {
+    "bytes": 43376832,
+    "sha256": "9686135082d2854e1ed7aa653cf21645317f2474bcede8d52f44085fe68a1b35"
+  },
+  "MotorSim-0.1.0-rc3-windows-x64-16097c43.zip": {
+    "bytes": 43396296,
+    "sha256": "da355109e4126ab58e62b2016ab55b68e828622b69563ff0f52da9a7e7577ae2"
+  },
+  "MotorSim-0.1.0-rc4-windows-x64-4e7e559f.zip": {
+    "bytes": 43396571,
+    "sha256": "17bcefc76b6275ca36c19068882cc026b878e8db55b7f5099f219ced305841a4"
+  },
+  "MotorSim-0.1.0-rc4-windows-x64-8d6f41dc.zip": {
+    "bytes": 43408653,
+    "sha256": "cb4a68fe7322f04b9cf804515a4f2ea05dab8dea84fbf94dcd8af8eaf05a8c6d"
+  },
+  "MotorSim-0.1.0-rc4-windows-x64-d6c4e19b.zip": {
+    "bytes": 43407420,
+    "sha256": "e4dee7c4469e0d80b7b8ec57ae19d30de86b14851976b35da16fe711d90278c9"
+  }
+}

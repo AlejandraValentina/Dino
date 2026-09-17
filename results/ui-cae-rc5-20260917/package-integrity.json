@@ -1,0 +1,53 @@
+{
+  "archive": "E:\\dino\\Dino\\dist\\MotorSim-0.1.0-rc5-windows-x64-8cbd0bfe.zip",
+  "sha256": "f3159c9dd91ddf64e7b02901a9488e6eea60f4c9346eed768bbf2e4f835c9d18",
+  "zip_bytes": 43420101,
+  "folder_bytes": 104918005,
+  "all_files_match_zip_after_checks": true,
+  "files": 162,
+  "build": {
+    "app_version": "0.1.0-rc5",
+    "source_commit": "8cbd0bfe580e4221f0f1d496bb9f0429827e3d73",
+    "source_dirty": false,
+    "trial": false,
+    "built_utc": "20260917T115436Z",
+    "python": "3.11.0 (main, Oct 24 2022, 18:26:48) [MSC v.1933 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "architecture": "AMD64",
+    "project_format": 6,
+    "result_formats": {
+      "two_stroke": [
+        1,
+        2,
+        3
+      ],
+      "four_stroke": 4
+    },
+    "models": {
+      "two_stroke": "four-cv-0d-prescribed-heat-v1-external-regularized-rk4-v1",
+      "four_stroke": "three-cv-0d-prescribed-heat-720-v1-external-regularized-rk4-v1"
+    },
+    "dependencies": {
+      "altgraph": "0.17.5",
+      "packaging": "26.3",
+      "pefile": "2024.8.26",
+      "pip": "22.3",
+      "pyinstaller": "6.22.3",
+      "pyinstaller-hooks-contrib": "2026.7",
+      "PySide6": "6.11.2",
+      "PySide6_Addons": "6.11.2",
+      "PySide6_Essentials": "6.11.2",
+      "pywin32-ctypes": "0.2.3",
+      "setuptools": "65.5.0",
+      "shiboken6": "6.11.2",
+      "pywinauto": "0.6.9",
+      "comtypes": "1.4.16",
+      "pywin32": "312",
+      "six": "1.17.0"
+    }
+  },
+  "cumulative_integration_seconds": 140.43800000008196,
+  "this_delivery_integration_seconds": 28.29700000025332,
+  "automated": true,
+  "manual_acceptance": false
+}

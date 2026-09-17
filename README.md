@@ -40,7 +40,31 @@ OpenSpec estricto aprobado. Revisión independiente puntual detectó y permitió
 corregir un fallo de Detalles; autorrevisión visual separada. Capturas Windows
 automatizadas al 100/125/150 %, sin atribuir aceptación manual. El monitor físico
 1440×900 limita el recorrido Full HD; se comprueban anchos lógicos de hasta 1920.
-Candidata y evidencia de paquete se registrarán al completar su recorrido.
+Candidata final: fuente `8cbd0bfe580e4221f0f1d496bb9f0429827e3d73` (incluye
+la implementación `5ee49e21` y la corrección de aviso compacto). Construida desde
+checkout limpio; Python 3.11.0 / PySide6 6.11.2 / PyInstaller 6.22.3.
+Recorrido automatizado del EXE aprobado: cuatro copias JSON, Guardar como y
+reapertura Unicode, navegación, dos puntos, cancelación, resultados/barrido
+histórico, comparación y CSV/importación/contraste. 2T: 10 ciclos, 13,516 s;
+4T: 7 ciclos, 14,594 s. Campos científicos y muestras exactamente iguales a
+referencias preservadas; tiempos/memoria/identificadores no son datos deterministas.
+Cancelación cooperativa: 0,187 s. Sin otras integraciones ni campañas.
+
+[Captura real del paquete](results/ui-cae-rc5-20260917/rc5-resumen-4t-reference.png)
+y [comparación numérica](results/ui-cae-rc5-20260917/exact-comparison.json).
+Capturas completas: `E:\MotorSim distribucion\Comprobación CAE rc5` y
+`E:\MotorSim distribucion\UI CAE rc5`. Escalado Qt 100/125/150 % sobre Windows;
+no se cambiaron políticas ni configuración global de pantalla.
+
+Abrir la candidata comprobada:
+```powershell
+& 'E:\MotorSim distribucion\Candidata CAE 0.1.0-rc5\MotorSim\MotorSim.exe'
+```
+ZIP: `dist/MotorSim-0.1.0-rc5-windows-x64-8cbd0bfe.zip`, 43.420.101 bytes.
+SHA256: `f3159c9dd91ddf64e7b02901a9488e6eea60f4c9346eed768bbf2e4f835c9d18`.
+162 archivos extraídos idénticos al ZIP tras las comprobaciones. rc1–rc4 intactas.
+Aceptación manual, Full HD físico y equipo sin Python/offline aislado permanecen
+por verificar. No se atribuye validación experimental.
 
 Comandos desde la raíz:
 ```powershell
@@ -49,7 +73,7 @@ Comandos desde la raíz:
 openspec validate implementacion-ui-cae-final --strict --no-interactive
 .\.venv-build\Scripts\python.exe packaging/build_windows.py
 ```
-La construcción final requiere fuente comprometida y árbol limpio. rc1–rc4 se
+La construcción final requiere fuente registrada en Git y árbol limpio. rc1–rc4 se
 conservan. La integración automática de OpenSpec y los prompts globales siguen
 sin modificarse. No archivar; aceptación manual final pendiente.
 

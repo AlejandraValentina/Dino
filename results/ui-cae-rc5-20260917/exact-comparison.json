@@ -1,0 +1,74 @@
+{
+  "2T": {
+    "actual": "E:\\MotorSim distribucion\\Comprobaci\u00f3n CAE rc5\\Datos\\MotorSim\\Resultados\\20260917-085633-cffeb82872\\manifest.json",
+    "reference": "E:\\MotorSim distribucion\\Comprobaci\u00f3n refinamiento rc4\\Datos\\MotorSim\\Resultados\\20260916-132839-df87fe068f\\manifest.json",
+    "all_scientific_result_fields_exact": true,
+    "scientific_keys": [
+      "profile",
+      "step_deg",
+      "cycles",
+      "controller",
+      "stop",
+      "converged",
+      "final_angle_deg",
+      "attempts",
+      "accepted_steps",
+      "rejected_steps",
+      "rejections_by_cause",
+      "rhs_evaluations",
+      "actual_substep_deg",
+      "rk_stage_evaluations",
+      "endpoint_evaluations"
+    ],
+    "different_keys": [],
+    "all_sample_cycles_and_partial_exact": true,
+    "excluded_nondeterministic": [
+      "seconds",
+      "peak_process_MiB",
+      "run_id",
+      "manifest/timings"
+    ],
+    "status": "converged",
+    "cycles": 10,
+    "seconds": 13.515999999828637,
+    "W_C_J": 16.49050751206088,
+    "p_max_Pa": 1331530.846070603,
+    "worst_independent_percent": 0.0004459656622212729
+  },
+  "4T": {
+    "actual": "E:\\MotorSim distribucion\\Comprobaci\u00f3n CAE rc5\\Datos\\MotorSim\\Resultados\\20260917-085650-f7f82c1cfb\\manifest.json",
+    "reference": "E:\\dino\\Dino\\results\\simulacion-2t\\cuatro-tiempos-20260916\\R2\\gui-sweep\\point-02\\manifest.json",
+    "all_scientific_result_fields_exact": true,
+    "scientific_keys": [
+      "profile",
+      "step_deg",
+      "cycles",
+      "controller",
+      "stop",
+      "converged",
+      "final_angle_deg",
+      "attempts",
+      "accepted_steps",
+      "rejected_steps",
+      "rejections_by_cause",
+      "rhs_evaluations",
+      "actual_substep_deg",
+      "rk_stage_evaluations",
+      "endpoint_evaluations"
+    ],
+    "different_keys": [],
+    "all_sample_cycles_and_partial_exact": true,
+    "excluded_nondeterministic": [
+      "seconds",
+      "peak_process_MiB",
+      "run_id",
+      "manifest/timings"
+    ],
+    "status": "converged",
+    "cycles": 7,
+    "seconds": 14.59400000050664,
+    "W_C_J": 50.52602475854359,
+    "p_max_Pa": 2618462.4643861516,
+    "worst_independent_percent": 7.683375214576464e-05
+  }
+}
