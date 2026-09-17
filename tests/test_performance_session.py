@@ -26,6 +26,21 @@ class PerformanceSessionTests(unittest.TestCase):
         sweep=load_sweep(path);inputs=sweep['index']['common_inputs'];origin=inputs['origin']
         self.w._activate(Project.from_dict(inputs['project_snapshot']),Path(origin['source_path']) if origin['source_path'] else None)
         return sweep
+    def test_high_rpm_2t_request_and_4t_block(self):
+        self.w._activate(example_project('2t-reference'),None)
+        self.w.navigation.go('performance')
+        for edit,value in zip(self.p.rpm_edits,('5000','15000','2500')):
+            edit.setText(value)
+        self.assertTrue(self.p.calculate_button.isEnabled())
+        with patch.object(QProcess,'start') as start:
+            self.p.calculate(output=Path(self.tmp.name)/'high')
+            self.assertEqual(start.call_count,1)
+            request=json.loads(self.v._request_path.read_text(encoding='utf-8'))
+            self.assertEqual(request['rpms'],[5000,7500,10000,12500,15000])
+            self.v._finish_cleanup('Cancelado')
+        self.w._activate(example_project('4t-reference'),None)
+        self.assertFalse(self.p.calculate_button.isEnabled())
+
     def test_empty_examples_no_dialog_no_process(self):
         for key in ('2t-reference','2t-compression','4t-reference','4t-compression'):
             with patch('motorsim.performance_view.QFileDialog.getOpenFileName') as dialog,patch.object(QProcess,'start') as start:

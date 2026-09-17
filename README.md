@@ -25,6 +25,18 @@ sintonía, combustión predictiva ni validación experimental.
 
 ## Rendimiento indicado — candidata rc6
 
+## Ampliación pública autorizada después de P0 — 17/09/2026
+La aplicación admite **2T 2500–15000 rpm** y conserva **4T 2500–3500 rpm**.
+Simulación y Rendimiento usan el mismo validador. Los barridos mantienen 2–5
+puntos y 300 s acumulados; ejemplo: Inicio=5000, Final=15000, Incremento=2500.
+16000–20000 siguen excluidos. P0 acredita la malla del caso sintético, sin
+validación experimental. Solver, tolerancias y formatos sin cambios.
+Esta autorización posterior no modifica las conclusiones históricas anteriores.
+No se reconstruye EXE: las candidatas previas conservan sus límites.
+Ejecutar la fuente actual: `.\.venv\Scripts\python.exe -m motorsim`.
+
+Antecedente histórico anterior a P0:
+
 Ampliación candidata2T1000–15000 (17/09/2026): **fase A BLOCKED**. A1000rpm
 se alcanzó el mínimo de paso antes de un ciclo; a2000rpm hubo ocho rechazos
 no físicos en el sexto ciclo. Convergieron3000/5000/8000/10000/12000/15000;

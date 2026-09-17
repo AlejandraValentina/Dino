@@ -17,15 +17,16 @@ class DomainTests(unittest.TestCase):
     def test_candidate_is_not_public(self):
         for rpm in (1000, 15000):
             self.assertEqual(validate_candidate_2t_rpm(rpm), rpm)
-            for cycle in ('2T', '4T'):
-                with self.assertRaises(ProjectError): validate_rpm(rpm, cycle)
+            with self.assertRaises(ProjectError): validate_rpm(rpm, '4T')
+        with self.assertRaises(ProjectError): validate_rpm(1000, '2T')
+        self.assertEqual(validate_rpm(15000, '2T'), 15000)
         for rpm in (999, 15001, True, 1000., '1000', None):
             with self.assertRaises(ProjectError): validate_candidate_2t_rpm(rpm)
 
     def test_public_contract_and_plans_both_cycles(self):
         for cycle in ('2T', '4T'):
             for rpm in (2500, 3000, 3500): self.assertEqual(validate_rpm(rpm, cycle), rpm)
-            for rpm in (2499, 3501, True, 3000., '3000'):
+            for rpm in (2499, 15001 if cycle == '2T' else 3501, True, 3000., '3000'):
                 with self.assertRaises(ProjectError): validate_rpm(rpm, cycle)
             self.assertEqual(plan_rpms(2500, 3500, 500, cycle), [2500, 3000, 3500])
             for args in ((1000,15000,500), (2500,3500,100), (2500,3500,300),
@@ -37,10 +38,10 @@ class DomainTests(unittest.TestCase):
         for cycle in ('2t', '4t'):
             project=example_project(cycle+'-reference')
             origin=dict(kind='project',project_name=project.name,source_path=None,dirty=True)
-            for rpm in (2500,3500):
+            for rpm in (2500,15000 if cycle == '2t' else 3500):
                 data=project_inputs(project,origin,rpm=rpm)
                 self.assertEqual(validated_model(data)[0].case.rpm,rpm)
-            for rpm in (1000,15000):
+            for rpm in (1000,15001 if cycle == '2t' else 3501):
                 with self.assertRaises(ProjectError): project_inputs(project,origin,rpm=rpm)
 
     def test_historical_readers_and_derivatives(self):

@@ -54,12 +54,12 @@ class RpmTests(unittest.TestCase):
     def test_plan_strict_bounds_types_endpoint(self):
         self.assertEqual(plan_rpms(2500,3500,500),[2500,3000,3500])
         self.assertEqual(plan_rpms(2500,3500,250),[2500,2750,3000,3250,3500])
-        for rpm in (True,2500.,'3000',None,float('nan'),float('inf'),2499,3501):
+        for rpm in (True,2500.,'3000',None,float('nan'),float('inf'),2499,15001):
             with self.subTest(rpm=rpm),self.assertRaises(ProjectError):validate_rpm(rpm)
         for args in ((2500,3500,300),(3000,2500,500),(2500,2500,1),(2500,3500,0),
                      (2500,3500,100),(2500,3500,True),(2500,3500,500.)):
             with self.subTest(args=args),self.assertRaises(ProjectError):plan_rpms(*args)
-        for rpms in ([2500,3500,3000],[2500,2750,3500],[2500,2500],[2500,3501]):
+        for rpms in ([2500,3500,3000],[2500,2750,3500],[2500,2500],[2500,15001]):
             with self.assertRaises(ValueError):validate_request(dict(common_inputs=inputs(),rpms=rpms))
 
     def test_angular_temporal_dependencies_and_initial_recipe(self):
@@ -241,7 +241,7 @@ class SweepWindowTests(unittest.TestCase):
 
     def test_ui_strict_plan_and_one_process_snapshot(self):
         self.assertEqual(self.view.rpm_edit.text(),'3000')
-        for text in ('','3000.0','nan','3,000','-2500','3501'):
+        for text in ('','3000.0','nan','3,000','-2500','15001'):
             self.view.rpm_edit.setText(text)
             with patch.object(QProcess,'start') as start:self.view.start();start.assert_not_called()
             self.assertTrue(self.view.error_label.text())

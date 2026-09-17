@@ -25,8 +25,8 @@ y Datos externos están integrados en la navegación; no ejecutan simulaciones.
 
 El modelo actual es 0D y no resuelve propagación/reflexión de ondas ni resonancia
 del escape. La curva no representa todavía la respuesta de un escape 2T sintonizado.
-La campaña candidata 1000–15000 rpm falló a1000/2000; se conserva el contrato
-2500–3500 rpm para 2T/4T. Sin ampliación acreditada ni validación experimental.
+Tras P0 y autorización explícita: 2500–15000 rpm para 2T; 2500–3500 rpm
+para 4T. La zona baja 1000/2000 sigue excluida. Sin validación experimental.
 
 Rendimiento reutiliza la curva compatible del proyecto en esta sesión. Si no hay,
 Calcular rendimiento inicia explícitamente el barrido existente con el intervalo
@@ -57,7 +57,7 @@ de los datos válidos, incluidos cambios sin guardar. No rellena dimensiones.
 Cancelar detiene el cálculo; cerrar durante un cálculo también lo cancela.
 Una ejecución fallida/cancelada conserva diagnóstico, no un resultado aceptado.
 
-Barrido del proyecto: 2500–3500 rpm, 2–5 puntos exactos, perfil B/100 Pa,
+Barrido del proyecto: 2T 2500–15000 rpm; 4T 2500–3500 rpm, 2–5 puntos exactos, perfil B/100 Pa,
 secuencial y con parada al primer fallo. Cada punto comienza independientemente.
 Reabrir: Abrir resultado → manifest.json; Abrir barrido → series.json.
 Los resultados quedan en %LOCALAPPDATA%\MotorSim\Resultados, fuera del paquete.

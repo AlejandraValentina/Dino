@@ -274,3 +274,17 @@ existir curva y clear_sweep al iniciar/sincronizar ejecución; ahora se conserva
 objeto mostrado, se compara plan por separado y se consume una nueva serie una
 sola vez al completar. Motor incompatible sigue retirándose. Fórmulas, plan_rpms,
 límites RPM, persistencia, solver y convergencia sin modificaciones.
+
+## Dominio público 2T tras P0 — autorización del 17/09/2026
+- [x] Habilitar 2500–15000 para 2T en el validador compartido; 4T sin cambios.
+- [x] Conservar máximo de cinco puntos, presupuestos, solver y cancelación.
+- [x] Actualizar ayuda y README, distinguiendo fuente de EXE anteriores.
+- [x] Comprobar contratos, solicitud UI hasta 15000, bloqueo 4T y regresiones.
+- [x] Autorrevisión puntual del diff y OpenSpec estricto; sin revisión independiente nueva.
+
+41 pruebas aprobadas: dominio 5, sesión Rendimiento 7, barrido 17,
+diagnóstico histórico 6 y recálculo 6. Pruebas Qt sin pantalla y procesos dobles;
+no son aceptación manual ni nueva campaña física. Se actualizaron aserciones
+que trataban 3501 como inválido para 2T. La prueba de hash histórico reconstruye
+exclusivamente el límite anterior de rpm_domain.py; hashes científicos y evidencia
+preservados. Sin empaquetar ni publicar; probar desde la fuente actual.

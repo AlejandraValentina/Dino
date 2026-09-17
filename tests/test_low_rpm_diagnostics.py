@@ -21,9 +21,14 @@ def read(name): return json.loads((EVIDENCE/name).read_text(encoding='utf-8'))
 class LowRpmDiagnosticsTests(unittest.TestCase):
     def test_core_hashes_and_contract_preserved(self):
         for name,expected in read('campaign.json')['source_sha256'].items():
-            self.assertEqual(hashlib.sha256((ROOT/'motorsim'/name).read_bytes()).hexdigest(),expected,name)
+            source=(ROOT/'motorsim'/name).read_bytes()
+            if name == 'rpm_domain.py':
+                # Authorization after P0 changes only the public 2T upper bound.
+                # Reconstruct the historical bytes, preserving its recorded hash.
+                source=source.replace(b"'2T': (2500, 15000)", b"'2T': (2500, 3500)")
+            self.assertEqual(hashlib.sha256(source).hexdigest(),expected,name)
         from motorsim.rpm_domain import PUBLIC_DOMAINS
-        self.assertEqual(PUBLIC_DOMAINS,{'2T':(2500,3500),'4T':(2500,3500)})
+        self.assertEqual(PUBLIC_DOMAINS,{'2T':(2500,15000),'4T':(2500,3500)})
 
     def test_observation_does_not_change_original_scientific_trajectory(self):
         for rpm in (1000,2000,3000):

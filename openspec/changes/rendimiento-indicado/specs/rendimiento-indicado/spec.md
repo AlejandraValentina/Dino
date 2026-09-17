@@ -95,3 +95,15 @@ si aprueban, preservando rc5, capturas/evidencia y aceptación manual separada.
 #### Scenario: Redimensionado
 - **WHEN** el ancho es reducido
 - **THEN** apila secundarios sin scroll horizontal global y conserva acceso por teclado.
+
+### Requirement: Ampliación pública 2T autorizada después de P0
+La aplicación SHALL aceptar enteros 2500–15000 para 2T y conservar 2500–3500
+para 4T. SHALL conservar barridos exactos de 2–5 puntos, presupuestos, física,
+formatos y cancelación. Esta autorización posterior sustituye el límite público
+anterior sin alterar las conclusiones de las campañas históricas.
+#### Scenario: Régimen alto 2T
+- **WHEN** se solicita 15000 rpm en Simulación o Rendimiento para 2T
+- **THEN** permite construir la solicitud con esas RPM.
+#### Scenario: Fuera del dominio
+- **WHEN** se solicita 15001 rpm para 2T o 3501 rpm para 4T
+- **THEN** bloquea con el intervalo correspondiente.

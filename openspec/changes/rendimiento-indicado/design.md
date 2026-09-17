@@ -62,3 +62,13 @@ Analítica independiente 2*pi/4*pi a3000rpm, invalidación, históricos, fallido
 inversión A/B y CSV. Suite conservada; Windows/EXE con barridos2T/4T históricos.
 No ejecutar solver. rc6 desde fuente limpia, preservar rc5 y evidencia. Aceptación
 manual pendiente; revisión puntual según AGENTS, sin archivar ni publicar.
+
+## Ampliación pública autorizada después de P0 — 17/09/2026
+La aplicación admite **2T 2500–15000 rpm** y conserva **4T 2500–3500 rpm**.
+Simulación y Rendimiento usan el mismo validador. Los barridos mantienen 2–5
+puntos y 300 s acumulados; ejemplo: Inicio=5000, Final=15000, Incremento=2500.
+16000–20000 siguen excluidos. P0 acredita la malla del caso sintético, sin
+validación experimental. Solver, tolerancias y formatos sin cambios.
+Esta autorización posterior no modifica las conclusiones históricas anteriores.
+No se reconstruye EXE: las candidatas previas conservan sus límites.
+Ejecutar la fuente actual: `.\.venv\Scripts\python.exe -m motorsim`.

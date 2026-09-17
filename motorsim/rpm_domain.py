@@ -1,7 +1,7 @@
 """Dominios públicos por ciclo; la campaña candidata no habilita la interfaz."""
 from .project import ProjectError
 
-PUBLIC_DOMAINS = {'2T': (2500, 3500), '4T': (2500, 3500)}
+PUBLIC_DOMAINS = {'2T': (2500, 15000), '4T': (2500, 3500)}
 CANDIDATE_2T_DOMAIN = (1000, 15000)
 
 
