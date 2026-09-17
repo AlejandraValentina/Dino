@@ -1,0 +1,27 @@
+START T01_rest
+END T01_rest PASS 0.453s []
+START T01_moving
+END T01_moving PASS 0.485s []
+START T02_sod
+END T02_sod FAIL 2.610s ['contact_position_error']
+START T03
+END T03 PASS 13.594s []
+START T04
+PROGRESS T04 step=2000 t=0.0019563986
+END T04 PASS 52.203s []
+START T05
+END T05 FAIL 0.235s ['completed']
+START T06_contact
+PROGRESS T06_contact step=2000 t=0.0048885526
+END T06_contact PASS 22.375s []
+START T07_periodic
+END T07_periodic PASS 1.031s []
+START T07_closed
+END T07_closed PASS 0.891s []
+START T07_open
+END T07_open PASS 0.891s []
+START T08_constant_rest_100
+END T08_constant_rest_100 PASS 0.406s []
+START T08_constant_rest_200
+END T08_constant_rest_200 PASS 1.594s []
+START T08_constant_rest_400

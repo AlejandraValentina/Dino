@@ -40,3 +40,9 @@ resultado posterior autoritativo está en artifacts/p1-decision.json y evidence.
 Pendiente únicamente aceptación humana de P1 antes de autorizar implementación.
 T01–T12 son requisitos futuros, no tests ejecutados. No archivar ni iniciar P2.
 Commit de evidencia contiene este registro; no publicar. redme.txt sigue ajeno.
+
+## Aceptación humana posterior — 17/09/2026
+P1_HUMAN_ACCEPTED por orden explícita de la usuaria. Recibo separado en
+`docs/gasdynamic/p1_human_acceptance.json`, con hashes del contrato congelado.
+No modifica los documentos ni evidencia de P1. Autoriza únicamente P2 con
+P2B condicionado; ninguna autorización P3.

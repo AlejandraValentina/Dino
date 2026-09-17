@@ -1,0 +1,19 @@
+{
+  "completed": 12,
+  "latest": "T08_constant_rest_200",
+  "status": "PASS",
+  "hashes": {
+    "artifacts/cases/T01_rest.json.gz": "8db911e3d94ad435687abf7890a03bce20007d264db9953d973c7826fe22896f",
+    "artifacts/cases/T01_moving.json.gz": "4deffcd1ea4edc0415d00120b31628a47d18a15b6c0eb490b065d2f19e01e570",
+    "artifacts/cases/T02_sod.json.gz": "8f23394da6884f63da6ea95bbade316ee9dc714944b00bfea442f774c7c2a6ee",
+    "artifacts/cases/T03.json.gz": "eec37a86c88cacf039cefd2fa5c9a8898ec7039fb29e6c6ffb8a80eb48b56870",
+    "artifacts/cases/T04.json.gz": "a9b560314d821edd6d21db3113fbbd298194ebc1790ca35d00d089b4b92f333a",
+    "artifacts/cases/T05.json.gz": "5e5f8106dc57bd00ee1d372aa32a3f82597112d16fa86d42e09ceac0c1470e91",
+    "artifacts/cases/T06_contact.json.gz": "fc51c930fb12f209012422889ffcf6b66f565e1730eafc8eaa0f97de336712a8",
+    "artifacts/cases/T07_periodic.json.gz": "a63ae235e3ead0d533ae1002a2c989a961b59359f0ae2fee3e89d6ac65bc6cf5",
+    "artifacts/cases/T07_closed.json.gz": "fbc8c374759a69bd811fe2504ca4a4316aa95446aec7621e4612dddf6c40e610",
+    "artifacts/cases/T07_open.json.gz": "ae2b8a974b84a59b4460c6eec8f97e2f17f5b3c884fa666ab199363b77bfd26d",
+    "artifacts/cases/T08_constant_rest_100.json.gz": "a71e3a8e2ae2cd95f308e2f5d0e4e6cf2e88e6104c97b3f5ab90a8894b826818",
+    "artifacts/cases/T08_constant_rest_200.json.gz": "40cceae38fdd9d95292936422a6590228203c4e9e4214b6fc46700496fc3937c"
+  }
+}

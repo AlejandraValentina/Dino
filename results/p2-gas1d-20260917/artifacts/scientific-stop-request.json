@@ -1,0 +1,12 @@
+{
+  "state": "SCIENTIFIC_CHANGE_REQUIRED",
+  "action": "Stop active P2A campaign after independent offline confirmation of T02 contract failure",
+  "case": "T02_sod",
+  "evidence_sha256": "8f23394da6884f63da6ea95bbade316ee9dc714944b00bfea442f774c7c2a6ee",
+  "measured_contact": 0.6925,
+  "exact_contact": 0.6854905240097903,
+  "error": 0.007009475990209624,
+  "limit": 0.005,
+  "reviewer": "/root/p2_review",
+  "reason": "No implementation/index/reference error found; changing metric, mesh, method or threshold would alter frozen P1. No P2B/P3."
+}
