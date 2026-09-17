@@ -1,6 +1,7 @@
 """Editor de la ficha del motor."""
 
 from pathlib import Path
+import sys
 
 from PySide6.QtCore import Qt, QSize, QTimer
 from PySide6.QtGui import (
@@ -26,7 +27,8 @@ from .runtime import APP_VERSION, build_info, resource
 from .workspaces import Navigation, SummaryPage, MotorPage, ResultWorkspace, scroll, refresh_motor_context
 from .comparison_view import ComparisonDialog
 from .external_view import ExternalDialog
-from .examples import EXAMPLES, example_project
+from .examples import EXAMPLES, PROJECT_FILES, example_project
+from .ui import NumericUnit
 
 
 class _FilePathLabel(QLabel):
@@ -247,17 +249,7 @@ class MainWindow(QMainWindow):
             edit.setMaximumWidth(200)
             caption = self._label(title)
             caption.setBuddy(edit)
-            container = QWidget()
-            column = QVBoxLayout(container)
-            column.setContentsMargins(0, 0, 0, 0)
-            column.setSpacing(4)
-            row = QHBoxLayout()
-            row.setContentsMargins(0, 0, 0, 0)
-            row.setSpacing(8)
-            row.addWidget(edit, 1)
-            row.addWidget(self._label(unit, "unit"))
-            column.addLayout(row)
-            column.addWidget(self.numeric_errors[field])
+            container = NumericUnit(edit,unit,self.numeric_errors[field])
             fields.addRow(caption, container)
         geometry.addLayout(fields)
         results = QFormLayout()
@@ -280,7 +272,7 @@ class MainWindow(QMainWindow):
         self.ducts_view = DuctsView();self.ducts4_view = DuctsView('4T')
         self.ducts_view.changed.connect(self._edited);self.ducts4_view.changed.connect(self._edited)
         self.valves_view = ValvesView();self.valves_view.changed.connect(self._edited)
-        self.simulation_view = SimulationView(self.execution_snapshot)
+        self.simulation_view = SimulationView(self.execution_snapshot,lambda:self.cycle_combo.currentText())
         self.simulation_view.idle.connect(self._simulation_idle)
         self.navigation=Navigation();self.tabs=self.navigation
         self.simulation_view.workspace_router=self._navigate_analysis
@@ -314,6 +306,7 @@ class MainWindow(QMainWindow):
         self.navigation.selected.connect(self._workspace_selected)
         self.setCentralWidget(self.navigation);self.navigation.go('summary')
         self.ui_status_timer=QTimer(self);self.ui_status_timer.setInterval(250)
+        self.simulation_view.state_label.changed.connect(self._calculation_status)
         self.ui_status_timer.timeout.connect(self._calculation_status);self.ui_status_timer.start()
         for previous, following in zip(self._edit_widgets, self._edit_widgets[1:]):
             QWidget.setTabOrder(previous, following)
@@ -324,9 +317,10 @@ class MainWindow(QMainWindow):
             self.result_workspace.detail_layout.addWidget(view.result_panel)
             self.result_workspace.message_host.addWidget(view.error_label)
         elif key=='simulation':
+            if not view.active and view.result is None and view.sweep is None:view._origin_changed()
             view.result_host.addWidget(view.result_panel)
             view.message_host.addWidget(view.error_label)
-        view.result_panel.show();view._arrange()
+        view.result_panel.setVisible(key=='results');view._arrange()
 
     def _navigate_analysis(self,key):
         self.navigation.go('results' if key=='sweep' else key)
@@ -335,7 +329,7 @@ class MainWindow(QMainWindow):
 
     def _calculation_status(self):
         view=self.simulation_view
-        state='Calculando' if view.active else ('Error' if view.state_label.text().startswith('Error') else 'Inactivo')
+        state=view.state_badge.text()
         self.notice.setText(f'{self.cycle_combo.currentText()} · {state} · {APP_VERSION}')
 
     def _arrange_groups(self):
@@ -521,10 +515,19 @@ class MainWindow(QMainWindow):
         if self._can_leave():
             self._activate(Project(), None)
 
-    def load_example(self, key: str) -> None:
+    def load_example_file(self, key: str) -> None:
+        root=(Path(sys.executable).resolve().parent/'Ejemplos' if getattr(sys,'frozen',False)
+              else Path(__file__).resolve().parent.parent/'examples'/'projects')
+        try:
+            project=load_project(root/PROJECT_FILES[key])
+        except (OSError,ProjectError) as exc:
+            QMessageBox.warning(self,'No se pudo cargar el ejemplo',str(exc));return
+        self.load_example(key,project=project)
+
+    def load_example(self, key: str, *, project=None) -> None:
         if not self._can_leave():
             return
-        self._activate(example_project(key), None)
+        self._activate(project if project is not None else example_project(key), None)
         self.dirty = True
         self._refresh_status()
         if self.simulation_view.origin_combo.currentIndex() == 1:

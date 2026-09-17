@@ -23,6 +23,36 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
+## Interfaz CAE — candidata rc5
+
+La referencia visual confirmada se adapta a Qt Widgets: paleta técnica común,
+paneles compactos, Resumen bilateral y Simulación con preparación, estado real y
+contexto colapsable. Los ocho espacios conservan sus controles y reglas. Los ejes
+vacíos no muestran presiones ficticias; las curvas usan muestras reales en orden
+temporal. El selector de Resumen abre copias de los cuatro JSON incluidos: sin
+ruta, con cambios pendientes y Guardar como obligatorio. No ejecuta ni abre resultados.
+
+Python 3.11.0, PySide6 6.11.2 y OpenSpec 1.3.1 disponibles. Sin dependencias nuevas.
+Comprobación automática: 258 pruebas aprobadas antes de la corrección puntual de
+Detalles; comprobaciones afectadas posteriores registradas en
+[tasks.md](openspec/changes/implementacion-ui-cae-final/tasks.md).
+OpenSpec estricto aprobado. Revisión independiente puntual detectó y permitió
+corregir un fallo de Detalles; autorrevisión visual separada. Capturas Windows
+automatizadas al 100/125/150 %, sin atribuir aceptación manual. El monitor físico
+1440×900 limita el recorrido Full HD; se comprueban anchos lógicos de hasta 1920.
+Candidata y evidencia de paquete se registrarán al completar su recorrido.
+
+Comandos desde la raíz:
+```powershell
+.\.venv\Scripts\python.exe -m motorsim
+.\.venv\Scripts\python.exe -m unittest discover -s tests
+openspec validate implementacion-ui-cae-final --strict --no-interactive
+.\.venv-build\Scripts\python.exe packaging/build_windows.py
+```
+La construcción final requiere fuente comprometida y árbol limpio. rc1–rc4 se
+conservan. La integración automática de OpenSpec y los prompts globales siguen
+sin modificarse. No archivar; aceptación manual final pendiente.
+
 ## Proyectos de ejemplo
 
 Los cuatro JSON físicos están en `examples/projects/`: referencias 2T/4T y sus

@@ -3,9 +3,10 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,
     QTreeWidget,QTreeWidgetItem,QStackedWidget,QScrollArea,QTabWidget,QPushButton,
-    QPlainTextEdit,QSizePolicy,QMenu,QToolButton)
+    QPlainTextEdit,QSizePolicy,QMenu,QToolButton,QComboBox)
 from .project import ProjectError
-from .ui import Header, Panel, Columns
+from .ui import Header, Panel, Columns, Badge, PropertyTable
+from .examples import EXAMPLES
 
 
 def label(text='',style=''):
@@ -24,7 +25,7 @@ class Navigation(QWidget):
         super().__init__();layout=QHBoxLayout(self);layout.setContentsMargins(0,0,0,0);layout.setSpacing(0)
         self.tree=QTreeWidget();self.tree.setObjectName('navigation');self.tree.setHeaderHidden(True)
         self.tree.setAccessibleName('Navegación principal');self.tree.setRootIsDecorated(False)
-        self.tree.setIndentation(10);self.tree.setMinimumWidth(145);self.tree.setMaximumWidth(190)
+        self.tree.setIndentation(10);self.tree.setMinimumWidth(145);self.tree.setMaximumWidth(200)
         self.tree.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.stack=QStackedWidget();self.stack.setMinimumWidth(0)
         layout.addWidget(self.tree);layout.addWidget(self.stack,1)
@@ -34,7 +35,7 @@ class Navigation(QWidget):
         if group not in self.groups:
             node=QTreeWidgetItem(self.tree,[group]);node.setFlags(Qt.ItemFlag.ItemIsEnabled)
             font=self.tree.font();font.setPointSize(8);font.setBold(True)
-            node.setFont(0,font);node.setForeground(0,QColor('#839bb7'))
+            node.setFont(0,font);node.setForeground(0,QColor('#8ba2be'))
             node.setExpanded(True);self.groups[group]=node
         item=QTreeWidgetItem(self.groups[group],[title]);item.setData(0,Qt.ItemDataRole.UserRole,key)
         item.setToolTip(0,title);self.items[key]=item;self.pages[key]=page;self.stack.addWidget(page)
@@ -65,38 +66,56 @@ class SummaryPage(QScrollArea):
         self.tabs=QTabWidget();box.addWidget(self.tabs)
         summary=QWidget();layout=QVBoxLayout(summary);layout.setContentsMargins(0,14,0,0);layout.setSpacing(16)
         identity=Panel('PROYECTO ACTIVO');geometry=Panel('GEOMETRÍA ESENCIAL')
-        self.identity=label('','sectionTitle');identity.content.addWidget(self.identity)
-        self.file=label('','unit');identity.content.addWidget(self.file);identity.content.addStretch()
-        self.facts=label();self.facts.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse);geometry.content.addWidget(self.facts);geometry.content.addStretch()
-        layout.addWidget(Columns(identity,geometry,800,(3,2)))
-        preparation=Panel('PREPARACIÓN');actions=Panel('CONTINUAR')
-        self.ready=label('','sectionTitle');preparation.content.addWidget(self.ready)
+        self.identity_table=PropertyTable(('Nombre','Fabricante / modelo','Ciclo','Archivo','Estado'))
+        identity.content.addWidget(self.identity_table)
+        self.identity=self.identity_table.values['Nombre'];self.file=self.identity_table.values['Archivo']
+        self.geometry_table=PropertyTable(('Cilindros','Diámetro × carrera','Compresión','Por cilindro','Cilindrada total'))
+        geometry.content.addWidget(self.geometry_table)
+        self.facts=label();self.facts.hide()
+        for title,key in (('Configurar geometría','geometry'),('Configurar motor','motor2')):
+            button=QPushButton(title+' →');button.clicked.connect(lambda checked=False,k=key:owner.navigation.go(k));geometry.content.addWidget(button)
+            if key=='motor2':self.motor_button=button
+        preparation=Panel('PREPARACIÓN Y ESTADO');actions=Panel('EJEMPLOS SINTÉTICOS')
+        self.ready_badge=Badge();preparation.content.addWidget(self.ready_badge)
+        self.ready=label();preparation.content.addWidget(self.ready)
         self.attention=QVBoxLayout();preparation.content.addLayout(self.attention)
-        preparation.content.addWidget(label('Revisá los datos antes de ejecutar. Las condiciones de cálculo se definen en Simulación.','unit'))
-        actions.content.addWidget(label('Abrí un proyecto, guardá tu trabajo o empezá con un ejemplo sintético.','unit'))
-        row=QGridLayout();actions.content.addLayout(row)
-        for i,key in enumerate(('open','save')):
-            button=QToolButton();button.setDefaultAction(owner.actions[key]);button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon);row.addWidget(button,0,i)
-        example=QToolButton();example.setText('Cargar ejemplo');menu=QMenu(example)
-        menu.addActions(list(owner.example_actions.values()));example.setMenu(menu)
-        example.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup);row.addWidget(example,1,0,1,2)
+        preparation.content.addWidget(label('La convergencia no está garantizada.','unit'))
         self.simulate_button=QPushButton('Ir a simulación →');self.simulate_button.setObjectName('primaryAction')
-        self.simulate_button.clicked.connect(lambda:owner.navigation.go('simulation'));actions.content.addWidget(self.simulate_button)
-        layout.addWidget(Columns(preparation,actions,800,(3,2)))
+        self.simulate_button.clicked.connect(lambda:owner.navigation.go('simulation'));preparation.content.addWidget(self.simulate_button)
+        actions.content.addWidget(label('EJEMPLO SINTÉTICO — NO MEDIDO','unit'))
+        self.example_combo=QComboBox();self.example_combo.setAccessibleName('Proyecto de ejemplo sintético')
+        for key,(title,_) in EXAMPLES.items():self.example_combo.addItem(title,key)
+        actions.content.addWidget(self.example_combo)
+        self.example_button=QPushButton('Cargar copia editable')
+        self.example_button.clicked.connect(lambda:owner.load_example_file(self.example_combo.currentData()))
+        actions.content.addWidget(self.example_button)
+        actions.content.addWidget(label('Sin resultados precalculados. Guardar solicitará un archivo nuevo.','unit'))
+        columns=[]
+        for panels in ((identity,preparation),(geometry,actions)):
+            column=QWidget();column_box=QVBoxLayout(column);column_box.setContentsMargins(0,0,0,0);column_box.setSpacing(12)
+            for panel in panels:column_box.addWidget(panel)
+            column_box.addStretch();columns.append(column)
+        layout.addWidget(Columns(*columns,800))
         layout.addStretch()
         self.tabs.addTab(summary,'Resumen');self.tabs.addTab(owner.general_group,'Datos del proyecto')
         box.addStretch();self.setWidget(body);self.issue_routes={}
     def refresh(self):
         w=self.owner;cycle=w.cycle_combo.currentText();name=w.name_edit.text() or 'Sin nombre'
-        self.identity.setText(name+' · '+cycle+'\nFabricante / modelo: '+' / '.join(x.text() or '—' for x in w.text_edits.values()))
+        for key,value in {'Nombre':name,'Fabricante / modelo':' / '.join(x.text() or '—' for x in w.text_edits.values()),
+                          'Ciclo':cycle,'Archivo':str(w.path) if w.path else 'Sin archivo asociado','Estado':w.state_label.text()}.items():
+            self.identity_table.set_value(key,value)
         def value(key):return w.numeric_edits[key].text() or '—'
-        self.facts.setText(f'Cilindros: {value("cylinder_count")}\nDiámetro × carrera: {value("bore_mm")} × {value("stroke_mm")} mm\n'
-            f'Compresión: {value("compression_ratio")}:1\nCilindrada por cilindro: {w.volume_label.text()} cm³\nCilindrada total: {w.total_volume_label.text()} cm³')
-        self.file.setText(w.state_label.text()+'\n'+(str(w.path) if w.path else 'Sin archivo asociado'))
+        facts={'Cilindros':value('cylinder_count'),'Diámetro × carrera':f'{value("bore_mm")} × {value("stroke_mm")} mm',
+               'Compresión':value('compression_ratio')+':1','Por cilindro':w.volume_label.text()+' cm³',
+               'Cilindrada total':w.total_volume_label.text()+' cm³'}
+        for key,val in facts.items():self.geometry_table.set_value(key,val)
+        self.facts.setText('\n'.join(f'{k}: {v}' for k,v in facts.items()))
+        self.motor_button.setText('Configurar motor '+cycle+' →')
         try:
             w.execution_snapshot()
             errors=[]
         except ProjectError as exc:errors=str(exc).splitlines()
+        self.ready_badge.set_state('ENTRADAS ADMITIDAS' if not errors else 'DATOS INCOMPLETOS','success' if not errors else 'warning')
         self.ready.setText('Listo para simular' if not errors else 'Faltan datos · revisar configuración')
         while self.attention.count():
             item=self.attention.takeAt(0)

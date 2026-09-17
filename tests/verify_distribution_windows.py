@@ -27,7 +27,7 @@ parser.add_argument('--work',type=Path,required=True)
 parser.add_argument('--resume-two',type=Path,help='Resultado 2T ya ejecutado: continuar solo 4T, sin repetirlo')
 parser.add_argument('--scale',default='1.5',choices=['1','1.25','1.5'])
 parser.add_argument('--projects-root',type=Path,help='Carpeta de JSON físicos; por defecto Ejemplos del paquete')
-parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis','uxseries','examples','uxvisual','physical-examples'],required=True)
+parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis','uxseries','examples','uxvisual','physical-examples','cae-examples','cae-points'],required=True)
 args=parser.parse_args();exe=args.exe.resolve();work=args.work.resolve();work.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from motorsim.reference_results import load_result
@@ -64,6 +64,7 @@ def front(w,width=1350,height=800):
     try:win32gui.SetForegroundWindow(w.handle)
     except Exception:pass
 def control(w,kind,name=None,suffix=None):
+    name={'Ejecutar':'Ejecutar cálculo','Comprobar entradas':'Comprobar'}.get(name,name)
     return wait(lambda:next((x for x in w.descendants() if x.element_info.control_type==kind
         and (name is None or x.window_text()==name or x.element_info.name==name)
         and (suffix is None or x.element_info.automation_id.endswith(suffix))),None))
@@ -166,7 +167,40 @@ def finish_calculation(folder,series=False):
 try:
     main=window('MotorSim');front(main)
     note('GUI EXE directo, cwd distinto, PATH sistema, sin PYTHONPATH/VIRTUAL_ENV; factor Qt '+args.scale)
-    if args.stage=='physical-examples':
+    if args.stage=='cae-examples':
+        from motorsim.examples import PROJECT_FILES
+        from motorsim.storage import load_project
+        for index,key in enumerate(PROJECT_FILES):
+            navigate('Resumen')
+            select_combo(control(main,'ComboBox','Proyecto de ejemplo sintético'),index)
+            original=exe.parent/'Ejemplos'/PROJECT_FILES[key];before=original.read_bytes()
+            button(main,'Cargar copia editable')
+            assert 'Cambios pendientes' in main.window_text() and 'Sin archivo asociado' in texts(main)
+            assert not worker_paths()
+            screenshot(main,'rc5-resumen-'+key)
+            target=work/(key+' copia á.json');button(main,'Guardar');file_dialog('Guardar proyecto como',target)
+            assert load_project(target)==load_project(original) and original.read_bytes()==before
+            navigate('Motor '+key[:2].upper());navigate('Simulación');button(main,'Comprobar entradas')
+            assert 'Entradas admitidas' in texts(main) and not worker_paths()
+        note('Cuatro JSON como copia sin ruta, dirty, Guardar como, ciclo contextual y validación sin worker')
+    elif args.stage=='cae-points':
+        record=work/'cae-points.json'
+        if record.exists():raise RuntimeError('No repetir puntos de rc5: conservar registro incluso incompleto.')
+        records={};record.write_text('{}',encoding='utf-8')
+        navigate('Simulación');screenshot(main,'rc5-simulacion-inicial')
+        for cycle,index in (('2T',0),('4T',2)):
+            select_combo(control(main,'ComboBox','Origen de la próxima ejecución'),index)
+            folder=start_calculation();records[cycle]={'path':str(folder/'manifest.json'),'started':True}
+            record.write_text(json.dumps(records,indent=2),encoding='utf-8')
+            screenshot(main,'rc5-ejecutando-'+cycle)
+            navigate('Resumen');navigate('Simulación')
+            result=finish_calculation(folder);records[cycle]['status']=result['status']
+            record.write_text(json.dumps(records,indent=2),encoding='utf-8')
+            assert result['status']=='converged'
+            screenshot(main,'rc5-convergido-'+cycle)
+            navigate('Resultados');screenshot(main,'rc5-resultados-'+cycle);navigate('Simulación')
+        note('Dos únicos puntos rc5 B100/3000, 2T y 4T, proceso del paquete y navegación conservados')
+    elif args.stage=='physical-examples':
         from motorsim.examples import PROJECT_FILES,example_file_project
         from motorsim.storage import load_project
         directory=args.projects_root or exe.parent/'Ejemplos'

@@ -61,3 +61,11 @@ No se recopilan ni envían datos. No hay actualización automática.
 Ejecutable no firmado; no desactives protecciones del equipo para abrirlo.
 Esta candidata no implica aceptación manual ni validación experimental.
 Avisos de dependencias y licencias: carpeta Licencias y AVISOS.txt.
+
+Candidata rc5 — interfaz técnica CAE
+Resumen reúne identidad, geometría y preparación. El selector de ejemplos usa
+los JSON incluidos como COPIAS editables: sin ruta, con cambios pendientes;
+Guardar pide un destino. Son EJEMPLOS SINTÉTICOS — NO MEDIDOS, sin resultados.
+Simulación separa preparación, estado y contexto colapsable. Los ejes vacíos no
+son resultados; las curvas corresponden a un ciclo convergido real. Detalles
+conserva parámetros/identificadores. Abrir históricos no ejecuta el modelo.

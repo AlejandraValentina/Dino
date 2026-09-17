@@ -2,6 +2,11 @@
 
 ## Lectura y autoridad
 
+Orden actual: `implementacion-ui-cae-final` traslada la referencia visual confirmada
+`Desktop/code.html` a Qt Widgets y prepara rc5. Mantener modelos, contratos,
+worker, formatos y candidatas anteriores. Pruebas UI, dos puntos 2T/4T y
+cancelación; revisión puntual independiente, commits locales sin publicar/archivar.
+
 Continuación actual de `ejemplos-precargados`: cuatro JSON físicos v6 versionados
 en examples/projects, generador canónico, carga real y próxima candidata con
 los mismos archivos. Sin solver ni campañas; conservar menús y paquetes previos.

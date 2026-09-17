@@ -21,7 +21,8 @@ from .sweep_view import SweepDialog
 from .comparison_view import ComparisonDialog
 from .external_view import ExternalDialog
 from .runtime import worker_command, diagnostic
-from .ui import Header, Panel, Columns
+from .ui import Header, Panel, ContextPanel, SimulationColumns, PropertyTable, Badge, Message, ValidationMessage, visual_state
+from .kinematics import calculate_geometry
 
 
 class PressurePlot(QWidget):
@@ -29,17 +30,22 @@ class PressurePlot(QWidget):
         super().__init__()
         self.pv, self.points = pv, []
         self.layout = TWO_LAYOUT
-        self.setMinimumHeight(270)
+        self.volume_range=None
+        self.mirror=None
+        self.setMinimumHeight(205)
         self.setMinimumWidth(260)
         self.setAccessibleName('Presión-volumen en orden temporal' if pv else 'Presión absoluta frente al ángulo continuo')
 
-    def set_rows(self, rows, layout=TWO_LAYOUT):
+    def set_rows(self, rows, layout=None):
+        layout=layout or self.layout
         self.layout=layout
         # No ordenar V ni aplicar módulo a ángulos: preservar la trayectoria.
         origin = rows[0]['angle_deg']-(0 if layout.period==720 else 180) if rows else 0
         self.points = [(r['V_m3'][layout.cylinder]*1e6 if self.pv else r['angle_deg']-origin,
                         r['p_T_Y'][layout.cylinder][0]/1000) for r in rows]
         self.update()
+        if self.mirror:
+            self.mirror.layout=self.layout;self.mirror.points=self.points;self.mirror.volume_range=self.volume_range;self.mirror.update()
 
     def paintEvent(self, event):
         p = QPainter(self)
@@ -50,13 +56,9 @@ class PressurePlot(QWidget):
         title = 'Presión–volumen · orden temporal' if self.pv else f'Presión–ángulo · ciclo {self.layout.period}°'
         p.drawText(QRectF(8, 4, self.width()-16, line), title)
         p.drawText(QRectF(8, line+4, self.width()-16, line), 'Presión absoluta [kPa]')
-        if not self.points:
-            p.drawText(QRectF(8, 3*line, self.width()-16, line*2), Qt.TextFlag.TextWordWrap,
-                       'Sin ciclo convergido para mostrar.')
-            return
-        xs, ys = zip(*self.points)
-        lo, hi = (0., max(xs)*1.05) if self.pv else ((0.,720.) if self.layout.period==720 else (180.,540.))
-        top = max(ys)*1.05
+        xs,ys=zip(*self.points) if self.points else ((),())
+        lo,hi=((0.,max(xs)*1.05) if xs else self.volume_range or (0.,1.)) if self.pv else ((0.,720.) if self.layout.period==720 else (180.,540.))
+        top=max(ys)*1.05 if ys else 1.
         margin = max(55, fm.horizontalAdvance(f'{top:.0f}')+12)
         box = QRectF(margin, 2*line+12, max(1, self.width()-margin-24), max(1, self.height()-5*line-20))
         p.setPen(QColor('#61758f'))
@@ -64,12 +66,16 @@ class PressurePlot(QWidget):
         p.drawLine(box.bottomLeft(), box.bottomRight())
         for fraction in (0, .5, 1):
             y = box.bottom()-box.height()*fraction
-            p.drawText(QRectF(0, y-line/2, margin-7, line), Qt.AlignmentFlag.AlignRight, f'{top*fraction:.0f}')
+            if self.points:p.drawText(QRectF(0, y-line/2, margin-7, line), Qt.AlignmentFlag.AlignRight, f'{top*fraction:.0f}')
             x = box.left()+box.width()*fraction
             caption = f'{lo+(hi-lo)*fraction:.0f}'
             if not self.pv:
                 caption += '\n'+('PMS' if self.layout.period==720 or fraction == .5 else 'PMI')
-            p.drawText(QRectF(x-28, box.bottom()+5, 56, line*2), Qt.AlignmentFlag.AlignHCenter, caption)
+            if not self.pv or self.points or self.volume_range:
+                p.drawText(QRectF(x-28, box.bottom()+5, 56, line*2), Qt.AlignmentFlag.AlignHCenter, caption)
+        if not self.points:
+            p.drawText(box.adjusted(8,0,-8,0), Qt.AlignmentFlag.AlignCenter|Qt.TextFlag.TextWordWrap,
+                       'Sin datos de ciclo para graficar')
         path = QPainterPath()
         for i, (x, y) in enumerate(self.points):
             point = QPointF(box.left()+(x-lo)/(hi-lo)*box.width(), box.bottom()-y/top*box.height())
@@ -83,7 +89,7 @@ class PressurePlot(QWidget):
 class SimulationView(QScrollArea):
     idle = Signal()
 
-    def __init__(self, project_snapshot=None):
+    def __init__(self, project_snapshot=None, project_cycle=None):
         super().__init__()
         self.setWidgetResizable(True)
         self.setFrameShape(QScrollArea.Shape.NoFrame)
@@ -98,6 +104,7 @@ class SimulationView(QScrollArea):
         self.completed_cycles = 0
         self.inputs = reference_inputs()
         self.project_snapshot = project_snapshot
+        self.project_cycle = project_cycle
         self._request_path = None
         self.sweep = None
         self.sweep_dialog = None
@@ -113,11 +120,15 @@ class SimulationView(QScrollArea):
             w=QLabel(text);w.setTextFormat(Qt.TextFormat.PlainText);w.setWordWrap(True);w.setObjectName(style);return w
         layout.addWidget(Header('Simulación','Prepará las entradas y seguí el cálculo del caso seleccionado.','Modelo 0D · Energía prescrita · Sin ondas ni validación experimental.'))
         preparation=Panel('01 · PREPARACIÓN');self.run_workspace=QWidget();run_layout=QVBoxLayout(self.run_workspace);run_layout.setContentsMargins(0,0,0,0);run_layout.setSpacing(16)
-        self.columns=Columns(preparation,self.run_workspace,950,(2,3));layout.addWidget(self.columns)
+        self.context_panel=ContextPanel()
+        self.context_table=PropertyTable(('Caso / proyecto','Ciclo','Geometría','Compresión','Modelo','Integración','Perfil','Regularización','Aporte térmico','Procedencia'))
+        self.context_panel.content.addWidget(self.context_table)
+        self.context_stale=label('','fieldError');self.context_panel.content.addWidget(self.context_stale)
+        self.columns=SimulationColumns(preparation,self.run_workspace,self.context_panel);layout.addWidget(self.columns)
         self.title_label=label('','sectionTitle');self.description_label=label('','unit');self.parameters_label=label()
-        for w in (self.title_label,self.description_label,self.parameters_label):preparation.content.addWidget(w)
+        for w in (self.title_label,self.description_label,self.parameters_label):w.hide()
         preparation.content.addWidget(label('Origen de las entradas','panelTitle'))
-        self.origin_combo=QComboBox();self.origin_combo.addItems(['Caso de referencia S2T-0D-01','Proyecto actual, con condiciones de referencia','Caso de referencia S4T-0D-01'])
+        self.origin_combo=QComboBox();self.origin_combo.addItems(['Referencia 2T','Proyecto actual','Referencia 4T'])
         self.origin_combo.setAccessibleName('Origen de la próxima ejecución');preparation.content.addWidget(self.origin_combo)
         self.origin_combo.setMinimumWidth(0)
         self.origin_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon);self.origin_combo.setMinimumContentsLength(16)
@@ -127,16 +138,19 @@ class SimulationView(QScrollArea):
         for title,edit in [('Punto [rpm]',self.rpm_edit),('Inicio [rpm]',self.start_rpm_edit),('Final [rpm]',self.end_rpm_edit),('Incremento [rpm]',self.step_rpm_edit)]:
             edit.setMaximumWidth(150);edit.setAccessibleName(title);form.addRow(title,edit)
         self.plan_label=label();form.addRow(self.plan_label);preparation.content.addWidget(self.options);self.options.hide()
-        self.run_button=QPushButton('&Ejecutar');self.cancel_button=QPushButton('&Cancelar');self.cancel_button.setEnabled(False)
-        self.check_button=QPushButton('Compro&bar entradas');self.details_button=QPushButton('&Detalles')
+        self.run_button=QPushButton('&Ejecutar cálculo');self.cancel_button=QPushButton('&Cancelar');self.cancel_button.setEnabled(False)
+        self.check_button=QPushButton('Compro&bar');self.details_button=QPushButton('&Detalles')
         self.run_button.setObjectName('primaryAction')
         actions=QGridLayout()
-        for i,w in enumerate((self.check_button,self.details_button,self.run_button,self.cancel_button)):actions.addWidget(w,i//2,i%2)
+        actions.addWidget(self.check_button,0,0);actions.addWidget(self.details_button,0,1)
+        actions.addWidget(self.run_button,1,0,1,2);actions.addWidget(self.cancel_button,2,0,1,2)
         preparation.content.addWidget(label('Validación y ejecución','panelTitle'));preparation.content.addLayout(actions)
         preparation.content.addStretch()
         progress=Panel('02 · ESTADO DEL CÁLCULO');run_layout.addWidget(progress)
-        self.state_label=label('Listo para ejecutar','sectionTitle');self.progress_label=label('Ciclos completos: 0 · Tiempo: 0,0 s','unit')
-        self.error_label=label('','fieldError')
+        self.state_badge=Badge('INACTIVO');progress.content.addWidget(self.state_badge)
+        self.state_label=Message('Esperando inicio de cálculo.','sectionTitle');self.progress_label=label('','unit')
+        self.state_label.changed.connect(self._state_changed)
+        self.error_label=ValidationMessage()
         for w in (self.state_label,self.progress_label):progress.content.addWidget(w)
         self.message_host=QVBoxLayout();self.message_host.addWidget(self.error_label);preparation.content.addLayout(self.message_host)
         self.open_button=QPushButton('&Abrir resultado…');self.open_sweep_button=QPushButton('Abrir barrido…');self.sweep_button=QPushButton('Ver barrido…');self.sweep_button.setEnabled(False)
@@ -149,12 +163,21 @@ class SimulationView(QScrollArea):
         result_layout.addWidget(self.identity_label);result_layout.addWidget(self.stale_label)
         self.result_tabs=QTabWidget();result_layout.addWidget(self.result_tabs)
         summary=QWidget();summary_layout=QVBoxLayout(summary)
-        self.summary_label=label('Abrí un resultado o un barrido en Resultados para consultar datos, o ejecutá un caso admitido.');self.summary_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        self.memory_label=label('','unit');self.path_label=label('Cada ejecución se guarda en una carpeta nueva de MotorSim/Resultados.','unit')
+        self.summary_label=Message('Abrí un resultado o un barrido en Resultados para consultar datos, o ejecutá un caso admitido.');self.summary_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.memory_label=Message('','unit');self.path_label=label('Cada ejecución se guarda en una carpeta nueva de MotorSim/Resultados.','unit')
         for w in (self.summary_label,self.memory_label,self.path_label):summary_layout.addWidget(w)
         summary_layout.addStretch();self.result_tabs.addTab(summary,'Resumen')
         plots=QWidget();self.plots_grid=QGridLayout(plots);self.angle_plot,self.pv_plot=PressurePlot(),PressurePlot(True)
         self.result_tabs.addTab(plots,'Curvas')
+        self.monitor_summary=label();self.monitor_timing=label('','unit')
+        self.summary_label.changed.connect(self.monitor_summary.setText);self.memory_label.changed.connect(self.monitor_timing.setText)
+        self.summary_label.changed.connect(lambda value:self.monitor_summary.setVisible(bool(value)))
+        self.memory_label.changed.connect(lambda value:self.monitor_timing.setVisible(bool(value)))
+        self.monitor_summary.hide();self.monitor_timing.hide()
+        progress.content.addWidget(self.monitor_summary);progress.content.addWidget(self.monitor_timing)
+        self.preview_angle,self.preview_pv=PressurePlot(),PressurePlot(True)
+        self.angle_plot.mirror=self.preview_angle;self.pv_plot.mirror=self.preview_pv
+        progress.content.addWidget(self.preview_angle);progress.content.addWidget(self.preview_pv)
         self.parameters_text=QPlainTextEdit();self.parameters_text.setReadOnly(True);self.result_tabs.addTab(self.parameters_text,'Parámetros')
         self.balances_text=QPlainTextEdit();self.balances_text.setReadOnly(True);self.result_tabs.addTab(self.balances_text,'Balances')
         self.result_host=QVBoxLayout();self.result_host.addWidget(self.result_panel);run_layout.addLayout(self.result_host)
@@ -178,6 +201,26 @@ class SimulationView(QScrollArea):
         self._describe_inputs()
         self._arrange()
 
+    def _state_changed(self,value):
+        if value=='En ejecución':caption,tone='EJECUTANDO','warning'
+        elif value.startswith('Convergencia numérica'):caption,tone='CONVERGIDO','success'
+        elif value.startswith('Sin convergencia'):caption,tone='NO CONVERGIDO','warning'
+        elif value.startswith('Cancelando'):caption,tone='CANCELANDO','warning'
+        elif value.startswith('Cancelado'):caption,tone='CANCELADO','warning'
+        elif value.startswith('Error'):caption,tone='ERROR','error'
+        elif value.startswith('Barrido:'):caption,tone='BARRIDO','neutral'
+        else:caption,tone='INACTIVO','neutral'
+        self.state_badge.set_state(caption,tone)
+
+    def _empty_axes(self,geometry):
+        cycle=geometry['cycle'] if geometry else ('4T' if self.origin_combo.currentIndex()==2 else '2T')
+        if geometry is None and self.project_cycle:cycle=self.project_cycle()
+        layout=FOUR_LAYOUT if cycle=='4T' else TWO_LAYOUT
+        derived=calculate_geometry(geometry or {},cycle)
+        for plot in (self.angle_plot,self.pv_plot):
+            plot.volume_range=(derived.chamber,derived.maximum) if derived.chamber is not None and derived.maximum is not None else None
+            plot.set_rows([],layout)
+
     def _rpms(self):
         def integer(edit):
             value=edit.text().strip()
@@ -195,8 +238,11 @@ class SimulationView(QScrollArea):
         for edit in (self.start_rpm_edit,self.end_rpm_edit,self.step_rpm_edit):
             edit.setEnabled(sweep)
             self.options.layout().setRowVisible(edit,sweep)
+        invalid=False
         try:self.plan_label.setText('Lista exacta: '+', '.join(map(str,self._rpms()))+' rpm')
-        except ProjectError as exc:self.plan_label.setText(str(exc))
+        except ProjectError as exc:self.plan_label.setText(str(exc));invalid=True
+        for edit in (self.rpm_edit,self.start_rpm_edit,self.end_rpm_edit,self.step_rpm_edit):
+            visual_state(edit,'error' if invalid and (edit is self.rpm_edit)!=sweep else 'neutral')
         self.project_changed()
 
     def show_sweep(self):
@@ -275,6 +321,9 @@ class SimulationView(QScrollArea):
                 self.description_label.setText('Las condiciones son supuestos de referencia, no mediciones ni una calibración del motor ingresado.')
                 self.parameters_label.clear()
                 self.identity_label.clear()
+                for value in self.context_table.values.values():value.setText('—')
+                self.context_panel.set_summary('Entradas incompletas · revisar proyecto')
+                self._empty_axes(None)
 
     def _describe_inputs(self):
         origin = self.inputs.get('origin')
@@ -293,6 +342,15 @@ class SimulationView(QScrollArea):
             + f"\nArchivo al ejecutar: {origin['source_path'] or 'sin archivo asociado'}") if origin else '')
         self.identity_label.setVisible(bool(origin) and (self.result is not None or self.active or self.sweep is not None))
         self.parameters_text.setPlainText(json.dumps(self.inputs,ensure_ascii=False,indent=2))
+        context={'Caso / proyecto':origin['project_name'] if origin else case['identifier'],
+            'Ciclo':geometry['cycle'],'Geometría':f"{geometry['cylinder_count']} cil · {geometry['bore_mm']:g} × {geometry['stroke_mm']:g} mm",
+            'Compresión':f"{geometry['compression_ratio']:g}:1",'Modelo':'0D · '+('3' if geometry['cycle']=='4T' else '4')+' volúmenes',
+            'Integración':'RK4 adaptativo','Perfil':self.inputs['profile']['name'],
+            'Regularización':f"{self.inputs['variant']['delta_p_Pa']} Pa",'Aporte térmico':'Energía prescrita',
+            'Procedencia':(origin['source_path'] or 'Proyecto sin archivo asociado') if origin else 'Referencia sintética · no medida'}
+        for name,value in context.items():self.context_table.set_value(name,value)
+        self.context_panel.set_summary(' · '.join(context[k] for k in ('Ciclo','Geometría','Compresión','Integración','Perfil','Regularización')))
+        if self.result is None:self._empty_axes(geometry)
         self.project_changed()
 
     def project_changed(self):
@@ -310,6 +368,7 @@ class SimulationView(QScrollArea):
                 stale = True
         self.stale_label.setText('El resultado corresponde a una configuración anterior' if stale else '')
         self.stale_label.setVisible(stale)
+        self.context_stale.setText(self.stale_label.text())
         if self.sweep_dialog:self.sweep_dialog.stale_label.setText(self.stale_label.text())
 
     @property
@@ -572,7 +631,7 @@ class SimulationView(QScrollArea):
         self._describe_inputs()
         state = result['status']
         r = result['result']
-        self.result_status_label.setText(f"{self.inputs['case']['project_geometry']['cycle']} · {self.inputs['case']['rpm']} rpm · {state} · {self.inputs['model_version']}")
+        self.result_status_label.setText(f"{self.inputs['case']['project_geometry']['cycle']} · {self.inputs['case']['rpm']} rpm · {state}")
         last=r['cycles'][-1] if r['cycles'] else {}
         self.balances_text.setPlainText(json.dumps({key:last[key] for key in ('discrete','independent','balances_passed') if key in last},ensure_ascii=False,indent=2))
         self.state_label.setText(dict(converged='Convergencia numérica alcanzada', cancelled='Cancelado',

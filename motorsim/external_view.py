@@ -28,7 +28,7 @@ def table(headers):
     widget.verticalHeader().hide()
     widget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
     widget.horizontalHeader().setStretchLastSection(True)
-    widget.setStyleSheet('QTableWidget::item:selected { color: #edf5ff; background: #234a69; }')
+    widget.setObjectName('externalTable')
     return widget
 
 
@@ -211,7 +211,7 @@ class ExternalDialog(QDialog):
         layout.addWidget(Columns(imported,series,800))
         self.contrast_panel=Panel('03 · CONTRASTE');layout.addWidget(self.contrast_panel)
         self.status=label('No hay contraste disponible. Importá los datos y seleccioná un barrido guardado.');self.contrast_panel.content.addWidget(self.status)
-        self.tabs=QTabWidget();self.contrast_panel.content.addWidget(self.tabs)
+        self.tabs=QTabWidget();self.tabs.setMinimumHeight(310);self.contrast_panel.content.addWidget(self.tabs)
         self.table=table(['RPM','Externo','Simulado','Simulado − externo','Relativa %','Estado'])
         self.tabs.addTab(self.table,'Tabla');self.plot=ExternalPlot();self.tabs.addTab(self.plot,'Puntos / RPM')
         self.details=QPlainTextEdit();self.details.setReadOnly(True);self.tabs.addTab(self.details,'Procedencia y condiciones')

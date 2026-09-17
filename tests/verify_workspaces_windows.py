@@ -9,6 +9,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont
 from PySide6.QtCore import QTimer
+from PySide6.QtTest import QTest
 from motorsim.window import MainWindow
 from motorsim.simulation_case import geometry
 from motorsim.four_stroke import geometry as geometry4
@@ -19,7 +20,7 @@ w=MainWindow();w.resize(args.width,args.height);w.show();args.output.mkdir(paren
 root=Path(__file__).resolve().parents[1];historical=root/'results/simulacion-2t/cuatro-tiempos-20260916/R2'
 captures=[]
 def capture(name):
-    app.processEvents();w.repaint();app.processEvents()
+    QTest.qWait(100);app.processEvents();w.repaint();app.processEvents()
     path=args.output/(name+'.png');assert w.grab().save(str(path));captures.append(str(path));print('CAPTURE',path,flush=True)
 def run():
     try:
@@ -30,9 +31,12 @@ def run():
         w.navigation.go('motor2');capture('motor-2t')
         w.navigation.go('geometry');capture('geometria-2t')
         w._activate(replace(geometry4(),name='PRUEBA SINTÉTICA 4T — no medida'),None)
+        w.navigation.go('summary');capture('resumen-4t')
         w.navigation.go('motor4');capture('motor-4t')
         w.navigation.go('simulation');w.simulation_view.origin_combo.setCurrentIndex(1);capture('simulacion')
         w.simulation_view.open_result(path=historical/'gui-sweep/point-02/manifest.json')
+        w.navigation.go('simulation');capture('simulacion-convergida')
+        w.simulation_view.verticalScrollBar().setValue(w.simulation_view.verticalScrollBar().maximum());capture('simulacion-contexto')
         w.navigation.go('results');capture('resultados')
         w.simulation_view.open_sweep(path=historical/'gui-sweep/series.json');capture('barrido')
         w.navigation.go('compare');w.comparison_page.select_result(0,path=historical/'gui-sweep/point-02/manifest.json')

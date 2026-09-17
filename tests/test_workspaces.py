@@ -94,9 +94,8 @@ class WorkspaceTests(unittest.TestCase):
         self.assertIn('No hay resultado',v.result_status_label.text())
         self.assertTrue(w.comparison_page.tabs.isHidden())
         self.assertFalse(w.external_page.export_button.isEnabled())
-        for key in ('open','save'):
-            button=next(b for b in w.summary_page.findChildren(QToolButton) if b.defaultAction() is w.actions[key])
-            self.assertEqual(button.toolButtonStyle(),Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        self.assertEqual(w.summary_page.example_combo.count(),4)
+        self.assertTrue(w.summary_page.example_button.isEnabled())
     def test_refined_columns_stack_without_losing_controls(self):
         from motorsim.ui import Columns
         w=self.w;w._activate(geometry(),None)
