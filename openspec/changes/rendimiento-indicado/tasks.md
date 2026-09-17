@@ -89,6 +89,88 @@ progreso real, curvas2T/4T y estado cancelado. OpenSpec estricto aprobado.
 Esta corrección se entrega en fuentes, sin construir rc7 ni sobrescribir rc6.
 Pendiente aceptación manual; no archivo ni publicación.
 
+## Frontera baja 2T — continuación diagnóstica posterior a a5b7ce9
+- [x] Instrumentar sin modificar producción ni devolver observaciones al solver.
+- [x] Ejecutar puntos independientes1500/1750/2000/2250/2500/2750/3000 y1000 adicional.
+- [x] Capturar primeras violaciones, rechazos y tiempos; diferenciar resultados diagnósticos.
+- [x] Analizar offline1000/2000 y comparar mecanismos1500/1750 sin reducir el mínimo.
+- [x] Reproducir exactamente campos científicos de1000/2000/3000 de faseA.
+- [x] Emitir LOW_RPM_FAILURE_MECHANISM_IDENTIFIED; conservar2500–3500 público.
+- [x] Completar suite existente, OpenSpec estricto y revisión independiente puntual.
+
+Evidencia nueva, sin reemplazar la de faseA:
+`results/frontera-baja-2t-20260917/`. Tabla completa en `frontera.md`; diagnósticos
+detallados `diagnostico-1000.md` y `diagnostico-2000.md`; campaign.json registra
+tiempos, pasos, dt angular/segundos, primeros estados inválidos, balances y
+derivados. Los JSON individuales conservan el resultado original completo; los
+*-observation.json incluyen locales de RK4/advance y rechazos. No se usa el
+formato de aplicación para introducir resultados fuera de su rango público.
+
+Comandos desde la raíz (solo la campaña genera integraciones):
+`python -m tools.diagnose_low_rpm --output <carpeta nueva>`;
+`python -m tools.analyze_low_rpm --evidence <misma carpeta>` reproduce offline
+únicamente intentos existentes al mismo paso. Perfil B/100Pa, mínimo0,001°,
+30ciclos/60s/2M RHS/512MiB por punto intactos. Ocho ejecuciones independientes,
+66,827s integración (66,811s los siete puntos de frontera),68,594s wall de campaña.
+Los tiempos incorporan observación y escritura, no son benchmark sin instrumentación.
+
+| RPM | Clasificación | Ciclos | Integración s | Mínimo medio paso aceptado ° | Rechazos | W_C J | pmax Pa | Peor balance independiente % |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|1500|FAIL_MIN_STEP|0|0,031|0,002118121|14|—|—|—|
+|1750|FAIL_MIN_STEP|0|0,750|0,001963342|33|—|—|—|
+|2000|FAIL_NEGATIVE_FRESH|5|8,156|0,001467500|141|15,96071417 diagnóstico|1281871,358 diagnóstico|0,001369350|
+|2250|PASS|11|15,625|0,001316776|252|15,88711098|1289143,321|0,001109984|
+|2500|PASS|10|14,734|0,001037568|197|16,20929180|1306559,768|0,000664958|
+|2750|PASS|10|13,859|0,001092357|159|16,40461571|1320495,930|0,000632005|
+|3000|PASS|10|13,656|0,002348157|191|16,49050751|1331530,846|0,000445966|
+
+1000: a181,428527416° el rechazo local domina en C.F, error6,431575698.
+El paso actual0,002276846297° requiere siguiente medio0,000706126890°.
+El donante de los enlaces internos K↔C cambia al cruzar Δp=0 con F_C inicial0.
+Sin coincidencia geométrica ni térmica; esos enlaces no tienen regularización
+exterior. Clasificación probable F (cambio de donante no suave), asociado a E
+(límite de especie). No se demostró bug del estimador ni rigidez espectral.
+
+2000: primera negativa en K4 a183° del ciclo1, recuperada. Terminal K4 a
+2272,799592767° del ciclo6: F_base=0, F_K3=1,20288235e-11kg, salida integrada
+9,52323993e-18kg; se resta del inventario base cero, no del inventario K3.
+Solo F viola dominio; m/U/T/p permanecen válidos. Escape C↔E cambia donante
+entre etapas. Masa/entalpía/fresca usan el donante correcto; conservación interna
+de fresca exacta en ese episodio (primer episodio tiene redondeo7,52e-23kg/s).
+Overshoot con escala diagnóstica3e-13kg:3,17441331e-5 terminal;259,966 primero.
+No se convierte la escala en tolerancia ni floor.
+
+Corrección de interpretación de faseA: sus “ocho rechazos no físicos” eran ocho
+rechazos consecutivos totales: seis locales y dos físicos. El rechazo7 en half-1
+se repite idéntico como paso completo en el8 al reducir a la mitad. Una reducción
+posterior tendría medio0,002586036619° (>mínimo), pero no se ejecuta más allá del
+límite8. Que resolvería el problema queda indeterminado, al igual que el estado
+final potencial tras una K4 inválida; no se evalúa RHS con F<0.
+
+1500 tiene negativa C.F cerca de la inversión K↔C y acaba por mínimo;1750
+presenta el límite superior F_I>m_I (un ulp al final), no F_C<0, y acaba por mínimo.
+No hay un único mecanismo de fallo. La transición terminal de esta malla es
+monotónica: menor PASS2250, mayor FAIL2000. Frontera candidata >2000 y≤2250,
+sin inferir continuidad ni ejecutar2050/2100/2150/2200.2500 sigue siendo un
+límite conservador razonable para el ejemplo/perfil, sin garantía general.
+
+Recomendación: siguiente fase separada sobre positividad conservativa de etapas
+y cambios de donante, incluidos límites F=0 y F=m. No autoriza correcciones
+ahora. No clipping, limiters, nuevas tolerancias, campaña alta/4T ni candidata.
+Sin cambios README que anuncien rango, ni cierre/archivo de aceptación manual.
+
+Comprobaciones:6 pruebas diagnósticas iniciales aprobadas/1,194s. Primera suite
+292/81,362s: un fallo de espera3s en test_active_process_survives_navigation_and_cancel
+(QProcess doble), sin diferencia científica. Sus12 pruebas aisladas aprobaron/3,921s;
+segunda suite completa292/84,652s aprobó sin cambiar aplicación, test ni expected.
+Se conservan ambos logs: fallo transitorio no reproducido, causa temporal exacta
+no establecida; no se atribuye al solver. OpenSpec estricto aprobado.
+Revisión independiente puntual de solo lectura sin defectos; cuatro pruebas de
+evidencia repetidas/0,393s (hashes, trayectorias, conteos y etapas), sin campañas
+ni replay. Autorrevisión separada del diff: ningún cambio en motorsim/ ni README,
+eliminación ajena redme.txt conservada fuera del commit. Sin inspección Windows
+nueva ni aceptación manual atribuida; esta entrega es diagnóstica de consola.
+
 ## Ampliación candidata 2T — fase A del 17/09/2026
 - [x] Separar validadores por ciclo y dominio candidato sin habilitarlo en UI/worker.
 - [x] Ejecutar ocho puntos independientes del ejemplo2T Referencia, B/100Pa.

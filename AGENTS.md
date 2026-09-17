@@ -2,6 +2,12 @@
 
 ## Lectura y autoridad
 
+Orden posterior a fase A bloqueada: mapear1500/1750/2000/2250/2500/2750/3000
+y diagnosticar1000/2000 mediante observación y análisis offline. Mantener solver,
+perfil, positividad, mínimo y dominio público. Sin warm-start, campaña alta/4T,
+corrección, candidata ni archivo. Revisión independiente puntual de instrumentación
+y conservación. El diagnóstico de2000 puede compartir la ejecución del mapa.
+
 Continuación actual de `rendimiento-indicado`: campaña candidata 2T 1000–15000,
 ocho RPM obligatorias, mismo perfil B/100 Pa y solver. Separar validación por
 ciclo; 4T permanece 2500–3500. Fase B (29 puntos, UI ampliada y exploración

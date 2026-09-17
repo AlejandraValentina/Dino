@@ -1,4 +1,15 @@
 ## Decisiones
+Continuación diagnóstica tras a5b7ce9: siete puntos de frontera y reproducción1000;
+2000 comparte observación y mapa. Herramientas exclusivamente en tools, sin
+editar producción. ObservedModel delega a Model.evaluate y registra excepciones;
+trace lee locales de advance/RK4 solo al rechazar. No reemplaza operaciones,
+estimador ni RHS. Las copias no conservan frames ni se devuelven al solver.
+El análisis offline reproduce únicamente intentos ya registrados a idéntico paso,
+con RK4 original, deteniéndose ante estado inválido. No integra un paso menor
+ni calcula un endpoint pasando por F<0. La siguiente propuesta se calcula
+algebraicamente. Comparación exacta1000/2000/3000 acredita no perturbación
+científica; tiempos incluyen sobrecosto de observación.
+
 Ampliación candidata posterior a 3c07687: fase A independiente con ocho RPM
 1000/2000/3000/5000/8000/10000/12000/15000. `rpm_domain` centraliza contratos por
 ciclo; candidato separado del dominio público hasta GO. El instrumento de

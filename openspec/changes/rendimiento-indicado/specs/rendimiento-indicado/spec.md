@@ -1,4 +1,19 @@
 ## ADDED Requirements
+### Requirement: Diagnóstico de frontera baja sin corrección
+La etapa diagnóstica SHALL ejecutar independientemente1500/1750/2000/2250/2500/
+2750/3000 y reproducir1000 con perfil, física, mínimo y positividad intactos.
+SHALL registrar estados, ciclos, tiempos, pasos/rechazos, primeros estados
+inválidos y últimos ciclos completos diferenciando diagnósticos de resultados.
+SHALL observar error por componente en1000, etapa RK y conservación/donantes
+en2000, sin clipping, tolerancias nuevas ni inferir continuidad entre muestras.
+#### Scenario: Observación de un estado no físico
+- **WHEN** una etapa del solver rechaza un estado
+- **THEN** capturar su contexto sin cambiar el cálculo y detener la reproducción
+  offline en la misma prohibición; no afirmar un estado final no evaluado.
+#### Scenario: Frontera observada
+- **WHEN** finalizan los puntos autorizados
+- **THEN** emitir una única conclusión diagnóstica, mantener2500–3500 público,
+  comprobar regresión3000 exacta y no ejecutar campaña alta/4T ni empaquetar.
 ### Requirement: Puerta numérica de ampliación 2T
 El sistema SHALL separar explícitamente dominios por ciclo. La ampliación
 candidata2T1000–15000 SHALL condicionarse a ocho puntos1000/2000/3000/5000/8000/
