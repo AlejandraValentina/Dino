@@ -247,6 +247,40 @@
       "max_repair_attempts": 3,
       "requires_human_approval": false,
       "next_phase": null
+    },
+    {
+      "id": "P1_R1_SCIENTIFIC_AMENDMENT",
+      "title": "P1_R1_SCIENTIFIC_AMENDMENT",
+      "objective": "Review only T02 contact observable; unchanged solver and P1; conditional P2A gate.",
+      "depends_on": [
+        "P0",
+        "P1"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "docs/gasdynamic/",
+        "docs/baselines/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "observable_tests",
+        "contact_study",
+        "complete_study",
+        "contact_accuracy",
+        "unique_monotone",
+        "B_converges",
+        "gas1d_unchanged",
+        "baseline_intact",
+        "contract_frozen",
+        "dependencies_accepted"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }
