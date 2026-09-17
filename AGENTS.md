@@ -13,6 +13,11 @@ sustituye el límite de solo consulta para esa vista. Comprobar cálculo, cancel
 y capturas Windows sin campañas generales. No empaquetar rc7 en esta tarea;
 mantener física, fórmulas, formatos y candidatas anteriores.
 
+Continuación posterior a d15ec98: controles RPM permanentes y recálculo repetible.
+Conservar la curva anterior al recalcular/cancelar/fallar, separar compatibilidad
+del motor y del plan RPM. Recorrido explícito de tres cálculos y cancelación por
+ciclo 2T/4T autorizado; no rc7, cambios numéricos ni campañas adicionales.
+
 Orden actual: `implementacion-ui-cae-final` traslada la referencia visual confirmada
 `Desktop/code.html` a Qt Widgets y prepara rc5. Mantener modelos, contratos,
 worker, formatos y candidatas anteriores. Pruebas UI, dos puntos 2T/4T y

@@ -1,4 +1,15 @@
 ## Decisiones
+Corrección iterativa posterior a d15ec98: setup siempre visible, campos deshabilitados
+solo con proceso activo. configured_plan/plan_matches_sweep comparan el plan exacto
+sin alterar compatible(proyecto). Los eventos de contexto solo invalidan un motor
+distinto; las opciones RPM actualizan el aviso sin adoptar resultados. La entrada
+a la vista y la finalización consumen nuevas referencias de sesión una sola vez,
+para que un índice cancelado no sustituya después la curva conservada. No hay
+copia ni mezcla de resultados: self.sweep/rows conservan el objeto anterior hasta
+aceptar uno nuevo. Cancelación/error/no convergencia preservan una curva previa;
+sin curva previa se admiten puntos válidos parciales no cancelados. Los índices y
+diagnósticos del controlador siguen persistidos con la infraestructura anterior.
+
 Corrección UX rc6: las decisiones originales de solo consulta abajo describen la
 primera candidata. Ahora la vista detecta compatibilidad mediante configuration_key
 y source_path de la procedencia; no usa curvas ajenas como actuales. La apertura

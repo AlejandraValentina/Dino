@@ -1,0 +1,11 @@
+test_cancel_recalculation_preserves_curve_plan_and_retry (test_performance_recalculation.PerformanceRecalculationTests.test_cancel_recalculation_preserves_curve_plan_and_retry) ... ok
+test_error_nonconvergence_and_first_failure_recover (test_performance_recalculation.PerformanceRecalculationTests.test_error_nonconvergence_and_first_failure_recover) ... ok
+test_history_edit_does_not_reclassify_as_current_motor (test_performance_recalculation.PerformanceRecalculationTests.test_history_edit_does_not_reclassify_as_current_motor) ... ok
+test_late_cancel_does_not_accept_already_closed_index (test_performance_recalculation.PerformanceRecalculationTests.test_late_cancel_does_not_accept_already_closed_index) ... ok
+test_rpm_edit_keeps_curve_and_separates_project_and_plan (test_performance_recalculation.PerformanceRecalculationTests.test_rpm_edit_keeps_curve_and_separates_project_and_plan) ... ok
+test_three_consecutive_calculations_replace_only_at_completion (test_performance_recalculation.PerformanceRecalculationTests.test_three_consecutive_calculations_replace_only_at_completion) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 10.724s
+
+OK

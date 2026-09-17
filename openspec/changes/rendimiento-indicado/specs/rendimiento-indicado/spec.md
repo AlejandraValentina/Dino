@@ -34,6 +34,25 @@ SHALL mostrar advertencias de magnitudes indicadas sin pérdidas ni valores al e
 #### Scenario: Punto no convergido
 - **WHEN** hay puntos fallidos/cancelados/no ejecutados
 - **THEN** no muestran valores ficticios, no unen curvas a través del hueco ni permiten abrirlos como convergidos.
+### Requirement: Recálculo iterativo y plan independiente
+El panel RPM SHALL permanecer visible. SHALL bloquear campos y cálculo solo
+durante ejecución; sin curva ofrecer Calcular rendimiento y con curva Recalcular
+rendimiento. La compatibilidad de proyecto SHALL ser distinta de la comparación
+exacta plan_rpms contra index.rpms. Cambiar solo RPM SHALL conservar resultados y
+mostrar plan anterior/nuevo y advertencia textual; no cargar otra serie ni revertir
+los campos. Un plan inválido SHALL impedir ejecutar sin destruir la curva.
+#### Scenario: Tres ejecuciones en una sesión
+- **WHEN** se calcula, se cambia a otro plan válido y se vuelve a calcular
+- **THEN** conserva los controles y genera una carpeta nueva por ejecución,
+  reemplaza resultados al completar y permite un tercer cálculo sin reiniciar.
+#### Scenario: Cancelación o error de recálculo
+- **WHEN** se inicia una nueva curva y luego se cancela o falla
+- **THEN** mantiene la curva anterior identificada como tal y el plan configurado,
+  muestra el motivo y habilita reintento; sin curva previa vuelve al estado vacío.
+#### Scenario: Barrido parcial
+- **WHEN** un barrido no cancelado termina con puntos no convergidos
+- **THEN** conserva la curva previa si existe; sin ella permite consultar sus
+  puntos válidos con las reglas de huecos y estado existentes.
 ### Requirement: Resultados comparación y CSV
 Resultados individuales SHALL mostrar ambos derivados. Comparar SHALL añadirlos
 solo bajo compatibilidad existente (incluidas mismasRPM). CSV nuevos SHALL

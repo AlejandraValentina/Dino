@@ -1,10 +1,10 @@
 """Analítica independiente y consulta de históricos; sin integrar el solver."""
-import csv,json,math,os,tempfile,unittest
+import csv,gc,json,math,os,tempfile,unittest
 from copy import deepcopy
 from pathlib import Path
 from unittest.mock import patch
 os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QEvent,Qt
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 from motorsim.performance import indicated_output,result_metrics,sweep_metrics,export_performance_csv
@@ -76,7 +76,9 @@ class PerformanceUITests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):cls.app=QApplication.instance() or QApplication([])
     def setUp(self):self.w=MainWindow();self.w.show();self.app.processEvents()
-    def tearDown(self):self.w.dirty=False;self.w.close();self.w.deleteLater();self.app.processEvents()
+    def tearDown(self):
+        self.w.dirty=False;self.w.close();self.w.deleteLater()
+        self.app.sendPostedEvents(None,QEvent.Type.DeferredDelete);self.app.processEvents();gc.collect()
     def test_empty_navigation_and_reuse_no_worker(self):
         w=self.w;p=w.performance_page
         with patch('motorsim.simulation_view.QProcess') as process:

@@ -1,10 +1,10 @@
 """Flujo de sesión/proyecto: dobles de proceso y resultados preservados, sin solver."""
-import json,os,tempfile,unittest
+import gc,json,os,tempfile,unittest
 from copy import deepcopy
 from pathlib import Path
 from unittest.mock import patch
 os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
-from PySide6.QtCore import QProcess
+from PySide6.QtCore import QEvent,QProcess
 from PySide6.QtWidgets import QApplication
 from motorsim.window import MainWindow
 from motorsim.project import Project
@@ -20,7 +20,8 @@ class PerformanceSessionTests(unittest.TestCase):
         self.w.show();self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
     def tearDown(self):
         if self.v.active:self.v._finish_cleanup()
-        self.w.dirty=False;self.w.close();self.w.deleteLater();self.app.processEvents()
+        self.w.dirty=False;self.w.close();self.w.deleteLater()
+        self.app.sendPostedEvents(None,QEvent.Type.DeferredDelete);self.app.processEvents();gc.collect()
     def activate_sweep_project(self,path):
         sweep=load_sweep(path);inputs=sweep['index']['common_inputs'];origin=inputs['origin']
         self.w._activate(Project.from_dict(inputs['project_snapshot']),Path(origin['source_path']) if origin['source_path'] else None)
@@ -54,7 +55,8 @@ class PerformanceSessionTests(unittest.TestCase):
                 self.v._series_id=sweep['index']['series_id'];self.v._finished(0,QProcess.ExitStatus.NormalExit)
                 if mode=='performance':self.assertEqual(self.w.navigation.current,'performance')
                 self.w.navigation.go('performance');self.assertIs(self.p.sweep,self.v.sweep);self.assertEqual(len(self.p.rows),3)
-                self.assertFalse(self.p.setup.isVisible())
+                self.assertTrue(self.p.setup.isVisible())
+                self.assertEqual(self.p.calculate_button.text(),'Recalcular rendimiento')
                 previous=self.p.sweep;self.v.sweep=None;self.w.navigation.go('performance');self.assertIs(self.p.sweep,previous)
     def test_project_changes_no_old_curve_historical_explicit(self):
         sweep=self.activate_sweep_project(PATHS[0]);self.v.sweep=sweep;self.w.navigation.go('performance');self.assertIs(self.p.sweep,sweep)

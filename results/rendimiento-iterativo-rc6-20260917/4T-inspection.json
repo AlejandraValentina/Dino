@@ -1,0 +1,12 @@
+{
+  "automated": true,
+  "manual_acceptance": false,
+  "platform": "windows",
+  "capture": "QWidget.grab de ventana real Windows; sin overlays ajenos",
+  "reopened": "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\run-3\\series.json",
+  "new_calculations": 0,
+  "captures": [
+    "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\10-final-reabierto-controles.png",
+    "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\11-final-reabierto-curva.png"
+  ]
+}

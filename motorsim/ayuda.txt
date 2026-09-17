@@ -27,6 +27,10 @@ Rendimiento reutiliza la curva compatible del proyecto en esta sesión. Si no ha
 Calcular rendimiento inicia explícitamente el barrido existente con el intervalo
 indicado; muestra progreso y Cancelar y presenta la curva al terminar. Entrar no
 ejecuta cálculos. Abrir barrido existente es una opción secundaria para históricos.
+Los campos RPM permanecen visibles después del cálculo. Cambiar el plan conserva
+la curva anterior y muestra un aviso hasta pulsar Recalcular rendimiento. Durante
+la ejecución se bloquean los campos y se identifica la curva anterior; cancelar
+o fallar la conserva, junto con las RPM nuevas, para permitir otro intento.
 Muestra potencia indicada [kW] y par indicado equivalente [N·m], derivados del
 trabajo p·dV guardado y de las RPM/ciclo de cada resultado, independientemente
 del editor. No incluyen fricción ni pérdidas mecánicas ni representan valores al

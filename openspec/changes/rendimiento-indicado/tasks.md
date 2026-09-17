@@ -88,3 +88,44 @@ progreso real, curvas2T/4T y estado cancelado. OpenSpec estricto aprobado.
 
 Esta corrección se entrega en fuentes, sin construir rc7 ni sobrescribir rc6.
 Pendiente aceptación manual; no archivo ni publicación.
+
+## Recálculo iterativo posterior a d15ec98
+- [x] Mantener controles RPM, comparar plan separado del motor y avisar curva anterior.
+- [x] Conservar resultados al iniciar/cancelar/fallar; reemplazar al finalizar correctamente.
+- [x] Pruebas A–J y regresiones afectadas.
+- [x] Windows: tres cálculos, cambio de plan y cancelación/reintento por ciclo 2T/4T.
+- [x] Capturas antes/después, revisión puntual, OpenSpec y documentación final.
+Sin rc7 ni archivo; detenerse listo para revisión manual.
+
+Recorridos automatizados Windows del17/09/2026, no aceptación manual: por cada
+ciclo, cargar Referencia; calcular2500/3500/500 (3puntos), cambiar Final a3000,
+recalcular (2puntos), volver a3500, iniciar/cancelar, reintentar (3puntos).
+Tres barridos convergidos y uno cancelado por ciclo, sin cambiar de vista,
+recargar proyecto ni borrar archivos. Índices en carpetas exclusivas;40archivos
+JSON previos verificados por hash en cada recorrido. Integración total229,969s.
+2T:39,719/28,125/1,672cancel/41,905s;4T:43,391/29,344/2,578cancel/43,235s.
+Resultados completos externos: `E:\MotorSim distribucion\Rendimiento iterativo rc6`.
+
+21tests iniciales de Rendimiento aprobaron. Revisión independiente puntual:
+cancelación tardía podía aceptar índice convergido antes de informar conservación.
+Corregido registrando el objeto cancelado antes de sincronizar;6tests de recálculo,
+incluido ese caso y reentrada, aprobaron/10,724s. Sin otra revisión general.
+Primera suite280: un WinError5/267 al limpiar original.csv temporal, sin fallos de
+aserciones. Segunda suite281: dos pruebas numéricas alcanzaron el límite512MiB
+del proceso de tests; se ajustó teardown de tests UI para despachar DeferredDelete
+y liberar objetos Python. Ningún cambio en límites, solver ni criterios físicos.
+
+Inspección visual del agente: plan cambiado conserva datos y aviso textual;
+cancelación4T conserva curva de2puntos y plan de3; resultado final actualizado
+y controles visibles. Algunas capturas de escritorio quedaron ocluidas por otras
+apps; se excluyen de Git. Finales recapturados con QWidget.grab de ventana Qt
+real en Windows al reabrir run-3, sin cálculos adicionales. La evidencia separa
+ese reabierto de los recorridos con worker real. Sin rc7; aceptación manual pendiente.
+
+Suite final281 aprobada/66,522s tras corregir la limpieza de tests. OpenSpec1.3.1
+estricto aprobado. Logs, hashes y capturas seleccionadas:
+`results/rendimiento-iterativo-rc6-20260917/`. Causa raíz: ocultación de setup al
+existir curva y clear_sweep al iniciar/sincronizar ejecución; ahora se conserva el
+objeto mostrado, se compara plan por separado y se consume una nueva serie una
+sola vez al completar. Motor incompatible sigue retirándose. Fórmulas, plan_rpms,
+límites RPM, persistencia, solver y convergencia sin modificaciones.

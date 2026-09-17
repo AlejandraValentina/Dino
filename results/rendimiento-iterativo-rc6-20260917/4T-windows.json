@@ -1,0 +1,71 @@
+{
+  "automated": true,
+  "manual_acceptance": false,
+  "real_worker": true,
+  "cycle": "4T",
+  "checks": [
+    "run-1: controles disponibles, estado correcto, carpeta exclusiva y datos previos intactos",
+    "run-2: controles disponibles, estado correcto, carpeta exclusiva y datos previos intactos",
+    "cancel-3: controles disponibles, estado correcto, carpeta exclusiva y datos previos intactos",
+    "run-3: controles disponibles, estado correcto, carpeta exclusiva y datos previos intactos",
+    "Tres cálculos completos y una cancelación en la misma sesión sin cambiar de vista, recargar proyecto ni borrar archivos"
+  ],
+  "captures": [
+    "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\01-sin-curva.png",
+    "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\02-primera-curva-controles.png",
+    "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\03-primera-curva.png",
+    "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\04-plan-modificado.png",
+    "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\05-segunda-curva-controles.png",
+    "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\06-recalculando-con-curva-anterior.png",
+    "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\07-cancelado-con-curva-anterior.png",
+    "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\08-tercera-curva-controles.png",
+    "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\09-tercera-curva.png"
+  ],
+  "runs": [
+    {
+      "name": "run-1",
+      "state": "converged",
+      "rpms": [
+        2500,
+        3000,
+        3500
+      ],
+      "integration_seconds": 43.39099999982864,
+      "path": "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\run-1\\series.json"
+    },
+    {
+      "name": "run-2",
+      "state": "converged",
+      "rpms": [
+        2500,
+        3000
+      ],
+      "integration_seconds": 29.34400000050664,
+      "path": "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\run-2\\series.json"
+    },
+    {
+      "name": "cancel-3",
+      "state": "cancelled",
+      "rpms": [
+        2500,
+        3000,
+        3500
+      ],
+      "integration_seconds": 2.5779999997466803,
+      "path": "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\cancel-3\\series.json"
+    },
+    {
+      "name": "run-3",
+      "state": "converged",
+      "rpms": [
+        2500,
+        3000,
+        3500
+      ],
+      "integration_seconds": 43.235000000335276,
+      "path": "E:\\MotorSim distribucion\\Rendimiento iterativo rc6\\4T-20260917\\run-3\\series.json"
+    }
+  ],
+  "wall_seconds": 132.875,
+  "previous_files_verified": 40
+}

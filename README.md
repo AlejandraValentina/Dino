@@ -26,11 +26,17 @@ sintonía, combustión predictiva ni validación experimental.
 ## Rendimiento indicado — candidata rc6
 
 CÁLCULO → Rendimiento reutiliza automáticamente la curva compatible del proyecto.
-Sin curva ofrece Inicio/Final/Incremento y **Calcular rendimiento**: acción explícita
+Inicio/Final/Incremento permanecen disponibles después de obtener una curva.
+Sin curva ofrece **Calcular rendimiento** y con ella **Recalcular rendimiento**: acción explícita
 que invoca el mismo barrido de Simulación. Entrar o cargar un ejemplo no ejecuta
 nada ni abre un diálogo. Muestra progreso y Cancelar; al finalizar presenta la
 curva sin seleccionar archivos. También reutiliza barridos hechos en Simulación.
 Cambiar el proyecto retira las curvas incompatibles sin borrar resultados.
+Cambiar solo RPM conserva la curva, compara el plan exacto y muestra una advertencia
+con las RPM anteriores y las nuevas. Durante recálculo bloquea los campos y presenta
+el resultado anterior identificado; al terminar correctamente lo sustituye. Cancelar
+o fallar conserva la curva y el plan configurado, permite reintentar y nunca
+sobrescribe carpetas anteriores. Un plan inválido deshabilita el cálculo.
 **Abrir barrido existente…** permite análisis histórico explícitamente identificado.
 Los derivados siguen usando exclusivamente las entradas guardadas. Presenta potencia indicada [kW]
 y par indicado equivalente [N·m], puntos reales y segmentos rectos, selección
@@ -59,7 +65,21 @@ Sin cambios físicos, nuevas integraciones ni campañas. rc5 se conserva.
 El flujo corregido está en fuentes; iniciar con `.\.venv\Scripts\python.exe -m motorsim`
 desde la raíz del repositorio. No se construyó rc7 ni se reemplazó el ZIP rc6.
 La candidata original documentada a continuación todavía tiene el flujo anterior.
-Comprobación de la corrección: suite274 aprobada y16pruebas afectadas posteriores
+Recorrido de revisión del recálculo (realizar una vez con cada ejemplo Referencia,
+2T y4T): calcular Inicio2500/Final3500/Incremento500; comprobar tres puntos y
+controles visibles. Cambiar Final a3000, comprobar aviso y curva anterior,
+recalcular y comprobar dos puntos. Cambiar Final de nuevo a3500, iniciar y
+cancelar; deben conservarse los dos puntos y el nuevo plan. Volver a pulsar
+Recalcular y comprobar tres puntos. Todo en Rendimiento, sin recargar proyecto
+ni borrar archivos. Cada ejecución genera una carpeta nueva.
+Recálculo iterativo comprobado: **281 pruebas aprobadas**, OpenSpec estricto y
+revisión independiente puntual (cancelación tardía corregida). Recorrido Windows
+automatizado por cada ciclo: tres cálculos completos, cambio de plan, cancelación
+y reintento; seis barridos convergidos en total. Archivos anteriores conservados.
+[Capturas y evidencia del recálculo](results/rendimiento-iterativo-rc6-20260917/evidence.json).
+Inspección visual del agente separada de aceptación manual, pendiente. Sin rc7.
+
+Comprobación inicial de d15ec98: suite274 aprobada y16pruebas afectadas posteriores
 (incluida recuperación tras cancelar sin curva) aprobadas. Windows visible automatizado:
 barrido2T desde Rendimiento y4T desde Simulación, ambos convergidos y presentados
 automáticamente; cancelación cooperativa por separado. Revisión independiente
