@@ -1,4 +1,4 @@
-MotorSim 0.1.0-rc4 — candidata Windows x64
+MotorSim 0.1.0-rc6 — candidata Windows x64
 
 Extraé la carpeta completa y abrí MotorSim.exe. Conservá MotorSimWorker.exe y
 _internal junto a la aplicación. No hace falta instalar Python ni usar consola.
@@ -22,6 +22,14 @@ Geometría reúne dimensiones y gráficos; Motor 2T/4T agrupa la configuración
 del ciclo activo y sus conductos. Cambiar de sección conserva los borradores.
 Resultados permite abrir resultados/barridos y consultar sus puntos. Comparar
 y Datos externos están integrados en la navegación; no ejecutan simulaciones.
+
+Rendimiento abre un barrido guardado o reutiliza el actual, sin ejecutar cálculos.
+Muestra potencia indicada [kW] y par indicado equivalente [N·m], derivados del
+trabajo p·dV guardado y de las RPM/ciclo de cada resultado, independientemente
+del editor. No incluyen fricción ni pérdidas mecánicas ni representan valores al
+eje. Seleccioná un punto con clic/flechas o desde la tabla para consultar detalle
+y abrir su resultado. Los huecos no se interpolan; los mayores valores son solo
+entre los puntos calculados. CSV conserva W y N·m con precisión completa.
 
 Los paneles se apilan al reducir el ancho. En cada motor, el contexto resume
 eventos, conductos y observaciones del ciclo activo. Simulación separa preparación,

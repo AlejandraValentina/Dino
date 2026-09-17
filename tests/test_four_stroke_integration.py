@@ -63,7 +63,7 @@ class FourIntegrationTests(unittest.TestCase):
         for row in b['samples']['cycles'][-1]:row['angle_deg']-=720*3
         compared=compare_results(a,b)
         self.assertEqual([r['angle_cycle_deg'] for r in compared['curves'][1]],[0,360,720])
-        self.assertEqual(len(compared['metrics']),5)
+        self.assertEqual(len(compared['metrics']),7)
         self.assertEqual(compared['metrics'][0]['unit'],'J/720°')
         self.assertEqual(len(compared['differences']['geometry']),1)
         with self.assertRaises(ComparisonError):compare_results(a,fixture())

@@ -23,6 +23,7 @@ from .external_view import ExternalDialog
 from .runtime import worker_command, diagnostic
 from .ui import Header, Panel, ContextPanel, SimulationColumns, PropertyTable, Badge, Message, ValidationMessage, visual_state
 from .kinematics import calculate_geometry
+from .performance import result_metrics, NOTICE
 
 
 class PressurePlot(QWidget):
@@ -648,13 +649,15 @@ class SimulationView(QScrollArea):
         self.pv_plot.set_rows([])
         if state == 'converged':
             cycle = r['cycles'][-1]
+            derived=result_metrics(result)
             worst = max(v for b in cycle['independent'].values() for v in b['normalized_m_u_f'])
             self.summary_label.setText(
                 f'Último ciclo completo: {cycle["cycle"]} · Trabajo indicado: {cycle["W_C_J"]:.6f} J/ciclo\n'+
                 (f'Cárter (diagnóstico): {cycle["W_K_J"]:.6f} J/ciclo · ' if 'W_K_J' in cycle else 'Ciclo 720° · ')+
+                f'Potencia indicada: {derived["indicated_power_W"]/1000:.6f} kW · Par indicado equivalente: {derived["indicated_torque_Nm"]:.6f} N·m\n'+
                 f'Presión máxima: {cycle["p_max_Pa"]/1000:.3f} kPa abs.\n'+
                 f'Balances aprobados · Mayor residuo independiente: {100*worst:.6f} % (límite 0,1 %)\n'
-                f'Parada: {r["stop"]}. Esta ejecución individual no comprueba sensibilidad.')
+                f'Parada: {r["stop"]}. Esta ejecución individual no comprueba sensibilidad.\n'+NOTICE)
             layout=FOUR_LAYOUT if self.inputs['case']['project_geometry']['cycle']=='4T' else TWO_LAYOUT
             self.summary_label.setText(self.summary_label.text()+'\nFracciones frescas: '+', '.join(f'{name}={y:.8f}' for name,y in zip(layout.cv,cycle['Y'])))
             rows = result['samples']['cycles'][-1]

@@ -27,7 +27,7 @@ parser.add_argument('--work',type=Path,required=True)
 parser.add_argument('--resume-two',type=Path,help='Resultado 2T ya ejecutado: continuar solo 4T, sin repetirlo')
 parser.add_argument('--scale',default='1.5',choices=['1','1.25','1.5'])
 parser.add_argument('--projects-root',type=Path,help='Carpeta de JSON físicos; por defecto Ejemplos del paquete')
-parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis','uxseries','examples','uxvisual','physical-examples','cae-examples','cae-points'],required=True)
+parser.add_argument('--stage',choices=['editor','numerical','history','cancel','missing','external','about','provenance','process','hardening','cancel-once','reopen','uxeditor','uxpoint','uxcancel','uxanalysis','uxseries','examples','uxvisual','physical-examples','cae-examples','cae-points','performance'],required=True)
 args=parser.parse_args();exe=args.exe.resolve();work=args.work.resolve();work.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from motorsim.reference_results import load_result
@@ -78,8 +78,8 @@ def tab(w,name):control(w,'TabItem',name).select();time.sleep(.2)
 
 def navigate(name):
     # Navegación por teclado, incluidos los encabezados no seleccionables.
-    steps={'Datos externos':0,'Comparar':1,'Resultados':2,'Simulación':4,
-           'Motor 2T':6,'Motor 4T':6,'Geometría':7,'Resumen':9}
+    steps={'Datos externos':0,'Comparar':1,'Resultados':2,'Rendimiento':4,'Simulación':5,
+           'Motor 2T':7,'Motor 4T':7,'Geometría':8,'Resumen':10}
     control(main,'Tree').set_focus();send_keys('{END}')
     if steps[name]:send_keys('{UP '+str(steps[name])+'}')
     time.sleep(.2)
@@ -167,7 +167,50 @@ def finish_calculation(folder,series=False):
 try:
     main=window('MotorSim');front(main)
     note('GUI EXE directo, cwd distinto, PATH sistema, sin PYTHONPATH/VIRTUAL_ENV; factor Qt '+args.scale)
-    if args.stage=='cae-examples':
+    if args.stage=='performance':
+        import csv,hashlib
+        from motorsim.performance import result_metrics
+        root=Path(__file__).resolve().parents[1]/'results/simulacion-2t'
+        sources={'2T':root/'barrido-20260915/gui-sweep',
+                 '4T':root/'cuatro-tiempos-20260916/R2/gui-sweep'}
+        before_results=result_folders()
+        hashes={p:hashlib.sha256(p.read_bytes()).hexdigest() for folder in sources.values() for p in folder.rglob('*') if p.is_file()}
+        for cycle,folder in sources.items():
+            navigate('Rendimiento');button(main,'Abrir barrido…');file_dialog('Abrir barrido para Rendimiento',folder/'series.json')
+            assert cycle in texts(main) and '3 / 3' in texts(main)
+            screenshot(main,'rc6-'+cycle+'-resumen')
+            plot=next(x for x in main.descendants() if x.element_info.name.startswith('Potencia indicada / Par indicado equivalente'))
+            plot.set_focus();send_keys('{END}');time.sleep(.3)
+            assert '3500 rpm' in texts(main)
+            screenshot(main,'rc6-'+cycle+'-combinado')
+            table=next(x for x in main.descendants() if x.element_info.name=='Puntos de rendimiento indicado')
+            table.set_focus();send_keys('^{HOME}{DOWN}');time.sleep(.3)
+            screenshot(main,'rc6-'+cycle+'-tabla')
+            button(main,'Abrir resultado del punto')
+            assert 'Potencia indicada' in texts(main) and 'Par indicado equivalente' in texts(main)
+            screenshot(main,'rc6-'+cycle+'-resultado')
+            navigate('Rendimiento');button(main,'Exportar rendimiento CSV…')
+            target=work/('CSV rendimiento '+cycle);file_dialog('Carpeta nueva para rendimiento.csv',target)
+            with (target/'rendimiento.csv').open(encoding='utf-8') as f:rows=list(csv.DictReader(f))
+            expected=load_sweep(folder/'series.json')
+            for row,result in zip(rows,expected['results']):
+                for key in ('indicated_power_W','indicated_torque_Nm'):
+                    assert float(row[key])==result_metrics(result)[key]
+            assert not worker_paths()
+            note(cycle+': barrido, gráfico/selección, tabla, punto individual y CSV preciso en EXE sin solver')
+        folder=sources['4T'].parent
+        navigate('Resultados');button(main,'Abrir barrido…');file_dialog('Abrir barrido',folder/'gui-sweep/series.json')
+        navigate('Rendimiento');button(main,'Usar barrido actual');assert '4T' in texts(main)
+        navigate('Comparar');button(main,'Abrir resultado A…');file_dialog('Abrir resultado A',folder/'gui-sweep/point-02/manifest.json')
+        button(main,'Abrir resultado B…');file_dialog('Abrir resultado B',folder/'gui-compression/manifest.json')
+        assert 'Compatibles' in texts(main);screenshot(main,'rc6-comparacion')
+        button(main,'Exportar CSV…');file_dialog('Crear carpeta nueva',work/'CSV comparación')
+        with (work/'CSV comparación/resumen.csv').open(encoding='utf-8') as f:rows=list(csv.DictReader(f))
+        assert {'indicated_power_W','indicated_torque_Nm'} <= {row['magnitude'] for row in rows}
+        assert not worker_paths() and result_folders()==before_results
+        assert all(hashlib.sha256(p.read_bytes()).hexdigest()==digest for p,digest in hashes.items())
+        note('Reutilización, comparación y CSV; archivos científicos intactos, ningún resultado nuevo ni worker')
+    elif args.stage=='cae-examples':
         from motorsim.examples import PROJECT_FILES
         from motorsim.storage import load_project
         for index,key in enumerate(PROJECT_FILES):

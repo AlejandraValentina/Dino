@@ -2,6 +2,11 @@
 
 ## Lectura y autoridad
 
+Orden actual: `rendimiento-indicado`, derivación de potencia/par indicados desde
+W_C/ciclo/RPM de resultados validados. Vista CAE y CSV nuevos; rc6 si aprueba.
+No física, solver, pérdidas mecánicas ni valores al eje. Reutilizar históricos,
+sin nuevas integraciones; revisión puntual, commits locales, sin publicar/archivar.
+
 Orden actual: `implementacion-ui-cae-final` traslada la referencia visual confirmada
 `Desktop/code.html` a Qt Widgets y prepara rc5. Mantener modelos, contratos,
 worker, formatos y candidatas anteriores. Pruebas UI, dos puntos 2T/4T y

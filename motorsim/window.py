@@ -29,6 +29,7 @@ from .comparison_view import ComparisonDialog
 from .external_view import ExternalDialog
 from .examples import EXAMPLES, PROJECT_FILES, example_project
 from .ui import NumericUnit
+from .performance_view import PerformanceView
 
 
 class _FilePathLabel(QLabel):
@@ -286,6 +287,7 @@ class MainWindow(QMainWindow):
         self.geometry_page=self.geometry_view
         self.summary_page=SummaryPage(self);self.workspace_scroll=self.summary_page
         self.result_workspace=ResultWorkspace(self.simulation_view)
+        self.performance_page=PerformanceView(self.simulation_view)
         self.comparison_page=ComparisonDialog(self,embedded=True)
         self.external_page=ExternalDialog(self,embedded=True)
         self.simulation_view.comparison_dialog=self.comparison_page
@@ -296,6 +298,7 @@ class MainWindow(QMainWindow):
             ('CONFIGURACIÓN','motor2','Motor 2T',self.motor2_page),
             ('CONFIGURACIÓN','motor4','Motor 4T',self.motor4_page),
             ('CÁLCULO','simulation','Simulación',self.simulation_view),
+            ('CÁLCULO','performance','Rendimiento',self.performance_page),
             ('ANÁLISIS','results','Resultados',self.result_workspace),
             ('ANÁLISIS','compare','Comparar',self.comparison_page),
             ('ANÁLISIS','external','Datos externos',scroll(self.external_page))):
@@ -313,6 +316,7 @@ class MainWindow(QMainWindow):
 
     def _workspace_selected(self,key):
         view=self.simulation_view
+        if key=='performance':self.performance_page.refresh_available();self.performance_page.selection_changed()
         if key=='results':
             self.result_workspace.detail_layout.addWidget(view.result_panel)
             self.result_workspace.message_host.addWidget(view.error_label)

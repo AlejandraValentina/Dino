@@ -189,7 +189,8 @@ class ComparisonDialog(QDialog):
         self.export_button.setEnabled(True)
         for i,row in enumerate(self.comparison['metrics']):
             self.table.insertRow(i)
-            values=[row['title'],row['unit'],*[f'{row[k]:.9g}' for k in ('a','b','difference')],
+            factor=1000 if row['magnitude']=='indicated_power_W' else 1
+            values=[row['title'],'kW' if factor==1000 else row['unit'],*[f'{row[k]/factor:.9g}' for k in ('a','b','difference')],
                     ('—' if row['magnitude'].startswith('Y_') else 'No definida') if row['relative_percent'] is None else f"{row['relative_percent']:.7g}"]
             for j,value in enumerate(values):
                 item=QTableWidgetItem(value)

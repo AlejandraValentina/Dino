@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (QDialog, QFileDialog, QHBoxLayout, QLabel, QPushB
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHeaderView, QAbstractItemView, QTabWidget)
 
 from .comparison import ComparisonError, write_csv_files
+from .performance import result_metrics
 
 
 STATES = dict(converged='Convergido', not_converged='No convergido', cancelled='Cancelado',
@@ -15,14 +16,16 @@ def export_sweep_csv(folder, sweep):
     index=sweep['index']
     rows=[['series_id','point_index','run_id','rpm','state','cycles','integration_seconds',
            'setup_seconds','writing_seconds','wall_seconds','W_C_J_per_cycle','W_K_J_per_cycle',
-           'p_max_absolute_Pa','reason']]
+           'p_max_absolute_Pa','reason','indicated_power_W','indicated_torque_Nm']]
     for i,(point,result) in enumerate(zip(index['points'],sweep['results'])):
         timing=point['timings'] or {}
         cycle=result['result']['cycles'][-1] if point['state']=='converged' else {}
+        derived=result_metrics(result) if result else None
         rows.append([index['series_id'],i,point['run_id'],point['rpm'],point['state'],
             len(result['result']['cycles']) if result else None,
             *[timing.get(k) for k in ('integration_seconds','setup_seconds','writing_seconds','wall_seconds')],
-            *[cycle.get(k) for k in ('W_C_J','W_K_J','p_max_Pa')],point['reason']])
+            *[cycle.get(k) for k in ('W_C_J','W_K_J','p_max_Pa')],point['reason'],
+            (derived or {}).get('indicated_power_W'),(derived or {}).get('indicated_torque_Nm')])
     if index['common_inputs']['case']['project_geometry']['cycle']=='4T':
         for row in rows:del row[11]
         rows[0][10]='W_C_J_per_720deg_cycle'

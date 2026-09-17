@@ -23,7 +23,34 @@ La usuaria aprobó el modelo 0D, caso y protocolo de
 La integración Qt conserva las condiciones del caso de referencia, sin cambios en JSON v5. Sin ondas, inercia de conductos,
 sintonía, combustión predictiva ni validación experimental.
 
-## Interfaz CAE — candidata rc5
+## Rendimiento indicado — candidata rc6
+
+CÁLCULO → Rendimiento abre un `series.json` validado o reutiliza el barrido actual.
+No ejecuta simulaciones ni toma datos del editor. Presenta potencia indicada [kW]
+y par indicado equivalente [N·m], puntos reales y segmentos rectos, selección
+por clic/teclado, tabla y acceso a Resultados. Los huecos no se unen. Los mayores
+valores corresponden únicamente a los puntos calculados del barrido.
+
+La función común `motorsim.performance.indicated_output` usa W_C/RPM/ciclo
+guardados: 2T P=W_C·rpm/60, T=W_C/(2π); 4T P=W_C·rpm/120, T=W_C/(4π).
+No reintegra p·dV. No incluye fricción ni pérdidas mecánicas ni valores al eje.
+Resultados individuales y Comparar muestran estos derivados; CSV nuevos incluyen
+`indicated_power_W` y `indicated_torque_Nm` sin redondear. Los originales no se reescriben.
+
+Pruebas pertinentes, incluida analítica independiente e históricos sin solver:
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_performance.py -v
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+openspec validate rendimiento-indicado --strict --no-interactive
+```
+Diez pruebas nuevas aprobadas; revisión independiente puntual sin defectos
+concretos. Recorridos Windows automatizados al 100/125/150 % con históricos
+2T/4T aprobados, separados de la inspección visual y de la aceptación manual
+pendiente. Detalle y evidencia en
+[tasks.md](openspec/changes/rendimiento-indicado/tasks.md).
+Sin cambios físicos, nuevas integraciones ni campañas. rc5 se conserva.
+
+## Interfaz CAE — candidata rc5 (evidencia anterior)
 
 La referencia visual confirmada se adapta a Qt Widgets: paleta técnica común,
 paneles compactos, Resumen bilateral y Simulación con preparación, estado real y

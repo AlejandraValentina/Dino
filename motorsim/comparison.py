@@ -4,6 +4,7 @@ from pathlib import Path
 
 from .project import NUMERIC_FIELDS, VALVE_FIELDS, PORT_FIELDS, INTAKE_FIELDS, DUCT_FIELDS
 from .reference_results import validated_model
+from .performance import result_metrics
 
 
 class ComparisonError(ValueError):
@@ -127,6 +128,12 @@ def compare_results(a,b):
         av,bv=left['Y'][i],right['Y'][i]
         metrics.append(dict(magnitude='Y_'+cv,title='Fracción fresca '+cv,unit='1',a=av,b=bv,
                             difference=bv-av,relative_percent=None))
+    derived_a,derived_b=result_metrics(a),result_metrics(b)
+    for key,title,unit in (('indicated_power_W','Potencia indicada','W'),
+                           ('indicated_torque_Nm','Par indicado equivalente','N·m')):
+        av,bv=derived_a[key],derived_b[key]
+        metrics.append(dict(magnitude=key,title=title,unit=unit,a=av,b=bv,difference=bv-av,
+                            relative_percent=100*(bv-av)/abs(av) if av!=0 else None))
     return dict(metrics=metrics,differences=differences,curves=[aligned_curve(a),aligned_curve(b)],
                 run_ids=[r['manifest']['run_id'] for r in (a,b)])
 
