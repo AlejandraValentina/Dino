@@ -1,0 +1,223 @@
+{
+  "phases": [
+    {
+      "id": "P0",
+      "title": "Freeze baseline 0D",
+      "objective": "Declaración futura: Freeze baseline 0D. Sin implementación ni autorización de ejecución.",
+      "depends_on": [],
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "phase_not_implemented"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": true,
+      "next_phase": "P1"
+    },
+    {
+      "id": "P1",
+      "title": "1D mathematical contract",
+      "objective": "Declaración futura: 1D mathematical contract. Sin implementación ni autorización de ejecución.",
+      "depends_on": [
+        "P0"
+      ],
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "phase_not_implemented"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": true,
+      "next_phase": "P2"
+    },
+    {
+      "id": "P2",
+      "title": "1D isolated solver",
+      "objective": "Declaración futura: 1D isolated solver. Sin implementación ni autorización de ejecución.",
+      "depends_on": [
+        "P1"
+      ],
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "phase_not_implemented"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": true,
+      "next_phase": "P3"
+    },
+    {
+      "id": "P3",
+      "title": "0D↔1D coupling",
+      "objective": "Declaración futura: 0D↔1D coupling. Sin implementación ni autorización de ejecución.",
+      "depends_on": [
+        "P2"
+      ],
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "phase_not_implemented"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": true,
+      "next_phase": "P4"
+    },
+    {
+      "id": "P4",
+      "title": "1D exhaust",
+      "objective": "Declaración futura: 1D exhaust. Sin implementación ni autorización de ejecución.",
+      "depends_on": [
+        "P3"
+      ],
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "phase_not_implemented"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": true,
+      "next_phase": "P5"
+    },
+    {
+      "id": "P5",
+      "title": "Intake + transfers",
+      "objective": "Declaración futura: Intake + transfers. Sin implementación ni autorización de ejecución.",
+      "depends_on": [
+        "P4"
+      ],
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "phase_not_implemented"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": true,
+      "next_phase": "P6"
+    },
+    {
+      "id": "P6",
+      "title": "Species/scavenging",
+      "objective": "Declaración futura: Species/scavenging. Sin implementación ni autorización de ejecución.",
+      "depends_on": [
+        "P5"
+      ],
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "phase_not_implemented"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": true,
+      "next_phase": "P7"
+    },
+    {
+      "id": "P7",
+      "title": "Heat/combustion improvements",
+      "objective": "Declaración futura: Heat/combustion improvements. Sin implementación ni autorización de ejecución.",
+      "depends_on": [
+        "P6"
+      ],
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "phase_not_implemented"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": true,
+      "next_phase": "P8"
+    },
+    {
+      "id": "P8",
+      "title": "Wide RPM performance",
+      "objective": "Declaración futura: Wide RPM performance. Sin implementación ni autorización de ejecución.",
+      "depends_on": [
+        "P7"
+      ],
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "phase_not_implemented"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": true,
+      "next_phase": "P9"
+    },
+    {
+      "id": "P9",
+      "title": "Experimental validation",
+      "objective": "Declaración futura: Experimental validation. Sin implementación ni autorización de ejecución.",
+      "depends_on": [
+        "P8"
+      ],
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "phase_not_implemented"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": true,
+      "next_phase": null
+    },
+    {
+      "id": "dummy",
+      "title": "Prueba inocua",
+      "objective": "Comprobar infraestructura con test, artefacto temporal y hash.",
+      "depends_on": [],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "dummy_test",
+        "artifact_hash"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": false,
+      "next_phase": null
+    }
+  ]
+}

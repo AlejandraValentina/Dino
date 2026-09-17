@@ -76,6 +76,8 @@ def main():
                 if source.is_file():shutil.copy2(source,out/source.name)
     (bundle/'BUILD-DEPENDENCIES.txt').write_text('\n'.join(f'{k}=={v}' for k,v in versions.items())+'\n',encoding='utf-8')
     archive=Path(str(destination)+'.zip')
+    if any('dev_orchestrator' in part.lower() for file in bundle.rglob('*') for part in file.relative_to(bundle).parts):
+        raise RuntimeError('Infraestructura de desarrollo detectada en el paquete; no se genera ZIP.')
     with zipfile.ZipFile(archive,'x',zipfile.ZIP_DEFLATED,compresslevel=6) as zipped:
         for file in sorted(bundle.rglob('*')):
             if file.is_file():zipped.write(file,file.relative_to(destination))

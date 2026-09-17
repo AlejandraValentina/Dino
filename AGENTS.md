@@ -2,6 +2,26 @@
 
 ## Lectura y autoridad
 
+Orden actual: crear únicamente `dev_orchestrator/` aislado, con dummy ejecutable,
+contratos, gates, evidencia y pruebas. La autorización sustituye la prohibición
+previa de un orquestador solo para esta infraestructura local de desarrollo.
+No inicia P0/P1/P2, física, campañas, integración con modelos externos ni candidata.
+
+## DEV ORCHESTRATOR
+
+dev_orchestrator/ es infraestructura de desarrollo y no forma parte del producto ni
+del paquete distribuible. El código de motorsim/ no debe depender de ella.
+
+- No incluirla en PyInstaller ni ZIPs; sin dependencias runtime nuevas.
+- Puede leer tests/results/specs y ejecutar checks autorizados, no modificar física.
+- Detenerse ante SCIENTIFIC_CHANGE_REQUIRED; no cambiar contratos para aprobar.
+- Reparaciones/reintentos acotados; sin agentes externos ni encadenamiento autónomo.
+- Revisor de solo lectura; el stub dummy no acredita revisión científica independiente.
+- Registrar cambios previos, no borrarlos ni atribuirlos a la ejecución.
+- No archivar, publicar, modificar configuración global ni empaquetar en esta tarea.
+
+## Órdenes anteriores conservadas
+
 Orden posterior a fase A bloqueada: mapear1500/1750/2000/2250/2500/2750/3000
 y diagnosticar1000/2000 mediante observación y análisis offline. Mantener solver,
 perfil, positividad, mínimo y dominio público. Sin warm-start, campaña alta/4T,
