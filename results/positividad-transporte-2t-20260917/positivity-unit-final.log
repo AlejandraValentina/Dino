@@ -1,0 +1,21 @@
+test_backflow (tests.test_stage_species_candidate.SpeciesLimiterTests.test_backflow) ... ok
+test_competing_outlets_and_multiple_receivers (tests.test_stage_species_candidate.SpeciesLimiterTests.test_competing_outlets_and_multiple_receivers) ... ok
+test_final_combination_checked_and_direction_not_averaged (tests.test_stage_species_candidate.SpeciesLimiterTests.test_final_combination_checked_and_direction_not_averaged) ... ok
+test_no_intervention_is_exact (tests.test_stage_species_candidate.SpeciesLimiterTests.test_no_intervention_is_exact) ... ok
+test_pure_donor_f_equals_m_y_one (tests.test_stage_species_candidate.SpeciesLimiterTests.test_pure_donor_f_equals_m_y_one) ... ok
+test_real_1750_upper_one_ulp_microstate (tests.test_stage_species_candidate.SpeciesLimiterTests.test_real_1750_upper_one_ulp_microstate) ... ok
+test_real_2000_zero_base_microstate (tests.test_stage_species_candidate.SpeciesLimiterTests.test_real_2000_zero_base_microstate) ... ok
+test_receiver_upper_limit (tests.test_stage_species_candidate.SpeciesLimiterTests.test_receiver_upper_limit) ... ok
+test_receiver_without_fresh (tests.test_stage_species_candidate.SpeciesLimiterTests.test_receiver_without_fresh) ... ok
+test_rk4_donor_switch_all_evaluated_stages_and_conservation (tests.test_stage_species_candidate.SpeciesLimiterTests.test_rk4_donor_switch_all_evaluated_stages_and_conservation) ... ok
+test_rk4_exact_when_inactive (tests.test_stage_species_candidate.SpeciesLimiterTests.test_rk4_exact_when_inactive) ... ok
+test_scientific_comparison_normalizes_only_json_representation (tests.test_stage_species_candidate.SpeciesLimiterTests.test_scientific_comparison_normalizes_only_json_representation) ... ok
+test_tiny_fresh (tests.test_stage_species_candidate.SpeciesLimiterTests.test_tiny_fresh) ... ok
+test_upper_bound_infeasible_is_not_clipped (tests.test_stage_species_candidate.SpeciesLimiterTests.test_upper_bound_infeasible_is_not_clipped) ... ok
+test_y_zero (tests.test_stage_species_candidate.SpeciesLimiterTests.test_y_zero) ... ok
+test_zero_fresh_requested_out (tests.test_stage_species_candidate.SpeciesLimiterTests.test_zero_fresh_requested_out) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 1.551s
+
+OK

@@ -1,0 +1,5 @@
+{"rpm": 3000, "angle_deg": 184.5, "cycle": 1, "stage": "k4", "corrections": [{"link": 2, "alpha": 0.0, "fresh_correction_kg": 2.993211908964195e-13}, {"link": 3, "alpha": 0.0, "fresh_correction_kg": 2.993211908964195e-13}, {"link": 4, "alpha": 0.0, "fresh_correction_kg": 4.129454236572099e-11}]}
+{"rpm": 3000, "angle_deg": 385.78807500756454, "cycle": 1, "stage": "k4", "corrections": [{"link": 0, "alpha": 0.9999994889394406, "fresh_correction_kg": 8.61247770428801e-16}]}
+{"rpm": 3000, "angle_deg": 385.7551225697165, "cycle": 1, "stage": "k4", "corrections": [{"link": 0, "alpha": 0.9999998999380809, "fresh_correction_kg": 2.160959864208044e-16}]}
+{"rpm": 3000, "angle_deg": 385.7473986178526, "cycle": 1, "stage": "k4", "corrections": [{"link": 0, "alpha": 0.9999999446988102, "fresh_correction_kg": 1.196621805319091e-16}]}
+{"rpm": 3000, "angle_deg": 467.3848807550958, "cycle": 1, "stage": "k4", "corrections": [{"link": 4, "alpha": 0.0, "fresh_correction_kg": 3.933494849719479e-14}]}

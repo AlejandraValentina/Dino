@@ -2,10 +2,12 @@
 
 ## Lectura y autoridad
 
-Orden actual: crear únicamente `dev_orchestrator/` aislado, con dummy ejecutable,
-contratos, gates, evidencia y pruebas. La autorización sustituye la prohibición
-previa de un orquestador solo para esta infraestructura local de desarrollo.
-No inicia P0/P1/P2, física, campañas, integración con modelos externos ni candidata.
+Orden actual: `positividad-transporte-2t`, candidato conservativo de especie por
+etapa RK4, microcasos, campaña baja y regresión histórica; alta RPM solo tras gate.
+Mantener física, tolerancias, mínimo, donor, dominio público y candidatas. Integrar
+en producción únicamente si aprueba conservación, invariantes e intervención.
+Sin clipping, regularización interna, 1D ni cambios de dev_orchestrator.
+La infraestructura anterior está registrada en e739cfd/bd0a119 y queda separada.
 
 ## DEV ORCHESTRATOR
 
