@@ -60,3 +60,31 @@ selección, tabla, secundarios y resultados inspeccionados. Escalado100/125/150 
 en Windows; monitor1440×900, no atribuir recorrido físico FullHD.
 OpenSpec estricto aprobado. Una revisión independiente puntual sin defectos.
 Único pendiente de cierre: aceptación manual de la usuaria. No archivar ni publicar.
+
+## Corrección UX rc6 autorizada — proyecto y sesión
+- [x] CTA explícita con plan compartido; histórico secundario sin diálogo automático.
+- [x] Reutilización compatible, invalidación visual y finalización en Rendimiento.
+- [x] Progreso y cancelación delegados en el controlador existente.
+- [x] Pruebas de flujo 2T/4T y regresión.
+- [x] Capturas Windows sin calcular/durante/terminada y reutilización desde Simulación.
+- [x] Revisión puntual y OpenSpec estricto; registro de evidencia sin rc7 ni archivo.
+
+Corrección comprobada el17/09/2026: suite274/62,259s aprobada. Revisión independiente
+encontró CTA oculto tras cancelación sin puntos convergidos; se corrigió para ofrecer
+reintento, conservando diagnóstico. Prueba específica añadida;16tests afectados
+posteriores aprobados/16,568s. Fórmulas, solver, física, formatos intactos.
+
+Windows real automatizado (no aceptación manual):2T iniciado desde Rendimiento,
+3puntos convergidos/39,328s integración;4T iniciado desde Simulación,3puntos
+convergidos/43,562s. Ambos muestran curvas al terminar sin selección de archivo.
+La rama de cancelación del script tenía un error de prefijo (`cancel-start` tratado
+como inicio de ciclo); falló después de acreditar ambos barridos, antes de iniciar
+otro proceso. Se corrigió el script y se ejecutó solo cancelación: cooperativa,
+sin puntos iniciados, índice conservado y CTA disponible. No se repitieron barridos.
+Evidencia completa en `E:\MotorSim distribucion\Rendimiento UX rc6`, incluidos
+el error original del script y resultados persistidos. Capturas/registro versionados
+en `results/rendimiento-ux-rc6-20260917/`. Inspección visual del agente: vacío,
+progreso real, curvas2T/4T y estado cancelado. OpenSpec estricto aprobado.
+
+Esta corrección se entrega en fuentes, sin construir rc7 ni sobrescribir rc6.
+Pendiente aceptación manual; no archivo ni publicación.

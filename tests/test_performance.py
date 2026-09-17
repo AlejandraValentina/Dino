@@ -83,7 +83,7 @@ class PerformanceUITests(unittest.TestCase):
             w.navigation.go('performance');self.assertIsNone(p.sweep);self.assertFalse(p.export_button.isEnabled())
             w.simulation_view.sweep=load_sweep(TWO);w.navigation.go('performance');p.reuse_button.click()
             self.assertEqual(p.table.rowCount(),3);process.assert_not_called()
-            w.cycle_combo.setCurrentText('4T');self.assertTrue(all(r['metrics']['cycle']=='2T' for r in p.rows))
+            w.cycle_combo.setCurrentText('4T');self.assertIsNone(p.sweep);self.assertFalse(p.rows)
     def test_both_cycles_point_selection_detail_results_and_keyboard(self):
         w=self.w;p=w.performance_page
         for path,cycle in ((TWO,'2T'),(FOUR,'4T')):

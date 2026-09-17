@@ -1,0 +1,18 @@
+{
+  "automated": true,
+  "manual_acceptance": false,
+  "real_worker": true,
+  "checks": [
+    "Cambiar ejemplo retira curvas incompatibles; cancelación cooperativa real"
+  ],
+  "captures": [
+    "E:\\MotorSim distribucion\\Rendimiento UX rc6\\cancelacion-20260917\\cancelado.png"
+  ],
+  "runs": {
+    "cancel": {
+      "state": "Barrido: Cancelación solicitada; sin iniciar puntos restantes",
+      "error": ""
+    }
+  },
+  "wall_seconds": 1.0159999998286366
+}

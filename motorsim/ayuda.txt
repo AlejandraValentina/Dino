@@ -23,7 +23,10 @@ del ciclo activo y sus conductos. Cambiar de sección conserva los borradores.
 Resultados permite abrir resultados/barridos y consultar sus puntos. Comparar
 y Datos externos están integrados en la navegación; no ejecutan simulaciones.
 
-Rendimiento abre un barrido guardado o reutiliza el actual, sin ejecutar cálculos.
+Rendimiento reutiliza la curva compatible del proyecto en esta sesión. Si no hay,
+Calcular rendimiento inicia explícitamente el barrido existente con el intervalo
+indicado; muestra progreso y Cancelar y presenta la curva al terminar. Entrar no
+ejecuta cálculos. Abrir barrido existente es una opción secundaria para históricos.
 Muestra potencia indicada [kW] y par indicado equivalente [N·m], derivados del
 trabajo p·dV guardado y de las RPM/ciclo de cada resultado, independientemente
 del editor. No incluyen fricción ni pérdidas mecánicas ni representan valores al

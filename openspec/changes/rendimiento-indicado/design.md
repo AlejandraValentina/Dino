@@ -1,4 +1,17 @@
 ## Decisiones
+Corrección UX rc6: las decisiones originales de solo consulta abajo describen la
+primera candidata. Ahora la vista detecta compatibilidad mediante configuration_key
+y source_path de la procedencia; no usa curvas ajenas como actuales. La apertura
+manual conserva el histórico explícitamente identificado hasta cambiar el proyecto.
+SimulationView conserva el barrido de sesión; PerformanceView solo referencia el
+objeto validado. Las entradas RPM se sincronizan con sus controles existentes;
+Calcular rendimiento delega en start_performance → start, sin duplicar ejecución.
+Señales pequeñas de contexto/actividad/idle actualizan la vista. Solo se grafican
+resultados validados al terminar; progreso toma eventos existentes del worker.
+Se conserva el destino de finalización para no sacar al usuario de Rendimiento.
+Esta corrección no requiere una nueva candidata antes de mostrar evidencia fuente.
+
+Decisiones de la primera candidata:
 Función pura de W_C, RPM y ciclo guardados: 2T P=W_C*rpm/60,T=W_C/(2*pi);
 4T P=W_C*rpm/120,T=W_C/(4*pi). Acepta trabajo finito (incluido negativo), RPM
 finitas positivas; entradas de aplicación siguen validadas por lectores actuales.

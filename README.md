@@ -25,8 +25,14 @@ sintonía, combustión predictiva ni validación experimental.
 
 ## Rendimiento indicado — candidata rc6
 
-CÁLCULO → Rendimiento abre un `series.json` validado o reutiliza el barrido actual.
-No ejecuta simulaciones ni toma datos del editor. Presenta potencia indicada [kW]
+CÁLCULO → Rendimiento reutiliza automáticamente la curva compatible del proyecto.
+Sin curva ofrece Inicio/Final/Incremento y **Calcular rendimiento**: acción explícita
+que invoca el mismo barrido de Simulación. Entrar o cargar un ejemplo no ejecuta
+nada ni abre un diálogo. Muestra progreso y Cancelar; al finalizar presenta la
+curva sin seleccionar archivos. También reutiliza barridos hechos en Simulación.
+Cambiar el proyecto retira las curvas incompatibles sin borrar resultados.
+**Abrir barrido existente…** permite análisis histórico explícitamente identificado.
+Los derivados siguen usando exclusivamente las entradas guardadas. Presenta potencia indicada [kW]
 y par indicado equivalente [N·m], puntos reales y segmentos rectos, selección
 por clic/teclado, tabla y acceso a Resultados. Los huecos no se unen. Los mayores
 valores corresponden únicamente a los puntos calculados del barrido.
@@ -50,7 +56,18 @@ pendiente. Detalle y evidencia en
 [tasks.md](openspec/changes/rendimiento-indicado/tasks.md).
 Sin cambios físicos, nuevas integraciones ni campañas. rc5 se conserva.
 
-rc6 comprobada: fuente `799b7d6f9bf6b0061bd9a1de60af682e8061630a`, construida
+El flujo corregido está en fuentes; iniciar con `.\.venv\Scripts\python.exe -m motorsim`
+desde la raíz del repositorio. No se construyó rc7 ni se reemplazó el ZIP rc6.
+La candidata original documentada a continuación todavía tiene el flujo anterior.
+Comprobación de la corrección: suite274 aprobada y16pruebas afectadas posteriores
+(incluida recuperación tras cancelar sin curva) aprobadas. Windows visible automatizado:
+barrido2T desde Rendimiento y4T desde Simulación, ambos convergidos y presentados
+automáticamente; cancelación cooperativa por separado. Revisión independiente
+detectó el caso de reintento tras cancelar, corregido y comprobado. Inspección
+visual del agente separada de aceptación manual, que sigue pendiente.
+[Capturas y evidencia de la corrección](results/rendimiento-ux-rc6-20260917/evidence.json).
+
+rc6 original comprobada: fuente `799b7d6f9bf6b0061bd9a1de60af682e8061630a`, construida
 desde checkout limpio con Python3.11.0/PySide6 6.11.2/PyInstaller6.22.3.
 Suite269 aprobada (54,860s);10tests afectados posteriores también aprobados.
 EXE directo, cwd diferente y PATH solo sistema: barridos2T/4T, gráfico/tabla,

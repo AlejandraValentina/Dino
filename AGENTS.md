@@ -7,6 +7,12 @@ W_C/ciclo/RPM de resultados validados. Vista CAE y CSV nuevos; rc6 si aprueba.
 No física, solver, pérdidas mecánicas ni valores al eje. Reutilizar históricos,
 sin nuevas integraciones; revisión puntual, commits locales, sin publicar/archivar.
 
+Corrección UX rc6 autorizada: Rendimiento asociado al proyecto, reutilización
+automática compatible y CTA explícita que invoca el barrido existente. Esta orden
+sustituye el límite de solo consulta para esa vista. Comprobar cálculo, cancelación
+y capturas Windows sin campañas generales. No empaquetar rc7 en esta tarea;
+mantener física, fórmulas, formatos y candidatas anteriores.
+
 Orden actual: `implementacion-ui-cae-final` traslada la referencia visual confirmada
 `Desktop/code.html` a Qt Widgets y prepara rc5. Mantener modelos, contratos,
 worker, formatos y candidatas anteriores. Pruebas UI, dos puntos 2T/4T y

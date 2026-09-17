@@ -39,8 +39,8 @@ def run():
             checks.append(cycle+': fuente preservada, detalle/teclado, punto, CSV, sin scroll horizontal global')
         w.simulation_view.sweep=load_sweep(files['2T']);w.navigation.go('performance');p.reuse_button.click()
         assert p.rows[0]['metrics']['cycle']=='2T';w.cycle_combo.setCurrentText('4T')
-        assert p.rows[0]['metrics']['cycle']=='2T' and not w.simulation_view.active
-        checks.append('Reutilización y procedencia independiente del editor; sin proceso')
+        assert p.sweep is None and not w.simulation_view.active
+        checks.append('Consulta histórica explícita e invalidación al cambiar el proyecto; sin proceso')
         (args.output/'evidence.json').write_text(json.dumps(dict(automated=True,manual_acceptance=False,platform=app.platformName(),
             qt_scale=os.environ.get('QT_SCALE_FACTOR','1'),logical_size=[w.width(),w.height()],checks=checks,captures=captures),ensure_ascii=False,indent=2),encoding='utf-8')
     except Exception:

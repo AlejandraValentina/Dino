@@ -316,7 +316,7 @@ class MainWindow(QMainWindow):
 
     def _workspace_selected(self,key):
         view=self.simulation_view
-        if key=='performance':self.performance_page.refresh_available();self.performance_page.selection_changed()
+        if key=='performance':self.performance_page.sync_session()
         if key=='results':
             self.result_workspace.detail_layout.addWidget(view.result_panel)
             self.result_workspace.message_host.addWidget(view.error_label)
@@ -450,6 +450,7 @@ class MainWindow(QMainWindow):
 
     def _edited(self) -> None:
         self.dirty = True
+        self.performance_page._historical_context=None
         self._update_geometry()
         self._refresh_status()
 
@@ -467,6 +468,7 @@ class MainWindow(QMainWindow):
         refresh_motor_context(self)
 
     def _activate(self, project: Project, path: Path | None) -> None:
+        self.performance_page.clear_sweep()
         blocked = [widget.blockSignals(True) for widget in self._edit_widgets]
         try:
             self.name_edit.setText(project.name)

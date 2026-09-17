@@ -3,13 +3,16 @@ import math
 from PySide6.QtCore import QPointF,QRectF,Qt,Signal
 from PySide6.QtGui import QColor,QPainter,QPen
 from PySide6.QtWidgets import (QWidget,QScrollArea,QVBoxLayout,QGridLayout,QPushButton,QFileDialog,
-    QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QLayout)
+    QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QLayout,QFormLayout,QLineEdit)
 from .ui import Header,Panel,Columns,text,ValidationMessage,visual_state
 from .performance import sweep_metrics,export_performance_csv,NOTICE
 from .reference_results import ResultError
 from .sweep import load_sweep
 from .sweep_view import STATES
 from .comparison import ComparisonError
+from .project import Project,ProjectError
+from .project_case import configuration_key
+from .sweep import plan_rpms
 
 
 class PerformancePlot(QWidget):
@@ -106,21 +109,39 @@ class PerformanceSummary(QWidget):
 class PerformanceView(QScrollArea):
     def __init__(self,controller):
         super().__init__();self.controller=controller;self.sweep=None;self.rows=[]
+        self._historical_context=None
         self.setWidgetResizable(True);self.setFrameShape(QScrollArea.Shape.NoFrame)
         body=QWidget();self.setWidget(body);box=QVBoxLayout(body);box.setContentsMargins(20,16,20,16);box.setSpacing(12)
         box.addWidget(Header('Rendimiento','Curvas derivadas de los puntos simulados del barrido seleccionado.',
             'Potencia/par indicados · sin pérdidas mecánicas · no representan valores al eje.'))
-        source=Panel('BARRIDO SELECCIONADO');box.addWidget(source)
+        self.empty_label=text('Todavía no hay una curva de rendimiento calculada para este proyecto.');box.addWidget(self.empty_label)
+        self.setup=Panel('CURVA DE RENDIMIENTO');box.addWidget(self.setup)
+        form=QFormLayout();form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows);self.setup.content.addLayout(form)
+        self.rpm_edits=[]
+        for title,original in zip(('Inicio [rpm]','Final [rpm]','Incremento [rpm]'),(controller.start_rpm_edit,controller.end_rpm_edit,controller.step_rpm_edit)):
+            edit=QLineEdit(original.text());edit.setMaximumWidth(150);edit.setAccessibleName('Rendimiento · '+title)
+            form.addRow(title,edit);self.rpm_edits.append(edit)
+            edit.textChanged.connect(original.setText);original.textChanged.connect(edit.setText)
+            edit.textChanged.connect(self.update_plan)
+        self.plan_label=text();self.setup.content.addWidget(self.plan_label)
+        self.calculate_button=QPushButton('Calcular rendimiento');self.calculate_button.setObjectName('primaryAction');self.setup.content.addWidget(self.calculate_button)
+        self.progress_panel=Panel('CALCULANDO RENDIMIENTO');box.addWidget(self.progress_panel)
+        self.progress_text=text();self.progress_panel.content.addWidget(self.progress_text)
+        self.cancel_button=QPushButton('Cancelar');self.progress_panel.content.addWidget(self.cancel_button)
+        self.cancel_button.clicked.connect(controller.cancel);self.calculate_button.clicked.connect(self.calculate)
+        source=Panel('BARRIDO SELECCIONADO');box.addWidget(source);self.source_panel=source
         actions=QGridLayout();source.content.addLayout(actions)
-        self.open_button=QPushButton('Abrir barrido…');self.open_button.setObjectName('primaryAction')
+        self.open_button=QPushButton('Abrir barrido existente…')
         self.reuse_button=QPushButton('Usar barrido actual');self.export_button=QPushButton('Exportar rendimiento CSV…')
         actions.addWidget(self.open_button,0,0);actions.addWidget(self.reuse_button,0,1);actions.addWidget(self.export_button,1,0,1,2)
         self.identity=text('No hay barrido seleccionado. Abrí uno guardado o usá el barrido actual.');source.content.addWidget(self.identity)
         self.error=ValidationMessage();source.content.addWidget(self.error)
         self.summary=PerformanceSummary(('Mayor potencia entre puntos calculados','Mayor par entre puntos calculados','Puntos convergidos','Rango RPM del barrido'))
         panel=Panel('RESUMEN DE LOS PUNTOS');panel.content.addWidget(self.summary);box.addWidget(panel)
+        self.result_panels=[panel]
         self.main_plot=PerformancePlot((('indicated_power_W','Potencia indicada','kW','#38bdf8',1000),('indicated_torque_Nm','Par indicado equivalente','N·m','#f59e0b',1)))
         plot_panel=Panel('POTENCIA Y PAR INDICADOS');plot_panel.content.addWidget(self.main_plot);box.addWidget(plot_panel)
+        self.result_panels.append(plot_panel)
         self.detail=text('Seleccioná un punto en el gráfico o una fila en la tabla.');plot_panel.content.addWidget(self.detail)
         self.point_button=QPushButton('Abrir resultado del punto');plot_panel.content.addWidget(self.point_button)
         plot_panel.content.addWidget(text(NOTICE,'unit'))
@@ -128,8 +149,9 @@ class PerformanceView(QScrollArea):
         for key,title,unit,factor in (('W_C_J','Trabajo indicado','J/ciclo',1),('p_max_Pa','Presión máxima absoluta','kPa',1000)):
             plot=PerformancePlot(((key,title,unit,'#38bdf8',factor),));self.secondary.append(plot)
             panel=Panel(title.upper());panel.content.addWidget(plot);panels.append(panel)
-        box.addWidget(Columns(*panels,850))
+        secondary=Columns(*panels,850);box.addWidget(secondary);self.result_panels.append(secondary)
         panel=Panel('PUNTOS DEL BARRIDO');box.addWidget(panel)
+        self.result_panels.append(panel)
         self.table=QTableWidget(0,6);self.table.setAccessibleName('Puntos de rendimiento indicado')
         self.table.setStyleSheet('QTableWidget::item:selected { color: #e5edf7; background: #213a52; }')
         self.table.setHorizontalHeaderLabels(['RPM','Estado','W_C [J/ciclo]','Potencia indicada [kW]','Par indicado equivalente [N·m]','pmax [kPa abs]'])
@@ -141,19 +163,88 @@ class PerformanceView(QScrollArea):
         self.export_button.clicked.connect(self.export);self.point_button.clicked.connect(self.open_point)
         self.table.itemSelectionChanged.connect(self.selection_changed)
         for plot in (self.main_plot,*self.secondary):plot.selected.connect(self.table.selectRow)
-        self.controller.idle.connect(self.refresh_available)
-        self.refresh_available();self.selection_changed();box.addStretch()
+        self.controller.idle.connect(self.calculation_finished)
+        self.controller.context_changed.connect(self.sync_session)
+        self.controller.activity_changed.connect(self.refresh_available)
+        self.update_plan();self.refresh_available();self.selection_changed();box.addStretch()
+
+    def project_context(self):
+        try:
+            project,origin=self.controller.project_snapshot()
+            return configuration_key(project),origin['source_path']
+        except (ProjectError,TypeError):return None
+
+    def compatible(self,sweep):
+        if sweep is None:return False
+        inputs=sweep['index']['common_inputs'];origin=inputs.get('origin')
+        return bool(origin and self.project_context()==(configuration_key(Project.from_dict(inputs['project_snapshot'])),origin['source_path']))
+
+    def sync_session(self):
+        current=self.controller.sweep
+        if self.controller.active and self.controller._running_sweep and self.sweep is not None:self.clear_sweep()
+        if not self.controller.active and self.compatible(current):
+            if current is not self.sweep:self.set_sweep(current)
+            self._historical_context=None
+        elif self.sweep is not None and not self.compatible(self.sweep):
+            if self._historical_context is None or self._historical_context!=(self.project_context(),):
+                self.clear_sweep()
+        self.refresh_available()
+
+    def calculation_finished(self):
+        self.sync_session()
+        self.error.setText(self.controller.error_label.text())
+
+    def clear_sweep(self):
+        self.sweep=None;self.rows=[];self._historical_context=None;self.table.setRowCount(0)
+        for plot in (self.main_plot,*self.secondary):plot.set_rows([])
+        self.identity.setText('');self.error.clear();self.selection_changed()
+
+    def update_plan(self):
+        if not hasattr(self,'plan_label'):return
+        try:
+            values=[edit.text().strip() for edit in self.rpm_edits]
+            if any(not value.isascii() or not value.isdigit() for value in values):raise ProjectError('RPM e incremento: ingresá enteros, sin separadores ni unidades.')
+            rpms=plan_rpms(*map(int,values));self.plan_label.setText('Puntos: '+' · '.join(map(str,rpms))+' rpm')
+        except ProjectError as exc:self.plan_label.setText(str(exc))
+
+    def calculate(self,checked=False,*,output=None):
+        if self.controller.active:return
+        self.controller.start_performance(output=output)
+        if self.controller.active:self.clear_sweep()
+        self.error.setText(self.controller.error_label.text())
+        self.refresh_available()
+
     def refresh_available(self):
+        running=self.controller.active
+        has_curve=any(row['metrics'] is not None for row in self.rows)
+        self.setup.setVisible(not has_curve and not running);self.empty_label.setVisible(not has_curve and not running)
+        self.progress_panel.setVisible(running)
+        self.progress_panel.heading.setText('CALCULANDO RENDIMIENTO' if self.controller._running_sweep else 'CÁLCULO EN CURSO')
+        self.open_button.setEnabled(not running);self.calculate_button.setEnabled(not running)
+        self.cancel_button.setEnabled(running and not self.controller.cancel_requested)
+        self.identity.setVisible(self.sweep is not None and not running)
+        self.source_panel.heading.setText('ANÁLISIS HISTÓRICO' if self.sweep is None else 'BARRIDO SELECCIONADO')
+        self.reuse_button.setVisible(False)
+        self.export_button.setVisible(self.sweep is not None and not running)
+        for panel in self.result_panels:panel.setVisible(self.sweep is not None and not running)
+        if running:
+            c=self.controller;finished=c.finished_points;total=len(c._captured_rpms)
+            count=sum(state=='converged' for state in finished.values())
+            self.progress_text.setText(c.state_label.text()+'\n'+c.progress_label.text()+'\n'+c.memory_label.text()+f'\nPuntos convergidos: {count} · Pendientes: {total-len(finished)}')
         self.reuse_button.setEnabled(self.controller.sweep is not None and not self.controller.active)
         self.export_button.setEnabled(self.sweep is not None)
         self.selection_changed()
     def open_sweep(self,checked=False,*,path=None):
         if path is None:path,_=QFileDialog.getOpenFileName(self,'Abrir barrido para Rendimiento','','Barrido (series.json)')
         if not path:return
-        try:self.set_sweep(load_sweep(path))
+        try:
+            self.set_sweep(load_sweep(path));self._historical_context=(self.project_context(),)
+            if not self.compatible(self.sweep):self.identity.setText('Análisis histórico · no es la curva del proyecto actual\n'+self.identity.text())
         except (ResultError,ValueError) as exc:self.error.setText(str(exc)+' Se conserva la selección anterior.')
     def reuse_current(self):
-        if self.controller.sweep is not None and not self.controller.active:self.set_sweep(self.controller.sweep)
+        if self.controller.sweep is not None and not self.controller.active:
+            self.set_sweep(self.controller.sweep);self._historical_context=(self.project_context(),)
+            if not self.compatible(self.sweep):self.identity.setText('Análisis histórico · no es la curva del proyecto actual\n'+self.identity.text())
     def set_sweep(self,sweep):
         rows=sweep_metrics(sweep)  # Validar antes de sustituir la selección.
         self.sweep,self.rows=sweep,rows;index=sweep['index'];inputs=index['common_inputs'];case=inputs['case']

@@ -1,0 +1,32 @@
+{
+  "automated": true,
+  "manual_acceptance": false,
+  "real_worker": true,
+  "checks": [
+    "2T: barrido real persistido, progreso, carga automática, sin diálogo; origen Rendimiento",
+    "4T: barrido real persistido, progreso, carga automática, sin diálogo; origen Simulación"
+  ],
+  "captures": [
+    "E:\\MotorSim distribucion\\Rendimiento UX rc6\\recorrido-20260917\\2T-sin-calcular.png",
+    "E:\\MotorSim distribucion\\Rendimiento UX rc6\\recorrido-20260917\\2T-calculando.png",
+    "E:\\MotorSim distribucion\\Rendimiento UX rc6\\recorrido-20260917\\2T-terminado.png",
+    "E:\\MotorSim distribucion\\Rendimiento UX rc6\\recorrido-20260917\\2T-curva.png",
+    "E:\\MotorSim distribucion\\Rendimiento UX rc6\\recorrido-20260917\\4T-sin-calcular.png",
+    "E:\\MotorSim distribucion\\Rendimiento UX rc6\\recorrido-20260917\\4T-calculando.png",
+    "E:\\MotorSim distribucion\\Rendimiento UX rc6\\recorrido-20260917\\4T-terminado.png",
+    "E:\\MotorSim distribucion\\Rendimiento UX rc6\\recorrido-20260917\\4T-curva.png"
+  ],
+  "runs": {
+    "2T": {
+      "state": "converged",
+      "integration_seconds": 39.328000000678,
+      "path": "E:\\MotorSim distribucion\\Rendimiento UX rc6\\recorrido-20260917\\barrido-2T\\series.json"
+    },
+    "4T": {
+      "state": "converged",
+      "integration_seconds": 43.561999999918044,
+      "path": "E:\\MotorSim distribucion\\Rendimiento UX rc6\\recorrido-20260917\\barrido-4T\\series.json"
+    }
+  },
+  "wall_seconds": 91.85999999940395
+}

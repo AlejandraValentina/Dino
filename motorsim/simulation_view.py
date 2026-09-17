@@ -89,6 +89,8 @@ class PressurePlot(QWidget):
 
 class SimulationView(QScrollArea):
     idle = Signal()
+    context_changed = Signal()
+    activity_changed = Signal()
 
     def __init__(self, project_snapshot=None, project_cycle=None):
         super().__init__()
@@ -110,6 +112,8 @@ class SimulationView(QScrollArea):
         self.sweep = None
         self.sweep_dialog = None
         self._running_sweep = False
+        self._completion_workspace = 'sweep'
+        self.finished_points = {}
         self._point_started = 0.
         self._point_caption = ""
         self._captured_rpms = [3000]
@@ -372,6 +376,7 @@ class SimulationView(QScrollArea):
         self.stale_label.setVisible(stale)
         self.context_stale.setText(self.stale_label.text());self.context_stale.setVisible(stale)
         if self.sweep_dialog:self.sweep_dialog.stale_label.setText(self.stale_label.text())
+        self.context_changed.emit()
 
     @property
     def active(self):
@@ -402,7 +407,7 @@ class SimulationView(QScrollArea):
         if self.workspace_router:self.workspace_router('results')
         else:self.ensureWidgetVisible(self.result_panel)
 
-    def start(self, checked=False, *, output=None):
+    def start(self, checked=False, *, output=None, completion_workspace='sweep'):
         if self.active:
             return
         try:
@@ -427,11 +432,14 @@ class SimulationView(QScrollArea):
         self._series_id = None
         self._finished_manifest = None
         self._running_sweep = running_sweep
+        self._completion_workspace = completion_workspace
+        self.finished_points = {}
         self._captured_rpms = rpms
         self._point_caption = ""
         if self.sweep_dialog:self.sweep_dialog.hide()
         self._request_path = request
         self._describe_inputs()
+
         self.output = target
         self.result = None
         self.angle_plot.set_rows([])
@@ -472,6 +480,13 @@ class SimulationView(QScrollArea):
         process.start()
         self._describe_inputs()
 
+    def start_performance(self, *, output=None):
+        """La misma captura, planificación, proceso y persistencia del barrido."""
+        if self.active:return
+        self.origin_combo.setCurrentIndex(1)
+        self.mode_combo.setCurrentIndex(1)
+        self.start(output=output,completion_workspace='performance')
+
     def _read_error(self):
         if self.process:
             self._stderr = (self._stderr+bytes(self.process.readAllStandardError()))[-8192:]
@@ -492,6 +507,8 @@ class SimulationView(QScrollArea):
                     self._point_started=time.monotonic()
                     self._point_caption=f"Punto {data['point_index']+1}/{data['point_total']} · {data['rpm']} rpm · "
                     self.progress_label.setText(self._point_caption+'Iniciando…')
+                elif data.get('event') == 'point_finished':
+                    self.finished_points[data['point_index']]=data['state']
                 elif data.get('event') == 'progress':
                     count, seconds = data['completed_cycles'], data['seconds']
                     if type(count) is int and 0 <= count <= 30 and math.isfinite(seconds) and seconds >= 0:
@@ -502,6 +519,7 @@ class SimulationView(QScrollArea):
             except (ValueError, KeyError, TypeError):
                 self.error_label.setText('Se recibió un mensaje de avance ilegible.')
         self._buffer = self._buffer[-8192:]
+        self.activity_changed.emit()
 
     def _tick(self):
         elapsed = time.monotonic()-self._started
@@ -509,6 +527,7 @@ class SimulationView(QScrollArea):
         # Límite de supervisión, no ampliación de los 60 s de integración del hijo.
         if time.monotonic()-self._point_started >= 65 and not self.cancel_requested:
             self.cancel()
+        self.activity_changed.emit()
 
     def cancel(self):
         if not self.active or self.cancel_requested:
@@ -516,6 +535,7 @@ class SimulationView(QScrollArea):
         self.cancel_requested = True
         self.cancel_button.setEnabled(False)
         self.state_label.setText('Cancelando…')
+        self.activity_changed.emit()
         process = self.process
         process.write(b'cancel\n')
         QTimer.singleShot(3000, lambda: self._kill_if_active(process))
@@ -564,7 +584,9 @@ class SimulationView(QScrollArea):
                 self.state_label.setText('Barrido: '+loaded['index']['reason'])
                 self.progress_label.setText(f"Integración total: {loaded['index']['integration_seconds']:.3f} s")
                 self._finish_cleanup()
-                if self.window().isEnabled():self.show_sweep()
+                if self.window().isEnabled():
+                    if self._completion_workspace=='performance' and self.workspace_router:self.workspace_router('performance')
+                    else:self.show_sweep()
                 self.project_changed()
             except (ResultError,OSError) as exc:
                 self.error_label.setText(str(exc)+' '+self._stderr.decode('utf-8',errors='replace')[:2000])
