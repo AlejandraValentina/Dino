@@ -89,6 +89,69 @@ progreso real, curvas2T/4T y estado cancelado. OpenSpec estricto aprobado.
 Esta corrección se entrega en fuentes, sin construir rc7 ni sobrescribir rc6.
 Pendiente aceptación manual; no archivo ni publicación.
 
+## Ampliación candidata 2T — fase A del 17/09/2026
+- [x] Separar validadores por ciclo y dominio candidato sin habilitarlo en UI/worker.
+- [x] Ejecutar ocho puntos independientes del ejemplo2T Referencia, B/100Pa.
+- [x] Registrar balances, ciclos, tiempos, trabajo, presión, derivados y paso mínimo.
+- [x] Decisión de fase A: BLOCKED; conservar dominio público2500–3500 para ambos ciclos.
+- [ ] Fase B condicionada a GO: planes2–57, presupuesto medido, curva29puntos,
+  cancelación larga, CSV/gráfico, inspección Windows y exploración superior.
+- [ ] Próxima candidata y aceptación manual: no habilitadas por esta evidencia.
+
+Evidencia: `results/rendimiento-dominio-2t-20260917/campaign.json` y ocho JSON
+con caso completo, resultados, balances por volumen/global y muestras. Instrumento:
+`python -m tools.verify_2t_rpm_domain --output <carpeta nueva>`;8ejecuciones,
+101,765s integración,103,234s wall. No altera modelos, estado inicial, B/100Pa,
+RK4, límites, tolerancias ni geometría; reemplaza únicamente RPM en el caso
+construido desde example_project('2t-reference'). No son archivos GUI nuevos.
+
+| RPM | Estado | Ciclos completos | Integración s | W_C J | pmax Pa | P indicada W | T equivalente N·m | Peor balance independiente % | Mínimo medio paso aceptado ° |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|1000|No convergido|0|0,016|—|—|—|—|—|0,001749209|
+|2000|No convergido, diagnóstico|5|7,890|15,96071417|1281871,358|532,023806|2,54022656|0,001369350|0,001467500|
+|3000|Convergido|10|13,422|16,49050751|1331530,846|824,525376|2,62454578|0,000445966|0,002348157|
+|5000|Convergido|10|13,156|15,30900149|1381589,029|1275,750125|2,43650326|0,000304383|0,001010962|
+|8000|Convergido|11|14,703|12,95447089|1454294,859|1727,262786|2,06176808|0,000238753|0,001705345|
+|10000|Convergido|12|16,125|11,60180965|1494822,842|1933,634941|1,84648535|0,000325985|0,001151015|
+|12000|Convergido|13|17,406|10,42662663|1527206,218|2085,325326|1,65944917|0,000289815|0,001155323|
+|15000|Convergido|14|19,047|8,98865893|1564829,778|2247,164733|1,43058950|0,000361196|0,001438810|
+
+Magnitudes del último ciclo completo;2000 es diagnóstico no aceptado. A1000 no
+se extrapola trabajo de ciclo desde la fracción ejecutada. Todos los últimos
+ciclos completos conservados cumplen balances; mayor residuo discreto normalizado
+en esos ciclos6,10e-14 (límites masa/fresca1e-6, energía1e-5). Límite independiente
+0,1%; todos inferiores. Estos balances no sustituyen la convergencia fallida.
+Los seis aprobados terminan por tres ciclos consecutivos convergidos.
+
+Fallos concretos sin reparación:
+-1000: a181,428527416° el controlador requiere paso0,00141225378068°,
+ medio paso0,000706126890342°, menor que0,001°. Cero ciclos completos.
+-2000: ocho rechazos no físicos a2272,789248620° (ciclo6); etapa C
+ a2272,799592767° con F=-9,523239929231602e-18kg, m=5,723536151636247e-5kg.
+ No se recorta F ni se relaja su validación. Cinco ciclos completos conservados.
+
+Intervalo público previamente comprobado conservado:2500–3500. Solo se midieron
+seis puntos adicionales/aprobados de la lista; no se afirma continuidad3000–15000
+ni se escoge un nuevo rango reducido por inferencia. Por eso BLOCKED, no GO.
+No curva29puntos, exploración16000/18000/20000 ni nueva fórmula de presupuesto:
+son dependencias de GO. Presupuesto300s, tope5puntos, recálculo/cancelación y
+formatos históricos se conservan. No se ejecutó otra campaña4T.
+
+Regresión3000: ciclos, balances, muestras de los dos últimos ciclos, W_C, pmax,
+controlador/RHS y derivados exactamente iguales al histórico gui-sweep/point-02.
+Prueba inicial de regresión corrigió su lectura: las muestras históricas están
+en samples.json, no en summary.json; no requirió reintegrar ni corregir solver.
+66 pruebas pertinentes aprobadas:5 dominio,17 barridos,22 Rendimiento/recálculo,
+10 integración4T y12 adaptador/proyecto. Logs tests-*.log junto a la campaña.
+Incluyen cancelaciones con dobles, protección de curva anterior y recálculo;
+no acreditan cancelación de un barrido largo ni inspección Windows nueva.
+OpenSpec1.3.1 estricto aprobado y diff --check sin defectos de espacios.
+Revisión independiente puntual de solo lectura: sin defectos concretos;
+verificó casos que difieren solo en RPM, hashes del núcleo y repitió5 pruebas
+de dominio/regresión sin solver. Autorrevisión del diff realizada por separado.
+Sin nueva inspección visual: no se amplió ni rediseñó la interfaz. Aceptación
+manual pendiente; no archivar, publicar ni reemplazar candidatas.
+
 ## Recálculo iterativo posterior a d15ec98
 - [x] Mantener controles RPM, comparar plan separado del motor y avisar curva anterior.
 - [x] Conservar resultados al iniciar/cancelar/fallar; reemplazar al finalizar correctamente.

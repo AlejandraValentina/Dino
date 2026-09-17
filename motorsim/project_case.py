@@ -11,15 +11,10 @@ from .ducts import route_geometry
 from .kinematics import piston_position
 from .simulation import Model
 from .simulation_case import SyntheticCase
+from .rpm_domain import validate_rpm
 
 SCENARIO_ID = 'S2T-0D-01-reference-conditions-v1'
 RPM_SCENARIO_ID = 'S2T-0D-reference-recipe-variable-rpm-v1'
-
-
-def validate_rpm(rpm):
-    if type(rpm) is not int or not 2500 <= rpm <= 3500:
-        raise ProjectError('Régimen: debe ser un entero entre 2500 y 3500 rpm.')
-    return rpm
 
 
 class ProjectCase(SyntheticCase):
@@ -129,7 +124,7 @@ def build_project_case(project, *, rpm=None):
         from .four_stroke import build_project_case as build_four
         return build_four(project,3000 if rpm is None else rpm)
     if rpm is not None:
-        validate_rpm(rpm)
+        validate_rpm(rpm, project.cycle)
     errors = execution_errors(project)
     if errors:
         raise ProjectError('\n'.join(errors))

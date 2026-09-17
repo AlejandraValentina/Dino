@@ -23,6 +23,11 @@ del ciclo activo y sus conductos. Cambiar de sección conserva los borradores.
 Resultados permite abrir resultados/barridos y consultar sus puntos. Comparar
 y Datos externos están integrados en la navegación; no ejecutan simulaciones.
 
+El modelo actual es 0D y no resuelve propagación/reflexión de ondas ni resonancia
+del escape. La curva no representa todavía la respuesta de un escape 2T sintonizado.
+La campaña candidata 1000–15000 rpm falló a1000/2000; se conserva el contrato
+2500–3500 rpm para 2T/4T. Sin ampliación acreditada ni validación experimental.
+
 Rendimiento reutiliza la curva compatible del proyecto en esta sesión. Si no hay,
 Calcular rendimiento inicia explícitamente el barrido existente con el intervalo
 indicado; muestra progreso y Cancelar y presenta la curva al terminar. Entrar no

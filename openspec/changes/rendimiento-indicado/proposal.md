@@ -1,4 +1,10 @@
 ## Why
+Continuación autorizada: evaluar el dominio candidato 2T 1000–15000 rpm con
+ocho puntos, sin cambiar física ni ampliar 4T. La fase A precede a cualquier
+habilitación de UI, curva de29 puntos o candidata nueva. Resultado BLOCKED:
+conservar contrato público y evidencia; fase B no iniciada. Esta autorización
+sustituye el límite histórico de no integrar exclusivamente para dicha campaña.
+
 Consultar potencia y par indicados derivados de barridos existentes sin reintegrar.
 ## What Changes
 Vista Rendimiento, gráfico combinado seleccionable, resumen, secundarios y tabla;

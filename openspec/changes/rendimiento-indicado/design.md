@@ -1,4 +1,17 @@
 ## Decisiones
+Ampliación candidata posterior a 3c07687: fase A independiente con ocho RPM
+1000/2000/3000/5000/8000/10000/12000/15000. `rpm_domain` centraliza contratos por
+ciclo; candidato separado del dominio público hasta GO. El instrumento de
+consola construye el caso del ejemplo canónico a3000 y reemplaza únicamente RPM
+antes de llamar al mismo Model/run_adaptive/Monitor, B/100 Pa. No relaja lector
+ni worker, no altera formatos científicos. Evidencia de investigación separada
+de resultados importables por GUI. Conserva ciclos, muestras y parada completos.
+60s/30ciclos/2M RHS/512MiB por punto sin cambios; ocho ejecuciones, máximo480s
+de integración. Una falla no impide medir los demás puntos obligatorios.
+Decisión medida: BLOCKED por1000/2000. No ampliar UI, cantidad de puntos ni
+presupuesto300s. No fase B, exploración superior ni candidata nueva. Los seis
+puntos aislados aprobados no acreditan un intervalo continuo3000–15000.
+
 Corrección iterativa posterior a d15ec98: setup siempre visible, campos deshabilitados
 solo con proceso activo. configured_plan/plan_matches_sweep comparan el plan exacto
 sin alterar compatible(proyecto). Los eventos de contexto solo invalidan un motor

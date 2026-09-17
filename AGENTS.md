@@ -2,6 +2,12 @@
 
 ## Lectura y autoridad
 
+Continuación actual de `rendimiento-indicado`: campaña candidata 2T 1000–15000,
+ocho RPM obligatorias, mismo perfil B/100 Pa y solver. Separar validación por
+ciclo; 4T permanece 2500–3500. Fase B (29 puntos, UI ampliada y exploración
+superior) solo después de GO numérico. No cambiar física para superar fallos.
+Registrar fase A y decisión antes de empaquetar; sin publicar ni archivar.
+
 Orden actual: `rendimiento-indicado`, derivación de potencia/par indicados desde
 W_C/ciclo/RPM de resultados validados. Vista CAE y CSV nuevos; rc6 si aprueba.
 No física, solver, pérdidas mecánicas ni valores al eje. Reutilizar históricos,

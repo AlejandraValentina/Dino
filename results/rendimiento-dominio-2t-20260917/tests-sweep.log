@@ -1,0 +1,22 @@
+test_ab_old_and_new_effective_conditions (test_sweep.RpmTests.test_ab_old_and_new_effective_conditions) ... ok
+test_angular_temporal_dependencies_and_initial_recipe (test_sweep.RpmTests.test_angular_temporal_dependencies_and_initial_recipe) ... ok
+test_individual_records_separate_times_with_controlled_runner (test_sweep.RpmTests.test_individual_records_separate_times_with_controlled_runner) ... ok
+test_plan_strict_bounds_types_endpoint (test_sweep.RpmTests.test_plan_strict_bounds_types_endpoint) ... ok
+test_process_reconstructs_rpm_not_arbitrary_conditions (test_sweep.RpmTests.test_process_reconstructs_rpm_not_arbitrary_conditions) ... ok
+test_v3_time_angle_and_old_versions (test_sweep.RpmTests.test_v3_time_angle_and_old_versions) ... ok
+test_cancel_before_and_exclusive_folder (test_sweep.SweepTests.test_cancel_before_and_exclusive_folder) ... ok
+test_cancel_between (test_sweep.SweepTests.test_cancel_between) ... ok
+test_cancel_during (test_sweep.SweepTests.test_cancel_during) ... ok
+test_diagnostic_reopen_integrity_and_csv (test_sweep.SweepTests.test_diagnostic_reopen_integrity_and_csv) ... ok
+test_intermediate_failure_preserves_prefix_no_retry (test_sweep.SweepTests.test_intermediate_failure_preserves_prefix_no_retry) ... ok
+test_single_copy_independent_starts_all_points (test_sweep.SweepTests.test_single_copy_independent_starts_all_points) ... ok
+test_close_protects_edits_cancels_series_and_opens_no_dialog (test_sweep.SweepWindowTests.test_close_protects_edits_cancels_series_and_opens_no_dialog) ... ok
+test_existing_destination_and_race_do_not_rewrite_other_series (test_sweep.SweepWindowTests.test_existing_destination_and_race_do_not_rewrite_other_series) ... ok
+test_reopen_without_process_preserves_editor_and_stale (test_sweep.SweepWindowTests.test_reopen_without_process_preserves_editor_and_stale) ... ok
+test_supervision_uses_point_clock_not_series_clock (test_sweep.SweepWindowTests.test_supervision_uses_point_clock_not_series_clock) ... ok
+test_ui_strict_plan_and_one_process_snapshot (test_sweep.SweepWindowTests.test_ui_strict_plan_and_one_process_snapshot) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 4.900s
+
+OK

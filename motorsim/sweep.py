@@ -14,8 +14,8 @@ from .project_case import validate_rpm
 from .reference_results import PROFILE, ResultError, load_result, project_inputs, validated_model
 
 
-def plan_rpms(start, end, step):
-    validate_rpm(start); validate_rpm(end)
+def plan_rpms(start, end, step, cycle='2T'):
+    validate_rpm(start, cycle); validate_rpm(end, cycle)
     if type(step) is not int or step <= 0:
         raise ProjectError('Incremento: debe ser un entero positivo.')
     if end <= start or (end-start) % step:
@@ -32,11 +32,12 @@ def validate_request(request):
     rpms=request['rpms']
     if not isinstance(rpms,list) or not 2<=len(rpms)<=5:
         raise ResultError('Lista de RPM incompleta.')
-    for rpm in rpms:validate_rpm(rpm)
-    if plan_rpms(rpms[0],rpms[-1],rpms[1]-rpms[0]) != rpms:
-        raise ResultError('Lista irregular de RPM.')
     inputs=request['common_inputs']
     _,profile=validated_model(inputs)
+    cycle=inputs['case']['project_geometry']['cycle']
+    for rpm in rpms:validate_rpm(rpm, cycle)
+    if plan_rpms(rpms[0],rpms[-1],rpms[1]-rpms[0],cycle) != rpms:
+        raise ResultError('Lista irregular de RPM.')
     if (profile != PROFILE or inputs.get('operating_point') != {'rpm':rpms[0]}
             or 'series_context' in inputs or 'origin' not in inputs):
         raise ResultError('Barrido: copia de proyecto, primer régimen y perfil B requeridos.')

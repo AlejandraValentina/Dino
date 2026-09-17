@@ -1,0 +1,17 @@
+test_child_revalidates_before_process_work_and_c_requires_snapshot (test_project_simulation.ProjectAdapterTests.test_child_revalidates_before_process_work_and_c_requires_snapshot) ... ok
+test_closure_uses_events_across_360 (test_project_simulation.ProjectAdapterTests.test_closure_uses_events_across_360) ... ok
+test_duct_discontinuity_and_intake_domain (test_project_simulation.ProjectAdapterTests.test_duct_discontinuity_and_intake_domain) ... ok
+test_each_geometry_entry_reaches_model (test_project_simulation.ProjectAdapterTests.test_each_geometry_entry_reaches_model) ... ok
+test_initial_inventories_scale_with_project_volumes (test_project_simulation.ProjectAdapterTests.test_initial_inventories_scale_with_project_volumes) ... ok
+test_missing_and_invalid_aggregate (test_project_simulation.ProjectAdapterTests.test_missing_and_invalid_aggregate) ... ok
+test_port_mapping_by_function_not_names_or_order (test_project_simulation.ProjectAdapterTests.test_port_mapping_by_function_not_names_or_order) ... ok
+test_reference_unchanged_and_equal_geometry (test_project_simulation.ProjectAdapterTests.test_reference_unchanged_and_equal_geometry) ... ok
+test_results_reopen_without_original_file_and_validate_contract (test_project_simulation.ProjectAdapterTests.test_results_reopen_without_original_file_and_validate_contract) ... ok
+test_double_child_uses_snapshot_then_cooperative_cancel (test_project_simulation.ProjectSimulationWindowTests.test_double_child_uses_snapshot_then_cooperative_cancel) ... ok
+test_result_provenance_stale_and_reopen_never_modify_editor (test_project_simulation.ProjectSimulationWindowTests.test_result_provenance_stale_and_reopen_never_modify_editor) ... ok
+test_unsaved_snapshot_independent_and_invalid_drafts_aggregated (test_project_simulation.ProjectSimulationWindowTests.test_unsaved_snapshot_independent_and_invalid_drafts_aggregated) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 1.969s
+
+OK

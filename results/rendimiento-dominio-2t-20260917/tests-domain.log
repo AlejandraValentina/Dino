@@ -1,0 +1,10 @@
+test_campaign_3000_exact_scientific_regression (test_rpm_domain.DomainTests.test_campaign_3000_exact_scientific_regression) ... ok
+test_candidate_is_not_public (test_rpm_domain.DomainTests.test_candidate_is_not_public) ... ok
+test_historical_readers_and_derivatives (test_rpm_domain.DomainTests.test_historical_readers_and_derivatives) ... ok
+test_project_worker_contract_both_cycles (test_rpm_domain.DomainTests.test_project_worker_contract_both_cycles) ... ok
+test_public_contract_and_plans_both_cycles (test_rpm_domain.DomainTests.test_public_contract_and_plans_both_cycles) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.640s
+
+OK

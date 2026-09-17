@@ -233,9 +233,10 @@ class SimulationView(QScrollArea):
             if not value or not value.isascii() or not value.isdigit():
                 raise ProjectError('RPM e incremento: ingresá enteros, sin separadores ni unidades.')
             return int(value)
+        cycle=self.project_cycle() if self.project_cycle else '2T'
         if self.mode_combo.currentIndex()==0:
-            return [validate_rpm(integer(self.rpm_edit))]
-        return plan_rpms(integer(self.start_rpm_edit),integer(self.end_rpm_edit),integer(self.step_rpm_edit))
+            return [validate_rpm(integer(self.rpm_edit),cycle)]
+        return plan_rpms(integer(self.start_rpm_edit),integer(self.end_rpm_edit),integer(self.step_rpm_edit),cycle)
 
     def _options_changed(self):
         sweep=self.mode_combo.currentIndex()==1

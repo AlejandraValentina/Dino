@@ -1,0 +1,15 @@
+test_diagnostic_reopen_strict_dimensions_phase_and_no_carter (test_four_stroke_integration.FourIntegrationTests.test_diagnostic_reopen_strict_dimensions_phase_and_no_carter) ... ok
+test_external_cycle_explicit_and_history_not_reinterpreted (test_four_stroke_integration.FourIntegrationTests.test_external_cycle_explicit_and_history_not_reinterpreted) ... ok
+test_external_pressure_declares_cycle_and_preserves_bar_conversion (test_four_stroke_integration.FourIntegrationTests.test_external_pressure_declares_cycle_and_preserves_bar_conversion) ... ok
+test_four_comparison_phase_no_carter_and_cross_cycle_rejected (test_four_stroke_integration.FourIntegrationTests.test_four_comparison_phase_no_carter_and_cross_cycle_rejected) ... ok
+test_reference_project_identical_numeric_inputs (test_four_stroke_integration.FourIntegrationTests.test_reference_project_identical_numeric_inputs) ... ok
+test_rpm_time_derivative_and_heat (test_four_stroke_integration.FourIntegrationTests.test_rpm_time_derivative_and_heat) ... ok
+test_sweep_fresh_copies_and_stop_without_integrating (test_four_stroke_integration.FourIntegrationTests.test_sweep_fresh_copies_and_stop_without_integrating) ... ok
+test_valves_timing_ducts_and_geometry_reach_model (test_four_stroke_integration.FourIntegrationTests.test_valves_timing_ducts_and_geometry_reach_model) ... ok
+test_snapshot_ignores_inactive_2t_and_aggregates_active_errors (test_four_stroke_integration.FourWindowIntegrationTests.test_snapshot_ignores_inactive_2t_and_aggregates_active_errors) ... ok
+test_snapshot_process_single_cancel_close_and_stale (test_four_stroke_integration.FourWindowIntegrationTests.test_snapshot_process_single_cancel_close_and_stale) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 1.345s
+
+OK

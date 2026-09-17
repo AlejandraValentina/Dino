@@ -226,7 +226,8 @@ class PerformanceView(QScrollArea):
     def configured_plan(self):
         values=[edit.text().strip() for edit in self.rpm_edits]
         if any(not value.isascii() or not value.isdigit() for value in values):raise ProjectError('RPM e incremento: ingresá enteros, sin separadores ni unidades.')
-        return plan_rpms(*map(int,values))
+        cycle=self.controller.project_cycle() if self.controller.project_cycle else '2T'
+        return plan_rpms(*map(int,values),cycle=cycle)
 
     def plan_matches_sweep(self,sweep):
         try:return sweep is not None and self.configured_plan()==sweep['index']['rpms']

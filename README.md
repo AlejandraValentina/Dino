@@ -25,6 +25,28 @@ sintonía, combustión predictiva ni validación experimental.
 
 ## Rendimiento indicado — candidata rc6
 
+Ampliación candidata2T1000–15000 (17/09/2026): **fase A BLOCKED**. A1000rpm
+se alcanzó el mínimo de paso antes de un ciclo; a2000rpm hubo ocho rechazos
+no físicos en el sexto ciclo. Convergieron3000/5000/8000/10000/12000/15000;
+estos puntos aislados no acreditan un intervalo continuo. La aplicación conserva
+2500–3500rpm y2–5puntos, tanto2T como4T. No se modificaron física, tolerancias,
+presupuesto, formatos ni candidatas. No se ejecutaron29puntos ni exploración
+16000–20000 porque requieren GO. Tabla y evidencia en
+[tareas](openspec/changes/rendimiento-indicado/tasks.md).
+66 pruebas pertinentes aprobadas, OpenSpec estricto y revisión independiente
+puntual sin defectos. Regresión 2T3000 exactamente igual al histórico, incluidas
+las muestras; lectores2T/4T compatibles. Sin nueva inspección Windows ni
+aceptación manual atribuida. Cancelación/recálculo conservados y probados con
+dobles; barrido largo no habilitado.
+Reproducir exclusivamente la fase A autorizada, en una carpeta nueva:
+`.\.venv\Scripts\python.exe -m tools.verify_2t_rpm_domain --output <carpeta nueva>`.
+Prueba de contrato y regresión sin integrar:
+`.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_rpm_domain.py -v`.
+
+El modelo actual es0D y no resuelve propagación/reflexión de ondas ni resonancia
+del escape. La curva no representa todavía la respuesta de un escape2T sintonizado.
+Es comprobación numérica, no validación física ni experimental.
+
 CÁLCULO → Rendimiento reutiliza automáticamente la curva compatible del proyecto.
 Inicio/Final/Incremento permanecen disponibles después de obtener una curva.
 Sin curva ofrece **Calcular rendimiento** y con ella **Recalcular rendimiento**: acción explícita

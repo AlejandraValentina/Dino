@@ -114,7 +114,7 @@ class FourStrokeProjectCase(FourStrokeCase):
 def build_project_case(project, rpm=3000):
     from .project import Intake, ProjectError
     from .project_case import validate_rpm
-    validate_rpm(rpm)
+    validate_rpm(rpm, '4T')
     issues=execution_errors(project)
     if issues:raise ProjectError('\n'.join(issues))
     canonical=replace(project,ports=(),intake=Intake(),ducts=Ducts(),crankcase_volume_bdc_cm3=None)

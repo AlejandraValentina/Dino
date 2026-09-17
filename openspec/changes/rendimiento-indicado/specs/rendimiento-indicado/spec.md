@@ -1,4 +1,18 @@
 ## ADDED Requirements
+### Requirement: Puerta numérica de ampliación 2T
+El sistema SHALL separar explícitamente dominios por ciclo. La ampliación
+candidata2T1000–15000 SHALL condicionarse a ocho puntos1000/2000/3000/5000/8000/
+10000/12000/15000 con el ejemplo Referencia, mismo perfil y física, convergencia,
+balances contractuales y resultados finitos. SHALL conservar4T2500–3500.
+#### Scenario: Falla de la campaña candidata
+- **WHEN** un punto obligatorio falla o no converge
+- **THEN** registrar RPM, causa, ciclos, tiempos, balances y diagnóstico sin
+  reparar física; no habilitar el rango completo ni iniciar la fase B condicionada.
+#### Scenario: Campaña aprobada
+- **WHEN** los ocho puntos cumplen el contrato y la decisión es GO
+- **THEN** habilitar2T1000–15000, planes exactos2–57 puntos, sugerencia1000/15000/500,
+  presupuesto acotado justificado por tiempos, progreso/cancelación y gráficos
+  reales; medir29 puntos y explorar16000/18000/20000 sin ampliar el límite público.
 ### Requirement: Derivados indicados comunes
 El sistema SHALL derivar potencia y par del W_C y RPM guardados: 2T P=W_C*rpm/60,
 T=W_C/(2*pi);4T P=W_C*rpm/120,T=W_C/(4*pi). SHALL rechazar ciclo inválido,

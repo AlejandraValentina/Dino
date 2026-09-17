@@ -58,7 +58,7 @@ def project_inputs(project, origin, profile=PROFILE, *, rpm=None, series_context
     four=project.cycle=='4T'
     extra = {}
     if rpm is not None:
-        extra['operating_point'] = dict(rpm=validate_rpm(rpm))
+        extra['operating_point'] = dict(rpm=validate_rpm(rpm, project.cycle))
     if series_context is not None:
         _require(rpm is not None and isinstance(series_context, dict)
                  and set(series_context) == {'series_id', 'point_index'}
@@ -88,7 +88,7 @@ def validated_model(inputs):
         rpm = None
         if 'operating_point' in inputs:
             _require(isinstance(inputs['operating_point'], dict) and set(inputs['operating_point']) == {'rpm'}, 'Punto operativo inválido.')
-            rpm = validate_rpm(inputs['operating_point']['rpm'])
+            rpm = validate_rpm(inputs['operating_point']['rpm'], project.cycle)
         expected = project_inputs(project, inputs['origin'], profile, rpm=rpm, series_context=inputs.get('series_context'))
         if inputs['project_snapshot'].get('format_version') == 5:
             expected['project_snapshot'].pop('four_stroke')
