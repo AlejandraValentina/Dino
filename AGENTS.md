@@ -2,6 +2,13 @@
 
 ## Lectura y autoridad
 
+Orden vigente: `p2-nucleo-gas1d`. P1_HUMAN_ACCEPTED; contrato P1 congelado.
+Implementar/verificar únicamente P2 aislado mediante dev_orchestrator. P2A
+first-order precede obligatoriamente a P2B MUSCL/SSP-RK2 con gate y revisión.
+Máximo3 reparaciones de implementación, nunca cambiar P1 para pasar. Sin UI,
+JSON, acoplamiento 0D, EXE ni P3. P0 y producción anterior conservan hashes.
+
+Antecedente histórico:
 Orden vigente: `p1-contrato-gas1d`. Registrar P0_HUMAN_ACCEPTED sin modificar
 baseline congelado; ejecutar solo P1 contractual por dev_orchestrator, con cero
 reparaciones automáticas y revisión independiente de solo lectura. Sin solver,

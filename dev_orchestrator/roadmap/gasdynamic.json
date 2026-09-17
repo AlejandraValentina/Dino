@@ -62,17 +62,25 @@
     {
       "id": "P2",
       "title": "1D isolated solver",
-      "objective": "Declaración futura: 1D isolated solver. Sin implementación ni autorización de ejecución.",
+      "objective": "P2A first-order isolated quasi-1D core, T01–T12, P2B only after reviewed P2A PASS; no P3.",
       "depends_on": [
+        "P0",
         "P1"
       ],
-      "allowed_paths": [],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
       "forbidden_paths": [
-        "motorsim/",
+        "docs/baselines/",
         "packaging/"
       ],
       "required_checks": [
-        "phase_not_implemented"
+        "p2_unit",
+        "p2a_campaign",
+        "P2A",
+        "baseline_intact",
+        "contract_frozen",
+        "dependencies_accepted"
       ],
       "gate_policy": "default",
       "max_repair_attempts": 3,
