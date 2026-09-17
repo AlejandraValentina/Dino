@@ -3,18 +3,28 @@
     {
       "id": "P0",
       "title": "Freeze baseline 0D",
-      "objective": "Declaración futura: Freeze baseline 0D. Sin implementación ni autorización de ejecución.",
+      "objective": "Verificar la malla numérica 2T 2500–15000 RPM y congelar baseline 0D; stress condicionado hasta20000. Sin P1.",
       "depends_on": [],
-      "allowed_paths": [],
+      "allowed_paths": [
+        "dev_orchestrator/runs/",
+        "docs/baselines/0d_2t_baseline_v1.md",
+        "docs/baselines/0d_2t_baseline_v1.json"
+      ],
       "forbidden_paths": [
         "motorsim/",
         "packaging/"
       ],
       "required_checks": [
-        "phase_not_implemented"
+        "p0_tests",
+        "main_complete",
+        "continuous_domain",
+        "historical_regression",
+        "production_unchanged",
+        "no_experimental_imports",
+        "artifact_inventory"
       ],
       "gate_policy": "default",
-      "max_repair_attempts": 3,
+      "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": "P1"
     },
