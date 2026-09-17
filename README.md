@@ -4,6 +4,7 @@ P0: **P0_HUMAN_ACCEPTED**, aceptación de la usuaria registrada separadamente
 sin cambiar el baseline NUMERICALLY_VERIFIED_BASELINE ni atribuir validación
 experimental. P1 define el contrato quasi-1D en [docs/gasdynamic](docs/gasdynamic/1d_mathematical_contract_v1.md),
 con [plan T01–T12](docs/gasdynamic/1d_verification_plan_v1.md) y manifest.
+P1: **P1_PASS_CONTRACT_READY / WAITING_HUMAN_APPROVAL**.
 No hay solver 1D implementado ni autorización P2. El estado/evidencia de P1 se
 registra en [sus tareas](openspec/changes/p1-contrato-gas1d/tasks.md).
 Checks documentales: `.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_p1_contract.py -v`.
