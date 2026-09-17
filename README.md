@@ -50,6 +50,22 @@ pendiente. Detalle y evidencia en
 [tasks.md](openspec/changes/rendimiento-indicado/tasks.md).
 Sin cambios físicos, nuevas integraciones ni campañas. rc5 se conserva.
 
+rc6 comprobada: fuente `799b7d6f9bf6b0061bd9a1de60af682e8061630a`, construida
+desde checkout limpio con Python3.11.0/PySide6 6.11.2/PyInstaller6.22.3.
+Suite269 aprobada (54,860s);10tests afectados posteriores también aprobados.
+EXE directo, cwd diferente y PATH solo sistema: barridos2T/4T, gráfico/tabla,
+punto individual, reutilización, comparación y CSV aprobados sin worker.
+[Captura del EXE](results/rendimiento-rc6-20260917/rc6-4T-combinado.png),
+[evidencia](results/rendimiento-rc6-20260917/evidence.json).
+
+```powershell
+& 'E:\MotorSim distribucion\Candidata Rendimiento 0.1.0-rc6\MotorSim\MotorSim.exe'
+```
+ZIP: `dist/MotorSim-0.1.0-rc6-windows-x64-799b7d6f.zip` (43.440.060bytes).
+SHA256: `0b5d8eaa46a5c82ff2ae82305ed5846467197c4c53b58ff80ef2198dd93e2db1`.
+162archivos extraídos verificados contra ZIP; rc5 intacta. Aceptación manual
+pendiente; sin validación experimental, publicación ni archivo del cambio.
+
 ## Interfaz CAE — candidata rc5 (evidencia anterior)
 
 La referencia visual confirmada se adapta a Qt Widgets: paleta técnica común,

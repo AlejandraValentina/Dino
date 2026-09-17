@@ -1,0 +1,30 @@
+{
+  "automated": true,
+  "manual_acceptance": false,
+  "platform": "windows",
+  "qt_scale": "1",
+  "logical_size": [
+    1366,
+    768
+  ],
+  "checks": [
+    "2T: fuente preservada, detalle/teclado, punto, CSV, sin scroll horizontal global",
+    "4T: fuente preservada, detalle/teclado, punto, CSV, sin scroll horizontal global",
+    "Reutilización y procedencia independiente del editor; sin proceso"
+  ],
+  "captures": [
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\rendimiento-vacio.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\2T-resumen.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\2T-combinado.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\2T-seleccion.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\2T-secundarios.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\2T-tabla.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\2T-resultado.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\4T-resumen.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\4T-combinado.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\4T-seleccion.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\4T-secundarios.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\4T-tabla.png",
+    "E:\\MotorSim distribucion\\Rendimiento rc6\\source-final-100\\4T-resultado.png"
+  ]
+}
