@@ -82,6 +82,8 @@ class CAETests(unittest.TestCase):
         self.assertEqual(v.context_table.values['Geometría'].text(),previous)
         self.assertEqual(v.angle_plot.points,points);self.assertEqual(v.preview_angle.points,points)
         self.assertEqual(v.state_badge.text(),'CONVERGIDO');self.assertTrue(v.context_stale.text())
+        w.resize(900,650);w.navigation.go('simulation');self.app.processEvents()
+        self.assertFalse(v.context_panel.toggle.isChecked());self.assertTrue(v.context_stale.isVisible())
     def test_details_opens_actual_parameters_without_worker(self):
         w=self.w;w.load_example_file('4t-reference');v=w.simulation_view
         w.navigation.go('simulation')

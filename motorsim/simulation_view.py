@@ -123,7 +123,7 @@ class SimulationView(QScrollArea):
         self.context_panel=ContextPanel()
         self.context_table=PropertyTable(('Caso / proyecto','Ciclo','Geometría','Compresión','Modelo','Integración','Perfil','Regularización','Aporte térmico','Procedencia'))
         self.context_panel.content.addWidget(self.context_table)
-        self.context_stale=label('','fieldError');self.context_panel.content.addWidget(self.context_stale)
+        self.context_stale=label('','fieldError')
         self.columns=SimulationColumns(preparation,self.run_workspace,self.context_panel);layout.addWidget(self.columns)
         self.title_label=label('','sectionTitle');self.description_label=label('','unit');self.parameters_label=label()
         for w in (self.title_label,self.description_label,self.parameters_label):w.hide()
@@ -151,7 +151,8 @@ class SimulationView(QScrollArea):
         self.state_label=Message('Esperando inicio de cálculo.','sectionTitle');self.progress_label=label('','unit')
         self.state_label.changed.connect(self._state_changed)
         self.error_label=ValidationMessage()
-        for w in (self.state_label,self.progress_label):progress.content.addWidget(w)
+        for w in (self.state_label,self.progress_label,self.context_stale):progress.content.addWidget(w)
+        self.context_stale.hide()
         self.message_host=QVBoxLayout();self.message_host.addWidget(self.error_label);preparation.content.addLayout(self.message_host)
         self.open_button=QPushButton('&Abrir resultado…');self.open_sweep_button=QPushButton('Abrir barrido…');self.sweep_button=QPushButton('Ver barrido…');self.sweep_button.setEnabled(False)
         self.compare_button=QPushButton('Comparar resultados…');self.external_button=QPushButton('Datos externos…')
@@ -368,7 +369,7 @@ class SimulationView(QScrollArea):
                 stale = True
         self.stale_label.setText('El resultado corresponde a una configuración anterior' if stale else '')
         self.stale_label.setVisible(stale)
-        self.context_stale.setText(self.stale_label.text())
+        self.context_stale.setText(self.stale_label.text());self.context_stale.setVisible(stale)
         if self.sweep_dialog:self.sweep_dialog.stale_label.setText(self.stale_label.text())
 
     @property
