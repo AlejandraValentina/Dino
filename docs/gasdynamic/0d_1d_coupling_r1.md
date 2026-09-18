@@ -45,3 +45,17 @@ Ninguna segunda BC de presión/temperatura en la cara acoplada.
 Para V(t), agregar únicamente-p*dV/dt a U y ledger; geometría1D estacionaria.
 La etapa intermedia Euler extendida de Heun se valida a t+2dt antes de combinar
 con estado inicial; el estado combinado usa V(t+dt). No hay momentum0D.
+
+
+## P3B: fixtures congelados antes de ejecutar
+Ambos métodos, CFL.4,N60,L.3m,A.0003m²,V0D.0001m³, pared derecha,
+tubo inicialmente100kPa/300K/u0. Equilibrio: cámara100kPa,Yambos.3,tf.0015s.
+Blowdown: cámara120kPa, Y0D.8,Ytubo.2,tf.0003s. Filling: cámara80kPa,
+mismas fracciones,tf.0003s. Reversión: blowdown extendido tf.004s, sin reset.
+C01 drift normalizado<=1e-12; C02/C03 signos de masa/energía y onda en tubo;
+C04 al menos un cruce natural con bracket/instante interpolado; C05/C06
+especieHLLC donante<=1e-12 normalizada (no reemplazar HLLE); C07 residuos
+globales y de stages<=1e-10. Todos: finitud/positividad estricta y CFL porstage.
+Referencia de signos proviene del gradiente inicial; conservación del balance
+cerrado; no se usa el modelo0D antiguo como solución de referencia. Máximo300s
+por caso y parada anteFAIL. Primera ejecución formal conserva todos resultados.
