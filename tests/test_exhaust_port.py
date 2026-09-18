@@ -35,3 +35,16 @@ class ExhaustPortTests(unittest.TestCase):
         expected=port_results(project.ports[0],project.stroke_mm,project.rod_length_mm)
         self.assertIn(expected.opening,port.events(self.area));self.assertIn(expected.closing,port.events(self.area))
         for angle,value in enumerate(expected.areas):self.assertEqual(port.area(angle),value*1e-6)
+
+    def test_geometry_adapter_existing_segments(self):
+        from math import pi,fsum
+        from motorsim.exhaust_geometry import exhaust_mesh
+        project=geometry();mesh=exhaust_mesh(project.ducts.exhaust,.003)
+        expected=fsum(pi*s.length_mm*(s.start_diameter_mm**2+s.start_diameter_mm*s.end_diameter_mm+s.end_diameter_mm**2)/12*1e-9 for s in project.ducts.exhaust)
+        self.assertAlmostEqual(fsum(mesh.volumes),expected,places=15)
+        self.assertAlmostEqual(mesh.faces[-1],.2)
+
+    def test_geometry_rejects_discontinuous_joint(self):
+        from motorsim.exhaust_geometry import exhaust_mesh
+        from motorsim.project import DuctSegment
+        with self.assertRaises(ValueError):exhaust_mesh((DuctSegment('',100,20,20),DuctSegment('',100,30,30)),.01)

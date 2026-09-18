@@ -823,6 +823,33 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P4_CLOSE",
+      "title": "P4 blocked closure regression",
+      "objective": "Frozen P0/P2/P3 and affected P4 tests after wave-refinement blocker",
+      "depends_on": [
+        "P2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "regression_tests",
+        "historical",
+        "P3_frozen",
+        "P3_evidence",
+        "P3B",
+        "P3C"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }
