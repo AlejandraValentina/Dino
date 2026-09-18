@@ -56,6 +56,8 @@ def hllc_flux(left,right,eos):
     w,s,star,f=(left,sl,stars[0],fl) if sm>=0 else (right,sr,stars[1],fr)
     q=eos.conservative(w)
     flux=tuple(fk+s*(sk-qk) for fk,sk,qk in zip(f,star,q))
-    # Algebraically the same scalar star flux; shared mass flux avoids unequal
-    # floating-point operation paths for pure Y=1 (not clipping/correction).
-    return (flux[0],flux[1],flux[2],flux[0]*w[3]),(sl,sm,sr),None
+    # F_mass*=rho*u+S*(rho*-rho)=rho*SM by Rankine-Hugoniot.
+    # The product preserves SM's sign without subtracting nearly equal states.
+    # Species shares this same mass flux and the same HLLC contact-wave donor.
+    mass=star[0]*sm
+    return (mass,flux[1],flux[2],mass*w[3]),(sl,sm,sr),None

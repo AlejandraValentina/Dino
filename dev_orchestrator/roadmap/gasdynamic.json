@@ -407,10 +407,12 @@
         "contract_frozen",
         "dependencies_accepted",
         "r3_reviewed",
-        "r3_contract_intact"
+        "r3_contract_intact",
+        "fix_tests",
+        "boundary_tests"
       ],
       "gate_policy": "default",
-      "max_repair_attempts": 1,
+      "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
     }

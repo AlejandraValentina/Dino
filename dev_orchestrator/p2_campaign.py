@@ -70,7 +70,10 @@ def campaign(run_dir, r3=False):
         checks['r3_contract_intact']=boundary['contract_sha256']==sha(ROOT/'docs/gasdynamic/1d_contract_v1_r3.json')
     if not all(checks.values()):raise ValueError('Precondition/hash failure: '+str(checks))
     records=[];case_hashes={}
-    for name in case_names():
+    names=case_names()
+    if r3:
+        names.remove('T02_sod_0.2');names.insert(0,'T02_sod_0.2')
+    for name in names:
         print('START '+name,flush=True)
         try:
             record=run_case(name,wall_limit=240. if name=='T10_800' else 120.,progress=lambda step,t:print(f'PROGRESS {name} step={step} t={t:.8g}',flush=True) if step%2000==0 else None)
@@ -97,7 +100,7 @@ def campaign(run_dir, r3=False):
                  wall_seconds=time.monotonic()-started,checks=checks,run_id=run_dir.name,
                  source_sha256={p.relative_to(ROOT).as_posix():sha(p) for p in (ROOT/'motorsim/gas1d').glob('*.py')},
                  contract_sha256=sha(ROOT/('docs/gasdynamic/1d_contract_v1_r3.json' if r3 else 'docs/gasdynamic/1d_contract_v1.json')),
-                 contract_revision='1D_CONTRACT_V1_R3' if r3 else '1D_CONTRACT_V1',repair_attempt=2 if r3 else 0,
+                 contract_revision='1D_CONTRACT_V1_R3' if r3 else '1D_CONTRACT_V1',repair_attempt=3 if r3 else 0,
                  note='First order only. P2B and P3 not executed. Physical validation not claimed.')
     write(art/'p2a-summary.json',summary)
     inventory={p.relative_to(run_dir).as_posix():sha(p) for p in art.rglob('*') if p.is_file() and p.name!='inventory.json'}

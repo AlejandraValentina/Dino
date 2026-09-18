@@ -38,6 +38,38 @@
       "timeout": 60
     },
     {
+      "id": "fix_tests",
+      "kind": "test",
+      "argv": [
+        "{python}",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_p2_fixes.py",
+        "-v"
+      ],
+      "timeout": 60
+    },
+    {
+      "id": "boundary_tests",
+      "kind": "test",
+      "argv": [
+        "{python}",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_p1_r3.py",
+        "-v"
+      ],
+      "timeout": 60
+    },
+    {
       "id": "p2a_campaign",
       "kind": "command",
       "argv": [
@@ -53,7 +85,9 @@
     }
   ],
   "required_tests": [
-    "p2_unit"
+    "p2_unit",
+    "fix_tests",
+    "boundary_tests"
   ],
   "required_checks": [
     "p2_unit",
@@ -63,7 +97,9 @@
     "contract_frozen",
     "dependencies_accepted",
     "r3_reviewed",
-    "r3_contract_intact"
+    "r3_contract_intact",
+    "fix_tests",
+    "boundary_tests"
   ],
   "required_evidence": [
     "artifacts/result.json",
@@ -72,7 +108,7 @@
     "artifacts/git-before.json"
   ],
   "gate": "default",
-  "max_repair_attempts": 1,
+  "max_repair_attempts": 0,
   "review": "required",
   "human_gate": true,
   "scientific_changes_authorized": false,

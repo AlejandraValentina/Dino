@@ -9,6 +9,24 @@ from motorsim.gas1d.solver import solve, event_step
 
 
 class P2FixTests(unittest.TestCase):
+    def test_hllc_near_rest_mass_sign_and_species(self):
+        import json
+        from pathlib import Path
+        example=json.loads((Path(__file__).parent/'gas1d_contact_roundoff.json').read_text())
+        eos=IdealGas(1.,1.4);left=tuple(example['left']);right=tuple(example['right'])
+        flux,speeds,reason=hllc_flux(left,right,eos)
+        self.assertIsNone(reason);self.assertEqual(speeds,tuple(example['speeds']))
+        self.assertGreater(speeds[1],0.);self.assertGreater(flux[0],0.)
+        self.assertEqual(flux[0],example['stable_mass']);self.assertEqual(flux[3],flux[0]*left[3])
+        self.assertGreater(example['old_fresh']+.00023780923036054375*flux[3],0.)
+        # General star-region Rankine-Hugoniot identity, without threshold tuning.
+        l=(1.,.2,1.,.2);r=(.125,-.1,.1,.8)
+        actual,(sl,sm,sr),reason=hllc_flux(l,r,eos)
+        w,s=(l,sl) if sm>=0 else (r,sr)
+        rho_star=w[0]*(s-w[1])/(s-sm)
+        expected=w[0]*w[1]+s*(rho_star-w[0])
+        self.assertAlmostEqual(actual[0],expected,places=14)
+
     def test_event_tail_partition_respects_cfl_and_minimum(self):
         dt=1.4665653203413753e-6;remaining=dt+9.195747462109605e-13
         split=event_step(dt,remaining)
