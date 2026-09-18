@@ -1,0 +1,6 @@
+# Preserve byte hashes of the independently reviewed P3 source on Windows.
+motorsim/coupling.py -text
+motorsim/coupled.py -text
+motorsim/coupling_adapter.py -text
+tests/test_coupled.py -text
+tests/test_coupling_adapter.py -text

@@ -1,5 +1,19 @@
 # MotorSim
 
+P3-R1: **P3_PASS_0D_1D_COUPLING_VERIFIED / WAITING_HUMAN_APPROVAL**.
+Interfaz Riemann de cámara homogénea estancada, conservativa por etapa; C00/C00B
+y C01–C12 PASS, adaptador de estado aislado2T/4T. 83 pruebas y regresiones
+completas offline P0/P2 PASS; 27 hashes congelados intactos. Revisión científica
+independiente PASS; aceptación humanaP3 pendiente. Sin conexión productiva,
+P4, publicación ni archivo. [Evidencia y decisión](results/p3-r1-20260918/decision.json),
+[definición](docs/gasdynamic/0d_1d_coupling_r1.md) y
+[registro de casos](openspec/changes/p3-acoplamiento-conservativo/tasks.md).
+Los gates nativos BLOCKED por falta de reviewer hook se conservan; el dictamen
+independiente se adjunta separadamente. La orden38a85593 autoriza R1 y sustituye
+sólo el cierreP3 reservoir, no las BC ni el núcleoP2.
+
+Antecedente histórico (bloqueo anterior resuelto por nuevo objeto físico R1):
+
 P3: **P3_BLOCKED_BACKFLOW / SCIENTIFIC_CHANGE_REQUIRED**.
 P2_HUMAN_ACCEPTED registrado; núcleo y contratos congelados. El preflight
 reproduce ausencia de rama/discontinuidad de reservoir al invertir flujo con

@@ -1,4 +1,12 @@
-## Contrato y secuencia
+## Diseño vigente R1
+La orden38a85593 sustituye la interfaz reservoir por Riemann estancado0D y fija
+la secuencia R1→P3B(C01–C07)→P3C(C08–C12)→adaptador de estado.
+Definición, fixtures congelados, criterios y referencia acústica vigentes en
+docs/gasdynamic/0d_1d_coupling_r1.md. La interfaz de producto no se conecta.
+El diseño inicial que sigue conserva el antecedente del bloqueo; no gobierna
+el cierre R1 ni altera los contratos P2 históricos.
+
+## Contrato y secuencia inicial (histórico)
 La aceptaciónP2 se registra separada, con hashes del núcleo y contratos vigentes.
 Primero auditar la frontera reservoir existente antes de integrar un volumen
 finito: P1 exige usarla en entrada y presión receptora/entalpía del donante en retorno.
