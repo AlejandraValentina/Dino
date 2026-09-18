@@ -2,6 +2,18 @@
 
 ## Lectura y autoridad
 
+Orden vigente: P2B tras **P1_R4_HUMAN_ACCEPTED** y **P2A_HUMAN_ACCEPTED**.
+MUSCL/minmod SSP-RK2 implementado, first-order congelado. Estado actual
+**FAILED_INFRASTRUCTURE**: T04 agotó120s; T01–T03 PASS, T12 parcial4/10,
+T05–T11 no ejecutados. No afirmar P2B/P2 PASS ni P2_HUMAN_ACCEPTED.
+Revisión independiente confirma STOP sin bug adicional identificado. Presupuesto
+P2B1/3 (comprobador CFL, no integración); presupuesto previo P2A3/3 intacto.
+No repetir campaña ni ampliar presupuesto temporal sin resolver el bloqueo
+explícitamente. No modificar P0/contratos congelados/UI/JSON ni iniciar P3.
+La orden actual extiende el refinamiento R4 a MUSCL sin restaurar8%; ver diseño
+P2 y evidencia results/p2b-gas1d-20260918. Sin push, archivo o cambios globales.
+
+Antecedente histórico:
 Orden más reciente: `p1-r4-cfl`. P1_R4_PASS_T11_REFINED_CONTRACT adoptó
 1D_CONTRACT_V1_R4 tras estudio congelado y revisión independiente.
 P2A_PASS_FIRST_ORDER_VERIFIED: T01–T12 bajo R4, seis runs T11 nuevos y46

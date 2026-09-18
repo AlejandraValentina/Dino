@@ -1,0 +1,14 @@
+test_first_order_dispatch_exact (test_p2b.P2BTests.test_first_order_dispatch_exact) ... ok
+test_invalid_input_rejected_without_clipping (test_p2b.P2BTests.test_invalid_input_rejected_without_clipping) ... ok
+test_local_downgrade_all_components_without_changing_average (test_p2b.P2BTests.test_local_downgrade_all_components_without_changing_average) ... ok
+test_minmod_not_mc (test_p2b.P2BTests.test_minmod_not_mc) ... ok
+test_nonuniform_linear_reconstruction (test_p2b.P2BTests.test_nonuniform_linear_reconstruction) ... ok
+test_stage_cfl_gate_uses_actual_step_inequality (test_p2b.P2BTests.test_stage_cfl_gate_uses_actual_step_inequality) ... ok
+test_stage_cfl_rejection_rolls_back_ledger (test_p2b.P2BTests.test_stage_cfl_rejection_rolls_back_ledger) ... ok
+test_uniform_state_shared_periodic_flux_and_stages (test_p2b.P2BTests.test_uniform_state_shared_periodic_flux_and_stages) ... ok
+test_variable_area_static_ledger (test_p2b.P2BTests.test_variable_area_static_ledger) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.020s
+
+OK

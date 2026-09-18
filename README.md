@@ -1,5 +1,18 @@
 # MotorSim
 
+P2B implementado en una ruta aislada **MUSCL/minmod + SSP-RK2**, con
+`FIRST_ORDER` conservado. **FAILED_INFRASTRUCTURE**: la campaña se detuvo
+al agotar T04 sus120s; no se declara P2B/P2 PASS. T01–T03 aprobaron;
+T12 tiene cuatro subcasos aprobados, y los restantes gates están pendientes.
+49 pruebas pertinentes y siete regresiones P0 offline PASS; revisión independiente
+confirma el bloqueo. Una reparación de instrumentación CFL de tres permitidas,
+sin cambiar integración ni tolerancias. P0, contratos anteriores, UI/JSON intactos.
+**P1_R4_HUMAN_ACCEPTED** y **P2A_HUMAN_ACCEPTED** registrados por orden de
+la usuaria; **no P2_HUMAN_ACCEPTED**. Sin P3, publicación ni archivo.
+[Tablas, arquitectura, comandos y pendientes P2B](openspec/changes/p2-nucleo-gas1d/tasks.md#p2b--resultado-18092026).
+
+Antecedente histórico P1-R4:
+
 P1-R4: **P1_R4_PASS_T11_REFINED_CONTRACT** y
 **P2A_PASS_FIRST_ORDER_VERIFIED** bajo
 [1D_CONTRACT_V1_R4](docs/gasdynamic/1d_cfl_sensitivity_v1_r4.md).
