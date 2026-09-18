@@ -24,3 +24,15 @@ reparaciones, reviewer independiente y gate humano. P3–P9 SHALL seguir deshabi
 #### Scenario: Núcleo verificado
 - **WHEN** P2A/P2B, regresión P0 y revisión aprueban
 - **THEN** termina P2_PASS_1D_CORE_VERIFIED / WAITING_HUMAN_APPROVAL sin P3.
+
+### Requirement: Revisión científica R5 de segundo orden
+T11 de MUSCL/minmod/SSP-RK2 SHALL aplicar el contrato1D_CONTRACT_V1_R5 adoptado
+tras evidencia completa y revisión independiente; FIRST_ORDER SHALL mantenerR4.
+SHALL conservar todos los casos, exactitud padre, conservación/admisibilidad y
+convergencia del error a referencia. SHALL preservar los fallos históricosR4.
+#### Scenario: Evidencia incompleta
+- **WHEN** falta un final acústico o Sod, o una comparación obligatoria
+- **THEN** T11 no puede aprobar aunque las sensibilidades disponibles cumplan.
+#### Scenario: Cierre técnico aprobado
+- **WHEN** T01–T12, P0, FIRST_ORDER, alcance y revisión independiente aprueban
+- **THEN** registra P2_PASS_1D_CORE_VERIFIED / WAITING_HUMAN_APPROVAL sin aceptarP2 ni iniciarP3.

@@ -117,3 +117,123 @@ Decisión: **P1_R5_PASS_CFL_SECOND_ORDER_CONTRACT**. Adoptado el delta exacto
 1D_CONTRACT_V1_R5 antes del cierre P2. R4 conserva FAIL histórico en segundo
 orden; no se reescribe evidencia anterior. Evaluador reforzado para exigir12/12
 y todas las comparaciones, observación independiente sin cambios numéricos.
+
+## Verificación completa posterior a adopción R5
+
+70 pruebas PASS; comprobaciones FO/P0 offline, cero integraciones en cierre.
+Matriz con58 resultados finales (56 reutilizados y2 nuevos), hashes en provenance.
+
+| Gate | Estado | Subcasos completos |
+|---|---|---|
+| T01 | PASS | 2/2 |
+| T02 | PASS | 1/1 |
+| T03 | PASS | 1/1 |
+| T04 | PASS | 1/1 |
+| T05 | PASS | 1/1 |
+| T06 | PASS | 1/1 |
+| T07 | PASS | 3/3 |
+| T08 | PASS | 18/18 |
+| T09 | PASS | 4/4 |
+| T10 | PASS | 4/4 |
+| T11 | PASS | 12/12 |
+| T12 | PASS | 10/10 |
+
+### Errores T10
+
+| N | L1 rho | L2 rho | L1 rhoY | L2 rhoY |
+|---|---|---|---|---|
+| T10_100 | 0.000913337613828 | 0.00123802917595 | 0.00228294128211 | 0.00313213649265 |
+| T10_200 | 0.000251371131953 | 0.000393951711005 | 0.000628677973104 | 0.000997095176925 |
+| T10_400 | 6.76194769036e-05 | 0.000124792483267 | 0.0001691384659 | 0.000315903166478 |
+| T10_800 | 1.80354721772e-05 | 3.95104106223e-05 | 4.5103622471e-05 | 0.000100025139403 |
+
+### Rendimiento registrado por caso
+Tiempos de evidencia reutilizada son históricos; sólo T10_800 y T03_0.2_N1600
+se ejecutaron ahora. Se conserva comparación FIRST_ORDER en closure.json.
+
+| Caso | Runtime s | Steps | RHS | HLLC | HLLE |
+|---|---|---|---|---|---|
+| T01_rest | 1.063 | 251 | 502 | 50200 | 0 |
+| T01_moving | 1.297 | 301 | 602 | 60200 | 0 |
+| T02_sod | 11.141 | 547 | 1314 | 526914 | 0 |
+| T03 | 37.063 | 901 | 1802 | 1439798 | 0 |
+| T04 | 150.968 | 3509 | 7243 | 5794400 | 0 |
+| T05 | 150.953 | 3510 | 7231 | 5777569 | 0 |
+| T06_contact | 66.515 | 3125 | 6500 | 2600000 | 0 |
+| T07_periodic | 3.032 | 301 | 602 | 120400 | 0 |
+| T07_closed | 2.594 | 251 | 502 | 100902 | 0 |
+| T07_open | 2.610 | 301 | 602 | 119798 | 0 |
+| T08_constant_rest_100 | 1.062 | 251 | 502 | 50702 | 0 |
+| T08_constant_rest_200 | 4.188 | 501 | 1002 | 201402 | 0 |
+| T08_constant_rest_400 | 19.250 | 1004 | 2014 | 807614 | 0 |
+| T08_smooth_rest_100 | 1.484 | 268 | 570 | 57570 | 0 |
+| T08_smooth_rest_200 | 6.625 | 580 | 1319 | 265119 | 0 |
+| T08_smooth_rest_400 | 32.188 | 1306 | 3223 | 1292423 | 0 |
+| T08_frustum_rest_100 | 1.547 | 273 | 591 | 59691 | 0 |
+| T08_frustum_rest_200 | 5.296 | 508 | 1030 | 207030 | 0 |
+| T08_frustum_rest_400 | 31.656 | 1292 | 3166 | 1269566 | 0 |
+| T08_constant_flow_100 | 1.453 | 299 | 598 | 59202 | 0 |
+| T08_constant_flow_200 | 14.047 | 1195 | 3584 | 713216 | 0 |
+| T08_constant_flow_400 | 61.406 | 2370 | 7088 | 2828112 | 0 |
+| T08_smooth_flow_100 | 3.125 | 448 | 1194 | 118206 | 0 |
+| T08_smooth_flow_200 | 12.078 | 890 | 2364 | 470436 | 0 |
+| T08_smooth_flow_400 | 45.796 | 1748 | 4600 | 1835400 | 0 |
+| T08_frustum_flow_100 | 2.469 | 388 | 954 | 94446 | 0 |
+| T08_frustum_flow_200 | 8.594 | 712 | 1651 | 328549 | 0 |
+| T08_frustum_flow_400 | 29.265 | 1323 | 2900 | 1157100 | 0 |
+| T09_contact | 66.062 | 3125 | 6500 | 2600000 | 0 |
+| T09_reverse | 62.391 | 3024 | 6096 | 2438400 | 0 |
+| T09_inleft | 29.531 | 1500 | 3000 | 1197000 | 0 |
+| T09_inright | 27.891 | 1500 | 3000 | 1197000 | 0 |
+| T10_100 | 8.015 | 1567 | 3134 | 313400 | 0 |
+| T10_200 | 32.047 | 3135 | 6270 | 1254000 | 0 |
+| T10_400 | 129.469 | 6270 | 12540 | 5016000 | 0 |
+| T10_800 | 526.656 | 12541 | 25082 | 20065600 | 0 |
+| T02_sod_0.2 | 19.500 | 993 | 2225 | 892225 | 0 |
+| T02_sod_0.4 | 11.125 | 547 | 1314 | 526914 | 0 |
+| T02_sod_0.6 | 9.250 | 421 | 1102 | 441902 | 0 |
+| T03_0.2 | 74.203 | 1801 | 3602 | 2877998 | 0 |
+| T03_0.4 | 37.515 | 901 | 1802 | 1439798 | 0 |
+| T03_0.6 | 30.469 | 675 | 1499 | 1197701 | 0 |
+| T03_0.2_N400 | 18.750 | 901 | 1802 | 718998 | 0 |
+| T03_0.4_N400 | 9.219 | 451 | 902 | 359898 | 0 |
+| T03_0.6_N400 | 6.125 | 301 | 602 | 240198 | 0 |
+| T03_0.2_N1600 | 304.844 | 3601 | 7202 | 11515998 | 0 |
+| T03_0.4_N1600 | 153.578 | 1801 | 3602 | 5759598 | 0 |
+| T03_0.6_N1600 | 125.234 | 1357 | 3026 | 4838574 | 0 |
+| T12_expansion | 4.796 | 283 | 581 | 232971 | 10 |
+| T12_contact | 66.578 | 3125 | 6500 | 2600000 | 0 |
+| T12_pure0 | 69.219 | 3308 | 7232 | 2892800 | 0 |
+| T12_pure1 | 69.172 | 3308 | 7232 | 2892800 | 0 |
+| T12_frustum_0_100 | 1.657 | 286 | 642 | 64842 | 0 |
+| T12_frustum_0_200 | 5.204 | 502 | 1007 | 202407 | 0 |
+| T12_frustum_0_400 | 25.828 | 1139 | 2554 | 1024154 | 0 |
+| T12_frustum_1_100 | 1.641 | 286 | 642 | 64842 | 0 |
+| T12_frustum_1_200 | 5.157 | 502 | 1007 | 202407 | 0 |
+| T12_frustum_1_400 | 25.688 | 1139 | 2554 | 1024154 | 0 |
+
+```json
+{
+  "current_acquisition_seconds": 831.5,
+  "maximum_case_seconds": 526.6560000004247,
+  "HLLC": 104498544,
+  "HLLE": 10,
+  "RHS": 189503
+}
+```
+
+Los831.500s son la suma de las DOS integraciones nuevas, no incluyen lectura,
+compresión, pruebas ni revisión. No hubo timeout600 ni necesidad de perfilado.
+No se midió memoria máxima de toda la ejecución. Los10 fallbacks HLLE de la
+matriz pertenecen al caso de expansión existente, no a las dos adquisiciones.
+Máximo balance global del conjunto8.942911515485987e-15; ambos nuevos sinHLLE.
+
+FIRST_ORDER:52 registros bajoR4 PASS, sin reintegración; producción0D, P0 y
+contratosP1–R4 conservan hashes. Siete comparaciones históricas P0 ejecutadas
+offline contra referencias originales, no nuevas campañas físicas.
+Autorrevisión de alcance y hashes separada de revisión independiente.
+Revisión independiente final PASS: final-review.json. Decisión derivada
+**P2_PASS_1D_CORE_VERIFIED / WAITING_HUMAN_APPROVAL** en decision.json.
+Aceptación humana NO emitida, P3 NO iniciado. Gate nativo BLOCKED por
+review_not_approved conservado; se adjunta revisión real, no se atribuye
+aprobación al stub ni se modifica configuración global.

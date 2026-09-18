@@ -1,5 +1,18 @@
 # MotorSim — Instrucciones de trabajo para Codex
 
+P1-R5E: **P1_R5_PASS_CFL_SECOND_ORDER_CONTRACT**; adoptado R5 solo para
+T11 segundo orden tras nueve finales y revisión científica independiente.
+**P2_PASS_1D_CORE_VERIFIED / WAITING_HUMAN_APPROVAL**: T01–T12 PASS,
+T12 10/10; 70 pruebas, siete regresiones históricas P0 offline, FIRST_ORDER/R4
+preservado. T10 N800: 526,656 s; órdenes 400→800: rho 1,906602 / especie 1,906890;
+T11 N1600/CFL 0,2: 304,844 s. Sólo dos integraciones nuevas, solver intacto.
+Aceptación humana P2 pendiente; NO iniciar P3, archivar ni publicar.
+Los gates nativos BLOCKED por falta de reviewer conectado se conservan;
+[decisión derivada con revisión independiente](results/p1-r5e-20260918/decision.json)
+y [tablas, delta y resultados](results/p1-r5e-20260918/analysis.md).
+
+Antecedente histórico:
+
 P1-R5 (orden350ec78f): **P1_R5_CFL_SECOND_ORDER_UNRESOLVED**.
 Revisión offline de ocho finales y un parcial: SSP no implica monotonía CFL
 entre mallas, pero falta N1600/CFL0,2 para justificar todas las cláusulas R5.

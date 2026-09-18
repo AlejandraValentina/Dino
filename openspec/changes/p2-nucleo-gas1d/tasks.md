@@ -525,7 +525,58 @@ Sin publicación, archivo ni P3; borrado ajeno redme.txt conservado.
 ## P1-R5E — adquisición autorizada separada de adopción
 
 Orden594e5cc0 autoriza exactamente T10 N800 y T11 N1600/CFL0,2 con600s cada uno, sin alterar solver/criterios. Sustituye el bloqueo de adquisición de R5, no adopta R5.
-- [ ] Adquirir ambos casos y conservar hashes, arrays y ledgers.
-- [ ] Reconstruir matriz3x3 y órdenes T10.
-- [ ] Revisión científica independiente con datos completos; adoptar R5 únicamente si justificado.
-- [ ] Evaluar P2 completo únicamente tras R5 PASS.
+- [x] Adquirir ambos casos y conservar hashes, arrays y ledgers.
+- [x] Reconstruir matriz3x3 y órdenes T10.
+- [x] Revisión científica independiente con datos completos; adoptar R5 únicamente si justificado.
+- [x] Evaluar P2 completo únicamente tras R5 PASS.
+
+
+### Resultado P1-R5E / cierre técnico P2 — 18/09/2026
+
+**P1_R5_PASS_CFL_SECOND_ORDER_CONTRACT**: adoptado1D_CONTRACT_V1_R5 en1228907
+tras revisión independiente de nueve finales. Se retira SOLO la monotonía
+S400>S800>S1600 para segundo orden; S1600<S400 en las tres parejas junto con
+E_A400>E_A800>E_A1600 por CFL y todos gates padre. PerfilesL1/L2 corroboran;
+fase no siempre monótona, registrada dentro de límites originales. No nueva
+cota empírica, sin omitir N800. FIRST_ORDER conservaR4. Históricos intactos.
+
+T10N800 PASS:526.656s,12541pasos,25082RHS,20065600HLLC,0HLLE.
+L1rho1.80354721771955e-5, L1rhoY4.510362247099889e-5.
+Orden200→400rho1.89430821594/especie1.89411641807;
+400→800rho1.90660166169/especie1.90688958599: criterio>=1.5 intacto.
+T11N1600/CFL0.2 completo diagnóstico:304.844s,3601pasos,7202RHS,
+11515998HLLC,0HLLE; A9.844305254606297Pa, Eabs0.15488100291986484Pa,
+Erel0.015489360727058105. Luego evaluado bajoR5 adoptado: PASS.
+
+[Tablas completas3x3, sensibilidades, dt, balances, perfiles y rendimiento](../../../results/p1-r5e-20260918/analysis.md).
+58 finales:56 reutilizados con hashes y2nuevos. T01–T12 PASS; T1210/10.
+Máximo residuo8.942911515485987e-15 (<1e-10), admisibilidadPASS;
+HLLC104498544,HLLE10,RHS189503 para el conjunto final. Memoria global no medida.
+Integraciones nuevas831.500s sumados, mayor caso526.656s. Ningún timeout600.
+ReutilizaciónFO52casos bajoR4 PASS; siete regresiones históricasP0 offline PASS.
+No nuevas campañas0D; producción/solver/contratosP1–R4 exactos.
+
+- [x] 70 pruebas pertinentes PASS (logs en verification), incluyendo caso Sod ausente.
+- [x] Revisión científica independiente /root/p1_r5_review PASS.
+- [x] Revisión final puntual independiente PASS, sin hallazgos pendientes.
+- [x] Autorrevisión separada de alcance/hashes/evidencia y conservación del borrado ajeno redme.txt.
+- [ ] P2_HUMAN_ACCEPTED: requiere orden posterior de la usuaria.
+
+Estado derivado **P2_PASS_1D_CORE_VERIFIED / WAITING_HUMAN_APPROVAL**.
+Los reportes nativos BLOCKED/review_not_approved permanecen intactos: el hook
+no tiene reviewer real. Dictámenes reales separados y hashes en scientific-review,
+final-review y decision.json; no se presenta el stub como revisión.
+Los pendientes históricos P1-R5 se resolvieron AHORA por ordenR5E, no retrospectivamente.
+Primer registro de fase falló antes de ejecutar por UTF8/roadmap; setup-failure
+preservado. Reproductor corrigió ruta relativa antes de análisis, sin reintegrar.
+Observación del revisor sobre integridad12/12 y comparativas se corrigió y probó;
+ninguna reparación numérica/científica ni modificación del presupuesto3/3 anterior.
+Sin publicación, archivo, aceptación humana P2, UI/EXE/JSON ni inicioP3.
+
+Comandos: `python -m dev_orchestrator.runners.run_phase P1_R5E` y
+`python -m dev_orchestrator.runners.run_phase P2_R5_VERIFY`, usando
+`.venv\Scripts\python.exe` y las dependencias P0, P1_R4_CFL_REVIEW,
+P2A_R4_VERIFY de docs/gasdynamic (argv exactos en los logs/evidence.json).
+Reproducción de tablas mediante dev_orchestrator.p1_r5_review indicada en analysis.md.
+
+- [x] OpenSpec estricto p2-nucleo-gas1d PASS tras registrar R5 y cierre; git diff --check PASS.
