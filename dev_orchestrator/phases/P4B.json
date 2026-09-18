@@ -29,7 +29,7 @@
         "--run-dir",
         "{run_dir}"
       ],
-      "timeout": 9800,
+      "timeout": 3500,
       "result_file": "artifacts/result.json"
     }
   ],
@@ -48,5 +48,5 @@
   "review": "required",
   "human_gate": true,
   "scientific_changes_authorized": false,
-  "timeout": 9900
+  "timeout": 3600
 }
