@@ -1,0 +1,38 @@
+{
+  "previous_timeout": 300,
+  "new_timeout": 600,
+  "reason": "infrastructure/runtime completion",
+  "source_sha256": {
+    "motorsim/gas1d/boundary.py": "f931664fa850a612f28998090fe9c5fe9088d621892a69a9d5eebcb9d6b17daf",
+    "motorsim/gas1d/contact.py": "ad5dc76f4482d7db1438297f5727a655af63fff20b9595770bb8e6a459609b06",
+    "motorsim/gas1d/eos.py": "22bae4c37c3a6edde31940d26d59430cf0c466fbfb706df1dfe4ecad1c4e21bf",
+    "motorsim/gas1d/mesh.py": "78dcdd71de7acd751e79367347e2826e4d7c81d83817f39a62728d375bcbb44e",
+    "motorsim/gas1d/methods.py": "36a92c7ae8e0d7574b897d835e1ab59ddbd7b8c1fee71770302943321869f52f",
+    "motorsim/gas1d/reference.py": "017d25da5a98934cf8fa5b75e1a324dbb40c09a22fa04927118b9c6ce48b83fd",
+    "motorsim/gas1d/riemann.py": "30ab73a693e679781e3f12b177fa02f04e13562909b9a4131a2b5c641d0321b3",
+    "motorsim/gas1d/second_order.py": "ccaaea3464ebe1cda8f600035dc43d2448ba00569f4022c1b18ba766c3b3de9a",
+    "motorsim/gas1d/solver.py": "b4b3f6978d0fc2433a49b11d03fd3f4914ab3890f1b4e0d498f3345f12f7e60c",
+    "motorsim/gas1d/verification.py": "aab8f153af13ff3de92bdd2ea9695887c251d49c823aa0b9b9269bdbece39f25",
+    "motorsim/gas1d/__init__.py": "ca85637c3d6ba44590d24561296ebc0235469199266cc1d5d0f90e2d5de4809f"
+  },
+  "cases": {
+    "T10_800": {
+      "path": "artifacts/cases/T10_800.json.gz",
+      "sha256": "9a37e405d6f4ca7a88d1cb3c5ae8eafb60052a0d3f955aecc36e8f3f387923f9",
+      "input_sha256": "1e16d223789a3238e74f2dd1c023883246217635024e425ede377a038e2dd22d",
+      "status": "completed",
+      "runtime": 526.6560000004247,
+      "role": "T10_CONTRACTUAL"
+    },
+    "T03_0.2_N1600": {
+      "path": "artifacts/cases/T03_0.2_N1600.json.gz",
+      "sha256": "ee574dc596fa07b313f48f71e58ca38616807fd5fb4f6646be0fc3ac2e89f999",
+      "input_sha256": "1db1a35167252533f8ecf748090b404a0a65742a0af14e3d6565cf52f2184c5d",
+      "status": "completed",
+      "runtime": 304.8439999995753,
+      "role": "R5_DIAGNOSTIC_EVIDENCE"
+    }
+  },
+  "R5_adopted": false,
+  "P2_accepted": false
+}

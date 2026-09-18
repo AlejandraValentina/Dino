@@ -84,3 +84,13 @@ cada registro, exigeT04PASS y rechaza saltar un fallo científico previo.
 T11/T12 se ejecutan en orden, por subcaso con300s; un timeout posterior se conserva
 incompleto y no impide medir casos independientes. Un fallo científico detiene.
 Esto no habilita PASS deP2 mientras falteT10, ni cambia ciencia/presupuesto1/3.
+
+## P1-R5E y adopción R5
+Orden594e5cc0 separa adquisición de contrato. Dos finales nuevos con600s,
+solver congelado. Nueve acústicos completos y revisión independiente aprueban
+1D_CONTRACT_V1_R5 SOLO para T11 segundo orden; delta exacto en docs/gasdynamic.
+S1600<S400 reemplaza monotonía por transición, manteniendo E_A decreciente
+en ambas transiciones para cada CFL y todos gates padre. N800 y falloR4
+se conservan; perfiles L1/L2 corroboran convergencia. FIRST_ORDER mantieneR4.
+Esto retira una garantía específica, no afirma equivalencia de criterios ni
+aceptación humana. Evaluación completa P2 posterior a esta adopción.
