@@ -75,3 +75,12 @@ Reutilización solo de PASS completo con identidad comprobada; solver original
 Nueva fase operativa P2B_RESUME conserva presupuesto P2B acumulado1/3; no lo reinicia.
 P1–R4 y P2A intactos. R4 compara refinamiento, no reinstala8%; N400 es diagnóstico
 para exactitud padre y exige estabilidad/balances. No P3, push ni archivo.
+
+T04 PASS150,968s y T05–T09 PASS. T10_800 agota300,047s; es infraestructura,
+no fallo científico. Para completar verificaciones independientes autorizadas,
+P2B_REMAINING parte explícitamente deT11 con checkpoint de esta ejecución.
+Retiene T10 incompleto sin acreditarlo ni repetirlo; verifica hashes/inputs de
+cada registro, exigeT04PASS y rechaza saltar un fallo científico previo.
+T11/T12 se ejecutan en orden, por subcaso con300s; un timeout posterior se conserva
+incompleto y no impide medir casos independientes. Un fallo científico detiene.
+Esto no habilita PASS deP2 mientras falteT10, ni cambia ciencia/presupuesto1/3.

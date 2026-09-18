@@ -48,7 +48,7 @@ def expected_signature(name,n=None):
         reference=cell_integrals(mesh,case['reference'],eos,case['area'],case['refbreaks'])))
 
 
-def load_reusable(folder,expected_source):
+def load_reusable(folder,expected_source,*,retain_timeouts=False):
     folder=Path(folder)
     checkpoint=folder/'artifacts/resume-checkpoint.json'
     if checkpoint.exists():
@@ -63,12 +63,16 @@ def load_reusable(folder,expected_source):
         if sha(path)!=item['sha256']:raise ValueError('Resume artifact hash mismatch: '+name)
         record=json.loads(gzip.decompress(path.read_bytes()))
         if record['name']!=name:raise ValueError('Resume case identity mismatch')
-        if record['status']!='PASS' or record['result']['status']!='completed':continue
+        passed=record['status']=='PASS' and record['result']['status']=='completed'
+        retained=(retain_timeouts and name!='T04' and record['result']['status']=='failed_infrastructure'
+            and record['result']['reason']=='wall_timeout' and all(record['checks'].get(k,False) for k in ('worst_ledger','stage_conservation','stage_CFL')))
+        if not passed and not retained:continue
         base,sep,n=name.partition('_N')
         expected=expected_signature(base,int(n) if sep else None)
         if signature(record)!=expected:raise ValueError('Resume inputs/configuration differ: '+name)
         records[name]=record;origins[name]=dict(path=path.relative_to(ROOT).as_posix(),sha256=item['sha256'],input_sha256=expected,
-            solver_revision='4620200',reason='Identical solver files, inputs, configuration and evidence hash; no reintegration')
+            solver_revision='4620200',accepted=passed,
+            reason='Identical solver files, inputs, configuration and evidence hash; no reintegration' if passed else 'Retained timeout, NOT credited as PASS; no reintegration')
     return records,origins
 
 
@@ -124,28 +128,31 @@ def runtime(r):
     return {k:r['result'].get(k) for k in keys}
 
 
-def campaign(run_dir,resume=None):
+def campaign(run_dir,resume=None,start_at=4):
     started=time.monotonic();art=run_dir/'artifacts';(art/'cases').mkdir()
     sources=source_hashes();checks=frozen_checks()
     if not all(checks.values()):raise ValueError('Frozen checks failed')
     available,origins=load_reusable(PREVIOUS,sources)
+    if start_at!=4 and resume is None:raise ValueError('Starting later requires explicit checkpoint')
     if resume:
-        extra,provenance=load_reusable(resume,sources);available.update(extra);origins.update(provenance)
+        extra,provenance=load_reusable(resume,sources,retain_timeouts=start_at>4);available.update(extra);origins.update(provenance)
     verify_inventory(OLD);verify_inventory(EVIDENCE/'study')
     controls={p.name[:-8]:json.loads(gzip.decompress(p.read_bytes())) for p in (OLD/'artifacts/cases').glob('*.json.gz')}
     control=v.aggregate(list(controls.values()));control['T11']=revised_t11(control['T11'],read(EVIDENCE/'study/artifacts/study.json'))
     checks['first_order_R4_control']=all(r['status']=='PASS' for r in control.values())
     write(art/'first-order-control.json',dict(matrix=control,reused_evidence=OLD.relative_to(ROOT).as_posix(),new_integrations=0))
-    records={};entries={};reused={};fresh=[];matrix={};stop=None
+    records={};entries={};reused={};retained={};fresh=[];matrix={};stop=None;failures=[]
     def checkpoint():
-        write(art/'resume-checkpoint.json',dict(source_sha256=sources,solver_revision='4620200',cases=entries,reused=reused,fresh=fresh,matrix=matrix,
+        write(art/'resume-checkpoint.json',dict(source_sha256=sources,solver_revision='4620200',cases=entries,reused=reused,retained_incomplete=retained,fresh=fresh,matrix=matrix,
             timeout=dict(old_timeout=120,new_timeout=300,previous_T10_800_exception=240,reason='infrastructure/runtime only'),solver_inputs_unchanged=True))
         write(art/'inventory.json',{p.relative_to(run_dir).as_posix():sha(p) for p in art.rglob('*') if p.is_file() and p.name!='inventory.json'})
     def obtain(name,n=None):
         key=name if n is None else f'{name}_N{n}'
         if key in available:
-            r=available[key];reused[key]=origins[key]
-            print('REUSE '+key+' '+origins[key]['sha256'],flush=True)
+            r=available[key]
+            if r['status']=='PASS':reused[key]=origins[key]
+            else:retained[key]=origins[key]
+            print(('REUSE ' if r['status']=='PASS' else 'RETAIN_INCOMPLETE ')+key+' '+origins[key]['sha256'],flush=True)
             target=art/'cases'/(key+'.json.gz');target.write_bytes((ROOT/origins[key]['path']).read_bytes())
         else:
             print('START '+key+' timeout=300',flush=True)
@@ -161,17 +168,31 @@ def campaign(run_dir,resume=None):
         if name not in available:raise ValueError('Missing required baseline passed record: '+name)
         obtain(name)
     for i in range(1,4):matrix[f'T{i:02}']=test_gate(f'T{i:02}',records)
-    # Only T04 executes before its explicit gate; later tests cannot run on a timeout.
-    for i in range(4,13):
+    for i in range(4,start_at):
+        test=f'T{i:02}'
+        for name in (n for n in v.case_names() if test_id(n)==test):
+            if name not in available:raise ValueError('Cannot skip unverified earlier case: '+name)
+            r=obtain(name)
+            if r['status']!='PASS':failures.append(dict(test=test,case=name,solver_status=r['result']['status'],reason=r['result']['reason']))
+        matrix[test]=test_gate(test,records)
+        if i==4 and matrix[test]['status']!='PASS':raise ValueError('T04 must PASS before later verification')
+        if matrix[test]['status']!='PASS' and not any(f['test']==test for f in failures):raise ValueError('Cannot skip scientific aggregate failure: '+test)
+    # T04 must PASS before any later integration.
+    # An explicitly retained later timeout is incomplete, not a scientific gate; independent tests may proceed.
+    for i in range(start_at,13):
         test=f'T{i:02}';names=[(name,None) for name in v.case_names() if test_id(name)==test]
         if test=='T11':names += [(f'T03_{c}',n) for n in (400,1600) for c in (.2,.4,.6)]
         for name,n in names:
             r=obtain(name,n)
             diagnostic_coarse=test=='T11' and n==400 and r['result']['status']=='completed' and all(r['checks'][k] for k in ('worst_ledger','stage_conservation','stage_CFL'))
             if r['status']!='PASS' and not diagnostic_coarse:
-                stop=dict(test=test,case=r['name'],solver_status=r['result']['status'],reason=r['result']['reason']);break
+                failure=dict(test=test,case=r['name'],solver_status=r['result']['status'],reason=r['result']['reason']);failures.append(failure)
+                timeout_only=(start_at>4 and test!='T04' and r['result']['status']=='failed_infrastructure' and r['result']['reason']=='wall_timeout'
+                    and all(r['checks'].get(k,False) for k in ('worst_ledger','stage_conservation','stage_CFL')))
+                if not timeout_only:stop=failure;break
         matrix[test]=test_gate(test,records);checkpoint()
         if stop or matrix[test]['status']!='PASS':
+            if stop is None and start_at>4 and any(f['test']==test and f.get('solver_status')=='failed_infrastructure' for f in failures):continue
             if stop is None:stop=dict(test=test,reason='contractual aggregate failure')
             break
     for i in range(1,13):matrix.setdefault(f'T{i:02}',test_gate(f'T{i:02}',records))
@@ -186,10 +207,11 @@ def campaign(run_dir,resume=None):
         original=full_matrix(base,ref)
         checks['aggregate_equivalence']=all(original[k]['status']==matrix[k]['status'] for k in matrix)
     state='P2B_READY_FOR_INDEPENDENT_REVIEW' if all(checks.values()) else 'P2_BLOCKED_SECOND_ORDER'
-    if stop and stop.get('solver_status')=='failed_infrastructure':state='FAILED_INFRASTRUCTURE'
-    elif stop and stop.get('solver_status')=='failed_numerical':state='P2_BLOCKED_POSITIVITY'
+    if any(f.get('solver_status')=='failed_infrastructure' for f in failures):state='FAILED_INFRASTRUCTURE'
+    if stop and stop.get('solver_status')=='failed_numerical':state='P2_BLOCKED_POSITIVITY'
+    elif stop and stop.get('reason')=='contractual aggregate failure':state='P2_BLOCKED_SECOND_ORDER'
     if not checks['baseline_intact'] or not checks['solver_unchanged']:state='P2_BLOCKED_REGRESSION'
-    summary=dict(state=state,checks=checks,matrix=matrix,stop=stop,source_sha256=sources,solver_revision='4620200',fresh=fresh,reused=reused,
+    summary=dict(state=state,checks=checks,matrix=matrix,stop=stop,failures=failures,source_sha256=sources,solver_revision='4620200',fresh=fresh,reused=reused,retained_incomplete=retained,
         cases=[{k:r[k] for k in ('name','status','checks','metrics','configuration')} | dict(runtime=runtime(r)) for r in records.values()],
         wall_seconds=time.monotonic()-started,P3='NOT_STARTED',P2_HUMAN_ACCEPTED=False,
         first_order_comparison=[dict(name=n,metrics=controls[n]['metrics'],runtime=runtime(controls[n])) for n in records if n in controls],
@@ -202,4 +224,5 @@ def campaign(run_dir,resume=None):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--run-dir',type=Path,required=True);parser.add_argument('--resume',type=Path)
-    args=parser.parse_args();campaign(args.run_dir,args.resume)
+    parser.add_argument('--start-at',type=int,choices=range(4,13),default=4)
+    args=parser.parse_args();campaign(args.run_dir,args.resume,args.start_at)

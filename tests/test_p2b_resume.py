@@ -21,6 +21,16 @@ class ResumeTests(unittest.TestCase):
         source=p.source_hashes();source['motorsim/gas1d/second_order.py']='changed'
         with self.assertRaisesRegex(ValueError,'source hashes differ'):p.load_reusable(p.PREVIOUS,source)
 
+    def test_timeout_retention_is_explicit_and_never_accepted(self):
+        folder=p.ROOT/'results/p2b-gas1d-20260918/resume-300-attempt-1'
+        normal,_=p.load_reusable(folder,p.source_hashes())
+        self.assertNotIn('T10_800',normal)
+        records,origins=p.load_reusable(folder,p.source_hashes(),retain_timeouts=True)
+        self.assertIn('T10_800',records)
+        self.assertFalse(origins['T10_800']['accepted'])
+        self.assertEqual(records['T10_800']['result']['status'],'failed_infrastructure')
+        self.assertEqual(p.test_gate('T10',records)['status'],'FAIL')
+
     def test_changed_inputs_change_signature(self):
         path=p.PREVIOUS/'artifacts/cases/T01_rest.json.gz'
         record=json.loads(gzip.decompress(path.read_bytes()))

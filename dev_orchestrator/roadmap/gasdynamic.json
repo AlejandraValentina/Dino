@@ -557,6 +557,42 @@
       "max_repair_attempts": 3,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P2B_REMAINING",
+      "title": "P2B remaining independent checks",
+      "objective": "Verify remaining T11 and T12 independently, retaining T10 infrastructure timeout without credit or repetition.",
+      "depends_on": [
+        "P0",
+        "P1_R4_CFL_REVIEW",
+        "P2A_R4_VERIFY"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "docs/gasdynamic/",
+        "docs/baselines/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "resume_tests",
+        "resume_campaign",
+        "P2B",
+        "baseline_intact",
+        "contract_frozen",
+        "dependencies_accepted",
+        "first_order_contracts_frozen",
+        "p1_r4_accepted",
+        "p2a_accepted",
+        "first_order_R4_control",
+        "solver_unchanged"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 3,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }
