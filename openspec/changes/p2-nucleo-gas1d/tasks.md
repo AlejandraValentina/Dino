@@ -257,3 +257,242 @@ independent-review.json, regression.json y verification-tests.log.
 Pendiente: resolver límite operativo sin cambiar ciencia; terminar T04–T11 y
 frustumsT12; acreditar orden, CFLR4 y gate integral; después aceptación humanaP2.
 No P3, empaquetado, publicación ni archivo. Eliminación ajena redme.txt preservada.
+
+## Reanudación P2B con 300 s — resultado
+**P2_BLOCKED_SECOND_ORDER / SCIENTIFIC_CHANGE_REQUIRED**. No P2 PASS ni P3.
+Orden12b4cba5 autorizó únicamente timeout operativo: old_timeout=120s,
+new_timeout=300s, reason=infrastructure/runtime only. T10_800 tenía excepción240s,
+ahora también300s. Tiempo físico, CFL, mallas y todos los criterios sin cambios.
+No hubo optimizaciones del solver. No fue necesario perfilarT04: aprobó150,968s.
+Los dos nuevos timeouts no se presentan como fallos científicos; existe además
+un incumplimiento R4 independiente que impide aprobar aunque se resuelvan ambos.
+
+- [x] T04 primero aislado; continuar sólo tras PASS y preservar su evidencia.
+- [x] T05–T09 completos, con persistencia por subcaso y gate.
+- [ ] T10 completo: falta solución finalN800 y pareja400→800.
+- [ ] T11 R4: faltaN1600/CFL0,2; además falla comparación disponible0,4/0,6.
+- [x] T12 completo10/10; cuatro previos reutilizados con identidad verificada.
+- [x] Regresión P0/first-order, revisión puntual, OpenSpec y commits locales.
+- [ ] Gate global P2 y aceptación humana; no elegibles.
+
+### Resultado contractual y limitaciones
+| Gate | Resultado actual |
+| --- | --- |
+| T01–T03 | PASS reutilizado con hashes/inputs/configuración/solver idénticos |
+| T04 | PASS,150,968s |
+| T05 | PASS,150,953s |
+| T06 | PASS,66,515s |
+| T07 | PASS,3/3 |
+| T08 | PASS,18/18 y comparaciones de refinamiento |
+| T09 | PASS,4/4 |
+| T10 | Incompleto:3/4 soluciones finales;N800timeout |
+| T11 | FAIL R4 en comparación completa0,4/0,6;11/12 soluciones finales |
+| T12 | PASS,10/10 |
+
+58 registros:56 completos y2 incompletos. No confundir registros con soluciones
+finales. Última fase:18 integraciones nuevas(17completas),39PASS reutilizados,
+1timeout retenido SIN crédito. Las otras32 integraciones de esta orden están en
+resume-300-attempt-1 (31completas). Totales de dos fases:50 integraciones nuevas,
+48completas,2timeouts; ocho resultados anteriores reutilizados. El intento de ruta
+relativa no integró ningún caso. No repeticiones automáticas de resultados acreditados.
+
+### T04 y T05
+| Métrica | T04 | T05 |
+| --- | ---: | ---: |
+| Tiempo real s | 150.968 | 150.953000001 |
+| Pasos | 3509 | 3510 |
+| RHS | 7243 | 7231 |
+| HLLC | 5794400 | 5777569 |
+| HLLE | 0 | 0 |
+| Flujos característicos | 7243 | 14462 |
+| dt mínimo s | 7.34968071646e-11 | 1.67612205799e-10 |
+| dt máximo s | 1.46652916971e-06 | 1.46648196472e-06 |
+| CFL máximo diagnóstico | 0.4 | 0.4 |
+| Coeficiente de reflexión | 0.975062687919 | -0.974345496683 |
+| Error coeficiente | 0.0249373120811 | 0.0256545033169 |
+| Error tiempo pico escalado | 0.002 | 0.002 |
+| Ledger máximo | 9.67042442344e-16 | 9.64469826127e-16 |
+| Ledger etapa máximo | 1.59190256723e-16 | 1.59276521307e-16 |
+
+Evaluaciones de flujo = HLLC+HLLE+flujos característicos (una cara periódica común
+se cuenta una vez). T05 utiliza exclusivamente ideal_open_pressure_release R3.
+Prefijos completos de ledgers por paso y etapa T04 idénticos al intento120s.
+Memoria pico no medida; no se atribuye una cifra por caso.
+
+### T10: refinamiento suave
+| N | dx | L1 rho | L2 rho | L1 rhoY | L2 rhoY | Orden rho / rhoY desde anterior | Tiempo s |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| 100 | 0.01 | 0.0009133376138 | 0.001238029176 | 0.002282941282 | 0.003132136493 | — | 8.015 |
+| 200 | 0.005 | 0.000251371132 | 0.000393951711 | 0.0006286779731 | 0.0009970951769 | 1.861329272 / 1.860500632 | 32.047 |
+| 400 | 0.0025 | 6.76194769e-05 | 0.0001247924833 | 0.0001691384659 | 0.0003159031665 | 1.894308216 / 1.894116418 | 129.469 |
+| 800 | 0.00125 | — | — | — | — | No acreditado | 300.047 timeout |
+
+200→400 supera1,5 en ambas magnitudes. No inferir400→800, ni calcular error
+final usando el estado parcialN800: t=0,008266995416406504s frente
+0,014665657704123739s (56,3698%),7069pasos,14138RHS,0rechazos.
+Presupuesto300s no se amplió. Comparación FO completa sigue en tabla anterior;
+N400 FO L1rho0,00287404547 frente MUSCL0,0000676194769, pero falta el gate global.
+
+### T11: R4, sin volver al 8 por ciento
+A=max_i(p_i−100000Pa) al tiempo final; S=abs(Aa−Ab)/10Pa.
+El casoN1600/CFL0,2 no completó:300,094s,3578pasos,7156RHS,0rechazos;
+t=0,0013117299762084292s frente0,0013199091933711366s (99,3803%).
+No se usa ese estado parcial como si estuviera en el tiempo final.
+
+| N | CFL | A final Pa | Error amplitud frente referencia /10Pa | Tiempo s |
+| --- | ---: | ---: | ---: | ---: |
+| 400 | 0.2 | 9.14443393229 | 0.0842560479141 | 18.750 |
+| 400 | 0.4 | 9.1483281148 | 0.0838666296637 | 9.219 |
+| 400 | 0.6 | 9.14993965974 | 0.0837054751697 | 6.125 |
+| 800 | 0.2 | 9.62864623751 | 0.0368099507599 | 74.203 |
+| 800 | 0.4 | 9.63078348491 | 0.0365962260199 | 37.515 |
+| 800 | 0.6 | 9.63281855416 | 0.0363927190949 | 30.469 |
+| 1600 | 0.2 | — incompleto | — | 300.094 |
+| 1600 | 0.4 | 9.84536868558 | 0.0153817571947 | 153.578 |
+| 1600 | 0.6 | 9.8463535082 | 0.0152832749329 | 125.234 |
+
+Comparación COMPLETA de CFL0,4 frente0,6:
+| N | Sensibilidad S |
+| --- | ---: |
+| 400 | 0,00016115449398057535 |
+| 800 | 0,00020350692502688617 |
+| 1600 | 0,00009848226181929931 |
+
+**FAIL: S400>S800 no se cumple.** Es independiente del caso0,2 que agotótiempo.
+Los seis arrays involucrados sí tienen tiempo final completo; el revisor recalculó
+A desde primitive y obtuvo exactamente esos valores. Que sean pequeños no autoriza
+relajar la monotonía estricta R4 ni restaurar8%. El error frente referencia disminuye
+para0,4 y0,6; comparaciones Sod y velocidad disponibles PASS. Las comparaciones
+que necesitan0,2/N1600 quedan pendientes. No se atribuye defecto al solver.
+
+### T12: diez subcasos
+| Caso | Resultado | Tiempo de su registro s | Procedencia |
+| --- | --- | ---: | --- |
+| T12_contact | PASS | 66.578 | Reutilizado; fuente/inputs/config/hash exactos |
+| T12_expansion | PASS | 4.796 | Reutilizado; fuente/inputs/config/hash exactos |
+| T12_frustum_0_100 | PASS | 1.657 | Nueva integración de esta orden |
+| T12_frustum_0_200 | PASS | 5.204 | Nueva integración de esta orden |
+| T12_frustum_0_400 | PASS | 25.828 | Nueva integración de esta orden |
+| T12_frustum_1_100 | PASS | 1.641 | Nueva integración de esta orden |
+| T12_frustum_1_200 | PASS | 5.157 | Nueva integración de esta orden |
+| T12_frustum_1_400 | PASS | 25.688 | Nueva integración de esta orden |
+| T12_pure0 | PASS | 69.219 | Reutilizado; fuente/inputs/config/hash exactos |
+| T12_pure1 | PASS | 69.172 | Reutilizado; fuente/inputs/config/hash exactos |
+
+Sin clipping ni positivity limiter nuevo; rho,p,T positivos y0<=Y<=1 en etapas
+aceptadas registradas. Diez fallbacksHLLE en expansión, motivo inadmissible_star,
+cero downgrades; contadores incluyen evaluaciones de intentos rechazados.
+En58registros,incluidosdosparciales:95669790HLLC+10HLLE; no comparar ese total
+con52casosFO como si fueran el mismo trabajo. Peor ledger8,94291151549e−15;
+peor ledger por etapa1,97476173377e−16, ambos bajo1e−10.
+
+### Tiempos por caso y comparación FO
+Tiempos reales de integraciones guardadas, no del coste de reutilizar archivos.
+Nuevos enestaorden salvo T01–T03 ycuatroT12 señalados como previos.
+| Caso | Estado | MUSCL s | FO histórico s |
+| --- | --- | ---: | ---: |
+| T01_moving | Completo | 1.297 | 0.406 |
+| T01_rest | Completo | 1.063 | 0.438 |
+| T02_sod | Completo | 11.141 | 2.453 |
+| T02_sod_0.2 | Completo | 19.500 | 4.984 |
+| T02_sod_0.4 | Completo | 11.125 | 2.515 |
+| T02_sod_0.6 | Completo | 9.250 | 1.672 |
+| T03 | Completo | 37.063 | 12.032 |
+| T03_0.2 | Completo | 74.203 | 23.984 |
+| T03_0.2_N1600 | Timeout parcial | 300.094 | — |
+| T03_0.2_N400 | Completo | 18.750 | — |
+| T03_0.4 | Completo | 37.515 | 12.219 |
+| T03_0.4_N1600 | Completo | 153.578 | — |
+| T03_0.4_N400 | Completo | 9.219 | — |
+| T03_0.6 | Completo | 30.469 | 8.172 |
+| T03_0.6_N1600 | Completo | 125.234 | — |
+| T03_0.6_N400 | Completo | 6.125 | — |
+| T04 | Completo | 150.968 | 46.156 |
+| T05 | Completo | 150.953 | 46.079 |
+| T06_contact | Completo | 66.515 | 20.047 |
+| T07_closed | Completo | 2.594 | 0.890 |
+| T07_open | Completo | 2.610 | 0.890 |
+| T07_periodic | Completo | 3.032 | 0.984 |
+| T08_constant_flow_100 | Completo | 1.453 | 0.469 |
+| T08_constant_flow_200 | Completo | 14.047 | 1.907 |
+| T08_constant_flow_400 | Completo | 61.406 | 7.766 |
+| T08_constant_rest_100 | Completo | 1.062 | 0.422 |
+| T08_constant_rest_200 | Completo | 4.188 | 1.625 |
+| T08_constant_rest_400 | Completo | 19.250 | 7.000 |
+| T08_frustum_flow_100 | Completo | 2.469 | 0.531 |
+| T08_frustum_flow_200 | Completo | 8.594 | 2.000 |
+| T08_frustum_flow_400 | Completo | 29.265 | 8.015 |
+| T08_frustum_rest_100 | Completo | 1.547 | 0.453 |
+| T08_frustum_rest_200 | Completo | 5.296 | 1.781 |
+| T08_frustum_rest_400 | Completo | 31.656 | 6.813 |
+| T08_smooth_flow_100 | Completo | 3.125 | 0.500 |
+| T08_smooth_flow_200 | Completo | 12.078 | 2.000 |
+| T08_smooth_flow_400 | Completo | 45.796 | 8.094 |
+| T08_smooth_rest_100 | Completo | 1.484 | 0.484 |
+| T08_smooth_rest_200 | Completo | 6.625 | 1.750 |
+| T08_smooth_rest_400 | Completo | 32.188 | 7.438 |
+| T09_contact | Completo | 66.062 | 20.422 |
+| T09_inleft | Completo | 29.531 | 10.250 |
+| T09_inright | Completo | 27.891 | 10.218 |
+| T09_reverse | Completo | 62.391 | 20.406 |
+| T10_100 | Completo | 8.015 | 2.656 |
+| T10_200 | Completo | 32.047 | 10.797 |
+| T10_400 | Completo | 129.469 | 44.000 |
+| T10_800 | Timeout parcial | 300.047 | 171.438 |
+| T12_contact | Completo | 66.578 | 20.000 |
+| T12_expansion | Completo | 4.796 | 1.296 |
+| T12_frustum_0_100 | Completo | 1.657 | 0.422 |
+| T12_frustum_0_200 | Completo | 5.204 | 1.781 |
+| T12_frustum_0_400 | Completo | 25.828 | 6.844 |
+| T12_frustum_1_100 | Completo | 1.641 | 0.453 |
+| T12_frustum_1_200 | Completo | 5.157 | 1.672 |
+| T12_frustum_1_400 | Completo | 25.688 | 6.750 |
+| T12_pure0 | Completo | 69.219 | 19.828 |
+| T12_pure1 | Completo | 69.172 | 20.000 |
+
+Tiempos de casos incompletos no comparan avance físico igual. Acústica y Sod
+mantienen tablas previas; se confirma menor difusiónT03, no mejora universal de fase.
+T08smooth/frustum reduce errores al refinar, y backflowT09 cumple signo y donor.
+Datos detallados, L1 y contadores por caso en resume-remaining-final/artifacts.
+
+### Correcciones, revisión y estado de cierre
+Reparación2/3: rutaCLI relativa del checkpoint no resuelta y precedencia de
+clasificación científica; falló antes de integrar. Se preserva remaining-path-failure.
+Reparación3/3: el agregador sólo evaluaba comparaciones con toda la suite completa,
+lo que ocultó la parejaR4disponible al existir otrotimeout. Ahora evalúa cada
+comparación con sus propios inputs finales completos. Un FAIL científico ya no
+se trata como mero timeout ni permite avanzar. Prueba focal reproduce exactamente
+la omisión. También distingue registros de casos realmente completos.
+
+La fase ejecutóT12 antes de detectar esa omisión; sus resultados son reales y se
+conservan. Tras detectar el FAIL científico no hubo nuevas integraciones. La
+reevaluación fue offline, sobre arrays intactos. Los reportes originales quedaron
+sin reescribir; resume-decision.json y resume-reevaluated-gates.json corrigen su
+interpretación. El runner original diceBLOCKED y su resumen sóloinfra; no son el
+estado científico vigente después de la reparación y revisión.
+
+Revisión independiente `/root/p2b_review`: confirma desde seis arrays finales
+el incumplimientoR4, aprueba fixes2/3 y3/3 y corrige expresamente su conclusión
+anterior de sóloinfra. No identifica defecto del solver que invalide los resultados.
+Autorrevisión separada: alcance, hashes, conteos, artefactos y documentación.
+60 pruebas pertinentes PASS; siete regresiones históricasP0 offline PASS;
+solver/contratos/P0 exactos, controlFO52 registros bajoR4 PASS y focal de despacho
+idéntico incluido en pruebas. No nuevas integraciones0D. OpenSpec estricto PASS.
+
+PresupuestoP2B **3/3 consumido**; no reiniciado por fases operativas. No más ajustes,
+rescates o campañas sin nueva orden. Para cerrarP2 falta resolver el incumplimiento
+científicoR4 y las dos integraciones incompletas, sin atribuirles aceptación humana.
+P1_R4_HUMAN_ACCEPTED yP2A_HUMAN_ACCEPTED permanecen; noP2_HUMAN_ACCEPTED.
+Sin P3, publicación, archivo, UI/JSON/EXE ni configuración global. redme.txt ajeno.
+
+Comandos ejecutados desdeE:\dino\Dino:
+```powershell
+.\.venv\Scripts\python.exe -m dev_orchestrator.runners.run_phase P2B_RESUME --dependency P0=docs/gasdynamic/p0_accepted_dependency.json --dependency P1_R4_CFL_REVIEW=docs/gasdynamic/p1_r4_accepted_dependency.json --dependency P2A_R4_VERIFY=docs/gasdynamic/p2a_accepted_dependency.json
+.\.venv\Scripts\python.exe -m dev_orchestrator.runners.run_phase P2B_REMAINING --dependency P0=docs/gasdynamic/p0_accepted_dependency.json --dependency P1_R4_CFL_REVIEW=docs/gasdynamic/p1_r4_accepted_dependency.json --dependency P2A_R4_VERIFY=docs/gasdynamic/p2a_accepted_dependency.json
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p 'test_p2b*.py' -v
+openspec validate p2-nucleo-gas1d --strict --no-interactive
+```
+Suite60: test_p2b*.py, test_gas1d.py, test_p2_fixes.py,
+test_p1_r2.py, test_p1_r3.py, test_p1_r4.py y test_p1_r4_gate.py con unittest.
+Commits operativos8ed6079,e92c1e3,6b6a7dc; el commit de cierre registrafix3,
+reevaluación y evidencia final. Todos locales, sinpush.

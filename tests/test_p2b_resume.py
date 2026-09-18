@@ -73,6 +73,25 @@ class ResumeTests(unittest.TestCase):
         self.assertEqual(p.test_gate('T10',records)['status'],'FAIL')
         records.pop('T10_800');self.assertEqual(p.test_gate('T10',records)['status'],'PARTIAL')
 
+    def test_available_r4_failure_not_hidden_by_other_missing_case(self):
+        records={}
+        for n,sensitivity in ((400,.000161),(800,.000203),(1600,.000098)):
+            for c in (.4,.6):
+                name=f'T03_{c}'+('' if n==800 else f'_N{n}')
+                records[name]=dict(status='PASS',result=dict(status='completed'),configuration=dict(N=n,CFL=c),
+                    checks=dict(worst_ledger=True,stage_conservation=True,stage_CFL=True),
+                    metrics=dict(amplitude=9.+(10*sensitivity if c==.6 else 0.),analytical_amplitude_error=1/n))
+        gate=p.test_gate('T11',records)
+        self.assertEqual(gate['status'],'FAIL')
+        self.assertFalse(gate['checks']['sensitivity_0.4_0.6'])
+        self.assertNotIn('sensitivity_0.2_0.4',gate['checks'])
+        self.assertEqual(gate['completed_subcases'],6)
+        failures=[dict(test='T11',case='T03_0.2_N1600',solver_status='failed_infrastructure')]
+        gate['checks']['T03_0.2_N1600']=False
+        self.assertFalse(p.only_infrastructure_failure(gate,failures,'T11'))
+        gate['checks']['sensitivity_0.4_0.6']=True
+        self.assertTrue(p.only_infrastructure_failure(gate,failures,'T11'))
+
     def test_runtime_override_does_not_change_physical_arguments(self):
         with patch('dev_orchestrator.p2b_campaign.solve',side_effect=RuntimeError('captured')) as solve:
             with self.assertRaisesRegex(RuntimeError,'captured'):run_case('T04',wall_limit=300.)

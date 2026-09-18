@@ -1,5 +1,16 @@
 # MotorSim
 
+P2B reanudado con300s/caso: **P2_BLOCKED_SECOND_ORDER**.
+T04–T09 aprobaron y T12 está **10/10 PASS**. T10_800 y T11 N1600/CFL0,2
+agotaron300s. Además, la comparación completa CFL0,4/0,6 incumple R4:
+la sensibilidad sube entreN400 yN800. El agregador ocultaba esa comparación
+al faltar otro caso; se corrigió offline, con revisión independiente, sin cambiar
+solver ni criterio. No hay PASS globalP2 ni autorizaciónP3. Presupuesto3/3.
+60 pruebas pertinentes, siete regresiones P0 offline y hashes intactos.
+[Resultado, tablas y corrección de revisión](openspec/changes/p2-nucleo-gas1d/tasks.md#reanudación-p2b-con-300-s--resultado).
+
+Antecedente histórico de la primera implementación P2B:
+
 P2B implementado en una ruta aislada **MUSCL/minmod + SSP-RK2**, con
 `FIRST_ORDER` conservado. **FAILED_INFRASTRUCTURE**: la campaña se detuvo
 al agotar T04 sus120s; no se declara P2B/P2 PASS. T01–T03 aprobaron;

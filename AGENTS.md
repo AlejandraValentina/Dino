@@ -2,6 +2,19 @@
 
 ## Lectura y autoridad
 
+Última orden12b4cba5: reanudación P2B con300s/caso, sin cambios científicos.
+Estado vigente **P2_BLOCKED_SECOND_ORDER / SCIENTIFIC_CHANGE_REQUIRED**:
+T11 CFL0,4/0,6 incumple monotonía estricta R4 entreN400 yN800, demostrado desde
+seis arrays finales completos. Dos timeouts adicionales: T10_800 yT03_0.2_N1600.
+T01–T09 yT12(10/10) PASS; no P2PASS niP2_HUMAN_ACCEPTED, noP3.
+PresupuestoP2B3/3 agotado, todos fixes de infraestructura/evaluación; solver
+4620200 y contratos siguen exactos. No más reparación/campaña/modificación
+científica sin nueva orden. No reinterpretar el incumplimiento como sólo timeout.
+La revisión anterior que decía sóloinfra quedó corregida explícitamente.
+Evidencia/decisión: results/p2b-gas1d-20260918/resume-decision.json.
+Sin push, archivo, UI/JSON, cambios globales ni nueva física.
+
+Antecedente histórico:
 Orden vigente: P2B tras **P1_R4_HUMAN_ACCEPTED** y **P2A_HUMAN_ACCEPTED**.
 MUSCL/minmod SSP-RK2 implementado, first-order congelado. Estado actual
 **FAILED_INFRASTRUCTURE**: T04 agotó120s; T01–T03 PASS, T12 parcial4/10,

@@ -90,15 +90,18 @@ def test_gate(test,records):
             if name.endswith('_N400'):
                 checks[name]=r['result']['status']=='completed' and all(r['checks'][k] for k in ('worst_ledger','stage_conservation','stage_CFL'))
     complete=len(selected)==len(names)
-    if complete and all(checks.values()):
+    # A missing independent case must not hide a comparison whose inputs are complete.
+    if selected:
         if test=='T08':
             for geom in ('constant','smooth','frustum'):
                 for n,m in ((100,200),(200,400)):
+                    if not all(selected.get(f'T08_{geom}_flow_{size}',{}).get('status')=='PASS' for size in (n,m)):continue
                     for field in ('rho','u','p'):
                         a=selected[f'T08_{geom}_flow_{n}']['metrics']['errors'][field]['L1'];b=selected[f'T08_{geom}_flow_{m}']['metrics']['errors'][field]['L1']
                         key=f'{geom}_{n}_{m}_{field}';checks[key]=b<=a+1e-12;metrics[key]=dict(coarse=a,fine=b)
         if test=='T10':
             for n,m in ((100,200),(200,400),(400,800)):
+                if not all(selected.get(f'T10_{size}',{}).get('status')=='PASS' for size in (n,m)):continue
                 for field in ('density_L1','fresh_L1'):
                     a=selected[f'T10_{n}']['metrics'][field];b=selected[f'T10_{m}']['metrics'][field]
                     order=math.log2(a/b) if a>0 and b>0 else None
@@ -106,21 +109,26 @@ def test_gate(test,records):
                     if n!=100:checks[key]=order is not None and order>=1.5
         if test=='T11':
             for c in (.4,.6):
-                a=selected['T02_sod_0.2'];b=selected[f'T02_sod_{c}']
-                for k,field in enumerate(('rho','u','p')):
-                    error=v.norms([w[k] for w in a['result']['primitive']],[w[k] for w in b['result']['primitive']],a['mesh']['volumes'],1.)['L1']
-                    key=f'Sod_{c}_{field}';metrics[key]=error;checks[key]=error<=.015
-                error=abs(selected['T03_0.2']['metrics']['speed']-selected[f'T03_{c}']['metrics']['speed'])/v.A0
-                key=f'pulse_{c}_speed';metrics[key]=error;checks[key]=error<=.005
-            data={(r['configuration']['N'],r['configuration']['CFL']):r for name,r in selected.items() if name.startswith('T03_')}
+                if all(selected.get(name,{}).get('status')=='PASS' for name in ('T02_sod_0.2',f'T02_sod_{c}')):
+                    a=selected['T02_sod_0.2'];b=selected[f'T02_sod_{c}']
+                    for k,field in enumerate(('rho','u','p')):
+                        error=v.norms([w[k] for w in a['result']['primitive']],[w[k] for w in b['result']['primitive']],a['mesh']['volumes'],1.)['L1']
+                        key=f'Sod_{c}_{field}';metrics[key]=error;checks[key]=error<=.015
+                if all(selected.get(name,{}).get('status')=='PASS' for name in ('T03_0.2',f'T03_{c}')):
+                    error=abs(selected['T03_0.2']['metrics']['speed']-selected[f'T03_{c}']['metrics']['speed'])/v.A0
+                    key=f'pulse_{c}_speed';metrics[key]=error;checks[key]=error<=.005
+            data={(r['configuration']['N'],r['configuration']['CFL']):r for name,r in selected.items() if name.startswith('T03_') and r['result']['status']=='completed'}
             for a,b in ((.2,.4),(.4,.6),(.2,.6)):
+                if not all((n,c) in data for n in (400,800,1600) for c in (a,b)):continue
                 vals=[abs(data[n,a]['metrics']['amplitude']-data[n,b]['metrics']['amplitude'])/10 for n in (400,800,1600)]
                 key=f'sensitivity_{a}_{b}';metrics[key]=vals;checks[key]=vals[0]>vals[1]>vals[2]
             for c in (.2,.4,.6):
+                if not all((n,c) in data for n in (400,800,1600)):continue
                 vals=[data[n,c]['metrics']['analytical_amplitude_error'] for n in (400,800,1600)]
                 key=f'analytical_error_{c}';metrics[key]=vals;checks[key]=vals[0]>vals[1]>vals[2]
     status='PASS' if complete and all(checks.values()) else ('FAIL' if checks and not all(checks.values()) else ('PARTIAL' if checks else 'NOT_RUN'))
-    return dict(status=status,checks=checks,metrics=metrics,completed_subcases=len(selected),expected_subcases=len(names))
+    return dict(status=status,checks=checks,metrics=metrics,recorded_subcases=len(selected),
+                completed_subcases=sum(r.get('result',{}).get('status','completed' if r['status']=='PASS' else '')=='completed' for r in selected.values()),expected_subcases=len(names))
 
 
 def runtime(r):
@@ -136,6 +144,12 @@ def classify_state(checks,stop,failures):
         if stop.get('solver_status')=='completed' or stop.get('reason')=='contractual aggregate failure':return 'P2_BLOCKED_SECOND_ORDER'
     if any(f.get('solver_status')=='failed_infrastructure' for f in failures):return 'FAILED_INFRASTRUCTURE'
     return 'P2B_READY_FOR_INDEPENDENT_REVIEW' if all(checks.values()) else 'P2_BLOCKED_SECOND_ORDER'
+
+
+def only_infrastructure_failure(gate,failures,test):
+    failed={key for key,passed in gate['checks'].items() if not passed}
+    timed_out={f['case'] for f in failures if f['test']==test and f.get('solver_status')=='failed_infrastructure'}
+    return bool(failed) and failed<=timed_out
 
 
 def campaign(run_dir,resume=None,start_at=4):
@@ -186,7 +200,7 @@ def campaign(run_dir,resume=None,start_at=4):
             if r['status']!='PASS':failures.append(dict(test=test,case=name,solver_status=r['result']['status'],reason=r['result']['reason']))
         matrix[test]=test_gate(test,records)
         if i==4 and matrix[test]['status']!='PASS':raise ValueError('T04 must PASS before later verification')
-        if matrix[test]['status']!='PASS' and not any(f['test']==test for f in failures):raise ValueError('Cannot skip scientific aggregate failure: '+test)
+        if matrix[test]['status']!='PASS' and not only_infrastructure_failure(matrix[test],failures,test):raise ValueError('Cannot skip scientific aggregate failure: '+test)
     # T04 must PASS before any later integration.
     # An explicitly retained later timeout is incomplete, not a scientific gate; independent tests may proceed.
     for i in range(start_at,13):
@@ -202,7 +216,7 @@ def campaign(run_dir,resume=None,start_at=4):
                 if not timeout_only:stop=failure;break
         matrix[test]=test_gate(test,records);checkpoint()
         if stop or matrix[test]['status']!='PASS':
-            if stop is None and start_at>4 and any(f['test']==test and f.get('solver_status')=='failed_infrastructure' for f in failures):continue
+            if stop is None and start_at>4 and only_infrastructure_failure(matrix[test],failures,test):continue
             if stop is None:stop=dict(test=test,reason='contractual aggregate failure')
             break
     for i in range(1,13):matrix.setdefault(f'T{i:02}',test_gate(f'T{i:02}',records))

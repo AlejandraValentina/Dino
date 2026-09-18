@@ -1,7 +1,7 @@
 {
   "phase": "P2B",
   "limit": 3,
-  "used": 2,
+  "used": 3,
   "repairs": [
     {
       "number": 1,
@@ -15,6 +15,13 @@
       "cause": "Relative checkpoint CLI path was not normalized before relative_to(ROOT); current scientific failure classification could be masked by an earlier timeout.",
       "change": "Resolve checkpoint under repository root and isolate/test classification priority; no solver or criteria changes.",
       "evidence": "remaining-path-failure",
+      "solver_updates_changed": false
+    },
+    {
+      "number": 3,
+      "cause": "Partial aggregate skipped available R4 comparisons when another independent case timed out, hiding nondecreasing CFL0.4/0.6 sensitivity.",
+      "change": "Evaluate each comparison with available completed inputs, independent of missing cases; distinguish recorded from completed cases. No science or integration changes.",
+      "evidence": "resume-remaining-final and resume-reevaluated-gates.json",
       "solver_updates_changed": false
     }
   ],

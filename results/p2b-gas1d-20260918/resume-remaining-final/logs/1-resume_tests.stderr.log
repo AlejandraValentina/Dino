@@ -1,0 +1,24 @@
+test_first_order_dispatch_exact (test_p2b.P2BTests.test_first_order_dispatch_exact) ... ok
+test_invalid_input_rejected_without_clipping (test_p2b.P2BTests.test_invalid_input_rejected_without_clipping) ... ok
+test_local_downgrade_all_components_without_changing_average (test_p2b.P2BTests.test_local_downgrade_all_components_without_changing_average) ... ok
+test_minmod_not_mc (test_p2b.P2BTests.test_minmod_not_mc) ... ok
+test_nonuniform_linear_reconstruction (test_p2b.P2BTests.test_nonuniform_linear_reconstruction) ... ok
+test_stage_cfl_gate_uses_actual_step_inequality (test_p2b.P2BTests.test_stage_cfl_gate_uses_actual_step_inequality) ... ok
+test_stage_cfl_rejection_rolls_back_ledger (test_p2b.P2BTests.test_stage_cfl_rejection_rolls_back_ledger) ... ok
+test_uniform_state_shared_periodic_flux_and_stages (test_p2b.P2BTests.test_uniform_state_shared_periodic_flux_and_stages) ... ok
+test_variable_area_static_ledger (test_p2b.P2BTests.test_variable_area_static_ledger) ... ok
+test_changed_inputs_change_signature (test_p2b_resume.ResumeTests.test_changed_inputs_change_signature) ... ok
+test_changed_solver_refuses_reuse (test_p2b_resume.ResumeTests.test_changed_solver_refuses_reuse) ... ok
+test_corrupt_checkpoint_evidence_rejected (test_p2b_resume.ResumeTests.test_corrupt_checkpoint_evidence_rejected) ... ok
+test_current_scientific_failure_not_hidden_by_previous_timeout (test_p2b_resume.ResumeTests.test_current_scientific_failure_not_hidden_by_previous_timeout) ... ok
+test_incomplete_t12_never_passes (test_p2b_resume.ResumeTests.test_incomplete_t12_never_passes) ... ok
+test_only_completed_identical_records_reused (test_p2b_resume.ResumeTests.test_only_completed_identical_records_reused) ... ok
+test_relative_checkpoint_path_from_cli (test_p2b_resume.ResumeTests.test_relative_checkpoint_path_from_cli) ... ok
+test_runtime_override_does_not_change_physical_arguments (test_p2b_resume.ResumeTests.test_runtime_override_does_not_change_physical_arguments) ... ok
+test_t10_requires_both_contractual_pairs (test_p2b_resume.ResumeTests.test_t10_requires_both_contractual_pairs) ... ok
+test_timeout_retention_is_explicit_and_never_accepted (test_p2b_resume.ResumeTests.test_timeout_retention_is_explicit_and_never_accepted) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 12.150s
+
+OK
