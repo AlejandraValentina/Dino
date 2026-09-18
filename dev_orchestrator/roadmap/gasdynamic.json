@@ -621,6 +621,44 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P2_R5_VERIFY",
+      "title": "P2 offline verification under adopted R5",
+      "objective": "Offline closure under independently adopted R5, no integrations or human acceptance.",
+      "depends_on": [
+        "P0",
+        "P1_R4_CFL_REVIEW",
+        "P2A_R4_VERIFY"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "docs/gasdynamic/",
+        "docs/baselines/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "focal_tests",
+        "offline_closure",
+        "P2B",
+        "P0_regression",
+        "FIRST_ORDER_R4",
+        "all_final",
+        "T12_ten",
+        "conservation",
+        "admissibility",
+        "solver_unchanged",
+        "baseline_intact",
+        "contract_frozen",
+        "first_order_contracts_frozen"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }
