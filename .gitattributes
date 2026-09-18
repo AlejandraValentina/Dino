@@ -4,3 +4,8 @@ motorsim/coupled.py -text
 motorsim/coupling_adapter.py -text
 tests/test_coupled.py -text
 tests/test_coupling_adapter.py -text
+
+# Preserve reviewed P4 bank byte hashes.
+motorsim/exhaust_port.py -text
+motorsim/exhaust1d.py -text
+motorsim/exhaust_geometry.py -text

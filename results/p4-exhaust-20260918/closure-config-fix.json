@@ -1,0 +1,17 @@
+{
+  "cause": "Duplicate command/result check ID historical",
+  "fix": "Command renamed baseline_command; result check historical preserved",
+  "all_ids": [
+    "regression_tests",
+    "baseline_command",
+    "historical",
+    "P3_frozen",
+    "P3_evidence",
+    "P3B",
+    "P3C"
+  ],
+  "unique": true,
+  "new_finite_runs": 0,
+  "tests_reexecuted": false,
+  "original_native_state": "FAILED_INFRASTRUCTURE"
+}

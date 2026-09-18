@@ -844,7 +844,8 @@
         "P3_frozen",
         "P3_evidence",
         "P3B",
-        "P3C"
+        "P3C",
+        "baseline_command"
       ],
       "gate_policy": "default",
       "max_repair_attempts": 0,

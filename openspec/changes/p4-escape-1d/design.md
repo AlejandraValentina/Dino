@@ -60,6 +60,17 @@ Refinamiento: diferencias400–200 menores que200–100 paraarrival,integral|pr|
 (o presiónperturbada enblowdown) e intercambiomasa. No exigirorden2 en shocks.
 CFL: spread/maxabs<=.025 paraesas3métricas; criteriofocal delbanco, no modificaR5.
 Blowdown: arrivals entre sensores.1/.3 a102kPa; delta_t acotado por distancia/
-max,min(u+a) positivos de snapshotslocales, margen2dx/a0. Es verificación de
+max,min(u+a) positivos de todos los estados locales muestreados en snapshots, margen2dx/a0. Es verificación de
 tiempo, no validación de amplitud. No interpretarP0 como igualdaddereferencia.
 Todos bancos conservan<=1e-10, admisibilidad/CFL/eventos y600s/caso.
+
+## Alcance de interpretación al cierre bloqueado
+La cota de llegada es una envolvente global de velocidades locales muestreadas,
+no una trayectoria característica reconstruida. Sensores seleccionan el centro
+más próximo; blowdown100/200/400 mide en .099/.1005/.09975m. Esto limita comparar
+presión a ubicación exactamenteidéntica. La masa global no depende del sensor
+ y también incumple el criterio; no reinterpretar el gate como error de sensor.
+Los eventos físicos de puerto son90/112.2040961/247.7959039/270°. El listado
+numérico además incluye0/180/360 y128.0154749/231.9845251: estos dos últimos son
+particiones adicionales calculadas por el cap de entrada, que no se alcanza
+porque314.159mm²>área máxima200mm². No implican una segunda apertura física.

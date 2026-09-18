@@ -1,5 +1,18 @@
 # MotorSim — Instrucciones de trabajo para Codex
 
+P4: **P4_BLOCKED_WAVE_PHYSICS / SCIENTIFIC_CHANGE_REQUIRED**.
+P3_HUMAN_ACCEPTED registrado y archivado; P0/P2/P3 congelados intactos.
+P4A/E01–E05 PASS. P4B ejecutó16 casos individuales PASS, pero el refinamiento
+100/200/400 de descarga incumple diferencias decrecientes de presión integrada
+e intercambio de masa. Revisión independiente confirma fallo desde estados
+finales, sin bug del agregador. No cambiar criterios ni repetir campañas para
+forzar cierre. P4C no habilitado/implementado; sinP5, UI, JSON o publicación.
+88 pruebas y regresiones offlineP0/P2/P3 PASS. [Decisión/evidencia](results/p4-exhaust-20260918/decision.json)
+y [tareas y tablas](openspec/changes/p4-escape-1d/tasks.md). Preservar los fallos
+nativos de infraestructura documentados; no son la causa del bloqueo científico.
+
+Antecedente de autorización:
+
 P3_HUMAN_ACCEPTED por orden cec0f5b3; baseline ec6ec55 congelado y cambio
 archivado. Autorizado únicamente P4 experimental, cambio p4-escape-1d.
 Sin reemplazarlegacy/UI/JSON; P4C sólo trasP4A/P4B PASS, sinP5 ni publicación.

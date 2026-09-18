@@ -30,7 +30,7 @@
       "timeout": 180
     },
     {
-      "id": "historical",
+      "id": "baseline_command",
       "kind": "command",
       "argv": [
         "{python}",
@@ -52,7 +52,8 @@
     "P3_frozen",
     "P3_evidence",
     "P3B",
-    "P3C"
+    "P3C",
+    "baseline_command"
   ],
   "required_evidence": [
     "artifacts/regression.json",
