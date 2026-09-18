@@ -1,5 +1,12 @@
 # MotorSim — Instrucciones de trabajo para Codex
 
+P3_HUMAN_ACCEPTED por orden cec0f5b3; baseline ec6ec55 congelado y cambio
+archivado. Autorizado únicamente P4 experimental, cambio p4-escape-1d.
+Sin reemplazarlegacy/UI/JSON; P4C sólo trasP4A/P4B PASS, sinP5 ni publicación.
+Revisión independiente y STOP ante cambio científico necesario.
+
+Antecedente histórico:
+
 P3-R1: **P3_PASS_0D_1D_COUPLING_VERIFIED / WAITING_HUMAN_APPROVAL**.
 Interfaz Riemann de cámara homogénea estancada, conservativa por etapa; C00/C00B
 y C01–C12 PASS, adaptador de estado aislado2T/4T. 83 pruebas y regresiones
@@ -7,7 +14,7 @@ completas offline P0/P2 PASS; 27 hashes congelados intactos. Revisión científi
 independiente PASS; aceptación humanaP3 pendiente. Sin conexión productiva,
 P4, publicación ni archivo. [Evidencia y decisión](results/p3-r1-20260918/decision.json),
 [definición](docs/gasdynamic/0d_1d_coupling_r1.md) y
-[registro de casos](openspec/changes/p3-acoplamiento-conservativo/tasks.md).
+[registro de casos](openspec/changes/archive/2026-09-18-p3-acoplamiento-conservativo/tasks.md).
 Los gates nativos BLOCKED por falta de reviewer hook se conservan; el dictamen
 independiente se adjunta separadamente. La orden38a85593 autoriza R1 y sustituye
 sólo el cierreP3 reservoir, no las BC ni el núcleoP2.

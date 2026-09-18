@@ -54,7 +54,7 @@ Núcleo/contratosP2 y producción0D/UI/JSON intactos. Borrado ajeno redme.txt co
 - [x] P2 T01–T12/58 finales y FIRST_ORDER/R4 reevaluados offline PASS, sin nuevas integracionesP2.
 - [x] Siete regresiones históricasP0 offline PASS y27 hashes de núcleo/contratos exactos.
 - [x] Revisión independiente final PASS; dictamen separado del hook nativo no conectado.
-- [ ] Aceptación humanaP3. NoP4 ni archivo.
+- [x] Aceptación humanaP3 por orden cec0f5b3; archivo autorizado. P4 se realiza en cambio separado.
 
 R1:6 contactos térmicos en reposo con flujosm/E/F exactamente0;66 muestras de
 velocidad y4 casos de diferencia de presión,76HLLC/0HLLE. Las36 series de
@@ -137,3 +137,8 @@ OpenSpec: `openspec validate p3-acoplamiento-conservativo --strict --no-interact
 AtributosGit locales preservan bytes de los cinco archivosP3 revisados al
 reabrir checkoutWindows; sin cambios de configuración global. Gráficas PNG/SVG
 y artefactos tienen inventarioSHA256; no incluyen datos privados ni entorno.
+
+## Aceptación posterior
+P3_HUMAN_ACCEPTED por la usuaria, orden cec0f5b3. Baseline ec6ec55 congelado.
+Se autoriza archivar. Casillas históricas reservoir no se marcan falsamente:
+fueron sustituidas por R1, cuyo cierre técnico y aceptación están acreditados.

@@ -1,0 +1,39 @@
+## Contrato IDEAL_PORT_BASELINE
+Área geométrica existente: uncovered_area(width,height,piston_position-top),
+mm²→m². Aeff=min(Aport,Apipe), Cd=1. Geometría sintética S2T-0D-01 intacta.
+Cara totalG=G_P3(Aeff)+(Apipe-Aeff)*(0,p_wall,0,0), p_wall de RiemannparedP2.
+Cámara recibe componentes0,2,3 de outwardP3; tubo recibe flujo total.
+ReacciónP3 y fuerza sobre paredcerrada separadas; no momentum0D ni trabajo
+axial artificial. Aeff0 bypassP3 (no área0 inválida), paredP2 completa exacta.
+No deadband. Continuidad para estados finitos y leygeométrica continua.
+
+Usar reconstrucciónP2 con ghostinterior(outflow) sólo para pendiente de primera
+celda: minmod=0 en esa celda, sin imponerBCfísica allí. Así la reconstrucción no
+salta al abrir/cerrar; fluxfísico real lo define cara dividida. RestoMUSCLP2.
+SSPRK2 conjunto, recálculo de0D/puerto/1D porstage, CFLP2 y eventosexactos.
+Geometría1D fija, fuente p*dA P2; trabajo0D -p*dV aparte.
+
+## Frontera exterior congelada
+nonreflecting con estado explícito exteriorp100kPa,T300K,Y0,u0 para bancos;
+truncamiento característico ideal lineal/local, NO radiaciónreal/anecoica general.
+Revisión detecta salto de presión al cambiarKdonante en backflow con distinta
+entropía: registrar preflight. No cambiarBC. Si afecta campaña o se necesita
+otra semántica: P4_BLOCKED_EXHAUST_BOUNDARY/SCIENTIFIC_CHANGE_REQUIRED.
+
+## Secuencia
+P4A puerto/banco; P4B ondas/geometría/refinamientos; P4C sólo después ambosPASS.
+Definir inputs/métricas antes de cada banco, sin ajustarcriterios a resultados.
+Máximo600s por prueba, rollback conjunto, sin clipping ni limiternuevo.
+P0/P2/P3 se conservan byte a byte; ningún import productivo del camino nuevo.
+
+## P4A fixtures fijados antes de ejecución
+Tubo recto .6m/20mm,N100,CFL.4, gasR287/gamma1.35, estado100kPa/300K/Y.2/u0;
+cámara V.0001m³,Y.8, puerto canónico32/10/20mm, carrera56/biela100mm,RPM3000.
+E01: cámara100kPa/300K,CA0→40; driftp<=1e-12 y m/U/F cámara exactamenteidénticos.
+E02/E03/E04: cámara300kPa/600K,CA80→300; primerflujoabierto saliente, m/U
+finalesmenores, presiónsensor.1m supera101kPa, flujoexacto0 trascierre.
+E05: cámara80kPa/300K,CA80→145; m/U aumentan, especieentrante usaYcaratubo
+(errorabsoluto<=1e-12), noYatmósfera. Todos balancesglobales/stages<=1e-10,
+CFLporstage<=solicitado, eventosalcanzadosexactos, rho/p/T>0,Yen[0,1].
+Sensores.1/.3/.5m registranp,u,M,Y. Llegada umbral1%contrasteprescrito;
+refinamiento y contrastevelocidadlocal se evalúan en P4B, noacreditadosaquí.
