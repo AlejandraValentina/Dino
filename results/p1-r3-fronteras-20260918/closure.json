@@ -1,0 +1,44 @@
+{
+  "stage": "P1_R3_BOUNDARY_SEMANTICS_REVIEW",
+  "state": "P1_R3_PASS_BOUNDARIES_SEPARATED",
+  "P2A": "BLOCKED",
+  "P2B": "NOT_STARTED",
+  "P3": "NOT_STARTED",
+  "human_acceptance": "PENDING_NOT_ATTRIBUTED",
+  "source_commit": "b353e90840eac764c98d1a7a76fa9abd2c3b20d2",
+  "matrix_source": "p2a-attempt-2/artifacts/p2a-summary.json",
+  "blocking_criterion": {
+    "test": "T11",
+    "metric": "pulse_0.6_amplitude",
+    "actual": 0.0833638270618394,
+    "limit": 0.08
+  },
+  "repair_budget": {
+    "total": 3,
+    "used": 3,
+    "remaining": 0
+  },
+  "preservation_checks": {
+    "baseline_intact": true,
+    "contract_frozen": true,
+    "dependencies_accepted": true
+  },
+  "protected_sha256": {
+    "docs/gasdynamic/1d_contract_v1_r2.json": "89d2bf0d0140db9e452769f06c360a64174340ef38313b35cbb2f2e9b20018f6",
+    "docs/gasdynamic/1d_contact_observable_v1_r2.md": "43bd47f4f7a2959139ca2884d3484d9d683895ec0c6750a10fbb0f0fddce1a51",
+    "motorsim/gas1d/contact.py": "ad5dc76f4482d7db1438297f5727a655af63fff20b9595770bb8e6a459609b06",
+    "motorsim/gas1d/eos.py": "22bae4c37c3a6edde31940d26d59430cf0c466fbfb706df1dfe4ecad1c4e21bf",
+    "motorsim/gas1d/mesh.py": "78dcdd71de7acd751e79367347e2826e4d7c81d83817f39a62728d375bcbb44e",
+    "motorsim/gas1d/reference.py": "017d25da5a98934cf8fa5b75e1a324dbb40c09a22fa04927118b9c6ce48b83fd"
+  },
+  "verified_inventory_entries": {
+    "boundary-attempt-1": 7,
+    "boundary-attempt-2": 7,
+    "p2a-attempt-1": 63,
+    "p2a-attempt-2": 63
+  },
+  "independent_review": "p2a-review.json",
+  "native_evidence_preserved": true,
+  "publication": "NOT_REQUESTED_NOT_PERFORMED",
+  "note": "No new physics change proposed to rescue T11. Stop. R3 acoustic study and final P2A have distinct source provenance."
+}

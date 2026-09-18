@@ -2,6 +2,16 @@
 
 ## Lectura y autoridad
 
+Orden más reciente: `p1-r3-fronteras`. P1_R3_PASS_BOUNDARIES_SEPARATED:
+contrato1D_CONTRACT_V1_R3 adoptado antes del código; T05 PASS y NR01 diagnóstico.
+P2A revalidado completo: T01–T10/T12 PASS, T11 FAIL (amplitud CFL0,6 frente0,2:
+0,08336382706 >0,08). 52 casos individuales PASS no acreditan P2A.
+STOP P2A BLOCKED, revisión independiente coincide;3/3 reparaciones consumidas.
+No más fixes, cambios de umbral/CFL, P2B ni P3 sin nueva decisión autorizada.
+Human gate de P2 pendiente. Conservar v1/R2, T02/T06, baseline0D e históricos.
+Sin publicar, archivar ni modificar UI/JSON/EXE/configuración global.
+
+Antecedente histórico:
 Orden más reciente: `p1-r2-contacto`. P1_R2_PASS_CONTACT_OBSERVABLE adopta
 1D_CONTRACT_V1_R2 sin alterar v1/T06. P2A NO reanudado: T05 tiene ramas
 incompatibles, SCIENTIFIC_CHANGE_REQUIRED. Excepción de velocidadcero retirada;

@@ -1,0 +1,11 @@
+test_assignments_and_explicit_exterior (test_p1_r3.BoundarySemanticsTests.test_assignments_and_explicit_exterior) ... ok
+test_distinct_characteristic_response (test_p1_r3.BoundarySemanticsTests.test_distinct_characteristic_response) ... ok
+test_no_microscopic_sign_switch (test_p1_r3.BoundarySemanticsTests.test_no_microscopic_sign_switch) ... ok
+test_pressure_and_outgoing_characteristic_both_normals (test_p1_r3.BoundarySemanticsTests.test_pressure_and_outgoing_characteristic_both_normals) ... ok
+test_previous_incompatible_states_are_not_zeroed (test_p1_r3.BoundarySemanticsTests.test_previous_incompatible_states_are_not_zeroed) ... ok
+test_scope_and_invalid_pressure (test_p1_r3.BoundarySemanticsTests.test_scope_and_invalid_pressure) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.006s
+
+OK

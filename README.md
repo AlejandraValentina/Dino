@@ -1,5 +1,19 @@
 # MotorSim
 
+P1-R3: **P1_R3_PASS_BOUNDARIES_SEPARATED**; contrato acústico
+[1D_CONTRACT_V1_R3](docs/gasdynamic/1d_boundary_semantics_v1_r3.md).
+T05 pressure-release aprobado sin modificar su tolerancia; NR01 independiente
+registrado como diagnóstico. **P2A BLOCKED**: T01–T10/T12 PASS, pero T11 da
+0,08336382706 >0,08 en sensibilidad de amplitud entre CFL0,6 y0,2.
+Los52 casos individuales y25 pruebas unitarias aprobaron; eso no acredita P2A.
+Revisión independiente confirma el incumplimiento. Reparaciones3/3 consumidas;
+no cambiar CFL/umbral ni iniciar P2B/P3. Aceptación humana de P2 pendiente.
+[Tablas, procedencia, comandos y pendientes](openspec/changes/p1-r3-fronteras/tasks.md).
+[Delta contractual exacto](docs/gasdynamic/1d_contract_v1_r3_delta.json).
+Producción0D/UI/JSON y contratos v1/R2 conservados. Sin publicar ni archivar.
+
+Antecedentes históricos (sus STOP no se reescriben):
+
 P1-R2: **P1_R2_PASS_CONTACT_OBSERVABLE**. Detector independiente de rho/p/u,
 sin Y ni referencia exacta, aprobado en ocho soluciones preservadas y por revisión
 independiente. Contrato [1D_CONTRACT_V1_R2](docs/gasdynamic/1d_contact_observable_v1_r2.md),

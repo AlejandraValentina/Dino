@@ -68,3 +68,20 @@ ensayo provisional fallido con excepción retirada de velocidadcero; sus dos
 ramas son incompatibles también a70dígitos. SCIENTIFIC_CHANGE_REQUIRED para BC,
 sin reanudar T01–T12/P2A ni iniciar P2B/P3. Una ronda de reparación/ensayo de3;
 las restantes no autorizan modificar física para superar el gate.
+
+## Continuación P1-R3 — 18/09/2026
+R3 aprobado tras revisión conceptual previa; BC pressure-release y T05 PASS.
+Campaña final `20260918T110612-P2_R3-9d1c983a7e65`, fuente b353e90:
+52/52 casos individuales PASS, T01–T10/T12 PASS, **T11 FAIL**.
+Sensibilidad amplitud pulso CFL0,6 frente0,2:0,0833638270618394 >0,08.
+**P2A BLOCKED** confirmado por revisión independiente; no bug de medición
+identificado. No confundir casos individuales con comparaciones agregadas.
+25 unit tests PASS; peor ledger6,53449e-15, HLLC36252480/HLLE6;
+baselineP0, P1v1/R2, T02/T06 conservados. Reparaciones acumuladas3/3:
+contadores/exterior R2; partición temporal R3; identidad aritmética de masa HLLC.
+No clipping, nuevos limiters, cambios de método/ondas, CFL o tolerancias.
+Primera campaña R3 preservada:51/52 casos PASS y la misma sensibilidad incumplida.
+Tablas, deltas y recibos en `../p1-r3-fronteras/tasks.md` y
+`results/p1-r3-fronteras-20260918/`. P2B no iniciado; decisión sobre T11 y
+human gate de P2 pendientes. Sin P3, aceptación humana atribuida, archivo o push.
+Los registros anteriores conservan su estado histórico.
