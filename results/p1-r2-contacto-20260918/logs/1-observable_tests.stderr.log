@@ -1,0 +1,12 @@
+test_acoustic_jumps_not_contact (test_p1_r2.HydroContactTests.test_acoustic_jumps_not_contact) ... ok
+test_invalid (test_p1_r2.HydroContactTests.test_invalid) ... ok
+test_no_tracer_argument (test_p1_r2.HydroContactTests.test_no_tracer_argument) ... ok
+test_normal_shock_not_contact (test_p1_r2.HydroContactTests.test_normal_shock_not_contact) ... ok
+test_pure_contact_and_translation (test_p1_r2.HydroContactTests.test_pure_contact_and_translation) ... ok
+test_reversal_and_galilean_invariance (test_p1_r2.HydroContactTests.test_reversal_and_galilean_invariance) ... ok
+test_uniform_absent_and_ties_ambiguous (test_p1_r2.HydroContactTests.test_uniform_absent_and_ties_ambiguous) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+OK

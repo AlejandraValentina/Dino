@@ -1,6 +1,6 @@
 """Isolated mathematical boundaries; no 0D coupling or real exhaust radiation."""
 from dataclasses import dataclass
-from math import sqrt
+from math import sqrt, ulp
 from .eos import InvalidState
 from .riemann import hllc_flux
 
@@ -28,14 +28,21 @@ class Boundary:
         ext=eos.validate((self.p0/(eos.R*self.T0),0.,self.p0,self.Y0));ke=self.p0/ext[0]**g
         if self.kind=='nonreflecting':
             base=self.state or ext;eos.validate(base)
+            ke=base[2]/base[0]**g
+            exterior_y=base[3]
             jm=normal*base[1]-2*eos.sound_speed(base)/(g-1)
             wb=(jp+jm)/2;ab=(g-1)*(jp-jm)/4
             if ab<=0:raise InvalidState('Nonpositive characteristic sound speed')
             k=ki if wb>=0 else ke
             rb=(ab*ab/(g*k))**(1/(g-1));pb=k*rb**g
         else:
+            exterior_y=self.Y0
             # Try outflow using the prescribed static receiving pressure.
             rb=(self.p0/ki)**(1/g);ab=sqrt(g*self.p0/rb);wb=jp-2*ab/(g-1);pb=self.p0
+            # Cancellation of two characteristics at rest: decide a zero-flow
+            # branch within arithmetic resolution, not a physical velocity band.
+            if self.kind=='open' and abs(wb)<=8*ulp(max(abs(jp),abs(2*ab/(g-1)))):
+                wb=0.
             if wb<0:
                 if self.kind=='open':
                     rb=ext[0];ab=eos.sound_speed(ext);wb=jp-2*ab/(g-1)
@@ -54,7 +61,7 @@ class Boundary:
                             else:hi=mid
                         wb=(lo+hi)/2;ab=sqrt((g-1)*(h0-wb*wb/2))
                     rb=(ab*ab/(g*ke))**(1/(g-1));pb=ke*rb**g
-        return eos.validate((rb,normal*wb,pb,y if wb>=0 else self.Y0))
+        return eos.validate((rb,normal*wb,pb,y if wb>=0 else exterior_y))
 
     def flux(self, interior, normal, eos):
         state=self.face_state(interior,normal,eos)

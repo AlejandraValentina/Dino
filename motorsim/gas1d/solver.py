@@ -31,6 +31,7 @@ def solve(mesh, initial, final_time, boundaries, *, eos=None, cfl=.4,
     periodic=boundaries=='periodic'
     if periodic and mesh.areas[0]!=mesh.areas[-1]:raise ValueError('Periodic faces must share area')
     t=0.;step=0;rejections=0;fallbacks={};hllc_count=0;minimum_dt=None;max_cfl=0.;history=[];signals=[];fallback_records=[]
+    characteristic_count=0
     extrema=[min(w[0] for w in states),min(w[2] for w in states),min(w[2]/(w[0]*eos.R) for w in states),min(w[3] for w in states),max(w[3] for w in states),max(abs(w[1])/eos.sound_speed(w) for w in states)]
     status='completed';reason='final_time';fluxes=[];next_sample=sample_interval;sample_number=1
     def observe_sensor():
@@ -42,17 +43,32 @@ def solve(mesh, initial, final_time, boundaries, *, eos=None, cfl=.4,
     while t<final_time:
         if time.monotonic()-started>wall_limit:status='failed_infrastructure';reason='wall_timeout';break
         try:
-            data=[hllc_flux(a,b,eos) for a,b in zip(states,states[1:])]
+            def count_riemann(i,item,left,right):
+                nonlocal hllc_count
+                if item[2]:
+                    fallbacks[item[2]]=fallbacks.get(item[2],0)+1
+                    if len(fallback_records)<100:
+                        fallback_records.append(dict(step=step,face=i,reason=item[2],speeds=item[1],left=left,right=right))
+                else:hllc_count+=1
+                return item
+            # Count immediately: later boundary failure must not erase evaluations.
+            data=[count_riemann(i+1,hllc_flux(a,b,eos),a,b) for i,(a,b) in enumerate(zip(states,states[1:]))]
             if periodic:
-                face=hllc_flux(states[-1],states[0],eos);data=[face,*data,face]
-            else:data=[boundaries[0].flux(states[0],-1,eos),*data,boundaries[1].flux(states[-1],1,eos)]
+                face=count_riemann(0,hllc_flux(states[-1],states[0],eos),states[-1],states[0])
+                data=[face,*data,face]
+            else:
+                boundary_data=[]
+                for bc,w,normal,i in ((boundaries[0],states[0],-1,0),(boundaries[1],states[-1],1,mesh.n)):
+                    item=bc.flux(w,normal,eos)
+                    if bc.kind in ('wall','fixed','outflow'):
+                        ghost=bc.face_state(w,normal,eos) if item[2] else None
+                        left,right=(ghost,w) if normal==-1 else (w,ghost)
+                        count_riemann(i,item,left,right)
+                    else:characteristic_count+=1
+                    boundary_data.append(item)
+                data=[boundary_data[0],*data,boundary_data[1]]
             fluxes=[tuple(a*f for f in item[0]) for a,item in zip(mesh.areas,data)]
             speeds=[max(abs(d[1][0]),abs(d[1][2])) for d in data]
-            for i,d in enumerate(data):
-                if d[2]:
-                    fallbacks[d[2]]=fallbacks.get(d[2],0)+1
-                    if len(fallback_records)<100:fallback_records.append(dict(step=step,face=i,reason=d[2],speeds=d[1],left=states[max(0,i-1)],right=states[min(mesh.n-1,i)]))
-                else:hllc_count+=1
             dt,limiting,dt_unit=cfl_step(mesh,states,speeds,eos,cfl)
             dt=min(dt,final_time-t)
             if next_sample is not None:dt=min(dt,next_sample-t)
@@ -100,4 +116,5 @@ def solve(mesh, initial, final_time, boundaries, *, eos=None, cfl=.4,
                 minimum_dt=minimum_dt,max_CFL=max_cfl,rejected_steps=rejections,
                 extrema=dict(zip(('min_rho','min_p','min_T','min_Y','max_Y','max_Mach'),extrema)),
                 hllc_flux_count=hllc_count,hlle_fallback_count=sum(fallbacks.values()),fallback_reason=fallbacks,
+                characteristic_flux_count=characteristic_count,riemann_flux_count=hllc_count+sum(fallbacks.values()),
                 fallback_records=fallback_records,fallback_records_truncated=sum(fallbacks.values())>100)

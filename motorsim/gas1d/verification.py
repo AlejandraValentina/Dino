@@ -5,6 +5,7 @@ from .mesh import uniform_mesh,smooth_mesh,segments_mesh
 from .boundary import Boundary
 from .reference import ExactRiemann,cell_integrals,primitives
 from .solver import solve
+from .contact import density_contact
 
 EOS=IdealGas();P0=100000.;T0=300.;RHO=P0/(EOS.R*T0);A0=sqrt(EOS.gamma*EOS.R*T0)
 BASE=(RHO,0.,P0,.3)
@@ -161,6 +162,22 @@ def measure(case,result,reference,initial):
                 candidates=[i for i in range(mesh.n-1) if abs((mesh.centers[i]+mesh.centers[i+1])/2-position)<=.05]
                 i=max(candidates,key=lambda i:abs(actual[i+1][k]-actual[i][k])/(mesh.centers[i+1]-mesh.centers[i]))
                 measured=(mesh.centers[i]+mesh.centers[i+1])/2;metrics[field+'_position']=measured;metrics[field+'_exact']=position
+                if field=='contact':
+                    metrics['contact_Y_gradient_position']=measured
+                    ys=[w[3] for w in actual];xs=mesh.centers
+                    crossings=[x for x,y in zip(xs,ys) if y==.5]
+                    crossings += [x+(.5-y)*(xx-x)/(yy-y) for x,xx,y,yy in zip(xs,xs[1:],ys,ys[1:]) if (y-.5)*(yy-.5)<0]
+                    if len(crossings)==1 and not any(a==b==.5 for a,b in zip(ys,ys[1:])):
+                        center=crossings[0];metrics['contact_Y_half_position']=center
+                        pairs=[((xs[i]+xs[i+1])/2,abs(ys[i+1]-ys[i])) for i in range(mesh.n-1) if abs((xs[i]+xs[i+1])/2-center)<=.05]
+                        metrics['contact_Y_centroid_position']=fsum(x*w for x,w in pairs)/fsum(w for x,w in pairs)
+                    detection=density_contact(mesh.centers,[w[:3] for w in actual],eos.gamma)
+                    metrics['contact_detector']=detection['status']
+                    checks['contact_unique']=detection['status']=='UNIQUE'
+                    if not checks['contact_unique']:
+                        checks['contact_position_error']=False
+                        continue
+                    measured=detection['position'];metrics['contact_position']=measured
                 require(field+'_position_error',abs(measured-position),2*dx)
             left,right=sorted(.5+s*case['end'] for s in exact.waves[0])
             indices=[i for i,x in enumerate(mesh.centers) if left+3*dx<x<right-3*dx and abs(x-contact_pos)>3*dx and abs(x-shock)>3*dx]

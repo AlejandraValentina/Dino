@@ -315,6 +315,37 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P2_T05",
+      "title": "P2_T05_IMPLEMENTATION_FIX_GATE",
+      "objective": "Exact T05 after R2 PASS and bounded implementation fixes.",
+      "depends_on": [
+        "P0",
+        "P1",
+        "P1_R2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "docs/gasdynamic/",
+        "docs/baselines/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "fix_tests",
+        "t05",
+        "T05",
+        "baseline_intact",
+        "contract_frozen",
+        "dependencies_accepted"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }
