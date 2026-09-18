@@ -449,6 +449,43 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P2A_R4_VERIFY",
+      "title": "T11 R4 then P2A regression",
+      "objective": "Verify T11 under reviewed R4 first, then hash-preserved offline P2A regression; no P2B.",
+      "depends_on": [
+        "P0",
+        "P1",
+        "P1_R4_CFL_REVIEW"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "docs/gasdynamic/",
+        "docs/baselines/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "r4_gate_tests",
+        "t11_then_p2a",
+        "baseline_intact",
+        "contract_frozen",
+        "dependencies_accepted",
+        "implementation_contracts_frozen",
+        "r4_scientific_review",
+        "previous_campaign_source_identical",
+        "six_fresh_t11",
+        "T11_R4",
+        "offline_52_remeasured",
+        "P2A_R4"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }
