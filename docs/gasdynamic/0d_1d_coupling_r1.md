@@ -59,3 +59,32 @@ globales y de stages<=1e-10. Todos: finitud/positividad estricta y CFL porstage.
 Referencia de signos proviene del gradiente inicial; conservación del balance
 cerrado; no se usa el modelo0D antiguo como solución de referencia. Máximo300s
 por caso y parada anteFAIL. Primera ejecución formal conserva todos resultados.
+
+## P3C: definición previa a ejecución
+Gate P3B independiente PASS. C08: N80, ambos métodos, CFL.4, mismo tubo y
+estado uniforme100kPa/300K/Y.3; V(t)=V0[1+.05sin(2pi*t/.003)], tf=.003s.
+Comparar inventario de energía con trabajo integrado por stages -p*Vdot,
+recalculado desde presiones y derivada analítica. Residuos<=1e-10.
+
+C09–C11: MUSCL, N40/80/160 y CFL.2/.4/.6, sin alterar solver. Pulso gaussiano
+incidente ε=1Pa, centro.15m, ancho.03m, tubo.3m, área.0003m², cámara.0001m³,
+p0=100kPa,T0=300K,Y=.3, tf=.0009s. Inicialización y referencia final mediante
+cuadratura de conservadas por celda. No es soporte compacto: registrar colas
+iniciales y reflexión analítica en pared derecha al tiempo final.
+
+Referencia independiente linealizada del modelo R1 (revisada antes del run):
+Z=rho*a; p'=pi+pr,u=(pr-pi)/Z; u*=(pch-2pi)/(2Z),p*=pch/2+pi.
+Con dU/dt=-A*rho*h0*u*, resulta pch_dot=(2pi-pch)/tau,tau=2V/(aA).
+pr=pch/2. Usar convolución causal desde0, pch(0)=0; en tubo evaluar pr(t-x/a)
+y anular para argumento negativo. pi=ε exp(-[(x+a*t-.15)/.03]^2).
+No imponer coeficiente reflejado: medirlo y compararlo con esta derivación.
+
+C09: L1 normalizado por ε para presión y ε/Z para velocidad; errores de cámara
+normalizados por Vε/a² (m), Vε/(gamma-1) (U), .3Vε/a² (F), ε (p).
+Onda saliente desde característica del flujo, error temporal L1/ε. Presupuesto
+fijo .025 para cada error (escala de accuracy acústica T03); no adaptación al
+resultado. C10: cada error final de perfil y cámara disminuye40→80→160 para
+cada CFL. C11: las tres diferencias de presión entre pares CFL, L1/ε, deben
+ser no mayores enN160 que enN40; registrarN80. No exige monotonía intermedia.
+C12: positividad de todas las etapas B/C, especie admisible, CFL por etapa y
+rechazo de estado inicial inválido. Máximo300s/caso; conservar fallos y detener.
