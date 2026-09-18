@@ -50,6 +50,7 @@ def expected_signature(name,n=None):
 
 def load_reusable(folder,expected_source,*,retain_timeouts=False):
     folder=Path(folder)
+    folder=(folder if folder.is_absolute() else ROOT/folder).resolve()
     checkpoint=folder/'artifacts/resume-checkpoint.json'
     if checkpoint.exists():
         manifest=read(checkpoint);sources=manifest['source_sha256'];entries=manifest['cases']
@@ -126,6 +127,15 @@ def runtime(r):
     keys=('status','reason','time','steps','rhs_count','wall_seconds','minimum_dt','maximum_dt','max_CFL','rejected_steps','rejection_reasons','extrema',
           'hllc_flux_count','hlle_fallback_count','characteristic_flux_count','riemann_flux_count','fallback_reason','downgrade_count')
     return {k:r['result'].get(k) for k in keys}
+
+
+def classify_state(checks,stop,failures):
+    if not checks['baseline_intact'] or not checks['solver_unchanged']:return 'P2_BLOCKED_REGRESSION'
+    if stop:
+        if stop.get('solver_status')=='failed_numerical':return 'P2_BLOCKED_POSITIVITY'
+        if stop.get('solver_status')=='completed' or stop.get('reason')=='contractual aggregate failure':return 'P2_BLOCKED_SECOND_ORDER'
+    if any(f.get('solver_status')=='failed_infrastructure' for f in failures):return 'FAILED_INFRASTRUCTURE'
+    return 'P2B_READY_FOR_INDEPENDENT_REVIEW' if all(checks.values()) else 'P2_BLOCKED_SECOND_ORDER'
 
 
 def campaign(run_dir,resume=None,start_at=4):
@@ -206,11 +216,7 @@ def campaign(run_dir,resume=None,start_at=4):
         base=[records[n] for n in v.case_names()];ref=[r for n,r in records.items() if n.startswith('T03_')]
         original=full_matrix(base,ref)
         checks['aggregate_equivalence']=all(original[k]['status']==matrix[k]['status'] for k in matrix)
-    state='P2B_READY_FOR_INDEPENDENT_REVIEW' if all(checks.values()) else 'P2_BLOCKED_SECOND_ORDER'
-    if any(f.get('solver_status')=='failed_infrastructure' for f in failures):state='FAILED_INFRASTRUCTURE'
-    if stop and stop.get('solver_status')=='failed_numerical':state='P2_BLOCKED_POSITIVITY'
-    elif stop and stop.get('reason')=='contractual aggregate failure':state='P2_BLOCKED_SECOND_ORDER'
-    if not checks['baseline_intact'] or not checks['solver_unchanged']:state='P2_BLOCKED_REGRESSION'
+    state=classify_state(checks,stop,failures)
     summary=dict(state=state,checks=checks,matrix=matrix,stop=stop,failures=failures,source_sha256=sources,solver_revision='4620200',fresh=fresh,reused=reused,retained_incomplete=retained,
         cases=[{k:r[k] for k in ('name','status','checks','metrics','configuration')} | dict(runtime=runtime(r)) for r in records.values()],
         wall_seconds=time.monotonic()-started,P3='NOT_STARTED',P2_HUMAN_ACCEPTED=False,

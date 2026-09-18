@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "E:\dino\Dino\dev_orchestrator\p2b_resume.py", line 228, in <module>
+    args=parser.parse_args();campaign(args.run_dir,args.resume,args.start_at)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p2b_resume.py", line 138, in campaign
+    extra,provenance=load_reusable(resume,sources,retain_timeouts=start_at>4);available.update(extra);origins.update(provenance)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p2b_resume.py", line 73, in load_reusable
+    records[name]=record;origins[name]=dict(path=path.relative_to(ROOT).as_posix(),sha256=item['sha256'],input_sha256=expected,
+                                                 ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ageribon\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 730, in relative_to
+    raise ValueError("{!r} is not in the subpath of {!r}"
+ValueError: 'results\\p2b-gas1d-20260918\\resume-300-attempt-1\\artifacts\\cases\\T01_rest.json.gz' is not in the subpath of 'E:\\dino\\Dino' OR one path is relative and the other is absolute.

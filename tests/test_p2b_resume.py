@@ -10,6 +10,21 @@ from dev_orchestrator.p2b_campaign import run_case
 
 
 class ResumeTests(unittest.TestCase):
+    def test_relative_checkpoint_path_from_cli(self):
+        records,_=p.load_reusable('results/p2b-gas1d-20260918/attempt-2',p.source_hashes())
+        self.assertEqual(len(records),8)
+
+    def test_current_scientific_failure_not_hidden_by_previous_timeout(self):
+        checks=dict(baseline_intact=True,solver_unchanged=True,P2B=False)
+        failures=[dict(solver_status='failed_infrastructure')]
+        self.assertEqual(p.classify_state(checks,None,failures),'FAILED_INFRASTRUCTURE')
+        for stop,expected in ((dict(solver_status='failed_numerical'),'P2_BLOCKED_POSITIVITY'),
+            (dict(solver_status='completed',reason='final_time'),'P2_BLOCKED_SECOND_ORDER'),
+            (dict(reason='contractual aggregate failure'),'P2_BLOCKED_SECOND_ORDER')):
+            self.assertEqual(p.classify_state(checks,stop,failures),expected)
+        checks['baseline_intact']=False
+        self.assertEqual(p.classify_state(checks,None,failures),'P2_BLOCKED_REGRESSION')
+
     def test_only_completed_identical_records_reused(self):
         records,origins=p.load_reusable(p.PREVIOUS,p.source_hashes())
         self.assertEqual(len(records),8)

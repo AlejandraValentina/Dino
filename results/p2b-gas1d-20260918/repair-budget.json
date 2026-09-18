@@ -1,13 +1,20 @@
 {
   "phase": "P2B",
   "limit": 3,
-  "used": 1,
+  "used": 2,
   "repairs": [
     {
       "number": 1,
       "cause": "False diagnostic CFL failure: rounded dt/unit = 0.4000000000000001 while operational dt <= CFL*unit passes.",
       "change": "Record accepted dt and both original stage limits; gate same exact inequalities with no epsilon. Boundary metadata added.",
       "evidence": "attempt-1",
+      "solver_updates_changed": false
+    },
+    {
+      "number": 2,
+      "cause": "Relative checkpoint CLI path was not normalized before relative_to(ROOT); current scientific failure classification could be masked by an earlier timeout.",
+      "change": "Resolve checkpoint under repository root and isolate/test classification priority; no solver or criteria changes.",
+      "evidence": "remaining-path-failure",
       "solver_updates_changed": false
     }
   ],
