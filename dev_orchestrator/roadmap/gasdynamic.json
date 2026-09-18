@@ -593,6 +593,34 @@
       "max_repair_attempts": 3,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P1_R5E",
+      "title": "P1-R5E evidence acquisition",
+      "objective": "Acquire only T10 N800 and T11 N1600 CFL0.2; no R5 adoption or P2 acceptance.",
+      "depends_on": [
+        "P0",
+        "P1_R4_CFL_REVIEW",
+        "P2A_R4_VERIFY"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "docs/gasdynamic/",
+        "docs/baselines/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "acquire",
+        "evidence_complete",
+        "solver_unchanged"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }

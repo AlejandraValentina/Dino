@@ -521,3 +521,11 @@ Sin publicación, archivo ni P3; borrado ajeno redme.txt conservado.
 
 - [x] Revisión independiente read-only /root/p1_r5_review: PASS de reproducción y STOP, NO PASS científico R5. Máximo residuo registrado4.911264175817217e-16.
 - [x] Tres pruebas focales del reproductor PASS; OpenSpec estricto p2-nucleo-gas1d PASS. Autorrevisión de alcance separada.
+
+## P1-R5E — adquisición autorizada separada de adopción
+
+Orden594e5cc0 autoriza exactamente T10 N800 y T11 N1600/CFL0,2 con600s cada uno, sin alterar solver/criterios. Sustituye el bloqueo de adquisición de R5, no adopta R5.
+- [ ] Adquirir ambos casos y conservar hashes, arrays y ledgers.
+- [ ] Reconstruir matriz3x3 y órdenes T10.
+- [ ] Revisión científica independiente con datos completos; adoptar R5 únicamente si justificado.
+- [ ] Evaluar P2 completo únicamente tras R5 PASS.
