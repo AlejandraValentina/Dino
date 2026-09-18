@@ -1,0 +1,14 @@
+START_T11 T02_sod_0.2
+END_T11 T02_sod_0.2 PASS deterministic=True
+START_T11 T02_sod_0.4
+END_T11 T02_sod_0.4 PASS deterministic=True
+START_T11 T02_sod_0.6
+END_T11 T02_sod_0.6 PASS deterministic=True
+START_T11 T03_0.2
+END_T11 T03_0.2 PASS deterministic=True
+START_T11 T03_0.4
+END_T11 T03_0.4 PASS deterministic=True
+START_T11 T03_0.6
+END_T11 T03_0.6 PASS deterministic=True
+T11_R4_PASS
+START_OFFLINE_P2A_REGRESSION

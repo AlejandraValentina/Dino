@@ -1,0 +1,97 @@
+{
+  "original": {
+    "status": "FAIL",
+    "checks": {
+      "T02_sod_0.2": true,
+      "T02_sod_0.4": true,
+      "T02_sod_0.6": true,
+      "T03_0.2": true,
+      "T03_0.4": true,
+      "T03_0.6": true,
+      "Sod_0.4_rho": true,
+      "Sod_0.4_u": true,
+      "Sod_0.4_p": true,
+      "pulse_0.4_speed": true,
+      "pulse_0.4_amplitude": true,
+      "Sod_0.6_rho": true,
+      "Sod_0.6_u": true,
+      "Sod_0.6_p": true,
+      "pulse_0.6_speed": true,
+      "pulse_0.6_amplitude": false
+    },
+    "metrics": {
+      "Sod_0.4_rho": 0.0005455051028578174,
+      "Sod_0.4_u": 0.0013470220649497064,
+      "Sod_0.4_p": 0.0005482886586822944,
+      "pulse_0.4_speed": 1.3681047872292666e-06,
+      "pulse_0.4_amplitude": 0.03854650811408646,
+      "Sod_0.6_rho": 0.0011137349454954648,
+      "Sod_0.6_u": 0.002724246426224665,
+      "Sod_0.6_p": 0.0011168474604367068,
+      "pulse_0.6_speed": 2.2848610995533924e-06,
+      "pulse_0.6_amplitude": 0.0833638270618394
+    }
+  },
+  "revised": {
+    "status": "PASS",
+    "checks": {
+      "T02_sod_0.2": true,
+      "T02_sod_0.4": true,
+      "T02_sod_0.6": true,
+      "T03_0.2": true,
+      "T03_0.4": true,
+      "T03_0.6": true,
+      "Sod_0.4_rho": true,
+      "Sod_0.4_u": true,
+      "Sod_0.4_p": true,
+      "pulse_0.4_speed": true,
+      "Sod_0.6_rho": true,
+      "Sod_0.6_u": true,
+      "Sod_0.6_p": true,
+      "pulse_0.6_speed": true,
+      "complete_refinement": true,
+      "stability_and_ledger": true,
+      "parent_accuracy_800_1600": true,
+      "sensitivity_decreases_0.2_0.4": true,
+      "sensitivity_decreases_0.4_0.6": true,
+      "sensitivity_decreases_0.2_0.6": true,
+      "analytical_error_decreases_0.2": true,
+      "analytical_error_decreases_0.4": true,
+      "analytical_error_decreases_0.6": true
+    },
+    "original_metrics": {
+      "Sod_0.4_rho": 0.0005455051028578174,
+      "Sod_0.4_u": 0.0013470220649497064,
+      "Sod_0.4_p": 0.0005482886586822944,
+      "pulse_0.4_speed": 1.3681047872292666e-06,
+      "pulse_0.4_amplitude": 0.03854650811408646,
+      "Sod_0.6_rho": 0.0011137349454954648,
+      "Sod_0.6_u": 0.002724246426224665,
+      "Sod_0.6_p": 0.0011168474604367068,
+      "pulse_0.6_speed": 2.2848610995533924e-06,
+      "pulse_0.6_amplitude": 0.0833638270618394
+    },
+    "superseded_diagnostics": {
+      "pulse_0.4_amplitude": true,
+      "pulse_0.6_amplitude": false
+    },
+    "contract": "1D_CONTRACT_V1_R4"
+  },
+  "fresh": [
+    "T02_sod_0.2",
+    "T02_sod_0.4",
+    "T02_sod_0.6",
+    "T03_0.2",
+    "T03_0.4",
+    "T03_0.6"
+  ],
+  "determinism": {
+    "T02_sod_0.2": true,
+    "T02_sod_0.4": true,
+    "T02_sod_0.6": true,
+    "T03_0.2": true,
+    "T03_0.4": true,
+    "T03_0.6": true
+  },
+  "state": "T11_R4_PASS"
+}

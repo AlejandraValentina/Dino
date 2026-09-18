@@ -1,0 +1,27 @@
+{
+  "state": "P1_R4_PASS_T11_REFINED_CONTRACT",
+  "P2A": "P2A_PASS_FIRST_ORDER_VERIFIED",
+  "contract": "1D_CONTRACT_V1_R4",
+  "contract_sha256": "9c747d2005c36b46d5d5a15389c0c25fb645b9e76b3451b2923d5a3f7ee9f2a9",
+  "study_integrations": 12,
+  "t11_fresh_integrations": 6,
+  "reused_p2a_cases": 46,
+  "reevaluated_p2a_records": 52,
+  "old_T11_amplitude_criterion": "FAIL_PRESERVED_DIAGNOSTIC",
+  "P2B": "NOT_STARTED",
+  "P3": "NOT_STARTED",
+  "human_acceptance": "PENDING_NOT_ATTRIBUTED",
+  "repair_budget": {
+    "total": 3,
+    "previously_used": 3,
+    "used_by_R4": 0
+  },
+  "preservation_checks": {
+    "baseline_intact": true,
+    "contract_frozen": true,
+    "dependencies_accepted": true,
+    "implementation_contracts_frozen": true
+  },
+  "reviewed_summary_sha256": "369ca150674f9f872354ee6fb7fbe27778235ce46a9cba71869747da52f63a9b",
+  "note": "Finite-grid convergence evidence, not universal asymptotic or experimental validation. No publication/archive."
+}

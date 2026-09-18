@@ -85,3 +85,17 @@ Tablas, deltas y recibos en `../p1-r3-fronteras/tasks.md` y
 `results/p1-r3-fronteras-20260918/`. P2B no iniciado; decisión sobre T11 y
 human gate de P2 pendientes. Sin P3, aceptación humana atribuida, archivo o push.
 Los registros anteriores conservan su estado histórico.
+
+## Continuación P1-R4 — 18/09/2026
+**P2A_PASS_FIRST_ORDER_VERIFIED** bajo1D_CONTRACT_V1_R4, revisado de forma
+independiente. El estudio congelado demuestra reducción de sensibilidad en
+N400/800/1600 y conserva límites de exactitud T03; se retira explícitamente la
+garantía8% aN800. El FAIL históricoR3 no se sobrescribe ni desaparece por cálculo.
+Run20260918T115319-P2A_R4_VERIFY-7474ef29fc6d: seis integraciones T11 nuevas,
+numéricamente idénticas;46 casos reutilizados por hashes,52 reevaluados.
+T01–T12 PASS bajoR4; fuente productiva/solver/P0/contratos anteriores intactos.
+Ocho pruebas pertinentes PASS, revisión independiente y OpenSpec estricto.
+Ver `../p1-r4-cfl/tasks.md` y `results/p1-r4-cfl-20260918/` para tablas y recibos.
+Presupuesto de reparaciones3/3 anterior no reiniciado; R4 fue revisión científica
+con implementación congelada. P2B no iniciado, human gate deP2 pendiente;
+P2 no se declara completo, no P3/publicación/archivo. redme.txt ajeno preservado.

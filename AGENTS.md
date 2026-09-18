@@ -2,6 +2,17 @@
 
 ## Lectura y autoridad
 
+Orden más reciente: `p1-r4-cfl`. P1_R4_PASS_T11_REFINED_CONTRACT adoptó
+1D_CONTRACT_V1_R4 tras estudio congelado y revisión independiente.
+P2A_PASS_FIRST_ORDER_VERIFIED: T01–T12 bajo R4, seis runs T11 nuevos y46
+reutilizados con hashes,52 reevaluados. El fallo8% de R3 permanece diagnóstico;
+R4 retira esa garantía y exige convergencia con límites T03 originales.
+No modificar solver/contratos anteriores/P0 ni reinterpretar PASS como aceptación
+humana de P2. P2B/P3 no iniciados en esta entrega; human gate P2 pendiente.
+La revisión científica no reinicia presupuesto de reparaciones3/3. Sin publicar,
+archivar, integrar comandos globales o cambiar UI/JSON/EXE. Ver tareas R4.
+
+Antecedente histórico:
 Orden más reciente: `p1-r3-fronteras`. P1_R3_PASS_BOUNDARIES_SEPARATED:
 contrato1D_CONTRACT_V1_R3 adoptado antes del código; T05 PASS y NR01 diagnóstico.
 P2A revalidado completo: T01–T10/T12 PASS, T11 FAIL (amplitud CFL0,6 frente0,2:

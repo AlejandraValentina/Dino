@@ -1,0 +1,13 @@
+test_determinism_discards_only_wall_clock (test_p1_r4.CFLStudyTests.test_determinism_discards_only_wall_clock) ... ok
+test_frozen_implementation_and_previous_contracts (test_p1_r4.CFLStudyTests.test_frozen_implementation_and_previous_contracts) ... ok
+test_metric_preserves_prescribed_ten_pa_denominator (test_p1_r4.CFLStudyTests.test_metric_preserves_prescribed_ten_pa_denominator) ... ok
+test_common_bias_or_parent_failure_blocks (test_p1_r4_gate.R4GateTests.test_common_bias_or_parent_failure_blocks) ... ok
+test_complete_evidence_passes_reviewed_criterion (test_p1_r4_gate.R4GateTests.test_complete_evidence_passes_reviewed_criterion) ... ok
+test_missing_mesh_blocks (test_p1_r4_gate.R4GateTests.test_missing_mesh_blocks) ... ok
+test_nondecreasing_pair_blocks (test_p1_r4_gate.R4GateTests.test_nondecreasing_pair_blocks) ... ok
+test_sod_and_speed_failures_are_not_superseded (test_p1_r4_gate.R4GateTests.test_sod_and_speed_failures_are_not_superseded) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.286s
+
+OK

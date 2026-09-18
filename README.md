@@ -1,5 +1,20 @@
 # MotorSim
 
+P1-R4: **P1_R4_PASS_T11_REFINED_CONTRACT** y
+**P2A_PASS_FIRST_ORDER_VERIFIED** bajo
+[1D_CONTRACT_V1_R4](docs/gasdynamic/1d_cfl_sensitivity_v1_r4.md).
+Estudio12 casos N400/800/1600 y CFL0,1/0,2/0,4/0,6: sensibilidad decreciente,
+estados admisibles y balances correctos; solver y contratos anteriores intactos.
+R4 retira la garantía comparativa del8% en N800 y conserva exactitud T03,
+añadiendo convergencia de sensibilidad y error. No se elevó0,08 a otro número.
+Después: seis integraciones T11 deterministas y reevaluación de52 registros
+(46 reutilizados con hashes) dan T01–T12 PASS; ocho pruebas pertinentes PASS.
+Revisión independiente aprobada; aceptación humana de P2 pendiente.
+P2B/P3 no iniciados. Sin publicación ni archivo.
+[Tablas, fuentes, comandos y límites](openspec/changes/p1-r4-cfl/tasks.md).
+
+Antecedente histórico P1-R3 (se conserva su fallo bajo aquel contrato):
+
 P1-R3: **P1_R3_PASS_BOUNDARIES_SEPARATED**; contrato acústico
 [1D_CONTRACT_V1_R3](docs/gasdynamic/1d_boundary_semantics_v1_r3.md).
 T05 pressure-release aprobado sin modificar su tolerancia; NR01 independiente

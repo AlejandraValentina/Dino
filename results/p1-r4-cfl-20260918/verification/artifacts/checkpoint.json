@@ -1,0 +1,18 @@
+{
+  "fresh": [
+    "T02_sod_0.2",
+    "T02_sod_0.4",
+    "T02_sod_0.6",
+    "T03_0.2",
+    "T03_0.4",
+    "T03_0.6"
+  ],
+  "determinism": {
+    "T02_sod_0.2": true,
+    "T02_sod_0.4": true,
+    "T02_sod_0.6": true,
+    "T03_0.2": true,
+    "T03_0.4": true,
+    "T03_0.6": true
+  }
+}
