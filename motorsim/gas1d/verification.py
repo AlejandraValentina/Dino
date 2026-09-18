@@ -77,7 +77,8 @@ def definition(name):
         n=800;mesh=uniform_mesh(n);center=.25 if test=='T03' else .3
         initial=lambda x:pulse(x,center);end=(.45 if test=='T03' else 1.15)/A0
         reference=lambda x:pulse(x-A0*end,center)
-        bc=(Boundary('nonreflecting'),Boundary('nonreflecting' if test=='T03' else ('wall' if test=='T04' else 'open')))
+        bc=(Boundary('nonreflecting',state=BASE),
+            Boundary('nonreflecting',state=BASE) if test=='T03' else Boundary('wall' if test=='T04' else 'ideal_open_pressure_release'))
         if test in ('T04','T05'):sensor=.7;interval=.001/A0
         if kind:cfl=float(kind)
     elif test in ('T06','T09','T12') and kind in ('contact','reverse','pure0','pure1'):

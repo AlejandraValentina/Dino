@@ -346,6 +346,42 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P1_R3_BOUNDARY_SEMANTICS_REVIEW",
+      "title": "P1_R3_BOUNDARY_SEMANTICS_REVIEW",
+      "objective": "Separate ideal pressure-release from nonreflecting and reservoir; T05 and NR01 gates before P2A.",
+      "depends_on": [
+        "P0",
+        "P1",
+        "P1_R2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "docs/gasdynamic/",
+        "docs/baselines/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "boundary_tests",
+        "fix_tests",
+        "boundary_study",
+        "T05",
+        "mesh_sign",
+        "all_ledgers",
+        "NR01_recorded",
+        "counter_identity",
+        "baseline_intact",
+        "contract_frozen",
+        "dependencies_accepted"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }

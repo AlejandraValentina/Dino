@@ -1,6 +1,6 @@
 """Isolated mathematical boundaries; no 0D coupling or real exhaust radiation."""
 from dataclasses import dataclass
-from math import sqrt
+from math import sqrt, expm1, log1p, isfinite
 from .eos import InvalidState
 from .riemann import hllc_flux
 
@@ -19,6 +19,14 @@ class Boundary:
         if self.kind=='outflow':return interior
         r,u,p,y=interior;w=normal*u;a=eos.sound_speed(interior);g=eos.gamma
         if self.kind=='wall':return r,-u,p,y
+        if self.kind=='ideal_open_pressure_release':
+            # R3 acoustic continuation, not a reservoir/donor switch.
+            if not isfinite(self.p0) or self.p0<=0 or abs(w)>=a:
+                raise InvalidState('Pressure-release requires positive pressure and subsonic interior')
+            ki=p/r**g;rb=(self.p0/ki)**(1/g);ab=sqrt(g*self.p0/rb)
+            wb=w-2*a/(g-1)*expm1((g-1)/(2*g)*log1p((self.p0-p)/p))
+            if abs(wb)>=ab:raise InvalidState('Pressure-release face outside subsonic acoustic scope')
+            return eos.validate((rb,normal*wb,self.p0,y))
         if self.kind not in ('open','nonreflecting','reservoir'): raise ValueError('Unknown boundary')
         if w>=a:return interior
         if w<=-a:
