@@ -90,20 +90,28 @@
     {
       "id": "P3",
       "title": "0Dâ†”1D coupling",
-      "objective": "DeclaraciÃ³n futura: 0Dâ†”1D coupling. Sin implementaciÃ³n ni autorizaciÃ³n de ejecuciÃ³n.",
+      "objective": "P3 preflight of frozen reservoir compatibility before conservative finite-volume coupling.",
       "depends_on": [
         "P2"
       ],
-      "allowed_paths": [],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
       "forbidden_paths": [
         "motorsim/",
         "packaging/"
       ],
       "required_checks": [
-        "phase_not_implemented"
+        "regression_tests",
+        "preflight",
+        "P2_HUMAN_ACCEPTED",
+        "P2_frozen",
+        "P2_regression",
+        "P0_regression",
+        "reservoir_branch_exists_for_admissible_reversal"
       ],
       "gate_policy": "default",
-      "max_repair_attempts": 3,
+      "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": "P4"
     },

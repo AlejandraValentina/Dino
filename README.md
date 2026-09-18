@@ -1,5 +1,14 @@
 # MotorSim
 
+Orden a75bf738: **P2_HUMAN_ACCEPTED**, núcleo1D y contratos congelados.
+Autorizado exclusivamente P3 aislado mediante dev_orchestrator. Preflight de
+frontera reservoir antes de P3A; sólo P3A PASS habilita volumen finito/P3B,
+y sólo volumen fijo PASS habilita P3C. Sin P4, producto, UI, JSON o publicación.
+Cambio: openspec/changes/p3-acoplamiento-conservativo. Ante una incompatibilidad
+del contrato congelado, SCIENTIFIC_CHANGE_REQUIRED, sin cambiar la BC.
+
+Antecedente histórico:
+
 P1-R5E: **P1_R5_PASS_CFL_SECOND_ORDER_CONTRACT**; adoptado R5 solo para
 T11 segundo orden tras nueve finales y revisión científica independiente.
 **P2_PASS_1D_CORE_VERIFIED / WAITING_HUMAN_APPROVAL**: T01–T12 PASS,
