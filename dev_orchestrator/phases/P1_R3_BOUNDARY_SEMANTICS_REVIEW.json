@@ -63,7 +63,9 @@
         "-m",
         "dev_orchestrator.p1_r3_boundaries",
         "--run-dir",
-        "{run_dir}"
+        "{run_dir}",
+        "--reuse-t05",
+        "results/p1-r3-fronteras-20260918/boundary-attempt-1"
       ],
       "timeout": 650,
       "result_file": "artifacts/result.json"

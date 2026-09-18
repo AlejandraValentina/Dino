@@ -5,10 +5,25 @@ from motorsim.gas1d.eos import IdealGas, InvalidState
 from motorsim.gas1d.boundary import Boundary
 from motorsim.gas1d.mesh import uniform_mesh
 from motorsim.gas1d.riemann import hllc_flux
-from motorsim.gas1d.solver import solve
+from motorsim.gas1d.solver import solve, event_step
 
 
 class P2FixTests(unittest.TestCase):
+    def test_event_tail_partition_respects_cfl_and_minimum(self):
+        dt=1.4665653203413753e-6;remaining=dt+9.195747462109605e-13
+        split=event_step(dt,remaining)
+        self.assertEqual(split,remaining/2)
+        self.assertGreaterEqual(split,1e-12);self.assertLessEqual(split,dt)
+        self.assertEqual(event_step(1e-12,1.5e-12),1e-12)  # No admissible two-way split.
+        eos=IdealGas();mesh=uniform_mesh(2);w=(1.2,0.,100000.,.3)
+        initial=[tuple(v*q for q in eos.conservative(w)) for v in mesh.volumes]
+        cfl_dt=.4*.5/eos.sound_speed(w);end=2*cfl_dt+5e-13
+        result=solve(mesh,initial,end,'periodic',eos=eos,sensor=.5,sample_interval=end)
+        self.assertEqual(result['status'],'completed')
+        self.assertEqual(result['time'],end);self.assertEqual(result['sensors'][-1][0],end)
+        self.assertGreaterEqual(result['minimum_dt'],1e-12)
+        self.assertLessEqual(result['max_CFL'],.4+1e-15)
+
     def test_counts_survive_later_boundary_failure(self):
         eos=IdealGas();mesh=uniform_mesh(4);w=(1.2,0.,100000.,.3)
         initial=[tuple(v*q for q in eos.conservative(w)) for v in mesh.volumes]

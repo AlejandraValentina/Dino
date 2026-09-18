@@ -8,6 +8,14 @@ from .riemann import hllc_flux
 def inventories(cells):return [fsum(c[k] for c in cells) for k in range(4)]
 
 
+def event_step(cfl_dt, remaining):
+    """Avoid creating an unadvanceable event tail; never exceed CFL or lower dt_min."""
+    dt=min(cfl_dt,remaining)
+    if 0<remaining-dt<1e-12 and remaining/2>=1e-12:
+        dt=min(dt,remaining/2)
+    return dt
+
+
 def cfl_step(mesh, states, speeds, eos, cfl):
     if not isfinite(cfl) or not 0<cfl<=.6:raise ValueError('Contractual CFL outside (0,.6]')
     limits=[]
@@ -70,8 +78,9 @@ def solve(mesh, initial, final_time, boundaries, *, eos=None, cfl=.4,
             fluxes=[tuple(a*f for f in item[0]) for a,item in zip(mesh.areas,data)]
             speeds=[max(abs(d[1][0]),abs(d[1][2])) for d in data]
             dt,limiting,dt_unit=cfl_step(mesh,states,speeds,eos,cfl)
-            dt=min(dt,final_time-t)
-            if next_sample is not None:dt=min(dt,next_sample-t)
+            remaining=final_time-t
+            if next_sample is not None:remaining=min(remaining,next_sample-t)
+            dt=event_step(dt,remaining)
             source=[w[2]*(mesh.areas[i+1]-mesh.areas[i]) for i,w in enumerate(states)]
             delta=[tuple(fluxes[i][k]-fluxes[i+1][k]+(source[i] if k==1 else 0.) for k in range(4)) for i in range(mesh.n)]
             accepted=False

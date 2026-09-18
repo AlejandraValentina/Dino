@@ -11,12 +11,24 @@ from motorsim.gas1d.verification import definition,measure,BASE,P0,A0
 from .p2_campaign import invariants,sha,write,ROOT
 
 
-def run(run_dir):
+def run(run_dir, previous=None):
     art=run_dir/'artifacts';(art/'cases').mkdir()
     checks=invariants()
     if not all(checks.values()):raise ValueError('Preservation failure')
     rows=[]
     for name,n in [('T05',200),('T05',400),('T05',800),('NR01',800)]:
+        if previous is not None and name=='T05':
+            old=json.loads((previous/'artifacts/boundary-summary.json').read_text(encoding='utf-8'))
+            if old['contract_sha256']!=sha(ROOT/'docs/gasdynamic/1d_contract_v1_r3.json'):
+                raise ValueError('Reused T05 contract mismatch')
+            rel=f'artifacts/cases/{name}-{n}.json.gz';source=previous/rel
+            inventory=json.loads((previous/'artifacts/inventory.json').read_text(encoding='utf-8'))
+            if sha(source)!=inventory[rel]:raise ValueError('Reused T05 hash mismatch')
+            record=json.loads(gzip.decompress(source.read_bytes()))
+            if not all(record['summary']['checks'].values()):raise ValueError('Cannot reuse failed T05')
+            row=record['summary'];row['reused_from']=str(source);row['source_sha256']=sha(source)
+            rows.append(row);(art/'cases'/f'{name}-{n}.json.gz').write_bytes(source.read_bytes())
+            continue
         case=definition('T05');case['mesh']=uniform_mesh(n)
         if name=='NR01':
             case['test']='NR01';case['bc']=(Boundary('nonreflecting',state=BASE),Boundary('nonreflecting',state=BASE))
@@ -56,4 +68,6 @@ def run(run_dir):
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--run-dir',type=Path,required=True);run(parser.parse_args().run_dir)
+    parser=argparse.ArgumentParser();parser.add_argument('--run-dir',type=Path,required=True)
+    parser.add_argument('--reuse-t05',type=Path)
+    args=parser.parse_args();run(args.run_dir,args.reuse_t05)
