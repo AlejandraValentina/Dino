@@ -1,0 +1,8 @@
+test_closed_wall_exact_and_continuous (test_exhaust_port.ExhaustPortTests.test_closed_wall_exact_and_continuous) ... ok
+test_existing_area_and_events (test_exhaust_port.ExhaustPortTests.test_existing_area_and_events) ... ok
+test_open_shared_flux_and_local_backflow_species (test_exhaust_port.ExhaustPortTests.test_open_shared_flux_and_local_backflow_species) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.004s
+
+OK

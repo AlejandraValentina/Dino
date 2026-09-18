@@ -37,3 +37,29 @@ E05: cámara80kPa/300K,CA80→145; m/U aumentan, especieentrante usaYcaratubo
 CFLporstage<=solicitado, eventosalcanzadosexactos, rho/p/T>0,Yen[0,1].
 Sensores.1/.3/.5m registranp,u,M,Y. Llegada umbral1%contrasteprescrito;
 refinamiento y contrastevelocidadlocal se evalúan en P4B, noacreditadosaquí.
+
+## P4B fixtures y criterios previos
+Pulsoacústico100Pa, x0=.08m, sigma=.015m, base100kPa/300K/Y.2; u'=p'/Z,
+rho'=p'/a². Cámara100kPa/300K/Y.2,V.0001m³, CAinicial180,RPM3000,tf.003s.
+Grecto .75m/20mm. Difusor: header.2m/20,cono.15m20→40,resto.4m/40.
+Convergente: header.2m/20,cono.15m20→10,resto.4m/10.
+Cadena: header.2/20,difusor.15/20→40,belly.05/40,baffle.15/40→20,tail.2/20.
+Longitud: header.3m/restoigual; controlisovolumen header.3/tail.1, restoigual.
+Nobjetivo100 vía dx=.75/N; extremos de segmentos coinciden con carasP2.
+Refinamientos100/200/400 para difusor y blowdownP4A; CFL.2/.4/.6 enN100.
+RPM2500/3000/3500 misma cadena/pulso; fase inicial180, leygeométricaidéntica.
+
+Señalreflejada en sensorcercano.05m: pr=(p-p0-Zu)/2. Separación lineal válida
+sólo para100Pa, no imponerla a blowdownfuerte. Ventanaretornopredefinida desde
+(2Lheader-x0-xs)/a−3sigma/a hasta +2Lcono/a. Signodifusornegativo/convergente
+positivo con amplitud>1Pa; rectoreflejoinvoluntario<=2.5Pa. Arrivalcruce1Pa
+interpolado, errorrespectocentrodepaquete<=3sigma/a+2dx/a; no ajuste a datos.
+ControlL: deltaarrival=2*.1/a dentro3dx/a; controlisovolumen Vigual relativo1e-12.
+GateRPM: tiemposfísicosdentro2dx/a y ángulosretornocrecientes conRPM.
+Refinamiento: diferencias400–200 menores que200–100 paraarrival,integral|pr|dt
+(o presiónperturbada enblowdown) e intercambiomasa. No exigirorden2 en shocks.
+CFL: spread/maxabs<=.025 paraesas3métricas; criteriofocal delbanco, no modificaR5.
+Blowdown: arrivals entre sensores.1/.3 a102kPa; delta_t acotado por distancia/
+max,min(u+a) positivos de snapshotslocales, margen2dx/a0. Es verificación de
+tiempo, no validación de amplitud. No interpretarP0 como igualdaddereferencia.
+Todos bancos conservan<=1e-10, admisibilidad/CFL/eventos y600s/caso.

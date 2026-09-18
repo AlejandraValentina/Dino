@@ -1,0 +1,6 @@
+START closed 100 0.4
+END closed_N100_CFL0.4 PASS final_time 1.8279999997466803
+START blowdown 100 0.4
+END blowdown_N100_CFL0.4 PASS final_time 17.843999999575317
+START backflow 100 0.4
+END backflow_N100_CFL0.4 PASS final_time 5.406000000424683
