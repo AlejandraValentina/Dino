@@ -1,0 +1,11 @@
+test_ambiguous_and_absent (test_p1_r1.ContactObservableTests.test_ambiguous_and_absent) ... ok
+test_exact_center_not_double_counted (test_p1_r1.ContactObservableTests.test_exact_center_not_double_counted) ... ok
+test_invalid_profile (test_p1_r1.ContactObservableTests.test_invalid_profile) ... ok
+test_linear_crossing_both_directions (test_p1_r1.ContactObservableTests.test_linear_crossing_both_directions) ... ok
+test_no_exact_location_oracle_for_b_c_d (test_p1_r1.ContactObservableTests.test_no_exact_location_oracle_for_b_c_d) ... ok
+test_nonmonotone_not_hidden (test_p1_r1.ContactObservableTests.test_nonmonotone_not_hidden) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK

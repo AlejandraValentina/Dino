@@ -1,5 +1,12 @@
 # MotorSim
 
+P1-R1: **P1_R1_CONTACT_ACCURACY_UNRESOLVED**. Estudio Sod y contacto puro
+N200/400/800/1600 completado por dev_orchestrator. El cruce Y=0,5 en Sod N400
+da error2,16805Δx >2Δx; no se adopta R1 ni se reanuda P2. Contrato y solver
+intactos; [tablas y estado](openspec/changes/p1-r1-contacto/tasks.md),
+[evidencia](results/p1-r1-contacto-20260917/artifacts/study.json).
+Pruebas del observable: `.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_p1_r1.py -v`.
+
 P0: **P0_HUMAN_ACCEPTED**, aceptación de la usuaria registrada separadamente
 sin cambiar el baseline NUMERICALLY_VERIFIED_BASELINE ni atribuir validación
 experimental. P1 define el contrato quasi-1D en [docs/gasdynamic](docs/gasdynamic/1d_mathematical_contract_v1.md),

@@ -2,6 +2,12 @@
 
 ## Lectura y autoridad
 
+Orden más reciente: `p1-r1-contacto`, etapa P1_R1_SCIENTIFIC_AMENDMENT.
+Estudio acotado del observable T02, sin cambiar solver ni P1 congelado.
+Resultado P1_R1_CONTACT_ACCURACY_UNRESOLVED: B supera2dx en N400; STOP.
+Sin R1 adoptado ni autorización efectiva de fixes P2, T05, P2B o P3.
+Las órdenes siguientes conservan su valor histórico; ver tareas del cambio.
+
 Orden vigente: `p2-nucleo-gas1d`. P1_HUMAN_ACCEPTED; contrato P1 congelado.
 Implementar/verificar únicamente P2 aislado mediante dev_orchestrator. P2A
 first-order precede obligatoriamente a P2B MUSCL/SSP-RK2 con gate y revisión.

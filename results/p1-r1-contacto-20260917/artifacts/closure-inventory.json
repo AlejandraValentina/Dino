@@ -1,0 +1,23 @@
+{
+  ".gitattributes": "730a35ae3d558080083c3103d9ac8100c3f6561678092abe341701dfa331eb1d",
+  "evidence.json": "29c0d8b8f80026287d13bf3a67f453ad82cc219e393433f837233ba432a6fb62",
+  "summary.md": "524bb492e6673622d79228c98fc4ef8f6cd6564248e1fb6ef34b16bb03ca279e",
+  "artifacts/checkpoint.json": "9b224a1e4ab7002884f5d4a6592109de7ca7c10728bb1bff046983f45b22c726",
+  "artifacts/historical-comparison.json": "d3271fb3d7e2ab01d22e5def85959f086bc97e6c4d5e26211c51baf07a0c1fd8",
+  "artifacts/independent-review.json": "e4feb38e2c4883727ef8d72dec6c385919da7873a7c1dd2d36f9807b08f61781",
+  "artifacts/inventory.json": "309dc7245adaa33183562f192c5f5041d43235a6024ce4cc6b476a0f6be76fc8",
+  "artifacts/result.json": "a04f382334e635e80ac6c078ad9767a173775eb482f6605393bc7727e366bf0f",
+  "artifacts/study.json": "2d4e7223cd2b3c55cf3949e3a788c3456473d36cf5776b4a033e259ee253e5b1",
+  "artifacts/cases/pure_contact-1600.json.gz": "449485eb058316197fb132e7dd069a25670216689f43767927583fa0a8a9fb5e",
+  "artifacts/cases/pure_contact-200.json.gz": "c28fa11bb89ccdb67d72504c022c5981116d464e94b018cf4e418734826f580a",
+  "artifacts/cases/pure_contact-400.json.gz": "dc4a3ec712598674935ecd954af51d1740c42109ebee0e2b6423a95b5406ca02",
+  "artifacts/cases/pure_contact-800.json.gz": "670d4fb9bf2acbcd56fb992b5f7d74111075fde9c1df015600b4aa0c6fa20f23",
+  "artifacts/cases/sod-1600.json.gz": "daf06dddf3fdad4dd0ec4299a710e9af91a2405975091b2b3cfb454f7f4e0867",
+  "artifacts/cases/sod-200.json.gz": "8e6b8ace2f03fceb49a2cd4fb0929b24c404874c30d03f7afeaf0378dcdaf07d",
+  "artifacts/cases/sod-400.json.gz": "218347daf9b3da4abf5fb6436479b76ff4b233bcca7429f42ac4461b57be8956",
+  "artifacts/cases/sod-800.json.gz": "f702c403b498b08b8e0aafe6b2f69357cf1a01e8d21403fbe9caeadd7bfacf03",
+  "logs/1-contact_study.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "logs/1-contact_study.stdout.log": "0bf13c3e61cf62e38782818560699e907dc1d45647cb61dfcb1fa7b6af14b6e5",
+  "logs/1-observable_tests.stderr.log": "f80cce263db8b6d5afc65130d47e5e3839aa92e02e0bbb6857a18542548145c5",
+  "logs/1-observable_tests.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

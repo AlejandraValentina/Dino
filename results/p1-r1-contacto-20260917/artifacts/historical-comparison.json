@@ -1,0 +1,14 @@
+{
+  "old_file": "results/p2-gas1d-20260917/artifacts/cases/T02_sod.json.gz",
+  "old_sha256": "8f23394da6884f63da6ea95bbade316ee9dc714944b00bfea442f774c7c2a6ee",
+  "equal_fields": {
+    "cells": true,
+    "primitive": true,
+    "ledger": true,
+    "face_fluxes": true,
+    "initial_inventory": true,
+    "final_inventory": true,
+    "steps": true,
+    "hlle_fallback_count": true
+  }
+}
