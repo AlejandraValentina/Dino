@@ -1,0 +1,10 @@
+{
+  "tests": "3/3 PASS test_p1_r5_offline",
+  "openspec": "p2-nucleo-gas1d strict PASS",
+  "protected_paths_diff_empty": true,
+  "new_integrations": 0,
+  "P0_regression": "not rerun; Phase C not enabled",
+  "self_review": "scope, evidence, missing finals, no new thresholds",
+  "foreign_change_preserved": "D redme.txt",
+  "source_commit": "cde73d5"
+}

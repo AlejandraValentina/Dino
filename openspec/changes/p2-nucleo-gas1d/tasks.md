@@ -496,3 +496,28 @@ Suite60: test_p2b*.py, test_gas1d.py, test_p2_fixes.py,
 test_p1_r2.py, test_p1_r3.py, test_p1_r4.py y test_p1_r4_gate.py con unittest.
 Commits operativos8ed6079,e92c1e3,6b6a7dc; el commit de cierre registrafix3,
 reevaluación y evidencia final. Todos locales, sinpush.
+
+
+## P1-R5 — revisión offline (18/09/2026)
+
+- [x] Reproducir ocho finales T11 y conservar N1600/CFL0,2 como parcial.
+- [x] Verificar hashes de evidencia/solver e identidad canónica de inputs/configuración.
+- [x] Calcular amplitudes desde arrays, referencia conservativa, errores absolutos/relativos, tres parejas CFL, cuatro balances, etapas y contadores.
+- [x] Examinar fundamento SSP y contraejemplo lógico sin ajustar tolerancias.
+- [ ] Aprobar científicamente R5: falta evidencia final N1600/CFL0,2.
+- [ ] Fase B: completar T10 N800 y T11 N1600/CFL0,2 con600s, solo tras PASS científico.
+- [ ] Fase C: cierre P2 T01–T12, regresiones P0 y aceptación humana.
+
+Estado **P1_R5_CFL_SECOND_ORDER_UNRESOLVED / P2_BLOCKED_SECOND_ORDER**.
+No se adopta contrato nuevo. R4 continúa FAIL en pareja0,4/0,6; no se descarta
+N800. La evidencia disponible admite una interpretación preasintótica, pero
+no acredita las cláusulas para los tres CFL. Fases B/C no ejecutadas; orden
+T10 400→800 desconocido. T01–T09 y T12 conservan PASS histórico, no reejecutado.
+P0 y P2A no reintegrados; sin cambios a contratos, solver, UI o formatos.
+Resultados y justificación: results/p1-r5-cfl-20260918/analysis.md y study.json.
+Reproductor: `.\.venv\Scripts\python.exe -m dev_orchestrator.p1_r5_offline`.
+La revisión independiente se registra en review.json separada de autorrevisión.
+Sin publicación, archivo ni P3; borrado ajeno redme.txt conservado.
+
+- [x] Revisión independiente read-only /root/p1_r5_review: PASS de reproducción y STOP, NO PASS científico R5. Máximo residuo registrado4.911264175817217e-16.
+- [x] Tres pruebas focales del reproductor PASS; OpenSpec estricto p2-nucleo-gas1d PASS. Autorrevisión de alcance separada.

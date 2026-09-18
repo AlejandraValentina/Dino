@@ -1,5 +1,14 @@
 # MotorSim
 
+P1-R5 (orden350ec78f): **P1_R5_CFL_SECOND_ORDER_UNRESOLVED**.
+Revisión offline de ocho finales y un parcial: SSP no implica monotonía CFL
+entre mallas, pero falta N1600/CFL0,2 para justificar todas las cláusulas R5.
+No se adopta R5; **P2_BLOCKED_SECOND_ORDER**. Fases B/C no habilitadas;
+no nuevas integraciones, cambios de solver ni P3. R4 y presupuesto3/3 intactos.
+[Análisis y tablas](results/p1-r5-cfl-20260918/analysis.md).
+
+Antecedente histórico:
+
 P2B reanudado con300s/caso: **P2_BLOCKED_SECOND_ORDER**.
 T04–T09 aprobaron y T12 está **10/10 PASS**. T10_800 y T11 N1600/CFL0,2
 agotaron300s. Además, la comparación completa CFL0,4/0,6 incumple R4:

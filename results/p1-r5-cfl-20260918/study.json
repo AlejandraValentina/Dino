@@ -1,0 +1,714 @@
+{
+  "state": "P1_R5_CFL_SECOND_ORDER_UNRESOLVED",
+  "P2": "P2_BLOCKED_SECOND_ORDER",
+  "source_sha256": {
+    "motorsim/gas1d/boundary.py": "f931664fa850a612f28998090fe9c5fe9088d621892a69a9d5eebcb9d6b17daf",
+    "motorsim/gas1d/contact.py": "ad5dc76f4482d7db1438297f5727a655af63fff20b9595770bb8e6a459609b06",
+    "motorsim/gas1d/eos.py": "22bae4c37c3a6edde31940d26d59430cf0c466fbfb706df1dfe4ecad1c4e21bf",
+    "motorsim/gas1d/mesh.py": "78dcdd71de7acd751e79367347e2826e4d7c81d83817f39a62728d375bcbb44e",
+    "motorsim/gas1d/methods.py": "36a92c7ae8e0d7574b897d835e1ab59ddbd7b8c1fee71770302943321869f52f",
+    "motorsim/gas1d/reference.py": "017d25da5a98934cf8fa5b75e1a324dbb40c09a22fa04927118b9c6ce48b83fd",
+    "motorsim/gas1d/riemann.py": "30ab73a693e679781e3f12b177fa02f04e13562909b9a4131a2b5c641d0321b3",
+    "motorsim/gas1d/second_order.py": "ccaaea3464ebe1cda8f600035dc43d2448ba00569f4022c1b18ba766c3b3de9a",
+    "motorsim/gas1d/solver.py": "b4b3f6978d0fc2433a49b11d03fd3f4914ab3890f1b4e0d498f3345f12f7e60c",
+    "motorsim/gas1d/verification.py": "aab8f153af13ff3de92bdd2ea9695887c251d49c823aa0b9b9269bdbece39f25",
+    "motorsim/gas1d/__init__.py": "ca85637c3d6ba44590d24561296ebc0235469199266cc1d5d0f90e2d5de4809f"
+  },
+  "rows": [
+    {
+      "N": 400,
+      "CFL": 0.2,
+      "complete": true,
+      "amplitude_Pa": 9.144433932291577,
+      "reference_Pa": 9.986994411432534,
+      "absolute_error_Pa": 0.8425604791409569,
+      "relative_error_to_reference": 0.08436577056420923,
+      "normalized_error_to_10Pa": 0.08425604791409569,
+      "residual_components": [
+        1.651710206755151e-16,
+        3.450800061178716e-21,
+        3.111502974123873e-16,
+        4.6946027607540074e-17
+      ],
+      "stage_residual_components": [
+        1.4602461810663641e-16,
+        8.707104808690446e-22,
+        1.5938550825109062e-16,
+        3.738974093676486e-17
+      ],
+      "admissible_recorded_interval": true,
+      "runtime": 18.75,
+      "steps": 901,
+      "RHS": 1802,
+      "HLLC": 718998,
+      "HLLE": 0,
+      "fallback_reasons": {},
+      "checks": {
+        "completed": true,
+        "worst_ledger": true,
+        "pressure_L1": true,
+        "pressure_L2": true,
+        "speed_relative_error": true,
+        "amplitude_ratio": true,
+        "stage_conservation": true,
+        "stage_CFL": true
+      },
+      "metrics": {
+        "worst_ledger": 3.111502974123873e-16,
+        "errors": {
+          "rho": {
+            "L1": 2.53024169336183e-07,
+            "L2": 8.878128848085947e-07,
+            "Linf": 6.30578529815784e-06
+          },
+          "u": {
+            "L1": 2.529977880925818e-07,
+            "L2": 8.879865931582298e-07,
+            "Linf": 6.3076682977540205e-06
+          },
+          "p": {
+            "L1": 3.4150612490811923e-07,
+            "L2": 1.1984478349478675e-06,
+            "Linf": 8.511722637631465e-06
+          },
+          "Y": {
+            "L1": 4.70595784562988e-16,
+            "L2": 6.543667598491711e-16,
+            "Linf": 2.886579864025407e-15
+          }
+        },
+        "pressure_L1": 0.003415061249081192,
+        "pressure_L2": 0.011984478349478675,
+        "speed": 340.943846377039,
+        "speed_relative_error": 3.3149458600556514e-05,
+        "amplitude": 9.144433932291577,
+        "amplitude_ratio": 0.9156342294357908,
+        "worst_stage_ledger": 1.5938550825109062e-16,
+        "analytical_amplitude": 9.986994411432534,
+        "analytical_amplitude_error": 0.08425604791409569,
+        "phase_displacement_error": 1.4917256370207181e-05,
+        "dissipation": 0.08436577056420924
+      },
+      "evidence_sha256": "2bf32cc4c99a65180d36c9092c4ce1b651657a8e7fa4fafa6cc2b8f94844d023",
+      "input_configuration_reference_sha256": "9118c7b5bfdf055a8437552fafec54da8a2978de89239e26fd56a75e79d0ceba"
+    },
+    {
+      "N": 400,
+      "CFL": 0.4,
+      "complete": true,
+      "amplitude_Pa": 9.148328114795731,
+      "reference_Pa": 9.986994411432534,
+      "absolute_error_Pa": 0.8386662966368021,
+      "relative_error_to_reference": 0.08397584519289862,
+      "normalized_error_to_10Pa": 0.08386662966368022,
+      "residual_components": [
+        1.3192259309483485e-16,
+        1.0826100847992068e-21,
+        2.294845112603231e-16,
+        3.6772762976220315e-17
+      ],
+      "stage_residual_components": [
+        1.4669147606465615e-16,
+        8.863796628848174e-22,
+        1.517795812200311e-16,
+        3.643946879021128e-17
+      ],
+      "admissible_recorded_interval": true,
+      "runtime": 9.218999999575317,
+      "steps": 451,
+      "RHS": 902,
+      "HLLC": 359898,
+      "HLLE": 0,
+      "fallback_reasons": {},
+      "checks": {
+        "completed": true,
+        "worst_ledger": true,
+        "pressure_L1": true,
+        "pressure_L2": true,
+        "speed_relative_error": true,
+        "amplitude_ratio": true,
+        "stage_conservation": true,
+        "stage_CFL": true
+      },
+      "metrics": {
+        "worst_ledger": 2.294845112603231e-16,
+        "errors": {
+          "rho": {
+            "L1": 2.5749643096091413e-07,
+            "L2": 8.990356737358607e-07,
+            "Linf": 6.299878092065558e-06
+          },
+          "u": {
+            "L1": 2.574739932290154e-07,
+            "L2": 8.992068951763536e-07,
+            "Linf": 6.301760642934094e-06
+          },
+          "p": {
+            "L1": 3.475414413052932e-07,
+            "L2": 1.2136000318920232e-06,
+            "Linf": 8.503747697686776e-06
+          },
+          "Y": {
+            "L1": 3.5180192092809615e-16,
+            "L2": 4.734827866421878e-16,
+            "Linf": 1.4988010832439613e-15
+          }
+        },
+        "pressure_L1": 0.003475414413052932,
+        "pressure_L2": 0.012136000318920233,
+        "speed": 340.946166185347,
+        "speed_relative_error": 3.995376151744168e-05,
+        "amplitude": 9.148328114795731,
+        "amplitude_ratio": 0.9160241548071014,
+        "worst_stage_ledger": 1.517795812200311e-16,
+        "analytical_amplitude": 9.986994411432534,
+        "analytical_amplitude_error": 0.08386662966368022,
+        "phase_displacement_error": 1.7979192682816288e-05,
+        "dissipation": 0.08397584519289858
+      },
+      "evidence_sha256": "750f4f67651e12ee3b2c4807383846dfe9b5d445f28ce98d4a073d609d156be8",
+      "input_configuration_reference_sha256": "4a1e4eedc99eea5de66c90fefc563bdfd52ec29290292dd34f534441f607883a"
+    },
+    {
+      "N": 400,
+      "CFL": 0.6,
+      "complete": true,
+      "amplitude_Pa": 9.149939659735537,
+      "reference_Pa": 9.986994411432534,
+      "absolute_error_Pa": 0.8370547516969964,
+      "relative_error_to_reference": 0.08381448083507331,
+      "normalized_error_to_10Pa": 0.08370547516969964,
+      "residual_components": [
+        1.6944798203416104e-16,
+        1.1502797431387425e-21,
+        2.0341310561295816e-16,
+        4.8530856042315446e-17
+      ],
+      "stage_residual_components": [
+        1.4735833377909592e-16,
+        8.556432045031455e-22,
+        1.4854231588871403e-16,
+        3.807211701516009e-17
+      ],
+      "admissible_recorded_interval": true,
+      "runtime": 6.125,
+      "steps": 301,
+      "RHS": 602,
+      "HLLC": 240198,
+      "HLLE": 0,
+      "fallback_reasons": {},
+      "checks": {
+        "completed": true,
+        "worst_ledger": true,
+        "pressure_L1": true,
+        "pressure_L2": true,
+        "speed_relative_error": true,
+        "amplitude_ratio": true,
+        "stage_conservation": true,
+        "stage_CFL": true
+      },
+      "metrics": {
+        "worst_ledger": 2.0341310561295816e-16,
+        "errors": {
+          "rho": {
+            "L1": 2.7466173995862113e-07,
+            "L2": 9.348806709343324e-07,
+            "Linf": 6.318009607056973e-06
+          },
+          "u": {
+            "L1": 2.7464847530738684e-07,
+            "L2": 9.350560387366576e-07,
+            "Linf": 6.319905801819277e-06
+          },
+          "p": {
+            "L1": 3.7070948510008764e-07,
+            "L2": 1.2619885545952417e-06,
+            "Linf": 8.528225783229573e-06
+          },
+          "Y": {
+            "L1": 3.258504577274836e-16,
+            "L2": 4.2815618158162198e-16,
+            "Linf": 1.609823385706477e-15
+          }
+        },
+        "pressure_L1": 0.0037070948510008763,
+        "pressure_L2": 0.012619885545952416,
+        "speed": 340.89667112146384,
+        "speed_relative_error": 0.00010522177147354039,
+        "amplitude": 9.149939659735537,
+        "amplitude_ratio": 0.9161855191649266,
+        "worst_stage_ledger": 1.4854231588871403e-16,
+        "analytical_amplitude": 9.986994411432534,
+        "analytical_amplitude_error": 0.08370547516969964,
+        "phase_displacement_error": -4.7349797163072874e-05,
+        "dissipation": 0.08381448083507337
+      },
+      "evidence_sha256": "08e5086ca5696268eb181f4512b13b6cc55d98d9799008f83996204f095e0d32",
+      "input_configuration_reference_sha256": "58b87eebb309a5bfe82f53bd867cfa7a7c6d0738547a2a267e04548c83247a54"
+    },
+    {
+      "N": 800,
+      "CFL": 0.2,
+      "complete": true,
+      "amplitude_Pa": 9.628646237513749,
+      "reference_Pa": 9.996745745113003,
+      "absolute_error_Pa": 0.36809950759925414,
+      "relative_error_to_reference": 0.036821933555647626,
+      "normalized_error_to_10Pa": 0.036809950759925415,
+      "residual_components": [
+        1.503591911850301e-16,
+        1.953378553019879e-21,
+        2.6519347554007364e-16,
+        5.330886802047546e-17
+      ],
+      "stage_residual_components": [
+        1.493589068911744e-16,
+        8.76605898822153e-22,
+        1.559036052736773e-16,
+        3.73397267227936e-17
+      ],
+      "admissible_recorded_interval": true,
+      "runtime": 74.20299999974668,
+      "steps": 1801,
+      "RHS": 3602,
+      "HLLC": 2877998,
+      "HLLE": 0,
+      "fallback_reasons": {},
+      "checks": {
+        "completed": true,
+        "worst_ledger": true,
+        "pressure_L1": true,
+        "pressure_L2": true,
+        "speed_relative_error": true,
+        "amplitude_ratio": true,
+        "stage_conservation": true,
+        "stage_CFL": true
+      },
+      "metrics": {
+        "worst_ledger": 2.6519347554007364e-16,
+        "errors": {
+          "rho": {
+            "L1": 8.953232275865055e-08,
+            "L2": 3.414338201658593e-07,
+            "Linf": 2.7570448808533766e-06
+          },
+          "u": {
+            "L1": 8.949327497896677e-08,
+            "L2": 3.4153183129981773e-07,
+            "Linf": 2.759140125856144e-06
+          },
+          "p": {
+            "L1": 1.2079864582774458e-07,
+            "L2": 4.6087958986295354e-07,
+            "Linf": 3.7208085563906932e-06
+          },
+          "Y": {
+            "L1": 6.852157730108393e-16,
+            "L2": 9.590645870533959e-16,
+            "Linf": 4.163336342344337e-15
+          }
+        },
+        "pressure_L1": 0.0012079864582774458,
+        "pressure_L2": 0.004608795898629536,
+        "speed": 340.9452508240533,
+        "speed_relative_error": 3.726888643540427e-05,
+        "amplitude": 9.628646237513749,
+        "amplitude_ratio": 0.9631780664443523,
+        "worst_stage_ledger": 1.559036052736773e-16,
+        "analytical_amplitude": 9.996745745113003,
+        "analytical_amplitude_error": 0.036809950759925415,
+        "phase_displacement_error": 1.677099889597763e-05,
+        "dissipation": 0.03682193355564767
+      },
+      "evidence_sha256": "f2c24693fa88a479edf2fe1926df808a4afe77573097642771c2562a16539487",
+      "input_configuration_reference_sha256": "e4efd8c31fb6fedc931dd1c3e510f9bb814342019dc9add88f2c0bf9fe903431"
+    },
+    {
+      "N": 800,
+      "CFL": 0.4,
+      "complete": true,
+      "amplitude_Pa": 9.63078348491399,
+      "reference_Pa": 9.996745745113003,
+      "absolute_error_Pa": 0.36596226019901223,
+      "relative_error_to_reference": 0.03660813924150428,
+      "normalized_error_to_10Pa": 0.03659622601990122,
+      "residual_components": [
+        1.7346820315091762e-16,
+        1.0358566478783739e-21,
+        2.3919422735821485e-16,
+        5.575621345788165e-17
+      ],
+      "stage_residual_components": [
+        1.493589068911744e-16,
+        8.556432045031455e-22,
+        1.5574424383156343e-16,
+        3.723969827824964e-17
+      ],
+      "admissible_recorded_interval": true,
+      "runtime": 37.514999999664724,
+      "steps": 901,
+      "RHS": 1802,
+      "HLLC": 1439798,
+      "HLLE": 0,
+      "fallback_reasons": {},
+      "checks": {
+        "completed": true,
+        "worst_ledger": true,
+        "pressure_L1": true,
+        "pressure_L2": true,
+        "speed_relative_error": true,
+        "amplitude_ratio": true,
+        "stage_conservation": true,
+        "stage_CFL": true
+      },
+      "metrics": {
+        "worst_ledger": 2.3919422735821485e-16,
+        "errors": {
+          "rho": {
+            "L1": 9.03720531767829e-08,
+            "L2": 3.44392601140616e-07,
+            "Linf": 2.751198521175002e-06
+          },
+          "u": {
+            "L1": 9.033084867336132e-08,
+            "L2": 3.4448972016481956e-07,
+            "Linf": 2.753295320879089e-06
+          },
+          "p": {
+            "L1": 1.219335510062592e-07,
+            "L2": 4.6487445457432277e-07,
+            "Linf": 3.7129157640447374e-06
+          },
+          "Y": {
+            "L1": 4.825306820777092e-16,
+            "L2": 6.676932405878899e-16,
+            "Linf": 2.609024107869118e-15
+          }
+        },
+        "pressure_L1": 0.0012193355100625918,
+        "pressure_L2": 0.004648744545743227,
+        "speed": 340.9455492862228,
+        "speed_relative_error": 3.814431523863071e-05,
+        "amplitude": 9.63078348491399,
+        "amplitude_ratio": 0.9633918607584957,
+        "worst_stage_ledger": 1.5574424383156343e-16,
+        "analytical_amplitude": 9.996745745113003,
+        "analytical_amplitude_error": 0.03659622601990122,
+        "phase_displacement_error": 1.716494185736937e-05,
+        "dissipation": 0.0366081392415043
+      },
+      "evidence_sha256": "4a08f2a9240d1e134a6c8c6bd1a57bb102d6372d4d9a7a4f35902094373e02da",
+      "input_configuration_reference_sha256": "864a3e1e3673f40bcaa07efac90f1f0eca7c8b046f40a359808d2476e98ba326"
+    },
+    {
+      "N": 800,
+      "CFL": 0.6,
+      "complete": true,
+      "amplitude_Pa": 9.63281855416426,
+      "reference_Pa": 9.996745745113003,
+      "absolute_error_Pa": 0.3639271909487434,
+      "relative_error_to_reference": 0.03640456606857811,
+      "normalized_error_to_10Pa": 0.036392719094874335,
+      "residual_components": [
+        1.751218840912399e-16,
+        2.7693902332028917e-21,
+        1.2246525896748586e-16,
+        4.102733880589318e-17
+      ],
+      "stage_residual_components": [
+        1.493589068911744e-16,
+        8.556432045031455e-22,
+        1.527461311915155e-16,
+        3.7489769390964503e-17
+      ],
+      "admissible_recorded_interval": true,
+      "runtime": 30.468999999575317,
+      "steps": 675,
+      "RHS": 1499,
+      "HLLC": 1197701,
+      "HLLE": 0,
+      "fallback_reasons": {},
+      "checks": {
+        "completed": true,
+        "worst_ledger": true,
+        "pressure_L1": true,
+        "pressure_L2": true,
+        "speed_relative_error": true,
+        "amplitude_ratio": true,
+        "stage_conservation": true,
+        "stage_CFL": true
+      },
+      "metrics": {
+        "worst_ledger": 1.751218840912399e-16,
+        "errors": {
+          "rho": {
+            "L1": 9.27018280484129e-08,
+            "L2": 3.493927009185098e-07,
+            "Linf": 2.749392242401116e-06
+          },
+          "u": {
+            "L1": 9.268746095588804e-08,
+            "L2": 3.4952274190704164e-07,
+            "Linf": 2.753783695740717e-06
+          },
+          "p": {
+            "L1": 1.2512851310366382e-07,
+            "L2": 4.7162205871281934e-07,
+            "Linf": 3.710477181739407e-06
+          },
+          "Y": {
+            "L1": 4.2792158705395854e-16,
+            "L2": 5.92804127206079e-16,
+            "Linf": 2.3869795029440866e-15
+          }
+        },
+        "pressure_L1": 0.0012512851310366381,
+        "pressure_L2": 0.004716220587128193,
+        "speed": 340.94258586621316,
+        "speed_relative_error": 2.945221453964919e-05,
+        "amplitude": 9.63281855416426,
+        "amplitude_ratio": 0.9635954339314219,
+        "worst_stage_ledger": 1.527461311915155e-16,
+        "analytical_amplitude": 9.996745745113003,
+        "analytical_amplitude_error": 0.036392719094874335,
+        "phase_displacement_error": 1.3253496542850456e-05,
+        "dissipation": 0.036404566068578115
+      },
+      "evidence_sha256": "fb00d7e03da00af8bb7b7c8ba1141b2d2afe889dea050bc0527b64b08ec21b34",
+      "input_configuration_reference_sha256": "7f370e8409f1684956a552f16d87acb435faa4b459abcceefb975b9123c1a422"
+    },
+    {
+      "N": 1600,
+      "CFL": 0.2,
+      "complete": false,
+      "amplitude_Pa": null,
+      "reference_Pa": 9.999186257526162,
+      "absolute_error_Pa": null,
+      "relative_error_to_reference": null,
+      "normalized_error_to_10Pa": null,
+      "residual_components": [
+        4.657422288491512e-16,
+        1.3461862110887196e-21,
+        4.0842433218299723e-16,
+        3.4397653364200805e-16
+      ],
+      "stage_residual_components": [
+        1.469832331098785e-16,
+        8.556432045031455e-22,
+        1.5916044438174834e-16,
+        3.7402244450558587e-17
+      ],
+      "admissible_recorded_interval": true,
+      "runtime": 300.0939999995753,
+      "steps": 3578,
+      "RHS": 7156,
+      "HLLC": 11442444,
+      "HLLE": 0,
+      "fallback_reasons": {},
+      "checks": {
+        "completed": false,
+        "worst_ledger": true,
+        "stage_conservation": true,
+        "stage_CFL": true
+      },
+      "metrics": {
+        "worst_ledger": 4.657422288491512e-16,
+        "worst_stage_ledger": 1.5916044438174834e-16
+      },
+      "evidence_sha256": "cece4cce697333e263cd1f310b46f539d0fa861365c50841cec7e981f160afeb",
+      "input_configuration_reference_sha256": "1db1a35167252533f8ecf748090b404a0a65742a0af14e3d6565cf52f2184c5d"
+    },
+    {
+      "N": 1600,
+      "CFL": 0.4,
+      "complete": true,
+      "amplitude_Pa": 9.84536868557916,
+      "reference_Pa": 9.999186257526162,
+      "absolute_error_Pa": 0.15381757194700185,
+      "relative_error_to_reference": 0.015383008975478063,
+      "normalized_error_to_10Pa": 0.015381757194700186,
+      "residual_components": [
+        4.046805844949314e-16,
+        2.1214607232758484e-21,
+        4.911264175817217e-16,
+        2.820004548734439e-16
+      ],
+      "stage_residual_components": [
+        1.4952562073722425e-16,
+        8.563638898732829e-22,
+        1.5949803949168075e-16,
+        3.7164677081044834e-17
+      ],
+      "admissible_recorded_interval": true,
+      "runtime": 153.57799999974668,
+      "steps": 1801,
+      "RHS": 3602,
+      "HLLC": 5759598,
+      "HLLE": 0,
+      "fallback_reasons": {},
+      "checks": {
+        "completed": true,
+        "worst_ledger": true,
+        "pressure_L1": true,
+        "pressure_L2": true,
+        "speed_relative_error": true,
+        "amplitude_ratio": true,
+        "stage_conservation": true,
+        "stage_CFL": true
+      },
+      "metrics": {
+        "worst_ledger": 4.911264175817217e-16,
+        "errors": {
+          "rho": {
+            "L1": 2.6401897630990852e-08,
+            "L2": 1.1264437128765903e-07,
+            "Linf": 1.1546199290961568e-06
+          },
+          "u": {
+            "L1": 2.6349772027794206e-08,
+            "L2": 1.1271522189039388e-07,
+            "Linf": 1.156812441067496e-06
+          },
+          "p": {
+            "L1": 3.557991981515443e-08,
+            "L2": 1.5202967010864898e-07,
+            "Linf": 1.5574806755466852e-06
+          },
+          "Y": {
+            "L1": 6.941322516773587e-16,
+            "L2": 9.508735737213653e-16,
+            "Linf": 3.608224830031759e-15
+          }
+        },
+        "pressure_L1": 0.0003557991981515443,
+        "pressure_L2": 0.0015202967010864896,
+        "speed": 340.94307359872494,
+        "speed_relative_error": 3.088279815344208e-05,
+        "amplitude": 9.84536868557916,
+        "amplitude_ratio": 0.9846169910245219,
+        "worst_stage_ledger": 1.5949803949168075e-16,
+        "analytical_amplitude": 9.999186257526162,
+        "analytical_amplitude_error": 0.015381757194700186,
+        "phase_displacement_error": 1.3897259169044066e-05,
+        "dissipation": 0.015383008975478063
+      },
+      "evidence_sha256": "1e62bdf8d59ed463063cfa3e8fca13584d4502f2062d1bd142c3196c35a4f54e",
+      "input_configuration_reference_sha256": "09a9ccb5f70ed30bb2180d100d3b6ad75cde18ccfbbfea723f47f9b61575d766"
+    },
+    {
+      "N": 1600,
+      "CFL": 0.6,
+      "complete": true,
+      "amplitude_Pa": 9.846353508197353,
+      "reference_Pa": 9.999186257526162,
+      "absolute_error_Pa": 0.15283274932880886,
+      "relative_error_to_reference": 0.015284518699086648,
+      "normalized_error_to_10Pa": 0.015283274932880887,
+      "residual_components": [
+        1.074407674813848e-16,
+        1.3198651554814452e-21,
+        1.2226301073146084e-16,
+        6.538940764880255e-17
+      ],
+      "stage_residual_components": [
+        1.493589068911744e-16,
+        8.66992728856356e-22,
+        1.5708863763877641e-16,
+        3.537098174954267e-17
+      ],
+      "admissible_recorded_interval": true,
+      "runtime": 125.23400000017136,
+      "steps": 1357,
+      "RHS": 3026,
+      "HLLC": 4838574,
+      "HLLE": 0,
+      "fallback_reasons": {},
+      "checks": {
+        "completed": true,
+        "worst_ledger": true,
+        "pressure_L1": true,
+        "pressure_L2": true,
+        "speed_relative_error": true,
+        "amplitude_ratio": true,
+        "stage_conservation": true,
+        "stage_CFL": true
+      },
+      "metrics": {
+        "worst_ledger": 1.2226301073146084e-16,
+        "errors": {
+          "rho": {
+            "L1": 2.7954501095449632e-08,
+            "L2": 1.1450249244291763e-07,
+            "Linf": 1.1542859197226641e-06
+          },
+          "u": {
+            "L1": 2.791078811647137e-08,
+            "L2": 1.1458087601849589e-07,
+            "Linf": 1.1564891732726138e-06
+          },
+          "p": {
+            "L1": 3.768360040912742e-08,
+            "L2": 1.5453362245603902e-07,
+            "Linf": 1.557029725809116e-06
+          },
+          "Y": {
+            "L1": 6.104838856657591e-16,
+            "L2": 8.376874589948629e-16,
+            "Linf": 3.3861802251067274e-15
+          }
+        },
+        "pressure_L1": 0.0003768360040912742,
+        "pressure_L2": 0.0015453362245603903,
+        "speed": 340.9438049262217,
+        "speed_relative_error": 3.30278779008264e-05,
+        "amplitude": 9.846353508197353,
+        "amplitude_ratio": 0.9847154813009134,
+        "worst_stage_ledger": 1.5708863763877641e-16,
+        "analytical_amplitude": 9.999186257526162,
+        "analytical_amplitude_error": 0.015283274932880887,
+        "phase_displacement_error": 1.4862545055352756e-05,
+        "dissipation": 0.015284518699086647
+      },
+      "evidence_sha256": "1ccc24359b9a74c38f60f88466fbcd770755db054e27fb4928b7803078e4323f",
+      "input_configuration_reference_sha256": "30284351c342b628bfb3e586c2247b7a1c0a0ddfcfd886a5c858a8830fca5a8f"
+    }
+  ],
+  "pairs": [
+    {
+      "CFL_pair": [
+        0.2,
+        0.4
+      ],
+      "S400_S800_S1600": [
+        0.00038941825041547415,
+        0.0002137247400241904,
+        null
+      ]
+    },
+    {
+      "CFL_pair": [
+        0.4,
+        0.6
+      ],
+      "S400_S800_S1600": [
+        0.00016115449398057535,
+        0.00020350692502688617,
+        9.848226181929931e-05
+      ]
+    },
+    {
+      "CFL_pair": [
+        0.2,
+        0.6
+      ],
+      "S400_S800_S1600": [
+        0.0005505727443960495,
+        0.00041723166505107655,
+        null
+      ]
+    }
+  ],
+  "new_integrations": 0,
+  "R5_adopted": false,
+  "phase_B_authorized_by_gate": false
+}
