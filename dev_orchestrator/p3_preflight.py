@@ -6,7 +6,7 @@ from math import sqrt
 from pathlib import Path
 import time
 
-from motorsim.coupling import ChamberState, interface_flux
+from motorsim.coupling import ChamberState, prescribed_reservoir_flux as interface_flux
 from motorsim.gas1d.eos import IdealGas, InvalidState
 from .p2_campaign import ROOT, sha, write
 from .p1_r5_close import close as verify_p2_offline

@@ -1,5 +1,5 @@
 import unittest
-from motorsim.coupling import ChamberState, interface_flux
+from motorsim.coupling import ChamberState, prescribed_reservoir_flux as interface_flux
 from motorsim.gas1d.eos import IdealGas, InvalidState
 
 

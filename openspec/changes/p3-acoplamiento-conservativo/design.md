@@ -54,3 +54,9 @@ admisibilidad estricta segúnP1. Los casos no ejecutados conservan NOT_RUN.
 Los parámetros temporales/onda de C04/C08–C11 requieren congelación antes de
 esas ejecuciones, nunca selección posterior. Si el preflight bloquea, no se
 inventan resultados ni se presenta esta tabla como campaña ejecutada.
+
+## Revisión R1 autorizada
+Orden38a85593 sustituye el cierreP3 reservoir por problemaRiemann con W0D
+estacionario; docs/gasdynamic/0d_1d_coupling_r1.md define delta, energía y gates.
+El bloqueo anterior se conserva histórico. Ninguna BC P2 cambia. P3B sólo tras
+C00/C00B, auditoría de flujo y revisión independiente PASS.

@@ -35,3 +35,9 @@ Revisión independiente /root/p3_review confirma STOP,27hashes y42evaluaciones;
 6sinrama. Ningún hallazgo adicional en interfaz preparatoria. Dictamen en
 results/p3-coupling-20260918/independent-review.json. Autorrevisión separada
 de alcance/documentos/hashes. OpenSpec estricto P3 y P2 PASS.
+
+## P3-R1 — orden38a85593
+- [ ] C00/C00B, curvas, forward/reverse, energía/especie y revisión independiente.
+- [ ] P3B C01–C07 tras R1 PASS.
+- [ ] P3C C08–C12 tras P3B PASS.
+- [ ] Adaptador0D y cierre sólo tras todos los gates.

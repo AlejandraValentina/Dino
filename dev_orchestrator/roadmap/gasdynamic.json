@@ -667,6 +667,37 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P3_R1",
+      "title": "P3-R1 Riemann interface",
+      "objective": "Riemann interface scientific gate before finite coupling",
+      "depends_on": [
+        "P2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "regression_tests",
+        "r1",
+        "C00",
+        "C00B",
+        "forward_reverse",
+        "species",
+        "shared_energy",
+        "P2_frozen",
+        "P2_regression",
+        "P0_regression"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }

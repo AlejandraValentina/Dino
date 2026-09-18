@@ -1,13 +1,13 @@
-"""Isolated P3 interface preflight. No production connection or time integrator.
+"""Isolated P3 interfaces. P3-R1 uses the frozen Euler Riemann kernel.
 
-The verified reservoir closure is reused unchanged. Its backflow limitations
-propagate as errors; this module neither switches closure nor clips states.
+The old prescribed-reservoir diagnostic remains explicitly named and separate.
 """
 from dataclasses import dataclass
 from math import isfinite
 
 from .gas1d.boundary import Boundary
 from .gas1d.eos import IdealGas, InvalidState
+from .gas1d.riemann import hllc_flux
 
 
 @dataclass(frozen=True)
@@ -45,7 +45,7 @@ class SharedFlux:
                     outward_axial_impulse=dt*self.outward[1])
 
 
-def interface_flux(chamber, interior, area, normal, *, eos=None):
+def prescribed_reservoir_flux(chamber, interior, area, normal, *, eos=None):
     eos = eos or IdealGas()
     if normal not in (-1, 1) or not isfinite(area) or area <= 0:
         raise ValueError('Invalid interface area/normal')
@@ -56,3 +56,36 @@ def interface_flux(chamber, interior, area, normal, *, eos=None):
     outward = tuple(normal * area * f for f in eos.flux(face))
     donor = 'pipe' if outward[0] > 0 else ('chamber' if outward[0] < 0 else 'none')
     return SharedFlux(face, outward, donor)
+
+
+@dataclass(frozen=True)
+class RiemannExchange:
+    flux_x: tuple
+    outward: tuple
+    wave_speeds: tuple
+    fallback_reason: str | None
+
+    def increments(self, dt):
+        if not isfinite(dt) or dt < 0:
+            raise ValueError('Invalid dt')
+        transfer = tuple(dt*self.outward[k] for k in (0, 2, 3))
+        return dict(chamber=transfer, pipe=tuple(-x for x in transfer),
+                    interface_axial_impulse=dt*self.outward[1])
+
+
+def interface_flux(chamber, interior, area, normal, *, eos=None):
+    """One Riemann problem; direction is an output, never an input branch.
+
+    Flux_x follows the pipe's x axis. Normal points OUT of the pipe.
+    The chamber receives normal*area*EulerFlux components mass/energy/species.
+    Its macroscopic velocity is zero; the interface force does no wall work.
+    """
+    eos = eos or IdealGas()
+    if normal not in (-1, 1) or not isfinite(area) or area <= 0:
+        raise ValueError('Invalid interface area/normal')
+    rho, pressure, _, fraction = chamber.thermodynamics(eos)
+    stagnant = eos.validate((rho, 0., pressure, fraction))
+    left, right = (stagnant, interior) if normal == -1 else (interior, stagnant)
+    flux, speeds, reason = hllc_flux(left, right, eos)
+    scaled = tuple(area*f for f in flux)
+    return RiemannExchange(scaled, tuple(normal*f for f in scaled), speeds, reason)
