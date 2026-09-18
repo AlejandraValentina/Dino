@@ -70,3 +70,43 @@ No redondear.08 a.09/.10 ni usar predicción aproximada como cota rigurosa.
 Revisión independiente read-only de métrica, datos y eventual criterio antes de
 adopciónR4. No aprobarP2A todavía. TrasR4PASS ejecutar soloT11 primero;
 regresiones necesarias después. P2B/P3 no se usan para rescatar esteestudio.
+
+## Propuesta contractual posterior al estudio, pendiente de revisión
+Estudio completo509,375s:12/12 estables y conservativos. S(.2,.6) disminuye
+.113607252676→.083363827062→.052871641950. Las otrasdos parejas también
+disminuyen; error del pico hacia referencia independiente decrece en cadaCFL.
+CFL.6 conserva la misma tendencia, sin evidencia de límite distinto o blow-up.
+CasoA respaldado en estas tres mallas; no prueba asintótica general.
+
+Propuesta R4 SOLO first-order, sin editarR3:
+1. N400/800/1600, C=.2,.4,.6, mismos IC/BC/t_final; todos completados,
+   admisibles sinclipping y cuatroledgers<=1e-10.
+2. A=max_i(p_i-p0), S(N;a,b)=abs(Aa-Ab)/10Pa intactos.
+   Exigir S(400;a,b)>S(800;a,b)>S(1600;a,b) para cada pareja
+   (.2,.4),(.4,.6),(.2,.6), ambastransiciones, sin escoger solo la mejorpareja.
+3. E_A(N,C)=abs(A(N,C)-A_ref(N))/10Pa, conA_ref del pico de primitivas
+   de integrales conservadas de la solución acústicaanalítica originalT03.
+   Exigir E_A(400,C)>E_A(800,C)>E_A(1600,C) para cadaCFL productivo.
+4. Conservar todos los gatespadreT03 aN800 y exigirlos también aN1600:
+   A/A_ref en[.65,1.05], E1p<=.025,E2p<=.08, velocidaderror<=.01a0,
+   admisibilidad yledger. Estos son los límites cuantitativos delobservable,
+   preceden al estudio y se contrastan con referenciaindependiente, no con
+   otra solución numérica que pueda compartir sesgo. N400errorL1.1/.2
+   permanece documentado, no requerido allí porcontratooriginal.
+5. Mantener T11SodN400 conE1diferenciasrho/u/p<=.015 y todosgatespadre;
+   mantener comparaciónvelocidadT03N800<=.005a0 frenteCFL.2.
+6. CFL.1 diagnóstico solamente, no nuevo requisito deproducción.
+7. Registrar sensibilidad.08 histórica como diagnóstico que continúaFAIL.
+   Esta revisión RETIRA la garantía <=8% enN800, no es criterio equivalente.
+   No reemplaza.08 por.09/.10. Añade condicionesdemalla/exactitud y se limita
+   al casoacústico y método contratados; no acreditar otrasanchuras/fronteras.
+8. MUSCL/SSP-RK2 queda fuera de esta revisión; conservaT11original hasta
+   definición posterior. No implementarP2B duranteP1-R4 ni comenzarP3.
+
+Si revisor aprueba, adoptar1D_CONTRACT_V1_R4 y registrarT11primero:
+repetir seisruns contractuales (tresSod+tresT03) con fuenteintacta y aplicar
+criterioR4 usando también los arrays400/1600conhash delestudio. Después,
+reevaluarT01–T12 desde52arraysR3conhash y seisrunsnuevos, conservando deltas
+originales y sin atribuir52integracionesnuevas. El solver/otrosgates son idénticos;
+esta regresión offline es suficiente solo si hashes y comparacionesconfirmanlo.
+P2A numéricamenteverificado no es aceptaciónhumana deP2; human gate pendiente.

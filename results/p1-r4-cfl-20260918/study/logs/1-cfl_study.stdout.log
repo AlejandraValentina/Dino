@@ -1,0 +1,29 @@
+START N=800 CFL=0.2
+END N=800 CFL=0.2 completed A=7.99875531278667 stable=True deterministic=True
+START N=800 CFL=0.4
+END N=800 CFL=0.4 completed A=8.384220393927535 stable=True deterministic=True
+START N=800 CFL=0.6
+END N=800 CFL=0.6 completed A=8.832393583405064 stable=True deterministic=True
+START N=400 CFL=0.1
+END N=400 CFL=0.1 completed A=6.6421470464702 stable=True deterministic=None
+START N=400 CFL=0.2
+END N=400 CFL=0.2 completed A=6.857220384961693 stable=True deterministic=None
+START N=400 CFL=0.4
+END N=400 CFL=0.4 completed A=7.3590926621400286 stable=True deterministic=None
+START N=400 CFL=0.6
+END N=400 CFL=0.6 completed A=7.993292911720346 stable=True deterministic=None
+START N=800 CFL=0.1
+PROGRESS N=800 CFL=0.1 step=2000 t=0.000733223871
+END N=800 CFL=0.1 completed A=7.825034930850961 stable=True deterministic=None
+START N=1600 CFL=0.1
+PROGRESS N=1600 CFL=0.1 step=2000 t=0.000366610207
+PROGRESS N=1600 CFL=0.1 step=4000 t=0.000733221653
+PROGRESS N=1600 CFL=0.1 step=6000 t=0.0010998342
+END N=1600 CFL=0.1 completed A=8.715426596696489 stable=True deterministic=None
+START N=1600 CFL=0.2
+PROGRESS N=1600 CFL=0.2 step=2000 t=0.000733221386
+END N=1600 CFL=0.2 completed A=8.834082853180007 stable=True deterministic=None
+START N=1600 CFL=0.4
+END N=1600 CFL=0.4 completed A=9.086891735962126 stable=True deterministic=None
+START N=1600 CFL=0.6
+END N=1600 CFL=0.6 completed A=9.362799272683333 stable=True deterministic=None

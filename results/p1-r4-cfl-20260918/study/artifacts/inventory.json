@@ -1,0 +1,17 @@
+{
+  "artifacts/checkpoint.json": "76987699b271ee8e94dcdfa0d6c6fe23c0057ead44be24bfabc545562de9fc49",
+  "artifacts/result.json": "e90ba745b9cb883b99121a74e2dff61b82b2bf4991e91f4b94f6102918e55c57",
+  "artifacts/study.json": "773e5af8bcebbe7634572170a975b9b554809fca66331413ad743300b412b082",
+  "artifacts/cases/T03-N1600-C0.1.json.gz": "31d63bddd24028c22c119565b4a537083c86fabbce667c1e2c00cf01f2f20ea1",
+  "artifacts/cases/T03-N1600-C0.2.json.gz": "25361203dfaa0bf354d4102b3fdc4434ec13ba2d978f7f0f638ed1b889cb9932",
+  "artifacts/cases/T03-N1600-C0.4.json.gz": "24ee147562d52e4161f1e31af48261d54fa15a6b2a7e8d4e833a42e989cb7d7d",
+  "artifacts/cases/T03-N1600-C0.6.json.gz": "9f84b425eb2b3c4b70a52ccd8df26cb1969bb7b1ebc0d10ef603ae890e9c125b",
+  "artifacts/cases/T03-N400-C0.1.json.gz": "bf3d3ccdc9d1c57c044526f0b5a0a56a182d83d4cdc39cf5f7cff8211a32856f",
+  "artifacts/cases/T03-N400-C0.2.json.gz": "c136ca932959f47ec8ac9b81749bf0831ab182c2466d78362e35209112bc4ad7",
+  "artifacts/cases/T03-N400-C0.4.json.gz": "d2b4c1fce44119728530a2cff30ddb964ca485b16b30f5b0615895a31cabb51f",
+  "artifacts/cases/T03-N400-C0.6.json.gz": "4b0281268689d1bae5a16338630d381dc4f81b096b91648e91cd60e87b4109b8",
+  "artifacts/cases/T03-N800-C0.1.json.gz": "5e86447d339140aa9e0d860cb10071091ca2fcede66ed5fc921cc7383be4dbf8",
+  "artifacts/cases/T03-N800-C0.2.json.gz": "9a6ae9ba3ad3b06578df69252fc611527fad9db14603d078ae11f9224381698c",
+  "artifacts/cases/T03-N800-C0.4.json.gz": "2d289c640ac8dacc4ef00ae3e0fd32d802c95675c706ab98b5b5bd74d95fbc09",
+  "artifacts/cases/T03-N800-C0.6.json.gz": "27404418aad6ef8c277edb4b0d1ecbae0706990518329dbdd3e409849028688f"
+}

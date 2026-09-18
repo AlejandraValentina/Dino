@@ -1,0 +1,8 @@
+test_determinism_discards_only_wall_clock (test_p1_r4.CFLStudyTests.test_determinism_discards_only_wall_clock) ... ok
+test_frozen_implementation_and_previous_contracts (test_p1_r4.CFLStudyTests.test_frozen_implementation_and_previous_contracts) ... ok
+test_metric_preserves_prescribed_ten_pa_denominator (test_p1_r4.CFLStudyTests.test_metric_preserves_prescribed_ten_pa_denominator) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.314s
+
+OK
