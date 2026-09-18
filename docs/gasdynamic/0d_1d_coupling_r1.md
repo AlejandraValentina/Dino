@@ -88,3 +88,13 @@ cada CFL. C11: las tres diferencias de presión entre pares CFL, L1/ε, deben
 ser no mayores enN160 que enN40; registrarN80. No exige monotonía intermedia.
 C12: positividad de todas las etapas B/C, especie admisible, CFL por etapa y
 rechazo de estado inicial inválido. Máximo300s/caso; conservar fallos y detener.
+
+### Corrección de infraestructura del evaluador C09
+Primer run P3C conserva C08 PASS ambos métodos; primer N40/CFL.2 integrado,
+pero sin resultado retenido al fallar cuadratura final relativa cerca de momento
+nulo. Sin resultado científico acústico en ese run. Se repite sólo ese caso y
+los pendientes, reutilizando C08 por SHA256. Inicialización permanece idéntica.
+Evaluación final usa GL4 compuesto8/16 subdivisiones/celda, separando frente
+causal si cruza celda; diferencia<=1e-10 de A*dx*(rho0,ε/a,p0/(gamma-1),.3rho0).
+Es control de convergencia de cuadratura, no cota rigurosa. Registrado y revisado
+independientemente; ningún cambio en solver, datos, mallas, CFL ni accuracy .025.

@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "E:\dino\Dino\dev_orchestrator\p3_acoustic.py", line 121, in <module>
+    p=argparse.ArgumentParser();p.add_argument('--run-dir',type=Path,required=True);campaign(p.parse_args().run_dir)
+                                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p3_acoustic.py", line 94, in campaign
+    save(acoustic(n,cfl))
+         ^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p3_acoustic.py", line 42, in acoustic
+    final=cell_integrals(mesh,lambda x:reference(x,END),EOS,lambda x:A,breaks=(SPEED*END,))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\motorsim\gas1d\reference.py", line 82, in cell_integrals
+    parts=[integrate(integrand,a,b) for a,b in zip(bounds,bounds[1:])]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\motorsim\gas1d\reference.py", line 82, in <listcomp>
+    parts=[integrate(integrand,a,b) for a,b in zip(bounds,bounds[1:])]
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\motorsim\gas1d\reference.py", line 73, in integrate
+    a=integrate(function,left,mid,depth+1);b=integrate(function,mid,right,depth+1)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\motorsim\gas1d\reference.py", line 73, in integrate
+    a=integrate(function,left,mid,depth+1);b=integrate(function,mid,right,depth+1)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\motorsim\gas1d\reference.py", line 73, in integrate
+    a=integrate(function,left,mid,depth+1);b=integrate(function,mid,right,depth+1)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [Previous line repeated 17 more times]
+  File "E:\dino\Dino\motorsim\gas1d\reference.py", line 72, in integrate
+    if depth>=20:raise ValueError('Reference quadrature not converged')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Reference quadrature not converged

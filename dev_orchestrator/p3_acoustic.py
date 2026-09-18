@@ -3,12 +3,12 @@ import argparse
 from dataclasses import asdict
 import gzip
 import json
-from math import cos, erf, exp, pi, sin, sqrt
+from math import cos, erf, exp, fsum, pi, sin, sqrt
 from pathlib import Path
 from motorsim.coupled import solve_coupled
 from motorsim.gas1d.eos import IdealGas
 from motorsim.gas1d.mesh import uniform_mesh
-from motorsim.gas1d.reference import cell_integrals
+from motorsim.gas1d.reference import NODES, WEIGHTS, cell_integrals
 from .p3_r1 import chamber
 from .p3_finite import common_checks, species_audit
 from .p2_campaign import ROOT, sha, write
@@ -16,6 +16,30 @@ from .p2_campaign import ROOT, sha, write
 P=100000.; T=300.; A=.0003; V=.0001; L=.3; EPS=1.; XC=.15; SIGMA=.03; END=.0009
 EOS=IdealGas(); RHO=P/(EOS.R*T); SPEED=sqrt(EOS.gamma*EOS.R*T); Z=RHO*SPEED
 TAU=2*V/(SPEED*A)
+
+
+def reference_integrals(mesh,t):
+    """Independent GL4 composite quadrature, with an absolute scale check.
+
+    Relative-only convergence is ill-defined for nearly cancelling momentum.
+    Check two subdivisions against a fixed perturbation momentum scale instead.
+    """
+    def evaluate(parts):
+        cells=[]
+        for left,right in zip(mesh.faces,mesh.faces[1:]):
+            bounds=[left,*([SPEED*t] if left<SPEED*t<right else []),right];rows=[]
+            for lower,upper in zip(bounds,bounds[1:]):
+                h=(upper-lower)/parts
+                for j in range(parts):
+                    middle=lower+(j+.5)*h
+                    rows.extend(tuple(h/2*w*A*q for q in EOS.conservative(reference(middle+h/2*x,t))) for x,w in zip(NODES,WEIGHTS))
+            cells.append(tuple(fsum(r[k] for r in rows) for k in range(4)))
+        return cells
+    coarse=evaluate(8);fine=evaluate(16)
+    scales=(RHO,EPS/SPEED,P/(EOS.gamma-1),.3*RHO)
+    error=max(abs(x-y)/(v*s) for a,b,v in zip(coarse,fine,mesh.volumes) for x,y,s in zip(a,b,scales))
+    if error>1e-10:raise ValueError(f'Reference absolute quadrature failed: {error}')
+    return fine,error
 
 
 def chamber_pressure(t):
@@ -39,7 +63,7 @@ def acoustic(n,cfl):
     mesh=uniform_mesh(n,L,A);ch=chamber(P,Y=.3,V=V)
     initial=cell_integrals(mesh,lambda x:reference(x,0),EOS,lambda x:A)
     r=solve_coupled(mesh,initial,ch,END,cfl=cfl,wall_limit=300.)
-    final=cell_integrals(mesh,lambda x:reference(x,END),EOS,lambda x:A,breaks=(SPEED*END,))
+    final,final_quadrature=reference_integrals(mesh,END)
     exact=[EOS.primitive(tuple(q/v for q in row)) for row,v in zip(final,mesh.volumes)]
     errors={name:sum(abs(w[k]-e[k]) for w,e in zip(r['primitive'],exact))/n/scale for name,k,scale in (('pressure',2,EPS),('velocity',1,EPS/Z))}
     pc=chamber_pressure(END)
@@ -58,7 +82,7 @@ def acoustic(n,cfl):
     errors['reflected_wave']=reflection_error
     checks=common_checks(r)
     checks.update(accuracy=all(v<=.025 for v in errors.values()),species=species_audit(r)<=1e-12,response=0<numerical_peak<1)
-    return dict(name=f'acoustic_N{n}_CFL{cfl}',inputs=dict(N=n,CFL=cfl,final_time=END,epsilon=EPS,tau=TAU),errors=errors,
+    return dict(name=f'acoustic_N{n}_CFL{cfl}',inputs=dict(N=n,CFL=cfl,final_time=END,epsilon=EPS,tau=TAU),quadrature=dict(final_difference_8_16=final_quadrature,scales=[RHO,EPS/SPEED,P/(EOS.gamma-1),.3*RHO]),errors=errors,
         reflection_peak=dict(numerical=numerical_peak,reference=exact_peak),initial=initial,result=r,checks=checks,status='PASS' if all(checks.values()) else 'FAIL')
 
 
@@ -86,7 +110,11 @@ def campaign(run_dir):
         write(art/'inventory.json',inventory)
         print(r['name'],r['status'],r['result']['wall_seconds'],r.get('errors',{}),flush=True)
     for method in ('FIRST_ORDER','MUSCL_SSPRK2'):
-        save(variable(method))
+        previous=ROOT/'results/p3-r1-20260918/p3c-infrastructure/artifacts/cases'/('variable_'+method+'.json.gz')
+        inventory_before=json.loads((previous.parent.parent/'inventory.json').read_text(encoding='utf-8'))
+        if sha(previous)!=inventory_before[previous.name]:raise ValueError('C08 reuse hash mismatch')
+        reused=json.loads(gzip.decompress(previous.read_bytes()));reused['reused_from']=str(previous.relative_to(ROOT));reused['reused_sha256']=sha(previous)
+        save(reused)
         if records[-1]['status']!='PASS':break
     if all(r['status']=='PASS' for r in records):
         for cfl in (.2,.4,.6):
