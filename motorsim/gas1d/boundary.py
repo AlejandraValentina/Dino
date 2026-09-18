@@ -1,6 +1,6 @@
 """Isolated mathematical boundaries; no 0D coupling or real exhaust radiation."""
 from dataclasses import dataclass
-from math import sqrt, ulp
+from math import sqrt
 from .eos import InvalidState
 from .riemann import hllc_flux
 
@@ -39,10 +39,6 @@ class Boundary:
             exterior_y=self.Y0
             # Try outflow using the prescribed static receiving pressure.
             rb=(self.p0/ki)**(1/g);ab=sqrt(g*self.p0/rb);wb=jp-2*ab/(g-1);pb=self.p0
-            # Cancellation of two characteristics at rest: decide a zero-flow
-            # branch within arithmetic resolution, not a physical velocity band.
-            if self.kind=='open' and abs(wb)<=8*ulp(max(abs(jp),abs(2*ab/(g-1)))):
-                wb=0.
             if wb<0:
                 if self.kind=='open':
                     rb=ext[0];ab=eos.sound_speed(ext);wb=jp-2*ab/(g-1)

@@ -1,0 +1,37 @@
+{
+  "preservation": {
+    "baseline_intact": true,
+    "contract_frozen": true,
+    "dependencies_accepted": true
+  },
+  "tests": [
+    {
+      "command": ".\\.venv\\Scripts\\python.exe -m unittest discover -s tests -p test_p1_r2.py -v",
+      "passed": 7,
+      "exit_code": 0
+    },
+    {
+      "command": ".\\.venv\\Scripts\\python.exe -m unittest discover -s tests -p test_p2_fixes.py -v",
+      "passed": 6,
+      "exit_code": 0
+    },
+    {
+      "command": ".\\.venv\\Scripts\\python.exe -m unittest discover -s tests -p test_gas1d.py -v",
+      "passed": 11,
+      "exit_code": 0
+    }
+  ],
+  "test_evidence": "Final tool executions after withdrawal; no general campaign rerun.",
+  "native_r2_sha256": "9fa96dd9f04b502584f0b4d3d24383e7c322afb850b725e12743393b5e37fc91",
+  "native_t05_sha256": "b7125bf1b61ef5f47fbef00a6b464b347e48c3d1b8678472d7e0f178a159841d",
+  "detector_sha256": "ad5dc76f4482d7db1438297f5727a655af63fff20b9595770bb8e6a459609b06",
+  "original_numerical_files_unchanged": {
+    "motorsim/gas1d/riemann.py": true,
+    "motorsim/gas1d/eos.py": true,
+    "motorsim/gas1d/mesh.py": true
+  },
+  "contract_delta_paths": [
+    "/model_version",
+    "/verification_cases/1/definition"
+  ]
+}

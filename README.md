@@ -1,6 +1,16 @@
 # MotorSim
 
-P1-R1: **P1_R1_CONTACT_ACCURACY_UNRESOLVED**. Estudio Sod y contacto puro
+P1-R2: **P1_R2_PASS_CONTACT_OBSERVABLE**. Detector independiente de rho/p/u,
+sin Y ni referencia exacta, aprobado en ocho soluciones preservadas y por revisión
+independiente. Contrato [1D_CONTRACT_V1_R2](docs/gasdynamic/1d_contact_observable_v1_r2.md),
+con único cambio del observable T02 y mismo límite2Δx; T06 intacto.
+**P2A no reanudado:** T05 sigue bloqueado por ramas de frontera incompatibles,
+confirmadas con70dígitos. Una excepción provisional de velocidadcero fue retirada;
+su ensayo fallido no acredita T05. Retenidos fixes de contadores y exterior no
+reflectivo. [Resultados y pendientes](openspec/changes/p1-r2-contacto/tasks.md).
+24pruebas pertinentes PASS; no equivalen a T01–T12 completos. Sin P2B/P3.
+
+Antecedente P1-R1: **P1_R1_CONTACT_ACCURACY_UNRESOLVED**. Estudio Sod y contacto puro
 N200/400/800/1600 completado por dev_orchestrator. El cruce Y=0,5 en Sod N400
 da error2,16805Δx >2Δx; no se adopta R1 ni se reanuda P2. Contrato y solver
 intactos; [tablas y estado](openspec/changes/p1-r1-contacto/tasks.md),
@@ -12,7 +22,7 @@ sin cambiar el baseline NUMERICALLY_VERIFIED_BASELINE ni atribuir validación
 experimental. P1 define el contrato quasi-1D en [docs/gasdynamic](docs/gasdynamic/1d_mathematical_contract_v1.md),
 con [plan T01–T12](docs/gasdynamic/1d_verification_plan_v1.md) y manifest.
 P1: **P1_HUMAN_ACCEPTED**, contrato congelado para P2.
-P2: **SCIENTIFIC_CHANGE_REQUIRED**; núcleo first-order aislado implementado pero
+Antecedente P2 anterior a R2: **SCIENTIFIC_CHANGE_REQUIRED**; núcleo first-order aislado implementado pero
 no aprobado. Sod incumple la localización contractual del contacto; T05 también
 falla por selección de rama cerca del reposo. Campaña detenida: T08 parcial,
 T09–T12 sin ejecutar, P2B/P3 sin iniciar. Producción 0D/UI/JSON intactos.

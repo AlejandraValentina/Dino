@@ -1,0 +1,10 @@
+test_counts_survive_later_boundary_failure (test_p2_fixes.P2FixTests.test_counts_survive_later_boundary_failure) ... ok
+test_fallback_records_actual_boundary_states (test_p2_fixes.P2FixTests.test_fallback_records_actual_boundary_states) ... ok
+test_flux_counts_actual_calls_and_periodic_shared_face (test_p2_fixes.P2FixTests.test_flux_counts_actual_calls_and_periodic_shared_face) ... ok
+test_nonreflecting_explicit_base_entropy_and_species (test_p2_fixes.P2FixTests.test_nonreflecting_explicit_base_entropy_and_species) ... ok
+test_open_roundoff_and_real_flow (test_p2_fixes.P2FixTests.test_open_roundoff_and_real_flow) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.004s
+
+OK

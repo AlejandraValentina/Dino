@@ -1,0 +1,27 @@
+{
+  "decimal_precision": 70,
+  "normal": 1,
+  "outgoing_velocity": "-3.6457860159731562026648441099565912592303961366502797634E-11",
+  "incoming_velocity": "4.1227810310643459762959545293638259901983560517418176089354E-8",
+  "J_plus": "1948.185969457025074172290298295676425572355175002648669926756284510436",
+  "outgoing_rest_invariant": "1948.185969457061532032450029857703074013454740915240973888122787308070",
+  "incoming_rest_invariant": "1948.185969415797263861646838532716880278716915100665109409338108421082",
+  "interior_entropy": "81706.05734251087328995151903134145705286252178191844981111189986240603",
+  "exterior_entropy": "81706.05733783823939964272049059132896278810601470868320756963295981073",
+  "historical17_final_code": "No consistent open-boundary branch",
+  "provisional2764_final_code": "No consistent open-boundary branch",
+  "state": "SCIENTIFIC_CHANGE_REQUIRED",
+  "P1_R2": "P1_R2_PASS_CONTACT_OBSERVABLE",
+  "P2A": "NOT_RESUMED",
+  "trial_status": "FAILED_PROVISIONAL_BOUNDARY_EXCEPTION_WITHDRAWN",
+  "trial_source_commit": "de1d896",
+  "steps": 2764,
+  "wall_seconds": 39.07799999974668,
+  "trial_time": 0.002702880649229224,
+  "note": "8ulp zero-velocity exception violated original prohibition; removed. Trial is diagnostic only, not contractual T05 accreditation. Both branch signs remain inconsistent at 70 digits. No wider band, entropy mixing or altered BC authorized.",
+  "preservation": {
+    "baseline_intact": true,
+    "contract_frozen": true,
+    "dependencies_accepted": true
+  }
+}

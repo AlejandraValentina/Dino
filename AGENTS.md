@@ -2,7 +2,13 @@
 
 ## Lectura y autoridad
 
-Orden más reciente: `p1-r1-contacto`, etapa P1_R1_SCIENTIFIC_AMENDMENT.
+Orden más reciente: `p1-r2-contacto`. P1_R2_PASS_CONTACT_OBSERVABLE adopta
+1D_CONTRACT_V1_R2 sin alterar v1/T06. P2A NO reanudado: T05 tiene ramas
+incompatibles, SCIENTIFIC_CHANGE_REQUIRED. Excepción de velocidadcero retirada;
+solo fixes de contabilidad y exterior no reflectivo retenidos. No iniciar P2B/P3
+ni modificar BC sin nueva decisión científica. Ver tareas y evidencia del cambio.
+
+Antecedente: `p1-r1-contacto`, etapa P1_R1_SCIENTIFIC_AMENDMENT.
 Estudio acotado del observable T02, sin cambiar solver ni P1 congelado.
 Resultado P1_R1_CONTACT_ACCURACY_UNRESOLVED: B supera2dx en N400; STOP.
 Sin R1 adoptado ni autorización efectiva de fixes P2, T05, P2B o P3.

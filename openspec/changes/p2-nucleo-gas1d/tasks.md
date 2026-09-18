@@ -59,3 +59,12 @@ aprobado; autorrevisión de alcance separada de revisión independiente.
 Figuras Sod/pulso SVG y PNG derivadas de arrays conservados; Sod inspeccionada
 visualmente. No inspección UI/Windows, paquete ni aceptación de P2 atribuida.
 Commit de evidencia registra este cierre. Sin publicar ni archivar; redme.txt ajeno.
+
+## Continuación P1-R2 — 18/09/2026
+El observable hidrodinámico T02 aprobó y se adoptó 1D_CONTRACT_V1_R2;
+el fallo histórico anterior no se reescribe. Ver tareas de p1-r2-contacto.
+Retenidos fixes de contabilidad y estado exterior no reflectivo. T05 no aprueba:
+ensayo provisional fallido con excepción retirada de velocidadcero; sus dos
+ramas son incompatibles también a70dígitos. SCIENTIFIC_CHANGE_REQUIRED para BC,
+sin reanudar T01–T12/P2A ni iniciar P2B/P3. Una ronda de reparación/ensayo de3;
+las restantes no autorizan modificar física para superar el gate.

@@ -1,7 +1,7 @@
 import math
 import unittest
 from unittest.mock import patch
-from motorsim.gas1d.eos import IdealGas
+from motorsim.gas1d.eos import IdealGas, InvalidState
 from motorsim.gas1d.boundary import Boundary
 from motorsim.gas1d.mesh import uniform_mesh
 from motorsim.gas1d.riemann import hllc_flux
@@ -26,12 +26,14 @@ class P2FixTests(unittest.TestCase):
             actual=Boundary('nonreflecting',state=base).face_state(base,normal,eos)
             for a,b in zip(actual,base):self.assertAlmostEqual(a,b,places=8)
 
-    def test_open_roundoff_and_real_flow(self):
+    def test_open_incompatible_branches_not_zeroed(self):
+        state=(1.161440185780459,1.8959009076787148e-10,99999.99999991049,.3000000000000006)
+        with self.assertRaisesRegex(InvalidState,'No consistent open-boundary branch'):
+            Boundary('open').face_state(state,1,IdealGas())
+
+    def test_open_real_flow_sign_preserved(self):
         eos=IdealGas();rho=100000/(287*300)
         for normal in (-1,1):
-            for r in (rho,math.nextafter(rho,0.),math.nextafter(rho,math.inf)):
-                actual=Boundary('open').face_state((r,0.,100000.,.3),normal,eos)
-                self.assertEqual(actual[1],0.)
             for velocity in (-1e-7,1e-7):
                 actual=Boundary('open').face_state((rho,velocity,100000.,.3),normal,eos)
                 self.assertEqual(math.copysign(1,actual[1]),math.copysign(1,velocity))
