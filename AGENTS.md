@@ -1,5 +1,15 @@
 # MotorSim — Instrucciones de trabajo para Codex
 
+P3: **P3_BLOCKED_BACKFLOW / SCIENTIFIC_CHANGE_REQUIRED**.
+P2_HUMAN_ACCEPTED registrado; núcleo y contratos congelados. El preflight
+reproduce ausencia de rama/discontinuidad de reservoir al invertir flujo con
+entropías distintas. No modificar la frontera para forzar avance sin decisión
+científica. Interfaz preparatoria aislada, sin integración finita ni producto.
+74 pruebas y regresiones offline P0/P2 PASS no acreditan P3. P3B/P3C pendientes;
+sin P4, publicación o archivo. [Evidencia y bloqueo](results/p3-coupling-20260918/analysis.md).
+
+Antecedente de autorización:
+
 Orden a75bf738: **P2_HUMAN_ACCEPTED**, núcleo1D y contratos congelados.
 Autorizado exclusivamente P3 aislado mediante dev_orchestrator. Preflight de
 frontera reservoir antes de P3A; sólo P3A PASS habilita volumen finito/P3B,

@@ -560,7 +560,7 @@ No nuevas campañas0D; producción/solver/contratosP1–R4 exactos.
 - [x] Revisión científica independiente /root/p1_r5_review PASS.
 - [x] Revisión final puntual independiente PASS, sin hallazgos pendientes.
 - [x] Autorrevisión separada de alcance/hashes/evidencia y conservación del borrado ajeno redme.txt.
-- [ ] P2_HUMAN_ACCEPTED: requiere orden posterior de la usuaria.
+- [x] P2_HUMAN_ACCEPTED: orden posterior a75bf738 del18/09/2026; recibo separado docs/gasdynamic/p2_human_acceptance.json. No modifica la evidencia histórica WAITING_HUMAN_APPROVAL.
 
 Estado derivado **P2_PASS_1D_CORE_VERIFIED / WAITING_HUMAN_APPROVAL**.
 Los reportes nativos BLOCKED/review_not_approved permanecen intactos: el hook

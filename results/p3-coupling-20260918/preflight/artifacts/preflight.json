@@ -1,0 +1,1634 @@
+{
+  "state": "P3_BLOCKED_BACKFLOW",
+  "gate": "SCIENTIFIC_CHANGE_REQUIRED",
+  "checks": {
+    "P2_HUMAN_ACCEPTED": true,
+    "P2_frozen": true,
+    "P2_regression": true,
+    "P0_regression": true,
+    "reservoir_branch_exists_for_admissible_reversal": false
+  },
+  "rows": [
+    {
+      "normal": -1,
+      "T_pipe": 299.0,
+      "w_normal": -0.001,
+      "interior": [
+        1.1653246011676552,
+        0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1613878905743584,
+        3.2353357613031903,
+        99993.92150880741,
+        0.8
+      ],
+      "outward": [
+        -0.03757479775119698,
+        -1000.0607821749624,
+        -12478.590333172513,
+        -0.03005983820095759
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -3.7574797751196983e-07,
+          -0.12478590333172514,
+          -3.005983820095759e-07
+        ],
+        "pipe": [
+          3.7574797751196983e-07,
+          0.12478590333172514,
+          3.005983820095759e-07
+        ],
+        "outward_axial_impulse": -0.010000607821749625
+      },
+      "transported_H": 332099.9999999999,
+      "transported_Y": 0.8000000000000002
+    },
+    {
+      "normal": -1,
+      "T_pipe": 299.0,
+      "w_normal": -1e-06,
+      "interior": [
+        1.1653246011676552,
+        1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1613879225606851,
+        3.234346151011664,
+        99993.92522667951,
+        0.8
+      ],
+      "outward": [
+        -0.037563305571655846,
+        -1000.0607449995902,
+        -12474.773780346903,
+        -0.03005064445732468
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -3.756330557165585e-07,
+          -0.12474773780346904,
+          -3.005064445732468e-07
+        ],
+        "pipe": [
+          3.756330557165585e-07,
+          0.12474773780346904,
+          3.005064445732468e-07
+        ],
+        "outward_axial_impulse": -0.010000607449995902
+      },
+      "transported_H": 332099.9999999999,
+      "transported_Y": 0.8
+    },
+    {
+      "normal": -1,
+      "T_pipe": 299.0,
+      "w_normal": -1e-09,
+      "interior": [
+        1.1653246011676552,
+        1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1613879225926662,
+        3.2343451613998013,
+        99993.92523039678,
+        0.8
+      ],
+      "outward": [
+        -0.03756329407945757,
+        -1000.06074496242,
+        -12474.769963787854,
+        -0.030050635263566057
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -3.7563294079457573e-07,
+          -0.12474769963787855,
+          -3.0050635263566057e-07
+        ],
+        "pipe": [
+          3.7563294079457573e-07,
+          0.12474769963787855,
+          3.0050635263566057e-07
+        ],
+        "outward_axial_impulse": -0.0100006074496242
+      },
+      "transported_H": 332099.9999999999,
+      "transported_Y": 0.8
+    },
+    {
+      "normal": -1,
+      "T_pipe": 299.0,
+      "w_normal": 0.0,
+      "interior": [
+        1.1653246011676552,
+        -0.0,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1653246011676552,
+        -0.0,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        0.0,
+        -1000.0,
+        0.0,
+        0.0
+      ],
+      "donor": "none",
+      "increments": {
+        "chamber": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipe": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "outward_axial_impulse": -0.01
+      }
+    },
+    {
+      "normal": -1,
+      "T_pipe": 299.0,
+      "w_normal": 1e-09,
+      "interior": [
+        1.1653246011676552,
+        -1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1653246011676552,
+        -9.999894245993346e-10,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1653122773930928e-11,
+        -1000.0,
+        3.857102066311718e-06,
+        2.3306245547861856e-12
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1653122773930928e-16,
+          3.857102066311718e-11,
+          2.3306245547861857e-17
+        ],
+        "pipe": [
+          -1.1653122773930928e-16,
+          -3.857102066311718e-11,
+          -2.3306245547861857e-17
+        ],
+        "outward_axial_impulse": -0.01
+      },
+      "transported_H": 330992.9999999999,
+      "transported_Y": 0.2
+    },
+    {
+      "normal": -1,
+      "T_pipe": 299.0,
+      "w_normal": 1e-06,
+      "interior": [
+        1.1653246011676552,
+        -1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1653246011676552,
+        -1.0000001111620804e-06,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1653247307075623e-08,
+        -1000.0,
+        0.003857143285910881,
+        2.3306494614151245e-09
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1653247307075624e-13,
+          3.857143285910881e-08,
+          2.3306494614151247e-14
+        ],
+        "pipe": [
+          -1.1653247307075624e-13,
+          -3.857143285910881e-08,
+          -2.3306494614151247e-14
+        ],
+        "outward_axial_impulse": -0.01
+      },
+      "transported_H": 330992.99999999994,
+      "transported_Y": 0.19999999999999998
+    },
+    {
+      "normal": -1,
+      "T_pipe": 299.0,
+      "w_normal": 0.001,
+      "interior": [
+        1.1653246011676552,
+        -0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1653246011676552,
+        -0.0009999999999763531,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.165324601140099e-05,
+        -1000.0000000116532,
+        3.8571428570574735,
+        2.3306492022801982e-06
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1653246011400992e-10,
+          3.857142857057474e-05,
+          2.3306492022801986e-11
+        ],
+        "pipe": [
+          -1.1653246011400992e-10,
+          -3.857142857057474e-05,
+          -2.3306492022801986e-11
+        ],
+        "outward_axial_impulse": -0.010000000000116534
+      },
+      "transported_H": 330993.0000004999,
+      "transported_Y": 0.2
+    },
+    {
+      "normal": -1,
+      "T_pipe": 300.0,
+      "w_normal": -0.001,
+      "interior": [
+        1.1614401858304297,
+        0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858254335,
+        0.0009999985335296974,
+        99999.99999941928,
+        0.8
+      ],
+      "outward": [
+        -1.1614384826078927e-05,
+        -1000.0000000058071,
+        -3.857137200740812,
+        -9.291507860863142e-06
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -1.1614384826078929e-10,
+          -3.857137200740812e-05,
+          -9.291507860863143e-11
+        ],
+        "pipe": [
+          1.1614384826078929e-10,
+          3.857137200740812e-05,
+          9.291507860863143e-11
+        ],
+        "outward_axial_impulse": -0.010000000000058072
+      },
+      "transported_H": 332100.0,
+      "transported_Y": 0.8
+    },
+    {
+      "normal": -1,
+      "T_pipe": 300.0,
+      "w_normal": -1e-06,
+      "interior": [
+        1.1614401858304297,
+        1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304302,
+        1.0000004522115612e-06,
+        100000.00000000004,
+        0.8
+      ],
+      "outward": [
+        -1.1614407110471099e-08,
+        -1000.0000000000005,
+        -0.003857144601387451,
+        -9.291525688376879e-09
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -1.16144071104711e-13,
+          -3.857144601387451e-08,
+          -9.29152568837688e-14
+        ],
+        "pipe": [
+          1.16144071104711e-13,
+          3.857144601387451e-08,
+          9.29152568837688e-14
+        ],
+        "outward_axial_impulse": -0.010000000000000005
+      },
+      "transported_H": 332099.99999999994,
+      "transported_Y": 0.8
+    },
+    {
+      "normal": -1,
+      "T_pipe": 300.0,
+      "w_normal": -1e-09,
+      "interior": [
+        1.1614401858304297,
+        1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304302,
+        1.000330393607851e-09,
+        100000.00000000004,
+        0.8
+      ],
+      "outward": [
+        -1.16182391824373e-11,
+        -1000.0000000000005,
+        -3.858417232487426e-06,
+        -9.294591345949841e-12
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -1.16182391824373e-16,
+          -3.8584172324874263e-11,
+          -9.294591345949842e-17
+        ],
+        "pipe": [
+          1.16182391824373e-16,
+          3.8584172324874263e-11,
+          9.294591345949842e-17
+        ],
+        "outward_axial_impulse": -0.010000000000000005
+      },
+      "transported_H": 332099.9999999999,
+      "transported_Y": 0.8
+    },
+    {
+      "normal": -1,
+      "T_pipe": 300.0,
+      "w_normal": 0.0,
+      "interior": [
+        1.1614401858304297,
+        -0.0,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304297,
+        -0.0,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        0.0,
+        -1000.0,
+        0.0,
+        0.0
+      ],
+      "donor": "none",
+      "increments": {
+        "chamber": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipe": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "outward_axial_impulse": -0.01
+      }
+    },
+    {
+      "normal": -1,
+      "T_pipe": 300.0,
+      "w_normal": 1e-09,
+      "interior": [
+        1.1614401858304297,
+        -1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304297,
+        -9.999894245993346e-10,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1614279031351156e-11,
+        -1000.0,
+        3.857102066311718e-06,
+        2.3228558062702315e-12
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1614279031351156e-16,
+          3.857102066311718e-11,
+          2.3228558062702315e-17
+        ],
+        "pipe": [
+          -1.1614279031351156e-16,
+          -3.857102066311718e-11,
+          -2.3228558062702315e-17
+        ],
+        "outward_axial_impulse": -0.01
+      },
+      "transported_H": 332099.99999999994,
+      "transported_Y": 0.20000000000000004
+    },
+    {
+      "normal": -1,
+      "T_pipe": 300.0,
+      "w_normal": 1e-06,
+      "interior": [
+        1.1614401858304297,
+        -1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304297,
+        -1.0000001111620804e-06,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1614403149385371e-08,
+        -1000.0,
+        0.003857143285910881,
+        2.322880629877074e-09
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1614403149385372e-13,
+          3.857143285910881e-08,
+          2.3228806298770743e-14
+        ],
+        "pipe": [
+          -1.1614403149385372e-13,
+          -3.857143285910881e-08,
+          -2.3228806298770743e-14
+        ],
+        "outward_axial_impulse": -0.01
+      },
+      "transported_H": 332099.99999999994,
+      "transported_Y": 0.2
+    },
+    {
+      "normal": -1,
+      "T_pipe": 300.0,
+      "w_normal": 0.001,
+      "interior": [
+        1.1614401858304297,
+        -0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304297,
+        -0.0009999999999763531,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1614401858029654e-05,
+        -1000.0000000116145,
+        3.8571428570574544,
+        2.322880371605931e-06
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1614401858029654e-10,
+          3.8571428570574544e-05,
+          2.322880371605931e-11
+        ],
+        "pipe": [
+          -1.1614401858029654e-10,
+          -3.8571428570574544e-05,
+          -2.322880371605931e-11
+        ],
+        "outward_axial_impulse": -0.010000000000116145
+      },
+      "transported_H": 332100.00000049995,
+      "transported_Y": 0.2
+    },
+    {
+      "normal": -1,
+      "T_pipe": 301.0,
+      "w_normal": -0.001,
+      "interior": [
+        1.15758158056189,
+        0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "NO_CONSISTENT_BRANCH",
+      "error": "No consistent reservoir inflow branch"
+    },
+    {
+      "normal": -1,
+      "T_pipe": 301.0,
+      "w_normal": -1e-06,
+      "interior": [
+        1.15758158056189,
+        1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "NO_CONSISTENT_BRANCH",
+      "error": "No consistent reservoir inflow branch"
+    },
+    {
+      "normal": -1,
+      "T_pipe": 301.0,
+      "w_normal": -1e-09,
+      "interior": [
+        1.15758158056189,
+        1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "NO_CONSISTENT_BRANCH",
+      "error": "No consistent reservoir inflow branch"
+    },
+    {
+      "normal": -1,
+      "T_pipe": 301.0,
+      "w_normal": 0.0,
+      "interior": [
+        1.15758158056189,
+        -0.0,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.15758158056189,
+        -0.0,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        0.0,
+        -1000.0,
+        0.0,
+        0.0
+      ],
+      "donor": "none",
+      "increments": {
+        "chamber": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipe": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "outward_axial_impulse": -0.01
+      }
+    },
+    {
+      "normal": -1,
+      "T_pipe": 301.0,
+      "w_normal": 1e-09,
+      "interior": [
+        1.15758158056189,
+        -1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.15758158056189,
+        -9.999894245993346e-10,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1575693386728728e-11,
+        -1000.0,
+        3.857102066311718e-06,
+        2.3151386773457455e-12
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.157569338672873e-16,
+          3.857102066311718e-11,
+          2.3151386773457455e-17
+        ],
+        "pipe": [
+          -1.157569338672873e-16,
+          -3.857102066311718e-11,
+          -2.3151386773457455e-17
+        ],
+        "outward_axial_impulse": -0.01
+      },
+      "transported_H": 333206.9999999999,
+      "transported_Y": 0.19999999999999998
+    },
+    {
+      "normal": -1,
+      "T_pipe": 301.0,
+      "w_normal": 1e-06,
+      "interior": [
+        1.15758158056189,
+        -1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.15758158056189,
+        -1.0000001111620804e-06,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1575817092410668e-08,
+        -1000.0,
+        0.003857143285910881,
+        2.315163418482134e-09
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.157581709241067e-13,
+          3.857143285910881e-08,
+          2.315163418482134e-14
+        ],
+        "pipe": [
+          -1.157581709241067e-13,
+          -3.857143285910881e-08,
+          -2.315163418482134e-14
+        ],
+        "outward_axial_impulse": -0.01
+      },
+      "transported_H": 333206.99999999994,
+      "transported_Y": 0.20000000000000004
+    },
+    {
+      "normal": -1,
+      "T_pipe": 301.0,
+      "w_normal": 0.001,
+      "interior": [
+        1.15758158056189,
+        -0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.15758158056189,
+        -0.0009999999999763531,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.157581580534517e-05,
+        -1000.0000000115758,
+        3.8571428570574353,
+        2.315163161069034e-06
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.157581580534517e-10,
+          3.8571428570574354e-05,
+          2.315163161069034e-11
+        ],
+        "pipe": [
+          -1.157581580534517e-10,
+          -3.8571428570574354e-05,
+          -2.315163161069034e-11
+        ],
+        "outward_axial_impulse": -0.010000000000115758
+      },
+      "transported_H": 333207.00000049995,
+      "transported_Y": 0.2
+    },
+    {
+      "normal": 1,
+      "T_pipe": 299.0,
+      "w_normal": -0.001,
+      "interior": [
+        1.1653246011676552,
+        -0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1613878905743584,
+        -3.2353357613031903,
+        99993.92150880741,
+        0.8
+      ],
+      "outward": [
+        -0.03757479775119698,
+        1000.0607821749624,
+        -12478.590333172513,
+        -0.03005983820095759
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -3.7574797751196983e-07,
+          -0.12478590333172514,
+          -3.005983820095759e-07
+        ],
+        "pipe": [
+          3.7574797751196983e-07,
+          0.12478590333172514,
+          3.005983820095759e-07
+        ],
+        "outward_axial_impulse": 0.010000607821749625
+      },
+      "transported_H": 332099.9999999999,
+      "transported_Y": 0.8000000000000002
+    },
+    {
+      "normal": 1,
+      "T_pipe": 299.0,
+      "w_normal": -1e-06,
+      "interior": [
+        1.1653246011676552,
+        -1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1613879225606851,
+        -3.234346151011664,
+        99993.92522667951,
+        0.8
+      ],
+      "outward": [
+        -0.037563305571655846,
+        1000.0607449995902,
+        -12474.773780346903,
+        -0.03005064445732468
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -3.756330557165585e-07,
+          -0.12474773780346904,
+          -3.005064445732468e-07
+        ],
+        "pipe": [
+          3.756330557165585e-07,
+          0.12474773780346904,
+          3.005064445732468e-07
+        ],
+        "outward_axial_impulse": 0.010000607449995902
+      },
+      "transported_H": 332099.9999999999,
+      "transported_Y": 0.8
+    },
+    {
+      "normal": 1,
+      "T_pipe": 299.0,
+      "w_normal": -1e-09,
+      "interior": [
+        1.1653246011676552,
+        -1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1613879225926662,
+        -3.2343451613998013,
+        99993.92523039678,
+        0.8
+      ],
+      "outward": [
+        -0.03756329407945757,
+        1000.06074496242,
+        -12474.769963787854,
+        -0.030050635263566057
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -3.7563294079457573e-07,
+          -0.12474769963787855,
+          -3.0050635263566057e-07
+        ],
+        "pipe": [
+          3.7563294079457573e-07,
+          0.12474769963787855,
+          3.0050635263566057e-07
+        ],
+        "outward_axial_impulse": 0.0100006074496242
+      },
+      "transported_H": 332099.9999999999,
+      "transported_Y": 0.8
+    },
+    {
+      "normal": 1,
+      "T_pipe": 299.0,
+      "w_normal": 0.0,
+      "interior": [
+        1.1653246011676552,
+        0.0,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1653246011676552,
+        0.0,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        0.0,
+        1000.0,
+        0.0,
+        0.0
+      ],
+      "donor": "none",
+      "increments": {
+        "chamber": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipe": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "outward_axial_impulse": 0.01
+      }
+    },
+    {
+      "normal": 1,
+      "T_pipe": 299.0,
+      "w_normal": 1e-09,
+      "interior": [
+        1.1653246011676552,
+        1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1653246011676552,
+        9.999894245993346e-10,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1653122773930928e-11,
+        1000.0,
+        3.857102066311718e-06,
+        2.3306245547861856e-12
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1653122773930928e-16,
+          3.857102066311718e-11,
+          2.3306245547861857e-17
+        ],
+        "pipe": [
+          -1.1653122773930928e-16,
+          -3.857102066311718e-11,
+          -2.3306245547861857e-17
+        ],
+        "outward_axial_impulse": 0.01
+      },
+      "transported_H": 330992.9999999999,
+      "transported_Y": 0.2
+    },
+    {
+      "normal": 1,
+      "T_pipe": 299.0,
+      "w_normal": 1e-06,
+      "interior": [
+        1.1653246011676552,
+        1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1653246011676552,
+        1.0000001111620804e-06,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1653247307075623e-08,
+        1000.0,
+        0.003857143285910881,
+        2.3306494614151245e-09
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1653247307075624e-13,
+          3.857143285910881e-08,
+          2.3306494614151247e-14
+        ],
+        "pipe": [
+          -1.1653247307075624e-13,
+          -3.857143285910881e-08,
+          -2.3306494614151247e-14
+        ],
+        "outward_axial_impulse": 0.01
+      },
+      "transported_H": 330992.99999999994,
+      "transported_Y": 0.19999999999999998
+    },
+    {
+      "normal": 1,
+      "T_pipe": 299.0,
+      "w_normal": 0.001,
+      "interior": [
+        1.1653246011676552,
+        0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1653246011676552,
+        0.0009999999999763531,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.165324601140099e-05,
+        1000.0000000116532,
+        3.8571428570574735,
+        2.3306492022801982e-06
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1653246011400992e-10,
+          3.857142857057474e-05,
+          2.3306492022801986e-11
+        ],
+        "pipe": [
+          -1.1653246011400992e-10,
+          -3.857142857057474e-05,
+          -2.3306492022801986e-11
+        ],
+        "outward_axial_impulse": 0.010000000000116534
+      },
+      "transported_H": 330993.0000004999,
+      "transported_Y": 0.2
+    },
+    {
+      "normal": 1,
+      "T_pipe": 300.0,
+      "w_normal": -0.001,
+      "interior": [
+        1.1614401858304297,
+        -0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858254335,
+        -0.0009999985335296974,
+        99999.99999941928,
+        0.8
+      ],
+      "outward": [
+        -1.1614384826078927e-05,
+        1000.0000000058071,
+        -3.857137200740812,
+        -9.291507860863142e-06
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -1.1614384826078929e-10,
+          -3.857137200740812e-05,
+          -9.291507860863143e-11
+        ],
+        "pipe": [
+          1.1614384826078929e-10,
+          3.857137200740812e-05,
+          9.291507860863143e-11
+        ],
+        "outward_axial_impulse": 0.010000000000058072
+      },
+      "transported_H": 332100.0,
+      "transported_Y": 0.8
+    },
+    {
+      "normal": 1,
+      "T_pipe": 300.0,
+      "w_normal": -1e-06,
+      "interior": [
+        1.1614401858304297,
+        -1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304302,
+        -1.0000004522115612e-06,
+        100000.00000000004,
+        0.8
+      ],
+      "outward": [
+        -1.1614407110471099e-08,
+        1000.0000000000005,
+        -0.003857144601387451,
+        -9.291525688376879e-09
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -1.16144071104711e-13,
+          -3.857144601387451e-08,
+          -9.29152568837688e-14
+        ],
+        "pipe": [
+          1.16144071104711e-13,
+          3.857144601387451e-08,
+          9.29152568837688e-14
+        ],
+        "outward_axial_impulse": 0.010000000000000005
+      },
+      "transported_H": 332099.99999999994,
+      "transported_Y": 0.8
+    },
+    {
+      "normal": 1,
+      "T_pipe": 300.0,
+      "w_normal": -1e-09,
+      "interior": [
+        1.1614401858304297,
+        -1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304302,
+        -1.000330393607851e-09,
+        100000.00000000004,
+        0.8
+      ],
+      "outward": [
+        -1.16182391824373e-11,
+        1000.0000000000005,
+        -3.858417232487426e-06,
+        -9.294591345949841e-12
+      ],
+      "donor": "chamber",
+      "increments": {
+        "chamber": [
+          -1.16182391824373e-16,
+          -3.8584172324874263e-11,
+          -9.294591345949842e-17
+        ],
+        "pipe": [
+          1.16182391824373e-16,
+          3.8584172324874263e-11,
+          9.294591345949842e-17
+        ],
+        "outward_axial_impulse": 0.010000000000000005
+      },
+      "transported_H": 332099.9999999999,
+      "transported_Y": 0.8
+    },
+    {
+      "normal": 1,
+      "T_pipe": 300.0,
+      "w_normal": 0.0,
+      "interior": [
+        1.1614401858304297,
+        0.0,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304297,
+        0.0,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        0.0,
+        1000.0,
+        0.0,
+        0.0
+      ],
+      "donor": "none",
+      "increments": {
+        "chamber": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipe": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "outward_axial_impulse": 0.01
+      }
+    },
+    {
+      "normal": 1,
+      "T_pipe": 300.0,
+      "w_normal": 1e-09,
+      "interior": [
+        1.1614401858304297,
+        1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304297,
+        9.999894245993346e-10,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1614279031351156e-11,
+        1000.0,
+        3.857102066311718e-06,
+        2.3228558062702315e-12
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1614279031351156e-16,
+          3.857102066311718e-11,
+          2.3228558062702315e-17
+        ],
+        "pipe": [
+          -1.1614279031351156e-16,
+          -3.857102066311718e-11,
+          -2.3228558062702315e-17
+        ],
+        "outward_axial_impulse": 0.01
+      },
+      "transported_H": 332099.99999999994,
+      "transported_Y": 0.20000000000000004
+    },
+    {
+      "normal": 1,
+      "T_pipe": 300.0,
+      "w_normal": 1e-06,
+      "interior": [
+        1.1614401858304297,
+        1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304297,
+        1.0000001111620804e-06,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1614403149385371e-08,
+        1000.0,
+        0.003857143285910881,
+        2.322880629877074e-09
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1614403149385372e-13,
+          3.857143285910881e-08,
+          2.3228806298770743e-14
+        ],
+        "pipe": [
+          -1.1614403149385372e-13,
+          -3.857143285910881e-08,
+          -2.3228806298770743e-14
+        ],
+        "outward_axial_impulse": 0.01
+      },
+      "transported_H": 332099.99999999994,
+      "transported_Y": 0.2
+    },
+    {
+      "normal": 1,
+      "T_pipe": 300.0,
+      "w_normal": 0.001,
+      "interior": [
+        1.1614401858304297,
+        0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.1614401858304297,
+        0.0009999999999763531,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1614401858029654e-05,
+        1000.0000000116145,
+        3.8571428570574544,
+        2.322880371605931e-06
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.1614401858029654e-10,
+          3.8571428570574544e-05,
+          2.322880371605931e-11
+        ],
+        "pipe": [
+          -1.1614401858029654e-10,
+          -3.8571428570574544e-05,
+          -2.322880371605931e-11
+        ],
+        "outward_axial_impulse": 0.010000000000116145
+      },
+      "transported_H": 332100.00000049995,
+      "transported_Y": 0.2
+    },
+    {
+      "normal": 1,
+      "T_pipe": 301.0,
+      "w_normal": -0.001,
+      "interior": [
+        1.15758158056189,
+        -0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "NO_CONSISTENT_BRANCH",
+      "error": "No consistent reservoir inflow branch"
+    },
+    {
+      "normal": 1,
+      "T_pipe": 301.0,
+      "w_normal": -1e-06,
+      "interior": [
+        1.15758158056189,
+        -1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "NO_CONSISTENT_BRANCH",
+      "error": "No consistent reservoir inflow branch"
+    },
+    {
+      "normal": 1,
+      "T_pipe": 301.0,
+      "w_normal": -1e-09,
+      "interior": [
+        1.15758158056189,
+        -1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "NO_CONSISTENT_BRANCH",
+      "error": "No consistent reservoir inflow branch"
+    },
+    {
+      "normal": 1,
+      "T_pipe": 301.0,
+      "w_normal": 0.0,
+      "interior": [
+        1.15758158056189,
+        0.0,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.15758158056189,
+        0.0,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        0.0,
+        1000.0,
+        0.0,
+        0.0
+      ],
+      "donor": "none",
+      "increments": {
+        "chamber": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipe": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "outward_axial_impulse": 0.01
+      }
+    },
+    {
+      "normal": 1,
+      "T_pipe": 301.0,
+      "w_normal": 1e-09,
+      "interior": [
+        1.15758158056189,
+        1e-09,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.15758158056189,
+        9.999894245993346e-10,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1575693386728728e-11,
+        1000.0,
+        3.857102066311718e-06,
+        2.3151386773457455e-12
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.157569338672873e-16,
+          3.857102066311718e-11,
+          2.3151386773457455e-17
+        ],
+        "pipe": [
+          -1.157569338672873e-16,
+          -3.857102066311718e-11,
+          -2.3151386773457455e-17
+        ],
+        "outward_axial_impulse": 0.01
+      },
+      "transported_H": 333206.9999999999,
+      "transported_Y": 0.19999999999999998
+    },
+    {
+      "normal": 1,
+      "T_pipe": 301.0,
+      "w_normal": 1e-06,
+      "interior": [
+        1.15758158056189,
+        1e-06,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.15758158056189,
+        1.0000001111620804e-06,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.1575817092410668e-08,
+        1000.0,
+        0.003857143285910881,
+        2.315163418482134e-09
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.157581709241067e-13,
+          3.857143285910881e-08,
+          2.315163418482134e-14
+        ],
+        "pipe": [
+          -1.157581709241067e-13,
+          -3.857143285910881e-08,
+          -2.315163418482134e-14
+        ],
+        "outward_axial_impulse": 0.01
+      },
+      "transported_H": 333206.99999999994,
+      "transported_Y": 0.20000000000000004
+    },
+    {
+      "normal": 1,
+      "T_pipe": 301.0,
+      "w_normal": 0.001,
+      "interior": [
+        1.15758158056189,
+        0.001,
+        100000.0,
+        0.2
+      ],
+      "status": "DEFINED",
+      "face": [
+        1.15758158056189,
+        0.0009999999999763531,
+        100000.0,
+        0.2
+      ],
+      "outward": [
+        1.157581580534517e-05,
+        1000.0000000115758,
+        3.8571428570574353,
+        2.315163161069034e-06
+      ],
+      "donor": "pipe",
+      "increments": {
+        "chamber": [
+          1.157581580534517e-10,
+          3.8571428570574354e-05,
+          2.315163161069034e-11
+        ],
+        "pipe": [
+          -1.157581580534517e-10,
+          -3.8571428570574354e-05,
+          -2.315163161069034e-11
+        ],
+        "outward_axial_impulse": 0.010000000000115758
+      },
+      "transported_H": 333207.00000049995,
+      "transported_Y": 0.2
+    }
+  ],
+  "analytic_limits": [
+    {
+      "T_pipe": 299.0,
+      "J_plus_at_rest": 1944.9362824671512,
+      "J_rest_reservoir": 1948.1859694157974,
+      "limiting_algebraic_root": -3.234345160408677,
+      "admissible_inflow_root_exists": true
+    },
+    {
+      "T_pipe": 300.0,
+      "J_plus_at_rest": 1948.1859694157974,
+      "J_rest_reservoir": 1948.1859694157974,
+      "limiting_algebraic_root": 1.9350951101551665e-13,
+      "admissible_inflow_root_exists": true
+    },
+    {
+      "T_pipe": 301.0,
+      "J_plus_at_rest": 1951.4302447179605,
+      "J_rest_reservoir": 1948.1859694157974,
+      "limiting_algebraic_root": 3.2598601011963706,
+      "admissible_inflow_root_exists": false
+    }
+  ],
+  "chamber": {
+    "mass": 0.011614401858304297,
+    "internal_energy": 2857.1428571428564,
+    "fresh_mass": 0.009291521486643438,
+    "volume": 0.01
+  },
+  "reason": "Frozen P1 reservoir equations have no consistent branch at admissible near-rest reversal with different entropy.",
+  "new_integrations": 0,
+  "wall_seconds": 11.75,
+  "matrix": {
+    "C01": {
+      "status": "NOT_RUN",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    },
+    "C02": {
+      "status": "NOT_RUN",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    },
+    "C03": {
+      "status": "NOT_RUN",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    },
+    "C04": {
+      "status": "BLOCKED",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    },
+    "C05": {
+      "status": "NOT_RUN",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    },
+    "C06": {
+      "status": "NOT_RUN",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    },
+    "C07": {
+      "status": "NOT_RUN",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    },
+    "C08": {
+      "status": "NOT_RUN",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    },
+    "C09": {
+      "status": "NOT_RUN",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    },
+    "C10": {
+      "status": "NOT_RUN",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    },
+    "C11": {
+      "status": "NOT_RUN",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    },
+    "C12": {
+      "status": "NOT_RUN",
+      "reason": "P3A compatibility gate precedes coupled time integration"
+    }
+  },
+  "P3A": "BLOCKED",
+  "P3B": "NOT_STARTED",
+  "P3C": "NOT_STARTED",
+  "P4": "NOT_STARTED",
+  "frozen_sha256": {
+    "motorsim/gas1d/boundary.py": "f931664fa850a612f28998090fe9c5fe9088d621892a69a9d5eebcb9d6b17daf",
+    "motorsim/gas1d/contact.py": "ad5dc76f4482d7db1438297f5727a655af63fff20b9595770bb8e6a459609b06",
+    "motorsim/gas1d/eos.py": "22bae4c37c3a6edde31940d26d59430cf0c466fbfb706df1dfe4ecad1c4e21bf",
+    "motorsim/gas1d/mesh.py": "78dcdd71de7acd751e79367347e2826e4d7c81d83817f39a62728d375bcbb44e",
+    "motorsim/gas1d/methods.py": "36a92c7ae8e0d7574b897d835e1ab59ddbd7b8c1fee71770302943321869f52f",
+    "motorsim/gas1d/reference.py": "017d25da5a98934cf8fa5b75e1a324dbb40c09a22fa04927118b9c6ce48b83fd",
+    "motorsim/gas1d/riemann.py": "30ab73a693e679781e3f12b177fa02f04e13562909b9a4131a2b5c641d0321b3",
+    "motorsim/gas1d/second_order.py": "ccaaea3464ebe1cda8f600035dc43d2448ba00569f4022c1b18ba766c3b3de9a",
+    "motorsim/gas1d/solver.py": "b4b3f6978d0fc2433a49b11d03fd3f4914ab3890f1b4e0d498f3345f12f7e60c",
+    "motorsim/gas1d/verification.py": "aab8f153af13ff3de92bdd2ea9695887c251d49c823aa0b9b9269bdbece39f25",
+    "motorsim/gas1d/__init__.py": "ca85637c3d6ba44590d24561296ebc0235469199266cc1d5d0f90e2d5de4809f",
+    "docs/gasdynamic/1d_boundary_semantics_v1_r3.md": "0812a57e62c90e242ff2b4522e20f9f0b1c10e46f86b8df7ddb892e70efce9a3",
+    "docs/gasdynamic/1d_cfl_sensitivity_v1_r4.md": "fd492558fe3201f9898b47a1876ce1e407c9bc6f895f0a86386c0d3ec9ae4710",
+    "docs/gasdynamic/1d_cfl_sensitivity_v1_r5.md": "5702fc3045402cbe0f57b0ac3d86e4fb0909c346e2ffc16bfcf4413e909b9204",
+    "docs/gasdynamic/1d_contact_observable_v1_r2.md": "43bd47f4f7a2959139ca2884d3484d9d683895ec0c6750a10fbb0f0fddce1a51",
+    "docs/gasdynamic/1d_contract_v1.json": "97ce1c0b47d80c10aaa9a2cbc9abb133d60961617b8f5a706fb73128e8451aee",
+    "docs/gasdynamic/1d_contract_v1_r2.json": "89d2bf0d0140db9e452769f06c360a64174340ef38313b35cbb2f2e9b20018f6",
+    "docs/gasdynamic/1d_contract_v1_r2_delta.json": "937e0495ccb545098aabdde71839125ff126b72da0e8d5aa7952b29e2c454282",
+    "docs/gasdynamic/1d_contract_v1_r3.json": "03a2a7961712f96379835de417c84c422a5988aced0421dc77707a8b891cfa88",
+    "docs/gasdynamic/1d_contract_v1_r3_delta.json": "7dc458aca655dedb897a91d100d39c43e0e21fb724141b83d3fc11dd798913eb",
+    "docs/gasdynamic/1d_contract_v1_r4.json": "9c747d2005c36b46d5d5a15389c0c25fb645b9e76b3451b2923d5a3f7ee9f2a9",
+    "docs/gasdynamic/1d_contract_v1_r4_delta.json": "083c9e3bd292478339c90d0f99498e62d59f4629b9693ac31bc38d3565d2a22e",
+    "docs/gasdynamic/1d_contract_v1_r5.json": "f19a592b62edf3ad4b18ce8961f8e4fc1b1dfee29eda9b3a33e0d166e1eba2bb",
+    "docs/gasdynamic/1d_contract_v1_r5_delta.json": "4aeb9d6de98b248038eb9e549268178692c34c5ce6d46b938b803b5bfeb0d92d",
+    "docs/gasdynamic/1d_mathematical_contract_v1.md": "14b58f56e95df07af93d3938da558cd05373fcec5805ce1a5d1dc90948043db6",
+    "docs/gasdynamic/1d_numerical_contract_v1.md": "2f944d67f01b3212ebd86791c0ebee815e9e76193b98c53696ad12fd61a24193",
+    "docs/gasdynamic/1d_verification_plan_v1.md": "41c4fc4fd198d1c8675a50a751de2ac606a3b0655633e787bb517b808bf702df"
+  }
+}
