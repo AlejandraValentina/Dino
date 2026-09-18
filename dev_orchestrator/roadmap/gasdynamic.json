@@ -745,6 +745,37 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P3_CLOSE",
+      "title": "P3 final verification",
+      "objective": "Final adapter tests and complete offline P2/P0 regression after P3B/P3C independent PASS",
+      "depends_on": [
+        "P2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "regression_tests",
+        "r1",
+        "C00",
+        "C00B",
+        "forward_reverse",
+        "species",
+        "shared_energy",
+        "P2_frozen",
+        "P2_regression",
+        "P0_regression"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }

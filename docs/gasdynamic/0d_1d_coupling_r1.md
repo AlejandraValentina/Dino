@@ -98,3 +98,13 @@ Evaluación final usa GL4 compuesto8/16 subdivisiones/celda, separando frente
 causal si cruza celda; diferencia<=1e-10 de A*dx*(rho0,ε/a,p0/(gamma-1),.3rho0).
 Es control de convergencia de cuadratura, no cota rigurosa. Registrado y revisado
 independientemente; ningún cambio en solver, datos, mallas, CFL ni accuracy .025.
+
+## Adaptador y comprobación aislada de trabajo
+C01–C12 PASS con revisión independiente habilita coupling_adapter.py: lectura
+por nombre de volumen existente y copia inversa de m/U/F; EOS tomada del caso,
+V de geometry(angle), sin conectar puertos ni ejecutar el modelo de motor.
+Pruebas cubren layouts2T/4T, invariancia del resto del estado y rechazo de volumen
+incompatible. La comprobación adiabática aislada prevista en diseño se realiza
+con doble de prueba de cara sellada (no prueba R1): conserva m/F y contrasta
+U=U0*(V0/V)^(gamma-1) al cuarto de ciclo de V(t), refinamientoN20/40/80,
+error final relativo<1e-5. No introduce condición de frontera nueva en producto.
