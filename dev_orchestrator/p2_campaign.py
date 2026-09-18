@@ -59,16 +59,21 @@ def plot(record,path):
     path.write_text('\n'.join(parts),encoding='utf-8')
 
 
-def campaign(run_dir):
+def campaign(run_dir, r3=False):
     started=time.monotonic();art=run_dir/'artifacts';(art/'cases').mkdir();(art/'plots').mkdir()
     write(art/'git-before.json',snapshot(ROOT))
     checks=invariants()
+    if r3:
+        receipt=read_json(ROOT/'results/p1-r3-fronteras-20260918/reviewed-evidence.json')
+        checks['r3_reviewed']=receipt['gate']=='PASS' and receipt['review']['kind']=='independent'
+        boundary=read_json(ROOT/'results/p1-r3-fronteras-20260918/boundary-attempt-2/artifacts/boundary-summary.json')
+        checks['r3_contract_intact']=boundary['contract_sha256']==sha(ROOT/'docs/gasdynamic/1d_contract_v1_r3.json')
     if not all(checks.values()):raise ValueError('Precondition/hash failure: '+str(checks))
     records=[];case_hashes={}
     for name in case_names():
         print('START '+name,flush=True)
         try:
-            record=run_case(name,progress=lambda step,t:print(f'PROGRESS {name} step={step} t={t:.8g}',flush=True) if step%2000==0 else None)
+            record=run_case(name,wall_limit=240. if name=='T10_800' else 120.,progress=lambda step,t:print(f'PROGRESS {name} step={step} t={t:.8g}',flush=True) if step%2000==0 else None)
         except Exception as exc:
             record=dict(name=name,status='FAIL',checks={'reference_or_execution':False},metrics={},
                         error=type(exc).__name__+': '+str(exc),result={'status':'failed_infrastructure','wall_seconds':0.})
@@ -88,10 +93,11 @@ def campaign(run_dir):
     if infrastructure:state='FAILED_INFRASTRUCTURE'
     summary=dict(state=state,P2B='NOT_IMPLEMENTED_GATED_BY_P2A',matrix=matrix,
                  cases=[{k:v for k,v in r.items() if k not in ('result','initial','reference','mesh')} |
-                        dict(runtime={k:r['result'].get(k) for k in ('status','reason','steps','wall_seconds','minimum_dt','max_CFL','rejected_steps','extrema','hllc_flux_count','hlle_fallback_count','fallback_reason')}) for r in records],
+                        dict(runtime={k:r['result'].get(k) for k in ('status','reason','steps','wall_seconds','minimum_dt','max_CFL','rejected_steps','extrema','hllc_flux_count','hlle_fallback_count','characteristic_flux_count','riemann_flux_count','fallback_reason')}) for r in records],
                  wall_seconds=time.monotonic()-started,checks=checks,run_id=run_dir.name,
                  source_sha256={p.relative_to(ROOT).as_posix():sha(p) for p in (ROOT/'motorsim/gas1d').glob('*.py')},
-                 contract_sha256=sha(ROOT/'docs/gasdynamic/1d_contract_v1.json'),repair_attempt=0,
+                 contract_sha256=sha(ROOT/('docs/gasdynamic/1d_contract_v1_r3.json' if r3 else 'docs/gasdynamic/1d_contract_v1.json')),
+                 contract_revision='1D_CONTRACT_V1_R3' if r3 else '1D_CONTRACT_V1',repair_attempt=2 if r3 else 0,
                  note='First order only. P2B and P3 not executed. Physical validation not claimed.')
     write(art/'p2a-summary.json',summary)
     inventory={p.relative_to(run_dir).as_posix():sha(p) for p in art.rglob('*') if p.is_file() and p.name!='inventory.json'}
@@ -102,4 +108,5 @@ def campaign(run_dir):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--run-dir',type=Path,required=True)
-    args=parser.parse_args();campaign(args.run_dir)
+    parser.add_argument('--r3',action='store_true')
+    args=parser.parse_args();campaign(args.run_dir,args.r3)
