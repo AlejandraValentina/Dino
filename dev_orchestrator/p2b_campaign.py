@@ -30,14 +30,14 @@ def frozen_checks():
     return checks
 
 
-def run_case(name, control=None, n=None):
+def run_case(name, control=None, n=None, *, wall_limit=None):
     case=v.definition(name)
     if n is not None:case['mesh']=uniform_mesh(n)
     mesh=case['mesh'];eos=case['eos']
     initial=cell_integrals(mesh,case['initial'],eos,case['area'],case['breaks'])
     reference=cell_integrals(mesh,case['reference'],eos,case['area'],case['refbreaks'])
     result=solve(mesh,initial,case['end'],case['bc'],method='MUSCL_SSPRK2',eos=eos,cfl=case['cfl'],
-                 sensor=case['sensor'],sample_interval=case['interval'],wall_limit=240. if name=='T10_800' else 120.,
+                 sensor=case['sensor'],sample_interval=case['interval'],wall_limit=(240. if name=='T10_800' else 120.) if wall_limit is None else wall_limit,
                  progress=lambda step,t:print(f'PROGRESS {name} N={mesh.n} step={step} t={t:.8g}',flush=True) if step%2000==0 else None)
     metrics,checks=v.measure(case,result,reference,initial)
     metrics['worst_stage_ledger']=max((max(s[k]) for s in result['stage_ledger'] for k in ('stage1_normalized','stage2_normalized')),default=0.)

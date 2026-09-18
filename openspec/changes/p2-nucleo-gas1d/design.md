@@ -61,3 +61,17 @@ y regresiones focalizadas realmente ejecutadas. P0 histórico por hashes/offline
 Presupuesto por caso120s original; T10_800 ya tenía240s por coste enR3.
 Si el coste second-order supera límite, reportar infraestructura sin cambiar
 silenciosamente presupuestos contractuales ni resultados.
+
+## Reanudación operativa autorizada — 18/09/2026
+Orden12b4cba5: old_timeout=120s, new_timeout=300s, reason=infrastructure/runtime only.
+T10_800 tenía excepción240s: también pasa a300s. Sin cambios de tiempo físico,
+N, CFL, método, EOS, BC, source, criterios o contratos congelados. Primero T04
+solo; tras PASS, T05→T12 secuenciales con límite independiente y persistencia
+por subcaso/gate. No nuevos intentos automáticos ni incremento superior a300s.
+Si T04 agota300s, diagnóstico de rendimiento autorizado, nunca rescate científico.
+Checkpoints atómicos con fuente, inputs/configuración y hashes de artefactos.
+Reutilización solo de PASS completo con identidad comprobada; solver original
+4620200 conserva hashes exactos (commits siguientes solo evidencia/infraestructura).
+Nueva fase operativa P2B_RESUME conserva presupuesto P2B acumulado1/3; no lo reinicia.
+P1–R4 y P2A intactos. R4 compara refinamiento, no reinstala8%; N400 es diagnóstico
+para exactitud padre y exige estabilidad/balances. No P3, push ni archivo.
