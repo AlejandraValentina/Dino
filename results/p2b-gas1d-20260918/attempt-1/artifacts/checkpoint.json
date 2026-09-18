@@ -1,0 +1,10 @@
+{
+  "latest": "T12_contact",
+  "status": "FAIL",
+  "hashes": {
+    "artifacts/cases/T01_rest.json.gz": "3920d121a656e577357fe0051e55c3c9f931641a81c270ac40b04001f88ca5b8",
+    "artifacts/cases/T01_moving.json.gz": "9ea0accd677afc7c0a9d9c373dcad104354c3743a9d0c39539e41579253b5813",
+    "artifacts/cases/T12_expansion.json.gz": "888e6b5bf8e7c193192aac0525c2b04b2bcfa42cc2656ad7013324ea6ed7b1c2",
+    "artifacts/cases/T12_contact.json.gz": "e64e2d6e2e28e94f7b809068770e887567329d7aea687dd214110988f8e19a9e"
+  }
+}

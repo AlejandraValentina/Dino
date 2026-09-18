@@ -1,7 +1,15 @@
 {
   "phase": "P2B",
   "limit": 3,
-  "used": 0,
-  "repairs": [],
+  "used": 1,
+  "repairs": [
+    {
+      "number": 1,
+      "cause": "False diagnostic CFL failure: rounded dt/unit = 0.4000000000000001 while operational dt <= CFL*unit passes.",
+      "change": "Record accepted dt and both original stage limits; gate same exact inequalities with no epsilon. Boundary metadata added.",
+      "evidence": "attempt-1",
+      "solver_updates_changed": false
+    }
+  ],
   "policy": "Existing max_repair_attempts is phase-local in contracts.py/run_phase.py. No global policy changes. New subphase budget explicitly authorized."
 }

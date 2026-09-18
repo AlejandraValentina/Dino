@@ -170,6 +170,7 @@ def solve(mesh, initial, final_time, boundaries, *, eos=None, cfl=.4,
                             inventory=inventory,boundary=list(boundary_int),source=list(source_int),residual=residual,normalized=normalized))
         stage_history.append(dict(step=step,stage1_normalized=stage_residuals[0],stage2_normalized=stage_residuals[1],
                                   stage1_CFL=dt/unit0,stage2_CFL=dt/unit1,stage2_limiting_cell=limiting1,
+                                  accepted_dt=dt,stage1_dt_limit=limit0,stage2_dt_limit=limit1,
                                   stage1_extrema=extreme(w1),stage2_extrema=extreme(w2)))
         fluxes=[tuple(.5*a+.5*b for a,b in zip(x,y)) for x,y in zip(f0,f1)]
         if next_sample is not None and t>=next_sample-4e-16:

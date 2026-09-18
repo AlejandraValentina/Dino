@@ -1,0 +1,10 @@
+{
+  "artifacts/checkpoint.json": "9572e5f5a8f1361136fe9f554e47c8f92818904a82539c98ede02d1a9b1c8b58",
+  "artifacts/first-order-control.json": "0b87eb805ce6b5775cbf21410a37e464e09019d38f11ecc693413dc3d14f2920",
+  "artifacts/p2b-summary.json": "2bbe93385daf45cd7376839966702c4e21a0b90eb9b523517acb5c18ded18499",
+  "artifacts/result.json": "e289dc89e832668137b991019f57e020aa124b3f4545412d3d8a3a6a26ff4cd5",
+  "artifacts/cases/T01_moving.json.gz": "9ea0accd677afc7c0a9d9c373dcad104354c3743a9d0c39539e41579253b5813",
+  "artifacts/cases/T01_rest.json.gz": "3920d121a656e577357fe0051e55c3c9f931641a81c270ac40b04001f88ca5b8",
+  "artifacts/cases/T12_contact.json.gz": "e64e2d6e2e28e94f7b809068770e887567329d7aea687dd214110988f8e19a9e",
+  "artifacts/cases/T12_expansion.json.gz": "888e6b5bf8e7c193192aac0525c2b04b2bcfa42cc2656ad7013324ea6ed7b1c2"
+}

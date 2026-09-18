@@ -20,6 +20,15 @@ class P2BTests(unittest.TestCase):
         self.assertEqual(minmod(-1.,2.),0.)
         self.assertEqual(minmod(0.,2.),0.)
 
+    def test_stage_cfl_gate_uses_actual_step_inequality(self):
+        from dev_orchestrator.p2b_campaign import stage_cfl_valid
+        dt=.4*9e-8
+        self.assertGreater(dt/9e-8,.4)
+        result=dict(max_CFL=dt/9e-8,stage_ledger=[dict(accepted_dt=dt,stage1_dt_limit=dt,stage2_dt_limit=dt)])
+        self.assertTrue(stage_cfl_valid(result))
+        result['stage_ledger'][0]['accepted_dt']=math.nextafter(dt,math.inf)
+        self.assertFalse(stage_cfl_valid(result))
+
     def test_nonuniform_linear_reconstruction(self):
         mesh=segments_mesh([dict(length=1000,start_diameter=100,end_diameter=180)],.2)
         states=[(1.2+x,.1*x,100000+100*x,.2+.1*x) for x in mesh.centers]

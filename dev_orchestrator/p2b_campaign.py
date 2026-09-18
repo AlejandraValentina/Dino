@@ -16,6 +16,11 @@ from .p1_r4_gate import OLD, EVIDENCE, verify_inventory, revised_t11
 FROZEN=ROOT/'results/p2b-gas1d-20260918/frozen-p2a.json'
 
 
+def stage_cfl_valid(result):
+    # Same floating-point inequality used by the integrator; no tolerance or altered CFL.
+    return all(s['accepted_dt']<=min(s['stage1_dt_limit'],s['stage2_dt_limit']) for s in result['stage_ledger'])
+
+
 def frozen_checks():
     checks=invariants()
     checks['first_order_contracts_frozen']=all(sha(ROOT/p)==h for p,h in json.loads(FROZEN.read_text(encoding='utf-8')).items())
@@ -37,7 +42,7 @@ def run_case(name, control=None, n=None):
     metrics,checks=v.measure(case,result,reference,initial)
     metrics['worst_stage_ledger']=max((max(s[k]) for s in result['stage_ledger'] for k in ('stage1_normalized','stage2_normalized')),default=0.)
     checks['stage_conservation']=metrics['worst_stage_ledger']<=1e-10
-    checks['stage_CFL']=result['max_CFL']<=case['cfl']
+    checks['stage_CFL']=stage_cfl_valid(result)
     if result['status']=='completed':
         if case['test'] in ('T04','T05'):checks['reflection_error']=metrics['reflection_error']<=.15
         if control and case['test'] in ('T02','T06'):
@@ -54,7 +59,8 @@ def run_case(name, control=None, n=None):
                 phase_displacement_error=(metrics['speed']-v.A0)*case['end'],
                 dissipation=1-metrics['amplitude_ratio'])
     return dict(name=name if n is None else f'{name}_N{n}',status='PASS' if all(checks.values()) else 'FAIL',checks=checks,metrics=metrics,
-                configuration=dict(N=mesh.n,CFL=case['cfl'],R=eos.R,gamma=eos.gamma,final_time=case['end'],method='MUSCL_SSPRK2'),
+                configuration=dict(N=mesh.n,CFL=case['cfl'],R=eos.R,gamma=eos.gamma,final_time=case['end'],method='MUSCL_SSPRK2',
+                                   boundaries='periodic' if case['bc']=='periodic' else [b.__dict__ for b in case['bc']]),
                 mesh=mesh.as_dict(),initial=initial,reference=reference,result=result)
 
 
@@ -143,7 +149,7 @@ def campaign(run_dir):
     summary=dict(state=state,matrix=matrix,checks=checks,cases=[brief(r) for r in allrecords],
         first_order_comparison=[dict(name=r['name'],first_order_metrics=controls[r['name']]['metrics'],first_order_runtime={k:controls[r['name']]['result'].get(k) for k in ('steps','wall_seconds','extrema','hllc_flux_count','hlle_fallback_count','fallback_reason')}) for r in records],
         wall_seconds=time.monotonic()-started,source_sha256={p.relative_to(ROOT).as_posix():sha(p) for p in (ROOT/'motorsim/gas1d').glob('*.py')},
-        contract='1D_CONTRACT_V1_R4',P3='NOT_STARTED',human_acceptance='P2_NOT_ACCEPTED',repair_attempt=0,
+        contract='1D_CONTRACT_V1_R4',P3='NOT_STARTED',human_acceptance='P2_NOT_ACCEPTED',repair_attempt=json.loads((FROZEN.parent/'repair-budget.json').read_text(encoding='utf-8'))['used'],
         note='STOP at first unresolved failure; partial tests do not constitute a complete gate. Review must classify science versus implementation.')
     write(art/'p2b-summary.json',summary)
     write(art/'result.json',dict(checks=[dict(id=k,passed=value,kind='numerical' if k in ('P2B','first_order_R4_control') else 'infrastructure',reason=state) for k,value in checks.items()],metrics=dict(cases=len(allrecords),wall_seconds=summary['wall_seconds']),scientific_change_required=False))
