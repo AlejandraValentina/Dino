@@ -1,0 +1,7 @@
+{
+  "phase": "P2B",
+  "limit": 3,
+  "used": 0,
+  "repairs": [],
+  "policy": "Existing max_repair_attempts is phase-local in contracts.py/run_phase.py. No global policy changes. New subphase budget explicitly authorized."
+}

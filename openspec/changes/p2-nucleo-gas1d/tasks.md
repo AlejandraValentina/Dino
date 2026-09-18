@@ -99,3 +99,15 @@ Ver `../p1-r4-cfl/tasks.md` y `results/p1-r4-cfl-20260918/` para tablas y recibo
 Presupuesto de reparaciones3/3 anterior no reiniciado; R4 fue revisión científica
 con implementación congelada. P2B no iniciado, human gate deP2 pendiente;
 P2 no se declara completo, no P3/publicación/archivo. redme.txt ajeno preservado.
+
+## P2B — orden actual 18/09/2026
+- [x] Registrar P1_R4_HUMAN_ACCEPTED y P2A_HUMAN_ACCEPTED por la usuaria, sin aceptación global P2.
+- [x] Congelar baseline first-order y verificar presupuesto de reparaciones por fase.
+- [ ] Implementar MUSCL/minmod y SSP-RK2 sin alterar primer orden ni física.
+- [ ] Pruebas de reconstrucción, stages, rechazo completo, BC y contadores.
+- [ ] Campaña P2B T01–T12 mediante dev_orchestrator con STOP ante bloqueo científico.
+- [ ] Comparación P2A/P2B y regresión P0/first-order según alcance ejecutado.
+- [ ] Revisión independiente, OpenSpec estricto, documentación y commits locales.
+
+P3 prohibido. Presupuesto P2B0/3; no se reinicia el presupuesto anterior deP2A.
+Se conserva eliminación ajena redme.txt y toda evidencia previa. Sin push/archivo.
