@@ -2,7 +2,7 @@ import unittest
 import random
 import json
 import numpy as np
-from motorsim.gas1d.batch import hllc,primitive,Kernel
+from motorsim.exhaust_batch import hllc,primitive,Kernel
 from motorsim.gas1d.eos import IdealGas,InvalidState
 from motorsim.gas1d.riemann import hllc_flux
 from motorsim.gas1d.second_order import reconstruct

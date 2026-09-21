@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "E:\dino\Dino\dev_orchestrator\p4_r3_regression.py", line 51, in <module>
+    p=argparse.ArgumentParser();p.add_argument('--run-dir',type=Path,required=True);run(p.parse_args().run_dir)
+                                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p4_r3_regression.py", line 18, in run
+    historical(folder/'historical');eos=IdealGas();cases=[]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p4_regression.py", line 10, in run
+    p3_regression(Path(run_dir)/'historical-regression')
+  File "E:\dino\Dino\dev_orchestrator\p3_r1.py", line 48, in run
+    regression(art/'p2-regression')
+  File "E:\dino\Dino\dev_orchestrator\p1_r5_close.py", line 27, in close
+    records, provenance = load_records(EVIDENCE_R5 / 'acquisition')
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p1_r5_review.py", line 20, in load_records
+    records, origins = load_reusable(PREVIOUS, source_hashes(), retain_timeouts=True)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p2b_resume.py", line 60, in load_reusable
+    if sources!=expected_source:raise ValueError('Resume solver/source hashes differ; reuse refused')
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Resume solver/source hashes differ; reuse refused

@@ -1,0 +1,160 @@
+test_first_order_dispatch_exact (test_p2b.P2BTests.test_first_order_dispatch_exact) ... ok
+test_invalid_input_rejected_without_clipping (test_p2b.P2BTests.test_invalid_input_rejected_without_clipping) ... ok
+test_local_downgrade_all_components_without_changing_average (test_p2b.P2BTests.test_local_downgrade_all_components_without_changing_average) ... ok
+test_minmod_not_mc (test_p2b.P2BTests.test_minmod_not_mc) ... ok
+test_nonuniform_linear_reconstruction (test_p2b.P2BTests.test_nonuniform_linear_reconstruction) ... ok
+test_stage_cfl_gate_uses_actual_step_inequality (test_p2b.P2BTests.test_stage_cfl_gate_uses_actual_step_inequality) ... ok
+test_stage_cfl_rejection_rolls_back_ledger (test_p2b.P2BTests.test_stage_cfl_rejection_rolls_back_ledger) ... ok
+test_uniform_state_shared_periodic_flux_and_stages (test_p2b.P2BTests.test_uniform_state_shared_periodic_flux_and_stages) ... ok
+test_variable_area_static_ledger (test_p2b.P2BTests.test_variable_area_static_ledger) ... ok
+test_available_r4_failure_not_hidden_by_other_missing_case (test_p2b_resume.ResumeTests.test_available_r4_failure_not_hidden_by_other_missing_case) ... ok
+test_changed_inputs_change_signature (test_p2b_resume.ResumeTests.test_changed_inputs_change_signature) ... ok
+test_changed_solver_refuses_reuse (test_p2b_resume.ResumeTests.test_changed_solver_refuses_reuse) ... ok
+test_corrupt_checkpoint_evidence_rejected (test_p2b_resume.ResumeTests.test_corrupt_checkpoint_evidence_rejected) ... ok
+test_current_scientific_failure_not_hidden_by_previous_timeout (test_p2b_resume.ResumeTests.test_current_scientific_failure_not_hidden_by_previous_timeout) ... ok
+test_incomplete_t12_never_passes (test_p2b_resume.ResumeTests.test_incomplete_t12_never_passes) ... ok
+test_only_completed_identical_records_reused (test_p2b_resume.ResumeTests.test_only_completed_identical_records_reused) ... ERROR
+test_relative_checkpoint_path_from_cli (test_p2b_resume.ResumeTests.test_relative_checkpoint_path_from_cli) ... ERROR
+test_runtime_override_does_not_change_physical_arguments (test_p2b_resume.ResumeTests.test_runtime_override_does_not_change_physical_arguments) ... ok
+test_t10_requires_both_contractual_pairs (test_p2b_resume.ResumeTests.test_t10_requires_both_contractual_pairs) ... ok
+test_timeout_retention_is_explicit_and_never_accepted (test_p2b_resume.ResumeTests.test_timeout_retention_is_explicit_and_never_accepted) ... ERROR
+test_VARIABLE_AREA_STATIC_EQUILIBRIUM_and_ledger (test_gas1d.GasTests.test_VARIABLE_AREA_STATIC_EQUILIBRIUM_and_ledger) ... ok
+test_boundary_generation (test_gas1d.GasTests.test_boundary_generation) ... ok
+test_cfl_uniform (test_gas1d.GasTests.test_cfl_uniform) ... ok
+test_eos_roundtrip_sound_pressure (test_gas1d.GasTests.test_eos_roundtrip_sound_pressure) ... ok
+test_equal_hllc_hlle (test_gas1d.GasTests.test_equal_hllc_hlle) ... ok
+test_exact_sod_independent_reference (test_gas1d.GasTests.test_exact_sod_independent_reference) ... ok
+test_fallback_expansion (test_gas1d.GasTests.test_fallback_expansion) ... ok
+test_frustum_volume_centroid_and_join (test_gas1d.GasTests.test_frustum_volume_centroid_and_join) ... ok
+test_invalid_states (test_gas1d.GasTests.test_invalid_states) ... ok
+test_scalar_donor_both_directions (test_gas1d.GasTests.test_scalar_donor_both_directions) ... ok
+test_stationary_contact (test_gas1d.GasTests.test_stationary_contact) ... ok
+test_counts_survive_later_boundary_failure (test_p2_fixes.P2FixTests.test_counts_survive_later_boundary_failure) ... ok
+test_event_tail_partition_respects_cfl_and_minimum (test_p2_fixes.P2FixTests.test_event_tail_partition_respects_cfl_and_minimum) ... ok
+test_fallback_records_actual_boundary_states (test_p2_fixes.P2FixTests.test_fallback_records_actual_boundary_states) ... ok
+test_flux_counts_actual_calls_and_periodic_shared_face (test_p2_fixes.P2FixTests.test_flux_counts_actual_calls_and_periodic_shared_face) ... ok
+test_hllc_near_rest_mass_sign_and_species (test_p2_fixes.P2FixTests.test_hllc_near_rest_mass_sign_and_species) ... ok
+test_nonreflecting_explicit_base_entropy_and_species (test_p2_fixes.P2FixTests.test_nonreflecting_explicit_base_entropy_and_species) ... ok
+test_open_incompatible_branches_not_zeroed (test_p2_fixes.P2FixTests.test_open_incompatible_branches_not_zeroed) ... ok
+test_open_real_flow_sign_preserved (test_p2_fixes.P2FixTests.test_open_real_flow_sign_preserved) ... ok
+test_acoustic_jumps_not_contact (test_p1_r2.HydroContactTests.test_acoustic_jumps_not_contact) ... ok
+test_invalid (test_p1_r2.HydroContactTests.test_invalid) ... ok
+test_no_tracer_argument (test_p1_r2.HydroContactTests.test_no_tracer_argument) ... ok
+test_normal_shock_not_contact (test_p1_r2.HydroContactTests.test_normal_shock_not_contact) ... ok
+test_pure_contact_and_translation (test_p1_r2.HydroContactTests.test_pure_contact_and_translation) ... ok
+test_reversal_and_galilean_invariance (test_p1_r2.HydroContactTests.test_reversal_and_galilean_invariance) ... ok
+test_uniform_absent_and_ties_ambiguous (test_p1_r2.HydroContactTests.test_uniform_absent_and_ties_ambiguous) ... ok
+test_assignments_and_explicit_exterior (test_p1_r3.BoundarySemanticsTests.test_assignments_and_explicit_exterior) ... ok
+test_distinct_characteristic_response (test_p1_r3.BoundarySemanticsTests.test_distinct_characteristic_response) ... ok
+test_no_microscopic_sign_switch (test_p1_r3.BoundarySemanticsTests.test_no_microscopic_sign_switch) ... ok
+test_pressure_and_outgoing_characteristic_both_normals (test_p1_r3.BoundarySemanticsTests.test_pressure_and_outgoing_characteristic_both_normals) ... ok
+test_previous_incompatible_states_are_not_zeroed (test_p1_r3.BoundarySemanticsTests.test_previous_incompatible_states_are_not_zeroed) ... ok
+test_scope_and_invalid_pressure (test_p1_r3.BoundarySemanticsTests.test_scope_and_invalid_pressure) ... ok
+test_determinism_discards_only_wall_clock (test_p1_r4.CFLStudyTests.test_determinism_discards_only_wall_clock) ... ok
+test_frozen_implementation_and_previous_contracts (test_p1_r4.CFLStudyTests.test_frozen_implementation_and_previous_contracts) ... ok
+test_metric_preserves_prescribed_ten_pa_denominator (test_p1_r4.CFLStudyTests.test_metric_preserves_prescribed_ten_pa_denominator) ... ok
+test_common_bias_or_parent_failure_blocks (test_p1_r4_gate.R4GateTests.test_common_bias_or_parent_failure_blocks) ... ok
+test_complete_evidence_passes_reviewed_criterion (test_p1_r4_gate.R4GateTests.test_complete_evidence_passes_reviewed_criterion) ... ok
+test_missing_mesh_blocks (test_p1_r4_gate.R4GateTests.test_missing_mesh_blocks) ... ok
+test_nondecreasing_pair_blocks (test_p1_r4_gate.R4GateTests.test_nondecreasing_pair_blocks) ... ok
+test_sod_and_speed_failures_are_not_superseded (test_p1_r4_gate.R4GateTests.test_sod_and_speed_failures_are_not_superseded) ... ok
+setUpClass (test_p1_r5_offline.OfflineReviewTests) ... ERROR
+setUpClass (test_p1_r5_review.RevisedGateTests) ... ERROR
+test_existing_two_and_four_stroke_states_roundtrip (test_coupling_adapter.AdapterTests.test_existing_two_and_four_stroke_states_roundtrip) ... ok
+test_invalid_mapping_rejected (test_coupling_adapter.AdapterTests.test_invalid_mapping_rejected) ... ok
+test_equilibrium_and_pressure_impulse (test_coupling_preflight.InterfaceTests.test_equilibrium_and_pressure_impulse) ... ok
+test_frozen_boundary_gap_is_not_hidden (test_coupling_preflight.InterfaceTests.test_frozen_boundary_gap_is_not_hidden) ... ok
+test_invalid_state_not_clipped (test_coupling_preflight.InterfaceTests.test_invalid_state_not_clipped) ... ok
+test_shared_increment_and_total_enthalpy (test_coupling_preflight.InterfaceTests.test_shared_increment_and_total_enthalpy) ... ok
+test_exactly_one_riemann_evaluation (test_coupling_riemann.RiemannCouplingTests.test_exactly_one_riemann_evaluation) ... ok
+test_fallback_vector_not_replaced (test_coupling_riemann.RiemannCouplingTests.test_fallback_vector_not_replaced) ... ok
+test_forward_reverse_species_and_orientation (test_coupling_riemann.RiemannCouplingTests.test_forward_reverse_species_and_orientation) ... ok
+test_thermal_contacts (test_coupling_riemann.RiemannCouplingTests.test_thermal_contacts) ... ok
+test_invalid_chamber_rejected (test_coupled.CoupledStageTests.test_invalid_chamber_rejected) ... ok
+test_isolated_adiabatic_work_source (test_coupled.CoupledStageTests.test_isolated_adiabatic_work_source) ... ok
+test_shared_stage_and_ledger (test_coupled.CoupledStageTests.test_shared_stage_and_ledger) ... ok
+test_closed_wall_exact_and_continuous (test_exhaust_port.ExhaustPortTests.test_closed_wall_exact_and_continuous) ... ok
+test_existing_area_and_events (test_exhaust_port.ExhaustPortTests.test_existing_area_and_events) ... ok
+test_geometry_adapter_existing_segments (test_exhaust_port.ExhaustPortTests.test_geometry_adapter_existing_segments) ... ok
+test_geometry_rejects_discontinuous_joint (test_exhaust_port.ExhaustPortTests.test_geometry_rejects_discontinuous_joint) ... ok
+test_open_shared_flux_and_local_backflow_species (test_exhaust_port.ExhaustPortTests.test_open_shared_flux_and_local_backflow_species) ... ok
+test_all_component_downgrade_is_observable (test_gas1d_batch.BatchTests.test_all_component_downgrade_is_observable) ... ok
+test_flux_branches_and_fallback_match_scalar (test_gas1d_batch.BatchTests.test_flux_branches_and_fallback_match_scalar) ... ok
+test_joint_steps_match_scalar (test_gas1d_batch.BatchTests.test_joint_steps_match_scalar) ... ok
+test_primitive_and_invalid_species (test_gas1d_batch.BatchTests.test_primitive_and_invalid_species) ... ok
+test_reconstruction_and_cfl_nonuniform (test_gas1d_batch.BatchTests.test_reconstruction_and_cfl_nonuniform) ... ok
+test_CFL_uses_stage_bound_and_species_is_strict (test_hybrid_exhaust.HybridGateTests.test_CFL_uses_stage_bound_and_species_is_strict) ... ok
+test_periodicity_checks_pressure_inventory_and_exchange (test_hybrid_exhaust.HybridGateTests.test_periodicity_checks_pressure_inventory_and_exchange) ... ok
+test_periodicity_rejects_missing_phase_support (test_hybrid_exhaust.HybridGateTests.test_periodicity_rejects_missing_phase_support) ... ok
+test_analytic_species_matches_legacy_at_all_heat_stages (test_hybrid_exhaust.HybridSourcesTests.test_analytic_species_matches_legacy_at_all_heat_stages) ... ok
+test_invalid_physical_state_is_rejected (test_hybrid_exhaust.HybridSourcesTests.test_invalid_physical_state_is_rejected) ... ok
+test_source_ledger_excludes_internal_transfers_and_dummy_exhaust (test_hybrid_exhaust.HybridSourcesTests.test_source_ledger_excludes_internal_transfers_and_dummy_exhaust) ... ok
+test_species_transform_is_not_clipping (test_hybrid_exhaust.HybridSourcesTests.test_species_transform_is_not_clipping) ... ok
+test_unreplaced_flows_and_geometry_are_legacy (test_hybrid_exhaust.HybridSourcesTests.test_unreplaced_flows_and_geometry_are_legacy) ... ok
+
+======================================================================
+ERROR: test_only_completed_identical_records_reused (test_p2b_resume.ResumeTests.test_only_completed_identical_records_reused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\dino\Dino\tests\test_p2b_resume.py", line 29, in test_only_completed_identical_records_reused
+    records,origins=p.load_reusable(p.PREVIOUS,p.source_hashes())
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p2b_resume.py", line 60, in load_reusable
+    if sources!=expected_source:raise ValueError('Resume solver/source hashes differ; reuse refused')
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Resume solver/source hashes differ; reuse refused
+
+======================================================================
+ERROR: test_relative_checkpoint_path_from_cli (test_p2b_resume.ResumeTests.test_relative_checkpoint_path_from_cli)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\dino\Dino\tests\test_p2b_resume.py", line 14, in test_relative_checkpoint_path_from_cli
+    records,_=p.load_reusable('results/p2b-gas1d-20260918/attempt-2',p.source_hashes())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p2b_resume.py", line 60, in load_reusable
+    if sources!=expected_source:raise ValueError('Resume solver/source hashes differ; reuse refused')
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Resume solver/source hashes differ; reuse refused
+
+======================================================================
+ERROR: test_timeout_retention_is_explicit_and_never_accepted (test_p2b_resume.ResumeTests.test_timeout_retention_is_explicit_and_never_accepted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\dino\Dino\tests\test_p2b_resume.py", line 41, in test_timeout_retention_is_explicit_and_never_accepted
+    normal,_=p.load_reusable(folder,p.source_hashes())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p2b_resume.py", line 60, in load_reusable
+    if sources!=expected_source:raise ValueError('Resume solver/source hashes differ; reuse refused')
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Resume solver/source hashes differ; reuse refused
+
+======================================================================
+ERROR: setUpClass (test_p1_r5_offline.OfflineReviewTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\dino\Dino\tests\test_p1_r5_offline.py", line 9, in setUpClass
+    cls.report = reproduce()
+                 ^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p1_r5_offline.py", line 16, in reproduce
+    assert manifest['source_sha256'] == source_hashes()
+AssertionError
+
+======================================================================
+ERROR: setUpClass (test_p1_r5_review.RevisedGateTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "E:\dino\Dino\tests\test_p1_r5_review.py", line 10, in setUpClass
+    cls.records, cls.provenance = load_records(ROOT / 'results/p1-r5e-20260918/acquisition')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p1_r5_review.py", line 20, in load_records
+    records, origins = load_reusable(PREVIOUS, source_hashes(), retain_timeouts=True)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\dev_orchestrator\p2b_resume.py", line 60, in load_reusable
+    if sources!=expected_source:raise ValueError('Resume solver/source hashes differ; reuse refused')
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Resume solver/source hashes differ; reuse refused
+
+----------------------------------------------------------------------
+Ran 91 tests in 1.561s
+
+FAILED (errors=5)

@@ -2,7 +2,7 @@
 import argparse,gzip,json
 from pathlib import Path
 import numpy as np
-from motorsim.gas1d.batch import Kernel,hllc,primitive
+from motorsim.exhaust_batch import Kernel,hllc,primitive
 from motorsim.gas1d.mesh import Mesh
 from motorsim.gas1d.eos import IdealGas
 from motorsim.gas1d.boundary import Boundary

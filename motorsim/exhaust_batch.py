@@ -4,8 +4,8 @@ No compiled backend. Scalar EOS, boundaries and HLLC remain the reference.
 All exceptional HLLC faces delegate to that reference, including HLLE reasons.
 """
 import numpy as np
-from .eos import InvalidState
-from .riemann import hllc_flux
+from .gas1d.eos import InvalidState
+from .gas1d.riemann import hllc_flux
 
 
 def valid(w,eos):

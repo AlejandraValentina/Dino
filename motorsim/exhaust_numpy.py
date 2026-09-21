@@ -3,7 +3,7 @@ Reference: motorsim.exhaust1d; no in-place updates of cached cell arrays.
 """
 from math import fsum, isfinite
 import numpy as np
-from .gas1d.batch import Kernel,primitive as batch_primitive,hllc as batch_hllc
+from .exhaust_batch import Kernel,primitive as batch_primitive,hllc as batch_hllc
 import time
 from .exhaust1d import port_flux,IdealGas,InvalidState,Boundary,hllc_flux,reconstruct,cfl_step,event_step
 

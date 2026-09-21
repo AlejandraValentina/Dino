@@ -1,0 +1,11 @@
+{
+  "cause": "New experimental batch module under gas1d changed the frozen P2 glob inventory",
+  "fix": "Move to motorsim/exhaust_batch.py and adjust imports; no frozen manifest or validator changed",
+  "computational_code_identical": true,
+  "normalized_computational_sha256": "d06ec7404fcf3488dc41c82a361e39b6c2eac0858815570e8881b928027da899",
+  "old_path": "motorsim/gas1d/batch.py",
+  "new_path": "motorsim\\exhaust_batch.py",
+  "benchmark_repeated": false,
+  "reason": "Only package/import location changes; arithmetic and data/control flow identical",
+  "native_failed_run_preserved": "regression-infrastructure-failure"
+}
