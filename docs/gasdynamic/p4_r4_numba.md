@@ -24,3 +24,7 @@ HLLC primero; focal >=1.2x antes del ciclo completo. Dos G1 independientes,
 mediana <=20s y proyección <=600s habilitan periodicidad; 20–25s NEAR_TARGET,
 >25s NATIVE_EXTENSION_DECISION_REQUIRED. No seleccionar el mejor tiempo.
 Si no pasa performance, no ejecutar periodicidad/G2. Sin P5/publicación.
+
+Primer kernel: equivalencia PASS; G1 caras480° 1.51879x. Diagnóstico aleatorio
+0.98782x conservado. Habilita ampliar sólo primitivas (7.50%) y MUSCL
+(11.27% inclusive); no sumar validación anidada. Sin alterar control SSPRK2.

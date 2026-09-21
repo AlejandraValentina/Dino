@@ -1074,6 +1074,30 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P4_R4_FOCAL",
+      "title": "Numba tests and three representative frozen G1 windows",
+      "objective": "Numba tests and three representative frozen G1 windows",
+      "depends_on": [
+        "P2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "numba_tests",
+        "focal_command",
+        "focal_gate"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }

@@ -13,10 +13,13 @@ class CachedMesh:
         self.areas=mesh.areas;self.volumes=mesh.volumes;self.widths=mesh.widths
         self.as_dict=mesh.as_dict
 
-def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensors=(),wall_limit=600.):
+def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensors=(),wall_limit=600.,numeric_backend=None):
+    kernel_class=Kernel;primitive_fn=batch_primitive;hllc_fn=batch_hllc
+    if numeric_backend is not None:
+        kernel_class=numeric_backend.Kernel;primitive_fn=numeric_backend.primitive;hllc_fn=numeric_backend.hllc
     eos=eos or IdealGas();exterior=exterior or Boundary('nonreflecting',state=(100000/(eos.R*300),0.,100000.,0.))
     mesh=CachedMesh(mesh)
-    kernel=Kernel(mesh,eos);fallback_faces=[];downgrade_cells=[];inventory_cache={}
+    kernel=kernel_class(mesh,eos);fallback_faces=[];downgrade_cells=[];inventory_cache={}
     cache={}
     start=time.monotonic();q=np.array(initial,dtype=np.float64);z=list(system.initial)
     events=system.events(mesh.areas[0],end);event_index=0;t=0.
@@ -24,7 +27,7 @@ def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensor
     def primitive(cells):
         key=id(cells)
         if key in cache and cache[key][0] is cells:return cache[key][1]
-        rows=batch_primitive(cells,kernel.volumes,eos)
+        rows=primitive_fn(cells,kernel.volumes,eos)
         if len(cache)>=4:del cache[next(iter(cache))]
         cache[key]=(cells,rows)
         return rows
@@ -48,7 +51,7 @@ def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensor
         if port['HLLE']:fallback_faces.append(dict(rhs=counts['rhs'],time=when,face=0,reason='frozen_port_HLLE',evaluations=port['HLLE']))
         flux=np.empty((mesh.n+1,4));speeds=np.empty(mesh.n+1)
         flux[0]=port['flux'];speeds[0]=max(abs(port['speeds'][0]),abs(port['speeds'][2]))
-        f,s,reasons,fallback_speeds=batch_hllc(right[:-1],left[1:],eos)
+        f,s,reasons,fallback_speeds=hllc_fn(right[:-1],left[1:],eos)
         counts['HLLE']+=len(reasons);counts['HLLC']+=mesh.n-1-len(reasons)
         for i,reason in reasons.items():fallback_faces.append(dict(rhs=counts['rhs'],time=when,face=i+1,reason=reason,speeds=fallback_speeds[i]))
         flux[1:-1]=kernel.areas[1:-1,None]*f;speeds[1:-1]=np.maximum(np.abs(s[:,0]),np.abs(s[:,2]))

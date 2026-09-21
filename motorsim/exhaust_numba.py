@@ -103,3 +103,53 @@ def hllc(left,right,eos):
         out[i]=f;speeds[i]=(s[0],np.nan if s[1] is None else s[1],s[2])
         if r:reasons[int(i)]=r;fallback[int(i)]=s
     return out,speeds,reasons,fallback
+
+
+@njit(cache=True, fastmath=False, parallel=False)
+def primitive_numeric(cells,volumes,gamma,R):
+    w=np.empty_like(cells)
+    for i in range(len(cells)):
+        r,m,e,z=cells[i]/volumes[i]
+        if not (isfinite(r) and isfinite(m) and isfinite(e) and isfinite(z) and r>0 and 0<=z<=r):
+            raise ValueError('Conserved rho/species inadmissible')
+        u=m/r;p=(gamma-1)*(e-.5*m*u)
+        w[i]=r,u,p,z/r
+        validate(w[i],R)
+    return w
+
+def primitive(cells,volumes,eos):
+    try:return primitive_numeric(cells,volumes,eos.gamma,eos.R)
+    except ValueError as exc:raise InvalidState(str(exc)) from exc
+
+@njit(cache=True, fastmath=False, parallel=False)
+def admissible(w,R):
+    r,u,p,y=w
+    if not (np.isfinite(w).all() and r>0 and p>0 and 0<=y<=1):return False
+    T=p/(r*R)
+    return isfinite(T) and T>0
+
+@njit(cache=True, fastmath=False, parallel=False)
+def reconstruct_numeric(w,lo,hi,dl,dr,left_offset,right_offset,R):
+    n=len(w);lf=np.empty_like(w);rf=np.empty_like(w);bad=np.zeros(n,np.bool_)
+    for i in range(n):
+        for k in range(4):
+            l=lo[k] if i==0 else w[i-1,k];r=hi[k] if i==n-1 else w[i+1,k]
+            a=(w[i,k]-l)/dl[i,0];b=(r-w[i,k])/dr[i,0]
+            slope=0. if a==0 or b==0 or (a>0)!=(b>0) else (a if abs(a)<=abs(b) else b)
+            lf[i,k]=w[i,k]+slope*left_offset[i,0];rf[i,k]=w[i,k]+slope*right_offset[i,0]
+        if not (admissible(lf[i],R) and admissible(rf[i],R)):
+            lf[i]=w[i];rf[i]=w[i];bad[i]=True
+    return lf,rf,bad
+
+from .exhaust_batch import Kernel as ReferenceKernel
+class Kernel(ReferenceKernel):
+    def reconstruct(self,w,boundaries):
+        lo=boundaries[0].face_state(tuple(w[0].tolist()),-1,self.eos)
+        hi=boundaries[1].face_state(tuple(w[-1].tolist()),1,self.eos)
+        a,b,bad=reconstruct_numeric(w,np.array(lo),np.array(hi),self.dl,self.dr,self.left_offset,self.right_offset,self.eos.R)
+        return a,b,np.flatnonzero(bad).tolist()
+
+def solve_exhaust(*args,**kwargs):
+    from .exhaust_numpy import solve_exhaust as reference
+    import sys
+    return reference(*args,numeric_backend=sys.modules[__name__],**kwargs)
