@@ -627,3 +627,20 @@ Commits:75210ad aceptación/perfil,655b9a9 bloqueestructural,5e7680e batching,
 Evidencia: `results/p4-r4-20260921/artifacts/benchmark.json`,
 `dev_orchestrator/runs/20260921T134738-P4_R4_FOCAL-c72685bc1449/artifacts/focal.json`
 y `dev_orchestrator/runs/20260921T134518-P4_R4_MICRO-2fc258aaeab7/artifacts/micro.json`.
+
+## P4-R5 — fusión del hot path Numba antes de extensión nativa (orden fusión)
+
+- [x] Revisión independiente P4-R4 read-only repetida; dummy BLOCKED conservado; revisión real **INDEPENDENT_REVIEW_PENDING** (sin reviewer conectado), checklist float64/fastmath/parallel/equivalencia/benchmark/JIT/tests.
+- [x] Ciencia congelada: Euler quasi1D/HLLC/HLLE/MUSCL/minmod/SSP-RK2/CFL/EOS/source/P3/port/geometría/eventos/malla G1 250 verificados, fastmath=False parallel=False.
+- [x] Perfil backend Numba actual (26.599 s) en 12 categorías A-L (Python 41.6%, SSP 15.3%, HLLC 12.6%, diagnósticos 8.8%, etc.) y cProfile top20; sin optimizar antes de identificar hotspots.
+- [x] Medición de crossings: 106137 Python→Numba, 35379 HLLC faces (8.861.357 flujos), 48546 primitives, 176895 face_state, 74874 coupling, ~1.45 GB allocations temporales por ciclo.
+- [x] Kernel fusionado `gas1d_rhs_numba` en `motorsim/exhaust_numba.py` + `exhaust_numba_fused.py` (`FUSED_ENABLED=True`): primitive+MUSCL+HLLC en una sola región compilada, sin duplicar física, comparando contra SCALAR/NUMPY/NUMBA_R4.
+- [x] Arrays de trabajo prealocados y reutilizados (w, lf, rf, flux, speeds, codes, bad) sin aliasing que cambie estados; in-place autorizado con equivalencia matemática y preservación de q^n/stages/ledgers; 3 tests aliasing PASS.
+- [x] Gate focal: 3 ventanas G1 idénticas a R4, equivalencia exacta 11/11 campos, speedups R5 vs R4 1.136×/1.519×/1.411× agregado 1.33× ≥1.2 PASS.
+- [x] Microbenchmark 1000 RHS: R4 0.381653 s vs R5 0.069238 s speedup 5.512× ≥1.15 PASS.
+- [x] Dos G1 completos calientes con JIT fuera: 19.519 s / 19.223 s wall (19.141/19.187 cycle), equivalencia exacta 13 campos, 13.164 pasos, 35.379 RHS, 8.861.357 HLLC, proyección 30× 574.92 s ≤600 → **P4_R5_NUMBA_FUSED_PERFORMANCE_PASS** (≤20 s). Segunda medida también 19.18 <20, mediana 19.16.
+- [x] Periodicidad G1: 30 ciclos con NUMBA_FUSED, sin streak 3 PASS (sensor_max ~0.60, work_rel 0.03); G2 15 ciclos diagnóstico similar; E14 requiere G1 PASS, no acreditado. Checkpoints deterministas por ciclo guardados. Estado final **P4_BLOCKED_PERIODIC_CONVERGENCE** (no P4 PASS, no P5).
+- [x] Regresiones: 101 tests patrón P4_R3_CLOSE PASS (26.371 s) + 5 Numba + 3 aliasing fused = 109 (106 pertinentes), OpenSpec estricto PASS, 449 amplios con 5 fallos preexistentes no atribuidos.
+- [x] Revisión final read-only sobre profile/kernel/equivalencia/fastmath/parallel/allocations/SSP/balances/benchmark/regresiones; dummy BLOCKED conservado.
+
+Evidencia: `results/p4-r5-20260921/artifacts/` (profile_r4/r5, crossings, micro_rhs, focal, benchmark, periodic), `docs/gasdynamic/p4_r5_fused.md`, `results/p4-r5-20260921/decision.json`, `results/p4-r5-20260921/independent-review.json` (INDEPENDENT_REVIEW_PENDING), `motorsim/exhaust_numba_fused.py`.
