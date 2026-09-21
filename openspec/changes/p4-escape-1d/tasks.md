@@ -644,3 +644,18 @@ y `dev_orchestrator/runs/20260921T134518-P4_R4_MICRO-2fc258aaeab7/artifacts/micr
 - [x] Revisión final read-only sobre profile/kernel/equivalencia/fastmath/parallel/allocations/SSP/balances/benchmark/regresiones; dummy BLOCKED conservado.
 
 Evidencia: `results/p4-r5-20260921/artifacts/` (profile_r4/r5, crossings, micro_rhs, focal, benchmark, periodic), `docs/gasdynamic/p4_r5_fused.md`, `results/p4-r5-20260921/decision.json`, `results/p4-r5-20260921/independent-review.json` (INDEPENDENT_REVIEW_PENDING), `motorsim/exhaust_numba_fused.py`.
+
+## P4-R6 — diagnóstico de periodicidad / posible órbita de período 2 (orden diagnóstico)
+
+- [x] D1 exacto 1–30 con thresholds contractuales, tablas completas work/cyl/sensor/port/inventarios y sensor_max localizado (sensor 0, fase 123.5–124°, p~100k vs 30k, denom~100k, metric 0.60).
+- [x] D2/diagnóstico lag2 (n vs n-2): work 0.00005–0.001, sensor_max 0.006–0.02 tras ciclo 24 vs D1 0.60; D3≈D1, D4≈D2 → período 2.
+- [x] Vector X_n (I/K/C + pipe integrals): ||X_n-X_{n-1}|| max 0.324, ||X_n-X_{n-2}|| max 0.00004–0.0007 sostenido → `PERIOD_2_ORBIT_CANDIDATE`.
+- [x] Invariancia 360°: geometry/port.area/events/volumes/dV idénticos theta vs theta+360 exacto; HybridSystem heat_start +360 correcto → PASS.
+- [x] Handoff n→n+1: state/cells/inventories/angle/composition/ledger exactos, sin reinicialización silenciosa → PASS.
+- [x] Búsqueda 720°: 720 solo en módulos 4T, no en camino híbrido 2T → `PERIOD_MAPPING_DEFECT` no encontrado.
+- [x] Restart determinism: checkpoint G1-28 → rerun ciclo 29 reproduce exacto (state/cells/work/history 0 diff) → PASS.
+- [x] Odd/even: W odd 13.838 vs even 13.331 (diff 3.6%), cada subsecuencia converge (5e-05/0.00014); pipe mass odd 1.48e-04 vs even 1.04e-04, port mass odd -6.54e-05 vs even -4.92e-05; divergencia ya en pipe al inicio del ciclo.
+- [x] G2 15 ciclos: D1 sensor_max 0.005 en 4–5 luego 0.46–0.55, D2 sensor_max 0.004–0.009 tras ciclo 7 → mismo patrón period-2, causa común.
+- [x] Clasificación: **P4_R6_PERIOD_2_ORBIT_CONFIRMED** — 360 PASS, handoff PASS, metric no defect, D2/vector convergen, D1 no, odd/even reproducibles. No P4 PASS, `SCIENTIFIC_CHANGE_REQUIRED`, STOP, no P5. No promediar ni relajar thresholds.
+
+Evidencia: `results/p4-r6-20260921/artifacts/diagnosis.json` (D1/D2/D3/D4, vector, odd/even), `results/p4-r6-20260921/artifacts/g1_cycles/` (30), `g2_cycles/` (15), `docs/gasdynamic/p4_r6_diagnosis.md`, `results/p4-r6-20260921/decision.json`.
