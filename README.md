@@ -1,9 +1,17 @@
 # MotorSim
 
-P4-R2 autorizado por orden2df31e6d: delta de refinamiento aprobado por reviewer,
-P4B reevaluado PASS bajoR2. Habilitado P4C experimental sólo con guard de coste
-antes de multiciclo. Solver/legacy/observables intactos; no UI/JSON/P5 ni publicación.
-[Delta](docs/gasdynamic/p4_refinement_r2.md). Los estados siguientes son históricos.
+P4-R2: **P4_R2_PASS_REFINEMENT_CONTRACT**; P4B PASS bajo el
+[delta R2](docs/gasdynamic/p4_refinement_r2.md), sin repetir N800.
+P4C: **P4_BLOCKED_PERFORMANCE**. G1 N250 completó un ciclo en263,328 s;
+proyección30ciclos7899,84 s frente al presupuesto600 s. Se detuvo antes de G2
+y multiciclo. Conservación/admisibilidad PASS sólo para el ciclo medido;
+periodicidad, comparación G1/G2 y retorno causal pendientes. No hubo backflow
+en este ciclo, por lo que no lo acredita. Sin aceptación ni P4 PASS/P5.
+96 pruebas (88 regresión +8 focales), regresiones offlineP0/P2/P3 PASS y151
+hashes congelados intactos. Solver/legacy/UI/JSON intactos; sin publicación.
+[Tareas y resultados](openspec/changes/p4-escape-1d/tasks.md),
+[trazas medidas](results/p4-r2-20260921/hybrid-traces.png).
+Los estados siguientes son históricos.
 
 
 P4-R1E: **P4_R1_PREASYMPTOTIC_REFINEMENT_CONFIRMED**.

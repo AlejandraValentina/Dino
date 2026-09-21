@@ -429,8 +429,95 @@ de auditoría, no aceptación humanaP4. Recibo: independent-review.json.
 ## P4-R2 — orden2df31e6d
 - [x] Revisión independiente y adopción versionada P4_REFINEMENT_R2.
 - [x] Reevaluación offline de16 casos/6 agregados restantes: P4B PASS bajoR2.
-- [ ] Implementar P4C aislado y medir un ciclo antes de multiciclo.
-- [ ] E12–E15 y regresiones; detener dependientes según gates/performance.
+- [x] Implementar P4C aislado y medir un ciclo antes de multiciclo.
+- [x] Evaluar E12/E15 del ciclo medido y ejecutar regresiones; aplicar STOP de coste.
+- [ ] E13 periódico y E14 G1/G2/retorno causal; E12/E15 sobre la campaña completa.
 
 Delta: docs/gasdynamic/p4_refinement_r2.md; evidencia results/p4-r2-20260921/gate-review.json.
 Sin integración nueva para PartesA/B. E11 histórico es banco, no ciclo motor.
+
+### Resultado P4C — P4_BLOCKED_PERFORMANCE
+
+Definición registrada antes de ejecución en docs/gasdynamic/p4c_hybrid.md,
+commit4747eb2. Ruta interna motorsim/hybrid_exhaust.py, sin import UI/JSON;
+legacy y kernels congelados intactos. Adaptador I/K/C reutiliza fuentes Model;
+puerto usa P3/P4. Combustión350→390 conserva F analítica mediante coordenada
+transformada, calor SSPRK2 registrado separado de su primitiva. Revisión previa
+independiente aprobó esa adaptación; corrigió sólo evaluadorCFL por etapas y
+retiró tolerancia de especie antes de integrar. Ocho pruebas focales PASS.
+
+G1 recto .75m/20mm,N250; G2 cadenaP4B,N251, ambos dxobjetivo3mm.
+G2 configurado, **no ejecutado**. Motor, RPM3000 e iniciales canónicos:
+tubo/exterior100kPa/500K/Y0/u0. La justificación cuantitativa de malla y
+periodicidad (30máximo,3comparaciones tras ciclo5) precede al coste medido.
+
+| Medición G1 | Resultado |
+|---|---:|
+| Ciclos completos | 1, 180→540° |
+| Solver / ciclo con postproceso | 261,563 / 263,328 s |
+| Proyección30 ciclos / presupuesto | 7899,840 / 600 s |
+| Pasos aceptados / RHS | 13164 / 35379 |
+| HLLC / HLLE | 8861357 / 0 |
+| Rechazos stage_CFL | 9051 |
+| Balance global normalizado m/E/F | 4,45e−15 / 4,52e−15 / 1,37e−15 |
+| Máximo residuo etapa / segmento | 3,53e−16 / 1,15e−14 |
+| Intercambio puerto m/E/F haciaC | −3,29831227e−5 kg / −23,08635686 J / −3,24525813e−6 kg |
+| rho/p/T mínimos1D | 0,519827851 kg/m³ / 99983,4422 Pa / 499,997876 K |
+| Y mínimo/máximo1D | 0 / 0,4481253805 |
+| Trazas de puerto cerrado | 13634, intercambio exactamente0 |
+| Trazas con backflow | 0, no acreditado por este ciclo |
+
+**E12 y E15 PASS únicamente para el ciclo medido**. EOS valida todas las
+etapas1D y Model las0D, sin clipping. Extremos0D de trazas RHS guardadas:
+p[91346,1073;1410384,7069]Pa,T[299,004389;1277,892918]K,Y[0;1]. No confundir
+estos extremos muestreados con un listado de todos los estados intermedios.
+El puerto es interno y no se suma como fuente externa del inventario conjunto.
+Audit offline vuelve a sumar inventarios/ledger; diferencias de unos ULP entre
+fsum y acumulación secuencial están expuestas, no se retocan los datos.
+
+Calor numérico0,523078783273J, primitiva0,523078782839J;
+diferencia4,3388e−10J. Especie quemada analítica6,53848478549e−7kg.
+Diagnósticos indicados del **primer ciclo transitorio**, no prestaciones periódicas:
+W=−0,418168664J, P=−20,9084332W, par=−0,0665536099Nm.
+El signo negativo no se oculta ni se interpreta como potencia al eje.
+
+El historial contiene sólo ciclo1; periodicidad=null. Guard30×tiempo>600s
+obliga STOP antes de G2 o ciclo2. Incluso mínimo7ciclos costaría1843,296s con
+esta medida; no se cambia el mínimo ni la malla para forzar continuación.
+**E13/E14 pendientes**: sin comparación G1/G2, tiempo/ángulo de retorno ni
+causalidad demostrada. backflow_local=true nativo es una comprobación vacua
+en este ciclo; soporte P3/P4A previo no equivale a evidencia híbrida nueva.
+
+### Evidencia, comandos y regresiones
+
+results/p4-r2-20260921/p4c conserva run nativo completo y arrays gzip;
+hybrid-audit.json registra auditoría, hybrid-traces.png/svg muestran señales
+reales guardadas. Sensores efectivos0,1005/0,2985/0,4995m: p/u/M/Y cada paso,
+p/u/T/Y/M en snapshots completos. Cara de puerto de segunda etapa y flujo
+promedioSSPRK2 etiquetados; no se presentan como evaluación puntual idéntica.
+No se guardó ni afirmó un checkpoint reanudable.
+
+Comandos reales:
+
+- `.venv\Scripts\python.exe -m dev_orchestrator.runners.run_phase P4C_PREFLIGHT --dependency P2=docs/gasdynamic/p2_accepted_dependency.json`
+- `.venv\Scripts\python.exe -m dev_orchestrator.runners.run_phase P4_CLOSE --dependency P2=docs/gasdynamic/p2_accepted_dependency.json`
+- `python -m dev_orchestrator.p4_hybrid_report results/p4-r2-20260921` (sólo auditoría/figuras offline).
+- `openspec validate p4-escape-1d --strict --no-interactive`
+
+P4_CLOSE:88 testsPASS(24,292s), más8focalesPASS; histórico offlineP0/P2/P3
+todoPASS,0 nuevas integraciones de campaña en regresiones. P4A/P4B y151hashes
+congelados intactos. El Python del venv no tiene matplotlib; generar figura con
+él falló tras guardar auditoría. Se usó Python3.11 existente con matplotlib para
+postproceso, sin instalar dependencias ni repetir integración.
+
+Ambos runs nativos tienen gateBLOCKED únicamente por review_not_approved del
+hook dummy; no errores ni scopeviolations. Conservarlo, adjuntar revisión
+independiente separada. Ese bloqueo técnico no sustituye al STOP científico/
+operativo P4_BLOCKED_PERFORMANCE. Autorrevisión de código/diff/figuras separada
+de la revisión read-only /root/p3_review. Sin aceptaciónP4, archivo, push niP5.
+
+Dictamen independiente final: **P4_BLOCKED_PERFORMANCE**, R2/P4B aprobados,
+96 tests y regresiones confirmadas, sin P4 PASS. Recibos separados:
+results/p4-r2-20260921/independent-review.json y decision.json; inventario SHA256
+de31 archivos de evidencia en inventory-all.json. OpenSpec estricto final PASS.
+Commits previos:84b36b9 deltaR2,4747eb2 fuente previa,a3087ba medición/STOP.

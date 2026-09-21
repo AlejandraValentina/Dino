@@ -1,0 +1,12 @@
+{
+  "checks": {
+    "historical": true,
+    "P3_frozen": true,
+    "P3_evidence": true,
+    "P3B": true,
+    "P3C": true
+  },
+  "P3_accepted": "P3_HUMAN_ACCEPTED",
+  "P3_evidence_files": 72,
+  "new_finite_integrations": 0
+}

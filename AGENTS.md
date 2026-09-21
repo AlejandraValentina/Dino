@@ -1,9 +1,15 @@
 # MotorSim — Instrucciones de trabajo para Codex
 
-P4-R2 autorizado por orden2df31e6d: delta de refinamiento aprobado por reviewer,
-P4B reevaluado PASS bajoR2. Habilitado P4C experimental sólo con guard de coste
-antes de multiciclo. Solver/legacy/observables intactos; no UI/JSON/P5 ni publicación.
-[Delta](docs/gasdynamic/p4_refinement_r2.md). Los estados siguientes son históricos.
+P4-R2: P4_R2_PASS_REFINEMENT_CONTRACT y P4B PASS bajoR2; P4C queda
+**P4_BLOCKED_PERFORMANCE**. Ciclo G1 N250 completo en263,328s; proyección30
+ciclos7899,84>600s. STOP aplicado antes de G2/multiciclo. E12/E15 sólo ciclo
+medido; E13/E14/retorno causal pendientes, sin backflow observado.96 pruebas
+y regresiones offlineP0/P2/P3 PASS;151 hashes congelados intactos.
+No repetir integración, remallar, optimizar, ampliar presupuesto ni iniciarP5
+sin nueva orden. No aceptaciónP4, archivo, UI/JSON, publicación o globales.
+[Delta](docs/gasdynamic/p4_refinement_r2.md),
+[tareas](openspec/changes/p4-escape-1d/tasks.md). Borrado ajeno redme.txt intacto.
+Los estados siguientes son históricos.
 
 
 P4-R1E: **P4_R1_PREASYMPTOTIC_REFINEMENT_CONFIRMED**.
