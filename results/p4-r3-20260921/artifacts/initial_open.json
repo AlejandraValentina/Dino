@@ -1,0 +1,1743 @@
+{
+  "name": "initial_open",
+  "start_angle": 180.0,
+  "physical_seconds": 0.0001,
+  "status": "completed",
+  "wall_seconds": 6.56427379976958,
+  "cpu_seconds": 6.53125,
+  "peak_process_working_set_bytes": 192147456,
+  "steps": 85,
+  "counts": {
+    "rhs": 254,
+    "HLLC": 63754,
+    "HLLE": 0,
+    "characteristic": 254,
+    "rejected": 84,
+    "downgrades": 0
+  },
+  "top_inclusive": [
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 27,
+      "function": "solve_exhaust",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 0.0339118,
+      "inclusive_seconds": 6.562944600000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 37,
+      "function": "rhs",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.23804960000000003,
+      "inclusive_seconds": 4.3724449000000005
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 33,
+      "function": "validate",
+      "primitive_calls": 849,
+      "calls": 849,
+      "self_seconds": 0.0012792,
+      "inclusive_seconds": 2.4421129
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 32,
+      "function": "primitive",
+      "primitive_calls": 850,
+      "calls": 850,
+      "self_seconds": 0.0016159000000000002,
+      "inclusive_seconds": 2.2648269
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 32,
+      "function": "<listcomp>",
+      "primitive_calls": 850,
+      "calls": 850,
+      "self_seconds": 0.3512405,
+      "inclusive_seconds": 2.263211
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.all>",
+      "primitive_calls": 728371,
+      "calls": 728371,
+      "self_seconds": 0.6978397000000001,
+      "inclusive_seconds": 2.022707
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 25,
+      "function": "validate",
+      "primitive_calls": 480848,
+      "calls": 480848,
+      "self_seconds": 0.5710945000000001,
+      "inclusive_seconds": 1.9686449000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 39,
+      "function": "primitive",
+      "primitive_calls": 212500,
+      "calls": 212500,
+      "self_seconds": 0.2820053,
+      "inclusive_seconds": 1.7253912
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 16,
+      "function": "reconstruct",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.3865833,
+      "inclusive_seconds": 1.4044588
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\riemann.py",
+      "line": 29,
+      "function": "hllc_flux",
+      "primitive_calls": 63754,
+      "calls": 63754,
+      "self_seconds": 0.20518270000000002,
+      "inclusive_seconds": 1.3622144
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 27,
+      "function": "<genexpr>",
+      "primitive_calls": 2404240,
+      "calls": 2404240,
+      "self_seconds": 0.6557427,
+      "inclusive_seconds": 0.8819300000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 63,
+      "function": "observe",
+      "primitive_calls": 255,
+      "calls": 255,
+      "self_seconds": 0.0018995000000000001,
+      "inclusive_seconds": 0.8435375
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\riemann.py",
+      "line": 6,
+      "function": "estimate_wave_speeds",
+      "primitive_calls": 63754,
+      "calls": 63754,
+      "self_seconds": 0.2589125,
+      "inclusive_seconds": 0.4282766
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.isfinite>",
+      "primitive_calls": 3583633,
+      "calls": 3583633,
+      "self_seconds": 0.41815050000000004,
+      "inclusive_seconds": 0.41815050000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 41,
+      "function": "<genexpr>",
+      "primitive_calls": 1062500,
+      "calls": 1062500,
+      "self_seconds": 0.28595360000000003,
+      "inclusive_seconds": 0.38313050000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 42,
+      "function": "evaluate",
+      "primitive_calls": 1103,
+      "calls": 1103,
+      "self_seconds": 0.0031655000000000003,
+      "inclusive_seconds": 0.2353986
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 195,
+      "function": "evaluate",
+      "primitive_calls": 1103,
+      "calls": 1103,
+      "self_seconds": 0.060145300000000006,
+      "inclusive_seconds": 0.2220233
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 36,
+      "function": "<listcomp>",
+      "primitive_calls": 63500,
+      "calls": 63500,
+      "self_seconds": 0.1509841,
+      "inclusive_seconds": 0.2145961
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 52,
+      "function": "<listcomp>",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.08703150000000001,
+      "inclusive_seconds": 0.2027759
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\solver.py",
+      "line": 19,
+      "function": "cfl_step",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.09863190000000001,
+      "inclusive_seconds": 0.19610360000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 32,
+      "function": "<genexpr>",
+      "primitive_calls": 1062500,
+      "calls": 1062500,
+      "self_seconds": 0.1865793,
+      "inclusive_seconds": 0.1865793
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 55,
+      "function": "validate",
+      "primitive_calls": 849,
+      "calls": 849,
+      "self_seconds": 0.0012903,
+      "inclusive_seconds": 0.1786106
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 60,
+      "function": "advance",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.0008453,
+      "inclusive_seconds": 0.1647448
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 60,
+      "function": "<listcomp>",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.0877584,
+      "inclusive_seconds": 0.16343180000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 46,
+      "function": "sound_speed",
+      "primitive_calls": 193380,
+      "calls": 193380,
+      "self_seconds": 0.08857490000000001,
+      "inclusive_seconds": 0.1253111
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.min>",
+      "primitive_calls": 141514,
+      "calls": 141514,
+      "self_seconds": 0.0708019,
+      "inclusive_seconds": 0.11861290000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 52,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.11574440000000001,
+      "inclusive_seconds": 0.11574440000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 37,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.1148358,
+      "inclusive_seconds": 0.1148358
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 38,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.1084547,
+      "inclusive_seconds": 0.1084547
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 34,
+      "function": "inventory",
+      "primitive_calls": 427,
+      "calls": 427,
+      "self_seconds": 0.0006008000000000001,
+      "inclusive_seconds": 0.1002253
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.fsum>",
+      "primitive_calls": 2816,
+      "calls": 2816,
+      "self_seconds": 0.0455006,
+      "inclusive_seconds": 0.0996422
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 34,
+      "function": "<listcomp>",
+      "primitive_calls": 427,
+      "calls": 427,
+      "self_seconds": 0.0017357000000000002,
+      "inclusive_seconds": 0.0996245
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 33,
+      "function": "conservative",
+      "primitive_calls": 9183,
+      "calls": 9183,
+      "self_seconds": 0.013229500000000002,
+      "inclusive_seconds": 0.07832660000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 46,
+      "function": "<genexpr>",
+      "primitive_calls": 316230,
+      "calls": 316230,
+      "self_seconds": 0.07753270000000001,
+      "inclusive_seconds": 0.07753270000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 60,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.0756734,
+      "inclusive_seconds": 0.0756734
+    }
+  ],
+  "top_self": [
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.all>",
+      "primitive_calls": 728371,
+      "calls": 728371,
+      "self_seconds": 0.6978397000000001,
+      "inclusive_seconds": 2.022707
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 27,
+      "function": "<genexpr>",
+      "primitive_calls": 2404240,
+      "calls": 2404240,
+      "self_seconds": 0.6557427,
+      "inclusive_seconds": 0.8819300000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 25,
+      "function": "validate",
+      "primitive_calls": 480848,
+      "calls": 480848,
+      "self_seconds": 0.5710945000000001,
+      "inclusive_seconds": 1.9686449000000001
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.isfinite>",
+      "primitive_calls": 3583633,
+      "calls": 3583633,
+      "self_seconds": 0.41815050000000004,
+      "inclusive_seconds": 0.41815050000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 16,
+      "function": "reconstruct",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.3865833,
+      "inclusive_seconds": 1.4044588
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 32,
+      "function": "<listcomp>",
+      "primitive_calls": 850,
+      "calls": 850,
+      "self_seconds": 0.3512405,
+      "inclusive_seconds": 2.263211
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 41,
+      "function": "<genexpr>",
+      "primitive_calls": 1062500,
+      "calls": 1062500,
+      "self_seconds": 0.28595360000000003,
+      "inclusive_seconds": 0.38313050000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 39,
+      "function": "primitive",
+      "primitive_calls": 212500,
+      "calls": 212500,
+      "self_seconds": 0.2820053,
+      "inclusive_seconds": 1.7253912
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\riemann.py",
+      "line": 6,
+      "function": "estimate_wave_speeds",
+      "primitive_calls": 63754,
+      "calls": 63754,
+      "self_seconds": 0.2589125,
+      "inclusive_seconds": 0.4282766
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 37,
+      "function": "rhs",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.23804960000000003,
+      "inclusive_seconds": 4.3724449000000005
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\riemann.py",
+      "line": 29,
+      "function": "hllc_flux",
+      "primitive_calls": 63754,
+      "calls": 63754,
+      "self_seconds": 0.20518270000000002,
+      "inclusive_seconds": 1.3622144
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 32,
+      "function": "<genexpr>",
+      "primitive_calls": 1062500,
+      "calls": 1062500,
+      "self_seconds": 0.1865793,
+      "inclusive_seconds": 0.1865793
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 36,
+      "function": "<listcomp>",
+      "primitive_calls": 63500,
+      "calls": 63500,
+      "self_seconds": 0.1509841,
+      "inclusive_seconds": 0.2145961
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 52,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.11574440000000001,
+      "inclusive_seconds": 0.11574440000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 37,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.1148358,
+      "inclusive_seconds": 0.1148358
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 38,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.1084547,
+      "inclusive_seconds": 0.1084547
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\solver.py",
+      "line": 19,
+      "function": "cfl_step",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.09863190000000001,
+      "inclusive_seconds": 0.19610360000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 46,
+      "function": "sound_speed",
+      "primitive_calls": 193380,
+      "calls": 193380,
+      "self_seconds": 0.08857490000000001,
+      "inclusive_seconds": 0.1253111
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 60,
+      "function": "<listcomp>",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.0877584,
+      "inclusive_seconds": 0.16343180000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 52,
+      "function": "<listcomp>",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.08703150000000001,
+      "inclusive_seconds": 0.2027759
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 46,
+      "function": "<genexpr>",
+      "primitive_calls": 316230,
+      "calls": 316230,
+      "self_seconds": 0.07753270000000001,
+      "inclusive_seconds": 0.07753270000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 60,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.0756734,
+      "inclusive_seconds": 0.0756734
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.min>",
+      "primitive_calls": 141514,
+      "calls": 141514,
+      "self_seconds": 0.0708019,
+      "inclusive_seconds": 0.11861290000000001
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.sqrt>",
+      "primitive_calls": 396864,
+      "calls": 396864,
+      "self_seconds": 0.0705013,
+      "inclusive_seconds": 0.0705013
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 195,
+      "function": "evaluate",
+      "primitive_calls": 1103,
+      "calls": 1103,
+      "self_seconds": 0.060145300000000006,
+      "inclusive_seconds": 0.2220233
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 10,
+      "function": "minmod",
+      "primitive_calls": 254000,
+      "calls": 254000,
+      "self_seconds": 0.0585485,
+      "inclusive_seconds": 0.063612
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 48,
+      "function": "flux",
+      "primitive_calls": 73191,
+      "calls": 73191,
+      "self_seconds": 0.0572065,
+      "inclusive_seconds": 0.0572065
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 34,
+      "function": "<genexpr>",
+      "primitive_calls": 321531,
+      "calls": 321531,
+      "self_seconds": 0.052816100000000005,
+      "inclusive_seconds": 0.052816100000000005
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<method 'append' of 'list' objects>",
+      "primitive_calls": 347075,
+      "calls": 347075,
+      "self_seconds": 0.049464100000000004,
+      "inclusive_seconds": 0.049464100000000004
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.fsum>",
+      "primitive_calls": 2816,
+      "calls": 2816,
+      "self_seconds": 0.0455006,
+      "inclusive_seconds": 0.0996422
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.max>",
+      "primitive_calls": 137016,
+      "calls": 137016,
+      "self_seconds": 0.040636700000000005,
+      "inclusive_seconds": 0.051436600000000006
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 27,
+      "function": "solve_exhaust",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 0.0339118,
+      "inclusive_seconds": 6.562944600000001
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.abs>",
+      "primitive_calls": 249986,
+      "calls": 249986,
+      "self_seconds": 0.0328518,
+      "inclusive_seconds": 0.0328518
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 79,
+      "function": "<genexpr>",
+      "primitive_calls": 106250,
+      "calls": 106250,
+      "self_seconds": 0.028803600000000002,
+      "inclusive_seconds": 0.028803600000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 79,
+      "function": "<listcomp>",
+      "primitive_calls": 85,
+      "calls": 85,
+      "self_seconds": 0.028477600000000002,
+      "inclusive_seconds": 0.057281200000000004
+    }
+  ],
+  "functions": [
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 67,
+      "function": "events",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 1.88e-05,
+      "inclusive_seconds": 0.0019161000000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 27,
+      "function": "physical",
+      "primitive_calls": 39365,
+      "calls": 39365,
+      "self_seconds": 0.014008000000000001,
+      "inclusive_seconds": 0.018739000000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 92,
+      "function": "add_transport",
+      "primitive_calls": 6618,
+      "calls": 6618,
+      "self_seconds": 0.0153024,
+      "inclusive_seconds": 0.0153024
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 55,
+      "function": "restriction",
+      "primitive_calls": 6618,
+      "calls": 6618,
+      "self_seconds": 0.0144931,
+      "inclusive_seconds": 0.0172763
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 163,
+      "function": "geometry",
+      "primitive_calls": 1442,
+      "calls": 1442,
+      "self_seconds": 0.0110795,
+      "inclusive_seconds": 0.038296800000000006
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\riemann.py",
+      "line": 6,
+      "function": "estimate_wave_speeds",
+      "primitive_calls": 63754,
+      "calls": 63754,
+      "self_seconds": 0.2589125,
+      "inclusive_seconds": 0.4282766
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 42,
+      "function": "evaluate",
+      "primitive_calls": 1103,
+      "calls": 1103,
+      "self_seconds": 0.0031655000000000003,
+      "inclusive_seconds": 0.2353986
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 195,
+      "function": "evaluate",
+      "primitive_calls": 1103,
+      "calls": 1103,
+      "self_seconds": 0.060145300000000006,
+      "inclusive_seconds": 0.2220233
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\riemann.py",
+      "line": 29,
+      "function": "hllc_flux",
+      "primitive_calls": 63754,
+      "calls": 63754,
+      "self_seconds": 0.20518270000000002,
+      "inclusive_seconds": 1.3622144
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 63,
+      "function": "observe",
+      "primitive_calls": 255,
+      "calls": 255,
+      "self_seconds": 0.0018995000000000001,
+      "inclusive_seconds": 0.8435375
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 27,
+      "function": "solve_exhaust",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 0.0339118,
+      "inclusive_seconds": 6.562944600000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 37,
+      "function": "rhs",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.23804960000000003,
+      "inclusive_seconds": 4.3724449000000005
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 59,
+      "function": "source",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.0015667,
+      "inclusive_seconds": 0.0627188
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\kinematics.py",
+      "line": 9,
+      "function": "piston_position",
+      "primitive_calls": 1961,
+      "calls": 1961,
+      "self_seconds": 0.0101785,
+      "inclusive_seconds": 0.0200623
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\coupling.py",
+      "line": 76,
+      "function": "interface_flux",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.0019386000000000002,
+      "inclusive_seconds": 0.018292100000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\solver.py",
+      "line": 19,
+      "function": "cfl_step",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.09863190000000001,
+      "inclusive_seconds": 0.19610360000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\coupling.py",
+      "line": 20,
+      "function": "thermodynamics",
+      "primitive_calls": 847,
+      "calls": 847,
+      "self_seconds": 0.0031235000000000004,
+      "inclusive_seconds": 0.010396500000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 16,
+      "function": "reconstruct",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.3865833,
+      "inclusive_seconds": 1.4044588
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\boundary.py",
+      "line": 16,
+      "function": "face_state",
+      "primitive_calls": 1270,
+      "calls": 1270,
+      "self_seconds": 0.007177500000000001,
+      "inclusive_seconds": 0.0245742
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_port.py",
+      "line": 37,
+      "function": "port_flux",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.0029088,
+      "inclusive_seconds": 0.0378189
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 57,
+      "function": "area",
+      "primitive_calls": 339,
+      "calls": 339,
+      "self_seconds": 0.00044940000000000003,
+      "inclusive_seconds": 0.0044016
+    },
+    {
+      "file": "<string>",
+      "line": 2,
+      "function": "__init__",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.00037440000000000005,
+      "inclusive_seconds": 0.00037440000000000005
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 25,
+      "function": "validate",
+      "primitive_calls": 480848,
+      "calls": 480848,
+      "self_seconds": 0.5710945000000001,
+      "inclusive_seconds": 1.9686449000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 51,
+      "function": "chamber",
+      "primitive_calls": 339,
+      "calls": 339,
+      "self_seconds": 0.0017214,
+      "inclusive_seconds": 0.0163989
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 39,
+      "function": "primitive",
+      "primitive_calls": 212500,
+      "calls": 212500,
+      "self_seconds": 0.2820053,
+      "inclusive_seconds": 1.7253912
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 174,
+      "function": "<listcomp>",
+      "primitive_calls": 1442,
+      "calls": 1442,
+      "self_seconds": 0.0034872,
+      "inclusive_seconds": 0.0085866
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 20,
+      "function": "geometry",
+      "primitive_calls": 1442,
+      "calls": 1442,
+      "self_seconds": 0.0038429000000000002,
+      "inclusive_seconds": 0.0421397
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\ports.py",
+      "line": 72,
+      "function": "crossing_angle",
+      "primitive_calls": 3,
+      "calls": 3,
+      "self_seconds": 8.510000000000001e-05,
+      "inclusive_seconds": 0.0013348000000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 48,
+      "function": "flux",
+      "primitive_calls": 73191,
+      "calls": 73191,
+      "self_seconds": 0.0572065,
+      "inclusive_seconds": 0.0572065
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_port.py",
+      "line": 24,
+      "function": "area",
+      "primitive_calls": 339,
+      "calls": 339,
+      "self_seconds": 0.0007068,
+      "inclusive_seconds": 0.0038402
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 34,
+      "function": "<listcomp>",
+      "primitive_calls": 427,
+      "calls": 427,
+      "self_seconds": 0.0017357000000000002,
+      "inclusive_seconds": 0.0996245
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 10,
+      "function": "minmod",
+      "primitive_calls": 254000,
+      "calls": 254000,
+      "self_seconds": 0.0585485,
+      "inclusive_seconds": 0.063612
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\solver.py",
+      "line": 11,
+      "function": "event_step",
+      "primitive_calls": 85,
+      "calls": 85,
+      "self_seconds": 9.470000000000001e-05,
+      "inclusive_seconds": 0.00012800000000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 29,
+      "function": "work",
+      "primitive_calls": 26129,
+      "calls": 26129,
+      "self_seconds": 0.016529600000000002,
+      "inclusive_seconds": 0.0319354
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 31,
+      "function": "heat",
+      "primitive_calls": 16289,
+      "calls": 16289,
+      "self_seconds": 0.010355300000000001,
+      "inclusive_seconds": 0.0331807
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 33,
+      "function": "angle",
+      "primitive_calls": 2129,
+      "calls": 2129,
+      "self_seconds": 0.0010228000000000001,
+      "inclusive_seconds": 0.0010228000000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 55,
+      "function": "validate",
+      "primitive_calls": 849,
+      "calls": 849,
+      "self_seconds": 0.0012903,
+      "inclusive_seconds": 0.1786106
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 61,
+      "function": "<genexpr>",
+      "primitive_calls": 1016,
+      "calls": 1016,
+      "self_seconds": 0.0004686,
+      "inclusive_seconds": 0.0013255
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 35,
+      "function": "physical",
+      "primitive_calls": 1442,
+      "calls": 1442,
+      "self_seconds": 0.0041124,
+      "inclusive_seconds": 0.0130141
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_port.py",
+      "line": 27,
+      "function": "events",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 0.0005453000000000001,
+      "inclusive_seconds": 0.0018846000000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 33,
+      "function": "burn",
+      "primitive_calls": 16035,
+      "calls": 16035,
+      "self_seconds": 0.0072401,
+      "inclusive_seconds": 0.039953600000000006
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 35,
+      "function": "abs_m",
+      "primitive_calls": 15781,
+      "calls": 15781,
+      "self_seconds": 0.0073931000000000005,
+      "inclusive_seconds": 0.046779900000000006
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 99,
+      "function": "<listcomp>",
+      "primitive_calls": 85,
+      "calls": 85,
+      "self_seconds": 0.00025350000000000004,
+      "inclusive_seconds": 0.0004554
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 89,
+      "function": "<genexpr>",
+      "primitive_calls": 8824,
+      "calls": 8824,
+      "self_seconds": 0.0019729,
+      "inclusive_seconds": 0.0019729
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 69,
+      "function": "<listcomp>",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 1.16e-05,
+      "inclusive_seconds": 1.16e-05
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 211,
+      "function": "<genexpr>",
+      "primitive_calls": 7721,
+      "calls": 7721,
+      "self_seconds": 0.0029704,
+      "inclusive_seconds": 0.0029704
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 60,
+      "function": "advance",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.0008453,
+      "inclusive_seconds": 0.1647448
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 37,
+      "function": "abs_h",
+      "primitive_calls": 9163,
+      "calls": 9163,
+      "self_seconds": 0.006245400000000001,
+      "inclusive_seconds": 0.035130600000000005
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 39,
+      "function": "size",
+      "primitive_calls": 2545,
+      "calls": 2545,
+      "self_seconds": 0.002062,
+      "inclusive_seconds": 0.014428300000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 202,
+      "function": "<genexpr>",
+      "primitive_calls": 22060,
+      "calls": 22060,
+      "self_seconds": 0.0071389,
+      "inclusive_seconds": 0.0094152
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\kinematics.py",
+      "line": 11,
+      "function": "<genexpr>",
+      "primitive_calls": 7844,
+      "calls": 7844,
+      "self_seconds": 0.0034016000000000003,
+      "inclusive_seconds": 0.0044045
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\ports.py",
+      "line": 21,
+      "function": "uncovered_area",
+      "primitive_calls": 6107,
+      "calls": 6107,
+      "self_seconds": 0.0039364000000000005,
+      "inclusive_seconds": 0.0069651
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 32,
+      "function": "primitive",
+      "primitive_calls": 850,
+      "calls": 850,
+      "self_seconds": 0.0016159000000000002,
+      "inclusive_seconds": 2.2648269
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 33,
+      "function": "validate",
+      "primitive_calls": 849,
+      "calls": 849,
+      "self_seconds": 0.0012792,
+      "inclusive_seconds": 2.4421129
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 34,
+      "function": "inventory",
+      "primitive_calls": 427,
+      "calls": 427,
+      "self_seconds": 0.0006008000000000001,
+      "inclusive_seconds": 0.1002253
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 36,
+      "function": "<lambda>",
+      "primitive_calls": 750,
+      "calls": 750,
+      "self_seconds": 0.0002379,
+      "inclusive_seconds": 0.0003153
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 46,
+      "function": "<genexpr>",
+      "primitive_calls": 316230,
+      "calls": 316230,
+      "self_seconds": 0.07753270000000001,
+      "inclusive_seconds": 0.07753270000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 46,
+      "function": "sound_speed",
+      "primitive_calls": 193380,
+      "calls": 193380,
+      "self_seconds": 0.08857490000000001,
+      "inclusive_seconds": 0.1253111
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 62,
+      "function": "<genexpr>",
+      "primitive_calls": 251,
+      "calls": 251,
+      "self_seconds": 3.88e-05,
+      "inclusive_seconds": 3.88e-05
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 65,
+      "function": "<genexpr>",
+      "primitive_calls": 64005,
+      "calls": 64005,
+      "self_seconds": 0.0102964,
+      "inclusive_seconds": 0.0102964
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 86,
+      "function": "<genexpr>",
+      "primitive_calls": 680,
+      "calls": 680,
+      "self_seconds": 0.00043930000000000005,
+      "inclusive_seconds": 0.0005115
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 37,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.1148358,
+      "inclusive_seconds": 0.1148358
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 38,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.1084547,
+      "inclusive_seconds": 0.1084547
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\mesh.py",
+      "line": 30,
+      "function": "<dictcomp>",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 8.1e-06,
+      "inclusive_seconds": 9e-06
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 80,
+      "function": "regularized_restriction",
+      "primitive_calls": 2206,
+      "calls": 2206,
+      "self_seconds": 0.0082488,
+      "inclusive_seconds": 0.0192703
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\boundary.py",
+      "line": 70,
+      "function": "flux",
+      "primitive_calls": 508,
+      "calls": 508,
+      "self_seconds": 0.0013589000000000001,
+      "inclusive_seconds": 0.023051600000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 52,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.11574440000000001,
+      "inclusive_seconds": 0.11574440000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\coupling.py",
+      "line": 91,
+      "function": "<genexpr>",
+      "primitive_calls": 1270,
+      "calls": 1270,
+      "self_seconds": 0.0002605,
+      "inclusive_seconds": 0.0002605
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\coupling.py",
+      "line": 90,
+      "function": "<genexpr>",
+      "primitive_calls": 1270,
+      "calls": 1270,
+      "self_seconds": 0.0002682,
+      "inclusive_seconds": 0.0002682
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 19,
+      "function": "cv",
+      "primitive_calls": 847,
+      "calls": 847,
+      "self_seconds": 0.0003441,
+      "inclusive_seconds": 0.0003441
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 32,
+      "function": "<genexpr>",
+      "primitive_calls": 1062500,
+      "calls": 1062500,
+      "self_seconds": 0.1865793,
+      "inclusive_seconds": 0.1865793
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 34,
+      "function": "<genexpr>",
+      "primitive_calls": 321531,
+      "calls": 321531,
+      "self_seconds": 0.052816100000000005,
+      "inclusive_seconds": 0.052816100000000005
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 60,
+      "function": "<listcomp>",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.0877584,
+      "inclusive_seconds": 0.16343180000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 66,
+      "function": "<genexpr>",
+      "primitive_calls": 64005,
+      "calls": 64005,
+      "self_seconds": 0.010249600000000001,
+      "inclusive_seconds": 0.010249600000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\coupling.py",
+      "line": 21,
+      "function": "<genexpr>",
+      "primitive_calls": 4235,
+      "calls": 4235,
+      "self_seconds": 0.0013644,
+      "inclusive_seconds": 0.0017947000000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 27,
+      "function": "<genexpr>",
+      "primitive_calls": 2404240,
+      "calls": 2404240,
+      "self_seconds": 0.6557427,
+      "inclusive_seconds": 0.8819300000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 36,
+      "function": "<genexpr>",
+      "primitive_calls": 45915,
+      "calls": 45915,
+      "self_seconds": 0.0126342,
+      "inclusive_seconds": 0.016794100000000003
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 41,
+      "function": "<genexpr>",
+      "primitive_calls": 1062500,
+      "calls": 1062500,
+      "self_seconds": 0.28595360000000003,
+      "inclusive_seconds": 0.38313050000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\riemann.py",
+      "line": 51,
+      "function": "<genexpr>",
+      "primitive_calls": 73464,
+      "calls": 73464,
+      "self_seconds": 0.021000900000000003,
+      "inclusive_seconds": 0.0270823
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\riemann.py",
+      "line": 58,
+      "function": "<genexpr>",
+      "primitive_calls": 45915,
+      "calls": 45915,
+      "self_seconds": 0.014751,
+      "inclusive_seconds": 0.014751
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_port.py",
+      "line": 39,
+      "function": "<genexpr>",
+      "primitive_calls": 762,
+      "calls": 762,
+      "self_seconds": 0.0002527,
+      "inclusive_seconds": 0.00031600000000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_port.py",
+      "line": 51,
+      "function": "<genexpr>",
+      "primitive_calls": 1016,
+      "calls": 1016,
+      "self_seconds": 0.0002474,
+      "inclusive_seconds": 0.0002474
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 29,
+      "function": "<listcomp>",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 2.5500000000000003e-05,
+      "inclusive_seconds": 2.5500000000000003e-05
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 50,
+      "function": "<genexpr>",
+      "primitive_calls": 1270,
+      "calls": 1270,
+      "self_seconds": 0.00034300000000000004,
+      "inclusive_seconds": 0.00034300000000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 60,
+      "function": "<genexpr>",
+      "primitive_calls": 317500,
+      "calls": 317500,
+      "self_seconds": 0.0756734,
+      "inclusive_seconds": 0.0756734
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 79,
+      "function": "<genexpr>",
+      "primitive_calls": 106250,
+      "calls": 106250,
+      "self_seconds": 0.028803600000000002,
+      "inclusive_seconds": 0.028803600000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 79,
+      "function": "<listcomp>",
+      "primitive_calls": 85,
+      "calls": 85,
+      "self_seconds": 0.028477600000000002,
+      "inclusive_seconds": 0.057281200000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 96,
+      "function": "<listcomp>",
+      "primitive_calls": 85,
+      "calls": 85,
+      "self_seconds": 0.0001415,
+      "inclusive_seconds": 0.0001415
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 110,
+      "function": "<listcomp>",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 8.000000000000001e-07,
+      "inclusive_seconds": 8.000000000000001e-07
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\mesh.py",
+      "line": 23,
+      "function": "n",
+      "primitive_calls": 64265,
+      "calls": 64265,
+      "self_seconds": 0.0225307,
+      "inclusive_seconds": 0.0312206
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 33,
+      "function": "conservative",
+      "primitive_calls": 9183,
+      "calls": 9183,
+      "self_seconds": 0.013229500000000002,
+      "inclusive_seconds": 0.07832660000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 36,
+      "function": "<listcomp>",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 4.9000000000000005e-06,
+      "inclusive_seconds": 0.0004739
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 52,
+      "function": "<listcomp>",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.08703150000000001,
+      "inclusive_seconds": 0.2027759
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 101,
+      "function": "<listcomp>",
+      "primitive_calls": 85,
+      "calls": 85,
+      "self_seconds": 0.0001392,
+      "inclusive_seconds": 0.0001392
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\second_order.py",
+      "line": 36,
+      "function": "<listcomp>",
+      "primitive_calls": 63500,
+      "calls": 63500,
+      "self_seconds": 0.1509841,
+      "inclusive_seconds": 0.2145961
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust1d.py",
+      "line": 32,
+      "function": "<listcomp>",
+      "primitive_calls": 850,
+      "calls": 850,
+      "self_seconds": 0.3512405,
+      "inclusive_seconds": 2.263211
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\mesh.py",
+      "line": 26,
+      "function": "widths",
+      "primitive_calls": 254,
+      "calls": 254,
+      "self_seconds": 0.0115916,
+      "inclusive_seconds": 0.0270723
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\mesh.py",
+      "line": 27,
+      "function": "<genexpr>",
+      "primitive_calls": 63754,
+      "calls": 63754,
+      "self_seconds": 0.015480700000000002,
+      "inclusive_seconds": 0.015480700000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\mesh.py",
+      "line": 29,
+      "function": "as_dict",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 2.4000000000000003e-06,
+      "inclusive_seconds": 1.1400000000000001e-05
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.cos>",
+      "primitive_calls": 3398,
+      "calls": 3398,
+      "self_seconds": 0.0009327000000000001,
+      "inclusive_seconds": 0.0009327000000000001
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.exp>",
+      "primitive_calls": 1103,
+      "calls": 1103,
+      "self_seconds": 0.00040710000000000003,
+      "inclusive_seconds": 0.00040710000000000003
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.expm1>",
+      "primitive_calls": 1103,
+      "calls": 1103,
+      "self_seconds": 0.0003969,
+      "inclusive_seconds": 0.0003969
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.fsum>",
+      "primitive_calls": 2816,
+      "calls": 2816,
+      "self_seconds": 0.0455006,
+      "inclusive_seconds": 0.0996422
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.isfinite>",
+      "primitive_calls": 3583633,
+      "calls": 3583633,
+      "self_seconds": 0.41815050000000004,
+      "inclusive_seconds": 0.41815050000000004
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.log1p>",
+      "primitive_calls": 1103,
+      "calls": 1103,
+      "self_seconds": 0.0006188000000000001,
+      "inclusive_seconds": 0.0006188000000000001
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.radians>",
+      "primitive_calls": 3398,
+      "calls": 3398,
+      "self_seconds": 0.0006375,
+      "inclusive_seconds": 0.0006375
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.sin>",
+      "primitive_calls": 3398,
+      "calls": 3398,
+      "self_seconds": 0.0012274,
+      "inclusive_seconds": 0.0012274
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method math.sqrt>",
+      "primitive_calls": 396864,
+      "calls": 396864,
+      "self_seconds": 0.0705013,
+      "inclusive_seconds": 0.0705013
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method time.monotonic>",
+      "primitive_calls": 87,
+      "calls": 87,
+      "self_seconds": 3.96e-05,
+      "inclusive_seconds": 3.96e-05
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<method 'get' of 'dict' objects>",
+      "primitive_calls": 84,
+      "calls": 84,
+      "self_seconds": 4.99e-05,
+      "inclusive_seconds": 4.99e-05
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<method 'copy' of 'list' objects>",
+      "primitive_calls": 255,
+      "calls": 255,
+      "self_seconds": 7.03e-05,
+      "inclusive_seconds": 7.03e-05
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<method 'append' of 'list' objects>",
+      "primitive_calls": 347075,
+      "calls": 347075,
+      "self_seconds": 0.049464100000000004,
+      "inclusive_seconds": 0.049464100000000004
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<method 'update' of 'set' objects>",
+      "primitive_calls": 3,
+      "calls": 3,
+      "self_seconds": 2.5e-06,
+      "inclusive_seconds": 2.5e-06
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.abs>",
+      "primitive_calls": 249986,
+      "calls": 249986,
+      "self_seconds": 0.0328518,
+      "inclusive_seconds": 0.0328518
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.all>",
+      "primitive_calls": 728371,
+      "calls": 728371,
+      "self_seconds": 0.6978397000000001,
+      "inclusive_seconds": 2.022707
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.getattr>",
+      "primitive_calls": 4,
+      "calls": 4,
+      "self_seconds": 9.000000000000001e-07,
+      "inclusive_seconds": 9.000000000000001e-07
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.len>",
+      "primitive_calls": 165731,
+      "calls": 165731,
+      "self_seconds": 0.020500900000000002,
+      "inclusive_seconds": 0.020500900000000002
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.max>",
+      "primitive_calls": 137016,
+      "calls": 137016,
+      "self_seconds": 0.040636700000000005,
+      "inclusive_seconds": 0.051436600000000006
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.min>",
+      "primitive_calls": 141514,
+      "calls": 141514,
+      "self_seconds": 0.0708019,
+      "inclusive_seconds": 0.11861290000000001
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method builtins.sorted>",
+      "primitive_calls": 2,
+      "calls": 2,
+      "self_seconds": 2.5e-06,
+      "inclusive_seconds": 2.5e-06
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+      "primitive_calls": 1,
+      "calls": 1,
+      "self_seconds": 1.0000000000000002e-06,
+      "inclusive_seconds": 1.0000000000000002e-06
+    }
+  ]
+}

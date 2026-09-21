@@ -948,6 +948,31 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P4_R3_STRUCTURAL",
+      "title": "P4-R3 structural block",
+      "objective": "Structural block full G1 equivalence and intermediate profile",
+      "depends_on": [
+        "P2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "benchmark_command",
+        "benchmark_equivalence",
+        "profile_command",
+        "profile_complete"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }

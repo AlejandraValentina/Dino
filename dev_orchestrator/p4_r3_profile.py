@@ -35,10 +35,13 @@ def run(folder,backend='SCALAR_REFERENCE'):
     solver=solve_exhaust
     if backend!='SCALAR_REFERENCE':
         from motorsim.exhaust_fast import solve_exhaust as optimized
+        from motorsim.hybrid_fast import HybridSystem as FastSystem,LegacySources
+        model=LegacySources();system_class=FastSystem
         solver=optimized
+    else:system_class=HybridSystem
     output=[]
     for name,angle,cells,z,heat in cases:
-        system=HybridSystem(model,angle,z,heat);profile=cProfile.Profile()
+        system=system_class(model,angle,z,heat);profile=cProfile.Profile()
         start=time.perf_counter();cpu=time.process_time();profile.enable()
         r=solver(mesh,cells,system,.0001,eos=eos,cfl=.4,
             exterior=Boundary('nonreflecting',state=(100000/(287*500),0.,100000.,0.)),sensors=(.1,.3,.5),wall_limit=90)
