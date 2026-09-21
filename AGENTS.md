@@ -1,5 +1,9 @@
 # MotorSim — Instrucciones de trabajo para Codex
 
+P4-R4 autorizado por orden8f6dbacb: evaluación focal Numba serial, equivalencia
+y gates en docs/gasdynamic/p4_r4_numba.md. Sustituye STOP R3 sólo en ese alcance.
+Sin cambios científicos, packaging, publicación ni P5. Estados siguientes históricos.
+
 P4-R3: **P4_R3_COMPILED_BACKEND_DECISION_REQUIRED**. Registrados
 P4_R2_HUMAN_ACCEPTED y P4B_HUMAN_ACCEPTED, NO P4_HUMAN_ACCEPTED.
 NumPy35,469/35,443s por cicloN250,7,42–7,43×, equivalencia exacta; proyección
