@@ -1,5 +1,10 @@
 # MotorSim
 
+P4-R3 autorizado por orden5e36dbe4: P4_R2_HUMAN_ACCEPTED y P4B_HUMAN_ACCEPTED.
+No aceptaciónP4. Optimización computacional aislada con equivalencia obligatoria;
+SCALAR_REFERENCE conservado, sin cambio científico/UI/JSON/P5. Perfil antes
+de optimizar y guard600s/30ciclos intacto. Estados anteriores históricos.
+
 P4-R2: **P4_R2_PASS_REFINEMENT_CONTRACT**; P4B PASS bajo el
 [delta R2](docs/gasdynamic/p4_refinement_r2.md), sin repetir N800.
 P4C: **P4_BLOCKED_PERFORMANCE**. G1 N250 completó un ciclo en263,328 s;

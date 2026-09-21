@@ -1,5 +1,10 @@
 # MotorSim — Instrucciones de trabajo para Codex
 
+P4-R3 autorizado por orden5e36dbe4: P4_R2_HUMAN_ACCEPTED y P4B_HUMAN_ACCEPTED.
+No aceptaciónP4. Optimización computacional aislada con equivalencia obligatoria;
+SCALAR_REFERENCE conservado, sin cambio científico/UI/JSON/P5. Perfil antes
+de optimizar y guard600s/30ciclos intacto. Estados anteriores históricos.
+
 P4-R2: P4_R2_PASS_REFINEMENT_CONTRACT y P4B PASS bajoR2; P4C queda
 **P4_BLOCKED_PERFORMANCE**. Ciclo G1 N250 completo en263,328s; proyección30
 ciclos7899,84>600s. STOP aplicado antes de G2/multiciclo. E12/E15 sólo ciclo

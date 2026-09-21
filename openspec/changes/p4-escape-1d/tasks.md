@@ -521,3 +521,10 @@ Dictamen independiente final: **P4_BLOCKED_PERFORMANCE**, R2/P4B aprobados,
 results/p4-r2-20260921/independent-review.json y decision.json; inventario SHA256
 de31 archivos de evidencia en inventory-all.json. OpenSpec estricto final PASS.
 Commits previos:84b36b9 deltaR2,4747eb2 fuente previa,a3087ba medición/STOP.
+
+## P4-R3 — orden5e36dbe4
+- [x] Registrar aceptación humana R2/P4B, sin aceptar P4.
+- [ ] Perfil estándar y clasificación de coste antes de optimización.
+- [ ] Optimizaciones aisladas y equivalencia por bloque.
+- [ ] Perfil intermedio, benchmark completo, regresiones y reviewer.
+- [ ] Reanudar periodicidad/G2 sólo con performance PASS.
