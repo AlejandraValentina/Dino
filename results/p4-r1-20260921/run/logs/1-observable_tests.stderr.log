@@ -1,0 +1,8 @@
+test_absolute_linear_quadrature (test_p4_r1.ObservableTests.test_absolute_linear_quadrature) ... ok
+test_logging_does_not_change_solution (test_p4_r1.ObservableTests.test_logging_does_not_change_solution) ... ok
+test_sensor_at_same_physical_point (test_p4_r1.ObservableTests.test_sensor_at_same_physical_point) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.074s
+
+OK

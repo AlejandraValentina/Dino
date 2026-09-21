@@ -1,0 +1,38 @@
+{
+  "kind": "offline snapshot microprofile; not full-run timing attribution",
+  "new_integrations": 0,
+  "solver_modified": false,
+  "physical_time": 0.008968816321386268,
+  "requested_end": 0.012222222222222223,
+  "accepted_steps": 16963,
+  "wall_seconds": 900.0310000004247,
+  "wall_seconds_per_accepted_step": 0.05305848022168394,
+  "RHS": 38700,
+  "reconstruction_calls": 38700,
+  "port_evaluations": 38700,
+  "coupling_evaluations": 37419,
+  "internal_Riemann_calls": 30921300,
+  "wall_Riemann_calls": 38700,
+  "total_Riemann_calls": 30997419,
+  "HLLC": 30997419,
+  "HLLE": 0,
+  "characteristic": 38700,
+  "rejections": {
+    "stage_CFL": 4774
+  },
+  "count_derivation": "One reconstruction/port/wall and N-1 internal Riemann per completed RHS; remaining Riemann calls are open-port P3 coupling. characteristic == rhs verifies completion.",
+  "microprofile_repeats": 20,
+  "microprofile_seconds": {
+    "reconstruction": 0.09295799769461155,
+    "internal_Riemann": 0.15789679996669292,
+    "port_and_coupling": 0.001087099313735962,
+    "exterior": 0.00026479829102754593
+  },
+  "microprofile_seconds_per_snapshot": {
+    "reconstruction": 0.0046478998847305775,
+    "internal_Riemann": 0.007894839998334647,
+    "port_and_coupling": 5.435496568679809e-05,
+    "exterior": 1.3239914551377296e-05
+  },
+  "limitation": "Final frozen snapshot only; excludes validation, advances, ledgers, logging and varied states. Do not extrapolate component percentages to the whole integration."
+}

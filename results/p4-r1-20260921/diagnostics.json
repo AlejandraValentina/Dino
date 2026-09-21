@@ -1,0 +1,122 @@
+{
+  "frozen": true,
+  "offline_metrics_reproduced": 9,
+  "historical_exact_parity": {
+    "blowdown_N100_CFL0.4": {
+      "cells": true,
+      "state": true,
+      "counts": true,
+      "stages": true,
+      "port_integral": true,
+      "external": true,
+      "events": true,
+      "hit_events": true
+    },
+    "blowdown_N200_CFL0.4": {
+      "cells": true,
+      "state": true,
+      "counts": true,
+      "stages": true,
+      "port_integral": true,
+      "external": true,
+      "events": true,
+      "hit_events": true
+    },
+    "blowdown_N400_CFL0.4": {
+      "cells": true,
+      "state": true,
+      "counts": true,
+      "stages": true,
+      "port_integral": true,
+      "external": true,
+      "events": true,
+      "hit_events": true
+    }
+  },
+  "events_and_tails": [
+    {
+      "name": "blowdown_N100_CFL0.4",
+      "end_angle": 300.0,
+      "end_pressure": 100222.026154412,
+      "end_slope": -371513.98423417244,
+      "opening_reached": true,
+      "closing_reached": true,
+      "postclosing_observed": true,
+      "reflection_status": "no identified candidate"
+    },
+    {
+      "name": "blowdown_N200_CFL0.2",
+      "end_angle": 300.0,
+      "end_pressure": 100227.30929308373,
+      "end_slope": -385871.5789020854,
+      "opening_reached": true,
+      "closing_reached": true,
+      "postclosing_observed": true,
+      "reflection_status": "no identified candidate"
+    },
+    {
+      "name": "blowdown_N200_CFL0.4",
+      "end_angle": 300.0,
+      "end_pressure": 100227.30539317592,
+      "end_slope": -385951.4544461108,
+      "opening_reached": true,
+      "closing_reached": true,
+      "postclosing_observed": true,
+      "reflection_status": "no identified candidate"
+    },
+    {
+      "name": "blowdown_N400_CFL0.2",
+      "end_angle": 300.0,
+      "end_pressure": 100227.78643418256,
+      "end_slope": -410140.10831440485,
+      "opening_reached": true,
+      "closing_reached": true,
+      "postclosing_observed": true,
+      "reflection_status": "no identified candidate"
+    },
+    {
+      "name": "blowdown_N400_CFL0.4",
+      "end_angle": 300.0,
+      "end_pressure": 100227.78130361084,
+      "end_slope": -410516.0829220836,
+      "opening_reached": true,
+      "closing_reached": true,
+      "postclosing_observed": true,
+      "reflection_status": "no identified candidate"
+    },
+    {
+      "name": "blowdown_N800_CFL0.4",
+      "end_angle": 241.43869378495282,
+      "end_pressure": 104327.88853516337,
+      "end_slope": -1518440.2525933282,
+      "opening_reached": true,
+      "closing_reached": false,
+      "postclosing_observed": false,
+      "reflection_status": "postclosing window not observed"
+    },
+    {
+      "name": "control_N100_CFL0.4",
+      "end_angle": 234.0,
+      "end_pressure": 99999.9998253717,
+      "end_slope": 0.04294099960302812
+    },
+    {
+      "name": "control_N200_CFL0.4",
+      "end_angle": 234.0,
+      "end_pressure": 99999.99982462978,
+      "end_slope": 0.04099910728670365
+    },
+    {
+      "name": "control_N400_CFL0.4",
+      "end_angle": 234.0,
+      "end_pressure": 99999.99983519886,
+      "end_slope": 0.04073430027279112
+    }
+  ],
+  "Q800_complete": null,
+  "D400_800_pressure": null,
+  "D400_800_mass": null,
+  "reason": "N800 timeout; partial integrals cannot enter full-window sequence",
+  "no_Richardson_order": true,
+  "window_note": "Identical fixed end for complete runs; N800 stopped before closing. No windows shifted. Small residual positive tail at complete end; phase/integral convergence remains unproven."
+}

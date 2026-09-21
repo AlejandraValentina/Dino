@@ -126,8 +126,189 @@ preservan bytes de los tres módulosP4 revisados; sin configuración global.
 
 - [x] Auditar posiciones históricas y fijar observables antes de ejecutar.
 - [x] Preparar registro de vecinos sin modificar solver; prueba de paridad exacta.
-- [ ] Ejecutar nominal y CFL focal, control y N800 sólo si corresponde.
-- [ ] Registrar tablas, señales, ledger y clasificación sin cambiar gate.
-- [ ] Revisión independiente de resultados y cierre documental.
+- [x] Ejecutar nominal y CFL focal, control y N800 sólo si corresponde.
+- [x] Registrar tablas, señales, ledger y clasificación sin cambiar gate.
+- [x] Revisión independiente de resultados y cierre documental.
 
 Definición previa: docs/gasdynamic/p4_r1_observables.md. Históricos intactos.
+
+## Resultado P4-R1 — 2026-09-21
+
+**P4_R1_PERFORMANCE_DIAGNOSTIC_REQUIRED**. Defecto de sensor confirmado
+(P4_R1_METRIC_IMPLEMENTATION_DEFECT) y corregido exclusivamente en el observable.
+P4 sigue abierto/bloqueado; no P4C, P5, cambio de gate, aceptación ni archivo.
+
+Definiciones previas: [p4_r1_observables.md](../../../docs/gasdynamic/p4_r1_observables.md).
+Código: dev_orchestrator/p4_r1.py, commit previo87851ec. Fuente numérica y
+historias anteriores:120 hashes intactos. Tres nominales reproducen exactamente
+celdas, cámara, stages, dt, eventos, conteos y ledgers anteriores.
+
+### Auditoría histórica (sin reemplazar evidencia)
+
+Qp: rectángulo derecho por paso aceptado, |p−100000 Pa|, Pa·s, sin normalización.
+El sensor pedido0,1 m se desplazaba al centro más cercano. La cuadratura también
+introduce dependencia de dt; no se ha demostrado un cambio arbitrario de logging.
+Qm: ledger SSPRK2 dt/2*(mdot1+mdot2), kg, negativo al salir de cámara.
+Ventana idéntica0→0,012222222222222223 s. Los siguientes Qp con trapecios aún
+usan el sensor histórico desplazado; no son los Qp corregidos a posición fija.
+
+| N | x histórico m | Qp histórico Pa·s | Qp PL mismo sensor Pa·s | Qm kg |
+|---|---:|---:|---:|---:|
+| 100 | 0.099 | 164.729319650664 | 164.785356822589 | -9.70056603322141e-05 |
+| 200 | 0.1005 | 164.804998778420 | 164.833308019080 | -9.70077286939145e-05 |
+| 400 | 0.09975 | 164.899734482389 | 164.913887996882 | -9.70099933773868e-05 |
+
+### Q corregidos, misma posición x=0,1 m
+
+Interpolación geométrica entre dos centros vecinos, t0 más todos los finales de
+paso; integral exacta del valor absoluto de la señal lineal temporal, con cruce
+por cero dividido. Sin decimación ni cambio de solución. Masa sin cambios.
+
+| N | Qp completo Pa·s | Qm completo kg | Estado |
+|---|---:|---:|---|
+| 100 | 164.742346961691 | -9.70056603322141e-05 | Completo |
+| 200 | 164.854748982338 | -9.70077286939145e-05 | Completo |
+| 400 | 164.903227803894 | -9.70099933773868e-05 | Completo |
+| 800 | — | — | Timeout, integral parcial excluida |
+
+| Observable | Mallas | Q_fino−Q_grueso | Diferencia absoluta |
+|---|---|---:|---:|
+| Q_pressure | 100→200 | 1.12402020647409e-01 | 1.12402020647409e-01 |
+| Q_pressure | 200→400 | 4.84788215557046e-02 | 4.84788215557046e-02 |
+| Q_mass | 100→200 | -2.06836170033812e-09 | 2.06836170033812e-09 |
+| Q_mass | 200→400 | -2.26468347228764e-09 | 2.26468347228764e-09 |
+
+D400→800 no disponible para ambos. N800 parcial: Qp=159,317364741868 Pa·s,
+Qm=−9,538417249462383e−5 kg, sólo0→0,008968816321386268 s; **no comparable**
+con integrales de ventana completa. Sin Richardson ni extrapolación.
+
+### Eventos y fase
+
+Apertura física90°/0,000555555555555556 s alcanzada en todas las descargas.
+Cierre programado270°/0,010555555555555556 s alcanzado sólo en100/200/400;
+N800 termina241,438693785°. No confundir evento programado con alcanzado.
+Llegada=primer cruce ascendente interpolado102000 Pa, sin posición analítica.
+Diferencias son entre mallas sucesivas, no errores contra solución exacta.
+
+| N | Llegada s | CA ° | Diferencia llegada s | Cierre alcanzado |
+|---|---:|---:|---:|---|
+| 100 | 8.763254918959e-04 | 95.773858854 | — | Sí |
+| 200 | 8.774345295839e-04 | 95.793821533 | +1.109037687947e-06 | Sí |
+| 400 | 8.755830727586e-04 | 95.760495310 | -1.851456825306e-06 | Sí |
+| 800 | 8.745722624311e-04 | 95.742300724 | -1.010810327483e-06 | No |
+
+La llegadaN800 ocurrió antes del timeout y es observable; su integral completa no.
+La secuencia de llegadas100/200/400 no es monótona; la última diferencia absoluta
+se reduce, pero esto no acredita el gate completo. No se identificó un candidato
+poscierre >=2000 Pa en las descargas completas. EnN800 la ventana poscierre
+**no fue observada**. No atribuir causalmente picos a reflexiones con un único sensor.
+Señales y extremos físicos conservados; sin mover ventanas tras mirar resultados.
+La presión final de los completos permanece~100,22 kPa, cola pequeña no nula;
+no prueba por sí sola independencia de la ventana ni convergencia de fase.
+
+### Sensibilidad temporal focal
+
+Ratio=|Q_CFL0,2−Q_CFL0,4|/D200→400 nominal. Umbrales diagnósticos definidos
+antes: <=0,1 pequeño; >=0,5 comparable; intermedio inconcluso. No nuevos gatesP4.
+
+| Observable | N | Q CFL0,4 | Q CFL0,2 | Diferencia absoluta | Ratio |
+|---|---:|---:|---:|---:|---:|
+| Q_pressure | 200 | 164.85474898234 | 164.85463129893 | 1.176834054775e-04 | 0.002427522 |
+| Q_pressure | 400 | 164.90322780389 | 164.90318343251 | 4.437138409230e-05 | 0.000915274 |
+| Q_mass | 200 | -9.7007728693914e-05 | -9.7007736044853e-05 | 7.350938610530e-12 | 0.003245901 |
+| Q_mass | 400 | -9.7009993377387e-05 | -9.7009995946039e-05 | 2.568652240778e-12 | 0.001134221 |
+
+Los cuatro cambios son pequeños; esto no estima rigurosamente todo el error
+ temporal, pero no muestra contaminación comparable en este contraste. CFL
+productivo0,4 intacto; no estudio general dx/dt ni campañas extra.
+
+### Control simple equivalente a E06
+
+Tubo recto0,75 m/20 mm, puerto constante200 mm² durante180→234°;
+0→0,003 s. Referencia lineal débil y L1 definidos antes de ejecutar, no solución
+exacta no lineal ni prueba de ondas fuertes. Área idéntica en todos los stages.
+
+| N | L1 normalizado | Qp Pa·s | Qm kg | Llegada s | Tiempo s |
+|---|---:|---:|---:|---:|---:|
+| 100 | 0.0062372757199 | 0.00754161710579 | -3.656141330082e-13 | 2.008493799925e-05 | 2.157 |
+| 200 | 0.00216432946744 | 0.00758034425026 | -3.479762774394e-13 | 2.069141848764e-05 | 8.563 |
+| 400 | 0.000710559647888 | 0.00757161321307 | -3.201751655362e-13 | 2.191874214232e-05 | 34.938 |
+
+Control convergente, sin N800 adicional. Su masa neta casi cero se informa sin
+ratio relativo mal condicionado. El contraste débil/fuerte no aísla por sí solo
+el puerto como causa: amplitud y condiciones también difieren.
+
+### Ledger, conservación, admissibilidad y coste
+
+Residuo de masa=|Qm−(m_final−m_inicial)|/masa_inicial_total. Auditoría adicional
+por suma independiente de stages. Conservación y positividad PASS en todos los
+intervalos alcanzados; N800 no aprueba final/eventos porque está incompleto.
+
+| Caso | Pasos | Tiempo solver s | dt mínimo s | dt máximo s | CFL máximo | Residuo global | Residuo masa |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| blowdown_N100_CFL0.4 | 2673 | 17.969 | 7.982491720e-07 | 7.039515698e-06 | 0.40000000000000008 | 1.985464998e-15 | 9.307525320e-16 |
+| blowdown_N200_CFL0.4 | 5405 | 71.000 | 3.920881915e-07 | 3.519757849e-06 | 0.40000000000000008 | 3.378286968e-15 | 3.412759284e-15 |
+| blowdown_N400_CFL0.4 | 10868 | 286.672 | 1.591807538e-08 | 1.759878924e-06 | 0.40000000000000008 | 2.706076806e-15 | 1.068641796e-15 |
+| blowdown_N200_CFL0.2 | 10765 | 137.985 | 3.137548774e-07 | 1.759878924e-06 | 0.20000000000000004 | 6.210941787e-15 | 1.895977380e-15 |
+| blowdown_N400_CFL0.2 | 21700 | 559.922 | 1.264635145e-07 | 8.799394622e-07 | 0.20000000000000004 | 4.827967923e-15 | 9.307525320e-16 |
+| control_N100_CFL0.4 | 342 | 2.157 | 2.554574926e-06 | 8.799394527e-06 | 0.40000000000000002 | 4.578090050e-16 | 9.159964826e-17 |
+| control_N200_CFL0.4 | 699 | 8.563 | 6.408287310e-07 | 4.399697286e-06 | 0.40000000000000002 | 6.253467629e-16 | 3.245364873e-16 |
+| control_N400_CFL0.4 | 1403 | 34.938 | 9.401554711e-07 | 2.199848634e-06 | 0.40000000000000002 | 7.938648579e-16 | 4.692226554e-17 |
+| blowdown_N800_CFL0.4 | 16963 | 900.031 | 2.069854083e-07 | 8.799394622e-07 | 0.40000000000000008 | 6.608845935e-15 | 1.930449696e-15 |
+
+| Caso | RHS | HLLC | HLLE | Rechazos |
+|---|---:|---:|---:|---:|
+| blowdown_N100_CFL0.4 | 5921 | 597209 | 0 | 575 |
+| blowdown_N200_CFL0.4 | 12018 | 2413958 | 0 | 1208 |
+| blowdown_N400_CFL0.4 | 24161 | 9685325 | 0 | 2425 |
+| blowdown_N200_CFL0.2 | 23860 | 4792712 | 0 | 2330 |
+| blowdown_N400_CFL0.2 | 48182 | 19314651 | 0 | 4782 |
+| control_N100_CFL0.4 | 684 | 69084 | 0 | 0 |
+| control_N200_CFL0.4 | 1429 | 287229 | 0 | 31 |
+| control_N400_CFL0.4 | 2882 | 1155682 | 0 | 76 |
+| blowdown_N800_CFL0.4 | 38700 | 30997419 | 0 | 4774 |
+
+Suma de nueve tiempos de solver2019,237 s; ocho completos y un parcial.
+N800900,031 s: control del límite al comienzo de paso, sin extensión; exceso
+0,031 s corresponde a finalizar el paso antes de comprobarlo de nuevo.
+CFL máximo0,4000000000000001 es redondeo; verificación contractual por límites
+de cada stage PASS, sin tolerancia nueva. Mayor residuo global6,60884593495e−15.
+
+Perfil N800:16963 pasos,38700 RHS/reconstrucciones/evaluaciones de puerto,
+37419 evaluaciones de coupling abierto,30921300 Riemann internos+38700 pared,
+30997419 HLLC totales, ceroHLLE.4774 rechazos por stage_CFL.
+Coste observado0,0530584802 s/paso aceptado, incluidos rechazos y logging.
+Inferencia de cuentas contrastada con characteristic==RHS y2*pasos+rechazos==RHS.
+Microperfil offline del estado final:20 repeticiones sin avanzar estado y un
+snapshot cProfile. Reconstrucción4,648 ms, Riemann internos7,895 ms,
+puerto/coupling0,0544 ms, exterior0,0132 ms por snapshot en ese equipo.
+No son porcentajes del coste global: excluyen advances, validación, ledgers,
+logging y variación de estados. Sin optimización ni integración adicional.
+
+### Verificación y revisión
+
+Tres tests focales PASS (0,074 s en run), reproducción offline de nueve métricas
+PASS, paridad exacta nominal histórica PASS,120 hashes PASS, OpenSpec estricto
+P4 PASS. No repetidas regresiones generalesP0/P2/P3: fuentes congeladas intactas.
+Autorrevisión del postproceso y visualización de señales separada de revisión
+independiente read-only por /root/p3_review. Esta última confirmó métricas,
+CFL/control, conteos, congelación y estado final; pidió distinguir cierre
+programado del no alcanzadoN800, recogido en diagnostics.json y esta tabla.
+Sin aceptación humana deP4. Gate nativo conservaSCIENTIFIC_CHANGE_REQUIRED;
+la ejecución del protocoloCOMPLETED no equivale a integraciónN800 completa.
+
+Evidencia: results/p4-r1-20260921, signals.png/svg, performance.json,
+snapshot-profile.txt, diagnostics.json, independent-review.json, decision.json,
+run/artifacts/cases (incluye parcial), inventory-all.json. Históricos intactos.
+
+Comandos desde raíz:
+- `.venv\Scripts\python.exe -m dev_orchestrator.runners.run_phase P4_R1 --dependency P2=docs/gasdynamic/p2_accepted_dependency.json`
+- `.venv\Scripts\python.exe -m dev_orchestrator.p4_r1_profile results/p4-r1-20260921/run/artifacts/cases/blowdown_N800_CFL0.4.json.gz results/p4-r1-20260921`
+- `python dev_orchestrator/p4_r1_plot.py results/p4-r1-20260921` (matplotlib sólo herramienta offline disponible; no dependencia del producto).
+- `openspec validate p4-escape-1d --strict --no-interactive`
+
+STOP. Pendientes: Q800 de ventana completa, D400→800 y convergencia global de
+descarga. Resolver siguiente autorización sobre rendimiento antes de otra
+integración; no ampliar timeout automáticamente. No propuesta de cambio del
+gate porque no se acreditó el caso preasintótico. P4B/P4C siguen pendientes.
+No publicación, archivo, nueva candidata ni modificación de producto.

@@ -1,5 +1,19 @@
 # MotorSim
 
+P4-R1: **P4_R1_PERFORMANCE_DIAGNOSTIC_REQUIRED**. Sensor histórico desplazado
+corregido sólo en postproceso; solver intacto (120 hashes). Temporal focal pequeño,
+control convergente; N800 agotó900,031 s antes del cierre (241,439° de300° finales).
+Q800 completo y D400→800 pendientes. Ocho casos completos, uno parcial; tres tests
+focales y OpenSpec estricto PASS, revisión independiente confirma STOP.
+[Tablas y definiciones](openspec/changes/p4-escape-1d/tasks.md),
+[decisión](results/p4-r1-20260921/decision.json),
+[señales](results/p4-r1-20260921/signals.png) y
+[perfil offline](results/p4-r1-20260921/performance.json).
+No nueva integración, ampliación de timeout u optimización; no aceptaciónP4,
+modificación de gate, P4C/P5, publicación o archivo. Borrado ajeno redme.txt intacto.
+
+Antecedente de autorización P4-R1:
+
 P4-R1 autorizado por orden47e73e41: diagnóstico focal con solver congelado,
 observable de presión en x=0,1 m y ledger de masa. Definiciones fijadas en
 [observables](docs/gasdynamic/p4_r1_observables.md). Esta autorización permite
