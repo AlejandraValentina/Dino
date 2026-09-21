@@ -612,3 +612,17 @@ ampliar600s, aceptarP4, archivar, publicar ni iniciarP5. Borrado ajeno preservad
 OpenSpec estricto final PASS; inventario SHA256 de82 archivos de evidencia.
 Commits:75210ad aceptación/perfil,655b9a9 bloqueestructural,5e7680e batching,
 2675763 benchmarks,d89dc70 correcciónnamespace,11ff512 regresiones/perfilcompleto.
+## P4-R4 — evaluación Numba serial (orden 8f6dbacb)
+
+- [x] Compatibilidad registrada: Windows 10 x64, Python 3.11.0, NumPy 2.3.0, Numba 0.62.1, llvmlite 0.45.1; `pip check` PASS. No se cambió Python/NumPy ni packaging.
+- [x] HLLC float64 `njit(cache=True, fastmath=False, parallel=False)` y backend seleccionable `NUMBA_EXPERIMENTAL`; SCALAR/NUMPY permanecen disponibles.
+- [x] Microbenchmark: equivalencia PASS con tolerancia prefijada; caras G1 480° 1,51879× (diagnóstico aleatorio 0,98782× conservado). JIT inicial 4,779 s en el fixture G1.
+- [x] Focal: tres ventanas congeladas G1, equivalencia completa de estados, historia, eventos, contadores, balances y observables; 5 tests Numba PASS; speedups 1,665× / 1,864× / 1,335×.
+- [x] Dos G1 completos calientes: 37,313 s (primero, JIT fuera del resultado) y 26,599 s; equivalencia exacta, 13.164 pasos, 26.328 RHS aceptados, 35.379 RHS totales, 8.861.357 HLLC, 0 HLLE, 9.051 rechazos. Proyección 30 ciclos 1.119,38 s / 797,98 s.
+- [x] OpenSpec estricto PASS y regresiones focales Numba PASS.
+- [ ] Gate de rendimiento: **P4_R4_NUMBA_NATIVE_EXTENSION_DECISION_REQUIRED** (>25 s/ciclo; la segunda medición sigue sobre 20–25 s). No iniciar periodicidad G1, G2, E14 ni P5.
+- [ ] Revisión independiente conectada: el runner dummy quedó BLOCKED por `review_not_approved`; conservar la evidencia y distinguirla de la autorrevisión.
+
+Evidencia: `results/p4-r4-20260921/artifacts/benchmark.json`,
+`dev_orchestrator/runs/20260921T134738-P4_R4_FOCAL-c72685bc1449/artifacts/focal.json`
+y `dev_orchestrator/runs/20260921T134518-P4_R4_MICRO-2fc258aaeab7/artifacts/micro.json`.

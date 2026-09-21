@@ -13,6 +13,16 @@ Dependencia opcional sólo para desarrollo experimental:
 (NumPy2.3.0, Python3.11.0 probado). La aplicación mantiene sus comandos y camino
 legacy. Prueba focal: `.venv\Scripts\python.exe -m unittest discover -s tests -p test_gas1d_batch.py -v`.
 No volver a lanzar benchmarks/campañas por consultar esta documentación.
+
+P4-R4 evaluó Numba 0.62.1/llvmlite 0.45.1 sobre Python 3.11.0 y NumPy 2.3.0
+en Windows x64. HLLC, primitivas y MUSCL seriales usan float64, `fastmath=False`
+y `parallel=False`; el backend `NUMBA_EXPERIMENTAL` conserva SCALAR_REFERENCE y
+NUMPY_REFERENCE. La equivalencia del ciclo G1 fue exacta. Dos mediciones calientes
+fueron 37,313 s y 26,599 s (proyecciones 1119,38 s y 797,98 s para 30 ciclos),
+por encima del objetivo de 20 s y del presupuesto de 600 s. Estado:
+`P4_R4_NUMBA_NATIVE_EXTENSION_DECISION_REQUIRED`; no se reanudaron periodicidad,
+G2 ni P5. Numba/llvmlite no se incorporan aún al packaging Windows; su JIT y caché
+requieren una decisión posterior. Evidencia en `results/p4-r4-20260921/`.
 Estados anteriores históricos:
 
 P4-R2: **P4_R2_PASS_REFINEMENT_CONTRACT**; P4B PASS bajo el
