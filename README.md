@@ -1,5 +1,13 @@
 # MotorSim
 
+P4-R1E autorizado por orden6e7321b2: una sola integraciónN800/CFL0,4 desde
+ t=0, con timeout1500s exclusivamente operativo. No checkpoint reanudable por
+la API congelada (tiempo/eventos/ledger); no se implementa resume. Reutilizar
+los ocho completos anteriores, observables y criterios intactos. Sin P4C/P5.
+La prohibición histórica de ampliar900s queda sustituida sólo por esta orden.
+
+Antecedente P4-R1:
+
 P4-R1: **P4_R1_PERFORMANCE_DIAGNOSTIC_REQUIRED**. Sensor histórico desplazado
 corregido sólo en postproceso; solver intacto (120 hashes). Temporal focal pequeño,
 control convergente; N800 agotó900,031 s antes del cierre (241,439° de300° finales).

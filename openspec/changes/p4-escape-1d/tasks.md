@@ -312,3 +312,18 @@ descarga. Resolver siguiente autorización sobre rendimiento antes de otra
 integración; no ampliar timeout automáticamente. No propuesta de cambio del
 gate porque no se acreditó el caso preasintótico. P4B/P4C siguen pendientes.
 No publicación, archivo, nueva candidata ni modificación de producto.
+
+## P4-R1E — orden6e7321b2, 2026-09-21
+
+- [x] Congelar solver, observables y evidenciaR1; elección restart desde t=0.
+- [ ] Ejecutar únicamente N800/CFL0,4 con límite1500s.
+- [ ] Evaluar todas las condicionesR1 con Q completos y revisión independiente.
+
+1500s es límite de integración;1650s del comando deja margen de serialización,
+no amplía el solver. Estimación previa900,031/0,734≈1226s. No optimización.
+No existe API de resume de tiempo/eventos/ledger: los arrays finales anteriores
+no se convierten en checkpoint. Se comprueba paridad exacta del prefijo aceptado.
+Mismo prepare/measured/compare deR1 por importación, sin modificar esos archivos.
+Mismas condiciones de presión, masa, llegada, conservación, positividad,CFL,
+control y temporal. Fallo de fase se registra separadamente. Timeout→
+P4_R2_PERFORMANCE_OPTIMIZATION_REQUIRED, sin optimizar ni repetir en esta orden.
