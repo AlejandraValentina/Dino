@@ -620,6 +620,7 @@ Commits:75210ad aceptación/perfil,655b9a9 bloqueestructural,5e7680e batching,
 - [x] Focal: tres ventanas congeladas G1, equivalencia completa de estados, historia, eventos, contadores, balances y observables; 5 tests Numba PASS; speedups 1,665× / 1,864× / 1,335×.
 - [x] Dos G1 completos calientes: 37,313 s (primero, JIT fuera del resultado) y 26,599 s; equivalencia exacta, 13.164 pasos, 26.328 RHS aceptados, 35.379 RHS totales, 8.861.357 HLLC, 0 HLLE, 9.051 rechazos. Proyección 30 ciclos 1.119,38 s / 797,98 s.
 - [x] OpenSpec estricto PASS y regresiones focales Numba PASS.
+- [x] Suite pertinente P0/P1/P2/P3/P4 y Numba: 106 tests PASS (24,100 s). La ejecución amplia de 449 tests conserva cinco fallos preexistentes/ambientales fuera de R4 (P1 habilitada por roadmap, UI CAE, P0 baseline y dos límites de memoria/cancelación); no se atribuyen al backend.
 - [ ] Gate de rendimiento: **P4_R4_NUMBA_NATIVE_EXTENSION_DECISION_REQUIRED** (>25 s/ciclo; la segunda medición sigue sobre 20–25 s). No iniciar periodicidad G1, G2, E14 ni P5.
 - [ ] Revisión independiente conectada: el runner dummy quedó BLOCKED por `review_not_approved`; conservar la evidencia y distinguirla de la autorrevisión.
 
