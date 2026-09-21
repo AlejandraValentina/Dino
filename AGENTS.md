@@ -1,5 +1,12 @@
 # MotorSim — Instrucciones de trabajo para Codex
 
+P4-R1 autorizado por orden47e73e41: diagnóstico focal con solver congelado,
+observable de presión en x=0,1 m y ledger de masa. Definiciones fijadas en
+[observables](docs/gasdynamic/p4_r1_observables.md). Esta autorización permite
+únicamente las repeticiones focales allí descritas; no cambia el gate P4 ni
+habilita P4C/P5. Estado anterior conservado a continuación.
+
+
 P4: **P4_BLOCKED_WAVE_PHYSICS / SCIENTIFIC_CHANGE_REQUIRED**.
 P3_HUMAN_ACCEPTED registrado y archivado; P0/P2/P3 congelados intactos.
 P4A/E01–E05 PASS. P4B ejecutó16 casos individuales PASS, pero el refinamiento

@@ -121,3 +121,13 @@ conservado fuera decommits. OpenSpecautomático sigueomitido.
 
 OpenSpec estricto: cambioP4 y specconsolidadaP3 PASS. AtributosGit locales
 preservan bytes de los tres módulosP4 revisados; sin configuración global.
+
+## P4-R1 — diagnóstico autorizado 2026-09-21
+
+- [x] Auditar posiciones históricas y fijar observables antes de ejecutar.
+- [x] Preparar registro de vecinos sin modificar solver; prueba de paridad exacta.
+- [ ] Ejecutar nominal y CFL focal, control y N800 sólo si corresponde.
+- [ ] Registrar tablas, señales, ledger y clasificación sin cambiar gate.
+- [ ] Revisión independiente de resultados y cierre documental.
+
+Definición previa: docs/gasdynamic/p4_r1_observables.md. Históricos intactos.

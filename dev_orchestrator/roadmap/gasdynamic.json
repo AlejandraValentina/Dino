@@ -851,6 +851,31 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P4_R1",
+      "title": "P4-R1 frozen convergence diagnosis",
+      "objective": "Frozen blowdown observables and focal convergence diagnosis",
+      "depends_on": [
+        "P2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "observable_tests",
+        "diagnostic_command",
+        "diagnostic_evidence",
+        "frozen_implementation"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }
