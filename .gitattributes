@@ -9,3 +9,7 @@ tests/test_coupling_adapter.py -text
 motorsim/exhaust_port.py -text
 motorsim/exhaust1d.py -text
 motorsim/exhaust_geometry.py -text
+
+# Preserve the accepted scalar hybrid reference and its periodicity contract.
+motorsim/hybrid_exhaust.py -text
+docs/gasdynamic/p4c_hybrid.md -text

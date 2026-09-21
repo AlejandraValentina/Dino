@@ -1,9 +1,19 @@
 # MotorSim
 
-P4-R3 autorizado por orden5e36dbe4: P4_R2_HUMAN_ACCEPTED y P4B_HUMAN_ACCEPTED.
-No aceptaciónP4. Optimización computacional aislada con equivalencia obligatoria;
-SCALAR_REFERENCE conservado, sin cambio científico/UI/JSON/P5. Perfil antes
-de optimizar y guard600s/30ciclos intacto. Estados anteriores históricos.
+**P4-R3: P4_R3_COMPILED_BACKEND_DECISION_REQUIRED.**
+R2 y P4B aceptados por la usuaria; P4 completo sigue pendiente.
+Backend experimental NumPy:35,469/35,443s por ciclo G1 N250,7,42–7,43× más
+rápido y equivalencia exacta. Proyección1064/1063s supera600s: sin periodicidad,
+G2 ni performance PASS. Referencia escalar y ciencia intactas; sin UI/JSON/P5.
+101 tests y regresiones offlineP0/P2/P3 aprobados; replay19 bancosP4A/P4B exacto.
+[Perfiles, comparaciones y opciones pendientes](docs/gasdynamic/p4_r3_performance.md).
+
+Dependencia opcional sólo para desarrollo experimental:
+`.venv\Scripts\python.exe -m pip install -r requirements-experimental.txt`
+(NumPy2.3.0, Python3.11.0 probado). La aplicación mantiene sus comandos y camino
+legacy. Prueba focal: `.venv\Scripts\python.exe -m unittest discover -s tests -p test_gas1d_batch.py -v`.
+No volver a lanzar benchmarks/campañas por consultar esta documentación.
+Estados anteriores históricos:
 
 P4-R2: **P4_R2_PASS_REFINEMENT_CONTRACT**; P4B PASS bajo el
 [delta R2](docs/gasdynamic/p4_refinement_r2.md), sin repetir N800.

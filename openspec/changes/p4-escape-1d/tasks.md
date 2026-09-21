@@ -524,7 +524,91 @@ Commits previos:84b36b9 deltaR2,4747eb2 fuente previa,a3087ba medición/STOP.
 
 ## P4-R3 — orden5e36dbe4
 - [x] Registrar aceptación humana R2/P4B, sin aceptar P4.
-- [ ] Perfil estándar y clasificación de coste antes de optimización.
-- [ ] Optimizaciones aisladas y equivalencia por bloque.
-- [ ] Perfil intermedio, benchmark completo, regresiones y reviewer.
+- [x] Perfil estándar y clasificación de coste antes de optimización.
+- [x] Optimizaciones aisladas y equivalencia por bloque.
+- [x] Perfil intermedio, benchmark completo, regresiones y reviewer.
+- [ ] Performance<=20s/ciclo, proyección30<=600s con margen.
 - [ ] Reanudar periodicidad/G2 sólo con performance PASS.
+
+### P4_R3_COMPILED_BACKEND_DECISION_REQUIRED
+
+R2/P4B aceptados por la usuaria, recibo docs/gasdynamic/p4_r3_acceptance.json.
+NO P4_HUMAN_ACCEPTED. Contratos/physics/meshN250/CFL/eventos/0D intactos.
+SCALAR_REFERENCE disponible por motorsim.hybrid_exhaust y selector interno
+hybrid_fast.run_cycle(...,backend='SCALAR_REFERENCE'/'STRUCTURAL'/'NUMPY').
+No import productivo de estos backends ni cambio UI/JSON/EXE.
+
+| Camino | Wall, s/ciclo | CPU, s | Speedup | 30ciclos, s |
+|---|---:|---:|---:|---:|
+| ReferenciaR2 | 263,328 | No registrado | 1× | 7899,840 |
+| Cachés estructurales | 226,773529 | 226,203125 | 1,161× | 6803,206 |
+| NumPy1 | 35,469199 | 35,406250 | 7,424× | 1064,076 |
+| NumPy2 | 35,443038 | 35,250000 | 7,430× | 1063,291 |
+
+Tres ventanas100µs antes/intermedio/después:17,531/13,709/1,047s con cProfile.
+Al ser viable se perfiló además el ciclo NumPy completo:63,682498s instrumentados,
+**excluidos** de la comparación de performance. Top final inclusivo: RHS55,52%,
+HLLC25,15%, evaluación0D24,52%, MUSCL11,27%, primitivas7,50%; no sumar anidados.
+Tabla completa self/inclusive/calls, CPU/RAM, clasificaciónA–F y opcionesA–D:
+docs/gasdynamic/p4_r3_performance.md. No se midieron allocations acumuladas ni
+se inventan CPU/RAM del baseline histórico. Mismo Windows10/i5-10400/Python3.11.0.
+
+Bloque1cachea primitivas inmutables, geometría y evaluación0D por estado/tiempo;
+equivalencia exacta antes del siguiente bloque. Bloque2NumPy2.3.0 aplica las
+mismas operaciones float64 a EOS/MUSCL/HLLC/CFL y avances de celdas; BC/P3 y
+fallbacks siguen escalares congelados. Fallback/downgrade por cara/celda;
+puerto agrega conteo por cara sin subrazón interna inventada. Dependencia sólo
+requirements-experimental.txt; pip check PASS, sin compilados/globales.
+
+Equivalencia **exacta, máximo absoluto0** para estados0D/1D, pC/pPuerto,
+flujosm/E/F, sensores, trabajo, inventarios/ledgers en bloque1, ambas medidas
+NumPy y perfil completo. Mismos eventos,13164pasos/26328etapas aceptadas,
+35379RHS,8861357HLLC/0HLLE,9051rechazosCFL. Revisor verificó histories/stages
+completos. Balances/admisibilidad y ausencia de backflow coinciden conR2.
+Performance mejora sustancialmente, pero NO cumple; no periódico/G2/E14/P4PASS.
+
+### Regresiones y revisión
+
+101 testsPASS(25,178s):88 históricos +8 adaptador +5 batch. EOS/MUSCL/HLLC/HLLE,
+supersónico/igualdad/downgrade y dos microintegraciones descarga/backflow contra
+referencia. Replay offline adicional:3P4A+16P4B,190 snapshots/finales,27050caras,
+igualdad exacta. Gates históricos aceptados intactos; P0/P2/P3 offlinePASS,
+151hashes históricos y cinco referenciasR3 intactos. No repetir campañas largas.
+
+Primer cierreFAILED_INFRASTRUCTURE: el archivo nuevo gas1d/batch.py alteraba
+inventario glob congeladoP2, sin cambiar archivos científicos. Movido a
+motorsim/exhaust_batch.py; cuerpo idéntico exceptoimports, no tocarvalidadores.
+Fallo conservado en regression-infrastructure-failure; corrección en
+namespace-correction.json; regresión posteriorPASS. Reviewer confirmó fix sin
+necesidad de repetir benchmark; el perfil completo posterior también fue exacto.
+
+Autorrevisión de fuentes/diff separada de revisión independiente read-only
+/root/p3_review: confirma perfiles/equivalencia/101tests/replay/bloqueo. No
+ejecutó integraciones; sólo lecturas y evaluaciones puntuales de kernels.
+Runs nativos restantes BLOCKED por review_not_approved del hook dummy,
+sin errors/scopeviolations; conservar junto al dictamen externo independiente.
+El estado técnico del hook no sustituye la decisión de performance.
+
+### Evidencia y reproducción
+
+results/p4-r3-20260921: artifacts/ contiene perfilbase; structural/ el bloque1;
+numpy/ las dos medidas finales y perfilporventanas; full-profile/ perfilcompleto;
+regression/ la comprobación final; decision.json e independent-review.json
+separan resultado medido, aceptación humana y revisión. Mantener originales.
+
+Comandos ejecutados (no relanzar automáticamente):
+
+- `.venv\Scripts\python.exe -m pip install -r requirements-experimental.txt`
+- `.venv\Scripts\python.exe -m dev_orchestrator.runners.run_phase P4_R3_PROFILE --dependency P2=docs/gasdynamic/p2_accepted_dependency.json`
+- Misma invocación con P4_R3_STRUCTURAL, P4_R3_NUMPY, P4_R3_CLOSE y P4_R3_FULL_PROFILE.
+- `.venv\Scripts\python.exe -m unittest discover -s tests -p test_gas1d_batch.py -v`
+- `openspec validate p4-escape-1d --strict --no-interactive`
+
+Falta decisión humana sobre AcontinuarNumPy/BNumba/Cextensión/Dresoluciónfutura.
+Para20s falta1,77346× adicional,43,613% menos wall. Cotas instrumentadasAmdahl
+orientativas en el documento, no promesa de compilación. No implementarB/C,
+ampliar600s, aceptarP4, archivar, publicar ni iniciarP5. Borrado ajeno preservado.
+
+OpenSpec estricto final PASS; inventario SHA256 de82 archivos de evidencia.
+Commits:75210ad aceptación/perfil,655b9a9 bloqueestructural,5e7680e batching,
+2675763 benchmarks,d89dc70 correcciónnamespace,11ff512 regresiones/perfilcompleto.

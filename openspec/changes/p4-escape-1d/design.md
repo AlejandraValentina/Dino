@@ -83,3 +83,10 @@ histórico; los otros gates permanecen intactos.
 ## P4C antes de ejecución
 Configuración, transformación de especie, malla, periodicidad y guard operativo:
 docs/gasdynamic/p4c_hybrid.md. Esta definición se registra antes de medir un ciclo.
+
+## P4-R3 computacional
+La orden5e36dbe4 acepta R2/P4B, sin aceptar P4. Ciencia y referencia escalar
+intactas. Perfil, bloques equivalentes y evidencia de coste en
+docs/gasdynamic/p4_r3_performance.md. Resultado:
+P4_R3_COMPILED_BACKEND_DECISION_REQUIRED. No modifica gates físicos ni habilita
+periodicidad/G2/P5. NumPy es dependencia opcional del camino experimental.

@@ -1,9 +1,14 @@
 # MotorSim — Instrucciones de trabajo para Codex
 
-P4-R3 autorizado por orden5e36dbe4: P4_R2_HUMAN_ACCEPTED y P4B_HUMAN_ACCEPTED.
-No aceptaciónP4. Optimización computacional aislada con equivalencia obligatoria;
-SCALAR_REFERENCE conservado, sin cambio científico/UI/JSON/P5. Perfil antes
-de optimizar y guard600s/30ciclos intacto. Estados anteriores históricos.
+P4-R3: **P4_R3_COMPILED_BACKEND_DECISION_REQUIRED**. Registrados
+P4_R2_HUMAN_ACCEPTED y P4B_HUMAN_ACCEPTED, NO P4_HUMAN_ACCEPTED.
+NumPy35,469/35,443s por cicloN250,7,42–7,43×, equivalencia exacta; proyección
+1064/1063s>600.101tests/regresiones y replayP4A/P4B PASS. Referencia escalar,
+151hashes históricos y cinco referenciasR3 intactos. Estado de cierre revisado.
+STOP: sin compilados, más optimizaciones/campañas, periodicidad/G2/P5, archivo
+ni publicación sin nueva orden. NumPy opcional sólo experimental; no UI/JSON.
+[Resultados y opciones](docs/gasdynamic/p4_r3_performance.md). Preservar borrado
+ajeno redme.txt. Estados anteriores históricos:
 
 P4-R2: P4_R2_PASS_REFINEMENT_CONTRACT y P4B PASS bajoR2; P4C queda
 **P4_BLOCKED_PERFORMANCE**. Ciclo G1 N250 completo en263,328s; proyección30
