@@ -1,0 +1,187 @@
+{
+  "G1": [
+    {
+      "cycle": 1,
+      "work_J": -0.418,
+      "periodicity_passed": false,
+      "sensor_max": 0.022
+    },
+    {
+      "cycle": 2,
+      "work_J": 14.961,
+      "periodicity_passed": false,
+      "sensor_max": 0.099
+    },
+    {
+      "cycle": 3,
+      "work_J": 12.206,
+      "periodicity_passed": false,
+      "sensor_max": 0.022
+    },
+    {
+      "cycle": 4,
+      "work_J": 12.441,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 5,
+      "work_J": 12.258,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 6,
+      "work_J": 12.301,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 7,
+      "work_J": 12.161,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 8,
+      "work_J": 12.19,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 9,
+      "work_J": 10.032,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 10,
+      "work_J": 13.621,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 11,
+      "work_J": 11.631,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 12,
+      "work_J": 13.602,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 13,
+      "work_J": 12.398,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 14,
+      "work_J": 13.616,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 15,
+      "work_J": 13.012,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 16,
+      "work_J": 13.528,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 17,
+      "work_J": 13.299,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 18,
+      "work_J": 13.481,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 19,
+      "work_J": 13.482,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 20,
+      "work_J": 13.437,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 21,
+      "work_J": 13.667,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 22,
+      "work_J": 13.399,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 23,
+      "work_J": 13.768,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 24,
+      "work_J": 13.36,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 25,
+      "work_J": 13.822,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 26,
+      "work_J": 13.341,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 27,
+      "work_J": 13.837,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 28,
+      "work_J": 13.333,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 29,
+      "work_J": 13.838,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    },
+    {
+      "cycle": 30,
+      "work_J": 13.331,
+      "periodicity_passed": false,
+      "sensor_max": 0.6
+    }
+  ],
+  "G2": [],
+  "note": "30 cycles, no periodic PASS, streak 0",
+  "implementation_agent": "OpenCode / Muse Spark 1.2"
+}

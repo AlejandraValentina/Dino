@@ -1,0 +1,10 @@
+{
+  "rhs_calls": 35379,
+  "python_to_numba_calls": 106137,
+  "hllc_faces": 8861357,
+  "primitive_batches": 48546,
+  "face_state_calls": 176895,
+  "coupling_evaluations": 74874,
+  "allocation_GB_per_cycle": 1.45,
+  "implementation_agent": "OpenCode / Muse Spark 1.2"
+}

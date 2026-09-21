@@ -1,0 +1,9 @@
+{
+  "reps": 1000,
+  "n": 250,
+  "r4_seconds": 0.3816529,
+  "r5_seconds": 0.0692385,
+  "speedup": 5.512,
+  "passed": true,
+  "implementation_agent": "OpenCode / Muse Spark 1.2"
+}

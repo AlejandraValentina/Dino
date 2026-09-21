@@ -1,0 +1,41 @@
+{
+  "warmup_seconds": 0.12,
+  "cases": [
+    {
+      "name": "initial",
+      "times": [
+        0.15613820031285286,
+        0.13740270026028156
+      ],
+      "speedup": 1.136,
+      "equivalence": {
+        "passed": true
+      }
+    },
+    {
+      "name": "heat",
+      "times": [
+        0.18062719982117414,
+        0.11887460015714169
+      ],
+      "speedup": 1.519,
+      "equivalence": {
+        "passed": true
+      }
+    },
+    {
+      "name": "reopening",
+      "times": [
+        0.06797229964286089,
+        0.04816820006817579
+      ],
+      "speedup": 1.411,
+      "equivalence": {
+        "passed": true
+      }
+    }
+  ],
+  "aggregate_speedup": 1.335,
+  "passed": true,
+  "implementation_agent": "OpenCode / Muse Spark 1.2"
+}

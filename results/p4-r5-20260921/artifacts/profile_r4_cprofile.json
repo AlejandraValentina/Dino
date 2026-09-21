@@ -1,0 +1,330 @@
+{
+  "wall_seconds": 51.42200000025332,
+  "solver_seconds": 44.92299999948591,
+  "top_self": [
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+      "line": 88,
+      "func": "faces",
+      "calls": 35379,
+      "self_s": 8.0593387,
+      "inline_s": 8.1151604
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 195,
+      "func": "evaluate",
+      "calls": 74874,
+      "self_s": 4.1732144,
+      "inline_s": 14.1759578
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+      "line": 108,
+      "func": "primitive_numeric",
+      "calls": 48546,
+      "self_s": 2.3933034,
+      "inline_s": 2.4362729
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numpy.py",
+      "line": 44,
+      "func": "rhs",
+      "calls": 35379,
+      "self_s": 2.2265626000000003,
+      "inline_s": 25.177842100000003
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+      "line": 131,
+      "func": "reconstruct_numeric",
+      "calls": 35379,
+      "self_s": 2.042122,
+      "inline_s": 2.0968266
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "func": "<built-in method math.fsum>",
+      "calls": 404005,
+      "self_s": 1.7649283,
+      "inline_s": 2.1698582
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "func": "<built-in method builtins.all>",
+      "calls": 1485636,
+      "self_s": 1.6130021,
+      "inline_s": 4.5459435
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 29,
+      "func": "work",
+      "calls": 2137607,
+      "self_s": 1.3990922000000001,
+      "inline_s": 2.6911787
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 25,
+      "func": "validate",
+      "calls": 781563,
+      "self_s": 1.1897662,
+      "inline_s": 3.6163797000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 27,
+      "func": "<genexpr>",
+      "calls": 3907815,
+      "self_s": 1.1316725,
+      "inline_s": 1.5293722
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 27,
+      "func": "physical",
+      "calls": 3036098,
+      "self_s": 1.123991,
+      "inline_s": 1.4870374000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 92,
+      "func": "add_transport",
+      "calls": 449244,
+      "self_s": 1.0579800000000001,
+      "inline_s": 1.0579800000000001
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "func": "<built-in method builtins.len>",
+      "calls": 8170662,
+      "self_s": 0.9598962000000001,
+      "inline_s": 0.9598962000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\boundary.py",
+      "line": 16,
+      "func": "face_state",
+      "calls": 176895,
+      "self_s": 0.8721169000000001,
+      "inline_s": 3.4579057000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 80,
+      "func": "regularized_restriction",
+      "calls": 149748,
+      "self_s": 0.8602838,
+      "inline_s": 1.4757580000000001
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "func": "<built-in method math.isfinite>",
+      "calls": 6726753,
+      "self_s": 0.8554379000000001,
+      "inline_s": 0.8554379000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 31,
+      "func": "heat",
+      "calls": 1291787,
+      "self_s": 0.8252955000000001,
+      "inline_s": 2.6414012000000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numpy.py",
+      "line": 16,
+      "func": "solve_exhaust",
+      "calls": 3,
+      "self_s": 0.7785726000000001,
+      "inline_s": 44.9131773
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_batch.py",
+      "line": 98,
+      "func": "cfl",
+      "calls": 35379,
+      "self_s": 0.7656862000000001,
+      "inline_s": 0.9723314000000001
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 55,
+      "func": "restriction",
+      "calls": 449244,
+      "self_s": 0.7537502,
+      "inline_s": 0.8651789000000001
+    }
+  ],
+  "top_inline": [
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_fast.py",
+      "line": 28,
+      "func": "run_cycle",
+      "calls": 1,
+      "self_s": 0.12459890000000001,
+      "inline_s": 51.4387902
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+      "line": 152,
+      "func": "solve_exhaust",
+      "calls": 3,
+      "self_s": 0.0001405,
+      "inline_s": 44.9133258
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numpy.py",
+      "line": 16,
+      "func": "solve_exhaust",
+      "calls": 3,
+      "self_s": 0.7785726000000001,
+      "inline_s": 44.9131773
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numpy.py",
+      "line": 44,
+      "func": "rhs",
+      "calls": 35379,
+      "self_s": 2.2265626000000003,
+      "inline_s": 25.177842100000003
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_fast.py",
+      "line": 20,
+      "func": "evaluate",
+      "calls": 185124,
+      "self_s": 0.7058495,
+      "inline_s": 16.0787082
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 42,
+      "func": "evaluate",
+      "calls": 74874,
+      "self_s": 0.2208053,
+      "inline_s": 15.323211
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 195,
+      "func": "evaluate",
+      "calls": 74874,
+      "self_s": 4.1732144,
+      "inline_s": 14.1759578
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numpy.py",
+      "line": 34,
+      "func": "validate",
+      "calls": 123417,
+      "self_s": 0.14508300000000002,
+      "inline_s": 13.721039200000002
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 55,
+      "func": "validate",
+      "calls": 123417,
+      "self_s": 0.09171040000000001,
+      "inline_s": 10.6454774
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+      "line": 96,
+      "func": "hllc",
+      "calls": 35379,
+      "self_s": 0.2532744,
+      "inline_s": 8.7244955
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+      "line": 88,
+      "func": "faces",
+      "calls": 35379,
+      "self_s": 8.0593387,
+      "inline_s": 8.1151604
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+      "line": 59,
+      "func": "source",
+      "calls": 61707,
+      "self_s": 0.333417,
+      "inline_s": 6.6805437
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\hybrid_fast.py",
+      "line": 63,
+      "func": "<listcomp>",
+      "calls": 13164,
+      "self_s": 0.038878800000000005,
+      "inline_s": 5.917850700000001
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "func": "<built-in method builtins.all>",
+      "calls": 1485636,
+      "self_s": 1.6130021,
+      "inline_s": 4.5459435
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+      "line": 146,
+      "func": "reconstruct",
+      "calls": 35379,
+      "self_s": 0.3538104,
+      "inline_s": 4.1382284
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\exhaust_port.py",
+      "line": 37,
+      "func": "port_flux",
+      "calls": 35379,
+      "self_s": 0.2875785,
+      "inline_s": 3.7926135000000003
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+      "line": 25,
+      "func": "validate",
+      "calls": 781563,
+      "self_s": 1.1897662,
+      "inline_s": 3.6163797000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\boundary.py",
+      "line": 16,
+      "func": "face_state",
+      "calls": 176895,
+      "self_s": 0.8721169000000001,
+      "inline_s": 3.4579057000000004
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+      "line": 35,
+      "func": "abs_m",
+      "calls": 1123113,
+      "self_s": 0.5054787000000001,
+      "inline_s": 3.3272697
+    },
+    {
+      "file": "E:\\dino\\Dino\\motorsim\\gas1d\\boundary.py",
+      "line": 70,
+      "func": "flux",
+      "calls": 70758,
+      "self_s": 0.18548710000000002,
+      "inline_s": 3.3159852
+    }
+  ],
+  "complete": true,
+  "reason": "final_time"
+}

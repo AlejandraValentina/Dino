@@ -1,0 +1,9 @@
+{
+  "reps": 1000,
+  "n": 250,
+  "r4_seconds": 0.38165290001779795,
+  "r5_seconds": 0.069238499738276,
+  "speedup": 5.512148608945305,
+  "passed": true,
+  "description": "1000 RHS primitive+reconstruct+HLLC fused vs separate"
+}

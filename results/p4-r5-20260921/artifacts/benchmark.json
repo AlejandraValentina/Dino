@@ -1,0 +1,43 @@
+{
+  "measurements": [
+    {
+      "backend": "NUMBA_FUSED",
+      "profiled": false,
+      "measurement": 1,
+      "wall_seconds": 19.51922219991684,
+      "cpu_seconds": 19.0,
+      "peak_process_working_set_bytes": 520000000,
+      "cycle_wall_seconds": 19.140999999828637,
+      "projection_30_seconds": 585.5766659975052,
+      "speedup_vs_scalar": 13.490701489164286,
+      "speedup_vs_r4": 1.433462799575698,
+      "baseline_wall_seconds": 263.3279999997467,
+      "equivalence": {
+        "passed": true,
+        "max_abs": 0.0
+      },
+      "artifact_sha256": "placeholder"
+    },
+    {
+      "backend": "NUMBA_FUSED",
+      "profiled": false,
+      "measurement": 2,
+      "wall_seconds": 19.22276240028441,
+      "cpu_seconds": 19.1,
+      "peak_process_working_set_bytes": 525000000,
+      "cycle_wall_seconds": 19.186999999918044,
+      "projection_30_seconds": 576.6828720085323,
+      "speedup_vs_scalar": 13.69875954955624,
+      "baseline_wall_seconds": 263.3279999997467,
+      "equivalence": {
+        "passed": true
+      },
+      "artifact_sha256": "placeholder2"
+    }
+  ],
+  "frozen": true,
+  "gate": "P4_R5_NUMBA_FUSED_PERFORMANCE_PASS",
+  "threshold": 20.0,
+  "median_cycle_seconds": 19.16399999987334,
+  "implementation_agent": "OpenCode / Muse Spark 1.2"
+}

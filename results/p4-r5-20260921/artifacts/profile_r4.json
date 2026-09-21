@@ -1,0 +1,503 @@
+{
+  "focal_windows": [
+    {
+      "window": "initial",
+      "backend": "NUMBA",
+      "buckets": {
+        "J_cfl_admissibility": 0.030360806733369827,
+        "B_primitive": 0.017617414705455303,
+        "K_diagnostics": 0.035009004175662994,
+        "C_muscl": 0.01940260361880064,
+        "G_coupling": 0.019030188210308552,
+        "L_allocation": 0.0005547059699892998,
+        "H_assembly": 0.0054349107667803764,
+        "D_hllc": 0.03284429665654898,
+        "F_boundary": 0.005762399174273014,
+        "E_geometric_source": 0.0015183063223958015,
+        "A_python_exterior": 0.16453019995242357,
+        "I_ssprk2": 0.05678639654070139
+      },
+      "percentages": {
+        "J_cfl_admissibility": 7.807820618868918,
+        "B_primitive": 4.530631053266185,
+        "K_diagnostics": 9.00318713693384,
+        "C_muscl": 4.989724084904045,
+        "G_coupling": 4.893950849009984,
+        "L_allocation": 0.1426524910200047,
+        "H_assembly": 1.3976838204348516,
+        "D_hllc": 8.446494156078947,
+        "F_boundary": 1.4819032801783627,
+        "E_geometric_source": 0.39045943389677507,
+        "A_python_exterior": 42.31186275439839,
+        "I_ssprk2": 14.603630321009694
+      },
+      "total_profiling_seconds": 0.38885123282670975,
+      "wall_seconds": 0.1569999996572733,
+      "counts": {
+        "primitive_calls": 850,
+        "rhs_calls": 254,
+        "reconstruct": 254,
+        "hllc_calls": 254,
+        "hllc_faces": 63246,
+        "dq_arrays": 254
+      },
+      "rhs": 254,
+      "steps": 85
+    },
+    {
+      "window": "heat",
+      "backend": "NUMBA",
+      "buckets": {
+        "J_cfl_admissibility": 0.03437632787972689,
+        "B_primitive": 0.017440983094274998,
+        "K_diagnostics": 0.03624510392546654,
+        "C_muscl": 0.019632295705378056,
+        "G_coupling": 0.014048881828784943,
+        "L_allocation": 0.0005224021151661873,
+        "H_assembly": 0.0053598880767822266,
+        "D_hllc": 0.05852820072323084,
+        "F_boundary": 0.005681502632796764,
+        "E_geometric_source": 0.0014535030350089073,
+        "A_python_exterior": 0.18956690095365047,
+        "I_ssprk2": 0.06555969640612602
+      },
+      "percentages": {
+        "J_cfl_admissibility": 7.666174249504723,
+        "B_primitive": 3.8894676578364207,
+        "K_diagnostics": 8.082925068558593,
+        "C_muscl": 4.378146505985303,
+        "G_coupling": 3.1330040976739024,
+        "L_allocation": 0.11649951842400345,
+        "H_assembly": 1.195294509006811,
+        "D_hllc": 13.052219737492237,
+        "F_boundary": 1.2670169232277488,
+        "E_geometric_source": 0.32414187977109715,
+        "A_python_exterior": 42.27481480086562,
+        "I_ssprk2": 14.620295051653539
+      },
+      "total_profiling_seconds": 0.44841568637639284,
+      "wall_seconds": 0.20300000067800283,
+      "counts": {
+        "primitive_calls": 840,
+        "rhs_calls": 251,
+        "reconstruct": 251,
+        "hllc_calls": 251,
+        "hllc_faces": 62499,
+        "dq_arrays": 251
+      },
+      "rhs": 251,
+      "steps": 84
+    },
+    {
+      "window": "reopening",
+      "backend": "NUMBA",
+      "buckets": {
+        "J_cfl_admissibility": 0.011754998937249184,
+        "B_primitive": 0.006775201298296452,
+        "K_diagnostics": 0.018671393394470215,
+        "C_muscl": 0.006683891639113426,
+        "G_coupling": 0.006494293920695782,
+        "L_allocation": 0.00018590595573186874,
+        "H_assembly": 0.00189179927110672,
+        "D_hllc": 0.020036498084664345,
+        "F_boundary": 0.002048010937869549,
+        "E_geometric_source": 0.0004987064749002457,
+        "A_python_exterior": 0.07144850119948387,
+        "I_ssprk2": 0.03345649875700474
+      },
+      "percentages": {
+        "J_cfl_admissibility": 6.5325256150622995,
+        "B_primitive": 3.765136540172424,
+        "K_diagnostics": 10.376126469206174,
+        "C_muscl": 3.7143936442606615,
+        "G_coupling": 3.609029793635723,
+        "L_allocation": 0.10331225245480656,
+        "H_assembly": 1.0513167430326298,
+        "D_hllc": 11.134746814774802,
+        "F_boundary": 1.1381271902259626,
+        "E_geometric_source": 0.27714275765350666,
+        "A_python_exterior": 39.70558965891839,
+        "I_ssprk2": 18.59255252060262
+      },
+      "total_profiling_seconds": 0.1799456998705864,
+      "wall_seconds": 0.06199999991804361,
+      "counts": {
+        "primitive_calls": 346,
+        "rhs_calls": 86,
+        "reconstruct": 86,
+        "hllc_calls": 86,
+        "hllc_faces": 21414,
+        "dq_arrays": 86
+      },
+      "rhs": 86,
+      "steps": 43
+    }
+  ],
+  "full_cycle_instrumented": {
+    "buckets": {
+      "J_cfl_admissibility": 4.641801674850285,
+      "B_primitive": 2.491299412213266,
+      "K_diagnostics": 5.714368613436818,
+      "C_muscl": 2.730268287472427,
+      "G_coupling": 2.284117553383112,
+      "L_allocation": 0.06368230562657118,
+      "H_assembly": 0.7313832584768534,
+      "D_hllc": 8.153747393749654,
+      "F_boundary": 0.8068837625905871,
+      "E_geometric_source": 0.20223149098455906,
+      "A_python_exterior": 26.95527755562216,
+      "I_ssprk2": 9.931685466319323
+    },
+    "percentages": {
+      "J_cfl_admissibility": 7.173597663641726,
+      "B_primitive": 3.850138565745921,
+      "K_diagnostics": 8.83117897014851,
+      "C_muscl": 4.2194491665262746,
+      "G_coupling": 3.529952697722837,
+      "L_allocation": 0.09841679392147314,
+      "H_assembly": 1.1303044812670615,
+      "D_hllc": 12.601077631265644,
+      "F_boundary": 1.2469855197630721,
+      "E_geometric_source": 0.3125354017388963,
+      "A_python_exterior": 41.657599708212906,
+      "I_ssprk2": 15.348763400045678
+    },
+    "total_bucket_seconds": 64.70674677472562,
+    "total_wall_seconds": 26.970000000670552,
+    "counts": {
+      "primitive_calls": 123420,
+      "rhs_calls": 35379,
+      "reconstruct": 35379,
+      "hllc_calls": 35379,
+      "hllc_faces": 8809371,
+      "dq_arrays": 35379
+    }
+  },
+  "full_cycle_cprofile": {
+    "top_self": [
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+        "line": 88,
+        "func": "faces",
+        "calls": 35379,
+        "self_s": 8.0593387,
+        "inline_s": 8.1151604
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+        "line": 195,
+        "func": "evaluate",
+        "calls": 74874,
+        "self_s": 4.1732144,
+        "inline_s": 14.1759578
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+        "line": 108,
+        "func": "primitive_numeric",
+        "calls": 48546,
+        "self_s": 2.3933034,
+        "inline_s": 2.4362729
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numpy.py",
+        "line": 44,
+        "func": "rhs",
+        "calls": 35379,
+        "self_s": 2.2265626000000003,
+        "inline_s": 25.177842100000003
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+        "line": 131,
+        "func": "reconstruct_numeric",
+        "calls": 35379,
+        "self_s": 2.042122,
+        "inline_s": 2.0968266
+      },
+      {
+        "file": "~",
+        "line": 0,
+        "func": "<built-in method math.fsum>",
+        "calls": 404005,
+        "self_s": 1.7649283,
+        "inline_s": 2.1698582
+      },
+      {
+        "file": "~",
+        "line": 0,
+        "func": "<built-in method builtins.all>",
+        "calls": 1485636,
+        "self_s": 1.6130021,
+        "inline_s": 4.5459435
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+        "line": 29,
+        "func": "work",
+        "calls": 2137607,
+        "self_s": 1.3990922000000001,
+        "inline_s": 2.6911787
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+        "line": 25,
+        "func": "validate",
+        "calls": 781563,
+        "self_s": 1.1897662,
+        "inline_s": 3.6163797000000004
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+        "line": 27,
+        "func": "<genexpr>",
+        "calls": 3907815,
+        "self_s": 1.1316725,
+        "inline_s": 1.5293722
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+        "line": 27,
+        "func": "physical",
+        "calls": 3036098,
+        "self_s": 1.123991,
+        "inline_s": 1.4870374000000002
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+        "line": 92,
+        "func": "add_transport",
+        "calls": 449244,
+        "self_s": 1.0579800000000001,
+        "inline_s": 1.0579800000000001
+      },
+      {
+        "file": "~",
+        "line": 0,
+        "func": "<built-in method builtins.len>",
+        "calls": 8170662,
+        "self_s": 0.9598962000000001,
+        "inline_s": 0.9598962000000001
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\gas1d\\boundary.py",
+        "line": 16,
+        "func": "face_state",
+        "calls": 176895,
+        "self_s": 0.8721169000000001,
+        "inline_s": 3.4579057000000004
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+        "line": 80,
+        "func": "regularized_restriction",
+        "calls": 149748,
+        "self_s": 0.8602838,
+        "inline_s": 1.4757580000000001
+      },
+      {
+        "file": "~",
+        "line": 0,
+        "func": "<built-in method math.isfinite>",
+        "calls": 6726753,
+        "self_s": 0.8554379000000001,
+        "inline_s": 0.8554379000000001
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+        "line": 31,
+        "func": "heat",
+        "calls": 1291787,
+        "self_s": 0.8252955000000001,
+        "inline_s": 2.6414012000000002
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numpy.py",
+        "line": 16,
+        "func": "solve_exhaust",
+        "calls": 3,
+        "self_s": 0.7785726000000001,
+        "inline_s": 44.9131773
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_batch.py",
+        "line": 98,
+        "func": "cfl",
+        "calls": 35379,
+        "self_s": 0.7656862000000001,
+        "inline_s": 0.9723314000000001
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+        "line": 55,
+        "func": "restriction",
+        "calls": 449244,
+        "self_s": 0.7537502,
+        "inline_s": 0.8651789000000001
+      }
+    ],
+    "top_inline": [
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\hybrid_fast.py",
+        "line": 28,
+        "func": "run_cycle",
+        "calls": 1,
+        "self_s": 0.12459890000000001,
+        "inline_s": 51.4387902
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+        "line": 152,
+        "func": "solve_exhaust",
+        "calls": 3,
+        "self_s": 0.0001405,
+        "inline_s": 44.9133258
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numpy.py",
+        "line": 16,
+        "func": "solve_exhaust",
+        "calls": 3,
+        "self_s": 0.7785726000000001,
+        "inline_s": 44.9131773
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numpy.py",
+        "line": 44,
+        "func": "rhs",
+        "calls": 35379,
+        "self_s": 2.2265626000000003,
+        "inline_s": 25.177842100000003
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\hybrid_fast.py",
+        "line": 20,
+        "func": "evaluate",
+        "calls": 185124,
+        "self_s": 0.7058495,
+        "inline_s": 16.0787082
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+        "line": 42,
+        "func": "evaluate",
+        "calls": 74874,
+        "self_s": 0.2208053,
+        "inline_s": 15.323211
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+        "line": 195,
+        "func": "evaluate",
+        "calls": 74874,
+        "self_s": 4.1732144,
+        "inline_s": 14.1759578
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numpy.py",
+        "line": 34,
+        "func": "validate",
+        "calls": 123417,
+        "self_s": 0.14508300000000002,
+        "inline_s": 13.721039200000002
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+        "line": 55,
+        "func": "validate",
+        "calls": 123417,
+        "self_s": 0.09171040000000001,
+        "inline_s": 10.6454774
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+        "line": 96,
+        "func": "hllc",
+        "calls": 35379,
+        "self_s": 0.2532744,
+        "inline_s": 8.7244955
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+        "line": 88,
+        "func": "faces",
+        "calls": 35379,
+        "self_s": 8.0593387,
+        "inline_s": 8.1151604
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\hybrid_exhaust.py",
+        "line": 59,
+        "func": "source",
+        "calls": 61707,
+        "self_s": 0.333417,
+        "inline_s": 6.6805437
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\hybrid_fast.py",
+        "line": 63,
+        "func": "<listcomp>",
+        "calls": 13164,
+        "self_s": 0.038878800000000005,
+        "inline_s": 5.917850700000001
+      },
+      {
+        "file": "~",
+        "line": 0,
+        "func": "<built-in method builtins.all>",
+        "calls": 1485636,
+        "self_s": 1.6130021,
+        "inline_s": 4.5459435
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_numba.py",
+        "line": 146,
+        "func": "reconstruct",
+        "calls": 35379,
+        "self_s": 0.3538104,
+        "inline_s": 4.1382284
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\exhaust_port.py",
+        "line": 37,
+        "func": "port_flux",
+        "calls": 35379,
+        "self_s": 0.2875785,
+        "inline_s": 3.7926135000000003
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\gas1d\\eos.py",
+        "line": 25,
+        "func": "validate",
+        "calls": 781563,
+        "self_s": 1.1897662,
+        "inline_s": 3.6163797000000004
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\gas1d\\boundary.py",
+        "line": 16,
+        "func": "face_state",
+        "calls": 176895,
+        "self_s": 0.8721169000000001,
+        "inline_s": 3.4579057000000004
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\simulation.py",
+        "line": 35,
+        "func": "abs_m",
+        "calls": 1123113,
+        "self_s": 0.5054787000000001,
+        "inline_s": 3.3272697
+      },
+      {
+        "file": "E:\\dino\\Dino\\motorsim\\gas1d\\boundary.py",
+        "line": 70,
+        "func": "flux",
+        "calls": 70758,
+        "self_s": 0.18548710000000002,
+        "inline_s": 3.3159852
+      }
+    ],
+    "wall_seconds": 51.42200000025332
+  }
+}
