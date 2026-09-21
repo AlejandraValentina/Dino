@@ -24,6 +24,24 @@ def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensor
     start=time.monotonic();q=np.array(initial,dtype=np.float64);z=list(system.initial)
     events=system.events(mesh.areas[0],end);event_index=0;t=0.
     counts=dict(rhs=0,HLLC=0,HLLE=0,characteristic=0,rejected=0,downgrades=0)
+    # R5 fused buffers (single allocation, reused per RHS) - enabled only for R5 fused backend
+    use_fused = numeric_backend is not None and getattr(numeric_backend, 'FUSED_ENABLED', False) and hasattr(numeric_backend, 'fused_interior') and exterior.kind == 'nonreflecting'
+    if use_fused:
+        n = mesh.n
+        w_buf = np.empty((n,4), dtype=np.float64)
+        lf_buf = np.empty((n,4), dtype=np.float64)
+        rf_buf = np.empty((n,4), dtype=np.float64)
+        flux_interior_buf = np.empty((n-1,4), dtype=np.float64)
+        speeds_interior_buf = np.empty((n-1,3), dtype=np.float64)
+        codes_buf = np.empty(n-1, dtype=np.int64)
+        bad_buf = np.empty(n, dtype=np.bool_)
+        # exterior primitive for fused hi calculation
+        if exterior.state is not None:
+            ext_state_arr = np.array(exterior.state, dtype=np.float64)
+        else:
+            ext_state_arr = np.array((exterior.p0/(eos.R*exterior.T0), 0., exterior.p0, exterior.Y0), dtype=np.float64)
+        volumes_np = np.array(kernel.volumes, dtype=np.float64)
+        # dl etc already 2D (n,1)
     def primitive(cells):
         key=id(cells)
         if key in cache and cache[key][0] is cells:return cache[key][1]
@@ -42,6 +60,65 @@ def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensor
     w=validate(q,z,t);initial_inventory=inventory(q,z);scale=(initial_inventory[0],initial_inventory[1],initial_inventory[0])
     sensor_indices=[min(range(mesh.n),key=lambda i:abs(mesh.centers[i]-x)) for x in sensors]
     def rhs(cells,state,when):
+        if use_fused:
+            counts['rhs']+=1
+            # 0D validation (chamber) before fused primitive
+            system.validate(state,when,eos)
+            try:
+                numeric_backend.fused_interior(cells, volumes_np, kernel.dl, kernel.dr, kernel.left_offset, kernel.right_offset, eos.gamma, eos.R, ext_state_arr, w_buf, lf_buf, rf_buf, bad_buf, flux_interior_buf, speeds_interior_buf, codes_buf)
+            except ValueError as exc:
+                raise InvalidState(str(exc))
+            ws = w_buf
+            left = lf_buf
+            right = rf_buf
+            down = np.flatnonzero(bad_buf).tolist()
+            counts['downgrades']+=len(down)
+            if down:
+                downgrade_cells.append(dict(rhs=counts['rhs'],time=when,cells=down))
+            ch=system.chamber(state,when);ch.thermodynamics(eos)
+            port=port_flux(ch,tuple(left[0].tolist()),system.area(when),mesh.areas[0],eos=eos)
+            counts['HLLC']+=port['HLLC'];counts['HLLE']+=port['HLLE']
+            if port['HLLE']:fallback_faces.append(dict(rhs=counts['rhs'],time=when,face=0,reason='frozen_port_HLLE',evaluations=port['HLLE']))
+            flux=np.empty((mesh.n+1,4));speeds=np.empty(mesh.n+1)
+            flux[0]=port['flux'];speeds[0]=max(abs(port['speeds'][0]),abs(port['speeds'][2]))
+            # handle interior HLLC fallback via reference for exact equivalence
+            reasons = {}
+            fallback_speeds = {}
+            f_interior = flux_interior_buf
+            s_interior = speeds_interior_buf
+            for idx in np.flatnonzero(codes_buf):
+                left_t = tuple(rf_buf[idx].tolist())
+                right_t = tuple(lf_buf[idx+1].tolist())
+                f0, s0, r0 = hllc_flux(left_t, right_t, eos)
+                f_interior[idx] = f0
+                # s0 is tuple (sl, sm, sr) where sm may be None
+                s_interior[idx,0] = s0[0]
+                s_interior[idx,1] = np.nan if s0[1] is None else s0[1]
+                s_interior[idx,2] = s0[2]
+                if r0:
+                    reasons[int(idx)] = r0
+                    fallback_speeds[int(idx)] = s0
+            # Now counts: HLLE = len(reasons) where reason string exists, HLLC = n-1 - len(reasons)
+            # For fused, we need to count similarly to original: only those with reason string count as HLLE
+            counts['HLLE']+=len(reasons);counts['HLLC']+=mesh.n-1-len(reasons)
+            for i,reason in reasons.items():
+                fallback_faces.append(dict(rhs=counts['rhs'],time=when,face=i+1,reason=reason,speeds=fallback_speeds[i]))
+            flux[1:-1]=kernel.areas[1:-1,None]*f_interior;speeds[1:-1]=np.maximum(np.abs(s_interior[:,0]),np.abs(s_interior[:,2]))
+            exterior_face=tuple(right[-1].tolist())
+            f,s,reason=exterior.flux(exterior_face,1,eos)
+            if exterior.kind in ('wall','fixed','outflow'):counts['HLLE' if reason else 'HLLC']+=1
+            else:counts['characteristic']+=1
+            if reason:fallback_faces.append(dict(rhs=counts['rhs'],time=when,face=mesh.n,reason=reason,speeds=s))
+            flux[-1]=tuple(mesh.areas[-1]*v for v in f);speeds[-1]=max(abs(s[0]),abs(s[2]))
+            limit,_,unit=kernel.cfl(ws,speeds,cfl)
+            dq=flux[:-1]-flux[1:];dq[:,1]+=ws[:,2]*kernel.area_delta
+            dz,external,terms=system.source(state,when,eos)
+            for k in range(3):dz[3*system.cylinder+k]+=port['exchange'][k];external[k]-=flux[-1][(0,2,3)[k]]
+            boundary_state=exterior.face_state(exterior_face,1,eos)
+            return dict(dq=dq,dz=dz,external=external,terms=terms,port=port,limit=limit,unit=unit,
+                        trace=dict(time=when,angle=system.angle(when),area=port['area'],chamber=list(state),volume=ch.volume,
+                        pressure=ch.thermodynamics(eos)[1],pipe_face=left[0].tolist(),exchange=port['exchange'],
+                        outlet=boundary_state,open_reaction=port['open_reaction'],closed_reaction=port['closed_reaction']))
         counts['rhs']+=1;ws=validate(cells,state,when)
         left,right,down=kernel.reconstruct(ws,(Boundary('outflow'),exterior));counts['downgrades']+=len(down)
         if down:downgrade_cells.append(dict(rhs=counts['rhs'],time=when,cells=down))
