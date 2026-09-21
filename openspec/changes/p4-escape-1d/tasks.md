@@ -425,3 +425,12 @@ sobre continuarP4. La confirmaciónR1 no habilitaP4C niP5, no acepta ni archivaP
 Revisión independiente final /root/p3_review: confirma PREASYMPTOTIC, recalcula
 Q/diferencias/balances, valida151 hashes y prefijo JSON exacto. Acepta corrección
 de auditoría, no aceptación humanaP4. Recibo: independent-review.json.
+
+## P4-R2 — orden2df31e6d
+- [x] Revisión independiente y adopción versionada P4_REFINEMENT_R2.
+- [x] Reevaluación offline de16 casos/6 agregados restantes: P4B PASS bajoR2.
+- [ ] Implementar P4C aislado y medir un ciclo antes de multiciclo.
+- [ ] E12–E15 y regresiones; detener dependientes según gates/performance.
+
+Delta: docs/gasdynamic/p4_refinement_r2.md; evidencia results/p4-r2-20260921/gate-review.json.
+Sin integración nueva para PartesA/B. E11 histórico es banco, no ciclo motor.

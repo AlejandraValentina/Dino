@@ -74,3 +74,8 @@ Los eventos físicos de puerto son90/112.2040961/247.7959039/270°. El listado
 numérico además incluye0/180/360 y128.0154749/231.9845251: estos dos últimos son
 particiones adicionales calculadas por el cap de entrada, que no se alcanza
 porque314.159mm²>área máxima200mm². No implican una segunda apertura física.
+
+## Delta vigente P4-R2
+Sólo refinamiento blowdown sustituido por docs/gasdynamic/p4_refinement_r2.md,
+versión P4_REFINEMENT_R2. Las secciones anteriores se conservan como contrato
+histórico; los otros gates permanecen intactos.

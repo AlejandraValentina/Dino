@@ -1,5 +1,11 @@
 # MotorSim
 
+P4-R2 autorizado por orden2df31e6d: delta de refinamiento aprobado por reviewer,
+P4B reevaluado PASS bajoR2. Habilitado P4C experimental sólo con guard de coste
+antes de multiciclo. Solver/legacy/observables intactos; no UI/JSON/P5 ni publicación.
+[Delta](docs/gasdynamic/p4_refinement_r2.md). Los estados siguientes son históricos.
+
+
 P4-R1E: **P4_R1_PREASYMPTOTIC_REFINEMENT_CONFIRMED**.
 N800 completo desde t=0 en1139,360s; presión, masa y llegada cumplen la reducción
 exigida; conservación/admisibilidad/CFL y controles previos PASS.151 hashes
