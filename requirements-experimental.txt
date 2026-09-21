@@ -1,0 +1,2 @@
+# P4-R3 optional isolated backend; not imported by the application/legacy path.
+numpy==2.3.0

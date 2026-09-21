@@ -48,3 +48,16 @@ no cambio de gates científicos. Si cambia materialmente, rechazar bloque.
 Conservar todas las medidas, no escoger la más rápida. Performance exige
 dos ciclos finales<=20s con margen; 20–30s: NEAR_TARGET; >30s:
 COMPILED_BACKEND_DECISION_REQUIRED. Sin periodicidad/G2 antes de PASS.
+
+## Bloque1 medido y autorización del batching
+
+G1 completo226,773529s, speedup1,1612×: insuficiente. Equivalencia exacta en
+todos los campos comparados, eventos, etapas, conteos y gates. Perfil intermedio
+13,709230s instrumentados: HLLC36,67%, MUSCL24,29%, primitivas15,83%, fuentes
+cacheadas1,41%. No extrapolar estos tiempos instrumentados al ciclo completo.
+
+NumPy2.3.0 instalado sólo en venv, declarado en requirements-experimental.txt;
+no dependencia de la ruta productiva/legacy. Batch EOS/MUSCL/HLLC/CFL y avances
+independientes float64, conservando orden algebraico. Fallbacks excepcionales
+delegan en HLLC/HLLE escalar congelado, con registros de cara/celda. BC y P3
+siguen escalares originales. Inventarios conservan math.fsum.

@@ -38,6 +38,8 @@ def run(folder,backend='SCALAR_REFERENCE'):
         from motorsim.hybrid_fast import HybridSystem as FastSystem,LegacySources
         model=LegacySources();system_class=FastSystem
         solver=optimized
+        if backend=='NUMPY':
+            from motorsim.exhaust_numpy import solve_exhaust as solver
     else:system_class=HybridSystem
     output=[]
     for name,angle,cells,z,heat in cases:

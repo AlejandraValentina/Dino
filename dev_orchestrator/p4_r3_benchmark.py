@@ -19,7 +19,7 @@ def equivalent(a,b):
         out[name]=dict(count=len(u),same_count=same,exact=same and u==v,
             max_abs=max((abs(i-j) for i,j in pairs),default=0),
             max_scaled=max((abs(i-j)/(atol+1e-10*abs(i)) for i,j in pairs),default=0))
-        out[name]['passed']=same and out[name]['max_scaled']<=1
+        out[name]['passed']=bool(same and out[name]['max_scaled']<=1)
     compare('final_0D',a['state'],b['state']);compare('final_1D',a['cells'],b['cells'])
     for key,atol in [('p_cyl',1e-8),('p_port',1e-8),('mass_flux_port',1e-13),('energy_flux_port',1e-13),('species_flux_port',1e-13),('W_indicated',1e-13),('sensors_p_u_M_Y',1e-13)]:
         compare(key,[h[key] for h in a['history']],[h[key] for h in b['history']],atol)
@@ -32,17 +32,17 @@ def equivalent(a,b):
     return dict(fields=out,discrete=discrete,passed=all(x['passed'] for x in out.values()) and all(discrete.values()))
 
 
-def run(folder,repeats=1):
+def run(folder,repeats=1,backend='STRUCTURAL'):
     from motorsim.hybrid_fast import run_cycle
     art=Path(folder)/'artifacts';art.mkdir(parents=True,exist_ok=True);assert verify()
     baseline=json.loads(gzip.decompress((ROOT/'results/p4-r2-20260921/p4c/artifacts/G1-cycle01.json.gz').read_bytes()))
     rows=[]
     for i in range(repeats):
         model,mesh,pipe,state=prepare('straight');start=time.perf_counter();cpu=time.process_time()
-        r=run_cycle(mesh,pipe,state);wall=time.perf_counter()-start;cpu=time.process_time()-cpu
+        r=run_cycle(mesh,pipe,state,backend=backend);wall=time.perf_counter()-start;cpu=time.process_time()-cpu
         comparison=equivalent(baseline,r)
         p=art/f'G1-{i+1}.json.gz';p.write_bytes(gzip.compress(json.dumps(r,allow_nan=False,separators=(',',':')).encode(),mtime=0))
-        entry=dict(measurement=i+1,wall_seconds=wall,cpu_seconds=cpu,peak_process_working_set_bytes=peak_memory(),
+        entry=dict(backend=backend,measurement=i+1,wall_seconds=wall,cpu_seconds=cpu,peak_process_working_set_bytes=peak_memory(),
             cycle_wall_seconds=r['cycle_wall_seconds'],projection_30_seconds=30*wall,speedup=baseline['cycle_wall_seconds']/wall,
             baseline_wall_seconds=baseline['cycle_wall_seconds'],equivalence=comparison,artifact_sha256=sha(p))
         rows.append(entry);write(art/'benchmark.json',dict(measurements=rows,frozen=verify()))
@@ -52,4 +52,4 @@ def run(folder,repeats=1):
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--run-dir',type=Path,required=True);p.add_argument('--repeats',type=int,default=1);a=p.parse_args();run(a.run_dir,a.repeats)
+    p=argparse.ArgumentParser();p.add_argument('--run-dir',type=Path,required=True);p.add_argument('--repeats',type=int,default=1);p.add_argument('--backend',default='STRUCTURAL');a=p.parse_args();run(a.run_dir,a.repeats,a.backend)

@@ -25,8 +25,15 @@ class HybridSystem(ReferenceSystem):
             self._evaluated[key]=result
         return self._evaluated[key]
 
-def run_cycle(mesh,pipe,state,begin=180.,*,case=None,wall_limit=600.,sensors=(.1,.3,.5)):
+def run_cycle(mesh,pipe,state,begin=180.,*,case=None,wall_limit=600.,sensors=(.1,.3,.5),backend='STRUCTURAL'):
     """Three accepted segments preserve the legacy closed analytical burn law."""
+    if backend=='SCALAR_REFERENCE':
+        from .hybrid_exhaust import run_cycle as reference
+        return reference(mesh,pipe,state,begin,case=case,wall_limit=wall_limit,sensors=sensors)
+    solver=solve_exhaust
+    if backend=='NUMPY':
+        from .exhaust_numpy import solve_exhaust as solver
+    elif backend!='STRUCTURAL':raise ValueError('Unknown hybrid backend')
     model=LegacySources(case);eos=IdealGas(R=model.case.gas_r,gamma=model.case.gamma)
     state=list(state);started=time.monotonic();records=[];rows=[];snapshots=[]
     if (begin-model.case.initial_angle_deg)%360 != 0:
@@ -42,7 +49,7 @@ def run_cycle(mesh,pipe,state,begin=180.,*,case=None,wall_limit=600.,sensors=(.1
         remaining=wall_limit-(time.monotonic()-started)
         if remaining<=0:complete=False;reason='wall_timeout';break
         system=HybridSystem(model,a,state,heat_start if a==heat_start else None)
-        r=solve_exhaust(mesh,pipe,system,(b-a)/model.rate,eos=eos,cfl=.4,exterior=exterior,sensors=sensors,wall_limit=remaining)
+        r=solver(mesh,pipe,system,(b-a)/model.rate,eos=eos,cfl=.4,exterior=exterior,sensors=sensors,wall_limit=remaining)
         amount=0. if system.heat is None else system.heat[1]*burn_fraction(system.angle(r['time']),heat_start,model.case.heat_duration_deg)
         correction=[0.,0.,amount];physical_final=system.physical(r['state'],r['time'])[:9]
         corrected_external=[v-c for v,c in zip(r['external'],correction)]

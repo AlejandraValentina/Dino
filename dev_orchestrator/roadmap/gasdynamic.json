@@ -973,6 +973,32 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P4_R3_NUMPY",
+      "title": "P4-R3 NumPy batching",
+      "objective": "Float64 batching equivalence, two full G1 measurements and final profile",
+      "depends_on": [
+        "P2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "benchmark_command",
+        "benchmark_equivalence",
+        "profile_command",
+        "profile_complete",
+        "batch_tests"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }

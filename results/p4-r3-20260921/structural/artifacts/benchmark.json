@@ -1,0 +1,132 @@
+{
+  "measurements": [
+    {
+      "measurement": 1,
+      "wall_seconds": 226.77352880034596,
+      "cpu_seconds": 226.203125,
+      "peak_process_working_set_bytes": 335699968,
+      "cycle_wall_seconds": 226.76499999966472,
+      "projection_30_seconds": 6803.205864010379,
+      "speedup": 1.1611937310001632,
+      "baseline_wall_seconds": 263.3279999997467,
+      "equivalence": {
+        "fields": {
+          "final_0D": {
+            "count": 9,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "final_1D": {
+            "count": 1000,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "p_cyl": {
+            "count": 13164,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "p_port": {
+            "count": 13164,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "mass_flux_port": {
+            "count": 13164,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "energy_flux_port": {
+            "count": 13164,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "species_flux_port": {
+            "count": 13164,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "W_indicated": {
+            "count": 13164,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "sensors_p_u_M_Y": {
+            "count": 157968,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "external": {
+            "count": 3,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "port_integral": {
+            "count": 3,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "final_inventory": {
+            "count": 3,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          },
+          "global_balance": {
+            "count": 3,
+            "same_count": true,
+            "exact": true,
+            "max_abs": 0.0,
+            "max_scaled": 0.0,
+            "passed": true
+          }
+        },
+        "discrete": {
+          "complete": true,
+          "steps": true,
+          "events": true,
+          "counts": true,
+          "scientific_checks": true
+        },
+        "passed": true
+      },
+      "artifact_sha256": "33a58b50a8f3a2448b1bbdf9a31859f8d202cda7afc0cf1fc03b1ad69ac0b13c"
+    }
+  ],
+  "frozen": true
+}
