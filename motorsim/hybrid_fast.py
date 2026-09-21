@@ -35,6 +35,8 @@ def run_cycle(mesh,pipe,state,begin=180.,*,case=None,wall_limit=600.,sensors=(.1
         from .exhaust_numpy import solve_exhaust as solver
     elif backend=='NUMBA_EXPERIMENTAL':
         from .exhaust_numba import solve_exhaust as solver
+    elif backend in ('NUMBA_FUSED','NUMBA_R5_FUSED','NUMBA_R5'):
+        from .exhaust_numba_fused import solve_exhaust as solver
     elif backend!='STRUCTURAL':raise ValueError('Unknown hybrid backend')
     model=LegacySources(case);eos=IdealGas(R=model.case.gas_r,gamma=model.case.gamma)
     state=list(state);started=time.monotonic();records=[];rows=[];snapshots=[]
