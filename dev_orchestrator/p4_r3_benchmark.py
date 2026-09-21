@@ -1,5 +1,5 @@
 """Fixed G1 comparison; every measurement retained, no periodic campaign."""
-import argparse,gzip,json,time
+import argparse,cProfile,gzip,json,pstats,time
 from pathlib import Path
 from .p4_hybrid import prepare,checks
 from .p4_r1e import verify
@@ -32,18 +32,29 @@ def equivalent(a,b):
     return dict(fields=out,discrete=discrete,passed=all(x['passed'] for x in out.values()) and all(discrete.values()))
 
 
-def run(folder,repeats=1,backend='STRUCTURAL'):
+def run(folder,repeats=1,backend='STRUCTURAL',profile=False):
     from motorsim.hybrid_fast import run_cycle
     art=Path(folder)/'artifacts';art.mkdir(parents=True,exist_ok=True);assert verify()
     baseline=json.loads(gzip.decompress((ROOT/'results/p4-r2-20260921/p4c/artifacts/G1-cycle01.json.gz').read_bytes()))
     rows=[]
     for i in range(repeats):
         model,mesh,pipe,state=prepare('straight');start=time.perf_counter();cpu=time.process_time()
-        r=run_cycle(mesh,pipe,state,backend=backend);wall=time.perf_counter()-start;cpu=time.process_time()-cpu
+        profiler=cProfile.Profile() if profile else None
+        if profiler:profiler.enable()
+        r=run_cycle(mesh,pipe,state,backend=backend)
+        if profiler:profiler.disable()
+        wall=time.perf_counter()-start;cpu=time.process_time()-cpu
+        if profiler:
+            profiler.dump_stats(str(art/'full-cycle.prof'))
+            stats=pstats.Stats(profiler)
+            functions=[dict(file=k[0],line=k[1],function=k[2],primitive_calls=v[0],calls=v[1],self_seconds=v[2],inclusive_seconds=v[3]) for k,v in stats.stats.items()]
+            write(art/'full-profile.json',dict(wall_seconds=wall,cpu_seconds=cpu,functions=functions,
+                top_inclusive=sorted(functions,key=lambda x:x['inclusive_seconds'],reverse=True)[:40],
+                top_self=sorted(functions,key=lambda x:x['self_seconds'],reverse=True)[:40]))
         comparison=equivalent(baseline,r)
         p=art/f'G1-{i+1}.json.gz';p.write_bytes(gzip.compress(json.dumps(r,allow_nan=False,separators=(',',':')).encode(),mtime=0))
-        entry=dict(backend=backend,measurement=i+1,wall_seconds=wall,cpu_seconds=cpu,peak_process_working_set_bytes=peak_memory(),
-            cycle_wall_seconds=r['cycle_wall_seconds'],projection_30_seconds=30*wall,speedup=baseline['cycle_wall_seconds']/wall,
+        entry=dict(backend=backend,profiled=profile,measurement=i+1,wall_seconds=wall,cpu_seconds=cpu,peak_process_working_set_bytes=peak_memory(),
+            cycle_wall_seconds=r['cycle_wall_seconds'],projection_30_seconds=None if profile else 30*wall,speedup=None if profile else baseline['cycle_wall_seconds']/wall,
             baseline_wall_seconds=baseline['cycle_wall_seconds'],equivalence=comparison,artifact_sha256=sha(p))
         rows.append(entry);write(art/'benchmark.json',dict(measurements=rows,frozen=verify()))
         print('G1',i+1,'wall',wall,'equivalent',comparison['passed'],flush=True)
@@ -52,4 +63,4 @@ def run(folder,repeats=1,backend='STRUCTURAL'):
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--run-dir',type=Path,required=True);p.add_argument('--repeats',type=int,default=1);p.add_argument('--backend',default='STRUCTURAL');a=p.parse_args();run(a.run_dir,a.repeats,a.backend)
+    p=argparse.ArgumentParser();p.add_argument('--run-dir',type=Path,required=True);p.add_argument('--repeats',type=int,default=1);p.add_argument('--backend',default='STRUCTURAL');p.add_argument('--profile',action='store_true');a=p.parse_args();run(a.run_dir,a.repeats,a.backend,a.profile)

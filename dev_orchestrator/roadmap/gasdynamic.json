@@ -1028,6 +1028,29 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P4_R3_FULL_PROFILE",
+      "title": "P4-R3 full diagnostic profile",
+      "objective": "Full optimized cycle profile, diagnostic timing excluded from benchmark",
+      "depends_on": [
+        "P2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "benchmark_command",
+        "benchmark_equivalence"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }
