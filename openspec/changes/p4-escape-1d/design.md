@@ -79,3 +79,7 @@ porque314.159mm²>área máxima200mm². No implican una segunda apertura física
 Sólo refinamiento blowdown sustituido por docs/gasdynamic/p4_refinement_r2.md,
 versión P4_REFINEMENT_R2. Las secciones anteriores se conservan como contrato
 histórico; los otros gates permanecen intactos.
+
+## P4C antes de ejecución
+Configuración, transformación de especie, malla, periodicidad y guard operativo:
+docs/gasdynamic/p4c_hybrid.md. Esta definición se registra antes de medir un ciclo.

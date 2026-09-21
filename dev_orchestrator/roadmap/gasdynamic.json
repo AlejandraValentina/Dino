@@ -900,6 +900,31 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P4C_PREFLIGHT",
+      "title": "P4C bounded hybrid measurement",
+      "objective": "One hybrid cycle cost guard before bounded periodic campaign",
+      "depends_on": [
+        "P2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "hybrid_tests",
+        "hybrid_command",
+        "hybrid_evidence",
+        "frozen_implementation"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }
