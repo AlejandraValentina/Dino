@@ -1,0 +1,13 @@
+test_CFL_uses_stage_bound_and_species_is_strict (test_hybrid_exhaust.HybridGateTests.test_CFL_uses_stage_bound_and_species_is_strict) ... ok
+test_periodicity_checks_pressure_inventory_and_exchange (test_hybrid_exhaust.HybridGateTests.test_periodicity_checks_pressure_inventory_and_exchange) ... ok
+test_periodicity_rejects_missing_phase_support (test_hybrid_exhaust.HybridGateTests.test_periodicity_rejects_missing_phase_support) ... ok
+test_analytic_species_matches_legacy_at_all_heat_stages (test_hybrid_exhaust.HybridSourcesTests.test_analytic_species_matches_legacy_at_all_heat_stages) ... ok
+test_invalid_physical_state_is_rejected (test_hybrid_exhaust.HybridSourcesTests.test_invalid_physical_state_is_rejected) ... ok
+test_source_ledger_excludes_internal_transfers_and_dummy_exhaust (test_hybrid_exhaust.HybridSourcesTests.test_source_ledger_excludes_internal_transfers_and_dummy_exhaust) ... ok
+test_species_transform_is_not_clipping (test_hybrid_exhaust.HybridSourcesTests.test_species_transform_is_not_clipping) ... ok
+test_unreplaced_flows_and_geometry_are_legacy (test_hybrid_exhaust.HybridSourcesTests.test_unreplaced_flows_and_geometry_are_legacy) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.030s
+
+OK
