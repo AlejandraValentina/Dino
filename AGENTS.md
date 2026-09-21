@@ -1,5 +1,18 @@
 # MotorSim — Instrucciones de trabajo para Codex
 
+P4-R1E: **P4_R1_PREASYMPTOTIC_REFINEMENT_CONFIRMED**.
+N800 completo desde t=0 en1139,360s; presión, masa y llegada cumplen la reducción
+exigida; conservación/admisibilidad/CFL y controles previos PASS.151 hashes
+intactos. Incidencia de auditoría tupla/lista corregida offline sin otra integración;
+evidencia nativa conservada, no confundir su fallo con el resultado científico.
+[Tablas](openspec/changes/p4-escape-1d/tasks.md),
+[decisión](results/p4-r1e-20260921/decision.json) y
+[señal completa/poscierre](results/p4-r1e-20260921/signals.png).
+STOP: no modificar gateP4, aceptar/archivar ni iniciarP4C/P5 sin nueva orden.
+Sin publicación; borrado ajeno redme.txt preservado.
+
+Antecedente de autorización P4-R1E:
+
 P4-R1E autorizado por orden6e7321b2: una sola integraciónN800/CFL0,4 desde
  t=0, con timeout1500s exclusivamente operativo. No checkpoint reanudable por
 la API congelada (tiempo/eventos/ledger); no se implementa resume. Reutilizar

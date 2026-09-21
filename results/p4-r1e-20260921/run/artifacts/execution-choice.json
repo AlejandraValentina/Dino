@@ -1,0 +1,9 @@
+{
+  "mode": "restart_from_t0",
+  "new_integrations": 1,
+  "wall_limit": 1500,
+  "reason": "Frozen solver has no resume API for time, events and ledgers. Saved final arrays are not a resumable checkpoint through that API.",
+  "input_sha256": "7f08df9606a3a514c780aec29c52ab73136f95ae2d7db588d0356645e0a1a09d",
+  "geometry_sha256": "5b525bce11d56c35600d77a9e17c83e4a807a74f14c5466b6de3c655a7e1f151",
+  "partial_source_sha256": "3ead5fb11d74d290ccd8adc6ff04729acf5383cc1557de1787341c993985883c"
+}

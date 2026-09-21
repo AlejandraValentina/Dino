@@ -12,6 +12,11 @@ from .p2_campaign import ROOT,sha,write
 OLD=ROOT/'results/p4-r1-20260921'
 
 
+def same_json_value(actual,stored):
+    """Normalize tuple/list representation only; no numeric rounding/tolerance."""
+    return json.dumps(actual,sort_keys=True,allow_nan=False)==json.dumps(stored,sort_keys=True,allow_nan=False)
+
+
 def verify():
     receipt=json.loads((ROOT/'docs/gasdynamic/p4_r1e_frozen.json').read_text(encoding='utf-8'))
     return frozen() and all(sha(ROOT/p)==h for p,h in receipt['sha256'].items())
@@ -52,8 +57,8 @@ def run(run_dir):
     write(art/'inventory.json',{path.name:sha(path)})
     # Exact prefix verifies restart determinism without altering numerical states.
     length=min(len(partial['result']['history']),len(r['history']))
-    prefix=dict(history=r['history'][:length]==partial['result']['history'][:length],
-                stages=r['stages'][:length]==partial['result']['stages'][:length])
+    prefix=dict(history=same_json_value(r['history'][:length],partial['result']['history'][:length]),
+                stages=same_json_value(r['stages'][:length],partial['result']['stages'][:length]))
     data=prior+[row];comp=compare(data)
     nominal=sorted([d for d in data if d['kind']=='blowdown' and d['CFL']==.4 and d['complete']],key=lambda d:d['N'])
     arrivals=[dict(N=d['N'],time=d['metrics']['arrival'],angle=d['metrics']['arrival_angle']) for d in nominal]

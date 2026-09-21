@@ -316,8 +316,8 @@ No publicación, archivo, nueva candidata ni modificación de producto.
 ## P4-R1E — orden6e7321b2, 2026-09-21
 
 - [x] Congelar solver, observables y evidenciaR1; elección restart desde t=0.
-- [ ] Ejecutar únicamente N800/CFL0,4 con límite1500s.
-- [ ] Evaluar todas las condicionesR1 con Q completos y revisión independiente.
+- [x] Ejecutar únicamente N800/CFL0,4 con límite1500s.
+- [x] Evaluar todas las condicionesR1 con Q completos y revisión independiente.
 
 1500s es límite de integración;1650s del comando deja margen de serialización,
 no amplía el solver. Estimación previa900,031/0,734≈1226s. No optimización.
@@ -327,3 +327,101 @@ Mismo prepare/measured/compare deR1 por importación, sin modificar esos archivo
 Mismas condiciones de presión, masa, llegada, conservación, positividad,CFL,
 control y temporal. Fallo de fase se registra separadamente. Timeout→
 P4_R2_PERFORMANCE_OPTIMIZATION_REQUIRED, sin optimizar ni repetir en esta orden.
+
+## Resultado P4-R1E — 2026-09-21
+
+**P4_R1_PREASYMPTOTIC_REFINEMENT_CONFIRMED** bajo todas las condicionesR1.
+Una sola integración nueva N800/CFL0,4, reiniciada desde t=0; completó
+0→0,012222222222222223 s (CA80→300) en1139,360 s, límite1500s.
+No resume ambiguo, optimización ni cambio científico. No aceptaciónP4 ni
+modificación de su gate; STOP antes deP4C/P5 y sin archivo/publicación.
+
+Reutilizados los ocho completosR1 por hashes (tres nominales, dos CFL y tres
+controles). El N800 parcial sólo se usa para auditar el prefijo registrado:
+16963 history/stages idénticos, no para integrales de convergencia.
+Fuentes y evidencia:120+31 hashes intactos. prepare/measured/compare y definición
+R1 sin cambios, sensor0,1m, cuadratura lineal y ledgerSSPRK2 originales.
+
+| N | Qp Pa·s | Qm kg | Llegada s | Llegada CA ° |
+|---|---:|---:|---:|---:|
+| 100 | 164.742346961691 | -9.70056603322141e-05 | 8.763254918959e-04 | 95.773858854 |
+| 200 | 164.854748982338 | -9.70077286939145e-05 | 8.774345295839e-04 | 95.793821533 |
+| 400 | 164.903227803894 | -9.70099933773868e-05 | 8.755830727586e-04 | 95.760495310 |
+| 800 | 164.923093338473 | -9.70116526264108e-05 | 8.745722624311e-04 | 95.742300724 |
+
+| Mallas | D presión Pa·s | D masa kg | D llegada s |
+|---|---:|---:|---:|
+| 100→200 | 1.124020206474e-01 | 2.068361700338e-09 | 1.109037687947e-06 |
+| 200→400 | 4.847882155570e-02 | 2.264683472288e-09 | 1.851456825306e-06 |
+| 400→800 | 1.986553457897e-02 | 1.659249024012e-09 | 1.010810327483e-06 |
+
+D400→800 menor queD200→400 en presión, masa y llegada. Se conservan todas
+las condiciones: conservación, admisibilidad, CFL, control convergente y efecto
+ temporal pequeño. El control/CFL no se repitió. No Richardson, cambio de umbral
+ni tolerancia relativa de masa añadida. relative_mass_difference sólo diagnóstico:
+1.710360538235e-05.
+
+### Registro N800 completo
+
+Pasos21831; RHS48516; HLLC38854978; HLLE0.
+Rechazos stage_CFL4854; downgrades0.
+dt mínimo9.154256934776e-08 s; máximo8.799394622473e-07 s.
+CFL máximo0.40000000000000008; comparación contractual dt<=límites de cada
+stage PASS, sin tolerancia nueva. Ledger masa frente inventario:
+3.757482443841e-15, normalizado por masa inicial total.
+
+| Balance combinado | Residuo final dimensional | Máximo normalizado por paso |
+|---|---:|---:|
+| Masa kg | -6.505213034913e-19 | 3.860899391836e-15 |
+| Energía J | -8.313350008393e-13 | 6.608845934951e-15 |
+| Especie kg | 1.084202172486e-18 | 3.757482443841e-15 |
+
+Normalización contractual: masa inicial, energía inicial, masa inicial para
+especie. Máximo porstage3.146163579517e-16; conservaciónPASS al límite1e−10.
+Mínimos del dominio1D: rho=0.70632205811636 kg/m³,
+p=99999.999999999971 Pa,T=299.99999999999977 K.
+Y∈[0.19999999999992873,0.80000000000002869] dentro de[0,1].
+Admisibilidad de cámara y tubo comprobada por el solver en sus stages.
+
+### Cierre y señal poscierre
+
+Cierre270° alcanzado a0,010555555555555556s. Cámara y ledger al cierre son
+exactamente iguales a sus valores finales. Hay2489 muestras posteriores:
+p mínimo100227,85042879335Pa, máximo101249,2443580738Pa. Señal completa
+conservada en el artifact y graficada en signals.png/svg; zoom sólo visual.
+No se identificó candidato poscierre con el detectorR1 ya congelado.
+
+En el instante exacto270° la geometría congelada devuelve área
+1,4210854715202002e−19m² por aritmética flotante; trazas guardadas sin redondear
+con flujo~−9,9848245e−19kg/s. Para t>t_cierre área/flujo son exactamente cero.
+No clamp, tolerancia ni modificación de ley de puerto; no ocultar esta diferencia
+entre instante de cierre y estados estrictamente posteriores.
+
+### Incidencia de auditoría, sin repetir integración
+
+El run nativo conserva summary.state=FAILED_INFRASTRUCTURE y gate
+SCIENTIFIC_CHANGE_REQUIRED: comparaba tuplas en memoria con listas JSON.
+No es un fallo numérico; las nueve condiciones científicas calculadas son true.
+Se corrigió sólo same_json_value, normalizando tupla/lista vía JSON, sin redondear
+ni aplicar tolerancia. Tres regresiones puras PASS: estructuras equivalentes,
+un ULP distinto y stage ausente. No integración tras el fix.
+
+La decisión offline exige primero151 hashes intactos, prefijo persistido exacto,
+reproducción exacta de measured y todas las condiciones originales. Originales
+nativos preservados en run/; audit-correction.json explica el diagnóstico y
+ decision.json registra el estado científico. No presentar run nativo comoPASS.
+Preflight del wrapper con resultado anterior inyectado fue offline, cero
+integraciones; sólo la ejecución formal de1139,360s adquirió nueva evidencia.
+
+OpenSpec estrictoP4 PASS. Autorrevisión del diff y señales separada de revisión
+independiente read-only. No regresiones físicas generales ni campañas adicionales.
+Evidencia: results/p4-r1e-20260921; fuente previa c3ebf1f.
+Comando ejecutado: `.venv\Scripts\python.exe -m dev_orchestrator.runners.run_phase P4_R1E --dependency P2=docs/gasdynamic/p2_accepted_dependency.json`.
+Pruebas puras: `.venv\Scripts\python.exe -m unittest discover -s tests -p test_p4_r1e.py -v`.
+
+Pendiente exclusivamente de nueva orden humana: revisión del gateP4 y decisión
+sobre continuarP4. La confirmaciónR1 no habilitaP4C niP5, no acepta ni archivaP4.
+
+Revisión independiente final /root/p3_review: confirma PREASYMPTOTIC, recalcula
+Q/diferencias/balances, valida151 hashes y prefijo JSON exacto. Acepta corrección
+de auditoría, no aceptación humanaP4. Recibo: independent-review.json.

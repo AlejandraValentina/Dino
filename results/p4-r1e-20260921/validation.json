@@ -1,0 +1,9 @@
+{
+  "pure_unit_tests": 3,
+  "unit_command": ".venv/Scripts/python.exe -m unittest discover -s tests -p test_p4_r1e.py -v",
+  "unit_result": "PASS",
+  "strict_OpenSpec_command": "openspec validate p4-escape-1d --strict --no-interactive",
+  "strict_OpenSpec_result": "PASS",
+  "additional_physical_integrations": 0,
+  "plot_inspection": "Root visually inspected signals.png; separate from independent scientific review"
+}
