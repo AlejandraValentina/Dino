@@ -999,6 +999,35 @@
       "max_repair_attempts": 0,
       "requires_human_approval": true,
       "next_phase": null
+    },
+    {
+      "id": "P4_R3_CLOSE",
+      "title": "P4-R3 closure regressions",
+      "objective": "Optimized kernel offline bank replay and regression tests",
+      "depends_on": [
+        "P2"
+      ],
+      "allowed_paths": [
+        "dev_orchestrator/runs/"
+      ],
+      "forbidden_paths": [
+        "motorsim/",
+        "packaging/"
+      ],
+      "required_checks": [
+        "regression_tests",
+        "baseline_command",
+        "P4A_replay",
+        "P4B_replay",
+        "original_individual_checks",
+        "historical",
+        "frozen",
+        "R3_reference"
+      ],
+      "gate_policy": "default",
+      "max_repair_attempts": 0,
+      "requires_human_approval": true,
+      "next_phase": null
     }
   ]
 }

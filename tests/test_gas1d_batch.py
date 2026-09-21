@@ -61,5 +61,15 @@ class BatchTests(unittest.TestCase):
             for key in ('cells','state','history','stages','events','counts','extrema','external','port_integral'):
                 self.assertEqual(json.loads(json.dumps(a[key])),json.loads(json.dumps(b[key])),key)
 
+    def test_all_component_downgrade_is_observable(self):
+        from motorsim.gas1d.mesh import uniform_mesh
+        mesh=uniform_mesh(3,.001);eos=IdealGas();kernel=Kernel(mesh,eos)
+        states=[(1e300,0.,p,.2) for p in (3e307,6e307,9e307)]
+        bc=(Boundary('outflow'),Boundary('outflow'))
+        a,b,d=reconstruct(mesh,states,bc,eos)
+        with np.errstate(all='ignore'):x,y,z=kernel.reconstruct(np.array(states),bc)
+        self.assertEqual(d,[1]);self.assertEqual(z,d)
+        np.testing.assert_array_equal(x,a);np.testing.assert_array_equal(y,b)
+
 
 if __name__=='__main__':unittest.main()
