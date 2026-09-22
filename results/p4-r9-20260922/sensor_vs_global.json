@@ -1,0 +1,18 @@
+{
+  "250": {
+    "sensor_m_avg": 0.007577062730260128,
+    "vector_note": "vector lag2 small 1e-05 vs sensor 0.015-0.034, sensor outlier"
+  },
+  "300": {
+    "sensor_m_avg": 0.003304991108096077,
+    "vector_note": "vector lag2 small 1e-05 vs sensor 0.015-0.034, sensor outlier"
+  },
+  "350": {
+    "sensor_m_avg": 0.01402603836955052,
+    "vector_note": "vector lag2 small 1e-05 vs sensor 0.015-0.034, sensor outlier"
+  },
+  "400": {
+    "sensor_m_avg": 0.013723491606529881,
+    "vector_note": "vector lag2 small 1e-05 vs sensor 0.015-0.034, sensor outlier"
+  }
+}
