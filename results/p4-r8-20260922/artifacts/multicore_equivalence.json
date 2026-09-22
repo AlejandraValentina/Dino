@@ -1,0 +1,188 @@
+{
+  "equivalence": "MULTICORE_SCHEDULER_EQUIVALENCE_PASS",
+  "workers_1": {
+    "workers": 1,
+    "wall": 75.78494369983673,
+    "sequential": 74.955148300156,
+    "speedup": 0.989050656249514,
+    "efficiency": 0.989050656249514,
+    "passed": 2,
+    "failed": 0,
+    "results": {
+      "GAS_N250_REP0": {
+        "job_id": "GAS_N250_REP0",
+        "worker_id": 0,
+        "N": 250,
+        "dx_target": 0.003,
+        "mesh_n": 250,
+        "cycles": 1,
+        "backend": "NUMBA_FUSED",
+        "cfl": 0.4,
+        "works": [
+          -0.41816866400067815
+        ],
+        "walls": [
+          37.436999999918044
+        ],
+        "total_wall": 37.436999999918044,
+        "history": [
+          {
+            "cycle": 1,
+            "work": -0.41816866400067815,
+            "state_hash": "67a0f49a715c",
+            "cells_hash": "5d4213ecae61",
+            "wall": 37.436999999918044
+          }
+        ]
+      },
+      "GAS_N250_REP1": {
+        "job_id": "GAS_N250_REP1",
+        "worker_id": 0,
+        "N": 250,
+        "dx_target": 0.003,
+        "mesh_n": 250,
+        "cycles": 1,
+        "backend": "NUMBA_FUSED",
+        "cfl": 0.4,
+        "works": [
+          -0.41816866400067815
+        ],
+        "walls": [
+          19.906999999657273
+        ],
+        "total_wall": 19.906999999657273,
+        "history": [
+          {
+            "cycle": 1,
+            "work": -0.41816866400067815,
+            "state_hash": "67a0f49a715c",
+            "cells_hash": "5d4213ecae61",
+            "wall": 19.906999999657273
+          }
+        ]
+      }
+    }
+  },
+  "workers_2": {
+    "workers": 2,
+    "wall": 28.96576220076531,
+    "sequential": 57.25061789993197,
+    "speedup": 1.9764927124347977,
+    "efficiency": 0.9882463562173989,
+    "passed": 2,
+    "failed": 0,
+    "results": {
+      "GAS_N250_REP0": {
+        "job_id": "GAS_N250_REP0",
+        "worker_id": 0,
+        "N": 250,
+        "dx_target": 0.003,
+        "mesh_n": 250,
+        "cycles": 1,
+        "backend": "NUMBA_FUSED",
+        "cfl": 0.4,
+        "works": [
+          -0.41816866400067815
+        ],
+        "walls": [
+          21.110000000335276
+        ],
+        "total_wall": 21.110000000335276,
+        "history": [
+          {
+            "cycle": 1,
+            "work": -0.41816866400067815,
+            "state_hash": "67a0f49a715c",
+            "cells_hash": "5d4213ecae61",
+            "wall": 21.110000000335276
+          }
+        ]
+      },
+      "GAS_N250_REP1": {
+        "job_id": "GAS_N250_REP1",
+        "worker_id": 1,
+        "N": 250,
+        "dx_target": 0.003,
+        "mesh_n": 250,
+        "cycles": 1,
+        "backend": "NUMBA_FUSED",
+        "cfl": 0.4,
+        "works": [
+          -0.41816866400067815
+        ],
+        "walls": [
+          21.140000000596046
+        ],
+        "total_wall": 21.140000000596046,
+        "history": [
+          {
+            "cycle": 1,
+            "work": -0.41816866400067815,
+            "state_hash": "67a0f49a715c",
+            "cells_hash": "5d4213ecae61",
+            "wall": 21.140000000596046
+          }
+        ]
+      }
+    }
+  },
+  "details": {
+    "diff0": 0.0,
+    "diff1": 0.0,
+    "hist0_match": true,
+    "hist1_match": true,
+    "w1": {
+      "job_id": "GAS_N250_REP0",
+      "worker_id": 0,
+      "N": 250,
+      "dx_target": 0.003,
+      "mesh_n": 250,
+      "cycles": 1,
+      "backend": "NUMBA_FUSED",
+      "cfl": 0.4,
+      "works": [
+        -0.41816866400067815
+      ],
+      "walls": [
+        37.436999999918044
+      ],
+      "total_wall": 37.436999999918044,
+      "history": [
+        {
+          "cycle": 1,
+          "work": -0.41816866400067815,
+          "state_hash": "67a0f49a715c",
+          "cells_hash": "5d4213ecae61",
+          "wall": 37.436999999918044
+        }
+      ]
+    },
+    "w2": {
+      "job_id": "GAS_N250_REP0",
+      "worker_id": 0,
+      "N": 250,
+      "dx_target": 0.003,
+      "mesh_n": 250,
+      "cycles": 1,
+      "backend": "NUMBA_FUSED",
+      "cfl": 0.4,
+      "works": [
+        -0.41816866400067815
+      ],
+      "walls": [
+        21.110000000335276
+      ],
+      "total_wall": 21.110000000335276,
+      "history": [
+        {
+          "cycle": 1,
+          "work": -0.41816866400067815,
+          "state_hash": "67a0f49a715c",
+          "cells_hash": "5d4213ecae61",
+          "wall": 21.110000000335276
+        }
+      ]
+    }
+  },
+  "timestamp": 1790073556.0677166
+}

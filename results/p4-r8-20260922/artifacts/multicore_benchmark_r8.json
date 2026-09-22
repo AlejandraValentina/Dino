@@ -1,0 +1,15 @@
+{
+  "worker_count": 2,
+  "wall_parallel": 1737.7050000010058,
+  "sequential_estimated": 3192.610999997705,
+  "speedup": 1.8372571869194467,
+  "efficiency": 0.9186285934597234,
+  "passed": 2,
+  "failed": 0,
+  "N350_wall": 1454.9059999966994,
+  "N400_wall": 1737.7050000010058,
+  "N350_avg": 36.372649999917485,
+  "N400_avg": 43.442625000025146,
+  "campaign_dir": "results\\p4-r8-20260922\\campaign_N350_N400",
+  "max_cycles": 40
+}
