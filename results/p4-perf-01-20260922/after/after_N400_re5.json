@@ -1,0 +1,98 @@
+{
+  "N": 400,
+  "dx_target": 0.001875,
+  "mesh_n": 400,
+  "backend": "NUMBA_FUSED",
+  "cfl": 0.4,
+  "restart_every": 5,
+  "cycles": [
+    {
+      "cycle": 1,
+      "wall_cycle_seconds": 32.14100000075996,
+      "solver_seconds": 29.71800000127405,
+      "diagnostics_seconds": 2.42299999948591,
+      "counts": {
+        "rhs": 47943,
+        "HLLC": 19203074,
+        "HLLE": 0,
+        "characteristic": 47943,
+        "rejected": 9935,
+        "downgrades": 0
+      },
+      "summary_bytes": 2030,
+      "summary_kb": 1.982421875,
+      "summary_time": 0.001358000561594963,
+      "restart_bytes": 0,
+      "restart_time": 0,
+      "restart_read": null,
+      "restart_written": false,
+      "work": 14.959531507312782,
+      "rss_before_mb": 291.69140625,
+      "rss_after_mb": 421.80078125
+    },
+    {
+      "cycle": 2,
+      "wall_cycle_seconds": 35.171999999322,
+      "solver_seconds": 32.60800000000745,
+      "diagnostics_seconds": 2.5639999993145466,
+      "counts": {
+        "rhs": 52380,
+        "HLLC": 20978587,
+        "HLLE": 0,
+        "characteristic": 52380,
+        "rejected": 11860,
+        "downgrades": 0
+      },
+      "summary_bytes": 2036,
+      "summary_kb": 1.98828125,
+      "summary_time": 0.001275000162422657,
+      "restart_bytes": 0,
+      "restart_time": 0,
+      "restart_read": null,
+      "restart_written": false,
+      "work": 12.205383499934367,
+      "rss_before_mb": 421.80078125,
+      "rss_after_mb": 468.625
+    },
+    {
+      "cycle": 3,
+      "wall_cycle_seconds": 39.20299999974668,
+      "solver_seconds": 36.34399999957532,
+      "diagnostics_seconds": 2.8590000001713634,
+      "counts": {
+        "rhs": 59638,
+        "HLLC": 23883342,
+        "HLLE": 0,
+        "characteristic": 59638,
+        "rejected": 14708,
+        "downgrades": 0
+      },
+      "summary_bytes": 2036,
+      "summary_kb": 1.98828125,
+      "summary_time": 0.027811100706458092,
+      "restart_bytes": 13636,
+      "restart_time": 0.0024953996762633324,
+      "restart_read": 0.0006633996963500977,
+      "restart_written": true,
+      "work": 12.44889194405304,
+      "rss_before_mb": 467.625,
+      "rss_after_mb": 481.21875
+    }
+  ],
+  "avg_wall_cycle_seconds": 35.50533333327621,
+  "avg_solver_seconds": 32.8900000002856,
+  "avg_summary_seconds": 0.010148033810158571,
+  "avg_restart_seconds": 0.0024953996762633324,
+  "avg_summary_kb": 1.986328125,
+  "avg_restart_kb": 13.31640625,
+  "total_summary_bytes": 6102,
+  "total_restart_bytes": 13636,
+  "total_checkpoint_bytes": 19738,
+  "peak_rss_mb": 481.21875,
+  "total_wall_seconds": 106.51599999982864,
+  "system_memory": {
+    "total_mb": 20224.828125,
+    "available_mb": 1218.44140625
+  },
+  "config_hash": "1998623b20dc"
+}

@@ -1,0 +1,33 @@
+{
+  "env_before": {
+    "OMP_NUM_THREADS": "unset",
+    "MKL_NUM_THREADS": "unset",
+    "OPENBLAS_NUM_THREADS": "unset",
+    "NUMEXPR_NUM_THREADS": "unset",
+    "VECLIB_MAXIMUM_THREADS": "unset",
+    "NUMBA_NUM_THREADS": "unset"
+  },
+  "env_after": {
+    "OMP_NUM_THREADS": "unset",
+    "MKL_NUM_THREADS": "unset",
+    "OPENBLAS_NUM_THREADS": "unset",
+    "NUMEXPR_NUM_THREADS": "unset",
+    "VECLIB_MAXIMUM_THREADS": "unset",
+    "NUMBA_NUM_THREADS": "unset"
+  },
+  "measurement": {
+    "N250_wall_before": 19.57766340021044,
+    "N250_solver_before": 17.87599999923259,
+    "N250_wall_after": 19.761111199855804,
+    "N250_solver_after": 17.984000001102686,
+    "wall_diff_percent": 0.9370260173305074,
+    "solver_diff_percent": 0.6041620154102267
+  },
+  "numba": {
+    "parallel": false,
+    "fastmath": false
+  },
+  "conclusion": "Hot path does not use BLAS (only Numba serial float64, fused). Setting OMP/MKL to 1 does not measurably change runtime (diff <5%), but improves predictability for multicore workers competing for CPU. No change to Numba parallel=False as required.",
+  "recommendation": "For MULTICORE_EXECUTION_V1, each worker should launch with env OMP_NUM_THREADS=1 etc., to avoid oversubscription when workers>1. Keep as orchestration wrapper, not solver change.",
+  "gate": "OVERSUBSCRIPTION_AUDIT_COMPLETE"
+}

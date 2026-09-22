@@ -1,0 +1,13 @@
+{
+  "np_savez": {
+    "size_bytes": 8578,
+    "write_seconds": 0.0036,
+    "read_seconds": 0.0009
+  },
+  "np_savez_compressed": {
+    "size_bytes": 7704,
+    "write_seconds": 0.0033,
+    "read_seconds": 0.0006
+  },
+  "choice": "np.savez (uncompressed) for predictable CPU, size overhead <1KB negligible vs 42MB JSON"
+}

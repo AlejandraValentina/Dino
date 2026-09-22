@@ -132,6 +132,10 @@ def hash_config(obj: Any) -> str:
 # --------------------------------------------------------------------
 def _job_wrapper(job_dict: Dict[str, Any], campaign_dir: str, worker_id: int) -> Dict[str, Any]:
     """Ejecuta un Job en proceso aislado, escribe evidencia aislada."""
+    import os
+    # P4-PERF-01 oversubscription audit: limit BLAS/OMP threads to 1 per worker for predictability
+    for _var in ("OMP_NUM_THREADS","MKL_NUM_THREADS","OPENBLAS_NUM_THREADS","NUMEXPR_NUM_THREADS","VECLIB_MAXIMUM_THREADS","NUMBA_NUM_THREADS"):
+        os.environ[_var] = "1"
     import time, traceback, json, hashlib
     from pathlib import Path
     job_id = job_dict["job_id"]
@@ -501,6 +505,9 @@ class Campaign:
 
 # Wrappers top-level para pickle
 def _chain_wrapper(chain_dict: Dict[str, Any], campaign_dir: str, worker_id: int):
+    import os
+    for _var in ("OMP_NUM_THREADS","MKL_NUM_THREADS","OPENBLAS_NUM_THREADS","NUMEXPR_NUM_THREADS","VECLIB_MAXIMUM_THREADS","NUMBA_NUM_THREADS"):
+        os.environ[_var] = "1"
     # chain_dict: {"chain_id": str, "jobs": [job_dict,...]}
     results = []
     for jd in chain_dict["jobs"]:

@@ -1,0 +1,157 @@
+{
+  "N": 400,
+  "dx_target": 0.001875,
+  "mesh_n": 400,
+  "backend": "NUMBA_FUSED",
+  "cfl": 0.4,
+  "warmup_wall": 39.04700000025332,
+  "cycles": [
+    {
+      "cycle": 1,
+      "begin": 540.0,
+      "wall_cycle_seconds": 34.546999999322,
+      "solver_seconds": 31.639999999664724,
+      "diagnostics_seconds": 2.9069999996572733,
+      "counts": {
+        "rhs": 47943,
+        "HLLC": 19203074,
+        "HLLE": 0,
+        "characteristic": 47943,
+        "rejected": 9935,
+        "downgrades": 0
+      },
+      "accepted_steps": 19004,
+      "rejected_steps": 9935,
+      "hllc_faces": 19203074,
+      "hlle_fallbacks": 0,
+      "history_len": 19004,
+      "stages_len": 0,
+      "io": {
+        "json_raw_bytes": 67904798,
+        "json_serialize_seconds": 2.212458699941635,
+        "gzip_bytes": 18630197,
+        "gzip_compress_seconds": 4.222682100720704,
+        "write_seconds": 0.019204900600016117,
+        "read_seconds": 0.011025100015103817,
+        "gzip_decompress_seconds": 0.2278314996510744,
+        "json_deserialize_seconds": 2.394143800251186,
+        "compression_ratio": 0.2743575939950517
+      },
+      "work": 14.959531507312782,
+      "power": 747.9765753656391,
+      "global_balance": [
+        3.323415432143194e-14,
+        3.0192632302758607e-14,
+        1.5579874578411097e-14
+      ],
+      "max_global_residual": 1.579823301679107e-14,
+      "checkpoint_json_raw_mb": 64.75906181335449,
+      "checkpoint_gz_mb": 17.76714038848877,
+      "rss_before_mb": 291.62890625,
+      "rss_after_mb": 427.66796875
+    },
+    {
+      "cycle": 2,
+      "begin": 900.0,
+      "wall_cycle_seconds": 35.186999999918044,
+      "solver_seconds": 32.57899999991059,
+      "diagnostics_seconds": 2.6080000000074506,
+      "counts": {
+        "rhs": 52380,
+        "HLLC": 20978587,
+        "HLLE": 0,
+        "characteristic": 52380,
+        "rejected": 11860,
+        "downgrades": 0
+      },
+      "accepted_steps": 20260,
+      "rejected_steps": 11860,
+      "hllc_faces": 20978587,
+      "hlle_fallbacks": 0,
+      "history_len": 20260,
+      "stages_len": 0,
+      "io": {
+        "json_raw_bytes": 71950231,
+        "json_serialize_seconds": 2.3013602001592517,
+        "gzip_bytes": 19784420,
+        "gzip_compress_seconds": 4.5852091005072,
+        "write_seconds": 0.027727600187063217,
+        "read_seconds": 0.009342500008642673,
+        "gzip_decompress_seconds": 0.2505377000197768,
+        "json_deserialize_seconds": 2.546003700233996,
+        "compression_ratio": 0.27497368285030244
+      },
+      "work": 12.205383499934367,
+      "power": 610.2691749967183,
+      "global_balance": [
+        2.6176730680340044e-14,
+        3.03572279610805e-14,
+        1.313232290638386e-14
+      ],
+      "max_global_residual": 1.8364389395910134e-14,
+      "checkpoint_json_raw_mb": 68.61708736419678,
+      "checkpoint_gz_mb": 18.86789321899414,
+      "rss_before_mb": 426.98828125,
+      "rss_after_mb": 472.50390625
+    },
+    {
+      "cycle": 3,
+      "begin": 1260.0,
+      "wall_cycle_seconds": 39.65600000042468,
+      "solver_seconds": 36.813000000081956,
+      "diagnostics_seconds": 2.8430000003427267,
+      "counts": {
+        "rhs": 59638,
+        "HLLC": 23883342,
+        "HLLE": 0,
+        "characteristic": 59638,
+        "rejected": 14708,
+        "downgrades": 0
+      },
+      "accepted_steps": 22465,
+      "rejected_steps": 14708,
+      "hllc_faces": 23883342,
+      "hlle_fallbacks": 0,
+      "history_len": 22465,
+      "stages_len": 0,
+      "io": {
+        "json_raw_bytes": 78855670,
+        "json_serialize_seconds": 2.4937399001792073,
+        "gzip_bytes": 22051066,
+        "gzip_compress_seconds": 5.015716399997473,
+        "write_seconds": 0.03517080005258322,
+        "read_seconds": 0.0076524000614881516,
+        "gzip_decompress_seconds": 0.26118769962340593,
+        "json_deserialize_seconds": 2.7842419994995,
+        "compression_ratio": 0.27963830628793085
+      },
+      "work": 12.44889194405304,
+      "power": 622.444597202652,
+      "global_balance": [
+        3.054576851861889e-14,
+        2.6919459315656784e-14,
+        8.765893835365244e-15
+      ],
+      "max_global_residual": 1.9588401224412335e-14,
+      "checkpoint_json_raw_mb": 75.20262718200684,
+      "checkpoint_gz_mb": 21.0295352935791,
+      "rss_before_mb": 451.84765625,
+      "rss_after_mb": 451.72265625
+    }
+  ],
+  "avg_wall_cycle_seconds": 36.46333333322158,
+  "avg_solver_seconds": 33.67733333321909,
+  "avg_serialize_seconds": 2.335852933426698,
+  "avg_gzip_seconds": 4.607869200408459,
+  "avg_write_seconds": 0.027367766946554184,
+  "avg_checkpoint_raw_mb": 69.52625878651936,
+  "avg_checkpoint_gz_mb": 19.22152296702067,
+  "peak_rss_mb": 472.50390625,
+  "total_wall_seconds": 109.38999999966472,
+  "python_numba_transitions_estimate": 319922,
+  "system_memory": {
+    "total_mb": 20224.828125,
+    "available_mb": 971.6640625
+  },
+  "config_hash": "1998623b20dc"
+}

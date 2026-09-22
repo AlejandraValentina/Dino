@@ -1,0 +1,98 @@
+{
+  "N": 400,
+  "dx_target": 0.001875,
+  "mesh_n": 400,
+  "backend": "NUMBA_FUSED",
+  "cfl": 0.4,
+  "restart_every": 1,
+  "cycles": [
+    {
+      "cycle": 1,
+      "wall_cycle_seconds": 32.40599999949336,
+      "solver_seconds": 29.95299999974668,
+      "diagnostics_seconds": 2.4529999997466803,
+      "counts": {
+        "rhs": 47943,
+        "HLLC": 19203074,
+        "HLLE": 0,
+        "characteristic": 47943,
+        "rejected": 9935,
+        "downgrades": 0
+      },
+      "summary_bytes": 2030,
+      "summary_kb": 1.982421875,
+      "summary_time": 0.027877099812030792,
+      "restart_bytes": 13635,
+      "restart_time": 0.038491999730467796,
+      "restart_read": 0.0006737997755408287,
+      "restart_written": true,
+      "work": 14.959531507312782,
+      "rss_before_mb": 293.1640625,
+      "rss_after_mb": 423.15234375
+    },
+    {
+      "cycle": 2,
+      "wall_cycle_seconds": 35.45299999974668,
+      "solver_seconds": 32.764999999664724,
+      "diagnostics_seconds": 2.6880000000819564,
+      "counts": {
+        "rhs": 52380,
+        "HLLC": 20978587,
+        "HLLE": 0,
+        "characteristic": 52380,
+        "rejected": 11860,
+        "downgrades": 0
+      },
+      "summary_bytes": 2040,
+      "summary_kb": 1.9921875,
+      "summary_time": 0.001538899727165699,
+      "restart_bytes": 13636,
+      "restart_time": 0.026050499640405178,
+      "restart_read": 0.0006216000765562057,
+      "restart_written": true,
+      "work": 12.205383499934367,
+      "rss_before_mb": 423.15234375,
+      "rss_after_mb": 476.9921875
+    },
+    {
+      "cycle": 3,
+      "wall_cycle_seconds": 39.46900000050664,
+      "solver_seconds": 36.53100000042468,
+      "diagnostics_seconds": 2.9380000000819564,
+      "counts": {
+        "rhs": 59638,
+        "HLLC": 23883342,
+        "HLLE": 0,
+        "characteristic": 59638,
+        "rejected": 14708,
+        "downgrades": 0
+      },
+      "summary_bytes": 2036,
+      "summary_kb": 1.98828125,
+      "summary_time": 0.0017141001299023628,
+      "restart_bytes": 13635,
+      "restart_time": 0.03233860060572624,
+      "restart_read": 0.0007686996832489967,
+      "restart_written": true,
+      "work": 12.44889194405304,
+      "rss_before_mb": 475.9921875,
+      "rss_after_mb": 484.6796875
+    }
+  ],
+  "avg_wall_cycle_seconds": 35.77599999991556,
+  "avg_solver_seconds": 33.082999999945365,
+  "avg_summary_seconds": 0.010376699889699617,
+  "avg_restart_seconds": 0.03229369999219974,
+  "avg_summary_kb": 1.9876302083333333,
+  "avg_restart_kb": 13.315755208333334,
+  "total_summary_bytes": 6106,
+  "total_restart_bytes": 40906,
+  "total_checkpoint_bytes": 47012,
+  "peak_rss_mb": 484.6796875,
+  "total_wall_seconds": 107.32799999974668,
+  "system_memory": {
+    "total_mb": 20224.828125,
+    "available_mb": 1526.92578125
+  },
+  "config_hash": "1998623b20dc"
+}

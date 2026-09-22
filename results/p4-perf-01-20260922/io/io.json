@@ -1,0 +1,56 @@
+{
+  "before": {
+    "N250": {
+      "avg_checkpoint_raw_mb": 43.3155403137207,
+      "avg_checkpoint_gz_mb": 12.159970919291178,
+      "avg_serialize_seconds": 1.4798945998772979,
+      "avg_gzip_seconds": 2.91040806658566,
+      "avg_write_seconds": 0.0048239997898538904
+    },
+    "N400": {
+      "avg_checkpoint_raw_mb": 69.52625878651936,
+      "avg_checkpoint_gz_mb": 19.22152296702067,
+      "avg_serialize_seconds": 2.335852933426698,
+      "avg_gzip_seconds": 4.607869200408459,
+      "avg_write_seconds": 0.027367766946554184
+    },
+    "detail_N250_cycle1": {
+      "json_raw_bytes": 42429639,
+      "json_serialize_seconds": 1.3387724002823234,
+      "gzip_bytes": 11806184,
+      "gzip_compress_seconds": 2.6637708004564047,
+      "write_seconds": 0.0043115997686982155,
+      "read_seconds": 0.005063899792730808,
+      "gzip_decompress_seconds": 0.14097659941762686,
+      "json_deserialize_seconds": 1.1752645997330546,
+      "compression_ratio": 0.27825322765531896
+    },
+    "detail_N400_cycle1": {
+      "json_raw_bytes": 67904798,
+      "json_serialize_seconds": 2.212458699941635,
+      "gzip_bytes": 18630197,
+      "gzip_compress_seconds": 4.222682100720704,
+      "write_seconds": 0.019204900600016117,
+      "read_seconds": 0.011025100015103817,
+      "gzip_decompress_seconds": 0.2278314996510744,
+      "json_deserialize_seconds": 2.394143800251186,
+      "compression_ratio": 0.2743575939950517
+    }
+  },
+  "after": {
+    "N250_re5": {
+      "summary_kb": 1.9798177083333333,
+      "restart_kb": 8.6259765625,
+      "summary_s": 0.013407266388336817,
+      "restart_s": 0.0036793993785977364,
+      "total_kb": 14.5654296875
+    },
+    "N400_re5": {
+      "summary_kb": 1.986328125,
+      "restart_kb": 13.31640625,
+      "summary_s": 0.010148033810158571,
+      "restart_s": 0.0024953996762633324,
+      "total_kb": 19.275390625
+    }
+  }
+}

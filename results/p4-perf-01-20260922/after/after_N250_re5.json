@@ -1,0 +1,98 @@
+{
+  "N": 250,
+  "dx_target": 0.003,
+  "mesh_n": 250,
+  "backend": "NUMBA_FUSED",
+  "cfl": 0.4,
+  "restart_every": 5,
+  "cycles": [
+    {
+      "cycle": 1,
+      "wall_cycle_seconds": 17.171999999321997,
+      "solver_seconds": 15.360000000335276,
+      "diagnostics_seconds": 1.811999998986721,
+      "counts": {
+        "rhs": 30021,
+        "HLLC": 7521407,
+        "HLLE": 0,
+        "characteristic": 30021,
+        "rejected": 6261,
+        "downgrades": 0
+      },
+      "summary_bytes": 2030,
+      "summary_kb": 1.982421875,
+      "summary_time": 0.022255700081586838,
+      "restart_bytes": 0,
+      "restart_time": 0,
+      "restart_read": null,
+      "restart_written": false,
+      "work": 14.960791152767484,
+      "rss_before_mb": 237.67578125,
+      "rss_after_mb": 319.1953125
+    },
+    {
+      "cycle": 2,
+      "wall_cycle_seconds": 18.031999999657273,
+      "solver_seconds": 16.43699999898672,
+      "diagnostics_seconds": 1.5950000006705523,
+      "counts": {
+        "rhs": 32541,
+        "HLLC": 8151755,
+        "HLLE": 0,
+        "characteristic": 32541,
+        "rejected": 7345,
+        "downgrades": 0
+      },
+      "summary_bytes": 2033,
+      "summary_kb": 1.9853515625,
+      "summary_time": 0.0012384997680783272,
+      "restart_bytes": 0,
+      "restart_time": 0,
+      "restart_read": null,
+      "restart_written": false,
+      "work": 12.205855232101204,
+      "rss_before_mb": 319.1953125,
+      "rss_after_mb": 349.39453125
+    },
+    {
+      "cycle": 3,
+      "wall_cycle_seconds": 20.125,
+      "solver_seconds": 18.046999999321997,
+      "diagnostics_seconds": 2.078000000678003,
+      "counts": {
+        "rhs": 37107,
+        "HLLC": 9295085,
+        "HLLE": 0,
+        "characteristic": 37107,
+        "rejected": 9151,
+        "downgrades": 0
+      },
+      "summary_bytes": 2019,
+      "summary_kb": 1.9716796875,
+      "summary_time": 0.016727599315345287,
+      "restart_bytes": 8833,
+      "restart_time": 0.0036793993785977364,
+      "restart_read": 0.004284999333322048,
+      "restart_written": true,
+      "work": 12.440886810555744,
+      "rss_before_mb": 348.39453125,
+      "rss_after_mb": 366.40625
+    }
+  ],
+  "avg_wall_cycle_seconds": 18.442999999659758,
+  "avg_solver_seconds": 16.614666666214664,
+  "avg_summary_seconds": 0.013407266388336817,
+  "avg_restart_seconds": 0.0036793993785977364,
+  "avg_summary_kb": 1.9798177083333333,
+  "avg_restart_kb": 8.6259765625,
+  "total_summary_bytes": 6082,
+  "total_restart_bytes": 8833,
+  "total_checkpoint_bytes": 14915,
+  "peak_rss_mb": 366.40625,
+  "total_wall_seconds": 55.32899999897927,
+  "system_memory": {
+    "total_mb": 20224.828125,
+    "available_mb": 1611.1953125
+  },
+  "config_hash": "e4e5b116deeb"
+}

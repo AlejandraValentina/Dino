@@ -1,0 +1,55 @@
+{
+  "benchmark": {
+    "1": {
+      "workers": 1,
+      "wall": 79.57827369961888,
+      "sequential": 79.20243290066719,
+      "speedup": 0.9952770928360377,
+      "efficiency": 0.9952770928360377,
+      "passed": 4,
+      "failed": 0,
+      "bytes_written": 48035,
+      "avg_runtime": 19.800608225166798,
+      "checkpoint_mb_per_job": 0.011452436447143555
+    },
+    "2": {
+      "workers": 2,
+      "wall": 41.663410199806094,
+      "sequential": 82.53581820148975,
+      "speedup": 1.981014463426565,
+      "efficiency": 0.9905072317132825,
+      "passed": 4,
+      "failed": 0,
+      "bytes_written": 48036,
+      "avg_runtime": 20.633954550372437,
+      "checkpoint_mb_per_job": 0.011452674865722656
+    },
+    "3": {
+      "workers": 3,
+      "wall": 50.280703499913216,
+      "sequential": 97.79924609977752,
+      "speedup": 1.9450651898684417,
+      "efficiency": 0.6483550632894806,
+      "passed": 4,
+      "failed": 0,
+      "bytes_written": 48032,
+      "avg_runtime": 24.44981152494438,
+      "checkpoint_mb_per_job": 0.01145172119140625
+    },
+    "4": {
+      "workers": 4,
+      "wall": 28.276688599959016,
+      "sequential": 108.16491369903088,
+      "speedup": 3.8252326935901415,
+      "efficiency": 0.9563081733975354,
+      "passed": 4,
+      "failed": 0,
+      "bytes_written": 47964,
+      "avg_runtime": 27.04122842475772,
+      "checkpoint_mb_per_job": 0.011435508728027344
+    }
+  },
+  "best_workers": "4",
+  "suggested_auto": "4",
+  "note": "Disk contention reduced 99% vs legacy 12MB per job; speedup now limited by compute not I/O"
+}
