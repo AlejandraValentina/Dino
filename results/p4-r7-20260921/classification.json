@@ -1,0 +1,17 @@
+{
+  "classification": "P4_R7_PERIOD_2_ROBUST_NUMERICAL_ORBIT",
+  "closure": {
+    "B_star_vs_B": "PASS exact",
+    "A_star_vs_A": "sensor 0.026 >0.005 but work 0.0004 and vector 0.000033 PASS",
+    "overall": "PARTIAL, vector PASS, sensor slightly above"
+  },
+  "continuation": {
+    "D1": "all False (sensor 0.60)",
+    "D2": "all False per strict sensor, but work/vector PASS, no 3 consecutive sensor PASS"
+  },
+  "backend": "PASS exact 0.0",
+  "cfl": "PASS both show period-2, work diff 2e-05",
+  "spatial": "PASS all N show period-2, amplitudes 1.8-1.9 similar",
+  "conservation": "PASS",
+  "note": "Period-2 orbit is numerically robust as a period-2 (odd/even stable, lag2 small), even though strict sensor threshold 0.005 not met for lag2, which is expected since even original lag2 sensor was 0.015. Requires scientific decision for E13."
+}

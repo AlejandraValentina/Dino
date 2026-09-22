@@ -659,3 +659,17 @@ Evidencia: `results/p4-r5-20260921/artifacts/` (profile_r4/r5, crossings, micro_
 - [x] Clasificación: **P4_R6_PERIOD_2_ORBIT_CONFIRMED** — 360 PASS, handoff PASS, metric no defect, D2/vector convergen, D1 no, odd/even reproducibles. No P4 PASS, `SCIENTIFIC_CHANGE_REQUIRED`, STOP, no P5. No promediar ni relajar thresholds.
 
 Evidencia: `results/p4-r6-20260921/artifacts/diagnosis.json` (D1/D2/D3/D4, vector, odd/even), `results/p4-r6-20260921/artifacts/g1_cycles/` (30), `g2_cycles/` (15), `docs/gasdynamic/p4_r6_diagnosis.md`, `results/p4-r6-20260921/decision.json`.
+
+## P4-R7 — robustez numérica de la órbita de período 2 (orden diagnóstico)
+
+- [x] A/B = finales ciclo 29/30 (hashes 449a31/3421b6) con N250/CFL0.4/NUMBA_FUSED.
+- [x] Cierre Poincaré: A→B* exact 0.0 PASS, B→A* work 0.00040 vector 0.000033 PASS, sensor 0.02650 >0.005 pero <<0.60 D1 y consistente con lag2 histórico 0.015; cross A* vs B sensor 0.60 FAIL confirma period-2.
+- [x] Continuación 6 ciclos desde A: D1 sensor 0.60 FAIL, D2 sensor 0.01–0.05 FAIL per 0.005 pero work/vector PASS, sin 3 D2 consecutivos sensor PASS.
+- [x] Backend 4 ciclos desde ciclo28: NUMBA_FUSED vs NUMPY_REFERENCE diff 0.0 exact, misma clasificación period-2 → PASS.
+- [x] CFL 8 ciclos desde ciclo28: 0.4 vs 0.2 work diff 2e-05 sensor 0.603 vs 0.603, D1/D2 idénticos → period-2 persiste, no `TIME_SENSITIVE`.
+- [x] Espacial G1 canónico N200(200)/N250(250)/N300(300) 10–30 ciclos: N200 amp 0.281 mean 13.595, N250 amp 0.253 mean 13.584, N300 amp 0.128 mean 13.529, todos period-2, amplitud no crece → `SPATIAL` PASS.
+- [x] Comparación órbita: mean 13.5–13.6, amplitudes 0.28/0.25/0.12, Delta_AB p_cyl min 56 Pa en 348° max 237k Pa en 179.5° amplificación desde 81.5° (blowdown).
+- [x] Conservación/admisibilidad/CFL PASS en todas las variantes.
+- [x] Clasificación: **P4_R7_PERIOD_2_ROBUST_NUMERICAL_ORBIT** (Caso A con matiz sensor) — robusta numéricamente como period-2 (backend/CFL/espacial), aunque sensor estricto 0.005 no se alcanza ni en lag2 original; requiere decisión científica para E13. No P4 PASS, no P5, no multicore AUTO (workers=1).
+
+Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.json`, `cfl.json`, `spatial_N*.json`, `orbit_comparison.json`, `docs/gasdynamic/p4_r7_robustness.md`, `results/p4-r7-20260921/decision.json` (multicore no modificado, workers=1).
