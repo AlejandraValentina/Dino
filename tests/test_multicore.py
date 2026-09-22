@@ -40,7 +40,7 @@ class MulticoreTests(unittest.TestCase):
 
     def test_isolated_evidence(self):
         with tempfile.TemporaryDirectory() as tmp:
-            camp = Campaign(Path(tmp)/"camp", workers=2)
+            camp = Campaign(Path(tmp)/"camp", workers=2, estimated_per_job_mb=20)
             for rpm in [3000,3500]:
                 camp.add_job(Job(job_id=f"RPM_{rpm}", func=job_compute, kwargs={"rpm": rpm, "sleep": 0.02}))
             res = camp.run()
@@ -58,13 +58,13 @@ class MulticoreTests(unittest.TestCase):
         rpms = [3000,3500,4000]
         # workers=1
         with tempfile.TemporaryDirectory() as tmp1:
-            c1 = Campaign(Path(tmp1)/"c1", workers=1)
+            c1 = Campaign(Path(tmp1)/"c1", workers=1, estimated_per_job_mb=20)
             for rpm in rpms:
                 c1.add_job(Job(job_id=f"RPM_{rpm}", func=job_compute, kwargs={"rpm": rpm}))
             r1 = c1.run()
             results1 = {j.job_id: json.loads((Path(tmp1)/"c1"/"jobs"/j.job_id/"result.json").read_text())["result"] for j in c1.jobs}
         with tempfile.TemporaryDirectory() as tmp2:
-            c2 = Campaign(Path(tmp2)/"c2", workers=3)
+            c2 = Campaign(Path(tmp2)/"c2", workers=3, estimated_per_job_mb=20)
             for rpm in rpms:
                 c2.add_job(Job(job_id=f"RPM_{rpm}", func=job_compute, kwargs={"rpm": rpm}))
             r2 = c2.run()
@@ -75,7 +75,7 @@ class MulticoreTests(unittest.TestCase):
 
     def test_cancellation_preserves_completed(self):
         with tempfile.TemporaryDirectory() as tmp:
-            camp = Campaign(Path(tmp)/"camp", workers=2)
+            camp = Campaign(Path(tmp)/"camp", workers=2, estimated_per_job_mb=20)
             for rpm in [3000,3500,4000]:
                 camp.add_job(Job(job_id=f"RPM_{rpm}", func=job_compute, kwargs={"rpm": rpm, "sleep": 0.05}))
             # Simular cancel_pending antes de run
@@ -84,7 +84,7 @@ class MulticoreTests(unittest.TestCase):
             # Ahora run con jobs ya cancelados no debe ejecutarlos (se quedan CANCELLED)
             # Para test de cancel_all durante run, usamos un camp con jobs y cancelamos a mitad
             # Simplificado: verificar que cancel_pending no afecta jobs ya completados en un run previo
-            camp2 = Campaign(Path(tmp)/"camp2", workers=2)
+            camp2 = Campaign(Path(tmp)/"camp2", workers=2, estimated_per_job_mb=20)
             for rpm in [3000,3500]:
                 camp2.add_job(Job(job_id=f"RPM_{rpm}", func=job_compute, kwargs={"rpm": rpm, "sleep": 0.02}))
             res = camp2.run()
@@ -99,7 +99,7 @@ class MulticoreTests(unittest.TestCase):
 
     def test_failure_isolation(self):
         with tempfile.TemporaryDirectory() as tmp:
-            camp = Campaign(Path(tmp)/"camp", workers=2)
+            camp = Campaign(Path(tmp)/"camp", workers=2, estimated_per_job_mb=20)
             camp.add_job(Job(job_id="RPM_3000", func=job_compute, kwargs={"rpm": 3000}))
             camp.add_job(Job(job_id="RPM_3500", func=job_fail))
             camp.add_job(Job(job_id="RPM_4000", func=job_compute, kwargs={"rpm": 4000}))
@@ -122,7 +122,7 @@ class MulticoreTests(unittest.TestCase):
         self.assertEqual(chains, [[3000,3500,4000,4500],[5000,5500,6000,6500],[7000,7500,8000,8500]])
         # Ejecutar chains
         with tempfile.TemporaryDirectory() as tmp:
-            camp = Campaign(Path(tmp)/"camp", workers=3)
+            camp = Campaign(Path(tmp)/"camp", workers=3, estimated_per_job_mb=20)
             for idx, chain_rpms in enumerate(chains):
                 chain = [Job(job_id=f"RPM_{rpm}", func=job_compute, kwargs={"rpm": rpm}, chain_id=f"chain_{idx}", job_type="DEPENDENT_CHAIN") for rpm in chain_rpms]
                 camp.add_chain(chain, chain_id=f"chain_{idx}")
