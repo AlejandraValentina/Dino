@@ -1,0 +1,16 @@
+{
+  "350": {
+    "has50": false,
+    "has60": false,
+    "has70": false,
+    "has80": false,
+    "note": "Early stop before 70, so 70/80 not needed. R10A localization at 50/60 would show same 65% inside as before, now with new data 50/60 still localized but outside small."
+  },
+  "400": {
+    "has50": true,
+    "has60": false,
+    "has70": false,
+    "has80": false,
+    "note": "Early stop before 70, so 70/80 not needed. R10A localization at 50/60 would show same 65% inside as before, now with new data 50/60 still localized but outside small."
+  }
+}
