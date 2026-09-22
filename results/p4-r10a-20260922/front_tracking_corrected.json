@@ -1,0 +1,154 @@
+{
+  "250": [
+    {
+      "pair": "40 vs 38",
+      "x_front_cur": 0.093,
+      "x_front_prev": 0.093,
+      "delta_x": 0.0,
+      "delta_x_dx": 0.0,
+      "tracking": "TRACKED",
+      "plateau_jump_cur": 649.4219757678657,
+      "jump_adj_cur": 7.085928571454133,
+      "width_A_m": 0.03900000000000001,
+      "width_B_m": 0.366
+    },
+    {
+      "pair": "39 vs 37",
+      "x_front_cur": 0.009,
+      "x_front_prev": 0.012,
+      "delta_x": -0.003000000000000001,
+      "delta_x_dx": -1.0000000000000002,
+      "tracking": "TRACKED",
+      "plateau_jump_cur": 15402.833882410101,
+      "jump_adj_cur": 4428.630578580931,
+      "width_A_m": 0.002999999999999999,
+      "width_B_m": 0.009
+    },
+    {
+      "pair": "38 vs 36",
+      "x_front_cur": 0.093,
+      "x_front_prev": 0.093,
+      "delta_x": 0.0,
+      "delta_x_dx": 0.0,
+      "tracking": "TRACKED",
+      "plateau_jump_cur": 649.5908266813931,
+      "jump_adj_cur": 7.08627952025563,
+      "width_A_m": 0.03900000000000001,
+      "width_B_m": 0.366
+    }
+  ],
+  "300": [
+    {
+      "pair": "40 vs 38",
+      "x_front_cur": 0.11,
+      "x_front_prev": 0.11,
+      "delta_x": 0.0,
+      "delta_x_dx": 0.0,
+      "tracking": "TRACKED",
+      "plateau_jump_cur": 591.0382302132639,
+      "jump_adj_cur": 5.804759290535003,
+      "width_A_m": 0.0325,
+      "width_B_m": 0.34500000000000003
+    },
+    {
+      "pair": "39 vs 37",
+      "x_front_cur": 0.01,
+      "x_front_prev": 0.007500000000000001,
+      "delta_x": 0.0024999999999999996,
+      "delta_x_dx": 0.9999999999999998,
+      "tracking": "TRACKED",
+      "plateau_jump_cur": 17735.90685714461,
+      "jump_adj_cur": 5478.6931950041035,
+      "width_A_m": 0.0024999999999999988,
+      "width_B_m": 0.0075
+    },
+    {
+      "pair": "38 vs 36",
+      "x_front_cur": 0.11,
+      "x_front_prev": 0.11,
+      "delta_x": 0.0,
+      "delta_x_dx": 0.0,
+      "tracking": "TRACKED",
+      "plateau_jump_cur": 593.893858547759,
+      "jump_adj_cur": 5.803918246776448,
+      "width_A_m": 0.0325,
+      "width_B_m": 0.3475
+    }
+  ],
+  "350": [
+    {
+      "pair": "40 vs 38",
+      "x_front_cur": 0.004285714285714286,
+      "x_front_prev": 0.004285714285714286,
+      "delta_x": 0.0,
+      "delta_x_dx": 0.0,
+      "tracking": "TRACKED",
+      "plateau_jump_cur": 7360.675636599124,
+      "jump_adj_cur": 4264.5848161760005,
+      "width_A_m": 0.0021428571428571425,
+      "width_B_m": 0.004285714285714285
+    },
+    {
+      "pair": "39 vs 37",
+      "x_front_cur": 0.105,
+      "x_front_prev": 0.105,
+      "delta_x": 0.0,
+      "delta_x_dx": 0.0,
+      "tracking": "TRACKED",
+      "plateau_jump_cur": 571.4452139436908,
+      "jump_adj_cur": 5.115724368835799,
+      "width_A_m": 0.030000000000000027,
+      "width_B_m": 0.3321428571428572
+    },
+    {
+      "pair": "38 vs 36",
+      "x_front_cur": 0.004285714285714286,
+      "x_front_prev": 0.004285714285714286,
+      "delta_x": 0.0,
+      "delta_x_dx": 0.0,
+      "tracking": "TRACKED",
+      "plateau_jump_cur": 4593.878986328549,
+      "jump_adj_cur": 3385.930252513186,
+      "width_A_m": 0.0021428571428571425,
+      "width_B_m": 0.0021428571428571425
+    }
+  ],
+  "400": [
+    {
+      "pair": "40 vs 38",
+      "x_front_cur": 0.001875,
+      "x_front_prev": 0.001875,
+      "delta_x": null,
+      "delta_x_dx": null,
+      "tracking": "AMBIGUOUS",
+      "plateau_jump_cur": 7511.24895844252,
+      "jump_adj_cur": 3987.2671389639727,
+      "width_A_m": 0.001875,
+      "width_B_m": 0.001875
+    },
+    {
+      "pair": "39 vs 37",
+      "x_front_cur": 0.103125,
+      "x_front_prev": 0.103125,
+      "delta_x": 0.0,
+      "delta_x_dx": 0.0,
+      "tracking": "TRACKED",
+      "plateau_jump_cur": 561.6913063008396,
+      "jump_adj_cur": 4.600986827703309,
+      "width_A_m": 0.02812500000000001,
+      "width_B_m": 0.32437499999999997
+    },
+    {
+      "pair": "38 vs 36",
+      "x_front_cur": 0.001875,
+      "x_front_prev": 0.00375,
+      "delta_x": null,
+      "delta_x_dx": null,
+      "tracking": "AMBIGUOUS",
+      "plateau_jump_cur": 9853.467367727975,
+      "jump_adj_cur": 4425.70462509734,
+      "width_A_m": 0.001875,
+      "width_B_m": 0.00375
+    }
+  ]
+}
