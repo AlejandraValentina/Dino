@@ -4,6 +4,7 @@ Composes P5-A interfaces; exhaust and periodic engine operation are absent.
 """
 from dataclasses import dataclass
 from copy import deepcopy
+from math import isfinite
 from .duct_network import interface_exchange
 from .coupling import ChamberState
 from .gas1d.eos import IdealGas
@@ -54,10 +55,11 @@ class Chamber:
         changing the chamber.  The only non-flux energy source is the
         contractual closed-system work term ``-p*dV/dt``.
         """
-        if not all(len(flux) == 4 for flux in outward_fluxes):
+        if not all(len(flux) == 4 and all(isfinite(value) for value in flux)
+                   for flux in outward_fluxes):
             raise ValueError("invalid chamber flux")
         _, pressure, _, _ = self.thermodynamics(eos)
-        if not isinstance(volume_rate, (int, float)):
+        if not isinstance(volume_rate, (int, float)) or not isfinite(volume_rate):
             raise ValueError("invalid volume rate")
         mass = sum(flux[0] for flux in outward_fluxes)
         energy = sum(flux[2] for flux in outward_fluxes) - pressure*volume_rate
@@ -66,8 +68,12 @@ class Chamber:
 
     def apply_rhs(self, rhs, dt, eos, volume_rate=0.0):
         """Apply one already assembled chamber stage and update its volume."""
-        if dt <= 0:
+        if (not isinstance(dt, (int, float)) or not isfinite(dt) or dt <= 0
+                or not isinstance(volume_rate, (int, float))
+                or not isfinite(volume_rate)):
             raise ValueError("dt must be positive")
+        if len(rhs) != 3 or not all(isfinite(value) for value in rhs):
+            raise ValueError("invalid chamber rhs")
         old_volume = self.volume
         new_volume = old_volume + dt*volume_rate
         if new_volume <= 0:
@@ -84,6 +90,10 @@ class Chamber:
 
     def apply_exchange(self, flux, dt, eos, work=0.0):
         """Apply one outward chamber flux; mass/energy/species are conserved."""
+        if not isinstance(dt, (int, float)) or not isfinite(dt) or dt <= 0:
+            raise ValueError("dt must be positive")
+        if not isinstance(work, (int, float)) or not isfinite(work):
+            raise ValueError("invalid work")
         self.apply_rhs((flux[0], flux[2] + work/dt, flux[3]), dt, eos)
 
 @dataclass

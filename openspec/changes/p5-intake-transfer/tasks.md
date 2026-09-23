@@ -8,4 +8,5 @@
 - [x] P5-B coordinator skeleton and stage/port traces implemented.
 - [ ] Conservative chamber/duct updates, p·dV ledger and integrated global conservation remain before P5-B verification.
 - [x] P5-B-R1: aplicación conservativa de fluxes a inventarios de cámaras y validación por stage.
+- [x] P5-B-R1: término contractual de trabajo `-p·dV/dt` validado con expansión, compresión y rechazo de entradas no finitas.
 - [ ] Integrar inventarios/celdas de ductos, término -p dV/dt y ledgers globales antes del cierre P5-B.

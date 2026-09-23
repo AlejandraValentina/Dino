@@ -49,10 +49,10 @@
       "id": "P5B-05",
       "phase": "P5_B",
       "description": "contractual_volume_work",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "3 focused contractual volume-work tests PASS; 14 P5B/coupling tests PASS; py_compile PASS",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -222,7 +222,7 @@
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     }
   ],
-  "active_task": "P5B-05",
-  "last_completed_task": "P5B-04",
-  "tasks_remaining": 16
+  "active_task": "P5B-06",
+  "last_completed_task": "P5B-05",
+  "tasks_remaining": 15
 }

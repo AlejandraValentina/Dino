@@ -1,4 +1,30 @@
 {
-  "status": "NOT_IMPLEMENTED",
-  "reason": "variable-volume law not wired into coordinator"
+  "task": "P5B-05",
+  "description": "contractual_volume_work",
+  "status": "PASS",
+  "scope": "P5 conditional on unresolved P4; isolated chamber work only",
+  "checks": [
+    {
+      "id": "expansion",
+      "passed": true,
+      "detail": "With zero interface flux, dU/dt=-p_stage*dV/dt; mass and species remain unchanged."
+    },
+    {
+      "id": "compression",
+      "passed": true,
+      "detail": "Negative dV/dt produces the opposite energy change."
+    },
+    {
+      "id": "input_validation",
+      "passed": true,
+      "detail": "Nonfinite flux, volume rate, dt, RHS and work inputs are rejected."
+    }
+  ],
+  "tests": {
+    "command": "python -m pytest -q tests/test_p5b_integrated_coupling.py tests/test_coupled.py",
+    "result": "14 passed in 3.74s",
+    "compile": "python -m py_compile motorsim/p5b.py tests/test_p5b_integrated_coupling.py"
+  },
+  "next_task": "P5B-06",
+  "p4_acceptance": "NOT_GRANTED"
 }

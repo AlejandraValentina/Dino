@@ -1,3 +1,5 @@
+import pytest
+
 from motorsim.p5b import Chamber, IntegratedIntakeTransfer, interior_rhs, ssprk2_step
 from motorsim.gas1d.mesh import uniform_mesh
 from motorsim.gas1d.eos import IdealGas
@@ -58,3 +60,37 @@ def test_integrated_step_applies_each_chamber_once_with_volume_work():
     assert n.cylinder.volume == .009995
     assert n.ledger['cc_work'] < 0
     assert n.ledger['cyl_work'] > 0
+
+def test_contractual_volume_work_uses_stage_pressure_and_sign():
+    chamber = Chamber((2.0, 0.0, 100000.0, .01), .01)
+    initial = chamber.inventory(E)
+    volume_rate = .001
+    dt = .1
+    rhs = chamber.conservative_rhs(((0.0, 0.0, 0.0, 0.0),), E,
+                                   volume_rate=volume_rate)
+    chamber.apply_rhs(rhs, dt, E, volume_rate=volume_rate)
+
+    # The contractual source is -p_stage*dV/dt.  No interface flux means
+    # mass/species stay fixed while expansion removes exactly p*dV energy.
+    assert chamber.volume == .0101
+    assert chamber.inventory(E)[0] == initial[0]
+    assert chamber.inventory(E)[1] == initial[1]
+    assert chamber.inventory(E)[2] == initial[2] - 100000.0*volume_rate*dt
+
+def test_contractual_volume_work_compression_has_opposite_sign():
+    chamber = Chamber((2.0, 0.0, 100000.0, .01), .01)
+    initial = chamber.inventory(E)
+    volume_rate = -.001
+    dt = .1
+    rhs = chamber.conservative_rhs(((0.0, 0.0, 0.0, 0.0),), E,
+                                   volume_rate=volume_rate)
+    chamber.apply_rhs(rhs, dt, E, volume_rate=volume_rate)
+    assert chamber.volume == .0099
+    assert chamber.inventory(E)[2] == initial[2] + 100000.0*.001*dt
+
+def test_contractual_volume_work_rejects_nonfinite_inputs():
+    chamber = Chamber((2.0, 0.0, 100000.0, .01), .01)
+    with pytest.raises(ValueError):
+        chamber.conservative_rhs(((0.0, 0.0, 0.0, 0.0),), E, volume_rate=float('nan'))
+    with pytest.raises(ValueError):
+        chamber.apply_rhs((0.0, 0.0, float('inf')), .1, E)
