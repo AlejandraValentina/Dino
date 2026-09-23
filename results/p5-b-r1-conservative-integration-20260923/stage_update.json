@@ -1,0 +1,12 @@
+{
+  "status": "PASS_TRACE",
+  "single_flux_per_interface": true,
+  "stage_order": [
+    "angle",
+    "areas",
+    "states",
+    "riemann",
+    "chamber_update",
+    "admissibility"
+  ]
+}

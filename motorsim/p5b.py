@@ -23,6 +23,15 @@ class Chamber:
         rho,u,p,y = eos.validate(self.primitive)
         return rho, p, p/(rho*eos.R), y
 
+    def apply_exchange(self, flux, dt, eos, work=0.0):
+        """Apply one outward chamber flux; mass/energy/species are conserved."""
+        rho,u,p,y = eos.validate(self.primitive)
+        m, s, energy = self.inventory(eos)
+        m += dt*flux[0]; energy += dt*flux[2] + work; s += dt*flux[3]
+        if m <= 0 or not 0 <= s <= m or energy <= 0:
+            raise ValueError("NUMERICAL_FAILURE: inadmissible chamber update")
+        self.primitive = (m/self.volume, 0.0, (eos.gamma-1)*energy/self.volume, s/m)
+
 
 class IntegratedIntakeTransfer:
     """Atmosphere→intake→crankcase with two independent transfer endpoints."""
@@ -52,8 +61,16 @@ class IntegratedIntakeTransfer:
         fluxes = [interface_exchange(self.crankcase, atmosphere, ai, -1, eos=self.eos)]
         for area in (at1, at2):
             fluxes.append(interface_exchange(self.crankcase, self.duct_states[1], area, 1, eos=self.eos))
+        # One interface solve supplies the flux trace and the chamber update.
+        self.crankcase.apply_exchange(fluxes[0]['outward'], dt, self.eos)
+        self.crankcase.apply_exchange(fluxes[1]['outward'], dt, self.eos)
+        self.crankcase.apply_exchange(fluxes[2]['outward'], dt, self.eos)
+        self.cylinder.apply_exchange(tuple(-x for x in fluxes[1]['outward']), dt, self.eos)
+        self.cylinder.apply_exchange(tuple(-x for x in fluxes[2]['outward']), dt, self.eos)
         self.history.append({'angle':self.angle,'areas':(ai,at1,at2),
-                             'fluxes':[f['outward'] for f in fluxes]})
+                             'fluxes':[f['outward'] for f in fluxes],
+                             'crankcase':self.crankcase.inventory(self.eos),
+                             'cylinder':self.cylinder.inventory(self.eos)})
         return self.history[-1]
 
     def snapshot(self):

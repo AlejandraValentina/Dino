@@ -1,0 +1,12 @@
+{
+  "chambers": [
+    "crankcase",
+    "cylinder"
+  ],
+  "ducts": [
+    "intake",
+    "transfer1",
+    "transfer2"
+  ],
+  "status": "chamber_inventory_update_added"
+}
