@@ -1,0 +1,43 @@
+{
+  "dx_target": 0.002,
+  "backend": "NUMBA_FUSED",
+  "cfl": 0.4,
+  "rpm": 3000,
+  "workers": 1,
+  "geometry": "chain",
+  "segments": [
+    {
+      "name": "",
+      "length_mm": 200,
+      "start_diameter_mm": 20,
+      "end_diameter_mm": 20
+    },
+    {
+      "name": "",
+      "length_mm": 150,
+      "start_diameter_mm": 20,
+      "end_diameter_mm": 40
+    },
+    {
+      "name": "",
+      "length_mm": 50,
+      "start_diameter_mm": 40,
+      "end_diameter_mm": 40
+    },
+    {
+      "name": "",
+      "length_mm": 150,
+      "start_diameter_mm": 40,
+      "end_diameter_mm": 20
+    },
+    {
+      "name": "",
+      "length_mm": 200,
+      "start_diameter_mm": 20,
+      "end_diameter_mm": 20
+    }
+  ],
+  "single_changed_variable": "dx_target",
+  "hypothesis": "H_NUM_RESOLUTION",
+  "prediction": "branch B lag2 sensor_max materially reduces"
+}

@@ -1,0 +1,11 @@
+{
+  "cycles_executed": "1-30",
+  "N": 375,
+  "wall_seconds": "not aggregated due postprocessing error",
+  "full_debug_cycles": [
+    20,
+    25,
+    30
+  ],
+  "error": "KeyError: steps in segment result counts"
+}

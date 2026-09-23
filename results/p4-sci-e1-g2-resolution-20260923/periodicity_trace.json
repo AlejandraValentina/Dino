@@ -1,0 +1,5 @@
+{
+  "status": "INCONCLUSIVE",
+  "reason": "required cycles 1-19 and 21-24/26-29 summaries were not persisted by runner",
+  "detector": "motorsim.periodicity"
+}

@@ -1,0 +1,4 @@
+{
+  "classification": "P4_SCI_E1_INCONCLUSIVE",
+  "reason": "cannot compare equivalent lag-2 sequence without per-cycle summaries"
+}

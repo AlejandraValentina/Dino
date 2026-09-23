@@ -1,0 +1,9 @@
+{
+  "baseline_sensor_max_last3": [
+    0.0897298,
+    0.0683317,
+    0.029058
+  ],
+  "refined": "UNAVAILABLE",
+  "primary_metric": "branch-B lag2 sensor_max"
+}

@@ -1,0 +1,13 @@
+{
+  "cycle": 20,
+  "angle": 7380.0,
+  "n": 375,
+  "dx_target": null,
+  "backend": "NUMBA_FUSED",
+  "cfl": 0.4,
+  "config_hash": "p4-sci-e1-g2-dx002",
+  "solver_hash": "",
+  "timestamp": 1790168931.3269985,
+  "float_dtype": "float64",
+  "version": "RESTART_V1"
+}
