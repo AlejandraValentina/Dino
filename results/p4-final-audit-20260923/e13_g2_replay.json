@@ -1,0 +1,1 @@
+{"source":"results/p4-r6-20260921/artifacts/g2_cycles","available_cycles":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],"lag1_streak":0,"branch_A_streak":0,"branch_B_streak":0,"detected_period":null,"status":"P4_BLOCKED_G2_PERIODIC_EVIDENCE","minimum_next_cycle":16,"solver_executed":false}

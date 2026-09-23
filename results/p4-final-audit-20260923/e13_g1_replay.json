@@ -1,0 +1,1 @@
+{"source":"results/p4-r13a-20260923","sequence":{"50":"PASS","52":"PASS","54":"FAIL","56":"PASS","58":"PASS","60":"PASS"},"detected_period":2,"converged_cycle":60,"cycle56_vs54":"PASS","sensor_max":0.0011905119731371136,"solver_executed":false}
