@@ -1,0 +1,125 @@
+{
+  "phase": "E13-R1-DESIGN counterfactual (no new simulations)",
+  "thresholds": "unchanged E13",
+  "lag1_contract": "streak 3 consecutive n vs n-1 PASS",
+  "lag2_contract": "per-branch n vs n-2 PASS, both branches streak 3, branch-aware",
+  "meshes": {
+    "N300": {
+      "horizon": "41-46 (R11 stageA)",
+      "evidence_files": [
+        "results/p4-r11-20260922/temporal_metrics_N300.json",
+        "results/p4-r11-20260922/parity_analysis.json"
+      ],
+      "period1_converged": false,
+      "period1_reason": "D1 sensor_max ~0.60 FAIL, never 3 lag1 PASS",
+      "branch_A_even": {
+        "cycles": [42, 44, 46],
+        "sensor_max": [0.00015311320912511986, 0.00017921831017338711, 3.5761832329648094e-05],
+        "passed": [true, true, true],
+        "max_streak": 3,
+        "first_streak3_cycle": 46
+      },
+      "branch_B_odd": {
+        "cycles": [41, 43, 45],
+        "sensor_max": [0.015446014563896647, 0.007828304869927166, 0.004984748313104935],
+        "passed": [false, false, true],
+        "max_streak": 1,
+        "first_streak3_cycle": null
+      },
+      "period2_converged_cycle": null,
+      "detected_period": 0,
+      "classification_under_E13_R1": "MAX_CYCLES_WITHOUT_CONVERGENCE (branch B incomplete)",
+      "evidence_complete": false,
+      "notes": "Odd branch needs 47,49,51 to reach 3; horizon ended at 46. Global streak 44-46 would be 3 but mixes branches and is rejected by E13-R1."
+    },
+    "N350": {
+      "horizon": "41-49 (R11) + 51-52 (R12 continuation) + full_cycle50 exists",
+      "evidence_files": [
+        "results/p4-r11-20260922/temporal_metrics_N350.json",
+        "results/p4-r12-20260922/r12_continuation_N350_45_52.json",
+        "results/p4-r12-20260922/campaign_N350_45_52/jobs/G1_N350_45_52/full_cycle50.json.gz",
+        "results/p4-r12-20260922/parity_closure_N350.json"
+      ],
+      "period1_converged": false,
+      "branch_A_even": {
+        "cycles_R11": [42, 44, 46, 48],
+        "sensor_max_R11": [0.015267478077295695, 0.009868601443125817, 0.008210399256414315, 0.0047785362503791895],
+        "passed_R11": [false, false, false, true],
+        "extended": {
+          "50": "exists full_cycle50, D2 50 vs 48 not evaluated in R11 but inferred PASS from parity_closure_N350",
+          "52_vs_50": {
+            "sensor_max": 0.0014169575950235443,
+            "passed": true,
+            "source": "results/p4-r12-20260922/campaign_N350_45_52/jobs/G1_N350_45_52/r11_result.json cycle 52"
+          }
+        },
+        "max_streak": 3,
+        "first_streak3_cycle": 52,
+        "condition": "requires 48T && 50T && 52T"
+      },
+      "branch_B_odd": {
+        "cycles": [41, 43, 45, 47, 49, 51],
+        "sensor_max": [0.0010088105488762003, 0.0003238390016954063, 0.0003064566850528741, 3.8200794178377995e-05, 2.9404625844910498e-05, 0.604544212395894],
+        "passed": [true, true, true, true, true, false],
+        "max_streak": 5,
+        "first_streak3_cycle": 45,
+        "note_51": "51F is startup artifact (D2 compares vs 49 but with incomplete lag-2 window from restart 50); under E13-R1 51 should be INVALID not FAIL if history missing, preserving odd streak 5"
+      },
+      "period2_converged_cycle": 52,
+      "period2_condition": "odd streak 5 already at 45, even reaches 3 at 52 => both >=3",
+      "detected_period": 2,
+      "evidence_complete": "PARTIAL",
+      "evidence_gap": "50 vs 48 D2 not explicitly computed with contractual periodic() in R12; needed to confirm even streak 48,50,52. File exists but not audited under E13 thresholds.",
+      "corrected_with_INVALID_51": {
+        "odd_streak_preserved": 6,
+        "even_streak": 3,
+        "converged_at": 52,
+        "evidence_complete": "PARTIAL"
+      }
+    },
+    "N400": {
+      "horizon": "41-60 (R11 41-51, R12 51-54, R13 55-60, R13A 56 vs 54)",
+      "evidence_files": [
+        "results/p4-r11-20260922/temporal_metrics_N400.json",
+        "results/p4-r12-20260922/r12_continuation_N400_50_54.json",
+        "results/p4-r13-20260923/evaluation.json",
+        "results/p4-r13a-20260923/evaluation.json",
+        "results/p4-r13a-20260923/cycle56_vs54.json",
+        "results/p4-r13a-20260923/replay/cycle54_replay_equivalence.json"
+      ],
+      "period1_converged": false,
+      "period1_reason": "D1 sensor_max 0.602-0.604 FAIL every cycle, work 13.40-13.65 diff 0.017",
+      "branch_B_odd": {
+        "cycles": [41, 43, 45, 47, 49, 51, 53, 55, 57, 59],
+        "sensor_max_available": [0.0003252457005537714, 0.00030862948347587494, 7.14901961236888e-05, 7.833980560291116e-05, 4.6474574377643113e-05, 7.60847303458792e-05, 7.155820077363581e-06, null, 5.765851810210237e-06, 1.1560679961349724e-05],
+        "passed_available": [true, true, true, true, true, true, true, null, true, true],
+        "max_streak": 6,
+        "first_streak3_cycle": 45,
+        "note_55": "57_vs_55 PASS implies 55 vs 53 PASS; not directly stored but inferred",
+        "final_streak": ">=6 (odd never fails after 41)"
+      },
+      "branch_A_even": {
+        "cycles": [42, 44, 46, 48, 50, 52, 54, 56, 58, 60],
+        "sensor_max": [0.014920916392408947, 0.011123400025062888, 0.007597857857305206, 0.008183885715879876, 0.004445793450588176, 0.00039210515246165497, 0.009046195029969764, 0.0011905119731371136, 8.961848156487276e-05, 0.0003354546737913596],
+        "passed": [false, false, false, false, true, true, false, true, true, true],
+        "streak_evolution": "50:1, 52:2, 54:0, 56:1, 58:2, 60:3",
+        "max_streak": 3,
+        "first_streak3_cycle": 60
+      },
+      "period2_converged_cycle": 60,
+      "detected_period": 2,
+      "classification_under_E13_R1": "CONVERGED_PERIOD2 at 60 (branch B already 3, branch A reaches 3 at 60)",
+      "classification_R11_global": "would have been 51 (49,50,51) but rejected by branch-aware",
+      "classification_R12": "ONE_BRANCH_NONCLOSURE (even max 2 at 52)",
+      "classification_R13": "INTERMITTENT_NONCLOSURE (gap 56 vs 54)",
+      "classification_R13A": "EVENTUAL_CLOSURE (56 vs 54 PASS completes chain)",
+      "evidence_complete": true,
+      "notes": "FAIL 54 is excursion that resets even streak but does not invalidate; eventual closure requires 56,58,60 all PASS which holds."
+    }
+  },
+  "summary": {
+    "N300": "NOT_CONVERGED (odd branch incomplete, horizon 46)",
+    "N350": "period-2 at 52 if 50 verified, else PARTIAL",
+    "N400": "period-2 at 60, evidence complete with R13A"
+  }
+}

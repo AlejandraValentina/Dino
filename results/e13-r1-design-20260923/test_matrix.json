@@ -1,0 +1,170 @@
+{
+  "phase": "E13-R1 test matrix (design only, not yet implemented)",
+  "thresholds": "work 0.005, cylinder 0.005, sensor_max 0.005, port 0.002, inv 0.002, conservation 1e-10",
+  "cases": {
+    "A_period1_clean": {
+      "description": "PASS,PASS,PASS lag-1 consecutive",
+      "sequence": [
+        {"cycle": "n-2", "lag1_passed": true},
+        {"cycle": "n-1", "lag1_passed": true},
+        {"cycle": "n", "lag1_passed": true, "conservation": true, "admissibility": true}
+      ],
+      "expected": {
+        "periodicity_status": "CONVERGED_PERIOD1",
+        "detected_period": 1,
+        "lag1_streak": 3,
+        "converged_cycle": "n"
+      }
+    },
+    "B_period1_with_reset": {
+      "description": "PASS,FAIL,PASS,PASS,PASS lag-1",
+      "sequence": [
+        {"cycle": "n-4", "lag1_passed": true, "lag1_streak": 1},
+        {"cycle": "n-3", "lag1_passed": false, "lag1_streak": 0},
+        {"cycle": "n-2", "lag1_passed": true, "lag1_streak": 1},
+        {"cycle": "n-1", "lag1_passed": true, "lag1_streak": 2},
+        {"cycle": "n", "lag1_passed": true, "lag1_streak": 3}
+      ],
+      "expected": {
+        "periodicity_status": "CONVERGED_PERIOD1",
+        "detected_period": 1,
+        "converged_cycle": "n",
+        "note": "only last three count; FAIL resets"
+      }
+    },
+    "C_period2_clean": {
+      "description": "A PASS,B PASS,A PASS,B PASS,A PASS,B PASS => both branches 3",
+      "sequence": [
+        {"cycle": 41, "branch": "B", "lag2_passed": true, "b_streak": 1},
+        {"cycle": 42, "branch": "A", "lag2_passed": true, "a_streak": 1},
+        {"cycle": 43, "branch": "B", "lag2_passed": true, "b_streak": 2},
+        {"cycle": 44, "branch": "A", "lag2_passed": true, "a_streak": 2},
+        {"cycle": 45, "branch": "B", "lag2_passed": true, "b_streak": 3},
+        {"cycle": 46, "branch": "A", "lag2_passed": true, "a_streak": 3}
+      ],
+      "expected": {
+        "periodicity_status": "CONVERGED_PERIOD2",
+        "detected_period": 2,
+        "a_streak": 3,
+        "b_streak": 3,
+        "converged_cycle": 46
+      }
+    },
+    "D_false_global_streak": {
+      "description": "A PASS,B PASS,A FAIL,B PASS,A PASS,B PASS => global 3 at end but per-branch not 3",
+      "sequence": [
+        {"cycle": 41, "branch": "B", "lag2_passed": true, "b_streak": 1, "a_streak": 0},
+        {"cycle": 42, "branch": "A", "lag2_passed": true, "b_streak": 1, "a_streak": 1},
+        {"cycle": 43, "branch": "B", "lag2_passed": false, "b_streak": 0, "a_streak": 1},
+        {"cycle": 44, "branch": "A", "lag2_passed": true, "b_streak": 0, "a_streak": 2},
+        {"cycle": 45, "branch": "B", "lag2_passed": true, "b_streak": 1, "a_streak": 2},
+        {"cycle": 46, "branch": "A", "lag2_passed": true, "b_streak": 1, "a_streak": 3}
+      ],
+      "expected": {
+        "periodicity_status": "NOT_CONVERGED",
+        "detected_period": 0,
+        "reason": "even though cycles 44,45,46 are three consecutive global PASS, branch B only 1 (44 is A) and branch A 3 not both",
+        "global_streak": 3,
+        "a_streak": 3,
+        "b_streak": 1
+      }
+    },
+    "E_real_N400": {
+      "description": "A even 50T,52T,54F,56T,58T,60T with B already closed",
+      "sequence": [
+        {"cycle": 50, "branch": "A", "lag2_passed": true, "a_streak": 1, "b_streak": 6},
+        {"cycle": 52, "branch": "A", "lag2_passed": true, "a_streak": 2, "b_streak": 6},
+        {"cycle": 54, "branch": "A", "lag2_passed": false, "a_streak": 0, "b_streak": 6},
+        {"cycle": 56, "branch": "A", "lag2_passed": true, "sensor_max": 0.0011905119731371136, "a_streak": 1, "b_streak": 6},
+        {"cycle": 58, "branch": "A", "lag2_passed": true, "sensor_max": 8.961848156487276e-05, "a_streak": 2, "b_streak": 6},
+        {"cycle": 60, "branch": "A", "lag2_passed": true, "sensor_max": 0.0003354546737913596, "a_streak": 3, "b_streak": 6}
+      ],
+      "expected": {
+        "periodicity_status": "CONVERGED_PERIOD2",
+        "detected_period": 2,
+        "converged_cycle": 60,
+        "not_converged_at": [52, 54],
+        "fail_54_visible": true
+      }
+    },
+    "F_period1_and_lag2_both_pass": {
+      "description": "period-1 PASS also implies lag-2 PASS; precedence to period-1",
+      "sequence": [
+        {"cycle": "n-2", "lag1_passed": true, "lag2_passed": true},
+        {"cycle": "n-1", "lag1_passed": true, "lag2_passed": true},
+        {"cycle": "n", "lag1_passed": true, "lag2_passed": true, "a_streak": 3, "b_streak": 3}
+      ],
+      "expected": {
+        "periodicity_status": "CONVERGED_PERIOD1",
+        "detected_period": 1,
+        "reason": "period-1 checked first; even though both branches would be 3, period-1 wins"
+      }
+    },
+    "G_restart": {
+      "description": "save streaks, restart process, continue identical",
+      "initial": {
+        "anchor_cycle": 40,
+        "a_streak": 2,
+        "b_streak": 2,
+        "lag1_streak": 0
+      },
+      "after_restart": {
+        "load": {"anchor_cycle": 40, "a_streak": 2, "b_streak": 2, "lag1_streak": 0},
+        "continue": [
+          {"cycle": 45, "branch": "B", "lag2_passed": true, "b_streak": 3, "a_streak": 2, "not_yet": true},
+          {"cycle": 46, "branch": "A", "lag2_passed": true, "b_streak": 3, "a_streak": 3, "converged": true}
+        ]
+      },
+      "expected": {
+        "identical_with_without_restart": true,
+        "persisted_fields": ["anchor_cycle", "a_streak", "b_streak", "lag1_streak", "detected_period"]
+      }
+    },
+    "H_fail_in_A_not_reset_B": {
+      "description": "fail in branch A does not reset B",
+      "sequence": [
+        {"cycle": 41, "branch": "B", "lag2_passed": true, "b_streak": 1, "a_streak": 0},
+        {"cycle": 42, "branch": "A", "lag2_passed": false, "b_streak": 1, "a_streak": 0},
+        {"cycle": 43, "branch": "B", "lag2_passed": true, "b_streak": 2, "a_streak": 0},
+        {"cycle": 44, "branch": "A", "lag2_passed": true, "b_streak": 2, "a_streak": 1}
+      ],
+      "expected": {
+        "a_streak": 1,
+        "b_streak": 2,
+        "branch_independent": true
+      }
+    },
+    "I_fail_in_B_not_reset_A": {
+      "description": "fail in branch B does not reset A",
+      "sequence": [
+        {"cycle": 41, "branch": "B", "lag2_passed": false, "b_streak": 0, "a_streak": 0},
+        {"cycle": 42, "branch": "A", "lag2_passed": true, "b_streak": 0, "a_streak": 1},
+        {"cycle": 43, "branch": "B", "lag2_passed": true, "b_streak": 1, "a_streak": 1},
+        {"cycle": 44, "branch": "A", "lag2_passed": true, "b_streak": 1, "a_streak": 2}
+      ],
+      "expected": {
+        "a_streak": 2,
+        "b_streak": 1
+      }
+    },
+    "J_invalid_history": {
+      "description": "n vs n-2 without n-2 history must be INVALID, not PASS",
+      "sequence": [
+        {"cycle": 51, "branch": "B", "lag2_passed": "INVALID", "reason": "start_cycle 50, no cycle 49 history for this job", "streak_unchanged": true}
+      ],
+      "expected": {
+        "streak_not_incremented": true,
+        "streak_not_reset": true
+      }
+    },
+    "K_boolean_serialization": {
+      "description": "JSON booleans must be true/false, not strings",
+      "inputs": ["true", "false", "\"True\"", "\"False\"", "\"true\"", "1", "0"],
+      "expected": {
+        "valid": [true, false],
+        "invalid_rejected": ["\"True\"", "\"False\"", "\"true\"", "1", "0"],
+        "check": "isinstance(v, bool)"
+      }
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "phase": "E13-R1-DESIGN open questions for human approval",
+  "implementation": false,
+  "questions": {
+    "A_streak_length": {
+      "proposal": "streak_required = 3",
+      "evidence": "Legacy P4C required 3 consecutive (min 5 cycles, max 30). R11/R12 used 3. R13A needed 3 after reset to distinguish excursion from closure.",
+      "alternatives": [2, 4],
+      "risk_if_2": "false positive with transient PASS (e.g., N400 50,52 only 2 not yet stable after 54 FAIL)",
+      "risk_if_4": "requires longer horizon (e.g., N400 would need 62, extra 2 cycles 31-46s each) without scientific gain",
+      "decision_required": "HUMAN_APPROVED"
+    },
+    "B_precedence": {
+      "proposal": "period-1 before period-2",
+      "reason": "period-1 implies period-2 PASS; without precedence period-1 would be misclassified as period-2",
+      "alternative": "period-2 first",
+      "decision_required": "HUMAN_APPROVED"
+    },
+    "C_branch_reset": {
+      "proposal": "FAIL in one branch does not reset the other",
+      "evidence": "R13A 54 FAIL resets even only, odd remains 6",
+      "bug_precedent": "p4_r12_branch_continuation.py draft had cross-reset bug",
+      "decision_required": "HUMAN_APPROVED"
+    },
+    "D_both_branches": {
+      "proposal": "period-2 requires a_streak>=3 AND b_streak>=3",
+      "alternative": "ANY branch 3",
+      "reason": "ANY would allow N400 51 (odd 6) with even 1 to converge falsely",
+      "decision_required": "HUMAN_APPROVED"
+    },
+    "E_thresholds": {
+      "proposal": "thresholds unchanged (work/cyl/sensor 0.005, port/inv 0.002)",
+      "evidence": "R13A 56 vs 54 sensor 0.00119 PASS under same thresholds; R11 D1 0.60 FAIL expected",
+      "decision_required": "HUMAN_APPROVED"
+    },
+    "F_period_gt2": {
+      "proposal": "GEN1 does not support period>2; declare UNSUPPORTED_PERIODICITY",
+      "alternative": "generic period-N detector",
+      "risk_generic": "overfitting to noise, requires N histories, not evidenced",
+      "decision_required": "HUMAN_APPROVED"
+    },
+    "G_restart_persist": {
+      "proposal": "restart must persist detector state (streaks, anchor, metrics)",
+      "alternative": "recompute from stored cycles only",
+      "tradeoff": "persist 1KB state vs replay up to 5 cycles (100-200s) to rebuild streaks; if FULL_DEBUG missing, recompute impossible",
+      "decision_required": "HUMAN_APPROVED"
+    },
+    "H_branch_identity": {
+      "proposal": "anchor_cycle = start_cycle of orbit, branch = (cycle - anchor) %2",
+      "alternative": "absolute parity cycle%2",
+      "issue": "absolute parity breaks after restart at 50 (odd/even flips relative to orbit origin)",
+      "decision_required": "HUMAN_APPROVED"
+    },
+    "I_invalid_handling": {
+      "proposal": "missing n-2 => INVALID (no increment, no reset)",
+      "alternative": "treat as FAIL",
+      "reason": "FAIL would incorrectly reset a healthy branch when job starts mid-orbit (e.g., N350 51)",
+      "decision_required": "HUMAN_APPROVED"
+    }
+  },
+  "derived_vs_proposed": {
+    "derived_from_evidence": ["orbit exists", "global streak mixes branches", "transient FAIL should not permaban"],
+    "proposed_contract": ["streak 3", "precedence", "independent reset", "both branches", "no period>2", "persist state", "anchor branch identity"]
+  },
+  "next_step": "human review of docs/gasdynamic/e13_r1_periodicity_contract_proposal.md and artifacts; no E13-R1 implementation until approved",
+  "p4_pass": false,
+  "p5_started": false
+}
