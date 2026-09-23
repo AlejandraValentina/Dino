@@ -1,0 +1,5 @@
+{
+  "metric": "reflection_ratio=reflected/incidence",
+  "measured": "not accepted as benchmark because separation/reference window is not contractually calibrated",
+  "status": "REFERENCE_GAP"
+}

@@ -33,7 +33,9 @@ def main():
         entry={'cycle':n,'branch':branch,'lag1_status':'PASS' if lag1.get('passed') else ('INVALID' if lag1.get('status')=='INVALID' else 'FAIL'),'lag1_sensor_max':lag1.get('sensor_max'),'lag2_status':'PASS' if lag2.get('passed') else ('INVALID' if lag2.get('status')=='INVALID' else 'FAIL'),'lag2_sensor_max':lag2.get('sensor_max'),'branch_A_streak':detector.branch_A_streak,'branch_B_streak':detector.branch_B_streak,'lag1_streak':detector.lag1_streak,'detected_period':detector.detected_period,'converged_cycle':detector.converged_cycle,'periodicity_status':('CONVERGED_PERIOD'+str(detector.detected_period) if detector.detected_period else 'NOT_CONVERGED'),'should_stop':detector.detected_period is not None,'invalid_reason':result.get('reason'),'conservation':True,'admissibility':True,'wall_seconds':row['cycle_wall_seconds']}
         trace.append(entry); rows.append(row); atomic(OUT/f'summary_cycle{n:02}.json',{'cycle':n,'complete':row['complete'],'work':row['work_indicated_J'],'history':row['history'],'checks':row['checks'],'periodicity':entry})
         atomic(OUT/'periodicity_trace.json',trace); atomic(OUT/'cycle_metrics.json',telemetry(rows))
-        if n in (5,10,15,20,25,30): save_restart(state,pipe,n,row['end'],{'backend':'NUMBA_FUSED','cfl':.4,'config_hash':'p4-sci-e1-g2-dx002'},OUT/f'restart_cycle{n:02}',detector=detector)
+        # Persist the terminal state of this cycle, after advancing the live chain.
+        terminal_state, terminal_pipe = row['state'], row['cells']
+        if n in (5,10,15,20,25,30): save_restart(terminal_state,terminal_pipe,n,row['end'],{'backend':'NUMBA_FUSED','cfl':.4,'config_hash':'p4-sci-e1-g2-dx002'},OUT/f'restart_cycle{n:02}',detector=detector)
         if n in (20,25,30): save_full_debug(row,OUT/f'full_cycle{n:02}.json.gz')
         cdir=CONTROL/f'restart_cycle{n:02}'
         if n in (5,10,15,20,25,30) and cdir.exists():

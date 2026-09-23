@@ -1,0 +1,7 @@
+{
+  "formula": "p_i*(A[i+1]-A[i])",
+  "expansion_sign": "positive area delta",
+  "contraction_sign": "negative area delta",
+  "double_counting": "not found in code audit",
+  "status": "NO_DEFECT_IDENTIFIED"
+}

@@ -1,0 +1,6 @@
+{
+  "geometry_source": "P4_SCI_GEOMETRY_SOURCE_UNRESOLVED",
+  "boundary": "P4_SCI_BOUNDARY_UNRESOLVED",
+  "coupling": "P4_SCI_COUPLING_RETURN_UNRESOLVED",
+  "integrated": "P4_SCI_REFERENCE_GAP_BLOCKS_DECISION"
+}

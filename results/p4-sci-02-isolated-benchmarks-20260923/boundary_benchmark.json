@@ -1,0 +1,6 @@
+{
+  "case": "existing straight-duct wave evidence",
+  "new_motor": false,
+  "status": "UNRESOLVED",
+  "reason": "no quantitative nonreflecting-boundary reference threshold"
+}

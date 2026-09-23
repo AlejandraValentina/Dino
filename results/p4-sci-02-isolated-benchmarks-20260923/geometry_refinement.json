@@ -1,0 +1,23 @@
+{
+  "N": [
+    52,
+    101,
+    202
+  ],
+  "arrival": [
+    0.0007032510144861432,
+    0.0007293668726328516,
+    0.0007417177581432679
+  ],
+  "pressure_integral": [
+    0.009004052246434963,
+    0.009339956963644895,
+    0.00953663641503765
+  ],
+  "conservation": [
+    true,
+    true,
+    true
+  ],
+  "interpretation": "bounded numerical sensitivity; no external reference error available"
+}

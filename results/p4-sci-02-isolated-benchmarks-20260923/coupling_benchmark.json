@@ -1,0 +1,6 @@
+{
+  "case": "code-level interface audit plus existing conservation evidence",
+  "isolated_run": false,
+  "status": "UNRESOLVED",
+  "reason": "no cheap isolated return-wave fixture with reference result"
+}

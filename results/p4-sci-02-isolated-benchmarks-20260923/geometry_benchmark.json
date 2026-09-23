@@ -1,0 +1,92 @@
+{
+  "case": "chain variable-area duct only",
+  "motor": false,
+  "port": false,
+  "coupling": false,
+  "cases": [
+    {
+      "N": 52,
+      "dx_target": 0.015,
+      "status": "PASS",
+      "metrics": {
+        "arrival": 0.0007032510144861432,
+        "expected_center_return": 0.0007919455160226819,
+        "negative": -6.481813343510639,
+        "positive": -0.5205098601212359,
+        "pressure_integral": 0.009004052246434963,
+        "mass_exchange": 5.803789298251254e-10,
+        "arrival_angle": 192.65851826075058,
+        "closing_angle": 270.0,
+        "volume": 0.0004084070449666731,
+        "signal_peak": 6.481813343510639
+      },
+      "checks": {
+        "completed": true,
+        "conservation": true,
+        "stages": true,
+        "positive": true,
+        "events": true,
+        "CFL": true,
+        "reflection_sign": true,
+        "return_timing": true
+      },
+      "wall_seconds": 1.2595766000449657
+    },
+    {
+      "N": 101,
+      "dx_target": 0.0075,
+      "status": "PASS",
+      "metrics": {
+        "arrival": 0.0007293668726328516,
+        "expected_center_return": 0.0007973772410982832,
+        "negative": -7.149944651157595,
+        "positive": -0.15013065119224533,
+        "pressure_integral": 0.009339956963644895,
+        "mass_exchange": 6.814887252777317e-10,
+        "arrival_angle": 193.12860370739133,
+        "closing_angle": 270.0,
+        "volume": 0.0004084070449666731,
+        "signal_peak": 7.149944651157595
+      },
+      "checks": {
+        "completed": true,
+        "conservation": true,
+        "stages": true,
+        "positive": true,
+        "events": true,
+        "CFL": true,
+        "reflection_sign": true,
+        "return_timing": true
+      },
+      "wall_seconds": 4.198063000105321
+    },
+    {
+      "N": 202,
+      "dx_target": 0.00375,
+      "status": "PASS",
+      "metrics": {
+        "arrival": 0.0007417177581432679,
+        "expected_center_return": 0.0007919455160226819,
+        "negative": -7.60035895472558,
+        "positive": -0.021626737712798126,
+        "pressure_integral": 0.00953663641503765,
+        "mass_exchange": 7.483414495506991e-10,
+        "arrival_angle": 193.35091964657883,
+        "closing_angle": 270.0,
+        "volume": 0.0004084070449666731,
+        "signal_peak": 7.60035895472558
+      },
+      "checks": {
+        "completed": true,
+        "conservation": true,
+        "stages": true,
+        "positive": true,
+        "events": true,
+        "CFL": true,
+        "reflection_sign": true,
+        "return_timing": true
+      },
+      "wall_seconds": 15.005430599674582
+    }
+  ]
+}
