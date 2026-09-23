@@ -50,6 +50,8 @@ def once():
     except subprocess.TimeoutExpired as e:
         (d/'stdout.log').write_text(e.stdout or '',encoding='utf-8'); (d/'stderr.log').write_text(e.stderr or '',encoding='utf-8'); code='TIMEOUT'
     after={'HEAD_after':git_head(),'status_after':git_status(),'state_after':read(R/'state.json',{}),'tasks_after':read(R/'current_tasks.json',{})}; write(d/'result.json',{'returncode':code,'duration':time.time()-start,**after})
+    previous=read(STATE,{}); count=int(previous.get('invocation_count',0))+1
+    write(STATE,{'status':'RUNNING' if code==0 else 'BLOCKED','pid':os.getpid(),'started_at':previous.get('started_at',now()),'last_heartbeat':now(),'invocation_count':count,'current_invocation':inv,'current_phase':after['state_after'].get('current_phase'),'current_task':after['state_after'].get('current_subphase'),'HEAD':after['HEAD_after'],'terminal_reason':None if code==0 else 'AGENT_FAILED'})
     release(); return 'PASS' if code==0 else 'SUPERVISOR_AGENT_FAILED'
 def main(argv):
     R.mkdir(parents=True,exist_ok=True); a=argv[1] if len(argv)>1 else 'status'

@@ -1,6 +1,7 @@
 {
   "repo": "E:\\dino\\Dino",
-  "agent_command": [],
+  "agent_command": ["codex", "exec", "-C", "E:\\dino\\Dino", "--dangerously-bypass-approvals-and-sandbox", "-"],
+  "agent_adapter": "codex",
   "agent_timeout_seconds": 3600,
   "max_no_progress_attempts": 3,
   "max_invocations": 20,
