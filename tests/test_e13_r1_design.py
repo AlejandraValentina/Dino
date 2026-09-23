@@ -14,8 +14,9 @@ class E13R1DesignTests(unittest.TestCase):
     def test_r13a_is_valid_pass_after_replay(self):
         d=json.loads(Path("results/p4-r13a-20260923/decision.json").read_text())
         self.assertTrue(d["cycle56_vs54"])
-    def test_all_decisions_pending(self):
+    def test_all_decisions_approved_without_implementation(self):
         d=json.loads(Path("results/e13-r1-design-20260923/r1_revision.json").read_text())
-        self.assertTrue(all(v=="PENDING_HUMAN_APPROVAL" for v in d["human_approval"].values()))
+        self.assertTrue(all(v=="HUMAN_APPROVED" for v in d["human_approval"].values()))
+        self.assertFalse(d["implementation"])
 
 if __name__ == "__main__": unittest.main()
