@@ -1,26 +1,22 @@
 {
   "current_phase": "P5_B",
-  "current_subphase": "P5-B-R1",
+  "current_subphase": "P5-B implementation",
   "base_commit": "854e59e",
-  "latest_commit": "1ce30c5",
-  "classification": "P5_B_BLOCKED_INTEGRATION",
-  "attempt": 2,
+  "latest_commit": "pending",
+  "classification": "PENDING_IMPLEMENTATION",
+  "attempt": 0,
   "gates": {
-    "implementation": "PARTIAL",
-    "numerical": "BLOCKED",
+    "implementation": "IN_PROGRESS",
+    "numerical": "PENDING",
     "regression": "PASS",
     "openspec": "PASS"
   },
-  "blockers": [
-    "-p dV/dt",
-    "global mass/energy/species ledgers",
-    "full gas1d interior evolution"
-  ],
+  "blockers": [],
   "dependencies": {
     "P4": "UNRESOLVED",
     "P5": "CONDITIONAL"
   },
   "started_at": "2026-09-23T16:18:57.340428+00:00",
   "completed_at": "2026-09-23T16:18:57.340428+00:00",
-  "next_action": "Implement stage-consistent volume work and auditable ledgers"
+  "next_action": "Complete duct/core stage integration and audit ledgers"
 }

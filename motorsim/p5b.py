@@ -48,7 +48,7 @@ class DuctCell:
 
 class IntegratedIntakeTransfer:
     """Atmosphere→intake→crankcase with two independent transfer endpoints."""
-    def __init__(self, crankcase, cylinder, duct_states, *, eos=None):
+    def __init__(self, crankcase, cylinder, duct_states, *, eos=None, volume_rates=(0.0, 0.0)):
         if len(duct_states) != 3:
             raise ValueError("expected intake, transfer1 and transfer2 states")
         self.eos = eos or IdealGas()
@@ -57,6 +57,9 @@ class IntegratedIntakeTransfer:
         self.duct_states = [x if isinstance(x, DuctCell) else DuctCell(self.eos.conservative(x), 1e-2)
                             for x in duct_states]
         self.angle = 0.0
+        self.volume_rates = tuple(volume_rates)
+        self.ledger = {'external_mass':0.0,'external_energy':0.0,'external_species':0.0,
+                       'cc_work':0.0,'cyl_work':0.0}
         self.history = []
 
     def _areas(self, angle):
@@ -76,14 +79,20 @@ class IntegratedIntakeTransfer:
         for area in (at1, at2):
             fluxes.append(interface_exchange(self.crankcase, self.duct_states[1].primitive(self.eos), area, 1, eos=self.eos))
         # One interface solve supplies the flux trace and the chamber update.
-        self.crankcase.apply_exchange(fluxes[0]['outward'], dt, self.eos)
+        self.crankcase.apply_exchange(fluxes[0]['outward'], dt, self.eos,
+                                      work=-self.crankcase.primitive[2]*self.volume_rates[0]*dt)
         self.crankcase.apply_exchange(fluxes[1]['outward'], dt, self.eos)
         self.crankcase.apply_exchange(fluxes[2]['outward'], dt, self.eos)
         self.cylinder.apply_exchange(tuple(-x for x in fluxes[1]['outward']), dt, self.eos)
-        self.cylinder.apply_exchange(tuple(-x for x in fluxes[2]['outward']), dt, self.eos)
+        self.cylinder.apply_exchange(tuple(-x for x in fluxes[2]['outward']), dt, self.eos,
+                                     work=-self.cylinder.primitive[2]*self.volume_rates[1]*dt)
         self.duct_states[0].apply_flux(fluxes[0]['outward'], dt, self.eos, sign=-1.0)
         self.duct_states[1].apply_flux(fluxes[1]['outward'], dt, self.eos, sign=-1.0)
         self.duct_states[2].apply_flux(fluxes[2]['outward'], dt, self.eos, sign=-1.0)
+        f = fluxes[0]['outward']; self.ledger['external_mass'] += dt*f[0]
+        self.ledger['external_energy'] += dt*f[2]; self.ledger['external_species'] += dt*f[3]
+        self.ledger['cc_work'] += -self.crankcase.primitive[2]*self.volume_rates[0]*dt
+        self.ledger['cyl_work'] += -self.cylinder.primitive[2]*self.volume_rates[1]*dt
         self.history.append({'angle':self.angle,'areas':(ai,at1,at2),
                              'fluxes':[f['outward'] for f in fluxes],
                              'crankcase':self.crankcase.inventory(self.eos),
