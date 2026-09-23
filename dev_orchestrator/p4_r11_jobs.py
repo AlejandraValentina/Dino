@@ -97,38 +97,49 @@ def p4_r11_cycle_job(job_id, job_dir, worker_id, N, dx_target, start_cycle, max_
     from motorsim.checkpoint import save_summary, save_restart
     from dev_orchestrator.p4_hybrid import checks
 
-    # Load start state: try R11 stageA restart first (for B stage), then R8
+    # Load start state: try R11 stageA restart for any start >40, then R8
     import gzip as gz, json as js
     row0 = None
-    # Try R11 stageA restart for start_cycle 60
-    if start_cycle == 60:
-        # Try stageA
-        for cand in [
+    state = None
+    cells = None
+    begin = None
+    # Try R11 stageA for start >=41
+    if start_cycle >= 41:
+        # Try restart first
+        candidates = [
+            Path(f"results/p4-r12-20260922/campaign_N{N}_45_52/jobs/G1_N{N}_45_52/restart_cycle{start_cycle:02}/state.npz"),
+            Path(f"results/p4-r12-20260922/campaign_N{N}_50_54/jobs/G1_N{N}_50_54/restart_cycle{start_cycle:02}/state.npz"),
             Path(f"results/p4-r11-20260922/campaign_stageA/jobs/G1_N{N}_A/restart_cycle{start_cycle:02}/state.npz"),
-            Path(f"results/p4-r11-20260922/campaign_stageA/jobs/G1_N{N}_A/full_cycle{start_cycle:02}.json.gz"),
-            Path(f"results/p4-r11-20260922/campaign_stageA/jobs/G1_N{N}_A/summary_cycle{start_cycle:02}.json"),
-        ]:
-            if cand.exists():
-                if cand.suffix == ".npz":
-                    # Load via checkpoint
-                    from motorsim.checkpoint import load_restart
-                    meta, s_arr, c_arr = load_restart(cand.parent)
-                    # Need full row for history? For B we will load full row from FULL_DEBUG if exists
-                    # Also need row0 with history for metrics, try to load full_cycle
-                    full_path = cand.parent.parent / f"full_cycle{start_cycle:02}.json.gz"
-                    if full_path.exists():
-                        row0 = js.loads(gz.decompress(full_path.read_bytes()))
-                    else:
-                        # Fallback: create minimal row from restart
-                        row0 = dict(state=s_arr.tolist(), cells=c_arr.tolist(), end=meta['angle'], begin=meta['angle']-360, history=[], initial_cylinder_mass=s_arr[6] if len(s_arr)>6 else 0.0001)
-                    state = s_arr.tolist() if isinstance(s_arr, np.ndarray) else s_arr
-                    cells = c_arr.tolist() if isinstance(c_arr, np.ndarray) else c_arr
-                    begin = meta['angle']
-                    break
-        if row0 is None:
-            # Fallback to R8
-            pass
+        ]
+        cand = next((p for p in candidates if p.exists()), candidates[-1])
+        if cand.exists():
+            from motorsim.checkpoint import load_restart
+            meta, s_arr, c_arr = load_restart(cand.parent)
+            # Try to load full for history
+            full_path = cand.parent.parent / f"full_cycle{start_cycle:02}.json.gz"
+            if full_path.exists():
+                try:
+                    row0 = js.loads(gz.decompress(full_path.read_bytes()))
+                except:
+                    row0 = None
+            if row0 is None:
+                # Create minimal row from restart (history will be duplicated)
+                row0 = dict(state=s_arr.tolist(), cells=c_arr.tolist(), end=meta['angle'], begin=meta['angle']-360, history=[], initial_cylinder_mass=float(s_arr[6]) if len(s_arr)>6 else 0.0001)
+            state = s_arr.tolist() if isinstance(s_arr, np.ndarray) else s_arr
+            cells = c_arr.tolist() if isinstance(c_arr, np.ndarray) else c_arr
+            begin = float(meta['angle'])
+        else:
+            # Try summary? For 45 we have summary but need state/cells from restart 45? Actually restart 45 exists, so above should have found it
+            # If not, try loading from summary's state? But summary doesn't have state/cells full?
+            # Fallback to try full_cycle directly
+            full_path = Path(f"results/p4-r11-20260922/campaign_stageA/jobs/G1_N{N}_A/full_cycle{start_cycle:02}.json.gz")
+            if full_path.exists():
+                row0 = js.loads(gz.decompress(full_path.read_bytes()))
+                state = row0['state']
+                cells = row0['cells']
+                begin = row0['end']
     if row0 is None:
+        # Fallback to R8
         if N==300:
             src = Path(f"results/p4-r8-20260922/artifacts/N300-continuation-cycle{start_cycle:02}.json.gz")
             if not src.exists():
@@ -141,10 +152,13 @@ def p4_r11_cycle_job(job_id, job_dir, worker_id, N, dx_target, start_cycle, max_
             src = Path(f"results/p4-r8-20260922/campaign_N350_N400/jobs/G1_N400_30cycles/G1-cycle{start_cycle:02}.json.gz")
         else:
             raise ValueError(N)
-        row0 = js.loads(gz.decompress(src.read_bytes()))
-        state = row0['state']
-        cells = row0['cells']
-        begin = row0['end']
+        if src.exists():
+            row0 = js.loads(gz.decompress(src.read_bytes()))
+            state = row0['state']
+            cells = row0['cells']
+            begin = row0['end']
+        else:
+            raise FileNotFoundError(f"No source for N{N} cycle {start_cycle}")
     # Prepare mesh
     from motorsim.exhaust_geometry import exhaust_mesh
     from dev_orchestrator.p4_waves import segments
@@ -226,11 +240,22 @@ def p4_r11_cycle_job(job_id, job_dir, worker_id, N, dx_target, start_cycle, max_
             vec1 = dict(max_norm=1)
             vec2 = dict(max_norm=1)
         # Record temporal
+        # Normalize bool to Python bool for JSON (avoid np.bool_ -> "False" via default=str)
+        def _to_py_bool(v):
+            if isinstance(v, (bool,)):
+                return bool(v)
+            try:
+                import numpy as np
+                if isinstance(v, np.bool_):
+                    return bool(v)
+            except:
+                pass
+            return bool(v) if isinstance(v, (int, float)) and v in (0,1) else v
         temporal.append(dict(
             cycle=cycle,
             work=row['work_indicated_J'],
-            d1_work=d1.get('work'), d1_sensor_max=d1.get('sensor_max'), d1_cyl=d1.get('cylinder'), d1_passed=d1.get('passed'),
-            d2_work=d2.get('work'), d2_sensor_max=d2.get('sensor_max'), d2_cyl=d2.get('cylinder'), d2_passed=d2.get('passed'),
+            d1_work=d1.get('work'), d1_sensor_max=d1.get('sensor_max'), d1_cyl=d1.get('cylinder'), d1_passed=bool(d1.get('passed')),
+            d2_work=d2.get('work'), d2_sensor_max=d2.get('sensor_max'), d2_cyl=d2.get('cylinder'), d2_passed=bool(d2.get('passed')),
             d2_details=d2.get('sensor_details'),
             vec1=vec1, vec2=vec2,
             port_exchange=row['port_integral'][0],

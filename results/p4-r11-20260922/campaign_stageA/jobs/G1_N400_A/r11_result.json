@@ -83,7 +83,7 @@
       "d2_work": 3.713431801971689e-05,
       "d2_sensor_max": 0.014920916392408947,
       "d2_cyl": 3.8016024265895286e-05,
-      "d2_passed": "False",
+      "d2_passed": false,
       "d2_details": [
         {
           "sensor_index": 0,
@@ -217,7 +217,7 @@
       "d2_work": 2.2647178019663513e-05,
       "d2_sensor_max": 0.011123400025062888,
       "d2_cyl": 2.0991884378531436e-05,
-      "d2_passed": "False",
+      "d2_passed": false,
       "d2_details": [
         {
           "sensor_index": 0,
@@ -351,7 +351,7 @@
       "d2_work": 8.848786931274195e-06,
       "d2_sensor_max": 0.007597857857305206,
       "d2_cyl": 1.3983298898764746e-05,
-      "d2_passed": "False",
+      "d2_passed": false,
       "d2_details": [
         {
           "sensor_index": 0,
@@ -485,7 +485,7 @@
       "d2_work": 5.655091923178929e-06,
       "d2_sensor_max": 0.008183885715879876,
       "d2_cyl": 7.027534229337241e-06,
-      "d2_passed": "False",
+      "d2_passed": false,
       "d2_details": [
         {
           "sensor_index": 0,

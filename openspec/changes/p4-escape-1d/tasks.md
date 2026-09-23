@@ -673,3 +673,13 @@ Evidencia: `results/p4-r6-20260921/artifacts/diagnosis.json` (D1/D2/D3/D4, vecto
 - [x] Clasificación: **P4_R7_PERIOD_2_ROBUST_NUMERICAL_ORBIT** (Caso A con matiz sensor) — robusta numéricamente como period-2 (backend/CFL/espacial), aunque sensor estricto 0.005 no se alcanza ni en lag2 original; requiere decisión científica para E13. No P4 PASS, no P5, no multicore AUTO (workers=1).
 
 Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.json`, `cfl.json`, `spatial_N*.json`, `orbit_comparison.json`, `docs/gasdynamic/p4_r7_robustness.md`, `results/p4-r7-20260921/decision.json` (multicore no modificado, workers=1).
+
+## P4-R12 — cierre por ramas (orden 87e62d1e)
+
+- [x] Auditoría N400 ciclo54 válida: continuación normal desde `restart_cycle50`; D2 compara 54 contra 52 y reproduce `sensor_max=0.009046195029969764`; conservación/admisibilidad PASS.
+- [x] Continuación única N350 desde `restart_cycle50`: sólo ciclos 51 y 52 ejecutados; ciclo52 PASS, conservación/admisibilidad PASS.
+- [x] Seguimientos impar/par independientes: N350 impar 5, par 3; N400 impar 6, par 2 con secuencia par `[PASS,PASS,FAIL]`.
+- [x] Corrección de serialización booleana: JSON `true`/`false`, nunca cadenas; tests específicos de streak y `numpy.bool_` PASS.
+- [x] R11 corregido y separado: `P4_R11_PERIOD2_LAG2_CLOSURE_CONFIRMED` permanece válido bajo su contrato global.
+- [x] Clasificación terminal R12: **P4_R12_ONE_BRANCH_NONCLOSURE**.
+- [x] OpenSpec estricto PASS; no se ejecutaron N400 56/58/60, E13-R1, P4 PASS ni P5.

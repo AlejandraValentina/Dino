@@ -16,7 +16,7 @@
       "d2_work": 2.716570484016415e-05,
       "d2_sensor_max": 0.015446014563896647,
       "d2_cyl": 2.661860843020222e-05,
-      "d2_passed": "False",
+      "d2_passed": false,
       "d2_details": [
         {
           "sensor_index": 0,
@@ -150,7 +150,7 @@
       "d2_work": 1.253707281158758e-05,
       "d2_sensor_max": 0.007828304869927166,
       "d2_cyl": 1.841040378442534e-05,
-      "d2_passed": "False",
+      "d2_passed": false,
       "d2_details": [
         {
           "sensor_index": 0,

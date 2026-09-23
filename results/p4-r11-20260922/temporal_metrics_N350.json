@@ -83,7 +83,7 @@
       "d2_work": 3.783784805552835e-05,
       "d2_sensor_max": 0.015267478077295695,
       "d2_cyl": 3.4012653890473654e-05,
-      "d2_passed": "False",
+      "d2_passed": false,
       "d2_details": [
         {
           "sensor_index": 0,
@@ -217,7 +217,7 @@
       "d2_work": 1.78377590831381e-05,
       "d2_sensor_max": 0.009868601443125817,
       "d2_cyl": 2.140293160129923e-05,
-      "d2_passed": "False",
+      "d2_passed": false,
       "d2_details": [
         {
           "sensor_index": 0,
@@ -351,7 +351,7 @@
       "d2_work": 1.0050242103550764e-05,
       "d2_sensor_max": 0.008210399256414315,
       "d2_cyl": 1.1485373585779641e-05,
-      "d2_passed": "False",
+      "d2_passed": false,
       "d2_details": [
         {
           "sensor_index": 0,
