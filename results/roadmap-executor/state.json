@@ -1,13 +1,13 @@
 {
   "current_phase": "P5_B",
-  "current_subphase": "P5B-04 chamber_conservative_rhs",
+  "current_subphase": "P5B-05 contractual_volume_work",
   "base_commit": "854e59e",
-  "latest_commit": "pending",
-  "classification": "IMPLEMENTING",
+  "latest_commit": "aece044",
+  "classification": "IMPLEMENTED_CHECKPOINT",
   "attempt": 0,
   "gates": {
-    "implementation": "IN_PROGRESS",
-    "numerical": "PENDING",
+    "implementation": "PASS",
+    "numerical": "PASS",
     "regression": "PASS",
     "openspec": "PASS"
   },
@@ -18,5 +18,5 @@
   },
   "started_at": "2026-09-23T16:18:57.340428+00:00",
   "completed_at": "2026-09-23T16:18:57.340428+00:00",
-  "next_action": "Implement stage-consistent chamber RHS and volume work"
+  "next_action": "Audit contractual volume-work behavior and proceed with P5B-05"
 }

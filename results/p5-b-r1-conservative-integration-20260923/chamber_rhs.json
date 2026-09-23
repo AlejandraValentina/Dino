@@ -1,0 +1,22 @@
+{
+  "task": "P5B-04",
+  "description": "chamber_conservative_rhs",
+  "status": "PASS",
+  "commit": "aece044",
+  "implementation": {
+    "rhs_order": ["mass", "internal_energy", "fresh_species_mass"],
+    "interface_fluxes_summed_per_stage": true,
+    "volume_update": "V_next = V + dt*dV/dt",
+    "volume_work": "-p_stage*dV/dt",
+    "pressure_sample": "pre_stage"
+  },
+  "verification": {
+    "focused_p5b_checks": 8,
+    "focused_p5b_status": "PASS",
+    "coupled_unittest_tests": 3,
+    "coupled_unittest_status": "PASS",
+    "py_compile": "PASS",
+    "pytest": "UNAVAILABLE: pytest is not installed in .venv"
+  },
+  "scope": "P5-B conditional only; P4 remains unresolved and no P5 production or campaign was run"
+}
