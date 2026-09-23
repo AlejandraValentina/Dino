@@ -1,0 +1,65 @@
+"""Windows-safe outer supervisor for the durable roadmap executor."""
+from __future__ import annotations
+import json, os, shutil, subprocess, sys, time, uuid
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT=Path(__file__).resolve().parents[1]; R=ROOT/'results'/'roadmap-executor'
+CFG=Path(__file__).with_name('roadmap_supervisor.json'); STATE=R/'supervisor_state.json'; LOCK=R/'supervisor.lock'
+TERMINAL={'P9_VALIDATION_COMPLETED','P9_VALIDATION_PARTIAL','P9_BLOCKED_EXPERIMENTAL_DATA_REQUIRED','P9_BLOCKED_CONFIGURATION_MISMATCH','P9_BLOCKED_MODEL_DISCREPANCY'}
+
+def now(): return datetime.now(timezone.utc).isoformat()
+def read(p, default):
+    try:return json.loads(Path(p).read_text(encoding='utf-8'))
+    except (FileNotFoundError, json.JSONDecodeError):return default
+def write(p,obj):
+    p=Path(p); tmp=p.with_suffix(p.suffix+'.tmp'); tmp.write_text(json.dumps(obj,indent=2),encoding='utf-8'); tmp.replace(p)
+def git_head(): return subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+def git_status(): return subprocess.check_output(['git','status','--short'],cwd=ROOT,text=True).strip().splitlines()
+def cli():
+    c=read(CFG,{})
+    if c.get('agent_command'): return c['agent_command']
+    # Discovery is reported separately; no CLI is assumed to accept our
+    # prompt protocol without an explicit command template.
+    return None
+def safe_status():
+    s=read(R/'state.json',{}); q=read(R/'current_tasks.json',{'tasks':[]}); done=sum(x.get('status')=='DONE' for x in q.get('tasks',[]))
+    sup=read(R/'supervisor_state.json',{})
+    detected = [n for n in ('codex','opencode') if shutil.which(n)]
+    return {'supervisor':sup.get('status','STOPPED'),'pid':sup.get('pid'),'HEAD':git_head(),'phase':s.get('current_phase'),'active_task':s.get('current_subphase'),'tasks':f'{done}/{len(q.get("tasks",[]))}','invocations':sup.get('invocation_count',0),'detected_clis':detected,'terminal_reason':sup.get('terminal_reason')}
+def acquire():
+    if LOCK.exists():
+        old=read(LOCK,{})
+        if old.get('pid') and old['pid']!=os.getpid():
+            try: os.kill(int(old['pid']),0); return False
+            except OSError: pass
+    write(LOCK,{'pid':os.getpid(),'started_at':now(),'repo':str(ROOT),'HEAD':git_head()}); return True
+def release():
+    if LOCK.exists() and read(LOCK,{}).get('pid')==os.getpid(): LOCK.unlink()
+def once():
+    cmd=cli()
+    if not cmd:return 'SUPERVISOR_READY_AGENT_COMMAND_REQUIRED'
+    if not acquire(): return 'SUPERVISOR_BLOCKED_UNEXPECTED_WORKTREE'
+    inv=uuid.uuid4().hex[:10]; d=R/'invocations'/inv; d.mkdir(parents=True,exist_ok=True)
+    before={'invocation_id':inv,'timestamp':now(),'HEAD_before':git_head(),'phase_before':read(R/'state.json',{}).get('current_phase'),'active_task_before':read(R/'state.json',{}).get('current_subphase'),'working_tree_before':git_status()}; write(d/'before.json',before)
+    prompt='Read AGENTS.md, roadmap state and current_tasks.json. Implement the active approved task completely, run focused tests, persist durable state. Do not reinterpret P4, do not push, preserve redme.txt unstaged.'
+    (d/'prompt.txt').write_text(prompt,encoding='utf-8'); start=time.time(); timeout=read(CFG,{}).get('agent_timeout_seconds',3600)
+    try:
+        p=subprocess.run(cmd,input=prompt,text=True,cwd=ROOT,capture_output=True,timeout=timeout)
+        (d/'stdout.log').write_text(p.stdout or '',encoding='utf-8'); (d/'stderr.log').write_text(p.stderr or '',encoding='utf-8'); code=p.returncode
+    except subprocess.TimeoutExpired as e:
+        (d/'stdout.log').write_text(e.stdout or '',encoding='utf-8'); (d/'stderr.log').write_text(e.stderr or '',encoding='utf-8'); code='TIMEOUT'
+    after={'HEAD_after':git_head(),'status_after':git_status(),'state_after':read(R/'state.json',{}),'tasks_after':read(R/'current_tasks.json',{})}; write(d/'result.json',{'returncode':code,'duration':time.time()-start,**after})
+    release(); return 'PASS' if code==0 else 'SUPERVISOR_AGENT_FAILED'
+def main(argv):
+    R.mkdir(parents=True,exist_ok=True); a=argv[1] if len(argv)>1 else 'status'
+    if a=='status': print(json.dumps(safe_status(),indent=2)); return 0
+    if a in ('once','resume'): print(once()); return 0
+    if a=='stop': write(STATE,{'status':'STOP_REQUESTED','pid':os.getpid(),'last_heartbeat':now()}); print('STOP_REQUESTED'); return 0
+    if a=='run':
+        for _ in range(read(CFG,{}).get('max_invocations',20)):
+            result=once(); print(result)
+            if result!='PASS': return 0
+        return 0
+    print('usage: status|run|resume|stop|once'); return 2
+if __name__=='__main__': raise SystemExit(main(sys.argv))

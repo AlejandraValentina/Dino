@@ -1,0 +1,1 @@
+{"status":"SUPERVISOR_READY_AGENT_COMMAND_REQUIRED","implementation":"PASS","fake_agent_tests":3,"detected_clis":["codex","opencode"],"real_smoke":"NOT_RUN","autonomous_run":"NOT_STARTED","current_phase":"P5_B","active_task":"P5B-04"}

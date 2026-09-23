@@ -1,0 +1,9 @@
+{
+  "repo": "E:\\dino\\Dino",
+  "agent_command": [],
+  "agent_timeout_seconds": 3600,
+  "max_no_progress_attempts": 3,
+  "max_invocations": 20,
+  "poll_seconds": 2,
+  "auto_commit": false
+}
