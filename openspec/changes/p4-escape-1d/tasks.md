@@ -683,3 +683,13 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [x] R11 corregido y separado: `P4_R11_PERIOD2_LAG2_CLOSURE_CONFIRMED` permanece válido bajo su contrato global.
 - [x] Clasificación terminal R12: **P4_R12_ONE_BRANCH_NONCLOSURE**.
 - [x] OpenSpec estricto PASS; no se ejecutaron N400 56/58/60, E13-R1, P4 PASS ni P5.
+
+## P4-R13 — horizonte fijo N400 (orden 235a9a48)
+
+- [x] Restart54 validado: N400, backend NUMBA_FUSED, CFL 0,4, float64, ángulo/ciclo 54; continuación física 55–60 sin early stop.
+- [x] Ciclos 55, 56, 57, 58, 59 y 60 completados con conservación/admisibilidad PASS; checkpoints y FULL_DEBUG guardados.
+- [x] Comparaciones disponibles: 58 vs 56 y 60 vs 58 PASS; control impar 57 vs 55 y 59 vs 57 PASS.
+- [x] Se conserva el FAIL R12 de 54 (`0.009046195029969764`); 56 vs 54 queda como brecha explícita porque R12 no guardó historia angular completa y no se repitió R12.
+- [x] Horizonte termina en 60; no se ejecutaron 62+, N350/N300/N500, E13-R1, P4 PASS ni P5.
+- [x] Clasificación conservadora: **P4_R13_N400_EVEN_INTERMITTENT_NONCLOSURE**; no se acredita cierre eventual sin 56 vs 54.
+- [x] Tests R13/R12: 10 PASS; OpenSpec estricto PASS.

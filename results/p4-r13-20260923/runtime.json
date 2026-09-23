@@ -1,0 +1,139 @@
+{
+  "restart54_equivalence": true,
+  "cycles_executed": [
+    55,
+    56,
+    57,
+    58,
+    59,
+    60
+  ],
+  "rows": [
+    {
+      "cycle": 55,
+      "work": 13.409528519146479,
+      "checks": {
+        "complete": true,
+        "global_balance": [
+          3.9304729194627454e-14,
+          4.577850843098429e-14,
+          2.290313167356111e-14
+        ]
+      },
+      "counts": {
+        "rhs": 56966,
+        "HLLC": 22816778,
+        "HLLE": 0,
+        "characteristic": 56966,
+        "rejected": 13162,
+        "downgrades": 0
+      },
+      "cycle_wall_seconds": 41.29700000025332
+    },
+    {
+      "cycle": 56,
+      "work": 13.64171866405269,
+      "checks": {
+        "complete": true,
+        "global_balance": [
+          3.15026021067365e-14,
+          2.909544737353565e-14,
+          7.860226220913103e-15
+        ]
+      },
+      "counts": {
+        "rhs": 58985,
+        "HLLC": 23624361,
+        "HLLE": 0,
+        "characteristic": 58985,
+        "rejected": 14011,
+        "downgrades": 0
+      },
+      "cycle_wall_seconds": 38.29600000008941
+    },
+    {
+      "cycle": 57,
+      "work": 13.409558680598277,
+      "checks": {
+        "complete": true,
+        "global_balance": [
+          3.295095039424021e-14,
+          3.4480814687003684e-14,
+          3.7247417882692367e-14
+        ]
+      },
+      "counts": {
+        "rhs": 56966,
+        "HLLC": 22816782,
+        "HLLE": 0,
+        "characteristic": 56966,
+        "rejected": 13162,
+        "downgrades": 0
+      },
+      "cycle_wall_seconds": 36.42100000008941
+    },
+    {
+      "cycle": 58,
+      "work": 13.641731736591696,
+      "checks": {
+        "complete": true,
+        "global_balance": [
+          3.3649657286540394e-14,
+          4.928635502553848e-14,
+          2.6924661605878674e-14
+        ]
+      },
+      "counts": {
+        "rhs": 58987,
+        "HLLC": 23625164,
+        "HLLE": 0,
+        "characteristic": 58987,
+        "rejected": 14011,
+        "downgrades": 0
+      },
+      "cycle_wall_seconds": 38.0
+    },
+    {
+      "cycle": 59,
+      "work": 13.409567163372722,
+      "checks": {
+        "complete": true,
+        "global_balance": [
+          3.88046009709018e-14,
+          4.558259047151153e-14,
+          3.8213552567127074e-14
+        ]
+      },
+      "counts": {
+        "rhs": 56966,
+        "HLLC": 22816782,
+        "HLLE": 0,
+        "characteristic": 56966,
+        "rejected": 13162,
+        "downgrades": 0
+      },
+      "cycle_wall_seconds": 36.73400000017136
+    },
+    {
+      "cycle": 60,
+      "work": 13.641746618767963,
+      "checks": {
+        "complete": true,
+        "global_balance": [
+          3.89432832200199e-14,
+          2.971839920189662e-14,
+          1.7657743437214346e-14
+        ]
+      },
+      "counts": {
+        "rhs": 58996,
+        "HLLC": 23628764,
+        "HLLE": 0,
+        "characteristic": 58996,
+        "rejected": 14016,
+        "downgrades": 0
+      },
+      "cycle_wall_seconds": 37.84399999957532
+    }
+  ]
+}
