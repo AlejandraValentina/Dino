@@ -1,0 +1,8 @@
+{
+  "state": true,
+  "cells": true,
+  "angle": true,
+  "cycle": true,
+  "dtype": "float64",
+  "exact": true
+}

@@ -693,3 +693,12 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [x] Horizonte termina en 60; no se ejecutaron 62+, N350/N300/N500, E13-R1, P4 PASS ni P5.
 - [x] Clasificación conservadora: **P4_R13_N400_EVEN_INTERMITTENT_NONCLOSURE**; no se acredita cierre eventual sin 56 vs 54.
 - [x] Tests R13/R12: 10 PASS; OpenSpec estricto PASS.
+
+## P4-R13A — cierre de evidencia 56 vs 54
+
+- [x] Replay sólo 51–54 desde el restart N400 ciclo50; terminal ciclo54 bitwise exacto contra restart R12: `P4_R13A_CYCLE54_REPLAY_EQUIVALENCE_PASS`.
+- [x] Reutilizado el `full_cycle56.json.gz` existente; 56 vs 54 PASS, `sensor_max=0.0011905119731371136`, sensor dominante 0, fase 132,5°.
+- [x] Secuencia par sin gap: 50 PASS, 52 PASS, 54 FAIL, 56 PASS, 58 PASS, 60 PASS.
+- [x] Clasificación corregida: **P4_R13_N400_EVEN_EVENTUAL_CLOSURE**; el FAIL de 54 permanece visible.
+- [x] Tests R13A/R13/R12: 15 PASS; OpenSpec estricto PASS.
+- [x] No se repitieron 55/56 de R13, no se ejecutaron 61+, E13-R1, P4 PASS ni P5.
