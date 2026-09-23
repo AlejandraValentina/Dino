@@ -32,6 +32,19 @@ class Chamber:
             raise ValueError("NUMERICAL_FAILURE: inadmissible chamber update")
         self.primitive = (m/self.volume, 0.0, (eos.gamma-1)*energy/self.volume, s/m)
 
+@dataclass
+class DuctCell:
+    conservative: tuple
+    volume: float
+
+    def primitive(self, eos):
+        return eos.primitive(self.conservative)
+
+    def apply_flux(self, flux, dt, eos, sign=1.0):
+        q = tuple(self.conservative[i] + sign*dt*flux[i]/self.volume for i in range(4))
+        eos.primitive(q)
+        self.conservative = q
+
 
 class IntegratedIntakeTransfer:
     """Atmosphere→intake→crankcase with two independent transfer endpoints."""
@@ -41,7 +54,8 @@ class IntegratedIntakeTransfer:
         self.eos = eos or IdealGas()
         self.crankcase = crankcase
         self.cylinder = cylinder
-        self.duct_states = list(duct_states)
+        self.duct_states = [x if isinstance(x, DuctCell) else DuctCell(self.eos.conservative(x), 1e-2)
+                            for x in duct_states]
         self.angle = 0.0
         self.history = []
 
@@ -58,19 +72,23 @@ class IntegratedIntakeTransfer:
         self.angle = self.angle + 360.0*dt if angle is None else float(angle)
         ai, at1, at2 = self._areas(self.angle)
         atmosphere = (101325.0/(self.eos.R*300.0), 0.0, 101325.0, .0)
-        fluxes = [interface_exchange(self.crankcase, atmosphere, ai, -1, eos=self.eos)]
+        fluxes = [interface_exchange(self.crankcase, self.duct_states[0].primitive(self.eos), ai, -1, eos=self.eos)]
         for area in (at1, at2):
-            fluxes.append(interface_exchange(self.crankcase, self.duct_states[1], area, 1, eos=self.eos))
+            fluxes.append(interface_exchange(self.crankcase, self.duct_states[1].primitive(self.eos), area, 1, eos=self.eos))
         # One interface solve supplies the flux trace and the chamber update.
         self.crankcase.apply_exchange(fluxes[0]['outward'], dt, self.eos)
         self.crankcase.apply_exchange(fluxes[1]['outward'], dt, self.eos)
         self.crankcase.apply_exchange(fluxes[2]['outward'], dt, self.eos)
         self.cylinder.apply_exchange(tuple(-x for x in fluxes[1]['outward']), dt, self.eos)
         self.cylinder.apply_exchange(tuple(-x for x in fluxes[2]['outward']), dt, self.eos)
+        self.duct_states[0].apply_flux(fluxes[0]['outward'], dt, self.eos, sign=-1.0)
+        self.duct_states[1].apply_flux(fluxes[1]['outward'], dt, self.eos, sign=-1.0)
+        self.duct_states[2].apply_flux(fluxes[2]['outward'], dt, self.eos, sign=-1.0)
         self.history.append({'angle':self.angle,'areas':(ai,at1,at2),
                              'fluxes':[f['outward'] for f in fluxes],
                              'crankcase':self.crankcase.inventory(self.eos),
-                             'cylinder':self.cylinder.inventory(self.eos)})
+                             'cylinder':self.cylinder.inventory(self.eos),
+                             'ducts':[list(d.conservative) for d in self.duct_states]})
         return self.history[-1]
 
     def snapshot(self):

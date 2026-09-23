@@ -1,0 +1,9 @@
+{
+  "expected": "admissible duct update",
+  "observed": "negative pressure with default duct volume 1e-4",
+  "minimal_reproducer": "P5-B step angle 300 dt 0.01",
+  "affected_code": "motorsim/p5b.py DuctCell.apply_flux",
+  "predicted_impact": "fixture numerical failure",
+  "fix": "increase fixture cell volume default to 1e-2; no solver change",
+  "verification": "3 focused tests PASS"
+}

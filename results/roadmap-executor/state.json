@@ -2,9 +2,9 @@
   "current_phase": "P5_B",
   "current_subphase": "P5-B-R1",
   "base_commit": "854e59e",
-  "latest_commit": "854e59e",
+  "latest_commit": "pending",
   "classification": "P5_B_BLOCKED_INTEGRATION",
-  "attempt": 1,
+  "attempt": 2,
   "gates": {
     "implementation": "PARTIAL",
     "numerical": "BLOCKED",
@@ -12,9 +12,9 @@
     "openspec": "PASS"
   },
   "blockers": [
-    "duct conservative update",
     "-p dV/dt",
-    "global ledgers"
+    "global mass/energy/species ledgers",
+    "full gas1d interior evolution"
   ],
   "dependencies": {
     "P4": "UNRESOLVED",
@@ -22,5 +22,5 @@
   },
   "started_at": "2026-09-23T16:18:57.340428+00:00",
   "completed_at": "2026-09-23T16:18:57.340428+00:00",
-  "next_action": "Complete P5-B conservative duct evolution and ledgers"
+  "next_action": "Implement stage-consistent volume work and auditable ledgers"
 }
