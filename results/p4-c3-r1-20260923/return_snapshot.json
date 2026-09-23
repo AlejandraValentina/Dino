@@ -1,0 +1,9 @@
+{
+  "status": "INCOMPLETE",
+  "selection_rule": "first sample at or after expected return with positive mass flux",
+  "selected": null,
+  "missing": [
+    "first-cell conservative state",
+    "interface area/normal in trace"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "status": "INCONCLUSIVE",
+  "reference": "dev_orchestrator/reference/exact_riemann.py",
+  "reason": "exact comparison cannot be formed without first-cell state",
+  "inputs_available": [
+    "chamber state",
+    "interface fluxes"
+  ],
+  "inputs_missing": [
+    "first-cell state"
+  ]
+}

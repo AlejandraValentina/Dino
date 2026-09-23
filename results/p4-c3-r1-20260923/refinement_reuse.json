@@ -1,0 +1,11 @@
+{
+  "status": "QUALITATIVE_PASS",
+  "levels": [
+    50,
+    100
+  ],
+  "return_timing": true,
+  "flow_reversal": true,
+  "chamber_response": true,
+  "new_mesh_study": false
+}

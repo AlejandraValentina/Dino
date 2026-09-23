@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "tests_previous": {
+    "focal_p4_sci_and_e13": 25,
+    "r12_r13_r13a_checkpoint": 26
+  },
+  "openspec": "PASS",
+  "new_artifact_checks": [
+    "reuse audit",
+    "snapshot selection",
+    "independent momentum status",
+    "sign convention",
+    "completeness"
+  ]
+}

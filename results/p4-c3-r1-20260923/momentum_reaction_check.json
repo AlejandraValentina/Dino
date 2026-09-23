@@ -1,0 +1,6 @@
+{
+  "status": "INCONCLUSIVE",
+  "productive_reaction_available": false,
+  "independent_reaction_available": false,
+  "reason": "existing artifact has no momentum state/face terms"
+}

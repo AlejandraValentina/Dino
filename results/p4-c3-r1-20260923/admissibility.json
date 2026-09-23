@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "source": "C3 solver run",
+  "rho_positive": true,
+  "p_positive": true,
+  "T_positive": true,
+  "Y_valid": true,
+  "finite": true
+}

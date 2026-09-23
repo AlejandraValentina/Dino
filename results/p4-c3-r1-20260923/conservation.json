@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "source": "C3 conservation artifact",
+  "mass": true,
+  "energy": true,
+  "species": true,
+  "external_flow": "none"
+}
