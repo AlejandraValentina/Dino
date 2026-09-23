@@ -3,7 +3,7 @@
 **Fase:** E13-R1-DESIGN — sólo diseño, no implementación.  
 **Fecha:** 2026-09-23  
 **Base:** `df1bc38` P4-R13A (R13A: `P4_R13_N400_EVEN_EVENTUAL_CLOSURE`)  
-**Estado:** `READY_FOR_HUMAN_REVIEW` — `proposal_revision=R1`, `implementation=false`, thresholds intactos, sin P4 PASS, sin P5  
+**Estado:** `HUMAN_APPROVED` — `proposal_revision=R1`, `implementation=false`, thresholds intactos, sin P4 PASS, sin P5  
 **Agente:** OpenCode / Muse Spark 1.2 — `INDEPENDENT_REVIEW_PENDING`
 
 ---
@@ -663,7 +663,8 @@ El restart debe conservar `anchor_cycle` y `branch_map` A/B. El anchor de la
 restart sin historia suficiente conserva el estado físico, pero inicia el
 detector con evidencia insuficiente y no reconstruye streaks por inferencia.
 
-Las decisiones A–J quedan `PENDING_HUMAN_APPROVAL`: A streak 3; B precedencia
+Las decisiones A–J quedan `HUMAN_APPROVED` por la aprobación explícita registrada
+el 2026-09-23: A streak 3; B precedencia
 period-1; C reset independiente; D ambas ramas; E thresholds sin cambios;
 F periodos mayores que 2 no soportados en GEN1; G estado del detector en
 restart; H anchor persistente; I INVALID reinicia sólo la rama afectada sin

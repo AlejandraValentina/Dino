@@ -16,7 +16,8 @@
     "cycle_convention"
   ],
   "restart": {"preserve_anchor_cycle": true, "preserve_branch_map": true, "insufficient_history": "INVALID_AND_RESET_AFFECTED"},
-  "human_approval": {"A": "PENDING_HUMAN_APPROVAL", "B": "PENDING_HUMAN_APPROVAL", "C": "PENDING_HUMAN_APPROVAL", "D": "PENDING_HUMAN_APPROVAL", "E": "PENDING_HUMAN_APPROVAL", "F": "PENDING_HUMAN_APPROVAL", "G": "PENDING_HUMAN_APPROVAL", "H": "PENDING_HUMAN_APPROVAL", "I": "PENDING_HUMAN_APPROVAL", "J": "PENDING_HUMAN_APPROVAL"},
+  "human_approval": {"A": "HUMAN_APPROVED", "B": "HUMAN_APPROVED", "C": "HUMAN_APPROVED", "D": "HUMAN_APPROVED", "E": "HUMAN_APPROVED", "F": "HUMAN_APPROVED", "G": "HUMAN_APPROVED", "H": "HUMAN_APPROVED", "I": "HUMAN_APPROVED", "J": "HUMAN_APPROVED"},
+  "approval_date": "2026-09-23",
   "r13_counterfactual": "56 vs 54 was initially INVALID/evidence gap and became VALID+PASS after R13A replay; N400 closes at 60 under the proposed contract",
   "p4_pass": false,
   "p5_started": false
