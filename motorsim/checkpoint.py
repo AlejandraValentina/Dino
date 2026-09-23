@@ -129,7 +129,7 @@ def load_summary(path: Path):
 # --------------------------------------------------------------------
 # RESTART — binary .npz + metadata.json (atomic)
 # --------------------------------------------------------------------
-def save_restart(state, cells, cycle: int, angle: float, config: dict, out_dir: Path, compressed: bool = False):
+def save_restart(state, cells, cycle: int, angle: float, config: dict, out_dir: Path, compressed: bool = False, detector=None):
     """Save exactly necessary to continue: state 0D (9), pipe conservative arrays (n,4), cycle/angle, config hash, solver hash, backend, etc."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -159,6 +159,8 @@ def save_restart(state, cells, cycle: int, angle: float, config: dict, out_dir: 
         float_dtype="float64",
         version="RESTART_V1",
     )
+    if detector is not None:
+        meta["detector"] = detector.to_json() if hasattr(detector, "to_json") else detector
     # Add provenance
     meta_path = out_dir / "metadata.json"
     npz_path = out_dir / "state.npz"
@@ -214,4 +216,3 @@ def assert_decision_size(path: Path, max_kb: int = 100):
     size_kb = path.stat().st_size / 1024
     if size_kb > max_kb:
         raise ValueError(f"decision.json too large: {size_kb:.1f}KB > {max_kb}KB, should be lightweight. Move details to artifacts.")
-

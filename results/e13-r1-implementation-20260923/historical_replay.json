@@ -1,0 +1,7 @@
+{
+  "source": ["results/p4-r13-20260923", "results/p4-r13a-20260923"],
+  "N400": {"cycle54_replay": "PASS (R13A bitwise equivalence)", "56_vs_54": "PASS", "sensor_max": 0.0011905119731371136},
+  "N350": {"status": "UNAVAILABLE_IN_HISTORICAL_ARTIFACTS"},
+  "N300": {"status": "INSUFFICIENT_HISTORICAL_ARTIFACTS"},
+  "new_simulations": false
+}

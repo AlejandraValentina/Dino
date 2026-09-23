@@ -12,6 +12,7 @@ from motorsim.gas1d.eos import IdealGas
 from .p4_waves import segments
 from .p4_r1e import verify
 from .p2_campaign import ROOT,sha,write
+from motorsim.periodicity import compare_cycles
 
 BUDGET=600.
 MAX_CYCLES=30
@@ -40,6 +41,10 @@ def checks(row):
 
 
 def periodic(previous,current):
+    result = compare_cycles(previous, current)
+    if result.get('status') == 'INVALID' and result.get('reason') == 'INCOMPLETE_ANGULAR_HISTORY':
+        raise ValueError(result['reason'])
+    return result
     def relative(a,b,floor=0.):return abs(a-b)/max(abs(a),abs(b),floor)
     def curve(row,key,index=None):
         hs=row['history'];xs=[h['angle']-row['begin'] for h in hs]
