@@ -1,0 +1,12 @@
+{
+  "intake": {
+    "positive_direction": "external_to_crankcase",
+    "normal": "-1",
+    "positive_flux": "into_crankcase"
+  },
+  "transfer": {
+    "positive_direction": "crankcase_to_cylinder",
+    "normal": "1",
+    "positive_flux": "toward_cylinder"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "intake_forward": "PASS",
+  "intake_backflow": "PASS",
+  "transfer_forward": "PASS",
+  "transfer_backflow": "PASS",
+  "closed_ports": "PASS",
+  "partial_ports": "PASS",
+  "intake_wave": "PASS_CORE_TRAVEL",
+  "transfer_wave": "PASS_CORE_TRAVEL",
+  "symmetry": "PASS",
+  "asymmetry": "PASS",
+  "global_conservation": "PASS_ANALYTICAL_CLOSED",
+  "admissibility": "PASS",
+  "serialization": "PASS"
+}

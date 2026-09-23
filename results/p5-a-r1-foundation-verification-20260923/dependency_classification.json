@@ -1,0 +1,17 @@
+{
+  "independent": [
+    "geometry",
+    "port laws",
+    "fixtures",
+    "waves",
+    "backflow",
+    "conservation",
+    "admissibility",
+    "serialization"
+  ],
+  "conditional_on_p4": [
+    "integrated periodicity",
+    "final operating point",
+    "tuned engine interaction"
+  ]
+}

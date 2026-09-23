@@ -1,0 +1,6 @@
+{
+  "status": "PASS_CORE_TRAVEL",
+  "propagation": "mesh travel-time verified",
+  "reflection": "boundary contract recorded",
+  "admissibility": true
+}

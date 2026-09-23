@@ -1,0 +1,7 @@
+{
+  "status": "PASS_ANALYTICAL_CLOSED",
+  "mass": true,
+  "energy": true,
+  "species": true,
+  "threshold": "P3/P4 contractual"
+}
