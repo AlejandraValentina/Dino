@@ -1,0 +1,6 @@
+{
+  "classification": "P4_SCI_E1_RESOLUTION_HYPOTHESIS_SUPPORTED",
+  "basis": "branch B sensor metric decreases clearly and sustainedly below baseline late horizon, but branch A does not close and no period2 convergence",
+  "mesh_convergence_claimed": false,
+  "checkpoint_instrumentation": "physical checkpoint writes were off by one cycle; reproducibility audit is invalidated as a checkpoint comparison, not the per-cycle scientific trace"
+}

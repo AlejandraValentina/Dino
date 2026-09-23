@@ -1,0 +1,74 @@
+{
+  "cycle": 15,
+  "angle": 5580.0,
+  "n": 375,
+  "dx_target": null,
+  "backend": "NUMBA_FUSED",
+  "cfl": 0.4,
+  "config_hash": "p4-sci-e1-g2-dx002",
+  "solver_hash": "",
+  "timestamp": 1790171893.8488626,
+  "float_dtype": "float64",
+  "version": "RESTART_V1",
+  "detector": {
+    "anchor_cycle": 1,
+    "branch_map": {
+      "A": "odd",
+      "B": "even"
+    },
+    "lag1_streak": 0,
+    "branch_A_streak": 0,
+    "branch_B_streak": 0,
+    "detected_period": null,
+    "converged_cycle": null,
+    "history_identity": {
+      "configuration_hash": "p4-sci-e1-g2-dx002",
+      "scientific_contract_id": "E13-R1",
+      "solver": "NUMBA_FUSED",
+      "backend": "NUMBA_FUSED",
+      "mesh": 375,
+      "geometry": "chain",
+      "rpm": 3000,
+      "operating_point": "G2",
+      "cycle_convention": "360",
+      "anchor_cycle": 1,
+      "branch_map": {
+        "A": "odd",
+        "B": "even"
+      }
+    },
+    "last_metrics": {
+      "work": 0.03465571666096567,
+      "cylinder": 0.005643174261955943,
+      "sensor": [
+        0.5428477864684109,
+        0.44955705339777985,
+        0.4277080750506675
+      ],
+      "sensor_max": 0.5428477864684109,
+      "port": 0.012321089579827834,
+      "inventories": [
+        0.0007171392862249813,
+        0.0,
+        0.0005455002252043872,
+        0.005516680607490975,
+        0.006364716211314473,
+        0.0006753582014864534,
+        0.0010156150963821233,
+        0.006175763814799385,
+        0.010316047058672173,
+        0.03580760759616161,
+        0.0051858214418768235,
+        0.04524649685649209
+      ],
+      "cylinder_pressure": 0.005643174261955943,
+      "sensor_pressure": [
+        0.5428477864684109,
+        0.44955705339777985,
+        0.4277080750506675
+      ],
+      "port_mass": 0.012321089579827834,
+      "passed": false
+    }
+  }
+}

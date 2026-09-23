@@ -1,0 +1,12 @@
+{
+  "dx_target": 0.002,
+  "N": 375,
+  "backend": "NUMBA_FUSED",
+  "cfl": 0.4,
+  "rpm": 3000,
+  "workers": 1,
+  "geometry": "chain",
+  "single_changed_variable": "dx_target",
+  "hypothesis": "H_NUM_RESOLUTION",
+  "prediction": "branch B lag2 sensor_max materially reduces"
+}

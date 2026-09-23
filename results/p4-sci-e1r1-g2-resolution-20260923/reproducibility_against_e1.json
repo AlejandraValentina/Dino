@@ -1,0 +1,38 @@
+[
+  {
+    "cycle": 5,
+    "state_max_abs_diff": 0.07107256372896131,
+    "mesh_shape_equal": true,
+    "control_used_as_input": false
+  },
+  {
+    "cycle": 10,
+    "state_max_abs_diff": 0.2569356108765817,
+    "mesh_shape_equal": true,
+    "control_used_as_input": false
+  },
+  {
+    "cycle": 15,
+    "state_max_abs_diff": 0.5547806612821375,
+    "mesh_shape_equal": true,
+    "control_used_as_input": false
+  },
+  {
+    "cycle": 20,
+    "state_max_abs_diff": 0.542990091819533,
+    "mesh_shape_equal": true,
+    "control_used_as_input": false
+  },
+  {
+    "cycle": 25,
+    "state_max_abs_diff": 0.5619339016630249,
+    "mesh_shape_equal": true,
+    "control_used_as_input": false
+  },
+  {
+    "cycle": 30,
+    "state_max_abs_diff": 0.5646415587122817,
+    "mesh_shape_equal": true,
+    "control_used_as_input": false
+  }
+]
