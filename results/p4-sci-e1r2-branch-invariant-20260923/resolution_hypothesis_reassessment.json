@@ -1,0 +1,5 @@
+{
+  "H1_resolution_changes_solution": "SUPPORTED",
+  "H2_insufficient_resolution_causes_E13_failure": "UNPROVEN",
+  "reason": "one branch remains open after relabeling; E13 requires both branches"
+}

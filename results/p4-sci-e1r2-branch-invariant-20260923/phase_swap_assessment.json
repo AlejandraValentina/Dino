@@ -1,0 +1,5 @@
+{
+  "H_PHASE_SWAP": "SUPPORTED",
+  "evidence": "closed branch changes A\u2192B while nonclosed changes B\u2192A",
+  "caveat": "state-based cross-mesh matching unavailable; global equivalence not proven"
+}

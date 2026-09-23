@@ -1,0 +1,6 @@
+{
+  "mapping_AA_BB": "UNRESOLVED",
+  "mapping_AB_BA": "UNRESOLVED",
+  "reason": "full equivalent branch state/work/cylinder/port arrays are not retained for all terminal pairs",
+  "no_sensor_only_decision": true
+}
