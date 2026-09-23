@@ -1,1 +1,12 @@
-{"status":"SUPERVISOR_READY_AGENT_COMMAND_REQUIRED","implementation":"PASS","fake_agent_tests":3,"detected_clis":["codex","opencode"],"real_smoke":"NOT_RUN","autonomous_run":"NOT_STARTED","current_phase":"P5_B","active_task":"P5B-04"}
+{
+  "status": "RUNNING",
+  "pid": 29280,
+  "started_at": "2026-09-23T16:50:31.711509+00:00",
+  "last_heartbeat": "2026-09-23T16:50:31.711509+00:00",
+  "invocation_count": 1,
+  "current_invocation": "d5b042dda8",
+  "current_phase": "P5_B",
+  "current_task": "P5B-05 contractual_volume_work",
+  "HEAD": "7fbd48a0df872bb3dee8af863cdc6a32fd481fc9",
+  "terminal_reason": null
+}

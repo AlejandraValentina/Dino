@@ -1,0 +1,10 @@
+ImplementÃ© y persistÃ­ `P5B-04`.
+
+- RHS conservativo de cÃ¡mara por etapa con suma de fluxes.
+- Trabajo `-pÂ·dV/dt` usando presiÃ³n pre-etapa.
+- ActualizaciÃ³n conservativa de volumen, masa, energÃ­a y especie.
+- 8 checks P5-B, 3 tests `unittest` y `py_compile`: PASS.
+- `pytest` no disponible en `.venv`.
+- Estado actualizado a `P5B-05`.
+- Commits locales: `aece044`, `7fbd48a`.
+- Sin push; `redme.txt` permanece borrado y sin staged.
