@@ -30,3 +30,31 @@ def test_interior_rhs_uses_gas1d_hllc():
 def test_global_ssprk2_two_stages():
     out=ssprk2_step((1.,), lambda z:(-z[0],), .1)
     assert 0 < out[0] < 1
+
+def test_chamber_rhs_sums_one_stage_and_includes_volume_work():
+    chamber = Chamber((2.0, 0.0, 100000.0, .25), .01)
+    rhs = chamber.conservative_rhs(
+        ((.2, 0.0, 10.0, .05), (-.1, 0.0, -4.0, -.02)),
+        E, volume_rate=.003)
+    assert rhs[0] == .1
+    assert abs(rhs[1] - (6.0 - 100000.0*.003)) < 1e-12
+    assert abs(rhs[2] - .03) < 1e-12
+
+def test_chamber_stage_updates_volume_and_uses_pre_stage_pressure():
+    chamber = Chamber((2.0, 0.0, 100000.0, .25), .01)
+    initial = chamber.inventory(E)
+    rhs = chamber.conservative_rhs(((0.0, 0.0, 0.0, 0.0),), E,
+                                   volume_rate=.001)
+    chamber.apply_rhs(rhs, .1, E, volume_rate=.001)
+    assert chamber.volume == .0101
+    assert chamber.inventory(E)[0] == initial[0]
+    assert chamber.inventory(E)[2] < initial[2]
+
+def test_integrated_step_applies_each_chamber_once_with_volume_work():
+    n = make()
+    n.volume_rates = (.001, -.0005)
+    n.step(.01, angle=120)
+    assert n.crankcase.volume == .00101
+    assert n.cylinder.volume == .009995
+    assert n.ledger['cc_work'] < 0
+    assert n.ledger['cyl_work'] > 0

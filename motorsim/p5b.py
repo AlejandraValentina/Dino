@@ -45,14 +45,46 @@ class Chamber:
         rho,u,p,y = eos.validate(self.primitive)
         return rho, p, p/(rho*eos.R), y
 
+    def conservative_rhs(self, outward_fluxes, eos, volume_rate=0.0):
+        """Return the chamber RHS for one common interface stage.
+
+        ``outward_fluxes`` are all expressed with the chamber-outward sign
+        convention.  The interface solves therefore happen against the same
+        stage state and their conservative contributions are summed before
+        changing the chamber.  The only non-flux energy source is the
+        contractual closed-system work term ``-p*dV/dt``.
+        """
+        if not all(len(flux) == 4 for flux in outward_fluxes):
+            raise ValueError("invalid chamber flux")
+        _, pressure, _, _ = self.thermodynamics(eos)
+        if not isinstance(volume_rate, (int, float)):
+            raise ValueError("invalid volume rate")
+        mass = sum(flux[0] for flux in outward_fluxes)
+        energy = sum(flux[2] for flux in outward_fluxes) - pressure*volume_rate
+        species = sum(flux[3] for flux in outward_fluxes)
+        return mass, energy, species
+
+    def apply_rhs(self, rhs, dt, eos, volume_rate=0.0):
+        """Apply one already assembled chamber stage and update its volume."""
+        if dt <= 0:
+            raise ValueError("dt must be positive")
+        old_volume = self.volume
+        new_volume = old_volume + dt*volume_rate
+        if new_volume <= 0:
+            raise ValueError("NUMERICAL_FAILURE: nonpositive chamber volume")
+        mass, species, energy = self.inventory(eos)
+        mass += dt*rhs[0]
+        energy += dt*rhs[1]
+        species += dt*rhs[2]
+        if mass <= 0 or not 0 <= species <= mass or energy <= 0:
+            raise ValueError("NUMERICAL_FAILURE: inadmissible chamber update")
+        self.volume = new_volume
+        self.primitive = (mass/new_volume, 0.0,
+                          (eos.gamma-1)*energy/new_volume, species/mass)
+
     def apply_exchange(self, flux, dt, eos, work=0.0):
         """Apply one outward chamber flux; mass/energy/species are conserved."""
-        rho,u,p,y = eos.validate(self.primitive)
-        m, s, energy = self.inventory(eos)
-        m += dt*flux[0]; energy += dt*flux[2] + work; s += dt*flux[3]
-        if m <= 0 or not 0 <= s <= m or energy <= 0:
-            raise ValueError("NUMERICAL_FAILURE: inadmissible chamber update")
-        self.primitive = (m/self.volume, 0.0, (eos.gamma-1)*energy/self.volume, s/m)
+        self.apply_rhs((flux[0], flux[2] + work/dt, flux[3]), dt, eos)
 
 @dataclass
 class DuctCell:
@@ -101,20 +133,23 @@ class IntegratedIntakeTransfer:
         for area in (at1, at2):
             fluxes.append(interface_exchange(self.crankcase, self.duct_states[1].primitive(self.eos), area, 1, eos=self.eos))
         # One interface solve supplies the flux trace and the chamber update.
-        self.crankcase.apply_exchange(fluxes[0]['outward'], dt, self.eos,
-                                      work=-self.crankcase.primitive[2]*self.volume_rates[0]*dt)
-        self.crankcase.apply_exchange(fluxes[1]['outward'], dt, self.eos)
-        self.crankcase.apply_exchange(fluxes[2]['outward'], dt, self.eos)
-        self.cylinder.apply_exchange(tuple(-x for x in fluxes[1]['outward']), dt, self.eos)
-        self.cylinder.apply_exchange(tuple(-x for x in fluxes[2]['outward']), dt, self.eos,
-                                     work=-self.cylinder.primitive[2]*self.volume_rates[1]*dt)
+        crankcase_fluxes = [item['outward'] for item in fluxes]
+        cylinder_fluxes = [tuple(-x for x in fluxes[i]['outward']) for i in (1, 2)]
+        crankcase_rhs = self.crankcase.conservative_rhs(
+            crankcase_fluxes, self.eos, self.volume_rates[0])
+        cylinder_rhs = self.cylinder.conservative_rhs(
+            cylinder_fluxes, self.eos, self.volume_rates[1])
+        crankcase_work = -self.crankcase.primitive[2]*self.volume_rates[0]*dt
+        cylinder_work = -self.cylinder.primitive[2]*self.volume_rates[1]*dt
+        self.crankcase.apply_rhs(crankcase_rhs, dt, self.eos, self.volume_rates[0])
+        self.cylinder.apply_rhs(cylinder_rhs, dt, self.eos, self.volume_rates[1])
         self.duct_states[0].apply_flux(fluxes[0]['outward'], dt, self.eos, sign=-1.0)
         self.duct_states[1].apply_flux(fluxes[1]['outward'], dt, self.eos, sign=-1.0)
         self.duct_states[2].apply_flux(fluxes[2]['outward'], dt, self.eos, sign=-1.0)
         f = fluxes[0]['outward']; self.ledger['external_mass'] += dt*f[0]
         self.ledger['external_energy'] += dt*f[2]; self.ledger['external_species'] += dt*f[3]
-        self.ledger['cc_work'] += -self.crankcase.primitive[2]*self.volume_rates[0]*dt
-        self.ledger['cyl_work'] += -self.cylinder.primitive[2]*self.volume_rates[1]*dt
+        self.ledger['cc_work'] += crankcase_work
+        self.ledger['cyl_work'] += cylinder_work
         self.history.append({'angle':self.angle,'areas':(ai,at1,at2),
                              'fluxes':[f['outward'] for f in fluxes],
                              'crankcase':self.crankcase.inventory(self.eos),
