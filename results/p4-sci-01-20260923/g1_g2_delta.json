@@ -1,0 +1,27 @@
+{
+  "constants": [
+    "engine",
+    "RPM",
+    "port",
+    "heat",
+    "EOS",
+    "solver",
+    "CFL",
+    "backend",
+    "boundary",
+    "initial state"
+  ],
+  "G1": {
+    "geometry": "straight 0.75m/20mm",
+    "N": 250
+  },
+  "G2": {
+    "geometry": "chain 0.20/0.15/0.05/0.15/0.20m; 20\u219240\u219220mm",
+    "N": 251
+  },
+  "confounders": [
+    "mesh topology and cell count",
+    "area variation and internal reflections"
+  ],
+  "solver_path": "same motorsim.hybrid_fast.run_cycle and NUMBA_FUSED"
+}

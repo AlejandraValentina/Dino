@@ -1,0 +1,31 @@
+{
+  "E1": {
+    "question": "does one G2 refinement reduce B lag2?",
+    "variable": "dx only",
+    "cycles": "same bounded horizon",
+    "prediction": "resolution hypothesis predicts lower sensor0 B metric; model/BC hypotheses predict persistence",
+    "falsification": "no reduction or same nonclosure"
+  },
+  "E2": {
+    "question": "does controlled smoothing of area transitions change B?",
+    "variable": "geometry representation only",
+    "prerequisite": "geometry-source audit identifies sensitivity"
+  },
+  "E3": {
+    "question": "does isolated exterior reflection explain return?",
+    "variable": "boundary test only",
+    "prerequisite": "BC hypothesis strengthened"
+  },
+  "E4": {
+    "question": "does controlled return wave reproduce B?",
+    "variable": "coupling forcing only",
+    "prerequisite": "coupling hypothesis strengthened"
+  },
+  "priority": [
+    "E1",
+    "E3",
+    "E4",
+    "E2"
+  ],
+  "new_campaign_authorized": false
+}

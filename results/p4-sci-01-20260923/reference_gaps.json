@@ -1,0 +1,8 @@
+{
+  "status": "REFERENCE_GAP",
+  "items": [
+    "no repository citation directly quantifies variable-area source error at abrupt frustum joins",
+    "no isolated G2 boundary/coupling return-wave benchmark"
+  ],
+  "impact": "prevents selecting a scientific fix from code inspection alone"
+}
