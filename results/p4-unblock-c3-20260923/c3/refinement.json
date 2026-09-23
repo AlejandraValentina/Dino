@@ -1,0 +1,15 @@
+{
+  "levels": [
+    {
+      "N": 50,
+      "return_signal_present": true
+    },
+    {
+      "N": 100,
+      "return_signal_present": true
+    }
+  ],
+  "mesh_converges": null,
+  "status": "INCONCLUSIVE",
+  "reason": "two levels establish signal persistence but no contractual return observable"
+}

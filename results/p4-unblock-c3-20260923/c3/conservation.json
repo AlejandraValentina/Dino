@@ -1,0 +1,17 @@
+{
+  "levels": [
+    {
+      "N": 50,
+      "max_global_resid": 0.0,
+      "admissibility": true
+    },
+    {
+      "N": 100,
+      "max_global_resid": 0.0,
+      "admissibility": true
+    }
+  ],
+  "threshold": 1e-10,
+  "pass": true,
+  "source": "solver reports preserved in C3 run"
+}

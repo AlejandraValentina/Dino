@@ -1,0 +1,17 @@
+{
+  "system": "finite chamber <-> fixed-area uniform duct <-> rigid wall",
+  "p_chamber": 200000,
+  "T_chamber": 400,
+  "Y_chamber": 0.5,
+  "p_duct": 100000,
+  "T_duct": 300,
+  "Y_duct": 0.2,
+  "length": 0.5,
+  "area": 0.0003141592653589793,
+  "horizon": 0.003,
+  "CFL": 0.2,
+  "meshes": [
+    50,
+    100
+  ]
+}

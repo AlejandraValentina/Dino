@@ -1,0 +1,10 @@
+{
+  "outgoing_expected": true,
+  "rigid_reflection": true,
+  "return_time_estimate": 0.002933131540824748,
+  "return_window": [
+    0.001466565770412374,
+    0.004399697311237122
+  ],
+  "flow_reversal_expected": true
+}

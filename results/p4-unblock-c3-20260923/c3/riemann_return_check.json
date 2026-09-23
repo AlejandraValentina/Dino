@@ -1,0 +1,9 @@
+{
+  "status": "INCONCLUSIVE",
+  "reason": "return snapshot was not captured as a dedicated exact-Riemann comparison before the fixed horizon",
+  "uses_exact_solution": false,
+  "return_window": [
+    1.3612710855082564e-06,
+    0.003
+  ]
+}

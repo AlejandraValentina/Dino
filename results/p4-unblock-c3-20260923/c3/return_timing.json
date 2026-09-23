@@ -1,0 +1,10 @@
+{
+  "sound_speed": 340.9325446477646,
+  "distance": 0.5,
+  "expected_return": 0.002933131540824748,
+  "observed_window": [
+    1.3612710855082564e-06,
+    0.003
+  ],
+  "return_signal_present": true
+}

@@ -1,0 +1,6 @@
+{
+  "boundary": "rigid wall",
+  "velocity_normal_zero": "enforced by existing wall treatment",
+  "reflection": "compressible pressure reflection expected",
+  "status": "PASS_CODE_PATH"
+}
