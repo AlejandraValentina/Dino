@@ -1,0 +1,9 @@
+{
+  "cycle15_source": "results\\p4-r6-20260921\\artifacts\\g2_cycles\\G2-cycle15.json.gz",
+  "state_reused": true,
+  "detector_anchor": 1,
+  "branch_map": {
+    "A": "odd_relative_to_anchor",
+    "B": "even_relative_to_anchor"
+  }
+}
