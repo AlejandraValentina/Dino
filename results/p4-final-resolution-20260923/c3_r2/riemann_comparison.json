@@ -1,0 +1,4 @@
+{
+  "status": "INCONCLUSIVE",
+  "reason": "reference call requires extracting primitive first-cell state from snapshot"
+}

@@ -520,6 +520,10 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
             "energy_flux":op0["outward"][2],
             "species_flux":op0["outward"][3],
             "velocity_star":sm,
+            "chamber_state": list(z),
+            "first_cell_state": list(cells[0]),
+            "interface_area": C2_AREA,
+            "interface_normal": -1.0,
         }
         record(z, cells, ws, t, flux_info=interface_info)
         max_cfl=max(max_cfl, dt/op0["unit"], dt/op1["unit"])
@@ -558,4 +562,3 @@ def c2_initial_riemann_check(p_ch, T_ch, Y_ch, p_du, T_du, Y_du):
     pipe = (rho_du,0.,p_du,Y_du)
     prod = interface_flux(ch_state, pipe, C2_AREA, -1, eos=eos)
     return {"exact":{"p_star":ref.pstar,"u_star":ref.ustar,"waves":ref.waves,"iface":ref.sample(0.0)},"prod":{"flux":prod.outward,"speeds":prod.wave_speeds,"reason":prod.fallback_reason,"p_star_est":None}}
-

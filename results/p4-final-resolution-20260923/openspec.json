@@ -1,0 +1,4 @@
+{
+  "status": "PASS",
+  "command": "openspec validate p4-escape-1d --strict --no-interactive"
+}

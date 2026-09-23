@@ -1,0 +1,8 @@
+{
+  "expected_return": 0.002880277994805399,
+  "return_window": [
+    0.0014401389974026996,
+    0.004320416992208099
+  ],
+  "selection": "first admissible sample in window with positive mass flux"
+}

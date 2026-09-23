@@ -1,0 +1,9 @@
+{
+  "N": 100,
+  "CFL": 0.2,
+  "t_final": 0.004,
+  "area": 0.0003141592653589793,
+  "duct_length": 0.5,
+  "boundary": "rigid wall",
+  "backend": "existing C2 fixture"
+}
