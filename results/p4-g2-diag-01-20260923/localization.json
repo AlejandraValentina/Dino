@@ -1,0 +1,5 @@
+{
+  "status": "INCONCLUSIVE_WITHOUT_PHASE_SUPPORTING_ARTIFACT",
+  "observation": "sensor pressure is the dominant failing observable; full phase-local support was not retained in compact continuation metrics",
+  "interpretation": "cannot claim a localized wavefront"
+}

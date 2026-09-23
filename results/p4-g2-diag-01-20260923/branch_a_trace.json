@@ -1,0 +1,296 @@
+[
+  {
+    "cycle": 3,
+    "compared_to": 1,
+    "branch": "A",
+    "status": "FAIL",
+    "sensor_max": 0.07311454553377497,
+    "sensor": [
+      0.07311454553377497,
+      0.0672764241603956,
+      0.0703985225297792
+    ],
+    "work": 1.0325431262891158,
+    "cylinder": 0.23427398181464554,
+    "port": 0.09742678643892029,
+    "inventories": 0.08435255678056912,
+    "streak_before": 0,
+    "streak_after": 0,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  },
+  {
+    "cycle": 5,
+    "compared_to": 3,
+    "branch": "A",
+    "status": "FAIL",
+    "sensor_max": 0.010168069107424878,
+    "sensor": [
+      0.00645959677380278,
+      0.0036560641965279043,
+      0.010168069107424878
+    ],
+    "work": 0.0029676149147104176,
+    "cylinder": 0.00383674609158068,
+    "port": 0.009666751791172294,
+    "inventories": 0.08548921446143168,
+    "streak_before": 0,
+    "streak_after": 0,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 2
+  },
+  {
+    "cycle": 7,
+    "compared_to": 5,
+    "branch": "A",
+    "status": "FAIL",
+    "sensor_max": 0.00955741710929512,
+    "sensor": [
+      0.009410065588389275,
+      0.00955741710929512,
+      0.009487135176758124
+    ],
+    "work": 0.030629912090492453,
+    "cylinder": 0.0055578820100059345,
+    "port": 0.005337914103788077,
+    "inventories": 0.025055686875722846,
+    "streak_before": 0,
+    "streak_after": 0,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 1
+  },
+  {
+    "cycle": 9,
+    "compared_to": 7,
+    "branch": "A",
+    "status": "FAIL",
+    "sensor_max": 0.005338932594818229,
+    "sensor": [
+      0.005338932594818229,
+      0.005330651537444888,
+      0.0051299366211422235
+    ],
+    "work": 0.024512886615305103,
+    "cylinder": 0.004742913869834493,
+    "port": 0.0006300498953600741,
+    "inventories": 0.012534597395592444,
+    "streak_before": 0,
+    "streak_after": 0,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  },
+  {
+    "cycle": 11,
+    "compared_to": 9,
+    "branch": "A",
+    "status": "FAIL",
+    "sensor_max": 0.0032497850943488914,
+    "sensor": [
+      0.0032497850943488914,
+      0.002775483873942122,
+      0.003163690486058882
+    ],
+    "work": 0.010246086614938683,
+    "cylinder": 0.0022448783815823287,
+    "port": 0.0011287172524278599,
+    "inventories": 0.0038650237726381704,
+    "streak_before": 0,
+    "streak_after": 0,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  },
+  {
+    "cycle": 13,
+    "compared_to": 11,
+    "branch": "A",
+    "status": "FAIL",
+    "sensor_max": 0.005393796682305447,
+    "sensor": [
+      0.005393796682305447,
+      0.003919457033515165,
+      0.004495261580252195
+    ],
+    "work": 0.0030433853364099576,
+    "cylinder": 0.0008776347709159157,
+    "port": 0.0018680766791668894,
+    "inventories": 0.0024598717953629393,
+    "streak_before": 0,
+    "streak_after": 0,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  },
+  {
+    "cycle": 15,
+    "compared_to": 13,
+    "branch": "A",
+    "status": "FAIL",
+    "sensor_max": 0.004084211467758745,
+    "sensor": [
+      0.004084211467758745,
+      0.003524873684229704,
+      0.003540503283151019
+    ],
+    "work": 0.0019814490816637666,
+    "cylinder": 0.0008096441436586985,
+    "port": 0.0010120610865679061,
+    "inventories": 0.0025064902604099034,
+    "streak_before": 0,
+    "streak_after": 0,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  },
+  {
+    "cycle": 17,
+    "compared_to": 15,
+    "branch": "A",
+    "status": "PASS",
+    "sensor_max": 0.001979926684807585,
+    "sensor": [
+      0.001979926684807585,
+      0.0014855449415556944,
+      0.0015407905160237934
+    ],
+    "work": 0.00032770564615917984,
+    "cylinder": 0.0003389330289903658,
+    "port": 0.000733675575383123,
+    "inventories": 0.0012386877392618883,
+    "streak_before": 0,
+    "streak_after": 1,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  },
+  {
+    "cycle": 19,
+    "compared_to": 17,
+    "branch": "A",
+    "status": "FAIL",
+    "sensor_max": 0.007063290353113516,
+    "sensor": [
+      0.007063290353113516,
+      0.0066306345493726245,
+      0.006664963363025178
+    ],
+    "work": 0.0050003309638392175,
+    "cylinder": 0.0008034905775467218,
+    "port": 1.2942849889876068e-05,
+    "inventories": 0.0010056075672449868,
+    "streak_before": 0,
+    "streak_after": 0,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  },
+  {
+    "cycle": 21,
+    "compared_to": 19,
+    "branch": "A",
+    "status": "PASS",
+    "sensor_max": 0.002340847002880685,
+    "sensor": [
+      0.002340847002880685,
+      0.0018425681208244728,
+      0.002126488261465776
+    ],
+    "work": 0.0006851465952923597,
+    "cylinder": 0.00026780615578073184,
+    "port": 0.0005465730670224459,
+    "inventories": 0.0008984340106490085,
+    "streak_before": 0,
+    "streak_after": 1,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  },
+  {
+    "cycle": 23,
+    "compared_to": 21,
+    "branch": "A",
+    "status": "PASS",
+    "sensor_max": 0.004249585271578233,
+    "sensor": [
+      0.004249585271578233,
+      0.0035793673008738007,
+      0.0034892372000891016
+    ],
+    "work": 0.0002924503506407154,
+    "cylinder": 0.0001751451533257961,
+    "port": 0.00046672677347375574,
+    "inventories": 0.000771493657149317,
+    "streak_before": 0,
+    "streak_after": 1,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  },
+  {
+    "cycle": 25,
+    "compared_to": 23,
+    "branch": "A",
+    "status": "PASS",
+    "sensor_max": 0.0009643634490156208,
+    "sensor": [
+      0.0009643634490156208,
+      0.0008128390654235556,
+      0.000905736507693124
+    ],
+    "work": 0.00019484834500165855,
+    "cylinder": 0.00011667055567562343,
+    "port": 0.0002363489798898879,
+    "inventories": 0.0003932458911114749,
+    "streak_before": 0,
+    "streak_after": 1,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  },
+  {
+    "cycle": 27,
+    "compared_to": 25,
+    "branch": "A",
+    "status": "PASS",
+    "sensor_max": 0.00027234513860523396,
+    "sensor": [
+      0.00027234513860523396,
+      0.00023547562560255093,
+      0.000256696375864451
+    ],
+    "work": 0.00017111049845035283,
+    "cylinder": 8.144221082193131e-05,
+    "port": 0.00013831949187037112,
+    "inventories": 0.0002249524807256335,
+    "streak_before": 0,
+    "streak_after": 1,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  },
+  {
+    "cycle": 29,
+    "compared_to": 27,
+    "branch": "A",
+    "status": "PASS",
+    "sensor_max": 0.0001577184022186247,
+    "sensor": [
+      0.0001577184022186247,
+      0.00012884397707924123,
+      0.00014332518892533347
+    ],
+    "work": 0.000137574451804887,
+    "cylinder": 5.790644013650341e-05,
+    "port": 9.316592848746307e-05,
+    "inventories": 0.0001551976495613002,
+    "streak_before": 0,
+    "streak_after": 1,
+    "conservation": true,
+    "admissibility": true,
+    "dominant_sensor": 0
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "route": "NO_JUSTIFIED_NEXT_SIMULATION",
+  "reason": "all 30 cycles are contractually exhausted; B remains persistently above thresholds without detector defect",
+  "p4": "P4_BLOCKED_G2_PERIODIC_EVIDENCE"
+}
