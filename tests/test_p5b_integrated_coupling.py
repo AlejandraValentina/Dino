@@ -1,4 +1,5 @@
-from motorsim.p5b import Chamber, IntegratedIntakeTransfer
+from motorsim.p5b import Chamber, IntegratedIntakeTransfer, interior_rhs
+from motorsim.gas1d.mesh import uniform_mesh
 from motorsim.gas1d.eos import IdealGas
 
 E=IdealGas()
@@ -19,3 +20,9 @@ def test_two_transfer_entities_and_restart_determinism():
 def test_complete_subsystem_has_trace_and_no_exhaust():
     n=make(); [n.step(.005, angle=i*30) for i in range(12)]
     assert len(n.history)==12 and all(len(x['fluxes'])==3 for x in n.history)
+
+def test_interior_rhs_uses_gas1d_hllc():
+    mesh=uniform_mesh(2, length=1., area=1.)
+    states=[(1.,0.,100000.,.2),(1.,10.,100000.,.2)]
+    rhs=interior_rhs(mesh,states,E)
+    assert len(rhs)==2 and rhs[0][0] != 0

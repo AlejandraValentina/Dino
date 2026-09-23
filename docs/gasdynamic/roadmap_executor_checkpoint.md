@@ -12,3 +12,5 @@ Roadmap executor attempt 2 fixed a localized fixture timestep/volume defect (neg
 # P5-B implementation checkpoint
 
 La implementación contractual continúa en estado `PENDING_IMPLEMENTATION`, no BLOCKED. Se añadieron estados conservativos de celdas 1D, aplicación de flux único a cámaras y ductos, y ledger básico de frontera/trabajo. Aún faltan cerrar la integración con el RHS interior gas1d, la cuadratura SSPRK2 y los balances auditables antes de evaluar el gate.
+
+Executor queue created at `results/roadmap-executor/current_tasks.json`. P5B-01 interior HLLC finite-volume RHS is implemented and verified (4 focused tests). The executor remains in `IMPLEMENTING` at P5B-02; nineteen approved tasks remain and no phase transition occurred.

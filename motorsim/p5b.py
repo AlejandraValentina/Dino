@@ -7,6 +7,21 @@ from copy import deepcopy
 from .duct_network import interface_exchange
 from .coupling import ChamberState
 from .gas1d.eos import IdealGas
+from .gas1d.riemann import hllc_flux
+
+
+def interior_rhs(mesh, states, eos=None):
+    """Interior finite-volume RHS using the existing HLLC core."""
+    eos = eos or IdealGas()
+    if len(states) != mesh.n:
+        raise ValueError("state/mesh size mismatch")
+    fluxes = [hllc_flux(a, b, eos)[0] for a, b in zip(states, states[1:])]
+    rhs = []
+    for i in range(mesh.n):
+        left = fluxes[i-1] if i else (0., 0., 0., 0.)
+        right = fluxes[i] if i < len(fluxes) else (0., 0., 0., 0.)
+        rhs.append(tuple(-(right[k]-left[k])/mesh.volumes[i] for k in range(4)))
+    return tuple(rhs)
 
 
 @dataclass
