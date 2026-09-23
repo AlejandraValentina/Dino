@@ -1,0 +1,14 @@
+{
+  "independent": [
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "B5 fixture topology"
+  ],
+  "conditional_on_p4": [
+    "full engine",
+    "periodicity",
+    "exhaust interaction"
+  ]
+}

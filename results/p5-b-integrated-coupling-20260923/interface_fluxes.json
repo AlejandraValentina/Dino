@@ -1,0 +1,5 @@
+{
+  "status": "PASS_TRACE",
+  "interfaces": 3,
+  "single_riemann_per_interface": true
+}

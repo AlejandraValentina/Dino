@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    "atmosphere",
+    "intake",
+    "crankcase",
+    "transfer1",
+    "transfer2",
+    "cylinder"
+  ],
+  "exhaust": "absent"
+}

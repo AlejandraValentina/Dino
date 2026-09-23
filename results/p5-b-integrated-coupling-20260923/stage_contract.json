@@ -1,0 +1,15 @@
+{
+  "order": [
+    "angle",
+    "volumes",
+    "areas",
+    "states",
+    "riemann",
+    "duct_rhs",
+    "chamber_rhs",
+    "pdV",
+    "update",
+    "admissibility"
+  ],
+  "status": "TRACE_IMPLEMENTED"
+}
