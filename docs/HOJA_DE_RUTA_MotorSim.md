@@ -218,3 +218,10 @@ La secuencia, las prioridades y los presupuestos anteriores son propuestas de pr
 [6] FAA, Aviation Maintenance Technician Handbook — Powerplant, Aircraft Engines (indicated/brake/friction horsepower): https://www.faa.gov/sites/faa.gov/files/03_amtp_ch1.pdf
 
 [7] Vannik Developments, EngMod4T detailed description: https://vannik.co.za/EngMod4TDetails.htm
+## Estado de governance P4 → P5 (23/09/2026)
+
+- **P4:** `BLOCKED`; `P4_acceptance = NOT_GRANTED`. La evidencia científica permanece en `P4_FINAL_BLOCKED_C3_INCONCLUSIVE`; P4 no es PASS.
+- **P5:** `AUTHORIZED_CONDITIONAL`; dependencia `P4_UNRESOLVED`.
+- **Transición:** `CONDITIONALLY_BYPASSED_FOR_DEVELOPMENT`.
+
+P5 comprende intake + transfers 1D: geometría/malla, solver 1D reutilizable, fixtures aislados, topología de acoplamiento con cárter/cilindro, fronteras, conservación, admisibilidad y flujo inverso. `INDEPENDENT_OF_P4`: componentes aislados y sus pruebas. `CONDITIONAL_ON_P4`: cualquier resultado que dependa materialmente del comportamiento gasdinámico integrado. P5 podrá alcanzar `P5_IMPLEMENTATION_VERIFIED_CONDITIONAL`, nunca `P5_FULLY_ACCEPTED` mientras P4 siga bloqueado.

@@ -702,3 +702,4 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [x] Clasificación corregida: **P4_R13_N400_EVEN_EVENTUAL_CLOSURE**; el FAIL de 54 permanece visible.
 - [x] Tests R13A/R13/R12: 15 PASS; OpenSpec estricto PASS.
 - [x] No se repitieron 55/56 de R13, no se ejecutaron 61+, E13-R1, P4 PASS ni P5.
+- [x] 23/09/2026 — Decisión humana: P4 BLOCKED/NOT_GRANTED y P5 AUTHORIZED_CONDITIONAL; documentación actualizada. No se implementó P5 ni se reabrió P4.
