@@ -24,6 +24,13 @@ def interior_rhs(mesh, states, eos=None):
     return tuple(rhs)
 
 
+def ssprk2_step(state, rhs, dt):
+    """Generic two-stage SSPRK2 update for a global tuple state."""
+    z1 = tuple(x + dt*r for x, r in zip(state, rhs(state)))
+    r1 = rhs(z1)
+    return tuple(.5*(x + y + dt*r) for x, y, r in zip(state, z1, r1))
+
+
 @dataclass
 class Chamber:
     primitive: tuple

@@ -1,4 +1,4 @@
-from motorsim.p5b import Chamber, IntegratedIntakeTransfer, interior_rhs
+from motorsim.p5b import Chamber, IntegratedIntakeTransfer, interior_rhs, ssprk2_step
 from motorsim.gas1d.mesh import uniform_mesh
 from motorsim.gas1d.eos import IdealGas
 
@@ -26,3 +26,7 @@ def test_interior_rhs_uses_gas1d_hllc():
     states=[(1.,0.,100000.,.2),(1.,10.,100000.,.2)]
     rhs=interior_rhs(mesh,states,E)
     assert len(rhs)==2 and rhs[0][0] != 0
+
+def test_global_ssprk2_two_stages():
+    out=ssprk2_step((1.,), lambda z:(-z[0],), .1)
+    assert 0 < out[0] < 1

@@ -16,10 +16,10 @@
       "id": "P5B-02",
       "phase": "P5_B",
       "description": "coupled_ssprk2_stage1",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "5 focused tests PASS",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -27,10 +27,10 @@
       "id": "P5B-03",
       "phase": "P5_B",
       "description": "coupled_ssprk2_stage2",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "5 focused tests PASS",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -222,7 +222,7 @@
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     }
   ],
-  "active_task": null,
-  "last_completed_task": "P5B-01",
-  "tasks_remaining": 19
+  "active_task": "P5B-04",
+  "last_completed_task": "P5B-03",
+  "tasks_remaining": 17
 }
