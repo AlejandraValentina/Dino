@@ -1,0 +1,1 @@
+{"geometry":"uniform duct","forcing":"moderate admissible compressible pulse","bc":"nonreflecting outlet","reference":"extended domain","criterion":"truncated and extended agree before external return","status":"READY_DESIGN"}

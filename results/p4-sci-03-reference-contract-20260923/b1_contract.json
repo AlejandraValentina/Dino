@@ -1,0 +1,1 @@
+{"geometry":"uniform duct","forcing":"small outgoing acoustic pulse","bc":"nonreflecting outlet","meshes":"at least three justified resolutions","criterion":"error to characteristic and extended-domain references decreases; incoming characteristic tends zero","status":"READY_DESIGN"}

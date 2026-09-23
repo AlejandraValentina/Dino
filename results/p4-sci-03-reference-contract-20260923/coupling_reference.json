@@ -1,0 +1,1 @@
+{"C1":{"reference":"independent exact ideal-gas Euler Riemann","observables":["mass_flux","interface_pressure","energy_flux","species_flux","wave_order"]},"C2":{"reference":"C1 plus temporal refinement","classification":"numerical verification"},"C3":{"reference":"rigid-wall return","observables":["arrival","mass reversal","chamber changes","conservation"]}}
