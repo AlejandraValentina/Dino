@@ -1,0 +1,23 @@
+{
+  "proposal_revision": "R1",
+  "implementation": false,
+  "invalid_semantics": {
+    "period1": "reset lag1_streak to 0; status INVALID, not scientific FAIL",
+    "period2": "reset only affected branch streak; preserve other branch",
+    "missing_history": "INVALID; no PASS/FAIL inference"
+  },
+  "identity_required": [
+    "configuration_hash",
+    "scientific_contract_id",
+    "solver_backend",
+    "mesh_identity",
+    "geometry_identity",
+    "rpm_operating_point",
+    "cycle_convention"
+  ],
+  "restart": {"preserve_anchor_cycle": true, "preserve_branch_map": true, "insufficient_history": "INVALID_AND_RESET_AFFECTED"},
+  "human_approval": {"A": "PENDING_HUMAN_APPROVAL", "B": "PENDING_HUMAN_APPROVAL", "C": "PENDING_HUMAN_APPROVAL", "D": "PENDING_HUMAN_APPROVAL", "E": "PENDING_HUMAN_APPROVAL", "F": "PENDING_HUMAN_APPROVAL", "G": "PENDING_HUMAN_APPROVAL", "H": "PENDING_HUMAN_APPROVAL", "I": "PENDING_HUMAN_APPROVAL", "J": "PENDING_HUMAN_APPROVAL"},
+  "r13_counterfactual": "56 vs 54 was initially INVALID/evidence gap and became VALID+PASS after R13A replay; N400 closes at 60 under the proposed contract",
+  "p4_pass": false,
+  "p5_started": false
+}

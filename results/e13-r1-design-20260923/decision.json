@@ -41,7 +41,7 @@
     "N350": "odd 45 3x, even 52 3x (partial), converged at 52 if 50 verified",
     "N300": "not converged at 46 (odd branch incomplete)"
   },
-  "approvals_required": ["A_streak3", "B_precedence_period1", "C_branch_reset", "D_both_branches", "E_thresholds_unchanged", "F_no_period_gt2", "G_restart_persist"],
+  "approvals_required": ["A_streak3", "B_precedence_period1", "C_branch_reset", "D_both_branches", "E_thresholds_unchanged", "F_no_period_gt2", "G_restart_persist", "H_persistent_branch_anchor", "I_invalid_resets_affected_not_scientific_fail", "J_configuration_science_identity_binding"],
   "base_commit": "df1bc38",
   "timestamp": "2026-09-23"
 }

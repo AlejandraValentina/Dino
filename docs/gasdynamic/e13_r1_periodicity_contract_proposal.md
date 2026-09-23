@@ -3,7 +3,7 @@
 **Fase:** E13-R1-DESIGN — sólo diseño, no implementación.  
 **Fecha:** 2026-09-23  
 **Base:** `df1bc38` P4-R13A (R13A: `P4_R13_N400_EVEN_EVENTUAL_CLOSURE`)  
-**Estado:** `READY_FOR_HUMAN_REVIEW` — `implementation=false`, thresholds intactos, sin P4 PASS, sin P5  
+**Estado:** `READY_FOR_HUMAN_REVIEW` — `proposal_revision=R1`, `implementation=false`, thresholds intactos, sin P4 PASS, sin P5  
 **Agente:** OpenCode / Muse Spark 1.2 — `INDEPENDENT_REVIEW_PENDING`
 
 ---
@@ -134,7 +134,8 @@ lag1_streak ≥ 3   ⇔   tres comparaciones lag-1 consecutivas PASS
 
 * inicia a `0` tras `start_cycle` (no hay previo);
 * `PASS` → `lag1_streak +=1`;
-* `FAIL` (cualquier threshold, NaN, error o conservación) → `lag1_streak =0`;
+* `FAIL` (comparación válida fuera de threshold, o conservación/admisibilidad fallida) → `lag1_streak =0`;
+* `INVALID` (historia ausente/incompleta, NaN/corrupción, identidad o configuración incompatible) → `lag1_streak =0`, pero no es FAIL científico;
 * el streak es consecutivo sin huecos; no se “recuerda” un PASS antiguo;
 * se evalúa a partir de `cycle ≥ start+5` (mínimo legacy) pero el contador
   puede empezar antes; la convergencia sólo se declara cuando `cycle ≥ min_cycle`
@@ -177,14 +178,16 @@ Reglas:
 
 * `PASS` en `A` → `a_streak +=1`, `b_streak` inalterado.
 * `FAIL` en `A` → `a_streak =0`, `b_streak` inalterado.
+* `INVALID` en `A` → `a_streak =0`, `b_streak` inalterado; rompe la consecutividad sin declarar no convergencia física.
 * `PASS` en `B` → `b_streak +=1`, `a_streak` inalterado.
 * `FAIL` en `B` → `b_streak =0`, `a_streak` inalterado.
+* `INVALID` en `B` → `b_streak =0`, `a_streak` inalterado.
 * Nunca mezclar: un `PASS` global no incrementa ambas; un `FAIL` no resetea
   la otra rama.
 * La comparación `n vs n-2` sólo es válida si ambos ciclos existen y
   conservación/admisibilidad PASS en `n`; si falta historial, la comparación
-  se marca `INVALID` y no cuenta como PASS ni FAIL para el streak
-  (requiere reconstrucción o replay).
+  se marca `INVALID`, no cuenta como PASS ni FAIL y reinicia únicamente el
+  streak afectado (requiere reconstrucción o replay).
 
 ---
 
@@ -641,3 +644,27 @@ Sin aprobación, **no** se inicia `E13-R1` ni `P4 PASS`.
 ---
 
 *Fin de propuesta E13-R1-DESIGN — requiere revisión humana independiente.*
+
+## 24. Revisión R1 — correcciones obligatorias antes de aprobación
+
+Esta revisión no implementa el detector. Fija dos semánticas que sustituyen
+las formulaciones ambiguas anteriores:
+
+1. `INVALID` rompe el streak de la comparación afectada, pero no se registra
+   como `FAIL` científico. Un `PASS, PASS, INVALID, PASS, PASS, PASS` sólo
+   converge en el último PASS; el contador es `1, 2, 0, 1, 2, 3`.
+2. El estado del detector sólo puede continuar si coincide la identidad
+   científica persistida: `configuration_hash`, `scientific_contract_id`,
+   solver/backend, malla, geometría, RPM/operating point y convención de ciclo.
+   Cualquier mismatch produce `INVALID` y reinicia los streaks afectados.
+
+El restart debe conservar `anchor_cycle` y `branch_map` A/B. El anchor de la
+órbita original no se redefine por el `start_cycle` de una reanudación. Un
+restart sin historia suficiente conserva el estado físico, pero inicia el
+detector con evidencia insuficiente y no reconstruye streaks por inferencia.
+
+Las decisiones A–J quedan `PENDING_HUMAN_APPROVAL`: A streak 3; B precedencia
+period-1; C reset independiente; D ambas ramas; E thresholds sin cambios;
+F periodos mayores que 2 no soportados en GEN1; G estado del detector en
+restart; H anchor persistente; I INVALID reinicia sólo la rama afectada sin
+ser FAIL; J vinculación a identidad de configuración/ciencia.

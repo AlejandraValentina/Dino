@@ -52,15 +52,21 @@
       "decision_required": "HUMAN_APPROVED"
     },
     "I_invalid_handling": {
-      "proposal": "missing n-2 => INVALID (no increment, no reset)",
+      "proposal": "missing n-2 => INVALID (reset affected streak only; never scientific FAIL)",
       "alternative": "treat as FAIL",
-      "reason": "FAIL would incorrectly reset a healthy branch when job starts mid-orbit (e.g., N350 51)",
+      "reason": "INVALID breaks consecutivity without asserting non-convergence; a later PASS must rebuild three comparisons",
+      "decision_required": "HUMAN_APPROVED"
+    },
+    "J_configuration_identity": {
+      "proposal": "detector state requires matching configuration_hash, scientific_contract_id, solver/backend, mesh, geometry, RPM and cycle convention; mismatch => INVALID and affected reset",
+      "alternative": "continue from physical state without identity checks",
+      "reason": "streaks cannot be transported between scientific configurations",
       "decision_required": "HUMAN_APPROVED"
     }
   },
   "derived_vs_proposed": {
     "derived_from_evidence": ["orbit exists", "global streak mixes branches", "transient FAIL should not permaban"],
-    "proposed_contract": ["streak 3", "precedence", "independent reset", "both branches", "no period>2", "persist state", "anchor branch identity"]
+    "proposed_contract": ["streak 3", "precedence", "independent reset", "both branches", "no period>2", "persist state", "anchor branch identity", "INVALID resets affected branch", "configuration identity binding"]
   },
   "next_step": "human review of docs/gasdynamic/e13_r1_periodicity_contract_proposal.md and artifacts; no E13-R1 implementation until approved",
   "p4_pass": false,
