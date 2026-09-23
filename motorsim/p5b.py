@@ -140,8 +140,11 @@ class IntegratedIntakeTransfer:
         ai, at1, at2 = self._areas(self.angle)
         atmosphere = (101325.0/(self.eos.R*300.0), 0.0, 101325.0, .0)
         fluxes = [interface_exchange(self.crankcase, self.duct_states[0].primitive(self.eos), ai, -1, eos=self.eos)]
-        for area in (at1, at2):
-            fluxes.append(interface_exchange(self.crankcase, self.duct_states[1].primitive(self.eos), area, 1, eos=self.eos))
+        for duct, area in zip(self.duct_states[1:], (at1, at2)):
+            # Resolve each physical interface exactly once from its own stage
+            # state.  The returned flux object is the single source consumed
+            # by both chamber and duct updates below.
+            fluxes.append(interface_exchange(self.crankcase, duct.primitive(self.eos), area, 1, eos=self.eos))
         # One interface solve supplies the flux trace and the chamber update.
         crankcase_fluxes = [item['outward'] for item in fluxes]
         cylinder_fluxes = [tuple(-x for x in fluxes[i]['outward']) for i in (1, 2)]

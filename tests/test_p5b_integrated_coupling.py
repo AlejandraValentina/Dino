@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 
 from motorsim.p5b import Chamber, IntegratedIntakeTransfer, interior_rhs, ssprk2_step
 from motorsim.gas1d.mesh import uniform_mesh
@@ -94,3 +95,24 @@ def test_contractual_volume_work_rejects_nonfinite_inputs():
         chamber.conservative_rhs(((0.0, 0.0, 0.0, 0.0),), E, volume_rate=float('nan'))
     with pytest.raises(ValueError):
         chamber.apply_rhs((0.0, 0.0, float('inf')), .1, E)
+
+def test_each_interface_is_resolved_once_from_its_own_duct_state():
+    node = make()
+    calls = []
+    expected_interiors = [duct.primitive(E) for duct in node.duct_states]
+    from motorsim import p5b
+    original = p5b.interface_exchange
+
+    def audited(chamber, interior, area, normal, *, eos):
+        result = original(chamber, interior, area, normal, eos=eos)
+        calls.append((interior, area, normal, tuple(result['outward'])))
+        return result
+
+    with patch.object(p5b, 'interface_exchange', side_effect=audited):
+        history = node.step(.01, angle=150)
+
+    assert len(calls) == 3
+    assert calls[0][0] == expected_interiors[0]
+    assert calls[1][0] == expected_interiors[1]
+    assert calls[2][0] == expected_interiors[2]
+    assert tuple(history['fluxes']) == tuple(call[3] for call in calls)

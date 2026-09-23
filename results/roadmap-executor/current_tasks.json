@@ -60,10 +60,10 @@
       "id": "P5B-06",
       "phase": "P5_B",
       "description": "interface_flux_single_source_audit",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "3 interface resolutions PASS; each uses its own duct state and the returned flux is reused in trace/updates; py_compile PASS",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -222,7 +222,7 @@
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     }
   ],
-  "active_task": "P5B-06",
-  "last_completed_task": "P5B-05",
-  "tasks_remaining": 15
+  "active_task": "P5B-07",
+  "last_completed_task": "P5B-06",
+  "tasks_remaining": 14
 }
