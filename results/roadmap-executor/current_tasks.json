@@ -93,10 +93,10 @@
       "id": "P5B-09",
       "phase": "P5_B",
       "description": "energy_global_ledger",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "3 focused energy-ledger tests PASS; 20 P5B tests PASS; 31 P5 coupling regressions PASS; py_compile PASS",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -222,7 +222,7 @@
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     }
   ],
-  "active_task": "P5B-08",
-  "last_completed_task": "P5B-08",
-  "tasks_remaining": 12
+  "active_task": "P5B-10",
+  "last_completed_task": "P5B-09",
+  "tasks_remaining": 11
 }

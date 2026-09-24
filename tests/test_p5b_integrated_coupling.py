@@ -194,3 +194,42 @@ def test_species_global_ledger_cancels_internal_transfers_and_tracks_external_po
     assert audit['external_species'] == pytest.approx(0.0, abs=1e-15)
     assert audit['delta_species'] == pytest.approx(audit['external_species'], abs=1e-15)
     assert audit['residual'] == pytest.approx(0.0, abs=1e-15)
+
+
+def test_energy_global_ledger_conserves_fixed_volume_closed_internal_system():
+    node = make()
+    initial = node.energy_ledger()
+    assert initial['delta_energy'] == 0.0
+    for angle in (0.0, 30.0, 60.0, 240.0):
+        node.step(.001, angle=angle)
+
+    audit = node.energy_ledger()
+    assert audit['external_energy'] == 0.0
+    assert audit['chamber_work'] == 0.0
+    assert audit['delta_energy'] == pytest.approx(0.0, abs=1e-12)
+    assert audit['residual'] == pytest.approx(0.0, abs=1e-12)
+
+
+def test_energy_global_ledger_tracks_external_boundary_flux_once():
+    node = make()
+    node.step(.001, angle=300.0)
+
+    audit = node.energy_ledger()
+    assert audit['external_energy'] != 0.0
+    assert audit['cc_work'] == 0.0
+    assert audit['cyl_work'] == 0.0
+    assert audit['delta_energy'] == pytest.approx(audit['external_energy'], abs=2e-12)
+    assert audit['residual'] == pytest.approx(0.0, abs=2e-12)
+
+
+def test_energy_global_ledger_preserves_variable_volume_work_signs():
+    node = make()
+    node.volume_rates = (.001, -.0005)
+    node.step(.001, angle=0.0)
+
+    audit = node.energy_ledger()
+    assert audit['external_energy'] == 0.0
+    assert audit['cc_work'] < 0.0
+    assert audit['cyl_work'] > 0.0
+    assert audit['delta_energy'] == pytest.approx(audit['chamber_work'], abs=1e-12)
+    assert audit['residual'] == pytest.approx(0.0, abs=1e-12)

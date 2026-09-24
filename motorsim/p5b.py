@@ -126,6 +126,7 @@ class IntegratedIntakeTransfer:
                        'cc_work':0.0,'cyl_work':0.0}
         self._initial_mass = self._total_mass()
         self._initial_species = self._total_species()
+        self._initial_energy = self._total_energy()
         self.history = []
 
     def _total_mass(self):
@@ -146,6 +147,14 @@ class IntegratedIntakeTransfer:
         duct_species = sum(cell.conservative[3] * cell.volume
                            for cell in self.duct_states[1:])
         return chamber_species + duct_species
+
+    def _total_energy(self):
+        """Return total stored conservative energy in the P5-B volumes."""
+        chamber_energy = (self.crankcase.inventory(self.eos)[2]
+                          + self.cylinder.inventory(self.eos)[2])
+        duct_energy = sum(cell.conservative[2] * cell.volume
+                          for cell in self.duct_states[1:])
+        return chamber_energy + duct_energy
 
     def mass_ledger(self):
         """Audit closed-system mass against the external interface integral.
@@ -182,6 +191,32 @@ class IntegratedIntakeTransfer:
             'delta_species': delta_species,
             'external_species': external_species,
             'residual': delta_species - external_species,
+        }
+
+    def energy_ledger(self):
+        """Audit global energy against boundary flux and chamber p*dV work.
+
+        The stored energy includes both chambers and the two internal transfer
+        duct cells.  Internal interface fluxes are not ledger inputs: the
+        same stage flux is applied with opposite signs at its two endpoints,
+        so adding it would double count interface pressure work.  ``external_energy``
+        and the two chamber work terms remain separate for auditability.
+        """
+        final_energy = self._total_energy()
+        external_energy = self.ledger['external_energy']
+        chamber_work = self.ledger['cc_work'] + self.ledger['cyl_work']
+        delta_energy = final_energy - self._initial_energy
+        accounted = external_energy + chamber_work
+        return {
+            'initial_energy': self._initial_energy,
+            'final_energy': final_energy,
+            'delta_energy': delta_energy,
+            'external_energy': external_energy,
+            'cc_work': self.ledger['cc_work'],
+            'cyl_work': self.ledger['cyl_work'],
+            'chamber_work': chamber_work,
+            'accounted_energy': accounted,
+            'residual': delta_energy - accounted,
         }
 
     def _areas(self, angle):

@@ -12,4 +12,5 @@
 - [x] P5B-06: auditoría de fuente única de flux por interfaz; cada interfaz se resuelve una vez desde su propio ducto y se reutiliza para trazas y actualizaciones.
 - [x] P5B-07: ledger global de masa; el residuo `ΔM - M_ext` se comprueba con entradas externas, transferencias internas y puertos cerrados.
 - [x] P5B-08: ledger global de especie pasiva; el residuo `ΔS - S_ext` se comprueba con entradas externas, transferencias internas y puertos cerrados.
+- [x] P5B-09: ledger global de energía; `ΔE = E_ext + W_cc + W_cyl`, con flujo externo y cada trabajo `-p·dV/dt` auditables por separado y sin doble conteo de interfaces internas.
 - [ ] Integrar inventarios/celdas de ductos, término -p dV/dt y ledgers globales antes del cierre P5-B.

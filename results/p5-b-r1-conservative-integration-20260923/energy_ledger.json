@@ -1,4 +1,18 @@
 {
-  "status": "INCONCLUSIVE",
-  "residual": null
+  "status": "PASS",
+  "task": "P5B-09",
+  "contract": "delta_system_energy = external_energy + cc_work + cyl_work",
+  "stored_energy": ["crankcase", "cylinder", "transfer_duct_1", "transfer_duct_2"],
+  "external_energy": "single intake boundary flux integral",
+  "work_terms": {
+    "cc_work": "-p_stage*dV_cc/dt*dt",
+    "cyl_work": "-p_stage*dV_cyl/dt*dt"
+  },
+  "internal_interface_policy": "internal transfer fluxes cancel between endpoints and are not added to the global ledger",
+  "focused_tests": {
+    "fixed_volume_closed_internal": "PASS",
+    "external_boundary_accounting": "PASS",
+    "variable_volume_work_sign": "PASS"
+  },
+  "residual": "within floating-point tolerance"
 }
