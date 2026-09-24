@@ -2,7 +2,7 @@
   "current_phase": "P5_B",
   "current_subphase": "P5B-16 restart_physical_state",
   "base_commit": "854e59e",
-  "latest_commit": "pending",
+  "latest_commit": "0c63a1e",
   "worktree_checkpoint": "P5B-14 complete fixture and gate state committed locally",
   "classification": "IMPLEMENTED_CHECKPOINT",
   "attempt": 0,
