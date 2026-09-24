@@ -1,8 +1,8 @@
 {
   "current_phase": "P5_B",
-  "current_subphase": "P5B-10 closed_volume_work_fixture",
+  "current_subphase": "P5B-11 single_0d1d_fixture",
   "base_commit": "854e59e",
-  "latest_commit": "PENDING_P5B10_CHECKPOINT",
+  "latest_commit": "05cdec7",
   "classification": "IMPLEMENTED_CHECKPOINT",
   "attempt": 0,
   "gates": {
