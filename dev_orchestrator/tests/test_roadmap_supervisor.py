@@ -84,7 +84,7 @@ class SupervisorTests(unittest.TestCase):
         self.config.write_text(json.dumps({"max_invocations": 0, "max_no_progress_attempts": 1, "live_status_file": str(self.r / "LIVE_STATUS.md")}))
         with patch.object(sup, "_invoke", side_effect=[self._fake_result(), self._fake_result()]):
             self.assertEqual(sup._run_loop(), "SUPERVISOR_BLOCKED_NO_PROGRESS")
-        self.assertEqual(sup.read(sup.STATE, {})["invocation_count"], 2)
+        self.assertEqual(sup.read(sup.STATE, {})["invocation_count"], 1)
 
     def test_live_status_contains_required_fields_and_tail(self):
         invocation = self.r / "invocations" / "abc"; invocation.mkdir(parents=True)

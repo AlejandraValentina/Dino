@@ -1,13 +1,13 @@
 """Durable, Windows-safe supervisor for the roadmap executor."""
 from __future__ import annotations
 
-import json, os, shutil, subprocess, sys, time, uuid
+import csv, glob, json, os, shutil, subprocess, sys, time, uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-R = ROOT / "results" / "roadmap-executor"
-CFG = Path(__file__).with_name("roadmap_supervisor.json")
+ROOT = Path(os.environ.get("MOTORSIM_SUPERVISOR_ROOT", Path(__file__).resolve().parents[1])).resolve()
+R = Path(os.environ.get("MOTORSIM_SUPERVISOR_RESULTS", ROOT / "results" / "roadmap-executor")).resolve()
+CFG = Path(os.environ.get("MOTORSIM_SUPERVISOR_CONFIG", Path(__file__).with_name("roadmap_supervisor.json"))).resolve()
 STATE = R / "supervisor_state.json"
 LOCK = R / "supervisor.lock"
 STOP_REQUEST = R / "supervisor.stop"
@@ -47,7 +47,10 @@ def git_status():
 
 
 def _meaningful_status(lines):
-    runtime = str(R.relative_to(ROOT)).replace("\\", "/") + "/"
+    try:
+        runtime = str(R.relative_to(ROOT)).replace("\\", "/") + "/"
+    except ValueError:
+        runtime = ""
     return sorted(line for line in lines if runtime not in line.replace("\\", "/"))
 
 
@@ -56,15 +59,50 @@ def pid_alive(pid):
     try:
         pid = int(pid)
         if os.name == "nt":
-            result = subprocess.run(["tasklist", "/FI", f"PID eq {pid}"], capture_output=True, text=True, check=False)
-            return result.returncode == 0 and any(str(pid) in line.split() for line in result.stdout.splitlines())
+            result = subprocess.run(["tasklist", "/FO", "CSV", "/NH", "/FI", f"PID eq {pid}"],
+                                    capture_output=True, text=True, check=False)
+            if result.returncode != 0:
+                return False
+            for row in csv.reader(result.stdout.splitlines()):
+                # CSV tasklist rows are Image Name, PID, Session Name, ... .
+                if len(row) >= 2 and row[1].strip() == str(pid):
+                    return True
+            return False
         os.kill(pid, 0); return True
     except (ValueError, OSError, subprocess.SubprocessError): return False
 
 
+def _extension_codex():
+    if os.name != "nt":
+        return None
+    user_profile = os.environ.get("USERPROFILE")
+    if not user_profile:
+        return None
+    candidates = [Path(item) for item in glob.glob(
+        str(Path(user_profile) / ".vscode" / "extensions" / "openai.chatgpt-*-win32-x64" /
+            "bin" / "windows-x86_64" / "codex.exe")) if Path(item).is_file()]
+    if not candidates:
+        return None
+    # Prefer the most recently installed/updated extension; path is a stable tie-breaker.
+    return str(max(candidates, key=lambda item: (item.stat().st_mtime_ns, str(item).lower())))
+
+
+def resolve_agent_command(command=None):
+    command = list(command if command is not None else (cfg().get("agent_command") or []))
+    if not command:
+        return None
+    configured = Path(str(command[0]))
+    resolved = str(configured) if configured.is_absolute() and configured.is_file() else shutil.which(str(command[0]))
+    if not resolved:
+        resolved = _extension_codex()
+    if not resolved:
+        raise FileNotFoundError(f"configured agent executable not found: {command[0]}")
+    command[0] = resolved
+    return command
+
+
 def cli():
-    command = cfg().get("agent_command")
-    return list(command) if command else None
+    return resolve_agent_command()
 
 
 def _roadmap_snapshot():
@@ -75,6 +113,32 @@ def _roadmap_snapshot():
             "done": sum(t.get("status") == "DONE" for t in tasks), "total": len(tasks),
             "phase": state.get("current_phase") or doc.get("phase"), "blockers": state.get("blockers", []),
             "worktree": _meaningful_status(git_status())}
+
+
+_TERMINAL_CLASSIFICATIONS = {
+    "PASS", "BLOCKED", "SCIENTIFIC_CHANGE_REQUIRED", "FAILED_INFRASTRUCTURE",
+    "P9_PASS", "P9_BLOCKED", "P9_SCIENTIFIC_CHANGE_REQUIRED", "P9_FAILED_INFRASTRUCTURE",
+}
+
+
+def _terminal_reason(snapshot=None):
+    snapshot = snapshot or _roadmap_snapshot()
+    state = read(R / "state.json", {})
+    doc = read(R / "current_tasks.json", {"tasks": []})
+    tasks = doc.get("tasks", [])
+    active = snapshot.get("active_task")
+    if not active and (not tasks or snapshot.get("done") == snapshot.get("total")):
+        return "ROADMAP_NO_ACTIVE_TASKS"
+    phase = str(snapshot.get("phase") or "")
+    for key in ("terminal_reason", "classification", "gate", "status"):
+        value = str(state.get(key) or doc.get(key) or "")
+        if value in _TERMINAL_CLASSIFICATIONS or (phase == "P9" and value.startswith("P9_")):
+            return f"ROADMAP_TERMINAL_{value}"
+    blockers = state.get("blockers") or doc.get("blockers") or []
+    if isinstance(blockers, str):
+        blockers = [blockers]
+    explicit = [str(item) for item in blockers if str(item).startswith(("BLOCKED_", "SCIENTIFIC_CHANGE_REQUIRED", "FAILED_INFRASTRUCTURE"))]
+    return f"ROADMAP_TERMINAL_{explicit[0]}" if explicit else None
 
 
 def _progressed(before, after):
@@ -146,6 +210,12 @@ def acquire():
     return True
 
 
+def _clear_stale_stop_after_acquire():
+    # The lock is held by this process, so a stale request cannot affect a new run.
+    try: STOP_REQUEST.unlink()
+    except FileNotFoundError: pass
+
+
 def release():
     if LOCK.exists() and _lock_owner().get("pid") == os.getpid(): LOCK.unlink()
 
@@ -165,16 +235,25 @@ def _prompt(snapshot):
 
 
 def _invoke():
-    command = cli()
+    try:
+        command = cli()
+    except FileNotFoundError as exc:
+        return str(exc)
     if not command: return "SUPERVISOR_READY_AGENT_COMMAND_REQUIRED"
     before = _roadmap_snapshot(); inv = uuid.uuid4().hex[:10]; directory = R / "invocations" / inv; directory.mkdir(parents=True, exist_ok=True)
     write(directory / "before.json", {"invocation_id": inv, "timestamp": now(), **before})
     (directory / "prompt.txt").write_text(_prompt(before), encoding="utf-8")
+    write(directory / "command.json", {"resolved_executable": command[0], "argv": command})
     state = dict(read(STATE, {})); state.update({"status": "RUNNING", "pid": os.getpid(), "child_pid": None, "current_invocation": inv,
         "current_phase": before["phase"], "current_task": before["active_task"], "done": before["done"], "total": before["total"],
         "HEAD": before["HEAD"], "agent_started_at": time.time(), "terminal_reason": None})
     with open(directory / "stdout.log", "wb") as out, open(directory / "stderr.log", "wb") as err:
-        child = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=out, stderr=err, cwd=ROOT); state["child_pid"] = child.pid; _save(state)
+        state["resolved_agent_executable"] = command[0]
+        _save(state)
+        popen_options = {"stdin": subprocess.PIPE, "stdout": out, "stderr": err, "cwd": ROOT}
+        if os.name != "nt":
+            popen_options["start_new_session"] = True
+        child = subprocess.Popen(command, **popen_options); state["child_pid"] = child.pid; _save(state)
         try:
             child.stdin.write(_prompt(before).encode("utf-8")); child.stdin.close()
         except (BrokenPipeError, OSError):
@@ -184,13 +263,31 @@ def _invoke():
             except OSError: pass
         started = time.time(); code = None
         while child.poll() is None:
-            if STOP_REQUEST.exists(): child.terminate(); code = "STOP_REQUESTED"; break
-            if time.time() - started > float(cfg().get("agent_timeout_seconds", 3600)): child.kill(); code = "TIMEOUT"; break
+            if STOP_REQUEST.exists(): terminate_process_tree(child); code = "STOP_REQUESTED"; break
+            if time.time() - started > float(cfg().get("agent_timeout_seconds", 3600)): terminate_process_tree(child); code = "TIMEOUT"; break
             state["HEAD"] = git_head(); _save(state); time.sleep(float(cfg().get("poll_seconds", 2)))
         if code is None: code = child.returncode
     after = _roadmap_snapshot(); write(directory / "result.json", {"returncode": code, "duration": time.time() - started,
         "progress": _progressed(before, after), "before": before, "after": after})
     return code, before, after, inv
+
+
+def terminate_process_tree(child, timeout=10.0):
+    """Terminate exactly the Popen child and its descendants, then wait."""
+    if child.poll() is None:
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/PID", str(child.pid), "/T", "/F"], capture_output=True, text=True, check=False)
+        else:
+            try: os.killpg(child.pid, 15)
+            except (AttributeError, ProcessLookupError, OSError): child.terminate()
+    try:
+        child.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        if os.name != "nt":
+            try: os.killpg(child.pid, 9)
+            except (AttributeError, ProcessLookupError, OSError): child.kill()
+        child.wait(timeout=timeout)
+    return child.returncode
 
 
 def _finish(result):
@@ -204,11 +301,15 @@ def _finish(result):
 
 def _run_loop():
     if not acquire(): return "SUPERVISOR_BLOCKED_ALREADY_RUNNING"
+    _clear_stale_stop_after_acquire()
     initial = _roadmap_snapshot(); state = dict(read(STATE, {})); state.update({"status": "RUNNING", "pid": os.getpid(), "child_pid": None,
         "started_at": state.get("started_at", now()), "current_phase": initial["phase"], "current_task": initial["active_task"],
         "done": initial["done"], "total": initial["total"], "HEAD": initial["HEAD"], "terminal_reason": None}); _save(state)
     try:
         while True:
+            terminal = _terminal_reason(initial if not state.get("invocation_count") else _roadmap_snapshot())
+            if terminal:
+                state.update({"status": "STOPPED", "terminal_reason": terminal}); _save(state); return terminal
             if STOP_REQUEST.exists(): state.update({"status": "STOPPED", "terminal_reason": "SUPERVISOR_STOP_REQUESTED"}); _save(state); return state["terminal_reason"]
             limit = int(cfg().get("max_invocations", 0))
             if limit > 0 and int(state.get("invocation_count", 0)) >= limit:
@@ -217,7 +318,7 @@ def _run_loop():
             if isinstance(result, str): state.update({"status": "BLOCKED", "terminal_reason": result}); _save(state); return result
             state, code, progress, no_progress = _finish(result)
             if STOP_REQUEST.exists(): state.update({"status": "STOPPED", "terminal_reason": "SUPERVISOR_STOP_REQUESTED"}); _save(state); return state["terminal_reason"]
-            if no_progress > int(cfg().get("max_no_progress_attempts", 3)):
+            if no_progress >= int(cfg().get("max_no_progress_attempts", 3)):
                 state.update({"status": "BLOCKED", "terminal_reason": "SUPERVISOR_BLOCKED_NO_PROGRESS"}); _save(state); return state["terminal_reason"]
             if code != 0 and not progress:
                 state.update({"status": "BLOCKED", "terminal_reason": "SUPERVISOR_AGENT_FAILED"}); _save(state); return state["terminal_reason"]
@@ -251,6 +352,7 @@ def main(argv):
     if command == "stop": write(STOP_REQUEST, {"requested_at": now(), "requested_by": os.getpid()}); print("STOP_REQUESTED"); return 0
     if command == "once":
         if not acquire(): print("SUPERVISOR_BLOCKED_ALREADY_RUNNING"); return 1
+        _clear_stale_stop_after_acquire()
         try:
             result = _invoke()
             if isinstance(result, str): print(result); return 0
@@ -258,10 +360,22 @@ def main(argv):
         finally: release()
     if command in ("run", "resume"): print(_run_loop()); return 0
     if command == "start":
+        owner = _lock_owner(); owner_pid = owner.get("pid")
+        if owner_pid and pid_alive(owner_pid):
+            print(f"SUPERVISOR_BLOCKED_ALREADY_RUNNING pid={owner_pid}"); return 1
         log = open(R / "supervisor.log", "a", encoding="utf-8"); flags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0) | getattr(subprocess, "DETACHED_PROCESS", 0)
-        try: process = subprocess.Popen([sys.executable, str(Path(__file__)), "run"], cwd=ROOT, stdin=subprocess.DEVNULL, stdout=log, stderr=log, creationflags=flags, close_fds=False)
-        except OSError: process = subprocess.Popen([sys.executable, str(Path(__file__)), "run"], cwd=ROOT, stdin=subprocess.DEVNULL, stdout=log, stderr=log, close_fds=False)
-        log.close(); print(process.pid); _show(); return 0
+        try: process = subprocess.Popen([sys.executable, str(Path(__file__)), "run"], cwd=ROOT, stdin=subprocess.DEVNULL, stdout=log, stderr=log, creationflags=flags, close_fds=True)
+        except OSError: process = subprocess.Popen([sys.executable, str(Path(__file__)), "run"], cwd=ROOT, stdin=subprocess.DEVNULL, stdout=log, stderr=log, close_fds=True)
+        log.close()
+        deadline = time.time() + 10.0
+        while time.time() < deadline:
+            current = read(STATE, {})
+            if current.get("status") == "RUNNING" and current.get("pid") and pid_alive(current.get("pid")):
+                print(current["pid"]); _show(); return 0
+            if not pid_alive(process.pid):
+                break
+            time.sleep(0.1)
+        print("SUPERVISOR_START_FAILED: supervisor did not report RUNNING with a live PID"); return 1
     print("usage: status|show|run|resume|once|start|stop"); return 2
 
 
