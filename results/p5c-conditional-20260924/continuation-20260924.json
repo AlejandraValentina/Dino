@@ -1,0 +1,8 @@
+{
+  "status":"P5_C_SCIENTIFIC_CONTRACT_REQUIRED",
+  "reason":"Current adapter advances P5-B core and exhaust sequentially; it does not assemble TR1/TR2/exhaust cylinder RHS in one stage-coherent coupled update as required.",
+  "tests":{"focused_previous":43,"relevant_regressions":59,"result":"PASS"},
+  "p4":"BLOCKED / NOT_GRANTED",
+  "conditional_on_p4":true,
+  "remaining_gates":["stage-coherent shared cylinder RHS","backflow","causal delay","complete ledgers","full topology evidence"]
+}
