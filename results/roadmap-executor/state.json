@@ -2,8 +2,8 @@
   "current_phase": "P5_B",
   "current_subphase": "P5B-12 one_transfer_fixture",
   "base_commit": "854e59e",
-  "latest_commit": "WORKTREE_P5B11",
-  "worktree_checkpoint": "P5B-11 external verification PASS; checkpoint commit pending",
+  "latest_commit": "487ca48",
+  "worktree_checkpoint": "P5B-11 checkpoint committed",
   "classification": "IMPLEMENTED_CHECKPOINT",
   "attempt": 0,
   "gates": {
