@@ -7,4 +7,4 @@ def test_invalid_output_byte_is_captured_without_decode(tmp_path):
     with out.open('wb') as fo, err.open('wb') as fe:
         p=subprocess.Popen([sys.executable,'-c',code],stdout=fo,stderr=fe)
         assert p.wait(timeout=5)==0
-    assert out.read_bytes()==b'\\x81' and err.read_bytes()==b'\\xff'
+    assert out.read_bytes()==bytes([0x81]) and err.read_bytes()==bytes([0xff])
