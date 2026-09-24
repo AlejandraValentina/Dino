@@ -1,5 +1,5 @@
 {
-  "status": "P5_C_CAUSAL_PROPAGATION_DEFECT",
+  "status": "P5_C_CAUSAL_OBSERVABLE_CHANGE_REQUIRED",
   "reason": "Current adapter advances P5-B core and exhaust sequentially; it does not assemble TR1/TR2/exhaust cylinder RHS in one stage-coherent coupled update as required.",
   "tests": {
     "focused_previous": 43,
@@ -71,5 +71,70 @@
     },
     "spatial_order": "near < middle < far",
     "diagnosis": "measurable far response occurs before physically plausible characteristic window despite sufficient horizon and valid sampling"
+  },
+  "causal_diagnostic": {
+    "classification": "P5_C_CAUSAL_OBSERVABLE_CHANGE_REQUIRED",
+    "actual_cfl": 0.0007348469228349534,
+    "dx_m": 0.005,
+    "dt_s": 1e-08,
+    "max_u_plus_a_m_s": 367.4234614174767,
+    "sensor_geometry": {
+      "centers_m": [
+        0.0025,
+        0.0075,
+        0.0125,
+        0.0175,
+        0.0225,
+        0.0275
+      ],
+      "faces_m": [
+        0,
+        0.005,
+        0.01,
+        0.015,
+        0.02,
+        0.025,
+        0.03
+      ]
+    },
+    "initialization": "all exhaust cells 100000 Pa, rho=1, u=0, Y=0",
+    "nonlinear_wave_type": "finite-amplitude HLLC Riemann compression",
+    "hllc_wave_speeds_m_s": [
+      -519.6152422706632,
+      96.22504486493763,
+      519.6152422706632
+    ],
+    "old_acoustic_window_valid": false,
+    "space_time_response": {
+      "threshold_pa": 1000,
+      "arrivals_s": {
+        "cell0": 2.71e-06,
+        "cell1": 2.71e-06,
+        "cell3": 1.283e-05,
+        "cell4": 1.933e-05
+      },
+      "ordering": "progressive"
+    },
+    "cfl_dependence": {
+      "0.2": {
+        "dt_s": 2.721655269759087e-06,
+        "cell1_s": 2.721655269759087e-06,
+        "cell4_s": 2.1773242158072697e-05
+      },
+      "0.4": {
+        "dt_s": 5.443310539518174e-06,
+        "cell1_s": 5.443310539518174e-06,
+        "cell4_s": 2.1773242158072697e-05
+      },
+      "0.6": {
+        "dt_s": 8.164965809277262e-06,
+        "cell1_s": 8.164965809277262e-06,
+        "cell4_s": 2.4494897427831785e-05
+      }
+    },
+    "resolution_dependence": "not run; CFL study already shows threshold dependence",
+    "observable_interpretation": "1000 Pa first crossing is a numerical precursor, not resolved main-front arrival",
+    "true_solver_defect_confirmed": false,
+    "next_required_decision": "Human approval required to replace causality observable with resolved-front metric (e.g. max pressure-gradient arrival)"
   }
 }
