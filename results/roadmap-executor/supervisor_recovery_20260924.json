@@ -1,0 +1,9 @@
+{
+  "previous_pid": 6156,
+  "previous_pid_alive": false,
+  "last_invocation": "bc28c61fec",
+  "last_durable_phase": "P5_B",
+  "last_durable_task": "P5B-15",
+  "tasks_done": 14,
+  "recovery": "resume from current_tasks.json without replaying DONE tasks"
+}
