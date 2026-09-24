@@ -18,8 +18,11 @@ def git_head(): return subprocess.check_output(['git','rev-parse','HEAD'],cwd=RO
 def git_status(): return subprocess.check_output(['git','status','--short'],cwd=ROOT,text=True).strip().splitlines()
 def pid_alive(pid):
     if not pid: return False
-    try: os.kill(int(pid),0); return True
-    except (OSError,ValueError): return False
+    try:
+        if os.name == 'nt':
+            return subprocess.run(['tasklist','/FI',f'PID eq {int(pid)}'],capture_output=True,text=True).returncode == 0 and str(pid) in subprocess.run(['tasklist','/FI',f'PID eq {int(pid)}'],capture_output=True,text=True).stdout
+        os.kill(int(pid),0); return True
+    except BaseException: return False
 def cli():
     c=read(CFG,{})
     if c.get('agent_command'): return c['agent_command']
@@ -72,7 +75,8 @@ def main(argv):
     if a=='start':
         log=open(R/'supervisor.log','a',encoding='utf-8')
         flags=getattr(subprocess,'CREATE_NEW_PROCESS_GROUP',0)|getattr(subprocess,'DETACHED_PROCESS',0)
-        p=subprocess.Popen([sys.executable,str(Path(__file__)),'run'],cwd=ROOT,stdin=subprocess.DEVNULL,stdout=log,stderr=log,creationflags=flags,close_fds=True)
+        try: p=subprocess.Popen([sys.executable,str(Path(__file__)),'run'],cwd=ROOT,stdin=subprocess.DEVNULL,stdout=log,stderr=log,creationflags=flags,close_fds=False)
+        except OSError: p=subprocess.Popen([sys.executable,str(Path(__file__)),'run'],cwd=ROOT,stdin=subprocess.DEVNULL,stdout=log,stderr=log,close_fds=False)
         write(STATE,{'status':'RUNNING','pid':p.pid,'started_at':now(),'last_heartbeat':now(),'invocation_count':0,'current_invocation':None,'current_phase':read(R/'state.json',{}).get('current_phase'),'current_task':read(R/'state.json',{}).get('current_subphase'),'HEAD':git_head(),'terminal_reason':None})
         print(p.pid); return 0
     print('usage: status|run|resume|stop|once'); return 2
