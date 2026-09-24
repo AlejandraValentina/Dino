@@ -192,10 +192,10 @@
       "id": "P5B-18",
       "phase": "P5_B",
       "description": "p5b_regressions",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "45 P5A/P5B tests PASS; OpenSpec P5/P4 strict PASS",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -203,10 +203,10 @@
       "id": "P5B-19",
       "phase": "P5_B",
       "description": "openspec_validation",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "OpenSpec P5/P4 strict PASS",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -214,15 +214,15 @@
       "id": "P5B-20",
       "phase": "P5_B",
       "description": "p5b_final_gate",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "all P5-B gates recorded PASS conditionally",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     }
   ],
-  "active_task": "P5B-18",
-  "last_completed_task": "P5B-17",
-  "tasks_remaining": 3
+  "active_task": null,
+  "last_completed_task": "P5B-20",
+  "tasks_remaining": 0
 }

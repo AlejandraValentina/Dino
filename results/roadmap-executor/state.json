@@ -1,10 +1,10 @@
 {
   "current_phase": "P5_B",
-  "current_subphase": "P5B-18 p5b_regressions",
+  "current_subphase": "P5_C",
   "base_commit": "854e59e",
   "latest_commit": "pending",
   "worktree_checkpoint": "P5B-14 complete fixture and gate state committed locally",
-  "classification": "IMPLEMENTED_CHECKPOINT",
+  "classification": "BLOCKED_CONTRACT",
   "attempt": 0,
   "gates": {
     "implementation": "PASS",
@@ -12,12 +12,14 @@
     "regression": "PASS",
     "openspec": "PASS"
   },
-  "blockers": [],
+  "blockers": [
+    "P5-C approved specification not present in active OpenSpec change"
+  ],
   "dependencies": {
     "P4": "UNRESOLVED",
     "P5": "CONDITIONAL"
   },
   "started_at": "2026-09-23T16:18:57.340428+00:00",
   "completed_at": "2026-09-23T16:18:57.340428+00:00",
-  "next_action": "Run P5B regression suite"
+  "next_action": "Human decision or approved P5-C specification required"
 }
