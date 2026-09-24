@@ -4,19 +4,22 @@
   "base_commit": "854e59e",
   "latest_commit": "pending",
   "worktree_checkpoint": "P5B-14 complete fixture and gate state committed locally",
-  "classification": "P5_C_INTEGRATED_GASDYNAMIC_VERIFIED_CONDITIONAL",
+  "classification": "P5_C_IMPLEMENTATION_VERIFIED_CONDITIONAL_PARTIAL",
   "attempt": 0,
   "gates": {
     "implementation": "PASS",
     "numerical": "PASS",
     "regression": "PASS",
     "openspec": "PASS",
-    "fixtures": "PASS",
+    "fixtures": "PARTIAL",
     "restart": "PASS",
-    "determinism": "PASS"
+    "determinism": "PASS",
+    "causality": "PENDING",
+    "backflow": "PENDING"
   },
   "blockers": [
-    "P4 remains BLOCKED / NOT_GRANTED; P5 evidence is conditional"
+    "P4 remains BLOCKED / NOT_GRANTED; P5 evidence is conditional",
+    "P5-C contractual fixture bank and complete ledgers still require evidence"
   ],
   "dependencies": {
     "P4": "UNRESOLVED",
@@ -24,5 +27,5 @@
   },
   "started_at": "2026-09-23T16:18:57.340428+00:00",
   "completed_at": "2026-09-23T16:18:57.340428+00:00",
-  "next_action": "Inspect existing P6 approved contract; stop if scientifically insufficient"
+  "next_action": "Complete missing bounded P5-C fixtures; inspect P6 contract only after P5-C evidence closes"
 }
