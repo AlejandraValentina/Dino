@@ -55,3 +55,24 @@ boundary is part of this fixture.
 - **WHEN** the finite fixture advances through both SSPRK2 stages
 - **THEN** global mass, total energy, and passive-species inventories are conserved,
   all chamber and duct states remain admissible, and the fixed chamber volume is unchanged
+
+### Requirement: one-transfer closed subsystem
+
+P5-B SHALL provide an isolated subsystem consisting of one crankcase 0-D chamber,
+one finite constant-area transfer duct, and one cylinder 0-D chamber. Each of the
+two physical chamber/duct interfaces SHALL be solved exactly once per SSPRK2 stage,
+with the same extensive flux reused with opposite signs in the connected duct cell
+and chamber. Both chambers SHALL use the contractual volume-rate mechanism; no
+intake, exhaust, heat release, combustion, or P6 species semantics are part of this
+fixture.
+
+#### Scenario: isolated crankcase-to-cylinder transfer
+
+- **WHEN** the two-stage fixture advances with open or closed transfer interfaces
+- **THEN** global mass and passive-species inventories conserve with no external
+  boundary, energy changes only by the two integrated `-p*dV/dt` chamber work terms,
+  closed interfaces have exact zero flux, and every stage state is admissible.
+  The fixture SHALL expose both the SSPRK2 stage-quadrature (applied) inventory
+  deltas and final-stored-state deltas; the strict energy conservation gate SHALL
+  apply to the applied delta, while stored-state roundoff SHALL be reported and
+  checked against a documented machine-roundoff bound.

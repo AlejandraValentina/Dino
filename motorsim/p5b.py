@@ -4,7 +4,8 @@ Composes P5-A interfaces; exhaust and periodic engine operation are absent.
 """
 from dataclasses import dataclass
 from copy import deepcopy
-from math import isfinite
+from math import fsum, isfinite
+import sys
 from .duct_network import interface_exchange
 from .coupling import ChamberState, interface_flux
 from .gas1d.boundary import Boundary
@@ -230,6 +231,274 @@ class Single0D1DFixture:
         for q in duct:
             self.eos.primitive(q)
         return True
+
+
+class OneTransferFixture:
+    """Closed crankcase/transfer-duct/cylinder SSPRK2 fixture.
+
+    Both ends of the finite duct are physical chamber interfaces.  There is
+    deliberately no terminal wall: each interface is solved once from the
+    stage state and the resulting extensive flux is used with the opposite
+    sign in the adjacent duct cell.  Chamber volume rates use the same
+    ``-p*dV/dt`` source as :class:`Chamber` and are evaluated at each stage.
+    """
+
+    def __init__(self, crankcase, cylinder, duct_states, *, mesh=None, eos=None,
+                 volume_rates=(0.0, 0.0), interface_areas=None):
+        self.eos = eos or IdealGas()
+        if not isinstance(crankcase, Chamber) or not isinstance(cylinder, Chamber):
+            raise TypeError("fixtures require Chamber instances")
+        if not duct_states:
+            raise ValueError("transfer duct needs at least one cell")
+        self.mesh = mesh or uniform_mesh(len(duct_states), length=0.03, area=1.0e-4)
+        if len(duct_states) != self.mesh.n:
+            raise ValueError("state/mesh size mismatch")
+        if (len(volume_rates) != 2 or
+                not all(isinstance(x, (int, float)) and isfinite(x)
+                        for x in volume_rates)):
+            raise ValueError("invalid chamber volume rates")
+        areas = (self.mesh.areas[0], self.mesh.areas[-1]) if interface_areas is None else tuple(interface_areas)
+        if (len(areas) != 2 or
+                not all(isinstance(x, (int, float)) and isfinite(x) and x >= 0 for x in areas)):
+            raise ValueError("invalid interface areas")
+        if crankcase.volume <= 0 or cylinder.volume <= 0:
+            raise ValueError("invalid chamber volume")
+        self.crankcase = crankcase
+        self.cylinder = cylinder
+        self.volume_rates = tuple(float(x) for x in volume_rates)
+        self.interface_areas = tuple(float(x) for x in areas)
+        self.duct_states = [
+            state if isinstance(state, DuctCell) else DuctCell(self.eos.conservative(state), volume)
+            for state, volume in zip(duct_states, self.mesh.volumes)
+        ]
+        self.history = []
+        self.ledger = {"external_mass": 0.0, "external_energy": 0.0,
+                       "external_species": 0.0, "cc_work": 0.0,
+                       "cyl_work": 0.0}
+        # These are the increments actually applied by the SSPRK2 algorithm:
+        # stage RHS quadrature, before the updated primitive/conservative
+        # values are stored in their float64 component fields.  They are kept
+        # separately from the inventory subtraction below so stored-state
+        # roundoff cannot be mistaken for a failure of the integration.
+        self._applied_deltas = {"mass": 0.0, "energy": 0.0, "species": 0.0}
+        # Keep the component inventories, rather than only their global sum.
+        # The ledger may then observe a small net increment without recovering
+        # it by subtracting two much larger system totals.
+        self._initial_state = self._state()
+        self._initial_components = self._component_values(self._initial_state)
+        self._initial = self._totals(self._initial_state)
+
+    def _state(self):
+        cc_mass, cc_species, cc_energy = self.crankcase.inventory(self.eos)
+        cy_mass, cy_species, cy_energy = self.cylinder.inventory(self.eos)
+        return ((cc_mass, 0.0, cc_energy, cc_species, self.crankcase.volume),
+                (cy_mass, 0.0, cy_energy, cy_species, self.cylinder.volume),
+                tuple(cell.conservative for cell in self.duct_states))
+
+    def _component_values(self, state):
+        cc, cy, duct = state
+        return {
+            "mass": (cc[0], cy[0], *(q[0] * v for q, v in zip(duct, self.mesh.volumes))),
+            "energy": (cc[2], cy[2], *(q[2] * v for q, v in zip(duct, self.mesh.volumes))),
+            "species": (cc[3], cy[3], *(q[3] * v for q, v in zip(duct, self.mesh.volumes))),
+        }
+
+    def _totals(self, state=None):
+        state = self._state() if state is None else state
+        return {key: fsum(values) for key, values in self._component_values(state).items()}
+
+    def _rhs(self, state):
+        cc_q, cy_q, duct_q = state
+        cc = ChamberState(cc_q[0], cc_q[2], cc_q[3], cc_q[4])
+        cy = ChamberState(cy_q[0], cy_q[2], cy_q[3], cy_q[4])
+        duct_primitive = [self.eos.primitive(q) for q in duct_q]
+
+        # These are the only two interface solves in a stage.  Zero area is
+        # handled by interface_exchange as an exact closed-port zero flux.
+        left = interface_exchange(cc, duct_primitive[0], self.interface_areas[0], -1, eos=self.eos)
+        right = interface_exchange(cy, duct_primitive[-1], self.interface_areas[1], 1, eos=self.eos)
+        left_flux = tuple(left["outward"])
+        right_flux = tuple(right["outward"])
+        face_fluxes = [tuple(-x for x in left_flux)]
+        for a, b, area in zip(duct_primitive, duct_primitive[1:], self.mesh.areas[1:-1]):
+            face_fluxes.append(tuple(area * value for value in hllc_flux(a, b, self.eos)[0]))
+        face_fluxes.append(right_flux)
+        duct_rhs = tuple(
+            tuple(-(face_fluxes[i + 1][k] - face_fluxes[i][k]) / volume for k in range(4))
+            for i, volume in enumerate(self.mesh.volumes)
+        )
+        cc_rhs = (left_flux[0], 0.0, left_flux[2] - cc.thermodynamics(self.eos)[1] * self.volume_rates[0], left_flux[3])
+        cy_rhs = (right_flux[0], 0.0, right_flux[2] - cy.thermodynamics(self.eos)[1] * self.volume_rates[1], right_flux[3])
+        trace = {
+            "interfaces": (left_flux, right_flux),
+            "closed": (left["closed"], right["closed"]),
+            "face_fluxes": tuple(face_fluxes),
+            "work_rates": (-cc.thermodynamics(self.eos)[1] * self.volume_rates[0],
+                           -cy.thermodynamics(self.eos)[1] * self.volume_rates[1]),
+        }
+        return (cc_rhs, cy_rhs, duct_rhs), trace
+
+    @staticmethod
+    def _combine(a, b, scale):
+        return tuple(x + scale * y for x, y in zip(a, b))
+
+    def _algorithmic_increment(self, rhs, dt):
+        """Return one SSPRK2 stage contribution to global inventories.
+
+        Chamber RHS values are already extensive.  Duct RHS values are per
+        unit volume, so their contribution is multiplied by the same cell
+        volume used by the update.  The sum is deliberately formed from the
+        stage RHS, rather than reconstructed from stored states.
+        """
+        return {
+            key: dt * fsum((rhs[0][index], rhs[1][index],
+                            *(cell[index] * volume
+                              for cell, volume in zip(rhs[2], self.mesh.volumes))))
+            for key, index in (("mass", 0), ("energy", 2), ("species", 3))
+        }
+
+    def _validate_state(self, state):
+        cc, cy, duct = state
+        ChamberState(cc[0], cc[2], cc[3], cc[4]).thermodynamics(self.eos)
+        ChamberState(cy[0], cy[2], cy[3], cy[4]).thermodynamics(self.eos)
+        for q in duct:
+            self.eos.primitive(q)
+
+    def step(self, dt):
+        if not isinstance(dt, (int, float)) or not isfinite(dt) or dt <= 0:
+            raise ValueError("dt must be positive")
+        initial = self._state()
+        rhs0, trace0 = self._rhs(initial)
+        stage1 = (
+            self._combine(initial[0], rhs0[0], dt)[:4] + (initial[0][4] + dt * self.volume_rates[0],),
+            self._combine(initial[1], rhs0[1], dt)[:4] + (initial[1][4] + dt * self.volume_rates[1],),
+            tuple(self._combine(q, r, dt) for q, r in zip(initial[2], rhs0[2])),
+        )
+        self._validate_state(stage1)
+        rhs1, trace1 = self._rhs(stage1)
+        stage_increment0 = self._algorithmic_increment(rhs0, dt)
+        stage_increment1 = self._algorithmic_increment(rhs1, dt)
+        for key in self._applied_deltas:
+            self._applied_deltas[key] += 0.5 * (stage_increment0[key] + stage_increment1[key])
+        final = (
+            tuple(0.5 * (x + y + dt * r) for x, y, r in zip(initial[0][:4], stage1[0][:4], rhs1[0])) +
+            (0.5 * (initial[0][4] + stage1[0][4] + dt * self.volume_rates[0]),),
+            tuple(0.5 * (x + y + dt * r) for x, y, r in zip(initial[1][:4], stage1[1][:4], rhs1[1])) +
+            (0.5 * (initial[1][4] + stage1[1][4] + dt * self.volume_rates[1]),),
+            tuple(tuple(0.5 * (x + y + dt * r) for x, y, r in zip(q0, q1, r1))
+                  for q0, q1, r1 in zip(initial[2], stage1[2], rhs1[2])),
+        )
+        self._validate_state(final)
+        self.crankcase.volume, self.cylinder.volume = final[0][4], final[1][4]
+        self.crankcase.primitive = (final[0][0] / final[0][4], 0.0,
+                                    (self.eos.gamma - 1.0) * final[0][2] / final[0][4],
+                                    final[0][3] / final[0][0])
+        self.cylinder.primitive = (final[1][0] / final[1][4], 0.0,
+                                   (self.eos.gamma - 1.0) * final[1][2] / final[1][4],
+                                   final[1][3] / final[1][0])
+        for cell, q in zip(self.duct_states, final[2]):
+            cell.conservative = q
+        self.ledger["cc_work"] += 0.5 * dt * (trace0["work_rates"][0] + trace1["work_rates"][0])
+        self.ledger["cyl_work"] += 0.5 * dt * (trace0["work_rates"][1] + trace1["work_rates"][1])
+        trace = {"stages": (trace0, trace1), "totals": self._totals(),
+                 "applied_stage_increments": (stage_increment0, stage_increment1),
+                 "stage_order": ("crankcase_interface", "cylinder_interface", "duct_faces")}
+        self.history.append(trace)
+        return trace
+
+    def conservation(self):
+        final_state = self._state()
+        final = self._totals(final_state)
+        final_components = self._component_values(final_state)
+        return {"initial": dict(self._initial), "final": final,
+                "delta": {
+                    key: fsum(value - initial for value, initial in zip(
+                        final_components[key], self._initial_components[key]))
+                    for key in final_components
+                }}
+
+    def mass_ledger(self):
+        audit = self.conservation()
+        integration_residual = (self._applied_deltas["mass"] -
+                                self.ledger["external_mass"])
+        return {"initial_mass": audit["initial"]["mass"], "final_mass": audit["final"]["mass"],
+                "delta_mass": audit["delta"]["mass"], "external_mass": self.ledger["external_mass"],
+                "residual": audit["delta"]["mass"] - self.ledger["external_mass"],
+                "applied_delta_mass": self._applied_deltas["mass"],
+                "state_delta_mass": audit["delta"]["mass"],
+                "integration_residual": integration_residual}
+
+    def species_ledger(self):
+        audit = self.conservation()
+        integration_residual = (self._applied_deltas["species"] -
+                                self.ledger["external_species"])
+        return {"initial_species": audit["initial"]["species"], "final_species": audit["final"]["species"],
+                "delta_species": audit["delta"]["species"], "external_species": self.ledger["external_species"],
+                "residual": audit["delta"]["species"] - self.ledger["external_species"],
+                "applied_delta_species": self._applied_deltas["species"],
+                "state_delta_species": audit["delta"]["species"],
+                "integration_residual": integration_residual}
+
+    def energy_ledger(self):
+        audit = self.conservation()
+        work = self.ledger["cc_work"] + self.ledger["cyl_work"]
+        stored_energies = (
+            *self._initial_components["energy"],
+            *self._component_values(self._state())["energy"])
+        component_count = 2 + len(self.duct_states)
+        state_scale = fsum(abs(value) for value in stored_energies)
+        component_scale = max(abs(value) for value in stored_energies)
+        accepted_updates = len(self.history)
+        # Conservative bound: each accepted update can round the two chamber
+        # and every duct-cell stored energy, and the final inventory subtraction
+        # can round once more.  epsilon * (2*n + 2) * component_count * the
+        # largest stored component bounds the accumulation without a fitted
+        # threshold.  state_scale is also exposed as the total component scale.
+        roundoff_bound = (sys.float_info.epsilon *
+                          (2 * accepted_updates + 2) * component_count * component_scale)
+        state_roundoff = audit["delta"]["energy"] - self._applied_deltas["energy"]
+        integration_residual = (self._applied_deltas["energy"] -
+                                (self.ledger["external_energy"] + work))
+        # This is the independently observable balance obtained by subtracting
+        # the stored final and initial totals.  It includes one additional
+        # floating-point operation over ``state_roundoff`` (the addition of
+        # the accounted work), so expose it separately and check it against
+        # the same conservative machine-roundoff bound.
+        stored_balance_roundoff = (audit["final"]["energy"] -
+                                    (audit["initial"]["energy"] +
+                                     self.ledger["external_energy"] + work))
+        return {"initial_energy": audit["initial"]["energy"], "final_energy": audit["final"]["energy"],
+                "delta_energy": audit["delta"]["energy"], "external_energy": self.ledger["external_energy"],
+                "cc_work": self.ledger["cc_work"], "cyl_work": self.ledger["cyl_work"],
+                "chamber_work": work, "accounted_energy": work,
+                # Legacy state-based semantics retained for existing callers.
+                "residual": audit["delta"]["energy"] - work,
+                "applied_delta_energy": self._applied_deltas["energy"],
+                "state_delta_energy": audit["delta"]["energy"],
+                "integration_residual": integration_residual,
+                "state_roundoff": state_roundoff,
+                "stored_balance_roundoff": stored_balance_roundoff,
+                "stored_balance_roundoff_bound": roundoff_bound,
+                "state_roundoff_bound": roundoff_bound,
+                "stored_energy_scale": state_scale,
+                "stored_energy_component_scale": component_scale,
+                "stored_energy_component_count": component_count,
+                "accepted_updates": accepted_updates}
+
+    def admissible(self):
+        self._validate_state(self._state())
+        return True
+
+
+def make_one_transfer_fixture(*, eos=None, cells=3, volume_rates=(0.0, 0.0), interface_areas=None):
+    """Build an externally closed crankcase/one-transfer/cylinder fixture."""
+    eos = eos or IdealGas()
+    mesh = uniform_mesh(cells, length=0.03, area=1.0e-4)
+    crankcase = Chamber((1.05, 0.0, 112000.0, 0.65), 1.0e-3)
+    cylinder = Chamber((0.95, 0.0, 97000.0, 0.25), 1.0e-2)
+    duct = tuple((1.0, 0.0, 100000.0, 0.4) for _ in range(cells))
+    return OneTransferFixture(crankcase, cylinder, duct, mesh=mesh, eos=eos,
+                              volume_rates=volume_rates, interface_areas=interface_areas)
 
 
 def make_single_0d1d_fixture(*, eos=None, cells=3):

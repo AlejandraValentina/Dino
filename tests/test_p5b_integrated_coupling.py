@@ -7,6 +7,8 @@ from motorsim.p5b import (
     make_single_0d1d_fixture,
     interior_rhs,
     make_closed_volume_work_fixture,
+    make_one_transfer_fixture,
+    OneTransferFixture,
     ssprk2_step,
 )
 from motorsim.gas1d.mesh import uniform_mesh
@@ -329,6 +331,99 @@ def test_single_0d1d_fixture_uses_contractual_rigid_wall_momentum_flux():
     assert wall[1] > 0.0
     expected = -(node.mesh.areas[-1] * wall[1] - (-shared[1])) / node.mesh.volumes[0]
     assert rhs[1][0][1] == pytest.approx(expected)
+
+
+def test_one_transfer_fixture_is_two_chambers_and_one_finite_duct():
+    node = make_one_transfer_fixture(cells=3)
+    assert isinstance(node, OneTransferFixture)
+    assert len(node.duct_states) == 3
+    assert node.interface_areas == (node.mesh.areas[0], node.mesh.areas[-1])
+    initial = node.conservation()["initial"]
+    for _ in range(8):
+        trace = node.step(1.0e-7)
+        assert len(trace["stages"]) == 2
+        assert trace["stage_order"] == (
+            "crankcase_interface", "cylinder_interface", "duct_faces")
+        assert node.admissible()
+    audit = node.conservation()
+    for key in ("mass", "energy", "species"):
+        assert audit["final"][key] == pytest.approx(initial[key], abs=1.0e-10)
+
+
+def test_one_transfer_solves_each_physical_interface_once_per_stage():
+    node = make_one_transfer_fixture(cells=2)
+    calls = []
+    original = p5b.interface_exchange
+
+    def audited(chamber, interior, area, normal, *, eos):
+        result = original(chamber, interior, area, normal, eos=eos)
+        calls.append((area, normal, result["outward"]))
+        return result
+
+    with patch.object(p5b, "interface_exchange", side_effect=audited):
+        trace = node.step(1.0e-7)
+    assert len(calls) == 4
+    assert [call[1] for call in calls] == [-1, 1, -1, 1]
+    assert trace["stages"][0]["interfaces"] == (calls[0][2], calls[1][2])
+    assert trace["stages"][1]["interfaces"] == (calls[2][2], calls[3][2])
+    for stage in trace["stages"]:
+        left, right = stage["interfaces"]
+        assert stage["face_fluxes"][0] == tuple(-x for x in left)
+        assert stage["face_fluxes"][-1] == right
+
+
+def test_one_transfer_closed_interfaces_have_exact_zero_leakage():
+    node = make_one_transfer_fixture(cells=2, interface_areas=(0.0, 0.0))
+    before = node.conservation()["initial"]
+    before_chambers = (node.crankcase.inventory(E), node.cylinder.inventory(E))
+    for _ in range(10):
+        trace = node.step(1.0e-6)
+        for stage in trace["stages"]:
+            assert stage["closed"] == (True, True)
+            assert stage["interfaces"] == ((0.0, 0.0, 0.0, 0.0),) * 2
+        assert node.crankcase.inventory(E) == pytest.approx(before_chambers[0])
+        assert node.cylinder.inventory(E) == pytest.approx(before_chambers[1])
+    assert node.conservation()["delta"]["mass"] == pytest.approx(0.0, abs=1.0e-15)
+    assert node.mass_ledger()["residual"] == pytest.approx(0.0, abs=1.0e-15)
+    assert node.species_ledger()["residual"] == pytest.approx(0.0, abs=1.0e-15)
+
+
+def test_one_transfer_volume_rates_use_contractual_work_without_external_energy():
+    """Small opposing work must pass the unchanged 1e-12 ledger gate.
+
+    This deliberately runs several steps so the observed increment is much
+    smaller than the stored chamber/duct inventories.  The fixture must audit
+    that increment component-wise rather than subtracting two global totals.
+    """
+    node = make_one_transfer_fixture(
+        cells=2, volume_rates=(-1.0e-4, 1.0e-4), interface_areas=(0.0, 0.0))
+    initial = node.conservation()["initial"]
+    for _ in range(10):
+        node.step(1.0e-6)
+        assert node.admissible()
+    mass = node.mass_ledger()
+    species = node.species_ledger()
+    energy = node.energy_ledger()
+    assert mass["delta_mass"] == pytest.approx(0.0, abs=1.0e-15)
+    assert species["delta_species"] == pytest.approx(0.0, abs=1.0e-15)
+    assert energy["external_energy"] == 0.0
+    # The strict gate applies to the stage quadrature, not to subtracting
+    # large stored chamber energies after ten accepted updates.
+    assert energy["applied_delta_energy"] == pytest.approx(
+        energy["chamber_work"], abs=1.0e-12)
+    assert energy["integration_residual"] == pytest.approx(0.0, abs=1.0e-12)
+    assert energy["state_delta_energy"] == energy["delta_energy"]
+    assert abs(energy["state_roundoff"]) <= energy["state_roundoff_bound"]
+    assert abs(energy["stored_balance_roundoff"]) <= energy["stored_balance_roundoff_bound"]
+    assert energy["accepted_updates"] == 10
+    assert energy["state_roundoff_bound"] > 0.0
+    assert mass["applied_delta_mass"] == pytest.approx(0.0, abs=1.0e-15)
+    assert mass["integration_residual"] == pytest.approx(0.0, abs=1.0e-15)
+    assert species["applied_delta_species"] == pytest.approx(0.0, abs=1.0e-15)
+    assert species["integration_residual"] == pytest.approx(0.0, abs=1.0e-15)
+    assert energy["stored_balance_roundoff"] == (
+        node.conservation()["final"]["energy"] -
+        (initial["energy"] + energy["chamber_work"]))
 
 
 def test_single_0d1d_fixture_validates_chamber_as_extensive_inventory():
