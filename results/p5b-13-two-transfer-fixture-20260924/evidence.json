@@ -54,6 +54,7 @@
     "no_push": true
   },
   "checkpoint": {
-    "status": "PENDING_LOCAL_COMMIT"
+    "status": "LOCAL_COMMIT",
+    "commit": "bd3dcbf"
   }
 }
