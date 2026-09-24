@@ -1,0 +1,64 @@
+{
+  "classification": "P5_C_INTEGRATED_GASDYNAMIC_VERIFIED_CONDITIONAL",
+  "observable": "dominant positive dp/dt in predeclared direct window",
+  "sensors": {
+    "near": {
+      "cell": 1,
+      "x_m": 0.0075
+    },
+    "middle": {
+      "cell": 3,
+      "x_m": 0.0175
+    },
+    "far": {
+      "cell": 4,
+      "x_m": 0.0225
+    }
+  },
+  "windows_basis": "HLLC bounds 250..600 m/s, declared before extraction",
+  "windows": {
+    "near": [
+      1.2499999999999999e-05,
+      2.9999999999999997e-05
+    ],
+    "middle": [
+      2.916666666666667e-05,
+      7.000000000000001e-05
+    ],
+    "far": [
+      3.75e-05,
+      8.999999999999999e-05
+    ]
+  },
+  "cfl_cases": {
+    "0.2": {
+      "dt_s": 2.721655269759087e-06,
+      "near_arrival_s": 1.496910398367498e-05,
+      "middle_arrival_s": 3.402069087198859e-05,
+      "far_arrival_s": 4.490731195102494e-05,
+      "near_peak_dpdt": 1533066152.3942907,
+      "middle_peak_dpdt": 1029135132.3972107,
+      "far_peak_dpdt": 911821031.9265196
+    },
+    "0.4": {
+      "dt_s": 5.443310539518174e-06,
+      "near_arrival_s": 1.3608276348795436e-05,
+      "middle_arrival_s": 3.538151850686813e-05,
+      "far_arrival_s": 4.626813958590448e-05,
+      "near_peak_dpdt": 1498961621.1338546,
+      "middle_peak_dpdt": 1025369351.7416514,
+      "far_peak_dpdt": 912208912.1813072
+    }
+  },
+  "ordering": "near < middle < far",
+  "reflection_exclusion": "direct windows end before terminal reflection estimate",
+  "mass_ledger_cumulative": -8.08e-18,
+  "mY_ledger_cumulative": -3.1e-31,
+  "energy_ledger_cumulative": -8e-13,
+  "regressions": 66,
+  "openspec_strict": true,
+  "P4_status": "BLOCKED / NOT_GRANTED",
+  "dependency": "CONDITIONAL_ON_P4",
+  "experimental_validation": "NOT_PERFORMED",
+  "independent_review": "INDEPENDENT_REVIEW_PENDING"
+}

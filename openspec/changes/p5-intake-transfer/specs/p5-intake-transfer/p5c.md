@@ -20,6 +20,14 @@ A checkpoint after a real update SHALL restore all dynamic chamber, duct, angle 
 ledger state. Uninterrupted and resumed bounded runs SHALL agree under the existing
 deterministic numeric policy.
 
+### Requirement: resolved causal front
+The bounded exhaust causality fixture SHALL locate the principal resolved
+compression front by the dominant positive `dp/dt` within predeclared direct
+arrival windows. The former 1000 Pa first-crossing remains diagnostic only.
+Near, middle and far sensors SHALL preserve finite downstream ordering and
+physically compatible effective speeds at two permitted CFL values, without
+terminal-reflection contamination.
+
 ### Requirement: governance
 P4 SHALL remain `BLOCKED`/`NOT_GRANTED`; P5-C may close only as
 `P5_C_INTEGRATED_GASDYNAMIC_VERIFIED_CONDITIONAL` when all focal fixtures and

@@ -22,3 +22,5 @@
 - [ ] P5-C: bounded conditional exhaust integration implemented; 43 focused P5B/P5C tests PASS, with closed-port, exhaust and restart/replay evidence in `results/p5c-conditional-20260924/evidence.json`. Full fixture-bank closure remains pending (backflow, causal delay, complete ledgers).
 - [ ] P5-C stage-coherent shared cylinder RHS: blocker found in current adapter; exhaust is applied after P5-B core step.
 - [x] Relevant P5-A/P5-B/P3 coupling/P4 exhaust focal regressions: 59 passed.
+- [x] P5-C resolved causal front: dominant positive dp/dt, predeclared windows, CFL 0.2/0.4 ordering PASS; precursor retained diagnostically.
+- [x] P5-C conditional closure evidence recorded in `results/p5c-conditional-20260924/causal-front-20260924.json`.
