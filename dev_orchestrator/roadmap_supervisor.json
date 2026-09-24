@@ -4,7 +4,8 @@
   "agent_adapter": "codex",
   "agent_timeout_seconds": 3600,
   "max_no_progress_attempts": 3,
-  "max_invocations": 20,
+  "max_invocations": 0,
+  "live_status_file": "results/roadmap-executor/LIVE_STATUS.md",
   "poll_seconds": 2,
   "auto_commit": false
 }
