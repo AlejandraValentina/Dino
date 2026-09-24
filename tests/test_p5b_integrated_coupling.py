@@ -1,7 +1,13 @@
 import pytest
 from unittest.mock import patch
 
-from motorsim.p5b import Chamber, IntegratedIntakeTransfer, interior_rhs, ssprk2_step
+from motorsim.p5b import (
+    Chamber,
+    IntegratedIntakeTransfer,
+    interior_rhs,
+    make_closed_volume_work_fixture,
+    ssprk2_step,
+)
 from motorsim.gas1d.mesh import uniform_mesh
 from motorsim.gas1d.eos import IdealGas
 
@@ -233,3 +239,39 @@ def test_energy_global_ledger_preserves_variable_volume_work_signs():
     assert audit['cyl_work'] > 0.0
     assert audit['delta_energy'] == pytest.approx(audit['chamber_work'], abs=1e-12)
     assert audit['residual'] == pytest.approx(0.0, abs=1e-12)
+
+
+def test_closed_volume_work_fixture_conserves_inventories_and_has_no_flux():
+    node = make_closed_volume_work_fixture()
+    initial_mass = node.mass_ledger()['initial_mass']
+    initial_species = node.species_ledger()['initial_species']
+    initial_energy = node.energy_ledger()['initial_energy']
+
+    for angle in (0.0, 30.0, 60.0, 240.0) * 5:
+        trace = node.step(1.0e-3, angle=angle)
+        assert trace['areas'] == (0.0, 0.0, 0.0)
+        assert all(all(value == 0.0 for value in flux) for flux in trace['fluxes'])
+
+    mass = node.mass_ledger()
+    species = node.species_ledger()
+    energy = node.energy_ledger()
+    assert mass['final_mass'] == pytest.approx(initial_mass, abs=1e-15)
+    assert species['final_species'] == pytest.approx(initial_species, abs=1e-15)
+    assert mass['external_mass'] == 0.0 and mass['residual'] == pytest.approx(0.0, abs=1e-15)
+    assert species['external_species'] == 0.0 and species['residual'] == pytest.approx(0.0, abs=1e-15)
+    assert energy['external_energy'] == 0.0
+    assert energy['delta_energy'] == pytest.approx(energy['chamber_work'], abs=1e-12)
+    assert energy['residual'] == pytest.approx(0.0, abs=1e-12)
+    assert energy['cc_work'] > 0.0
+    assert energy['cyl_work'] < 0.0
+    assert energy['final_energy'] == pytest.approx(initial_energy + energy['chamber_work'], abs=1e-12)
+
+
+def test_closed_volume_work_fixture_keeps_chambers_admissible():
+    node = make_closed_volume_work_fixture(volume_rates=(-2.0e-4, 2.0e-4))
+    for angle in (0.0, 60.0, 240.0) * 4:
+        node.step(1.0e-3, angle=angle)
+        for chamber in (node.crankcase, node.cylinder):
+            rho, pressure, temperature, fraction = chamber.thermodynamics(E)
+            assert rho > 0.0 and pressure > 0.0 and temperature > 0.0
+            assert 0.0 <= fraction <= 1.0

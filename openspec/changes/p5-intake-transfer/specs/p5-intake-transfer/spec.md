@@ -29,3 +29,15 @@ P5-B SHALL compose atmosphere, intake, crankcase, two transfer ducts and cylinde
 #### Scenario: isolated integrated fixture
 - **WHEN** the short fixture is executed
 - **THEN** interface traces and stage timing are recorded without inferring P4 acceptance
+
+### Requirement: closed-volume work fixture
+P5-B SHALL provide a closed-volume fixture that uses the contractual chamber
+volume-rate mechanism with every physical port closed and without heat or
+combustion sources.
+
+#### Scenario: closed-volume compression and expansion
+- **WHEN** the fixture advances with moving crankcase and cylinder volumes
+- **THEN** mass and passive-species inventories remain constant, external
+  mass/species/energy fluxes are zero, and system energy changes only by the
+  stage-consistent integrated `-p*dV/dt` work; compression work is positive,
+  expansion work is negative, and chamber states remain admissible

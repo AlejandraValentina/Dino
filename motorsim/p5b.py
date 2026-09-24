@@ -110,6 +110,27 @@ class DuctCell:
         self.conservative = q
 
 
+def make_closed_volume_work_fixture(*, eos=None, volume_rates=(-1.0e-4, 1.0e-4)):
+    """Build the P5B-10 closed-volume work fixture.
+
+    All physical ports are closed by the caller's closed-angle trajectory;
+    this factory only supplies the two chambers, their passive inventories,
+    and the existing contractual volume-rate mechanism.  No heat, reaction,
+    or external state is introduced here.
+    """
+    eos = eos or IdealGas()
+    crankcase = Chamber((1.0, 0.0, 100000.0, 0.5), 1.0e-3)
+    cylinder = Chamber((1.0, 0.0, 100000.0, 0.5), 1.0e-2)
+    closed_duct = (1.0, 0.0, 101325.0, 0.0)
+    return IntegratedIntakeTransfer(
+        crankcase,
+        cylinder,
+        (closed_duct, closed_duct, closed_duct),
+        eos=eos,
+        volume_rates=volume_rates,
+    )
+
+
 class IntegratedIntakeTransfer:
     """Atmosphere→intake→crankcase with two independent transfer endpoints."""
     def __init__(self, crankcase, cylinder, duct_states, *, eos=None, volume_rates=(0.0, 0.0)):
