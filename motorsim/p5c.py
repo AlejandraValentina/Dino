@@ -27,12 +27,13 @@ class IntegratedP5C:
 
     def __init__(self, crankcase, cylinder, duct_states, exhaust_states=None,
                  *, eos=None, meshes=None, exhaust_mesh=None,
-                 exhaust_area=1.0e-4, port_area=0.0, volume_rates=(0.0, 0.0)):
+                 exhaust_area=1.0e-4, port_area=0.0, volume_rates=(0.0, 0.0),
+                 external_boundary=False):
         self.eos = eos or IdealGas()
         self.core = IntegratedIntakeTransfer(crankcase, cylinder, duct_states,
                                              eos=self.eos, meshes=meshes,
                                              volume_rates=volume_rates,
-                                             external_boundary=False)
+                                             external_boundary=external_boundary)
         if exhaust_states is None:
             exhaust_states = ((1.0, 0.0, 100000.0, 0.0),) * 3
         self.exhaust_mesh = exhaust_mesh or uniform_mesh(len(exhaust_states),
@@ -47,6 +48,7 @@ class IntegratedP5C:
                        "port_energy": 0.0, "port_species": 0.0}
         self.history = []
         self._initial = self.totals()
+        self._last_external = {"mass": 0.0, "energy": 0.0, "species": 0.0}
 
     def _duct_totals(self, path):
         return {"mass": fsum(q[0] * v for q, v in
@@ -196,8 +198,20 @@ class IntegratedP5C:
                   "stage_rhs": (t0['cylinder_rhs'], t1['cylinder_rhs']),
                   "stage_interfaces": (t0['cylinder_interfaces'], t1['cylinder_interfaces']),
                   "totals": self.totals(), "dependency": self.dependency_status}
+        self._last_external = {"mass": 0.5*(t0['core']['external'][0] + t1['core']['external'][0])*dt,
+                               "energy": 0.5*(t0['core']['external'][2] + t1['core']['external'][2])*dt,
+                               "species": 0.5*(t0['core']['external'][3] + t1['core']['external'][3])*dt}
+        record['ledger'] = self.ledger_report()
         self.history.append(record)
         return record
+
+    def ledger_report(self):
+        final = self.totals()
+        delta = {k: final[k] - self._initial[k] for k in final}
+        ext = dict(self._last_external)
+        return {"initial": dict(self._initial), "final": final, "delta": delta,
+                "external": ext,
+                "residual": {k: delta[k] - ext[k] for k in ('mass','energy','species')}}
 
     def snapshot(self):
         return {"core": self.core.snapshot(), "exhaust": deepcopy(self.exhaust),
@@ -221,3 +235,10 @@ def make_p5c_fixture(*, eos=None, cells=2, port_area=0.0):
     cylinder = Chamber((1.0, 0.0, 100000.0, 0.2), 1.0e-2)
     return IntegratedP5C(crankcase, cylinder, ducts, (state,) * cells,
                          eos=eos, port_area=port_area)
+
+
+def make_p5c_full_fixture(*, eos=None, cells=2, port_area=1.0e-4):
+    """Full short topology with the atmospheric intake boundary enabled."""
+    fixture = make_p5c_fixture(eos=eos, cells=cells, port_area=port_area)
+    fixture.core.external_boundary = True
+    return fixture
