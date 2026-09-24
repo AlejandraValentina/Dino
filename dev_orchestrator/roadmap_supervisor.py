@@ -53,7 +53,7 @@ def once():
     prompt='Read AGENTS.md, roadmap state and current_tasks.json. Implement the active approved task completely, run focused tests, persist durable state. Do not reinterpret P4, do not push, preserve redme.txt unstaged.'
     (d/'prompt.txt').write_text(prompt,encoding='utf-8'); start=time.time(); timeout=read(CFG,{}).get('agent_timeout_seconds',3600)
     with open(d/'stdout.log','wb') as out, open(d/'stderr.log','wb') as err:
-        p=subprocess.Popen(cmd,input=None,stdin=subprocess.PIPE,stdout=out,stderr=err,cwd=ROOT)
+        p=subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=out,stderr=err,cwd=ROOT)
         write(STATE,{'status':'RUNNING','pid':os.getpid(),'child_pid':p.pid,'current_invocation':inv,'last_heartbeat':now(),'current_phase':before['phase_before'],'current_task':before['active_task_before']})
         p.stdin.write(prompt.encode('utf-8')); p.stdin.close(); started=time.time()
         while p.poll() is None:
