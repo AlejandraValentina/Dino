@@ -501,6 +501,283 @@ def make_one_transfer_fixture(*, eos=None, cells=3, volume_rates=(0.0, 0.0), int
                               volume_rates=volume_rates, interface_areas=interface_areas)
 
 
+class _TransferPath:
+    """Private independent state for one finite transfer in TwoTransferFixture."""
+
+    def __init__(self, duct_states, mesh, eos, interface_areas):
+        if not duct_states or len(duct_states) != mesh.n:
+            raise ValueError("transfer duct state/mesh size mismatch")
+        self.mesh = mesh
+        self.interface_areas = tuple(float(x) for x in interface_areas)
+        self.duct_states = [
+            state if isinstance(state, DuctCell)
+            else DuctCell(eos.conservative(state), volume)
+            for state, volume in zip(duct_states, mesh.volumes)
+        ]
+        self.history = []
+        self.ledger = {"mass": 0.0, "energy": 0.0, "species": 0.0}
+
+    def state(self):
+        return tuple(cell.conservative for cell in self.duct_states)
+
+
+class TwoTransferFixture:
+    """Closed crankcase/two-transfer/cylinder SSPRK2 fixture.
+
+    Each path owns its mesh, cells, history and ledger.  A stage resolves the
+    four physical interfaces exactly once, then assembles both chamber RHSs by
+    summing the two path contributions before either chamber is updated.
+    """
+
+    def __init__(self, crankcase, cylinder, transfer_states, *, meshes=None,
+                 eos=None, volume_rates=(0.0, 0.0), interface_areas=None):
+        self.eos = eos or IdealGas()
+        if not isinstance(crankcase, Chamber) or not isinstance(cylinder, Chamber):
+            raise TypeError("fixtures require Chamber instances")
+        if len(transfer_states) != 2:
+            raise ValueError("two independent transfer states are required")
+        if meshes is None:
+            meshes = tuple(uniform_mesh(len(states), length=0.03, area=1.0e-4)
+                           for states in transfer_states)
+        if len(meshes) != 2:
+            raise ValueError("two independent transfer meshes are required")
+        if len(volume_rates) != 2 or not all(
+                isinstance(x, (int, float)) and isfinite(x) for x in volume_rates):
+            raise ValueError("invalid chamber volume rates")
+        if interface_areas is None:
+            interface_areas = tuple((mesh.areas[0], mesh.areas[-1]) for mesh in meshes)
+        if len(interface_areas) != 2 or any(len(areas) != 2 for areas in interface_areas):
+            raise ValueError("two pairs of interface areas are required")
+        if (any(not isinstance(x, (int, float)) or not isfinite(x) or x < 0
+                for areas in interface_areas for x in areas)):
+            raise ValueError("invalid interface areas")
+        if crankcase.volume <= 0 or cylinder.volume <= 0:
+            raise ValueError("invalid chamber volume")
+        self.crankcase = crankcase
+        self.cylinder = cylinder
+        self.volume_rates = tuple(float(x) for x in volume_rates)
+        self.transfers = tuple(
+            _TransferPath(states, mesh, self.eos, areas)
+            for states, mesh, areas in zip(transfer_states, meshes, interface_areas)
+        )
+        # Public convenience mirrors the one-transfer fixture without sharing
+        # either list or cell objects with a path.
+        self.duct_states = tuple(path.duct_states for path in self.transfers)
+        self.history = []
+        self.ledger = {"external_mass": 0.0, "external_energy": 0.0,
+                       "external_species": 0.0, "cc_work": 0.0,
+                       "cyl_work": 0.0}
+        self._applied_deltas = {"mass": 0.0, "energy": 0.0, "species": 0.0}
+        self._initial_state = self._state()
+        self._initial_components = self._component_values(self._initial_state)
+        self._initial = self._totals(self._initial_state)
+
+    def _state(self):
+        cc_mass, cc_species, cc_energy = self.crankcase.inventory(self.eos)
+        cy_mass, cy_species, cy_energy = self.cylinder.inventory(self.eos)
+        return ((cc_mass, 0.0, cc_energy, cc_species, self.crankcase.volume),
+                (cy_mass, 0.0, cy_energy, cy_species, self.cylinder.volume),
+                tuple(path.state() for path in self.transfers))
+
+    def _component_values(self, state):
+        cc, cy, paths = state
+        values = {
+            "mass": [cc[0], cy[0]],
+            "energy": [cc[2], cy[2]],
+            "species": [cc[3], cy[3]],
+        }
+        for path, mesh in zip(paths, (item.mesh for item in self.transfers)):
+            for key, index in (("mass", 0), ("energy", 2), ("species", 3)):
+                values[key].extend(q[index] * volume
+                                   for q, volume in zip(path, mesh.volumes))
+        return {key: tuple(items) for key, items in values.items()}
+
+    def _totals(self, state=None):
+        state = self._state() if state is None else state
+        return {key: fsum(values) for key, values in self._component_values(state).items()}
+
+    def _path_rhs(self, cc, cy, path, duct_q):
+        duct_primitive = [self.eos.primitive(q) for q in duct_q]
+        left = interface_exchange(cc, duct_primitive[0], path.interface_areas[0], -1, eos=self.eos)
+        right = interface_exchange(cy, duct_primitive[-1], path.interface_areas[1], 1, eos=self.eos)
+        left_flux, right_flux = tuple(left["outward"]), tuple(right["outward"])
+        face_fluxes = [tuple(-value for value in left_flux)]
+        for a, b, area in zip(duct_primitive, duct_primitive[1:], path.mesh.areas[1:-1]):
+            face_fluxes.append(tuple(area * value for value in hllc_flux(a, b, self.eos)[0]))
+        face_fluxes.append(right_flux)
+        duct_rhs = tuple(
+            tuple(-(face_fluxes[i + 1][k] - face_fluxes[i][k]) / volume for k in range(4))
+            for i, volume in enumerate(path.mesh.volumes)
+        )
+        return ((left_flux, right_flux), duct_rhs), {
+            "interfaces": (left_flux, right_flux),
+            "closed": (left["closed"], right["closed"]),
+            "face_fluxes": tuple(face_fluxes),
+        }
+
+    def _rhs(self, state):
+        cc_q, cy_q, paths_q = state
+        cc = ChamberState(cc_q[0], cc_q[2], cc_q[3], cc_q[4])
+        cy = ChamberState(cy_q[0], cy_q[2], cy_q[3], cy_q[4])
+        path_rhs, traces = [], []
+        for path, duct_q in zip(self.transfers, paths_q):
+            rhs, trace = self._path_rhs(cc, cy, path, duct_q)
+            path_rhs.append(rhs)
+            traces.append(trace)
+        cc_flux = tuple(sum(rhs[0][0][k] for rhs in path_rhs) for k in range(4))
+        cy_flux = tuple(sum(rhs[0][1][k] for rhs in path_rhs) for k in range(4))
+        cc_pressure = cc.thermodynamics(self.eos)[1]
+        cy_pressure = cy.thermodynamics(self.eos)[1]
+        cc_rhs = (cc_flux[0], 0.0, cc_flux[2] - cc_pressure * self.volume_rates[0], cc_flux[3])
+        cy_rhs = (cy_flux[0], 0.0, cy_flux[2] - cy_pressure * self.volume_rates[1], cy_flux[3])
+        return (cc_rhs, cy_rhs, tuple(item[1] for item in path_rhs)), {
+            "transfers": tuple(traces),
+            "aggregate_chamber_rhs": (cc_rhs, cy_rhs),
+            "work_rates": (-cc_pressure * self.volume_rates[0],
+                           -cy_pressure * self.volume_rates[1]),
+        }
+
+    @staticmethod
+    def _combine(a, b, scale):
+        return tuple(x + scale * y for x, y in zip(a, b))
+
+    def _algorithmic_increment(self, rhs, dt):
+        return {
+            key: dt * fsum((rhs[0][index], rhs[1][index],
+                            *(cell[index] * volume
+                              for cells, path in zip(rhs[2], self.transfers)
+                              for cell, volume in zip(cells, path.mesh.volumes))))
+            for key, index in (("mass", 0), ("energy", 2), ("species", 3))
+        }
+
+    def _validate_state(self, state):
+        cc, cy, paths = state
+        ChamberState(cc[0], cc[2], cc[3], cc[4]).thermodynamics(self.eos)
+        ChamberState(cy[0], cy[2], cy[3], cy[4]).thermodynamics(self.eos)
+        for path in paths:
+            for q in path:
+                self.eos.primitive(q)
+
+    def step(self, dt):
+        if not isinstance(dt, (int, float)) or not isfinite(dt) or dt <= 0:
+            raise ValueError("dt must be positive")
+        initial = self._state()
+        rhs0, trace0 = self._rhs(initial)
+        stage1 = (
+            self._combine(initial[0], rhs0[0], dt)[:4] +
+            (initial[0][4] + dt * self.volume_rates[0],),
+            self._combine(initial[1], rhs0[1], dt)[:4] +
+            (initial[1][4] + dt * self.volume_rates[1],),
+            tuple(tuple(self._combine(q, r, dt) for q, r in zip(path, path_rhs))
+                  for path, path_rhs in zip(initial[2], rhs0[2])),
+        )
+        self._validate_state(stage1)
+        rhs1, trace1 = self._rhs(stage1)
+        stage_increment0 = self._algorithmic_increment(rhs0, dt)
+        stage_increment1 = self._algorithmic_increment(rhs1, dt)
+        for key in self._applied_deltas:
+            self._applied_deltas[key] += 0.5 * (stage_increment0[key] + stage_increment1[key])
+        final = (
+            tuple(0.5 * (x + y + dt * r) for x, y, r in zip(initial[0][:4], stage1[0][:4], rhs1[0])) +
+            (0.5 * (initial[0][4] + stage1[0][4] + dt * self.volume_rates[0]),),
+            tuple(0.5 * (x + y + dt * r) for x, y, r in zip(initial[1][:4], stage1[1][:4], rhs1[1])) +
+            (0.5 * (initial[1][4] + stage1[1][4] + dt * self.volume_rates[1]),),
+            tuple(tuple(tuple(0.5 * (x + y + dt * r) for x, y, r in zip(q0, q1, r1))
+                        for q0, q1, r1 in zip(path0, path1, path_rhs))
+                  for path0, path1, path_rhs in zip(initial[2], stage1[2], rhs1[2])),
+        )
+        self._validate_state(final)
+        self.crankcase.volume, self.cylinder.volume = final[0][4], final[1][4]
+        self.crankcase.primitive = (final[0][0] / final[0][4], 0.0,
+                                    (self.eos.gamma - 1.0) * final[0][2] / final[0][4],
+                                    final[0][3] / final[0][0])
+        self.cylinder.primitive = (final[1][0] / final[1][4], 0.0,
+                                   (self.eos.gamma - 1.0) * final[1][2] / final[1][4],
+                                   final[1][3] / final[1][0])
+        for path, path_final in zip(self.transfers, final[2]):
+            for cell, q in zip(path.duct_states, path_final):
+                cell.conservative = q
+            path.history.append((trace0["transfers"][self.transfers.index(path)],
+                                 trace1["transfers"][self.transfers.index(path)]))
+        self.ledger["cc_work"] += 0.5 * dt * (trace0["work_rates"][0] + trace1["work_rates"][0])
+        self.ledger["cyl_work"] += 0.5 * dt * (trace0["work_rates"][1] + trace1["work_rates"][1])
+        trace = {"stages": (trace0, trace1),
+                 "totals": self._totals(),
+                 "applied_stage_increments": (stage_increment0, stage_increment1),
+                 "stage_order": ("transfer_interfaces", "aggregate_chamber_rhs", "duct_faces")}
+        self.history.append(trace)
+        return trace
+
+    def conservation(self):
+        final_state = self._state()
+        final = self._totals(final_state)
+        final_components = self._component_values(final_state)
+        return {"initial": dict(self._initial), "final": final,
+                "delta": {key: fsum(value - initial for value, initial in zip(
+                    final_components[key], self._initial_components[key]))
+                           for key in final_components}}
+
+    def mass_ledger(self):
+        audit = self.conservation()
+        integration_residual = self._applied_deltas["mass"] - self.ledger["external_mass"]
+        return {"initial_mass": audit["initial"]["mass"], "final_mass": audit["final"]["mass"],
+                "delta_mass": audit["delta"]["mass"], "external_mass": self.ledger["external_mass"],
+                "residual": audit["delta"]["mass"] - self.ledger["external_mass"],
+                "applied_delta_mass": self._applied_deltas["mass"],
+                "state_delta_mass": audit["delta"]["mass"], "integration_residual": integration_residual}
+
+    def species_ledger(self):
+        audit = self.conservation()
+        integration_residual = self._applied_deltas["species"] - self.ledger["external_species"]
+        return {"initial_species": audit["initial"]["species"], "final_species": audit["final"]["species"],
+                "delta_species": audit["delta"]["species"], "external_species": self.ledger["external_species"],
+                "residual": audit["delta"]["species"] - self.ledger["external_species"],
+                "applied_delta_species": self._applied_deltas["species"],
+                "state_delta_species": audit["delta"]["species"], "integration_residual": integration_residual}
+
+    def energy_ledger(self):
+        audit = self.conservation()
+        work = self.ledger["cc_work"] + self.ledger["cyl_work"]
+        stored = (*self._initial_components["energy"],
+                  *self._component_values(self._state())["energy"])
+        component_count = 2 + sum(len(path.duct_states) for path in self.transfers)
+        component_scale = max(abs(value) for value in stored)
+        bound = (sys.float_info.epsilon * (2 * len(self.history) + 2) *
+                 component_count * component_scale)
+        state_roundoff = audit["delta"]["energy"] - self._applied_deltas["energy"]
+        integration_residual = self._applied_deltas["energy"] - work
+        stored_balance_roundoff = audit["final"]["energy"] - (audit["initial"]["energy"] + work)
+        return {"initial_energy": audit["initial"]["energy"], "final_energy": audit["final"]["energy"],
+                "delta_energy": audit["delta"]["energy"], "external_energy": self.ledger["external_energy"],
+                "cc_work": self.ledger["cc_work"], "cyl_work": self.ledger["cyl_work"],
+                "chamber_work": work, "accounted_energy": work,
+                "residual": audit["delta"]["energy"] - work,
+                "applied_delta_energy": self._applied_deltas["energy"],
+                "state_delta_energy": audit["delta"]["energy"], "integration_residual": integration_residual,
+                "state_roundoff": state_roundoff, "stored_balance_roundoff": stored_balance_roundoff,
+                "stored_balance_roundoff_bound": bound, "state_roundoff_bound": bound,
+                "stored_energy_component_count": component_count, "accepted_updates": len(self.history)}
+
+    def admissible(self):
+        self._validate_state(self._state())
+        return True
+
+
+def make_two_transfer_fixture(*, eos=None, cells=3, volume_rates=(0.0, 0.0),
+                              transfer_states=None, meshes=None, interface_areas=None):
+    """Build two independent finite transfer paths between two chambers."""
+    eos = eos or IdealGas()
+    if transfer_states is None:
+        transfer_states = tuple(tuple((1.0, 0.0, 100000.0, 0.4) for _ in range(cells))
+                                for _ in range(2))
+    if meshes is None:
+        meshes = tuple(uniform_mesh(cells, length=0.03, area=1.0e-4) for _ in range(2))
+    crankcase = Chamber((1.05, 0.0, 112000.0, 0.65), 1.0e-3)
+    cylinder = Chamber((0.95, 0.0, 97000.0, 0.25), 1.0e-2)
+    return TwoTransferFixture(crankcase, cylinder, transfer_states, meshes=meshes, eos=eos,
+                              volume_rates=volume_rates, interface_areas=interface_areas)
+
+
 def make_single_0d1d_fixture(*, eos=None, cells=3):
     """Return a fixed-volume, closed chamber/finite-duct verification case."""
     eos = eos or IdealGas()

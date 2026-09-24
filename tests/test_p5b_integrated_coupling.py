@@ -9,6 +9,8 @@ from motorsim.p5b import (
     make_closed_volume_work_fixture,
     make_one_transfer_fixture,
     OneTransferFixture,
+    make_two_transfer_fixture,
+    TwoTransferFixture,
     ssprk2_step,
 )
 from motorsim.gas1d.mesh import uniform_mesh
@@ -446,3 +448,88 @@ def test_single_0d1d_fixture_validates_chamber_as_extensive_inventory():
         state[0][3],
         node.chamber.volume,
     )]
+
+
+def test_two_transfer_fixture_resolves_four_interfaces_once_per_stage_and_reuses_flux():
+    node = make_two_transfer_fixture(cells=2)
+    calls = []
+    original = p5b.interface_exchange
+
+    def audited(chamber, interior, area, normal, *, eos):
+        result = original(chamber, interior, area, normal, eos=eos)
+        calls.append((interior, area, normal, tuple(result["outward"])))
+        return result
+
+    with patch.object(p5b, "interface_exchange", side_effect=audited):
+        trace = node.step(1.0e-7)
+    assert isinstance(node, TwoTransferFixture)
+    assert len(calls) == 8
+    assert [item[2] for item in calls] == [-1, 1, -1, 1] * 2
+    for stage in trace["stages"]:
+        for transfer in stage["transfers"]:
+            left, right = transfer["interfaces"]
+            assert transfer["face_fluxes"][0] == tuple(-x for x in left)
+            assert transfer["face_fluxes"][-1] == right
+
+
+def test_two_transfer_symmetric_paths_match_without_aliasing_and_conserve():
+    node = make_two_transfer_fixture(cells=3)
+    assert node.transfers[0] is not node.transfers[1]
+    assert node.transfers[0].duct_states is not node.transfers[1].duct_states
+    assert node.transfers[0].history is not node.transfers[1].history
+    initial = node.conservation()["initial"]
+    for _ in range(8):
+        trace = node.step(1.0e-7)
+        for stage in trace["stages"]:
+            a, b = stage["transfers"]
+            for left, right in zip(a["interfaces"], b["interfaces"]):
+                assert left == pytest.approx(right, abs=1.0e-15)
+            for faces_a, faces_b in zip(a["face_fluxes"], b["face_fluxes"]):
+                assert faces_a == pytest.approx(faces_b, abs=1.0e-15)
+        assert node.admissible()
+    audit = node.conservation()
+    for key in ("mass", "species", "energy"):
+        assert audit["final"][key] == pytest.approx(initial[key], abs=2.0e-10)
+    assert node.mass_ledger()["integration_residual"] == pytest.approx(0.0, abs=1.0e-15)
+    assert node.species_ledger()["integration_residual"] == pytest.approx(0.0, abs=1.0e-15)
+    energy = node.energy_ledger()
+    assert energy["applied_delta_energy"] == pytest.approx(0.0, abs=1.0e-12)
+    assert energy["integration_residual"] == pytest.approx(0.0, abs=1.0e-12)
+    assert abs(energy["stored_balance_roundoff"]) <= energy["stored_balance_roundoff_bound"]
+
+
+def test_two_transfer_asymmetric_paths_remain_independent_and_distinct():
+    left = tuple((1.0, 0.0, 104000.0, 0.2) for _ in range(3))
+    right = tuple((0.8, 12.0, 92000.0, 0.7) for _ in range(3))
+    node = make_two_transfer_fixture(cells=3, transfer_states=(left, right))
+    original_right = tuple(cell.conservative for cell in node.transfers[1].duct_states)
+    node.step(1.0e-7)
+    first = node.history[-1]["stages"][0]["transfers"]
+    assert any(left != pytest.approx(right, abs=1.0e-12)
+               for left, right in zip(first[0]["interfaces"], first[1]["interfaces"]))
+    assert tuple(cell.conservative for cell in node.transfers[1].duct_states) != original_right
+    assert node.transfers[0].duct_states[0] is not node.transfers[1].duct_states[0]
+    assert node.admissible()
+
+
+def test_two_transfer_closed_interfaces_are_exact_zero_and_work_is_stage_accounted():
+    node = make_two_transfer_fixture(cells=2, volume_rates=(-1.0e-4, 1.0e-4),
+                                     interface_areas=((0.0, 0.0), (0.0, 0.0)))
+    initial_chambers = (node.crankcase.inventory(E), node.cylinder.inventory(E))
+    for _ in range(10):
+        trace = node.step(1.0e-6)
+        for stage in trace["stages"]:
+            for transfer in stage["transfers"]:
+                assert transfer["closed"] == (True, True)
+                assert transfer["interfaces"] == ((0.0, 0.0, 0.0, 0.0),) * 2
+        assert node.admissible()
+    assert node.crankcase.inventory(E)[0] == pytest.approx(initial_chambers[0][0])
+    assert node.cylinder.inventory(E)[0] == pytest.approx(initial_chambers[1][0])
+    mass = node.mass_ledger()
+    species = node.species_ledger()
+    energy = node.energy_ledger()
+    assert mass["integration_residual"] == pytest.approx(0.0, abs=1.0e-15)
+    assert species["integration_residual"] == pytest.approx(0.0, abs=1.0e-15)
+    assert energy["applied_delta_energy"] == pytest.approx(energy["chamber_work"], abs=1.0e-12)
+    assert energy["integration_residual"] == pytest.approx(0.0, abs=1.0e-12)
+    assert abs(energy["stored_balance_roundoff"]) <= energy["stored_balance_roundoff_bound"]

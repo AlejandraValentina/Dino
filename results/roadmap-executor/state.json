@@ -1,9 +1,9 @@
 {
   "current_phase": "P5_B",
-  "current_subphase": "P5B-12 one_transfer_fixture",
+  "current_subphase": "P5B-14 complete_p5b_fixture",
   "base_commit": "854e59e",
-  "latest_commit": "487ca48",
-  "worktree_checkpoint": "P5B-11 checkpoint committed",
+  "latest_commit": "7c39b0c",
+  "worktree_checkpoint": "P5B-13 implementation and evidence pending local commit",
   "classification": "IMPLEMENTED_CHECKPOINT",
   "attempt": 0,
   "gates": {
@@ -19,5 +19,5 @@
   },
   "started_at": "2026-09-23T16:18:57.340428+00:00",
   "completed_at": "2026-09-23T16:18:57.340428+00:00",
-  "next_action": "Implement and verify P5B-12 one_transfer_fixture"
+  "next_action": "Implement and verify P5B-14 complete_p5b_fixture"
 }

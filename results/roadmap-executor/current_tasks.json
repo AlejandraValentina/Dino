@@ -126,10 +126,10 @@
       "id": "P5B-12",
       "phase": "P5_B",
       "description": "one_transfer_fixture",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "one-transfer closed subsystem implemented; 5 focused P5B-12 checks included in 27 P5B tests PASS; 40 relevant P5/P5B/coupling tests PASS; py_compile and diff-check PASS; evidence in results/p5b-12-one-transfer-fixture-20260924/evidence.json",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -137,10 +137,10 @@
       "id": "P5B-13",
       "phase": "P5_B",
       "description": "two_transfer_fixture",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "5 focused P5B-13 tests PASS; 35 full P5B tests PASS; 31 P5/coupling regressions PASS; py_compile and diff-check PASS; evidence in results/p5b-13-two-transfer-fixture-20260924/evidence.json",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -222,7 +222,7 @@
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     }
   ],
-  "active_task": "P5B-12",
-  "last_completed_task": "P5B-11",
-  "tasks_remaining": 9
+  "active_task": "P5B-14",
+  "last_completed_task": "P5B-13",
+  "tasks_remaining": 7
 }

@@ -76,3 +76,25 @@ fixture.
   deltas and final-stored-state deltas; the strict energy conservation gate SHALL
   apply to the applied delta, while stored-state roundoff SHALL be reported and
   checked against a documented machine-roundoff bound.
+
+### Requirement: two-transfer closed subsystem
+
+P5-B SHALL provide an isolated subsystem composed of one crankcase 0-D chamber,
+one cylinder 0-D chamber, and two independent finite transfer ducts. Each of the
+four chamber/duct interfaces SHALL be solved exactly once per SSPRK2 stage, and
+the same extensive flux SHALL be reused with opposite signs in the adjacent duct
+cell and chamber. Chamber RHS contributions from both ducts SHALL be summed before
+each chamber stage update. No intake, atmosphere, exhaust, heat, combustion,
+periodicity, or P6 semantics are part of this fixture.
+
+#### Scenario: symmetric and asymmetric two-transfer verification
+
+- **WHEN** the two-stage fixture advances with identical, then intentionally
+  different, transfer initial states/geometries
+- **THEN** symmetric per-transfer traces match within deterministic tolerance;
+  asymmetric traces remain distinct without state/array/history/ledger aliasing;
+  global mass and passive-species inventories conserve; energy changes only by
+  crankcase and cylinder `-p*dV/dt` work; individually closed interfaces have
+  exact zero flux; duct interiors evolve; every stage is admissible and
+  stage-consistent. The strict energy gate SHALL use applied SSPRK2 quadrature,
+  with final stored-state roundoff independently reported and bounded.
