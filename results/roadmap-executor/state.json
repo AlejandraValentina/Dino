@@ -1,19 +1,22 @@
 {
-  "current_phase": "P5_B",
-  "current_subphase": "P5_C",
+  "current_phase": "P5_C",
+  "current_subphase": "P6",
   "base_commit": "854e59e",
   "latest_commit": "pending",
   "worktree_checkpoint": "P5B-14 complete fixture and gate state committed locally",
-  "classification": "BLOCKED_CONTRACT",
+  "classification": "P5_C_INTEGRATED_GASDYNAMIC_VERIFIED_CONDITIONAL",
   "attempt": 0,
   "gates": {
     "implementation": "PASS",
     "numerical": "PASS",
     "regression": "PASS",
-    "openspec": "PASS"
+    "openspec": "PASS",
+    "fixtures": "PASS",
+    "restart": "PASS",
+    "determinism": "PASS"
   },
   "blockers": [
-    "P5-C approved specification not present in active OpenSpec change"
+    "P4 remains BLOCKED / NOT_GRANTED; P5 evidence is conditional"
   ],
   "dependencies": {
     "P4": "UNRESOLVED",
@@ -21,5 +24,5 @@
   },
   "started_at": "2026-09-23T16:18:57.340428+00:00",
   "completed_at": "2026-09-23T16:18:57.340428+00:00",
-  "next_action": "Human decision or approved P5-C specification required"
+  "next_action": "Inspect existing P6 approved contract; stop if scientifically insufficient"
 }
