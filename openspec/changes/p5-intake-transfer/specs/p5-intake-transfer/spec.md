@@ -98,3 +98,25 @@ periodicity, or P6 semantics are part of this fixture.
   exact zero flux; duct interiors evolve; every stage is admissible and
   stage-consistent. The strict energy gate SHALL use applied SSPRK2 quadrature,
   with final stored-state roundoff independently reported and bounded.
+
+### Requirement: complete finite P5-B topology
+
+P5-B SHALL provide one global conservative SSPRK2 fixture composed of an
+atmosphere boundary, a finite intake duct, one crankcase chamber, two
+independent finite transfer ducts, and one cylinder chamber. Every stage SHALL
+reevaluate the port laws, chamber states, interface Riemann solves, duct
+interior fluxes, chamber RHSs, and contractual volume work from the same stage
+state. The atmosphere/intake far boundary SHALL be the only external boundary;
+all other interface fluxes SHALL be reused with opposite signs on connected
+stored components.
+
+#### Scenario: complete finite topology
+
+- **WHEN** the fixture advances through closed and open intake/transfer angles
+- **THEN** all three duct families evolve as stored finite-volume states,
+  closed physical ports have exact zero mass/energy/species flux, the five
+  physical interfaces are solved once per stage, global mass/species balance
+  equals the stage-consistent atmospheric integral, and energy balance equals
+  atmospheric energy plus both integrated `-p*dV/dt` work terms. Stored-state
+  subtraction roundoff SHALL be reported separately from the strict applied
+  SSPRK2 quadrature gate; no periodicity or P4 acceptance is inferred.
