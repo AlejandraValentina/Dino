@@ -99,16 +99,102 @@ class IntegratedP5C:
         return {"flux": flux, "closed": face["area"] == 0.0,
                 "external": ext, "area": face["area"]}
 
+    def _state(self):
+        return self.core._state() + (self.exhaust.conservative(),)
+
+    def _exhaust_rhs(self, q, cyl_q, dt_angle):
+        """Return exhaust duct RHS and its single cylinder-facing flux."""
+        chamber = ChamberState(cyl_q[0], cyl_q[2], cyl_q[3], cyl_q[4])
+        prim = [self.eos.primitive(x) for x in q]
+        face = port_flux(chamber, prim[0], self.port_area, self.exhaust_area,
+                         eos=self.eos)
+        faces = [face['flux']]
+        for a, b, area in zip(prim, prim[1:], self.exhaust_mesh.areas[1:]):
+            f, _, _ = hllc_flux(a, b, self.eos)
+            faces.append(tuple(area * x for x in f))
+        out = Boundary('outflow').flux(prim[-1], 1, self.eos)[0]
+        faces.append(tuple(self.exhaust_mesh.areas[-1] * x for x in out))
+        rhs = tuple(tuple(-(faces[i + 1][k] - faces[i][k]) /
+                          self.exhaust_mesh.volumes[i] for k in range(4))
+                    for i in range(len(q)))
+        return rhs, face, faces[-1]
+
+    def _stage_rhs(self, state):
+        core_state = state[:-1]
+        core_rhs, trace = self.core._rhs(core_state, self.angle)
+        ex_rhs, port, external = self._exhaust_rhs(state[-1], state[1], 0.0)
+        # One cylinder RHS: P5-B TR1/TR2 terms plus this same exhaust flux.
+        cyl = core_rhs[1]
+        cyl = (cyl[0] - port['flux'][0],
+               cyl[1] - port['flux'][2], cyl[2] - port['flux'][3])
+        return (core_rhs[0], cyl, core_rhs[2], core_rhs[3], core_rhs[4], ex_rhs), {
+            'core': trace, 'port': port, 'external': external,
+            'cylinder_rhs': cyl, 'transfer_rhs': (core_rhs[1],),
+            'cylinder_interfaces': (trace['interfaces'][3], trace['interfaces'][4],
+                                    tuple(-x for x in port['flux'])),
+        }
+
+    @staticmethod
+    def _add_state(state, rhs, dt):
+        out = []
+        for q, r in zip(state, rhs):
+            if isinstance(q, tuple) and q and isinstance(q[0], (int, float)):
+                if len(q) == 5:
+                    out.append((q[0] + dt*r[0], q[1], q[2] + dt*r[1],
+                                q[3] + dt*r[2], q[4]))
+                else:
+                    out.append(tuple(a + dt*b for a, b in zip(q, r)))
+            else:
+                out.append(tuple(tuple(a + dt*b for a, b in zip(cell, dr))
+                                 for cell, dr in zip(q, r)))
+        return tuple(out)
+
+    @staticmethod
+    def _blend(a, b, rb, dt):
+        out = []
+        for qa, qb, rr in zip(a, b, rb):
+            if qa and isinstance(qa[0], (int, float)):
+                if len(qa) == 5 and len(rr) == 3:
+                    out.append((.5*(qa[0]+qb[0]+dt*rr[0]), qa[1],
+                                .5*(qa[2]+qb[2]+dt*rr[1]),
+                                .5*(qa[3]+qb[3]+dt*rr[2]),
+                                .5*(qa[4]+qb[4])))
+                else:
+                    out.append(tuple(.5*(x+y+dt*z) for x,y,z in zip(qa,qb,rr)))
+            else:
+                out.append(tuple(tuple(.5*(x+y+dt*z) for x,y,z in zip(x0,x1,r))
+                                 for x0,x1,r in zip(qa,qb,rr)))
+        return tuple(out)
+
+    def _install(self, state):
+        cc, cy, intake, tr1, tr2, exhaust = state
+        self.core.crankcase.volume, self.core.cylinder.volume = cc[4], cy[4]
+        for chamber, q in ((self.core.crankcase, cc), (self.core.cylinder, cy)):
+            chamber.primitive = (q[0]/q[4], 0.0,
+                                 (self.eos.gamma-1)*q[2]/q[4], q[3]/q[0])
+        for path, values in zip((self.core.intake, *self.core.transfers),
+                                (intake, tr1, tr2)):
+            for cell, q in zip(path.cells, values): cell.conservative = q
+        for cell, q in zip(self.exhaust.cells, exhaust): cell.conservative = q
+
     def step(self, dt, *, angle=None, port_area=None):
         if not isinstance(dt, (int, float)) or not isfinite(dt) or dt <= 0:
             raise ValueError("dt must be positive")
         if port_area is not None:
             self.port_area = float(port_area)
         self.angle = self.angle + float(dt) if angle is None else float(angle)
-        self.core.step(dt, angle=self.angle)
-        trace = self._exhaust_step(dt)
+        q0 = self._state()
+        r0, t0 = self._stage_rhs(q0)
+        q1 = self._add_state(q0, r0, dt)
+        r1, t1 = self._stage_rhs(q1)
+        qn = self._blend(q0, q1, r1, dt)
+        self._install(qn)
         self.admissible()
+        trace = {'flux': t1['port']['flux'], 'closed': t1['port']['area'] == 0.0,
+                 'external': t1['external'], 'area': t1['port']['area']}
         record = {"angle": self.angle, "exhaust": trace,
+                  "stage_rhs": (t0['cylinder_rhs'], t1['cylinder_rhs']),
+                  "stage_interfaces": (t0['cylinder_interfaces'], t1['cylinder_interfaces']),
                   "totals": self.totals(), "dependency": self.dependency_status}
         self.history.append(record)
         return record

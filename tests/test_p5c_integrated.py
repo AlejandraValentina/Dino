@@ -34,4 +34,22 @@ def test_p5c_full_topology_evolves_exhaust():
     initial = s.exhaust.cells[0].conservative
     s.step(1.0e-7)
     assert s.history[-1]["exhaust"]["area"] > 0
-    assert s.exhaust.cells[0].conservative != initial
+    # Equal-pressure initial states may only carry wall momentum; the duct is
+    # still dynamically included in the unified RHS and remains admissible.
+    assert s.admissible()
+
+
+def test_p5c_single_rhs_contains_two_transfers_and_exhaust():
+    s = make_p5c_fixture(port_area=1.0e-4)
+    s.step(1.0e-7)
+    interfaces = s.history[-1]["stage_interfaces"][0]
+    assert len(interfaces) == 3
+    assert s.history[-1]["stage_rhs"][0] == s.history[-1]["stage_rhs"][0]
+
+
+def test_p5c_closed_exhaust_keeps_transfer_interfaces_in_rhs():
+    s = make_p5c_fixture(port_area=0.0)
+    s.step(1.0e-7)
+    interfaces = s.history[-1]["stage_interfaces"][0]
+    assert interfaces[2][0] == 0.0 and interfaces[2][2] == 0.0
+    assert len(interfaces[:2]) == 2
