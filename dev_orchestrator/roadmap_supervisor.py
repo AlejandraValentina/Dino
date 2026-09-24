@@ -39,9 +39,7 @@ def safe_status():
 def acquire():
     if LOCK.exists():
         old=read(LOCK,{})
-        if old.get('pid') and old['pid']!=os.getpid():
-            try: os.kill(int(old['pid']),0); return False
-            except OSError: pass
+        if old.get('pid') and old['pid']!=os.getpid() and pid_alive(old['pid']): return False
     write(LOCK,{'pid':os.getpid(),'started_at':now(),'repo':str(ROOT),'HEAD':git_head()}); return True
 def release():
     if LOCK.exists() and read(LOCK,{}).get('pid')==os.getpid(): LOCK.unlink()
