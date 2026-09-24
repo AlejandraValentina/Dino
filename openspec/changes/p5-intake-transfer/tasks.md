@@ -14,4 +14,5 @@
 - [x] P5B-08: ledger global de especie pasiva; el residuo `ΔS - S_ext` se comprueba con entradas externas, transferencias internas y puertos cerrados.
 - [x] P5B-09: ledger global de energía; `ΔE = E_ext + W_cc + W_cyl`, con flujo externo y cada trabajo `-p·dV/dt` auditables por separado y sin doble conteo de interfaces internas.
 - [x] P5B-10: fixture de volumen cerrado; puertos cerrados, inventarios constantes, trabajo contractual de compresión/expansión y admisibilidad auditados ([evidencia](../../../results/p5b-10-closed-volume-work-20260924/evidence.json)).
+- [x] P5B-11: fixture finito single 0D↔1D con pared rígida Euler contractual, validación dimensional de cámara mediante `ChamberState`, conservación global y admisibilidad verificadas; 27 P5B y 40 pruebas relevantes PASS ([evidencia](../../../results/p5b-11-single-0d1d-fixture-20260924/evidence.json)).
 - [ ] Integrar inventarios/celdas de ductos, término -p dV/dt y ledgers globales antes del cierre P5-B.

@@ -4,12 +4,15 @@ from unittest.mock import patch
 from motorsim.p5b import (
     Chamber,
     IntegratedIntakeTransfer,
+    make_single_0d1d_fixture,
     interior_rhs,
     make_closed_volume_work_fixture,
     ssprk2_step,
 )
 from motorsim.gas1d.mesh import uniform_mesh
+from motorsim.gas1d.boundary import Boundary
 from motorsim.gas1d.eos import IdealGas
+from motorsim import p5b
 
 E=IdealGas()
 def make():
@@ -275,3 +278,76 @@ def test_closed_volume_work_fixture_keeps_chambers_admissible():
             rho, pressure, temperature, fraction = chamber.thermodynamics(E)
             assert rho > 0.0 and pressure > 0.0 and temperature > 0.0
             assert 0.0 <= fraction <= 1.0
+
+
+def test_single_0d1d_fixture_is_finite_and_externally_closed():
+    node = make_single_0d1d_fixture(cells=3)
+    initial = node.conservation()["initial"]
+    for _ in range(8):
+        node.step(1.0e-7)
+    audit = node.conservation()
+    assert audit["final"]["mass"] == pytest.approx(initial["mass"], abs=1.0e-15)
+    assert audit["final"]["energy"] == pytest.approx(initial["energy"], abs=1.0e-10)
+    assert audit["final"]["species"] == pytest.approx(initial["species"], abs=1.0e-15)
+    assert all(abs(value) < 1.0e-10 for value in audit["delta"].values())
+    assert node.admissible()
+
+
+def test_single_0d1d_fixture_reuses_one_shared_flux_with_opposite_signs():
+    node = make_single_0d1d_fixture(cells=1)
+    trace = node.step(1.0e-7)
+    for stage, shared in enumerate(trace["shared_fluxes"]):
+        chamber_rhs = trace["chamber_rhs"][stage]
+        duct_rhs = trace["duct_rhs"][stage][0]
+        assert chamber_rhs[0] == shared[0]
+        assert chamber_rhs[2] == shared[2]
+        assert chamber_rhs[3] == shared[3]
+        assert duct_rhs[0] == pytest.approx(-shared[0] / node.mesh.volumes[0])
+        assert duct_rhs[2] == pytest.approx(-shared[2] / node.mesh.volumes[0])
+        assert duct_rhs[3] == pytest.approx(-shared[3] / node.mesh.volumes[0])
+    assert any(abs(value) > 0.0 for value in trace["shared_fluxes"][0])
+
+
+def test_single_0d1d_fixture_keeps_chamber_volume_fixed_and_admissible():
+    node = make_single_0d1d_fixture()
+    volume = node.chamber.volume
+    for _ in range(5):
+        node.step(1.0e-7)
+    rho, pressure, temperature, fraction = node.chamber.thermodynamics(E)
+    assert node.chamber.volume == volume
+    assert rho > 0.0 and pressure > 0.0 and temperature > 0.0
+    assert 0.0 <= fraction <= 1.0
+    assert node.admissible()
+
+
+def test_single_0d1d_fixture_uses_contractual_rigid_wall_momentum_flux():
+    node = make_single_0d1d_fixture(cells=1)
+    state = node._state()
+    (rhs, shared, _) = node._rhs(state)
+    wall = Boundary('wall').flux(E.primitive(state[1][0]), 1, E)[0]
+    assert wall[0] == 0.0 and wall[2] == 0.0 and wall[3] == 0.0
+    assert wall[1] > 0.0
+    expected = -(node.mesh.areas[-1] * wall[1] - (-shared[1])) / node.mesh.volumes[0]
+    assert rhs[1][0][1] == pytest.approx(expected)
+
+
+def test_single_0d1d_fixture_validates_chamber_as_extensive_inventory():
+    eos = IdealGas()
+    node = make_single_0d1d_fixture(eos=eos, cells=1)
+    state = node._state()
+    calls = []
+    chamber_state = p5b.ChamberState
+
+    def record_chamber_state(*args):
+        calls.append(args)
+        return chamber_state(*args)
+
+    with patch.object(p5b, 'ChamberState', side_effect=record_chamber_state):
+        node._validate_state(state)
+
+    assert calls == [(
+        state[0][0],
+        state[0][2],
+        state[0][3],
+        node.chamber.volume,
+    )]

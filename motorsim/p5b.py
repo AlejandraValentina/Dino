@@ -6,8 +6,10 @@ from dataclasses import dataclass
 from copy import deepcopy
 from math import isfinite
 from .duct_network import interface_exchange
-from .coupling import ChamberState
+from .coupling import ChamberState, interface_flux
+from .gas1d.boundary import Boundary
 from .gas1d.eos import IdealGas
+from .gas1d.mesh import uniform_mesh
 from .gas1d.riemann import hllc_flux
 
 
@@ -108,6 +110,135 @@ class DuctCell:
         q = tuple(self.conservative[i] + sign*dt*flux[i]/self.volume for i in range(4))
         eos.primitive(q)
         self.conservative = q
+
+
+class Single0D1DFixture:
+    """Finite, externally closed chamber-to-duct P5-B fixture.
+
+    The chamber is a fixed-volume, stagnant 0-D control volume.  The duct is
+    a finite-volume 1-D mesh with a closed wall at its far end.  The chamber
+    interface is solved once per SSPRK2 stage; the exact same extensive flux
+    is added to the chamber and subtracted from the first duct cell.
+    """
+
+    def __init__(self, chamber, duct_states, *, mesh=None, eos=None):
+        self.eos = eos or IdealGas()
+        self.mesh = mesh or uniform_mesh(len(duct_states), length=0.03, area=1.0e-4)
+        if len(duct_states) != self.mesh.n:
+            raise ValueError("state/mesh size mismatch")
+        if chamber.volume <= 0 or not isfinite(chamber.volume):
+            raise ValueError("invalid chamber volume")
+        self.chamber = chamber
+        self.duct_states = [
+            state if isinstance(state, DuctCell)
+            else DuctCell(self.eos.conservative(state), volume)
+            for state, volume in zip(duct_states, self.mesh.volumes)
+        ]
+        self.history = []
+        self._initial = self._totals()
+
+    def _state(self):
+        mass, species, energy = self.chamber.inventory(self.eos)
+        return ((mass, 0.0, energy, species),
+                tuple(cell.conservative for cell in self.duct_states))
+
+    def _totals(self, state=None):
+        if state is None:
+            state = self._state()
+        chamber, duct = state
+        return {
+            "mass": chamber[0] + sum(q[0] * v for q, v in zip(duct, self.mesh.volumes)),
+            "energy": chamber[2] + sum(q[2] * v for q, v in zip(duct, self.mesh.volumes)),
+            "species": chamber[3] + sum(q[3] * v for q, v in zip(duct, self.mesh.volumes)),
+        }
+
+    def _rhs(self, state):
+        chamber_q, duct_q = state
+        chamber = ChamberState(chamber_q[0], chamber_q[2], chamber_q[3], self.chamber.volume)
+        duct_primitive = [self.eos.primitive(q) for q in duct_q]
+        shared = interface_flux(
+            chamber, duct_primitive[0], self.mesh.areas[0], -1, eos=self.eos
+        ).outward
+        face_fluxes = [tuple(-value for value in shared)]
+        for left, right, area in zip(duct_primitive, duct_primitive[1:], self.mesh.areas[1:]):
+            face_fluxes.append(tuple(area * value for value in hllc_flux(left, right, self.eos)[0]))
+        wall_flux = Boundary('wall').flux(duct_primitive[-1], 1, self.eos)[0]
+        face_fluxes.append(tuple(self.mesh.areas[-1] * value for value in wall_flux))
+        duct_rhs = []
+        for index, volume in enumerate(self.mesh.volumes):
+            left = face_fluxes[index]
+            right = face_fluxes[index + 1]
+            duct_rhs.append(tuple(-(right[k] - left[k]) / volume for k in range(4)))
+        chamber_rhs = (shared[0], 0.0, shared[2], shared[3])
+        return (chamber_rhs, tuple(duct_rhs)), shared, tuple(face_fluxes[1:-1])
+
+    def _validate_state(self, state):
+        chamber, duct = state
+        ChamberState(chamber[0], chamber[2], chamber[3], self.chamber.volume).thermodynamics(self.eos)
+        for q in duct:
+            self.eos.primitive(q)
+
+    @staticmethod
+    def _combine(a, b, scale):
+        return tuple(x + scale * y for x, y in zip(a, b))
+
+    def step(self, dt):
+        if not isinstance(dt, (int, float)) or not isfinite(dt) or dt <= 0:
+            raise ValueError("dt must be positive")
+        initial = self._state()
+        rhs0, shared0, internal0 = self._rhs(initial)
+        stage1 = (
+            self._combine(initial[0], rhs0[0], dt),
+            tuple(self._combine(q, r, dt) for q, r in zip(initial[1], rhs0[1])),
+        )
+        self._validate_state(stage1)
+        rhs1, shared1, internal1 = self._rhs(stage1)
+        final = (
+            tuple(0.5 * (x + y + dt * r) for x, y, r in zip(initial[0], stage1[0], rhs1[0])),
+            tuple(tuple(0.5 * (x + y + dt * r) for x, y, r in zip(q0, q1, r1))
+                  for q0, q1, r1 in zip(initial[1], stage1[1], rhs1[1])),
+        )
+        self._validate_state(final)
+        self.chamber.primitive = (
+            final[0][0] / self.chamber.volume, 0.0,
+            (self.eos.gamma - 1.0) * final[0][2] / self.chamber.volume,
+            final[0][3] / final[0][0],
+        )
+        for cell, q in zip(self.duct_states, final[1]):
+            cell.conservative = q
+        trace = {
+            "shared_fluxes": (shared0, shared1),
+            "chamber_rhs": (rhs0[0], rhs1[0]),
+            "duct_rhs": (rhs0[1], rhs1[1]),
+            "internal_fluxes": (internal0, internal1),
+            "totals": self._totals(),
+        }
+        self.history.append(trace)
+        return trace
+
+    def conservation(self):
+        totals = self._totals()
+        return {
+            "initial": dict(self._initial),
+            "final": totals,
+            "delta": {key: totals[key] - self._initial[key] for key in totals},
+        }
+
+    def admissible(self):
+        chamber, duct = self._state()
+        ChamberState(chamber[0], chamber[2], chamber[3], self.chamber.volume).thermodynamics(self.eos)
+        for q in duct:
+            self.eos.primitive(q)
+        return True
+
+
+def make_single_0d1d_fixture(*, eos=None, cells=3):
+    """Return a fixed-volume, closed chamber/finite-duct verification case."""
+    eos = eos or IdealGas()
+    mesh = uniform_mesh(cells, length=0.03, area=1.0e-4)
+    chamber = Chamber((1.0, 0.0, 110000.0, 0.4), 1.0e-3)
+    duct = tuple((1.0, 0.0, 100000.0, 0.2) for _ in range(cells))
+    return Single0D1DFixture(chamber, duct, mesh=mesh, eos=eos)
 
 
 def make_closed_volume_work_fixture(*, eos=None, volume_rates=(-1.0e-4, 1.0e-4)):

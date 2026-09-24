@@ -115,10 +115,10 @@
       "id": "P5B-11",
       "phase": "P5_B",
       "description": "single_0d1d_fixture",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "5 focused P5B-11 checks included in 27 P5B tests PASS; 40 relevant P5/P5B/coupling tests PASS; py_compile and diff-check PASS; rigid-wall momentum and extensive-chamber validation defects corrected",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -222,7 +222,7 @@
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     }
   ],
-  "active_task": "P5B-11",
-  "last_completed_task": "P5B-10",
-  "tasks_remaining": 10
+  "active_task": "P5B-12",
+  "last_completed_task": "P5B-11",
+  "tasks_remaining": 9
 }

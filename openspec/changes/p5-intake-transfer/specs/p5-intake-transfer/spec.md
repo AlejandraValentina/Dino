@@ -41,3 +41,17 @@ combustion sources.
   mass/species/energy fluxes are zero, and system energy changes only by the
   stage-consistent integrated `-p*dV/dt` work; compression work is positive,
   expansion work is negative, and chamber states remain admissible
+
+### Requirement: finite single chamber-to-duct fixture
+
+P5-B SHALL provide an externally closed finite fixture composed of one fixed-volume
+0-D chamber and a finite 1-D duct using the existing gas1d Riemann interface and
+SSPRK2 stage convention. The shared interface flux SHALL update the chamber and
+the adjacent duct cell with opposite signs; no exhaust, heat release, or external
+boundary is part of this fixture.
+
+#### Scenario: closed single 0D↔1D transfer
+
+- **WHEN** the finite fixture advances through both SSPRK2 stages
+- **THEN** global mass, total energy, and passive-species inventories are conserved,
+  all chamber and duct states remain admissible, and the fixed chamber volume is unchanged
