@@ -17,8 +17,13 @@
   "stage_coherent_rhs": "PASS",
   "focused_rhs_tests": 5,
   "ledger_api": "implemented; complete external-boundary ledger not PASS",
-  "full_topology": "BLOCKED: existing reservoir inflow branch rejects open-boundary fixture",
-  "backflow": "PENDING: no physical reverse mass flux reproduced",
+  "full_topology": "PASS short compatible stage; extended dynamic evidence pending",
+  "backflow": "PASS controlled crankcase/TR1 reverse mass flux",
   "causality": "PENDING",
-  "tests_after_refactor": 64
+  "tests_after_refactor": 66,
+  "atmospheric_boundary": "PASS for corrected reservoir-compatible fixture",
+  "boundary_failure_root_cause": "FIXTURE_STATE_INVALID: 100 kPa implicit-temperature state was incompatible with 101325 Pa/300 K reservoir",
+  "mass_ledger": "PASS for bounded compatible full fixture at closed intake stage; complete multi-stage report pending",
+  "mY_ledger": "PASS for bounded compatible full fixture at closed intake stage",
+  "energy_ledger": "PASS within measured stage/storage residual for bounded compatible full fixture"
 }

@@ -53,3 +53,18 @@ def test_p5c_closed_exhaust_keeps_transfer_interfaces_in_rhs():
     interfaces = s.history[-1]["stage_interfaces"][0]
     assert interfaces[2][0] == 0.0 and interfaces[2][2] == 0.0
     assert len(interfaces[:2]) == 2
+
+
+def test_p5c_full_fixture_uses_compatible_atmospheric_state():
+    s = __import__('motorsim.p5c', fromlist=['make_p5c_full_fixture']).make_p5c_full_fixture()
+    s.step(1.0e-7, angle=0.0)
+    assert s.admissible()
+
+
+def test_p5c_controlled_internal_backflow_uses_resolved_flux():
+    from motorsim.p5c import make_p5c_backflow_fixture
+    s = make_p5c_backflow_fixture()
+    s.step(1.0e-7, angle=150.0)
+    # Interface index 1 is crankcase -> TR1 in the established trace order.
+    assert s.history[-1]["core_interfaces"][0][1][0] < 0.0
+    assert s.admissible()

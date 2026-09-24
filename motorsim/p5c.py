@@ -197,6 +197,7 @@ class IntegratedP5C:
         record = {"angle": self.angle, "exhaust": trace,
                   "stage_rhs": (t0['cylinder_rhs'], t1['cylinder_rhs']),
                   "stage_interfaces": (t0['cylinder_interfaces'], t1['cylinder_interfaces']),
+                  "core_interfaces": (t0['core']['interfaces'], t1['core']['interfaces']),
                   "totals": self.totals(), "dependency": self.dependency_status}
         self._last_external = {"mass": 0.5*(t0['core']['external'][0] + t1['core']['external'][0])*dt,
                                "energy": 0.5*(t0['core']['external'][2] + t1['core']['external'][2])*dt,
@@ -240,5 +241,22 @@ def make_p5c_fixture(*, eos=None, cells=2, port_area=0.0):
 def make_p5c_full_fixture(*, eos=None, cells=2, port_area=1.0e-4):
     """Full short topology with the atmospheric intake boundary enabled."""
     fixture = make_p5c_fixture(eos=eos, cells=cells, port_area=port_area)
+    # Match the reservoir stagnation state at the intake boundary.  The
+    # generic fixture's 100 kPa/implicit-temperature state requests a hotter
+    # supersonic-compatible inflow and is outside Boundary('reservoir').
+    rho = 101325.0 / (fixture.eos.R * 300.0)
+    for cell in fixture.core.intake.cells:
+        cell.conservative = fixture.eos.conservative((rho, 0.0, 101325.0, 0.0))
     fixture.core.external_boundary = True
+    fixture._initial = fixture.totals()
+    return fixture
+
+
+def make_p5c_backflow_fixture(*, eos=None):
+    """Controlled reverse-flow case at the crankcase/TR1 interface."""
+    fixture = make_p5c_fixture(eos=eos, port_area=0.0)
+    fixture.core.crankcase.primitive = (1.0, 0.0, 1.0e6, 0.2)
+    fixture.core.transfers[0].cells[0].conservative = fixture.eos.conservative(
+        (1.0, 0.0, 1.0e5, 0.8))
+    fixture._initial = fixture.totals()
     return fixture
