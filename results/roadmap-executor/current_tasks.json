@@ -170,10 +170,10 @@
       "id": "P5B-16",
       "phase": "P5_B",
       "description": "restart_physical_state",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "35 P5B tests PASS; snapshot/restore terminal equivalence PASS",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -181,10 +181,10 @@
       "id": "P5B-17",
       "phase": "P5_B",
       "description": "determinism_physical_state",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "35 P5B tests PASS; deterministic repeat PASS",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -222,7 +222,7 @@
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     }
   ],
-  "active_task": "P5B-16",
-  "last_completed_task": "P5B-15",
-  "tasks_remaining": 5
+  "active_task": "P5B-18",
+  "last_completed_task": "P5B-17",
+  "tasks_remaining": 3
 }

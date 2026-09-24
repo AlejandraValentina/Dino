@@ -1,8 +1,8 @@
 {
   "current_phase": "P5_B",
-  "current_subphase": "P5B-16 restart_physical_state",
+  "current_subphase": "P5B-18 p5b_regressions",
   "base_commit": "854e59e",
-  "latest_commit": "0c63a1e",
+  "latest_commit": "pending",
   "worktree_checkpoint": "P5B-14 complete fixture and gate state committed locally",
   "classification": "IMPLEMENTED_CHECKPOINT",
   "attempt": 0,
@@ -19,5 +19,5 @@
   },
   "started_at": "2026-09-23T16:18:57.340428+00:00",
   "completed_at": "2026-09-23T16:18:57.340428+00:00",
-  "next_action": "Implement and verify physical restart equivalence"
+  "next_action": "Run P5B regression suite"
 }
