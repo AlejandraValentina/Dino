@@ -116,3 +116,30 @@ def test_each_interface_is_resolved_once_from_its_own_duct_state():
     assert calls[1][0] == expected_interiors[1]
     assert calls[2][0] == expected_interiors[2]
     assert tuple(history['fluxes']) == tuple(call[3] for call in calls)
+
+
+def test_mass_global_ledger_balances_external_intake_and_internal_transfers():
+    node = make()
+    initial = node.mass_ledger()
+    assert initial['delta_mass'] == 0.0
+    assert initial['external_mass'] == 0.0
+    assert initial['residual'] == 0.0
+
+    for angle in (0.0, 120.0, 150.0, 300.0, 330.0):
+        node.step(.001, angle=angle)
+
+    audit = node.mass_ledger()
+    assert audit['external_mass'] > 0.0
+    assert audit['delta_mass'] == pytest.approx(audit['external_mass'], abs=1e-15)
+    assert audit['residual'] == pytest.approx(0.0, abs=1e-15)
+
+
+def test_mass_global_ledger_is_closed_when_all_ports_are_closed():
+    node = make()
+    for angle in (0.0, 30.0, 60.0, 240.0):
+        node.step(.001, angle=angle)
+
+    audit = node.mass_ledger()
+    assert audit['external_mass'] == 0.0
+    assert audit['delta_mass'] == pytest.approx(0.0, abs=1e-15)
+    assert audit['residual'] == pytest.approx(0.0, abs=1e-15)

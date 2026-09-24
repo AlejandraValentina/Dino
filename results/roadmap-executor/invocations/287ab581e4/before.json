@@ -1,0 +1,14 @@
+{
+  "invocation_id": "287ab581e4",
+  "timestamp": "2026-09-23T17:01:44.563970+00:00",
+  "HEAD_before": "2f47efbbeb58f0cfa7797e793e0e14417f5bbd31",
+  "phase_before": "P5_B",
+  "active_task_before": "P5B-07 mass_global_ledger",
+  "working_tree_before": [
+    "D redme.txt",
+    " M results/roadmap-executor/supervisor_state.json",
+    "?? results/roadmap-executor/invocations/8846287d7c/",
+    "?? results/roadmap-executor/invocations/b443988bb3/",
+    "?? results/roadmap-executor/supervisor.lock"
+  ]
+}

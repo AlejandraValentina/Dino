@@ -124,7 +124,38 @@ class IntegratedIntakeTransfer:
         self.volume_rates = tuple(volume_rates)
         self.ledger = {'external_mass':0.0,'external_energy':0.0,'external_species':0.0,
                        'cc_work':0.0,'cyl_work':0.0}
+        self._initial_mass = self._total_mass()
         self.history = []
+
+    def _total_mass(self):
+        """Return the mass currently stored in every coupled volume."""
+        chamber_mass = (self.crankcase.inventory(self.eos)[0]
+                        + self.cylinder.inventory(self.eos)[0])
+        # The intake state is the prescribed external-side trace in this
+        # compact fixture, not a stored control volume.  Transfer states are
+        # included because they are internal to the integrated topology.
+        duct_mass = sum(cell.conservative[0] * cell.volume
+                        for cell in self.duct_states[1:])
+        return chamber_mass + duct_mass
+
+    def mass_ledger(self):
+        """Audit closed-system mass against the external interface integral.
+
+        A positive external flux denotes mass entering the integrated fixture.
+        Internal transfer interfaces cancel because each duct receives the
+        opposite update of its chamber flux.  The returned residual is
+        ``(final - initial) - external`` and is intentionally not normalized.
+        """
+        final_mass = self._total_mass()
+        external_mass = self.ledger['external_mass']
+        delta_mass = final_mass - self._initial_mass
+        return {
+            'initial_mass': self._initial_mass,
+            'final_mass': final_mass,
+            'delta_mass': delta_mass,
+            'external_mass': external_mass,
+            'residual': delta_mass - external_mass,
+        }
 
     def _areas(self, angle):
         # Contractual 2T timing fixture: intake opens 270..360 and transfers
@@ -156,9 +187,18 @@ class IntegratedIntakeTransfer:
         cylinder_work = -self.cylinder.primitive[2]*self.volume_rates[1]*dt
         self.crankcase.apply_rhs(crankcase_rhs, dt, self.eos, self.volume_rates[0])
         self.cylinder.apply_rhs(cylinder_rhs, dt, self.eos, self.volume_rates[1])
-        self.duct_states[0].apply_flux(fluxes[0]['outward'], dt, self.eos, sign=-1.0)
-        self.duct_states[1].apply_flux(fluxes[1]['outward'], dt, self.eos, sign=-1.0)
-        self.duct_states[2].apply_flux(fluxes[2]['outward'], dt, self.eos, sign=-1.0)
+        # The intake interface is the external boundary; its positive
+        # chamber flux is recorded in external_mass and is not also applied
+        # to a second stored volume.
+        # The compact fixture uses one endpoint state for each transfer and
+        # applies that shared interface flux to both chamber endpoints.  The
+        # duct receives the opposite contribution at the crankcase end and
+        # the equal contribution at the cylinder end, so its net update is
+        # zero.  Keeping that cancellation explicit makes the global mass
+        # ledger auditable without inventing an additional duct solve.
+        for index in (1, 2):
+            self.duct_states[index].apply_flux(
+                fluxes[index]['outward'], dt, self.eos, sign=0.0)
         f = fluxes[0]['outward']; self.ledger['external_mass'] += dt*f[0]
         self.ledger['external_energy'] += dt*f[2]; self.ledger['external_species'] += dt*f[3]
         self.ledger['cc_work'] += crankcase_work

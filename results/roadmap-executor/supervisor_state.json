@@ -1,12 +1,12 @@
 {
   "status": "RUNNING",
-  "pid": 29280,
+  "pid": 11864,
   "started_at": "2026-09-23T16:50:31.711509+00:00",
-  "last_heartbeat": "2026-09-23T16:50:31.711509+00:00",
-  "invocation_count": 1,
-  "current_invocation": "d5b042dda8",
+  "last_heartbeat": "2026-09-23T17:01:44.515768+00:00",
+  "invocation_count": 3,
+  "current_invocation": "8846287d7c",
   "current_phase": "P5_B",
-  "current_task": "P5B-05 contractual_volume_work",
-  "HEAD": "7fbd48a0df872bb3dee8af863cdc6a32fd481fc9",
+  "current_task": "P5B-07 mass_global_ledger",
+  "HEAD": "2f47efbbeb58f0cfa7797e793e0e14417f5bbd31",
   "terminal_reason": null
 }

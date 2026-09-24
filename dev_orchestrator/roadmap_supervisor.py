@@ -16,6 +16,10 @@ def write(p,obj):
     p=Path(p); tmp=p.with_suffix(p.suffix+'.tmp'); tmp.write_text(json.dumps(obj,indent=2),encoding='utf-8'); tmp.replace(p)
 def git_head(): return subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
 def git_status(): return subprocess.check_output(['git','status','--short'],cwd=ROOT,text=True).strip().splitlines()
+def pid_alive(pid):
+    if not pid: return False
+    try: os.kill(int(pid),0); return True
+    except (OSError,ValueError): return False
 def cli():
     c=read(CFG,{})
     if c.get('agent_command'): return c['agent_command']
@@ -26,7 +30,9 @@ def safe_status():
     s=read(R/'state.json',{}); q=read(R/'current_tasks.json',{'tasks':[]}); done=sum(x.get('status')=='DONE' for x in q.get('tasks',[]))
     sup=read(R/'supervisor_state.json',{})
     detected = [n for n in ('codex','opencode') if shutil.which(n)]
-    return {'supervisor':sup.get('status','STOPPED'),'pid':sup.get('pid'),'HEAD':git_head(),'phase':s.get('current_phase'),'active_task':s.get('current_subphase'),'tasks':f'{done}/{len(q.get("tasks",[]))}','invocations':sup.get('invocation_count',0),'detected_clis':detected,'terminal_reason':sup.get('terminal_reason')}
+    status=sup.get('status','STOPPED')
+    if status=='RUNNING' and not pid_alive(sup.get('pid')): status='STALE'
+    return {'supervisor':status,'pid':sup.get('pid'),'HEAD':git_head(),'phase':s.get('current_phase'),'active_task':s.get('current_subphase'),'tasks':f'{done}/{len(q.get("tasks",[]))}','invocations':sup.get('invocation_count',0),'detected_clis':detected,'terminal_reason':sup.get('terminal_reason')}
 def acquire():
     if LOCK.exists():
         old=read(LOCK,{})
@@ -63,5 +69,11 @@ def main(argv):
             result=once(); print(result)
             if result!='PASS': return 0
         return 0
+    if a=='start':
+        log=open(R/'supervisor.log','a',encoding='utf-8')
+        flags=getattr(subprocess,'CREATE_NEW_PROCESS_GROUP',0)|getattr(subprocess,'DETACHED_PROCESS',0)
+        p=subprocess.Popen([sys.executable,str(Path(__file__)),'run'],cwd=ROOT,stdin=subprocess.DEVNULL,stdout=log,stderr=log,creationflags=flags,close_fds=True)
+        write(STATE,{'status':'RUNNING','pid':p.pid,'started_at':now(),'last_heartbeat':now(),'invocation_count':0,'current_invocation':None,'current_phase':read(R/'state.json',{}).get('current_phase'),'current_task':read(R/'state.json',{}).get('current_subphase'),'HEAD':git_head(),'terminal_reason':None})
+        print(p.pid); return 0
     print('usage: status|run|resume|stop|once'); return 2
 if __name__=='__main__': raise SystemExit(main(sys.argv))

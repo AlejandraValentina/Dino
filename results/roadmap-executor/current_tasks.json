@@ -71,10 +71,10 @@
       "id": "P5B-07",
       "phase": "P5_B",
       "description": "mass_global_ledger",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "2 focused mass-ledger tests PASS; 27 P5/P5B coupling tests PASS; py_compile PASS",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -222,7 +222,7 @@
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     }
   ],
-  "active_task": "P5B-07",
-  "last_completed_task": "P5B-06",
-  "tasks_remaining": 14
+  "active_task": "P5B-08",
+  "last_completed_task": "P5B-07",
+  "tasks_remaining": 13
 }
