@@ -82,10 +82,10 @@
       "id": "P5B-08",
       "phase": "P5_B",
       "description": "species_global_ledger",
-      "status": "TODO",
+      "status": "DONE",
       "dependencies": [],
       "attempts": 0,
-      "verification": null,
+      "verification": "3 focused species-ledger tests PASS; 30 P5/P5B coupling tests PASS; py_compile PASS",
       "commit_if_checkpoint": true,
       "blocker_if_failed": "BLOCKED_NUMERICAL"
     },
@@ -223,6 +223,6 @@
     }
   ],
   "active_task": "P5B-08",
-  "last_completed_task": "P5B-07",
-  "tasks_remaining": 13
+  "last_completed_task": "P5B-08",
+  "tasks_remaining": 12
 }

@@ -10,4 +10,6 @@
 - [x] P5-B-R1: aplicación conservativa de fluxes a inventarios de cámaras y validación por stage.
 - [x] P5-B-R1: término contractual de trabajo `-p·dV/dt` validado con expansión, compresión y rechazo de entradas no finitas.
 - [x] P5B-06: auditoría de fuente única de flux por interfaz; cada interfaz se resuelve una vez desde su propio ducto y se reutiliza para trazas y actualizaciones.
+- [x] P5B-07: ledger global de masa; el residuo `ΔM - M_ext` se comprueba con entradas externas, transferencias internas y puertos cerrados.
+- [x] P5B-08: ledger global de especie pasiva; el residuo `ΔS - S_ext` se comprueba con entradas externas, transferencias internas y puertos cerrados.
 - [ ] Integrar inventarios/celdas de ductos, término -p dV/dt y ledgers globales antes del cierre P5-B.

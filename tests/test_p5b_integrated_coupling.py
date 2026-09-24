@@ -143,3 +143,54 @@ def test_mass_global_ledger_is_closed_when_all_ports_are_closed():
     assert audit['external_mass'] == 0.0
     assert audit['delta_mass'] == pytest.approx(0.0, abs=1e-15)
     assert audit['residual'] == pytest.approx(0.0, abs=1e-15)
+
+def test_species_global_ledger_balances_external_intake_and_internal_transfers():
+    # Use a pressure-high crankcase so the open intake carries the chamber's
+    # passive species out through the external boundary.
+    node = IntegratedIntakeTransfer(
+        Chamber((1.0, 0.0, 110000.0, .5), .001),
+        Chamber((1.0, 0.0, 100000.0, .5), .01),
+        ((1.0, 0.0, 101325.0, 0.0),) * 3,
+        eos=E,
+    )
+    initial = node.species_ledger()
+    assert initial['delta_species'] == 0.0
+    assert initial['external_species'] == 0.0
+    assert initial['residual'] == 0.0
+
+    for angle in (0.0, 120.0, 150.0, 300.0, 330.0):
+        node.step(.001, angle=angle)
+
+    audit = node.species_ledger()
+    # The signed boundary convention is shared with the mass ledger; this
+    # fixture's prescribed atmosphere has Y=0, so species leaves the chamber
+    # during the intake-open interval and the signed value is negative.
+    assert abs(audit['external_species']) > 0.0
+    assert audit['delta_species'] == pytest.approx(audit['external_species'], abs=1e-15)
+    assert audit['residual'] == pytest.approx(0.0, abs=1e-15)
+
+def test_species_global_ledger_is_closed_when_all_ports_are_closed():
+    node = make()
+    for angle in (0.0, 30.0, 60.0, 240.0):
+        node.step(.001, angle=angle)
+
+    audit = node.species_ledger()
+    assert audit['external_species'] == 0.0
+    assert audit['delta_species'] == pytest.approx(0.0, abs=1e-15)
+    assert audit['residual'] == pytest.approx(0.0, abs=1e-15)
+
+
+def test_species_global_ledger_cancels_internal_transfers_and_tracks_external_port():
+    node = make()
+    initial = node.species_ledger()
+    assert initial['delta_species'] == 0.0
+    assert initial['external_species'] == 0.0
+    assert initial['residual'] == 0.0
+
+    for angle in (120.0, 150.0, 300.0, 330.0):
+        node.step(.001, angle=angle)
+
+    audit = node.species_ledger()
+    assert audit['external_species'] == pytest.approx(0.0, abs=1e-15)
+    assert audit['delta_species'] == pytest.approx(audit['external_species'], abs=1e-15)
+    assert audit['residual'] == pytest.approx(0.0, abs=1e-15)

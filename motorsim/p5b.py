@@ -125,6 +125,7 @@ class IntegratedIntakeTransfer:
         self.ledger = {'external_mass':0.0,'external_energy':0.0,'external_species':0.0,
                        'cc_work':0.0,'cyl_work':0.0}
         self._initial_mass = self._total_mass()
+        self._initial_species = self._total_species()
         self.history = []
 
     def _total_mass(self):
@@ -137,6 +138,14 @@ class IntegratedIntakeTransfer:
         duct_mass = sum(cell.conservative[0] * cell.volume
                         for cell in self.duct_states[1:])
         return chamber_mass + duct_mass
+
+    def _total_species(self):
+        """Return the fresh-species inventory in all stored coupled volumes."""
+        chamber_species = (self.crankcase.inventory(self.eos)[1]
+                           + self.cylinder.inventory(self.eos)[1])
+        duct_species = sum(cell.conservative[3] * cell.volume
+                           for cell in self.duct_states[1:])
+        return chamber_species + duct_species
 
     def mass_ledger(self):
         """Audit closed-system mass against the external interface integral.
@@ -155,6 +164,24 @@ class IntegratedIntakeTransfer:
             'delta_mass': delta_mass,
             'external_mass': external_mass,
             'residual': delta_mass - external_mass,
+        }
+
+    def species_ledger(self):
+        """Audit fresh-species inventory against the external interface.
+
+        Species is stored as fresh mass, not as a mass fraction.  The intake
+        endpoint is the only external boundary in this fixture; transfer
+        interfaces are internal and therefore cancel from the global balance.
+        """
+        final_species = self._total_species()
+        external_species = self.ledger['external_species']
+        delta_species = final_species - self._initial_species
+        return {
+            'initial_species': self._initial_species,
+            'final_species': final_species,
+            'delta_species': delta_species,
+            'external_species': external_species,
+            'residual': delta_species - external_species,
         }
 
     def _areas(self, angle):
