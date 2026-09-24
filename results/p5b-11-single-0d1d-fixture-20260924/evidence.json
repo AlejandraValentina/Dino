@@ -47,9 +47,9 @@
     "scope": "P5B-11 only; no P5B-12"
   },
   "checkpoint": {
-    "status": "READY_TO_COMMIT",
-    "commit": "PENDING",
-    "last_commit": "c06ac8a"
+    "status": "COMMITTED",
+    "commit": "487ca48",
+    "last_commit": "a824547"
   },
   "scope_notes": [
     "No exhaust, heat release, alternate physics, or P6 species semantics added.",
