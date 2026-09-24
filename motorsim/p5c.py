@@ -49,6 +49,8 @@ class IntegratedP5C:
         self.history = []
         self._initial = self.totals()
         self._last_external = {"mass": 0.0, "energy": 0.0, "species": 0.0}
+        self._external_cumulative = {"mass": 0.0, "energy": 0.0, "species": 0.0}
+        self._previous_totals = dict(self._initial)
 
     def _duct_totals(self, path):
         return {"mass": fsum(q[0] * v for q, v in
@@ -202,6 +204,8 @@ class IntegratedP5C:
         self._last_external = {"mass": 0.5*(t0['core']['external'][0] + t1['core']['external'][0])*dt,
                                "energy": 0.5*(t0['core']['external'][2] + t1['core']['external'][2])*dt,
                                "species": 0.5*(t0['core']['external'][3] + t1['core']['external'][3])*dt}
+        for key in self._external_cumulative:
+            self._external_cumulative[key] += self._last_external[key]
         record['ledger'] = self.ledger_report()
         self.history.append(record)
         return record
@@ -210,14 +214,23 @@ class IntegratedP5C:
         final = self.totals()
         delta = {k: final[k] - self._initial[k] for k in final}
         ext = dict(self._last_external)
+        residual = {k: delta[k] - self._external_cumulative[k]
+                    for k in ('mass','energy','species')}
+        step_delta = {k: final[k] - self._previous_totals[k] for k in final}
+        step_residual = {k: step_delta[k] - self._last_external[k]
+                         for k in ('mass','energy','species')}
+        self._previous_totals = dict(final)
         return {"initial": dict(self._initial), "final": final, "delta": delta,
-                "external": ext,
-                "residual": {k: delta[k] - ext[k] for k in ('mass','energy','species')}}
+                "external": dict(self._external_cumulative), "step_external": ext,
+                "residual": residual, "step_delta": step_delta,
+                "step_residual": step_residual}
 
     def snapshot(self):
         return {"core": self.core.snapshot(), "exhaust": deepcopy(self.exhaust),
                 "angle": self.angle, "port_area": self.port_area,
-                "ledger": dict(self.ledger), "history": deepcopy(self.history)}
+                "ledger": dict(self.ledger), "history": deepcopy(self.history),
+                "initial": dict(self._initial), "previous": dict(self._previous_totals),
+                "external_cumulative": dict(self._external_cumulative)}
 
     def restore(self, snapshot):
         self.core.restore(snapshot["core"])
@@ -226,6 +239,10 @@ class IntegratedP5C:
         self.port_area = snapshot["port_area"]
         self.ledger = dict(snapshot["ledger"])
         self.history = deepcopy(snapshot["history"])
+        self._initial = dict(snapshot.get("initial", self._initial))
+        self._previous_totals = dict(snapshot.get("previous", self._initial))
+        self._external_cumulative = dict(snapshot.get("external_cumulative", {
+            "mass": 0.0, "energy": 0.0, "species": 0.0}))
 
 
 def make_p5c_fixture(*, eos=None, cells=2, port_area=0.0):

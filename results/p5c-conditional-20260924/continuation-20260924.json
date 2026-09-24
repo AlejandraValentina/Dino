@@ -19,11 +19,15 @@
   "ledger_api": "implemented; complete external-boundary ledger not PASS",
   "full_topology": "PASS short compatible stage; extended dynamic evidence pending",
   "backflow": "PASS controlled crankcase/TR1 reverse mass flux",
-  "causality": "PENDING",
+  "causality": "PENDING: controlled pressure wave reaches near cells, far-sensor arrival not yet established under valid timestep",
   "tests_after_refactor": 66,
   "atmospheric_boundary": "PASS for corrected reservoir-compatible fixture",
   "boundary_failure_root_cause": "FIXTURE_STATE_INVALID: 100 kPa implicit-temperature state was incompatible with 101325 Pa/300 K reservoir",
-  "mass_ledger": "PASS for bounded compatible full fixture at closed intake stage; complete multi-stage report pending",
-  "mY_ledger": "PASS for bounded compatible full fixture at closed intake stage",
-  "energy_ledger": "PASS within measured stage/storage residual for bounded compatible full fixture"
+  "mass_ledger": "PASS bounded 13-step compatible trajectory",
+  "mY_ledger": "PASS bounded 13-step compatible trajectory",
+  "energy_ledger": "PASS bounded 13-step compatible trajectory",
+  "multi_stage_steps": 13,
+  "mass_cumulative_residual": -8.075606965399542e-18,
+  "mY_cumulative_residual": -3.1044281988840603e-31,
+  "energy_cumulative_residual": -8.000810472790861e-13
 }
