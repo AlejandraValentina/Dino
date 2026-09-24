@@ -1,1 +1,1 @@
-{"phase":"P5_B","classification":"P5_B_BLOCKED_INTEGRATION","implementation":"PARTIAL","numerical":"BLOCKED","regression_tests":13,"openspec_p5":"PASS","openspec_p4":"PASS","next":"Complete duct conservative evolution, -p dV/dt and ledgers","p4_dependency":"UNRESOLVED"}
+{"phase":"P5_B","classification":"P5B-14_PASS","implementation":"PASS","numerical":"PASS","regression_tests":63,"openspec_p5":"PASS","openspec_p4":"BLOCKED / NOT_GRANTED","next":"P5B-15 integrated_closed_port_fixture","p4_dependency":"UNRESOLVED"}

@@ -2,8 +2,8 @@
   "current_phase": "P5_B",
   "current_subphase": "P5B-15 integrated_closed_port_fixture",
   "base_commit": "854e59e",
-  "latest_commit": "4380b0a",
-  "worktree_checkpoint": "P5B-14 complete fixture committed locally",
+  "latest_commit": "pending",
+  "worktree_checkpoint": "P5B-14 complete fixture and gate state pending local checkpoint",
   "classification": "IMPLEMENTED_CHECKPOINT",
   "attempt": 0,
   "gates": {
