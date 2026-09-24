@@ -35,7 +35,8 @@ def safe_status():
     detected = [n for n in ('codex','opencode') if shutil.which(n)]
     status=sup.get('status','STOPPED')
     if status=='RUNNING' and not pid_alive(sup.get('pid')): status='STALE'
-    return {'supervisor':status,'pid':sup.get('pid'),'HEAD':git_head(),'phase':s.get('current_phase'),'active_task':s.get('current_subphase'),'tasks':f'{done}/{len(q.get("tasks",[]))}','invocations':sup.get('invocation_count',0),'detected_clis':detected,'terminal_reason':sup.get('terminal_reason')}
+    hb=sup.get('last_heartbeat'); age=None
+    return {'supervisor':status,'pid':sup.get('pid'),'pid_alive':pid_alive(sup.get('pid')),'child_pid':sup.get('child_pid'),'child_alive':pid_alive(sup.get('child_pid')),'HEAD':git_head(),'phase':s.get('current_phase'),'active_task':s.get('current_subphase'),'tasks':f'{done}/{len(q.get("tasks",[]))}','invocations':sup.get('invocation_count',0),'current_invocation':sup.get('current_invocation'),'last_heartbeat':hb,'detected_clis':detected,'terminal_reason':sup.get('terminal_reason')}
 def acquire():
     if LOCK.exists():
         old=read(LOCK,{})
@@ -51,14 +52,19 @@ def once():
     before={'invocation_id':inv,'timestamp':now(),'HEAD_before':git_head(),'phase_before':read(R/'state.json',{}).get('current_phase'),'active_task_before':read(R/'state.json',{}).get('current_subphase'),'working_tree_before':git_status()}; write(d/'before.json',before)
     prompt='Read AGENTS.md, roadmap state and current_tasks.json. Implement the active approved task completely, run focused tests, persist durable state. Do not reinterpret P4, do not push, preserve redme.txt unstaged.'
     (d/'prompt.txt').write_text(prompt,encoding='utf-8'); start=time.time(); timeout=read(CFG,{}).get('agent_timeout_seconds',3600)
-    try:
-        p=subprocess.run(cmd,input=prompt,text=True,cwd=ROOT,capture_output=True,timeout=timeout)
-        (d/'stdout.log').write_text(p.stdout or '',encoding='utf-8'); (d/'stderr.log').write_text(p.stderr or '',encoding='utf-8'); code=p.returncode
-    except subprocess.TimeoutExpired as e:
-        (d/'stdout.log').write_text(e.stdout or '',encoding='utf-8'); (d/'stderr.log').write_text(e.stderr or '',encoding='utf-8'); code='TIMEOUT'
+    with open(d/'stdout.log','wb') as out, open(d/'stderr.log','wb') as err:
+        p=subprocess.Popen(cmd,input=None,stdin=subprocess.PIPE,stdout=out,stderr=err,cwd=ROOT)
+        write(STATE,{'status':'RUNNING','pid':os.getpid(),'child_pid':p.pid,'current_invocation':inv,'last_heartbeat':now(),'current_phase':before['phase_before'],'current_task':before['active_task_before']})
+        p.stdin.write(prompt.encode('utf-8')); p.stdin.close(); started=time.time()
+        while p.poll() is None:
+            if time.time()-started > timeout:
+                p.kill(); code='TIMEOUT'; break
+            sup=read(STATE,{}); sup.update({'status':'RUNNING','pid':os.getpid(),'child_pid':p.pid,'current_invocation':inv,'last_heartbeat':now(),'HEAD':git_head()}); write(STATE,sup)
+            time.sleep(read(CFG,{}).get('poll_seconds',2))
+        else: code=p.returncode
     after={'HEAD_after':git_head(),'status_after':git_status(),'state_after':read(R/'state.json',{}),'tasks_after':read(R/'current_tasks.json',{})}; write(d/'result.json',{'returncode':code,'duration':time.time()-start,**after})
     previous=read(STATE,{}); count=int(previous.get('invocation_count',0))+1
-    write(STATE,{'status':'RUNNING' if code==0 else 'BLOCKED','pid':os.getpid(),'started_at':previous.get('started_at',now()),'last_heartbeat':now(),'invocation_count':count,'current_invocation':inv,'current_phase':after['state_after'].get('current_phase'),'current_task':after['state_after'].get('current_subphase'),'HEAD':after['HEAD_after'],'terminal_reason':None if code==0 else 'AGENT_FAILED'})
+    write(STATE,{'status':'RUNNING' if code==0 else 'BLOCKED','pid':os.getpid(),'child_pid':None,'started_at':previous.get('started_at',now()),'last_heartbeat':now(),'invocation_count':count,'current_invocation':inv,'current_phase':after['state_after'].get('current_phase'),'current_task':after['state_after'].get('current_subphase'),'HEAD':after['HEAD_after'],'terminal_reason':None if code==0 else 'AGENT_FAILED'})
     release(); return 'PASS' if code==0 else 'SUPERVISOR_AGENT_FAILED'
 def main(argv):
     R.mkdir(parents=True,exist_ok=True); a=argv[1] if len(argv)>1 else 'status'
