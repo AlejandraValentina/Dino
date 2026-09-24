@@ -1,5 +1,5 @@
 {
-  "status": "P5_C_VERIFICATION_INCOMPLETE",
+  "status": "P5_C_CAUSAL_PROPAGATION_DEFECT",
   "reason": "Current adapter advances P5-B core and exhaust sequentially; it does not assemble TR1/TR2/exhaust cylinder RHS in one stage-coherent coupled update as required.",
   "tests": {
     "focused_previous": 43,
@@ -19,7 +19,7 @@
   "ledger_api": "implemented; complete external-boundary ledger not PASS",
   "full_topology": "PASS short compatible stage; extended dynamic evidence pending",
   "backflow": "PASS controlled crankcase/TR1 reverse mass flux",
-  "causality": "PENDING: controlled pressure wave reaches near cells, far-sensor arrival not yet established under valid timestep",
+  "causality": "P5_C_CAUSAL_PROPAGATION_DEFECT",
   "tests_after_refactor": 66,
   "atmospheric_boundary": "PASS for corrected reservoir-compatible fixture",
   "boundary_failure_root_cause": "FIXTURE_STATE_INVALID: 100 kPa implicit-temperature state was incompatible with 101325 Pa/300 K reservoir",
@@ -29,5 +29,47 @@
   "multi_stage_steps": 13,
   "mass_cumulative_residual": -8.075606965399542e-18,
   "mY_cumulative_residual": -3.1044281988840603e-31,
-  "energy_cumulative_residual": -8.000810472790861e-13
+  "energy_cumulative_residual": -8.000810472790861e-13,
+  "causal_fixture": {
+    "cells": 6,
+    "length_m": 0.03,
+    "dx_m": 0.005,
+    "dt_s": 1e-08,
+    "steps": 7000,
+    "horizon_s": 7e-05,
+    "initial_cylinder_p_pa": 200000.0,
+    "initial_exhaust_p_pa": 100000.0,
+    "sound_speed_m_s": 367.4234614174767,
+    "threshold_pa": 1000.0,
+    "sensors": {
+      "near": {
+        "cell": 1,
+        "x_m": 0.0075,
+        "arrival_s": 2.71e-06
+      },
+      "middle": {
+        "cell": 3,
+        "x_m": 0.0175,
+        "arrival_s": 1.283e-05
+      },
+      "far": {
+        "cell": 4,
+        "x_m": 0.0225,
+        "arrival_s": 1.933e-05
+      }
+    },
+    "nominal_u_plus_a_s": 367.4234614174767,
+    "nominal_windows_s": {
+      "near": [
+        2.04e-05,
+        3e-05
+      ],
+      "far": [
+        6.13e-05,
+        8e-05
+      ]
+    },
+    "spatial_order": "near < middle < far",
+    "diagnosis": "measurable far response occurs before physically plausible characteristic window despite sufficient horizon and valid sampling"
+  }
 }
