@@ -61,3 +61,6 @@ def test_p6_integrates_on_p5c_and_derives_legacy_view():
     assert len(result['species_final']) == 4
     assert result['legacy_fresh_cylinder'] >= 0.0
     assert system.validate()
+    assert len(system.stage_species) == 2
+    assert system.stage_species[0]['before'] != system.stage_species[1]['before'] or \
+        system.stage_species[0]['after'] == system.stage_species[1]['before']

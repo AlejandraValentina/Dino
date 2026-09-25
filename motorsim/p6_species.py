@@ -158,16 +158,22 @@ class P6IntegratedSystem:
         # P5-C; no independent gas flux solve or legacy mY state is evolved.
         before = self._species_totals()
         record = self.gas.step(dt, angle=angle)
-        # Apply conservative donor transport at the recorded stage interfaces.
-        # P5-C traces carry outward mass fluxes for the transfer/cylinder faces.
-        interfaces = record['core_interfaces'][0]
-        for flux, left_name, right_name in ((interfaces[1], 'crankcase', 'tr1'),
-                                             (interfaces[2], 'crankcase', 'tr2'),
-                                             (interfaces[3], 'tr1', 'cylinder'),
-                                             (interfaces[4], 'tr2', 'cylinder')):
-            self._exchange(flux[0], left_name, right_name, dt)
-        pflux = record['exhaust']['flux']
-        self._exchange(pflux[0], 'cylinder', 'exhaust', dt)
+        # Consume both stage traces.  Each stage reads the currently updated
+        # authoritative species state; no legacy scalar is cached.
+        self.stage_species = []
+        for stage, interfaces in enumerate(record['core_interfaces']):
+            before_stage = {k: [tuple(x) for x in v] for k, v in self.species.items()}
+            for flux, left_name, right_name in ((interfaces[1], 'crankcase', 'tr1'),
+                                                 (interfaces[2], 'crankcase', 'tr2'),
+                                                 (interfaces[3], 'tr1', 'cylinder'),
+                                                 (interfaces[4], 'tr2', 'cylinder')):
+                self._exchange(flux[0], left_name, right_name, dt * .5)
+            if stage < len(record.get('stage_interfaces', ())):
+                pflux = record['stage_interfaces'][stage][2]
+                self._exchange(pflux[0], 'cylinder', 'exhaust', dt * .5)
+            self.stage_species.append({'before': before_stage,
+                                       'after': {k: [tuple(x) for x in v]
+                                                 for k, v in self.species.items()}})
         self.validate()
         after = self._species_totals()
         return {'gas': record, 'species_initial': before,
