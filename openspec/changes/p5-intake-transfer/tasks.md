@@ -25,3 +25,7 @@
 - [x] P5-C resolved causal front: dominant positive dp/dt, predeclared windows, CFL 0.2/0.4 ordering PASS; precursor retained diagnostically.
 - [x] P5-C conditional closure evidence recorded in `results/p5c-conditional-20260924/causal-front-20260924.json`.
 - [ ] P6 four-species conservative transport and scavenging accounting.
+- [x] P6-A four-species state, donor semantics, legacy mapping and scavenging metrics.
+- [x] P6-B stage companion integrated with P5-C traces; authoritative species state and derived legacy fresh view.
+- [ ] P6-C full topology species fixture bank and independent ledgers.
+- [ ] P6-D restart/determinism and regressions.

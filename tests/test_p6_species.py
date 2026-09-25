@@ -5,6 +5,8 @@ from motorsim.p6_species import (SPECIES, P6SpeciesLedger, SpeciesChamber,
                                   donor_species, validate_species,
                                   legacy_to_species, legacy_fresh_mass,
                                   scavenging_metrics)
+from motorsim.p5c import make_p5c_fixture
+from motorsim.p6_species import P6IntegratedSystem
 
 
 def test_four_species_sum_and_atmosphere():
@@ -51,3 +53,11 @@ def test_scavenging_metrics_do_not_count_reverse_exhaust():
                                  exhaust_outward_mass=-.5)
     assert metrics['fresh_short_circuit_mass'] == 0.0
     assert metrics['cylinder_fresh_mass'] == pytest.approx(.5)
+
+
+def test_p6_integrates_on_p5c_and_derives_legacy_view():
+    system = P6IntegratedSystem(make_p5c_fixture(port_area=0.0))
+    result = system.step(1e-7)
+    assert len(result['species_final']) == 4
+    assert result['legacy_fresh_cylinder'] >= 0.0
+    assert system.validate()
