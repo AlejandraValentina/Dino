@@ -1,0 +1,3677 @@
+{
+  "f05": {
+    "summary": {
+      "initial": {
+        "gas_mass": 0.020003,
+        "fresh_air_mass": 0.0062506,
+        "fuel_mass": 0.0037503,
+        "residual_mass": 0.0050007,
+        "burned_mass": 0.0050014000000000005,
+        "species_sum": 0.020003,
+        "species_sum_minus_gas_mass": 0.0
+      },
+      "final": {
+        "gas_mass": 0.020003,
+        "fresh_air_mass": 0.006250599999999999,
+        "fuel_mass": 0.0037503000000000007,
+        "residual_mass": 0.0050007,
+        "burned_mass": 0.0050014,
+        "species_sum": 0.020003,
+        "species_sum_minus_gas_mass": 0.0
+      },
+      "external": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "measured_change": [
+        -8.673617379884035e-19,
+        8.673617379884035e-19,
+        0.0,
+        -8.673617379884035e-19
+      ],
+      "cumulative_residual": [
+        -8.673617379884035e-19,
+        8.673617379884035e-19,
+        0.0,
+        -8.673617379884035e-19
+      ],
+      "worst_per_step_residual": 8.673617379884035e-19
+    },
+    "trace": [
+      {
+        "step_index": 1,
+        "stage_index": 0,
+        "interfaces": [
+          {
+            "stage_index": 0,
+            "interface_name": "intake<->crankcase",
+            "left_component": "intake",
+            "right_component": "crankcase",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "crankcase<->tr1",
+            "left_component": "crankcase",
+            "right_component": "tr1",
+            "gas_mass_flux": -0.0006525078196539585,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr1",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.7,
+              "fuel": 0.2,
+              "residual": 0.05,
+              "burned": 0.05
+            },
+            "species_fluxes": {
+              "fresh_air": -0.0004567554737577709,
+              "fuel": -0.0001305015639307917,
+              "residual": -3.2625390982697925e-05,
+              "burned": -3.2625390982697925e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "crankcase<->tr2",
+            "left_component": "crankcase",
+            "right_component": "tr2",
+            "gas_mass_flux": -0.0006525078196539585,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.1,
+              "fuel": 0.3,
+              "residual": 0.2,
+              "burned": 0.4
+            },
+            "species_fluxes": {
+              "fresh_air": -6.525078196539585e-05,
+              "fuel": -0.00019575234589618755,
+              "residual": -0.0001305015639307917,
+              "burned": -0.0002610031278615834
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "tr1<->cylinder",
+            "left_component": "tr1",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.00131222664791956,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr1",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.7,
+              "fuel": 0.2,
+              "residual": 0.05,
+              "burned": 0.05
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0009185586535436919,
+              "fuel": 0.000262445329583912,
+              "residual": 6.5611332395978e-05,
+              "burned": 6.5611332395978e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "tr2<->cylinder",
+            "left_component": "tr2",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.00131222664791956,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.1,
+              "fuel": 0.3,
+              "residual": 0.2,
+              "burned": 0.4
+            },
+            "species_fluxes": {
+              "fresh_air": 0.000131222664791956,
+              "fuel": 0.00039366799437586794,
+              "residual": 0.000262445329583912,
+              "burned": 0.000524890659167824
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "cylinder<->exhaust",
+            "left_component": "cylinder",
+            "right_component": "exhaust",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          }
+        ],
+        "rhs": {
+          "stage_index": 0,
+          "interfaces": [
+            {
+              "interface_name": "intake<->crankcase",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr1",
+              "species_flux": {
+                "fresh_air": -0.0004567554705645226,
+                "fuel": -0.0001305015607375434,
+                "residual": -3.262539524036234e-05,
+                "burned": -3.262539311153013e-05
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr2",
+              "species_flux": {
+                "fresh_air": -6.525079154514078e-05,
+                "fuel": -0.00019575234057410702,
+                "residual": -0.0001305015649952078,
+                "burned": -0.0002610031225395029
+              }
+            },
+            {
+              "interface_name": "tr1<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.000918558647121906,
+                "fuel": 0.0002624453231621261,
+                "residual": 6.561134095835921e-05,
+                "burned": 6.561133667716861e-05
+              }
+            },
+            {
+              "interface_name": "tr2<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.00013122268405731373,
+                "fuel": 0.00039366798367289146,
+                "residual": 0.00026244533172450733,
+                "burned": 0.0005248906484648474
+              }
+            },
+            {
+              "interface_name": "cylinder<->exhaust",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            }
+          ],
+          "crankcase": {
+            "contributions": [
+              -0.0005220062621096634,
+              -0.0003262539013116504,
+              -0.00016312696023557013,
+              -0.00029362851565103304
+            ],
+            "assembled_rhs": [
+              -0.0005220062621096634,
+              -0.0003262539013116504,
+              -0.00016312696023557013,
+              -0.00029362851565103304
+            ]
+          },
+          "cylinder": {
+            "contributions": [
+              -0.0010497813311792197,
+              -0.0006561133068350175,
+              -0.0003280566726828665,
+              -0.000590501985142016
+            ],
+            "assembled_rhs": [
+              -0.0010497813311792197,
+              -0.0006561133068350175,
+              -0.0003280566726828665,
+              -0.000590501985142016
+            ]
+          }
+        }
+      },
+      {
+        "step_index": 1,
+        "stage_index": 1,
+        "interfaces": [
+          {
+            "stage_index": 1,
+            "interface_name": "intake<->crankcase",
+            "left_component": "intake",
+            "right_component": "crankcase",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "crankcase<->tr1",
+            "left_component": "crankcase",
+            "right_component": "tr1",
+            "gas_mass_flux": -0.0006525054826670133,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr1",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.6999999951061915,
+              "fuel": 0.19999999510619154,
+              "residual": 0.05000000652507799,
+              "burned": 0.050000003262539
+            },
+            "species_fluxes": {
+              "fresh_air": -0.0004567538346736724,
+              "fuel": -0.0001305010933401658,
+              "residual": -3.262527839099983e-05,
+              "burned": -3.2625276262175246e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "crankcase<->tr2",
+            "left_component": "crankcase",
+            "right_component": "tr2",
+            "gas_mass_flux": -0.0006525054826670133,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.10000001468142547,
+              "fuel": 0.2999999918436525,
+              "residual": 0.20000000163126952,
+              "burned": 0.39999999184365254
+            },
+            "species_fluxes": {
+              "fresh_air": -6.525055784641194e-05,
+              "fuel": -0.00019575163947804252,
+              "residual": -0.00013050109759781496,
+              "burned": -0.0002610021877447439
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "tr1<->cylinder",
+            "left_component": "tr1",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0013122262382979119,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr1",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.6999999951061915,
+              "fuel": 0.19999999510619154,
+              "residual": 0.05000000652507799,
+              "burned": 0.050000003262539
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0009185583603867544,
+              "fuel": 0.0002624452412377985,
+              "residual": 6.561132047727413e-05,
+              "burned": 6.561131619608488e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "tr2<->cylinder",
+            "left_component": "tr2",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0013122262382979119,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.10000001468142547,
+              "fuel": 0.2999999918436525,
+              "residual": 0.20000000163126952,
+              "burned": 0.39999999184365254
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0001312226430951429,
+              "fuel": 0.0003936678607864004,
+              "residual": 0.00026244524980017706,
+              "burned": 0.0005248904846161917
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "cylinder<->exhaust",
+            "left_component": "cylinder",
+            "right_component": "exhaust",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          }
+        ],
+        "rhs": {
+          "stage_index": 1,
+          "interfaces": [
+            {
+              "interface_name": "intake<->crankcase",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr1",
+              "species_flux": {
+                "fresh_air": -0.000456753831480447,
+                "fuel": -0.00013050109014694036,
+                "residual": -3.262528264863374e-05,
+                "burned": -3.2625278390992205e-05
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr2",
+              "species_flux": {
+                "fresh_air": -6.525056742608824e-05,
+                "fuel": -0.00019575163415600015,
+                "residual": -0.00013050109866222343,
+                "burned": -0.0002610021824227015
+              }
+            },
+            {
+              "interface_name": "tr1<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0009185583539649935,
+                "fuel": 0.0002624452348160376,
+                "residual": 6.561132903962201e-05,
+                "burned": 6.56113204772588e-05
+              }
+            },
+            {
+              "interface_name": "tr2<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0001312226623604256,
+                "fuel": 0.0003936678500834656,
+                "residual": 0.00026244525194076397,
+                "burned": 0.0005248904739132567
+              }
+            },
+            {
+              "interface_name": "cylinder<->exhaust",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            }
+          ],
+          "crankcase": {
+            "contributions": [
+              -0.0005220043989065353,
+              -0.0003262527243029405,
+              -0.00016312638131085717,
+              -0.0002936274608136937
+            ],
+            "assembled_rhs": [
+              -0.0005220043989065353,
+              -0.0003262527243029405,
+              -0.00016312638131085717,
+              -0.0002936274608136937
+            ]
+          },
+          "cylinder": {
+            "contributions": [
+              -0.0010497810163254192,
+              -0.0006561130848995032,
+              -0.000328056580980386,
+              -0.0005905017943905155
+            ],
+            "assembled_rhs": [
+              -0.0010497810163254192,
+              -0.0006561130848995032,
+              -0.000328056580980386,
+              -0.0005905017943905155
+            ]
+          }
+        }
+      },
+      {
+        "step_index": 2,
+        "stage_index": 0,
+        "interfaces": [
+          {
+            "stage_index": 0,
+            "interface_name": "intake<->crankcase",
+            "left_component": "intake",
+            "right_component": "crankcase",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "crankcase<->tr1",
+            "left_component": "crankcase",
+            "right_component": "tr1",
+            "gas_mass_flux": -0.0006525054826710809,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr1",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.6999999902124006,
+              "fuel": 0.19999999021240056,
+              "residual": 0.05000001305013261,
+              "burned": 0.0500000065250663
+            },
+            "species_fluxes": {
+              "fresh_air": -0.00045675383148329434,
+              "fuel": -0.0001305010901477539,
+              "residual": -3.262528264883712e-05,
+              "burned": -3.262527839119558e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "crankcase<->tr2",
+            "left_component": "crankcase",
+            "right_component": "tr2",
+            "gas_mass_flux": -0.0006525054826710809,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.10000002936279835,
+              "fuel": 0.29999998368733427,
+              "residual": 0.20000000326253314,
+              "burned": 0.39999998368733425
+            },
+            "species_fluxes": {
+              "fresh_air": -6.5250567426495e-05,
+              "fuel": -0.00019575163415722045,
+              "residual": -0.00013050109866303693,
+              "burned": -0.0002610021824243285
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "tr1<->cylinder",
+            "left_component": "tr1",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0013122262382976922,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr1",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.6999999902124006,
+              "fuel": 0.19999999021240056,
+              "residual": 0.05000001305013261,
+              "burned": 0.0500000065250663
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0009185583539648397,
+              "fuel": 0.0002624452348159937,
+              "residual": 6.561132903961103e-05,
+              "burned": 6.561132047724783e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "tr2<->cylinder",
+            "left_component": "tr2",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0013122262382976922,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.10000002936279835,
+              "fuel": 0.29999998368733427,
+              "residual": 0.20000000326253314,
+              "burned": 0.39999998368733425
+            },
+            "species_fluxes": {
+              "fresh_air": 0.00013122266236040365,
+              "fuel": 0.00039366785008339967,
+              "residual": 0.00026244525194072006,
+              "burned": 0.0005248904739131689
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "cylinder<->exhaust",
+            "left_component": "cylinder",
+            "right_component": "exhaust",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          }
+        ],
+        "rhs": {
+          "stage_index": 0,
+          "interfaces": [
+            {
+              "interface_name": "intake<->crankcase",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr1",
+              "species_flux": {
+                "fresh_air": -0.00045675382829006887,
+                "fuel": -0.00013050108695452842,
+                "residual": -3.262528690647103e-05,
+                "burned": -3.262528052001253e-05
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr2",
+              "species_flux": {
+                "fresh_air": -6.52505770061713e-05,
+                "fuel": -0.00019575162883517805,
+                "residual": -0.0001305010997274454,
+                "burned": -0.0002610021771022861
+              }
+            },
+            {
+              "interface_name": "tr1<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0009185583475430787,
+                "fuel": 0.00026244522839423266,
+                "residual": 6.56113376019589e-05,
+                "burned": 6.561132475842175e-05
+              }
+            },
+            {
+              "interface_name": "tr2<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.00013122268162568635,
+                "fuel": 0.0003936678393804648,
+                "residual": 0.000262445254081307,
+                "burned": 0.000524890463210234
+              }
+            },
+            {
+              "interface_name": "cylinder<->exhaust",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            }
+          ],
+          "crankcase": {
+            "contributions": [
+              -0.0005220044052962402,
+              -0.00032625271578970644,
+              -0.00016312638663391643,
+              -0.00029362745762229864
+            ],
+            "assembled_rhs": [
+              -0.0005220044052962402,
+              -0.00032625271578970644,
+              -0.00016312638663391643,
+              -0.00029362745762229864
+            ]
+          },
+          "cylinder": {
+            "contributions": [
+              -0.0010497810291687651,
+              -0.0006561130677746975,
+              -0.0003280565916832659,
+              -0.0005905017879686558
+            ],
+            "assembled_rhs": [
+              -0.0010497810291687651,
+              -0.0006561130677746975,
+              -0.0003280565916832659,
+              -0.0005905017879686558
+            ]
+          }
+        }
+      },
+      {
+        "step_index": 2,
+        "stage_index": 1,
+        "interfaces": [
+          {
+            "stage_index": 1,
+            "interface_name": "intake<->crankcase",
+            "left_component": "intake",
+            "right_component": "crankcase",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "crankcase<->tr1",
+            "left_component": "crankcase",
+            "right_component": "tr1",
+            "gas_mass_flux": -0.000652503145691999,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr1",
+            "donor_mass": 0.9999999999999999,
+            "donor_species_fractions": {
+              "fresh_air": 0.6999999853186096,
+              "fuel": 0.19999998531860957,
+              "residual": 0.050000019575187224,
+              "burned": 0.05000000978759361
+            },
+            "species_fluxes": {
+              "fresh_air": -0.0004567521924047459,
+              "fuel": -0.00013050061955874635,
+              "residual": -3.262517005747119e-05,
+              "burned": -3.262516367103557e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "crankcase<->tr2",
+            "left_component": "crankcase",
+            "right_component": "tr2",
+            "gas_mass_flux": -0.000652503145691999,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.10000004404417123,
+              "fuel": 0.299999975531016,
+              "residual": 0.20000000489379677,
+              "burned": 0.39999997553101596
+            },
+            "species_fluxes": {
+              "fresh_air": -6.525034330816018e-05,
+              "fuel": -0.00019575092774151064,
+              "residual": -0.00013050063233161757,
+              "burned": -0.0002610012423107105
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "tr1<->cylinder",
+            "left_component": "tr1",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0013122258286754288,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr1",
+            "donor_mass": 0.9999999999999999,
+            "donor_species_fractions": {
+              "fresh_air": 0.6999999853186096,
+              "fuel": 0.19999998531860957,
+              "residual": 0.050000019575187224,
+              "burned": 0.05000000978759361
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0009185580608075005,
+              "fuel": 0.00026244514646978605,
+              "residual": 6.561131712083772e-05,
+              "burned": 6.561130427730458e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "tr2<->cylinder",
+            "left_component": "tr2",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0013122258286754288,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.10000004404417123,
+              "fuel": 0.299999975531016,
+              "residual": 0.20000000489379677,
+              "burned": 0.39999997553101596
+            },
+            "species_fluxes": {
+              "fresh_air": 0.000131222640663442,
+              "fuel": 0.0003936677164937958,
+              "residual": 0.0002624451721568523,
+              "burned": 0.0005248902993613386
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "cylinder<->exhaust",
+            "left_component": "cylinder",
+            "right_component": "exhaust",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          }
+        ],
+        "rhs": {
+          "stage_index": 1,
+          "interfaces": [
+            {
+              "interface_name": "intake<->crankcase",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr1",
+              "species_flux": {
+                "fresh_air": -0.00045675218921154335,
+                "fuel": -0.0001305006163655438,
+                "residual": -3.2625174315074616e-05,
+                "burned": -3.2625165799837286e-05
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr2",
+              "species_flux": {
+                "fresh_air": -6.525035288776788e-05,
+                "fuel": -0.00019575092241950635,
+                "residual": -0.00013050063339601844,
+                "burned": -0.0002610012369887063
+              }
+            },
+            {
+              "interface_name": "tr1<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0009185580543857646,
+                "fuel": 0.0002624451400480502,
+                "residual": 6.561132568315227e-05,
+                "burned": 6.561130855846185e-05
+              }
+            },
+            {
+              "interface_name": "tr2<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.00013122265992864972,
+                "fuel": 0.0003936677057909026,
+                "residual": 0.0002624451742974309,
+                "burned": 0.0005248902886584455
+              }
+            },
+            {
+              "interface_name": "cylinder<->exhaust",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            }
+          ],
+          "crankcase": {
+            "contributions": [
+              -0.0005220025420993112,
+              -0.00032625153878505016,
+              -0.00016312580771109307,
+              -0.0002936264027885436
+            ],
+            "assembled_rhs": [
+              -0.0005220025420993112,
+              -0.00032625153878505016,
+              -0.00016312580771109307,
+              -0.0002936264027885436
+            ]
+          },
+          "cylinder": {
+            "contributions": [
+              -0.0010497807143144144,
+              -0.0006561128458389528,
+              -0.00032805649998058316,
+              -0.0005905015972169074
+            ],
+            "assembled_rhs": [
+              -0.0010497807143144144,
+              -0.0006561128458389528,
+              -0.00032805649998058316,
+              -0.0005905015972169074
+            ]
+          }
+        }
+      },
+      {
+        "step_index": 3,
+        "stage_index": 0,
+        "interfaces": [
+          {
+            "stage_index": 0,
+            "interface_name": "intake<->crankcase",
+            "left_component": "intake",
+            "right_component": "crankcase",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "crankcase<->tr1",
+            "left_component": "crankcase",
+            "right_component": "tr1",
+            "gas_mass_flux": -0.0006525031456960665,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr1",
+            "donor_mass": 1.0000000000000002,
+            "donor_species_fractions": {
+              "fresh_air": 0.6999999804248361,
+              "fuel": 0.1999999804248361,
+              "residual": 0.050000026100218475,
+              "burned": 0.05000001305010923
+            },
+            "species_fluxes": {
+              "fresh_air": -0.0004567521892143905,
+              "fuel": -0.00013050061636635726,
+              "residual": -3.262517431527798e-05,
+              "burned": -3.262516580004065e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "crankcase<->tr2",
+            "left_component": "crankcase",
+            "right_component": "tr2",
+            "gas_mass_flux": -0.0006525031456960665,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.10000005872549156,
+              "fuel": 0.2999999673747269,
+              "residual": 0.2000000065250546,
+              "burned": 0.39999996737472693
+            },
+            "species_fluxes": {
+              "fresh_air": -6.525035288817461e-05,
+              "fuel": -0.0001957509224207266,
+              "residual": -0.00013050063339683195,
+              "burned": -0.0002610012369903333
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "tr1<->cylinder",
+            "left_component": "tr1",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0013122258286752057,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr1",
+            "donor_mass": 1.0000000000000002,
+            "donor_species_fractions": {
+              "fresh_air": 0.6999999804248361,
+              "fuel": 0.1999999804248361,
+              "residual": 0.050000026100218475,
+              "burned": 0.05000001305010923
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0009185580543856083,
+              "fuel": 0.00026244514004800546,
+              "residual": 6.56113256831411e-05,
+              "burned": 6.561130855845069e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "tr2<->cylinder",
+            "left_component": "tr2",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0013122258286752057,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.10000005872549156,
+              "fuel": 0.2999999673747269,
+              "residual": 0.2000000065250546,
+              "burned": 0.39999996737472693
+            },
+            "species_fluxes": {
+              "fresh_air": 0.00013122265992862738,
+              "fuel": 0.00039366770579083566,
+              "residual": 0.0002624451742973863,
+              "burned": 0.0005248902886583563
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "cylinder<->exhaust",
+            "left_component": "cylinder",
+            "right_component": "exhaust",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          }
+        ],
+        "rhs": {
+          "stage_index": 0,
+          "interfaces": [
+            {
+              "interface_name": "intake<->crankcase",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr1",
+              "species_flux": {
+                "fresh_air": -0.000456752186021188,
+                "fuel": -0.00013050061317315475,
+                "residual": -3.262517857288141e-05,
+                "burned": -3.262516792884236e-05
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr2",
+              "species_flux": {
+                "fresh_air": -6.525036246778231e-05,
+                "fuel": -0.0001957509170987223,
+                "residual": -0.0001305006344612328,
+                "burned": -0.000261001231668329
+              }
+            },
+            {
+              "interface_name": "tr1<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0009185580479638725,
+                "fuel": 0.00026244513362626965,
+                "residual": 6.561133424545567e-05,
+                "burned": 6.561131283960797e-05
+              }
+            },
+            {
+              "interface_name": "tr2<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.00013122267919383514,
+                "fuel": 0.00039366769508794244,
+                "residual": 0.00026244517643796497,
+                "burned": 0.0005248902779554632
+              }
+            },
+            {
+              "interface_name": "cylinder<->exhaust",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            }
+          ],
+          "crankcase": {
+            "contributions": [
+              -0.0005220025484889703,
+              -0.00032625153027187703,
+              -0.0001631258130341142,
+              -0.0002936263995971714
+            ],
+            "assembled_rhs": [
+              -0.0005220025484889703,
+              -0.00032625153027187703,
+              -0.0001631258130341142,
+              -0.0002936263995971714
+            ]
+          },
+          "cylinder": {
+            "contributions": [
+              -0.0010497807271577077,
+              -0.0006561128287142121,
+              -0.00032805651068342065,
+              -0.0005905015907950712
+            ],
+            "assembled_rhs": [
+              -0.0010497807271577077,
+              -0.0006561128287142121,
+              -0.00032805651068342065,
+              -0.0005905015907950712
+            ]
+          }
+        }
+      },
+      {
+        "step_index": 3,
+        "stage_index": 1,
+        "interfaces": [
+          {
+            "stage_index": 1,
+            "interface_name": "intake<->crankcase",
+            "left_component": "intake",
+            "right_component": "crankcase",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "crankcase<->tr1",
+            "left_component": "crankcase",
+            "right_component": "tr1",
+            "gas_mass_flux": -0.0006525008087248497,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr1",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.6999999755310627,
+              "fuel": 0.19999997553106275,
+              "residual": 0.05000003262524975,
+              "burned": 0.050000016312624865
+            },
+            "species_fluxes": {
+              "fresh_air": -0.0004567505501413934,
+              "fuel": -0.0001305001457789686,
+              "residual": -3.262506172424433e-05,
+              "burned": -3.26250510802434e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "crankcase<->tr2",
+            "left_component": "crankcase",
+            "right_component": "tr2",
+            "gas_mass_flux": -0.0006525008087248497,
+            "physical_flow_direction": "right_to_left",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.10000007340681188,
+              "fuel": 0.2999999592184378,
+              "residual": 0.20000000815631241,
+              "burned": 0.3999999592184379
+            },
+            "species_fluxes": {
+              "fresh_air": -6.525012877048909e-05,
+              "fuel": -0.00019575021600745258,
+              "residual": -0.00013050016706697037,
+              "burned": -0.00026100029687993763
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "tr1<->cylinder",
+            "left_component": "tr1",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0013122254190523293,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr1",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.6999999755310627,
+              "fuel": 0.19999997553106275,
+              "residual": 0.05000003262524975,
+              "burned": 0.050000016312624865
+            },
+            "species_fluxes": {
+              "fresh_air": 0.000918557761227869,
+              "fuel": 0.0002624450517017044,
+              "residual": 6.561131376429848e-05,
+              "burned": 6.561129235845746e-05
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "tr2<->cylinder",
+            "left_component": "tr2",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0013122254190523293,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "tr2",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.10000007340681188,
+              "fuel": 0.2999999592184378,
+              "residual": 0.20000000815631241,
+              "burned": 0.3999999592184379
+            },
+            "species_fluxes": {
+              "fresh_air": 0.00013122263823151743,
+              "fuel": 0.00039366757220109624,
+              "residual": 0.0002624450945133863,
+              "burned": 0.0005248901141063293
+            },
+            "closed": false
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "cylinder<->exhaust",
+            "left_component": "cylinder",
+            "right_component": "exhaust",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          }
+        ],
+        "rhs": {
+          "stage_index": 1,
+          "interfaces": [
+            {
+              "interface_name": "intake<->crankcase",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr1",
+              "species_flux": {
+                "fresh_air": -0.0004567505469482136,
+                "fuel": -0.00013050014258578888,
+                "residual": -3.2625065981817246e-05,
+                "burned": -3.2625053209029854e-05
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr2",
+              "species_flux": {
+                "fresh_air": -6.525013835002816e-05,
+                "fuel": -0.00019575021068548643,
+                "residual": -0.00013050016813136362,
+                "burned": -0.00026100029155797145
+              }
+            },
+            {
+              "interface_name": "tr1<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.000918557754806158,
+                "fuel": 0.0002624450452799935,
+                "residual": 6.561132232657967e-05,
+                "burned": 6.561129663959805e-05
+              }
+            },
+            {
+              "interface_name": "tr2<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.00013122265749665013,
+                "fuel": 0.00039366756149824476,
+                "residual": 0.0002624450966539567,
+                "burned": 0.0005248901034034778
+              }
+            },
+            {
+              "interface_name": "cylinder<->exhaust",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            }
+          ],
+          "crankcase": {
+            "contributions": [
+              -0.0005220006852982418,
+              -0.00032625035327127534,
+              -0.00016312523411318088,
+              -0.0002936253447670013
+            ],
+            "assembled_rhs": [
+              -0.0005220006852982418,
+              -0.00032625035327127534,
+              -0.00016312523411318088,
+              -0.0002936253447670013
+            ]
+          },
+          "cylinder": {
+            "contributions": [
+              -0.0010497804123028082,
+              -0.0006561126067782383,
+              -0.00032805641898053637,
+              -0.0005905014000430758
+            ],
+            "assembled_rhs": [
+              -0.0010497804123028082,
+              -0.0006561126067782383,
+              -0.00032805641898053637,
+              -0.0005905014000430758
+            ]
+          }
+        }
+      }
+    ],
+    "counters": {
+      "fresh_delivery_TR1_trace": 3.543010194086732e-10,
+      "fresh_delivery_TR2_trace": 1.5746713044012423e-10,
+      "fresh_delivery_total_trace": 5.117681498487974e-10,
+      "fresh_delivery_TR1_counter": 3.543010155556241e-10,
+      "fresh_delivery_TR2_counter": 1.574671330088236e-10,
+      "fresh_delivery_total_counter": 5.117681485644477e-10,
+      "short_circuit_trace": 0.0,
+      "short_circuit_counter": 0.0
+    }
+  },
+  "f06": {
+    "summary": {
+      "initial": {
+        "gas_mass": 0.020003,
+        "fresh_air_mass": 0.0062506,
+        "fuel_mass": 0.0037503,
+        "residual_mass": 0.0050007,
+        "burned_mass": 0.0050014000000000005,
+        "species_sum": 0.020003,
+        "species_sum_minus_gas_mass": 0.0
+      },
+      "final": {
+        "gas_mass": 0.020002999999999993,
+        "fresh_air_mass": 0.006250599999999997,
+        "fuel_mass": 0.0037502999999999985,
+        "residual_mass": 0.005000699999999999,
+        "burned_mass": 0.005001399999999998,
+        "species_sum": 0.020002999999999993,
+        "species_sum_minus_gas_mass": 0.0
+      },
+      "external": [
+        -2.1535513601031394e-18,
+        -7.178504538352114e-19,
+        -1.4357009076704257e-18,
+        -2.871401816743338e-18
+      ],
+      "measured_change": [
+        -3.469446951953614e-18,
+        -1.3010426069826053e-18,
+        -8.673617379884035e-19,
+        -2.6020852139652106e-18
+      ],
+      "cumulative_residual": [
+        -1.3158955918504748e-18,
+        -5.831921531473939e-19,
+        5.683391696820222e-19,
+        2.693166027781272e-19
+      ],
+      "worst_per_step_residual": 8.673617379884035e-19
+    },
+    "trace": [
+      {
+        "step_index": 1,
+        "stage_index": 0,
+        "interfaces": [
+          {
+            "stage_index": 0,
+            "interface_name": "intake<->crankcase",
+            "left_component": "intake",
+            "right_component": "crankcase",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "crankcase<->tr1",
+            "left_component": "crankcase",
+            "right_component": "tr1",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "crankcase<->tr2",
+            "left_component": "crankcase",
+            "right_component": "tr2",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "tr1<->cylinder",
+            "left_component": "tr1",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "tr2<->cylinder",
+            "left_component": "tr2",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "cylinder<->exhaust",
+            "left_component": "cylinder",
+            "right_component": "exhaust",
+            "gas_mass_flux": 0.0041602038505807,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "cylinder",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.2,
+              "fuel": 0.2,
+              "residual": 0.3,
+              "burned": 0.3
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0008320407701161401,
+              "fuel": 0.0008320407701161401,
+              "residual": 0.00124806115517421,
+              "burned": 0.00124806115517421
+            },
+            "closed": false
+          }
+        ],
+        "rhs": {
+          "stage_index": 0,
+          "interfaces": [
+            {
+              "interface_name": "intake<->crankcase",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr1",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr2",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "tr1<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "tr2<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "cylinder<->exhaust",
+              "species_flux": {
+                "fresh_air": 0.00083204077011614,
+                "fuel": 0.00083204077011614,
+                "residual": 0.0012480611551742102,
+                "burned": 0.0012480611551742102
+              }
+            }
+          ],
+          "crankcase": {
+            "contributions": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "assembled_rhs": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "cylinder": {
+            "contributions": [
+              0.00083204077011614,
+              0.00083204077011614,
+              0.0012480611551742102,
+              0.0012480611551742102
+            ],
+            "assembled_rhs": [
+              0.00083204077011614,
+              0.00083204077011614,
+              0.0012480611551742102,
+              0.0012480611551742102
+            ]
+          }
+        }
+      },
+      {
+        "step_index": 1,
+        "stage_index": 1,
+        "interfaces": [
+          {
+            "stage_index": 1,
+            "interface_name": "intake<->crankcase",
+            "left_component": "intake",
+            "right_component": "crankcase",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "crankcase<->tr1",
+            "left_component": "crankcase",
+            "right_component": "tr1",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "crankcase<->tr2",
+            "left_component": "crankcase",
+            "right_component": "tr2",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "tr1<->cylinder",
+            "left_component": "tr1",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "tr2<->cylinder",
+            "left_component": "tr2",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "cylinder<->exhaust",
+            "left_component": "cylinder",
+            "right_component": "exhaust",
+            "gas_mass_flux": 0.004162203949993341,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "cylinder",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.19999999999999998,
+              "fuel": 0.19999999999999998,
+              "residual": 0.30000000000000004,
+              "burned": 0.30000000000000004
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0008324407899986681,
+              "fuel": 0.0008324407899986681,
+              "residual": 0.0012486611849980025,
+              "burned": 0.0012486611849980025
+            },
+            "closed": false
+          }
+        ],
+        "rhs": {
+          "stage_index": 1,
+          "interfaces": [
+            {
+              "interface_name": "intake<->crankcase",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr1",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr2",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "tr1<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "tr2<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "cylinder<->exhaust",
+              "species_flux": {
+                "fresh_air": 0.0008324407899986681,
+                "fuel": 0.0008324407899986681,
+                "residual": 0.0012486611849980025,
+                "burned": 0.0012486611849980025
+              }
+            }
+          ],
+          "crankcase": {
+            "contributions": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "assembled_rhs": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "cylinder": {
+            "contributions": [
+              0.0008324407899986681,
+              0.0008324407899986681,
+              0.0012486611849980025,
+              0.0012486611849980025
+            ],
+            "assembled_rhs": [
+              0.0008324407899986681,
+              0.0008324407899986681,
+              0.0012486611849980025,
+              0.0012486611849980025
+            ]
+          }
+        }
+      },
+      {
+        "step_index": 2,
+        "stage_index": 0,
+        "interfaces": [
+          {
+            "stage_index": 0,
+            "interface_name": "intake<->crankcase",
+            "left_component": "intake",
+            "right_component": "crankcase",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "crankcase<->tr1",
+            "left_component": "crankcase",
+            "right_component": "tr1",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "crankcase<->tr2",
+            "left_component": "crankcase",
+            "right_component": "tr2",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "tr1<->cylinder",
+            "left_component": "tr1",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "tr2<->cylinder",
+            "left_component": "tr2",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 0,
+            "interface_name": "cylinder<->exhaust",
+            "left_component": "cylinder",
+            "right_component": "exhaust",
+            "gas_mass_flux": 0.004162197996071051,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "cylinder",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.19999999999999998,
+              "fuel": 0.19999999999999998,
+              "residual": 0.30000000000000004,
+              "burned": 0.30000000000000004
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0008324395992142101,
+              "fuel": 0.0008324395992142101,
+              "residual": 0.0012486593988213154,
+              "burned": 0.0012486593988213154
+            },
+            "closed": false
+          }
+        ],
+        "rhs": {
+          "stage_index": 0,
+          "interfaces": [
+            {
+              "interface_name": "intake<->crankcase",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr1",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr2",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "tr1<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "tr2<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "cylinder<->exhaust",
+              "species_flux": {
+                "fresh_air": 0.0008324395992142101,
+                "fuel": 0.0008324395992142101,
+                "residual": 0.0012486593988213154,
+                "burned": 0.0012486593988213154
+              }
+            }
+          ],
+          "crankcase": {
+            "contributions": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "assembled_rhs": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "cylinder": {
+            "contributions": [
+              0.0008324395992142101,
+              0.0008324395992142101,
+              0.0012486593988213154,
+              0.0012486593988213154
+            ],
+            "assembled_rhs": [
+              0.0008324395992142101,
+              0.0008324395992142101,
+              0.0012486593988213154,
+              0.0012486593988213154
+            ]
+          }
+        }
+      },
+      {
+        "step_index": 2,
+        "stage_index": 1,
+        "interfaces": [
+          {
+            "stage_index": 1,
+            "interface_name": "intake<->crankcase",
+            "left_component": "intake",
+            "right_component": "crankcase",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "crankcase<->tr1",
+            "left_component": "crankcase",
+            "right_component": "tr1",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "crankcase<->tr2",
+            "left_component": "crankcase",
+            "right_component": "tr2",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "tr1<->cylinder",
+            "left_component": "tr1",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "tr2<->cylinder",
+            "left_component": "tr2",
+            "right_component": "cylinder",
+            "gas_mass_flux": 0.0,
+            "physical_flow_direction": "closed",
+            "donor_component": null,
+            "donor_mass": 0.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0,
+              "fuel": 0.0,
+              "residual": 0.0,
+              "burned": 0.0
+            },
+            "closed": true
+          },
+          {
+            "stage_index": 1,
+            "interface_name": "cylinder<->exhaust",
+            "left_component": "cylinder",
+            "right_component": "exhaust",
+            "gas_mass_flux": 0.004164178793438998,
+            "physical_flow_direction": "left_to_right",
+            "donor_component": "cylinder",
+            "donor_mass": 1.0,
+            "donor_species_fractions": {
+              "fresh_air": 0.19999999999999998,
+              "fuel": 0.19999999999999998,
+              "residual": 0.30000000000000004,
+              "burned": 0.30000000000000004
+            },
+            "species_fluxes": {
+              "fresh_air": 0.0008328357586877995,
+              "fuel": 0.0008328357586877995,
+              "residual": 0.0012492536380316996,
+              "burned": 0.0012492536380316996
+            },
+            "closed": false
+          }
+        ],
+        "rhs": {
+          "stage_index": 1,
+          "interfaces": [
+            {
+              "interface_name": "intake<->crankcase",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr1",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "crankcase<->tr2",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "tr1<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "tr2<->cylinder",
+              "species_flux": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              }
+            },
+            {
+              "interface_name": "cylinder<->exhaust",
+              "species_flux": {
+                "fresh_air": 0.0008328357586877994,
+                "fuel": 0.0008328357586877994,
+                "residual": 0.0012492536380316998,
+                "burned": 0.0012492536380316998
+              }
+            }
+          ],
+          "crankcase": {
+            "contributions": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "assembled_rhs": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "cylinder": {
+            "contributions": [
+              0.0008328357586877994,
+              0.0008328357586877994,
+              0.0012492536380316998,
+              0.0012492536380316998
+            ],
+            "assembled_rhs": [
+              0.0008328357586877994,
+              0.0008328357586877994,
+              0.0012492536380316998,
+              0.0012492536380316998
+            ]
+          }
+        }
+      }
+    ],
+    "counters": {
+      "fresh_delivery_TR1_trace": 0.0,
+      "fresh_delivery_TR2_trace": 0.0,
+      "fresh_delivery_total_trace": 0.0,
+      "fresh_delivery_TR1_counter": 0.0,
+      "fresh_delivery_TR2_counter": 0.0,
+      "fresh_delivery_total_counter": 0.0,
+      "short_circuit_trace": 3.329756918016818e-10,
+      "short_circuit_counter": 3.329756918016818e-10
+    },
+    "reverse": {
+      "trace": [
+        {
+          "step_index": 1,
+          "stage_index": 0,
+          "interfaces": [
+            {
+              "stage_index": 0,
+              "interface_name": "intake<->crankcase",
+              "left_component": "intake",
+              "right_component": "crankcase",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 0,
+              "interface_name": "crankcase<->tr1",
+              "left_component": "crankcase",
+              "right_component": "tr1",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 0,
+              "interface_name": "crankcase<->tr2",
+              "left_component": "crankcase",
+              "right_component": "tr2",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 0,
+              "interface_name": "tr1<->cylinder",
+              "left_component": "tr1",
+              "right_component": "cylinder",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 0,
+              "interface_name": "tr2<->cylinder",
+              "left_component": "tr2",
+              "right_component": "cylinder",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 0,
+              "interface_name": "cylinder<->exhaust",
+              "left_component": "cylinder",
+              "right_component": "exhaust",
+              "gas_mass_flux": -0.005078753532543026,
+              "physical_flow_direction": "right_to_left",
+              "donor_component": "exhaust",
+              "donor_mass": 1.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.1,
+                "fuel": 0.1,
+                "residual": 0.3,
+                "burned": 0.5
+              },
+              "species_fluxes": {
+                "fresh_air": -0.0005078753532543026,
+                "fuel": -0.0005078753532543026,
+                "residual": -0.0015236260597629079,
+                "burned": -0.002539376766271513
+              },
+              "closed": false
+            }
+          ],
+          "rhs": {
+            "stage_index": 0,
+            "interfaces": [
+              {
+                "interface_name": "intake<->crankcase",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "crankcase<->tr1",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "crankcase<->tr2",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "tr1<->cylinder",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "tr2<->cylinder",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "cylinder<->exhaust",
+                "species_flux": {
+                  "fresh_air": -0.0005080042891998298,
+                  "fuel": -0.0005080042891998298,
+                  "residual": -0.0015236260597629079,
+                  "burned": -0.0025391188943804585
+                }
+              }
+            ],
+            "crankcase": {
+              "contributions": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "assembled_rhs": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "cylinder": {
+              "contributions": [
+                -0.0005080042891998298,
+                -0.0005080042891998298,
+                -0.0015236260597629079,
+                -0.0025391188943804585
+              ],
+              "assembled_rhs": [
+                -0.0005080042891998298,
+                -0.0005080042891998298,
+                -0.0015236260597629079,
+                -0.0025391188943804585
+              ]
+            }
+          }
+        },
+        {
+          "step_index": 1,
+          "stage_index": 1,
+          "interfaces": [
+            {
+              "stage_index": 1,
+              "interface_name": "intake<->crankcase",
+              "left_component": "intake",
+              "right_component": "crankcase",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 1,
+              "interface_name": "crankcase<->tr1",
+              "left_component": "crankcase",
+              "right_component": "tr1",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 1,
+              "interface_name": "crankcase<->tr2",
+              "left_component": "crankcase",
+              "right_component": "tr2",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 1,
+              "interface_name": "tr1<->cylinder",
+              "left_component": "tr1",
+              "right_component": "cylinder",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 1,
+              "interface_name": "tr2<->cylinder",
+              "left_component": "tr2",
+              "right_component": "cylinder",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 1,
+              "interface_name": "cylinder<->exhaust",
+              "left_component": "cylinder",
+              "right_component": "exhaust",
+              "gas_mass_flux": -0.005079133406727189,
+              "physical_flow_direction": "right_to_left",
+              "donor_component": "exhaust",
+              "donor_mass": 1.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.10002538732086544,
+                "fuel": 0.10002538732086544,
+                "residual": 0.3,
+                "burned": 0.4999492253582691
+              },
+              "species_fluxes": {
+                "fresh_air": -0.0005080422862622339,
+                "fuel": -0.0005080422862622339,
+                "residual": -0.0015237400220181566,
+                "burned": -0.002539308812184564
+              },
+              "closed": false
+            }
+          ],
+          "rhs": {
+            "stage_index": 1,
+            "interfaces": [
+              {
+                "interface_name": "intake<->crankcase",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "crankcase<->tr1",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "crankcase<->tr2",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "tr1<->cylinder",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "tr2<->cylinder",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "cylinder<->exhaust",
+                "species_flux": {
+                  "fresh_air": -0.0005081717231118476,
+                  "fuel": -0.0005081711757562137,
+                  "residual": -0.0015237394746625225,
+                  "burned": -0.002539051033196605
+                }
+              }
+            ],
+            "crankcase": {
+              "contributions": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "assembled_rhs": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "cylinder": {
+              "contributions": [
+                -0.0005081717231118476,
+                -0.0005081711757562137,
+                -0.0015237394746625225,
+                -0.002539051033196605
+              ],
+              "assembled_rhs": [
+                -0.0005081717231118476,
+                -0.0005081711757562137,
+                -0.0015237394746625225,
+                -0.002539051033196605
+              ]
+            }
+          }
+        },
+        {
+          "step_index": 2,
+          "stage_index": 0,
+          "interfaces": [
+            {
+              "stage_index": 0,
+              "interface_name": "intake<->crankcase",
+              "left_component": "intake",
+              "right_component": "crankcase",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 0,
+              "interface_name": "crankcase<->tr1",
+              "left_component": "crankcase",
+              "right_component": "tr1",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 0,
+              "interface_name": "crankcase<->tr2",
+              "left_component": "crankcase",
+              "right_component": "tr2",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 0,
+              "interface_name": "tr1<->cylinder",
+              "left_component": "tr1",
+              "right_component": "cylinder",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 0,
+              "interface_name": "tr2<->cylinder",
+              "left_component": "tr2",
+              "right_component": "cylinder",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 0,
+              "interface_name": "cylinder<->exhaust",
+              "left_component": "cylinder",
+              "right_component": "exhaust",
+              "gas_mass_flux": -0.005079129329577283,
+              "physical_flow_direction": "right_to_left",
+              "donor_component": "exhaust",
+              "donor_mass": 1.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.10005087136297434,
+                "fuel": 0.10005076359741867,
+                "residual": 0.2999998922344443,
+                "burned": 0.49989847280516264
+              },
+              "species_fluxes": {
+                "fresh_air": -0.0005081713151894469,
+                "fuel": -0.0005081707678342523,
+                "residual": -0.0015237382515179902,
+                "burned": -0.0025390489950355933
+              },
+              "closed": false
+            }
+          ],
+          "rhs": {
+            "stage_index": 0,
+            "interfaces": [
+              {
+                "interface_name": "intake<->crankcase",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "crankcase<->tr1",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "crankcase<->tr2",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "tr1<->cylinder",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "tr2<->cylinder",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "cylinder<->exhaust",
+                "species_flux": {
+                  "fresh_air": -0.0005083006845910869,
+                  "fuel": -0.0005082995914299628,
+                  "residual": -0.0015237377057120607,
+                  "burned": -0.002538791347844173
+                }
+              }
+            ],
+            "crankcase": {
+              "contributions": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "assembled_rhs": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "cylinder": {
+              "contributions": [
+                -0.0005083006845910869,
+                -0.0005082995914299628,
+                -0.0015237377057120607,
+                -0.002538791347844173
+              ],
+              "assembled_rhs": [
+                -0.0005083006845910869,
+                -0.0005082995914299628,
+                -0.0015237377057120607,
+                -0.002538791347844173
+              ]
+            }
+          }
+        },
+        {
+          "step_index": 2,
+          "stage_index": 1,
+          "interfaces": [
+            {
+              "stage_index": 1,
+              "interface_name": "intake<->crankcase",
+              "left_component": "intake",
+              "right_component": "crankcase",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 1,
+              "interface_name": "crankcase<->tr1",
+              "left_component": "crankcase",
+              "right_component": "tr1",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 1,
+              "interface_name": "crankcase<->tr2",
+              "left_component": "crankcase",
+              "right_component": "tr2",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 1,
+              "interface_name": "tr1<->cylinder",
+              "left_component": "tr1",
+              "right_component": "cylinder",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 1,
+              "interface_name": "tr2<->cylinder",
+              "left_component": "tr2",
+              "right_component": "cylinder",
+              "gas_mass_flux": 0.0,
+              "physical_flow_direction": "closed",
+              "donor_component": null,
+              "donor_mass": 0.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "species_fluxes": {
+                "fresh_air": 0.0,
+                "fuel": 0.0,
+                "residual": 0.0,
+                "burned": 0.0
+              },
+              "closed": true
+            },
+            {
+              "stage_index": 1,
+              "interface_name": "cylinder<->exhaust",
+              "left_component": "cylinder",
+              "right_component": "exhaust",
+              "gas_mass_flux": -0.0050794997473987994,
+              "physical_flow_direction": "right_to_left",
+              "donor_component": "exhaust",
+              "donor_mass": 1.0,
+              "donor_species_fractions": {
+                "fresh_air": 0.10007634214610378,
+                "fuel": 0.10007612692001813,
+                "residual": 0.2999997847739143,
+                "burned": 0.49984774615996386
+              },
+              "species_fluxes": {
+                "fresh_air": -0.00050833775465173,
+                "fuel": -0.0005083366614108823,
+                "residual": -0.001523848830978792,
+                "burned": -0.002538976500357396
+              },
+              "closed": false
+            }
+          ],
+          "rhs": {
+            "stage_index": 1,
+            "interfaces": [
+              {
+                "interface_name": "intake<->crankcase",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "crankcase<->tr1",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "crankcase<->tr2",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "tr1<->cylinder",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "tr2<->cylinder",
+                "species_flux": {
+                  "fresh_air": 0.0,
+                  "fuel": 0.0,
+                  "residual": 0.0,
+                  "burned": 0.0
+                }
+              },
+              {
+                "interface_name": "cylinder<->exhaust",
+                "species_flux": {
+                  "fresh_air": -0.0005084676207661742,
+                  "fuel": -0.0005084654375915534,
+                  "residual": -0.0015238477410450212,
+                  "burned": -0.00253871894799605
+                }
+              }
+            ],
+            "crankcase": {
+              "contributions": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "assembled_rhs": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "cylinder": {
+              "contributions": [
+                -0.0005084676207661742,
+                -0.0005084654375915534,
+                -0.0015238477410450212,
+                -0.00253871894799605
+              ],
+              "assembled_rhs": [
+                -0.0005084676207661742,
+                -0.0005084654375915534,
+                -0.0015238477410450212,
+                -0.00253871894799605
+              ]
+            }
+          }
+        }
+      ],
+      "summary": {
+        "initial": {
+          "gas_mass": 0.020003,
+          "fresh_air_mass": 0.0062506,
+          "fuel_mass": 0.0037503,
+          "residual_mass": 0.0050007,
+          "burned_mass": 0.0050014000000000005,
+          "species_sum": 0.020003,
+          "species_sum_minus_gas_mass": 0.0
+        },
+        "final": {
+          "gas_mass": 0.02000300000000001,
+          "fresh_air_mass": 0.00625060000000001,
+          "fuel_mass": 0.0037503,
+          "residual_mass": 0.005000699999999999,
+          "burned_mass": 0.0050014,
+          "species_sum": 0.02000300000000001,
+          "species_sum_minus_gas_mass": 0.0
+        },
+        "external": [
+          1.0188138893418852e-17,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "measured_change": [
+          9.540979117872439e-18,
+          0.0,
+          -8.673617379884035e-19,
+          -8.673617379884035e-19
+        ],
+        "cumulative_residual": [
+          -6.471597755464129e-19,
+          0.0,
+          -8.673617379884035e-19,
+          -8.673617379884035e-19
+        ],
+        "worst_per_step_residual": 8.673617379884035e-19
+      },
+      "counters": {
+        "fresh_delivery_TR1_trace": 0.0,
+        "fresh_delivery_TR2_trace": 0.0,
+        "fresh_delivery_total_trace": 0.0,
+        "fresh_delivery_TR1_counter": 0.0,
+        "fresh_delivery_TR2_counter": 0.0,
+        "fresh_delivery_total_counter": 0.0,
+        "short_circuit_trace": 0.0,
+        "short_circuit_counter": 0.0
+      }
+    }
+  },
+  "f07": {
+    "summary": {
+      "initial": {
+        "gas_mass": 0.02053348780487805,
+        "fresh_air_mass": 0.0065688926829268295,
+        "fuel_mass": 0.0038210317073170733,
+        "residual_mass": 0.005089114634146342,
+        "burned_mass": 0.005054448780487805,
+        "species_sum": 0.02053348780487805,
+        "species_sum_minus_gas_mass": 0.0
+      },
+      "final": {
+        "gas_mass": 0.02053348780513136,
+        "fresh_air_mass": 0.006568892683180141,
+        "fuel_mass": 0.003821031707317073,
+        "residual_mass": 0.005089114634146341,
+        "burned_mass": 0.005054448780487804,
+        "species_sum": 0.020533487805131357,
+        "species_sum_minus_gas_mass": -3.469446951953614e-18
+      },
+      "external": [
+        2.533131205286625e-13,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "measured_change": [
+        2.533112608560373e-13,
+        -4.336808689942018e-19,
+        -8.673617379884035e-19,
+        -8.673617379884035e-19
+      ],
+      "cumulative_residual": [
+        -1.8596726252419776e-18,
+        -4.336808689942018e-19,
+        -8.673617379884035e-19,
+        -8.673617379884035e-19
+      ],
+      "worst_per_step_residual": 8.673617379884035e-19
+    },
+    "external_trace": [
+      {
+        "stage_index": 0,
+        "atmosphere_intake": {
+          "gas_mass_flux": 0.0,
+          "donor_component": "atmosphere",
+          "species_flux": {
+            "fresh_air": 0.0,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        },
+        "exhaust_atmosphere": {
+          "gas_mass_flux": 0.0,
+          "donor_component": "exhaust",
+          "species_flux": {
+            "fresh_air": 0.0,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        }
+      },
+      {
+        "stage_index": 1,
+        "atmosphere_intake": {
+          "gas_mass_flux": 2.0264982087961522e-07,
+          "donor_component": "atmosphere",
+          "species_flux": {
+            "fresh_air": 2.0264982087961522e-07,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        },
+        "exhaust_atmosphere": {
+          "gas_mass_flux": 0.0,
+          "donor_component": "exhaust",
+          "species_flux": {
+            "fresh_air": 0.0,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        }
+      },
+      {
+        "stage_index": 0,
+        "atmosphere_intake": {
+          "gas_mass_flux": 2.026501663253902e-07,
+          "donor_component": "atmosphere",
+          "species_flux": {
+            "fresh_air": 2.026501663253902e-07,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        },
+        "exhaust_atmosphere": {
+          "gas_mass_flux": 0.0,
+          "donor_component": "exhaust",
+          "species_flux": {
+            "fresh_air": 0.0,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        }
+      },
+      {
+        "stage_index": 1,
+        "atmosphere_intake": {
+          "gas_mass_flux": 4.0530031986588494e-07,
+          "donor_component": "atmosphere",
+          "species_flux": {
+            "fresh_air": 4.0530031986588494e-07,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        },
+        "exhaust_atmosphere": {
+          "gas_mass_flux": 0.0,
+          "donor_component": "exhaust",
+          "species_flux": {
+            "fresh_air": 0.0,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        }
+      },
+      {
+        "stage_index": 0,
+        "atmosphere_intake": {
+          "gas_mass_flux": 4.0530066536517585e-07,
+          "donor_component": "atmosphere",
+          "species_flux": {
+            "fresh_air": 4.0530066536517585e-07,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        },
+        "exhaust_atmosphere": {
+          "gas_mass_flux": 0.0,
+          "donor_component": "exhaust",
+          "species_flux": {
+            "fresh_air": 0.0,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        }
+      },
+      {
+        "stage_index": 1,
+        "atmosphere_intake": {
+          "gas_mass_flux": 6.079511515184624e-07,
+          "donor_component": "atmosphere",
+          "species_flux": {
+            "fresh_air": 6.079511515184624e-07,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        },
+        "exhaust_atmosphere": {
+          "gas_mass_flux": 0.0,
+          "donor_component": "exhaust",
+          "species_flux": {
+            "fresh_air": 0.0,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        }
+      },
+      {
+        "stage_index": 0,
+        "atmosphere_intake": {
+          "gas_mass_flux": 6.079514969642374e-07,
+          "donor_component": "atmosphere",
+          "species_flux": {
+            "fresh_air": 6.079514969642374e-07,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        },
+        "exhaust_atmosphere": {
+          "gas_mass_flux": 0.0,
+          "donor_component": "exhaust",
+          "species_flux": {
+            "fresh_air": 0.0,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        }
+      },
+      {
+        "stage_index": 1,
+        "atmosphere_intake": {
+          "gas_mass_flux": 8.106023157357439e-07,
+          "donor_component": "atmosphere",
+          "species_flux": {
+            "fresh_air": 8.106023157357439e-07,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        },
+        "exhaust_atmosphere": {
+          "gas_mass_flux": 0.0,
+          "donor_component": "exhaust",
+          "species_flux": {
+            "fresh_air": 0.0,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        }
+      },
+      {
+        "stage_index": 0,
+        "atmosphere_intake": {
+          "gas_mass_flux": 8.106026612350348e-07,
+          "donor_component": "atmosphere",
+          "species_flux": {
+            "fresh_air": 8.106026612350348e-07,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        },
+        "exhaust_atmosphere": {
+          "gas_mass_flux": 0.0,
+          "donor_component": "exhaust",
+          "species_flux": {
+            "fresh_air": 0.0,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        }
+      },
+      {
+        "stage_index": 1,
+        "atmosphere_intake": {
+          "gas_mass_flux": 1.0132538126837058e-06,
+          "donor_component": "atmosphere",
+          "species_flux": {
+            "fresh_air": 1.0132538126837058e-06,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        },
+        "exhaust_atmosphere": {
+          "gas_mass_flux": 0.0,
+          "donor_component": "exhaust",
+          "species_flux": {
+            "fresh_air": 0.0,
+            "fuel": 0.0,
+            "residual": 0.0,
+            "burned": 0.0
+          }
+        }
+      }
+    ],
+    "worst_local_species_sum_error": 1.772318331590833e-10,
+    "worst_local_species_sum_location": [
+      "crankcase",
+      0
+    ],
+    "gas_mass_initial": 0.02053348780487805,
+    "gas_mass_final": 0.02053348780513136,
+    "gas_mass_residual": -1.8596726252419776e-18
+  },
+  "tests": "campaign executed by repository Python"
+}

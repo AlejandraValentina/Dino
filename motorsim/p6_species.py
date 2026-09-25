@@ -155,6 +155,8 @@ class P6IntegratedSystem:
         self.fresh_delivered_tr2 = 0.0
         self.fresh_short_circuit = 0.0
         self._stage_active = False
+        self.verification_trace = []
+        self.external_flux_trace = []
 
     def _default_state(self):
         fresh = atmospheric_species()
@@ -195,6 +197,15 @@ class P6IntegratedSystem:
         self.species_mass = self._mass_state_from_views()
         self._refresh_species_views()
 
+    def _views_match_authoritative_state(self):
+        for name, cells in self.species.items():
+            for view, mass in zip(cells, self.species_mass[name]):
+                total = fsum(mass)
+                expected = tuple(x / total for x in mass) if total else (0.0,) * 4
+                if any(abs(a - b) > 1e-15 for a, b in zip(view, expected)):
+                    return False
+        return True
+
     def validate(self):
         for cells in self.species_mass.values():
             for cell in cells: validate_species(cell, fsum(cell))
@@ -209,14 +220,17 @@ class P6IntegratedSystem:
         """Advance gas and species with stage snapshots from the same P5-C RHS."""
         # Species are updated from the exact stage interface traces exposed by
         # P5-C; no independent gas flux solve or legacy mY state is evolved.
-        self._sync_manual_views()
+        if not self._views_match_authoritative_state():
+            self._sync_manual_views()
         before = self._species_totals()
         record = self.gas.step(dt, angle=angle)
         # Consume both stage traces.  Each stage reads the currently updated
         # authoritative species state; no legacy scalar is cached.
         self.stage_species = []
-        self.verification_trace = []
-        self.external_flux_trace = []
+        if not hasattr(self, 'verification_trace'):
+            self.verification_trace = []
+        if not hasattr(self, 'external_flux_trace'):
+            self.external_flux_trace = []
         self._stage_active = True
         for stage, interfaces in enumerate(record['core_interfaces']):
             before_stage = {k: [tuple(x) for x in v] for k, v in self.species.items()}
@@ -240,10 +254,11 @@ class P6IntegratedSystem:
                 self._exchange(flux[0], left_name, right_name, dt * .5)
             if stage < len(record.get('stage_interfaces', ())):
                 pflux = record['stage_interfaces'][stage][2]
+                physical_exhaust_flux = tuple(-x for x in pflux)
                 if self.capture_trace:
                     stage_trace.append(self._trace_interface(stage, 'cylinder', 'exhaust',
-                                                             pflux, before_stage))
-                self._exchange(pflux[0], 'cylinder', 'exhaust', dt * .5)
+                                                             physical_exhaust_flux, before_stage))
+                self._exchange(physical_exhaust_flux[0], 'cylinder', 'exhaust', dt * .5)
             self._boundary_exchange(record['stage_external'][stage][0], 'intake',
                                     dt * .5, incoming=True)
             self._boundary_exchange(record.get('stage_exhaust_external',
@@ -251,7 +266,8 @@ class P6IntegratedSystem:
                                     'exhaust', dt * .5, incoming=False)
             if self.capture_trace:
                 rhs_trace = self._stage_rhs_trace(
-                    stage, interfaces, record['stage_interfaces'][stage][2], before_stage)
+                    stage, interfaces, tuple(-x for x in record['stage_interfaces'][stage][2]),
+                    before_stage)
                 self.verification_trace.append({"step_index": len(getattr(self.gas, 'history', [])),
                                                 "stage_index": stage, "interfaces": stage_trace,
                                                 "rhs": rhs_trace})
@@ -278,7 +294,8 @@ class P6IntegratedSystem:
         # exhaust outlet in the stage port trace; both are already resolved.
         ext = record.get('stage_external', ((0.0, 0.0, 0.0, 0.0),
                                             (0.0, 0.0, 0.0, 0.0)))[stage]
-        exhaust = record['stage_interfaces'][stage][2]
+        exhaust = record.get('stage_exhaust_external',
+                             ((0.0, 0.0, 0.0, 0.0),) * 2)[stage]
         atmospheric = tuple(ext)
         atmosphere_state = atmospheric_species()
         intake_donor = state['intake'][0] if atmospheric[0] < 0 else atmosphere_state
