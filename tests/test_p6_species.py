@@ -2,7 +2,9 @@ import pytest
 
 from motorsim.p6_species import (SPECIES, P6SpeciesLedger, SpeciesChamber,
                                   advect_species, atmospheric_species,
-                                  donor_species, validate_species)
+                                  donor_species, validate_species,
+                                  legacy_to_species, legacy_fresh_mass,
+                                  scavenging_metrics)
 
 
 def test_four_species_sum_and_atmosphere():
@@ -36,3 +38,16 @@ def test_chamber_species_admissibility():
     chamber = SpeciesChamber(1.0, (.8, .1, .1, 0.0))
     chamber.apply((.1, 0.0, 0.0, 0.0), .1)
     assert sum(chamber.species) == pytest.approx(chamber.mass)
+
+
+def test_legacy_mapping_is_deterministic_and_derived():
+    state = legacy_to_species(2.0, .25)
+    assert state == (0.5, 0.0, 1.5, 0.0)
+    assert legacy_fresh_mass(state) == pytest.approx(.5)
+
+
+def test_scavenging_metrics_do_not_count_reverse_exhaust():
+    metrics = scavenging_metrics((.4, .1, .3, .2), transfer_fresh=.2,
+                                 exhaust_outward_mass=-.5)
+    assert metrics['fresh_short_circuit_mass'] == 0.0
+    assert metrics['cylinder_fresh_mass'] == pytest.approx(.5)

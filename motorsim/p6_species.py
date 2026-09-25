@@ -65,6 +65,36 @@ def atmospheric_species():
     return (1.0, 0.0, 0.0, 0.0)
 
 
+def legacy_to_species(mass, fresh_fraction=1.0):
+    """Deterministic P5 compatibility mapping; no fabricated fuel history."""
+    if mass < 0 or not 0.0 <= fresh_fraction <= 1.0:
+        raise ValueError("invalid legacy composition")
+    fresh = mass * fresh_fraction
+    return (fresh, 0.0, mass - fresh, 0.0)
+
+
+def legacy_fresh_mass(species):
+    validate_species(species, fsum(species))
+    return species[0] + species[1]
+
+
+def scavenging_metrics(cylinder_species, transfer_fresh=0.0,
+                       exhaust_outward_mass=0.0, donor_species_state=None):
+    total = fsum(cylinder_species)
+    fresh = legacy_fresh_mass(cylinder_species)
+    donor = donor_species_state if donor_species_state is not None else cylinder_species
+    fresh_fraction_donor = legacy_fresh_mass(donor) / fsum(donor) if fsum(donor) else 0.0
+    short = max(0.0, exhaust_outward_mass) * fresh_fraction_donor
+    return {
+        "cylinder_fresh_mass": fresh,
+        "cylinder_fresh_fraction": fresh / total if total else 0.0,
+        "cylinder_residual_mass": cylinder_species[2],
+        "cylinder_burned_mass": cylinder_species[3],
+        "fresh_mass_delivered": max(0.0, transfer_fresh),
+        "fresh_short_circuit_mass": short,
+    }
+
+
 class P6SpeciesLedger:
     """Independent global species inventory and external exchange ledger."""
     def __init__(self, components):
