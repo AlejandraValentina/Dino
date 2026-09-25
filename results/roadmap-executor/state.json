@@ -1,10 +1,10 @@
 {
-  "current_phase": "P5_C",
-  "current_subphase": "P6",
+  "current_phase": "P6",
+  "current_subphase": "P6-A",
   "base_commit": "854e59e",
   "latest_commit": "pending",
   "worktree_checkpoint": "P5B-14 complete fixture and gate state committed locally",
-  "classification": "P5_C_INTEGRATED_GASDYNAMIC_VERIFIED_CONDITIONAL",
+  "classification": "P6_IMPLEMENTATION_IN_PROGRESS_CONDITIONAL",
   "attempt": 0,
   "gates": {
     "implementation": "PASS",
@@ -16,10 +16,11 @@
     "determinism": "PASS",
     "causality": "PASS",
     "backflow": "PENDING",
-    "stage_coherent_rhs": "PASS"
+    "stage_coherent_rhs": "PASS",
+    "species_unit": "PASS"
   },
   "blockers": [
-    "P4 remains BLOCKED / NOT_GRANTED; P5 evidence conditional"
+    "P4 remains BLOCKED / NOT_GRANTED; all P6 evidence conditional"
   ],
   "dependencies": {
     "P4": "UNRESOLVED",
@@ -27,5 +28,5 @@
   },
   "started_at": "2026-09-23T16:18:57.340428+00:00",
   "completed_at": "2026-09-23T16:18:57.340428+00:00",
-  "next_action": "Do not begin P6 in this invocation"
+  "next_action": "Integrate four-species state with P5-C stages and verify full ledgers"
 }

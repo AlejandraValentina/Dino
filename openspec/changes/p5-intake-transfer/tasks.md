@@ -24,3 +24,4 @@
 - [x] Relevant P5-A/P5-B/P3 coupling/P4 exhaust focal regressions: 59 passed.
 - [x] P5-C resolved causal front: dominant positive dp/dt, predeclared windows, CFL 0.2/0.4 ordering PASS; precursor retained diagnostically.
 - [x] P5-C conditional closure evidence recorded in `results/p5c-conditional-20260924/causal-front-20260924.json`.
+- [ ] P6 four-species conservative transport and scavenging accounting.
