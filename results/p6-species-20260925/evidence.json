@@ -1,0 +1,21 @@
+{
+  "classification":"P6_IMPLEMENTATION_IN_PROGRESS_CONDITIONAL",
+  "HEAD":"eaaf4e8",
+  "ssprk2_species":"PARTIAL companion integration; full stage-authoritative state pending",
+  "P6_F01":"unit primitive PASS",
+  "P6_F02":"unit transport PASS",
+  "P6_F03":"unit donor/shared-flux PASS",
+  "P6_F04":"unit reverse donor PASS; integrated heterogeneous fixture pending",
+  "P6_F05":"PENDING",
+  "P6_F06":"primitive PASS; integrated campaign pending",
+  "P6_F07":"PENDING",
+  "P6_F08":"PENDING",
+  "P6_F09":"PENDING",
+  "legacy_mY_derived":"PASS",
+  "regression_test_count":69,
+  "openspec_strict":true,
+  "P4_status":"BLOCKED / NOT_GRANTED",
+  "dependency":"CONDITIONAL_ON_P4",
+  "experimental_validation":"NOT_PERFORMED",
+  "independent_review":"INDEPENDENT_REVIEW_PENDING"
+}

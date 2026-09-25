@@ -1,6 +1,6 @@
 {
   "current_phase": "P6",
-  "current_subphase": "P6-B",
+  "current_subphase": "P6-C",
   "base_commit": "854e59e",
   "latest_commit": "pending",
   "worktree_checkpoint": "P5B-14 complete fixture and gate state committed locally",
@@ -18,7 +18,7 @@
     "backflow": "PENDING",
     "stage_coherent_rhs": "PASS",
     "species_unit": "PASS",
-    "species_stage_coherent": "PASS"
+    "species_stage_coherent": "PARTIAL"
   },
   "blockers": [
     "P4 remains BLOCKED / NOT_GRANTED; all P6 evidence conditional"
@@ -29,5 +29,5 @@
   },
   "started_at": "2026-09-23T16:18:57.340428+00:00",
   "completed_at": "2026-09-23T16:18:57.340428+00:00",
-  "next_action": "Complete P6 fixture bank and full species ledgers"
+  "next_action": "Complete full-topology species state and independent four-species ledgers"
 }
