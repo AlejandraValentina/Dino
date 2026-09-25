@@ -155,6 +155,7 @@ class P6IntegratedSystem:
         self.fresh_delivered_tr2 = 0.0
         self.fresh_short_circuit = 0.0
         self._stage_active = False
+        self._count_transport = True
         self.verification_trace = []
         self.external_flux_trace = []
 
@@ -231,16 +232,19 @@ class P6IntegratedSystem:
             self.verification_trace = []
         if not hasattr(self, 'external_flux_trace'):
             self.external_flux_trace = []
+        trace_start = len(self.verification_trace)
+        species_q0 = {k: [tuple(x) for x in v] for k, v in self.species_mass.items()}
+        self._count_transport = False
         self._stage_active = True
         for stage, interfaces in enumerate(record['core_interfaces']):
             before_stage = {k: [tuple(x) for x in v] for k, v in self.species.items()}
             before_mass_stage = {k: [tuple(x) for x in v] for k, v in self.species_mass.items()}
             face_groups = record.get('stage_face_fluxes', ((), ()))[stage]
             for component, faces in zip(('intake', 'tr1', 'tr2'), face_groups):
-                self._transport_internal_faces(component, faces, dt * .5)
+                self._transport_internal_faces(component, faces, dt)
             self._transport_internal_faces('exhaust',
                                            record.get('stage_exhaust_faces', ((), ()))[stage],
-                                           dt * .5)
+                                           dt)
             interface_specs = ((interfaces[0], 'intake', 'crankcase'),
                                (interfaces[1], 'crankcase', 'tr1'),
                                                  (interfaces[2], 'crankcase', 'tr2'),
@@ -251,19 +255,19 @@ class P6IntegratedSystem:
                 if self.capture_trace:
                     stage_trace.append(self._trace_interface(stage, left_name, right_name,
                                                              flux, before_stage))
-                self._exchange(flux[0], left_name, right_name, dt * .5)
+                self._exchange(flux[0], left_name, right_name, dt)
             if stage < len(record.get('stage_interfaces', ())):
                 pflux = record['stage_interfaces'][stage][2]
                 physical_exhaust_flux = tuple(-x for x in pflux)
                 if self.capture_trace:
                     stage_trace.append(self._trace_interface(stage, 'cylinder', 'exhaust',
                                                              physical_exhaust_flux, before_stage))
-                self._exchange(physical_exhaust_flux[0], 'cylinder', 'exhaust', dt * .5)
+                self._exchange(physical_exhaust_flux[0], 'cylinder', 'exhaust', dt)
             self._boundary_exchange(record['stage_external'][stage][0], 'intake',
-                                    dt * .5, incoming=True)
+                                    dt, incoming=True)
             self._boundary_exchange(record.get('stage_exhaust_external',
                                                ((0.0, 0.0, 0.0, 0.0),) * 2)[stage][0],
-                                    'exhaust', dt * .5, incoming=False)
+                                    'exhaust', dt, incoming=False)
             if self.capture_trace:
                 rhs_trace = self._stage_rhs_trace(
                     stage, interfaces, tuple(-x for x in record['stage_interfaces'][stage][2]),
@@ -278,8 +282,29 @@ class P6IntegratedSystem:
                                        'species_mass_before': before_mass_stage,
                                        'species_mass_after': {k: [tuple(x) for x in v]
                                                               for k, v in self.species_mass.items()}})
+            if stage == 0:
+                species_q1 = {k: [tuple(x) for x in v] for k, v in self.species_mass.items()}
+            else:
+                species_q2 = {k: [tuple(x) for x in v] for k, v in self.species_mass.items()}
+        self.species_mass = {k: [tuple(0.5 * (a + c)
+                                      for a, c in zip(species_q0[k][i], species_q2[k][i]))
+                               for i in range(len(species_q0[k]))]
+                             for k in species_q0}
+        self._refresh_species_views()
+        for trace in self.verification_trace[trace_start:]:
+            for item in trace['interfaces']:
+                value = item['gas_mass_flux'] * sum(item['donor_species_fractions'][name]
+                                                   for name in ('fresh_air', 'fuel'))
+                if item['interface_name'] == 'tr1<->cylinder' and value > 0:
+                    self.fresh_delivered_tr1 += 0.5 * dt * value
+                if item['interface_name'] == 'tr2<->cylinder' and value > 0:
+                    self.fresh_delivered_tr2 += 0.5 * dt * value
+                if item['interface_name'] == 'cylinder<->exhaust' and value > 0:
+                    self.fresh_short_circuit += 0.5 * dt * value
+        self.fresh_delivered = self.fresh_delivered_tr1 + self.fresh_delivered_tr2
         self.validate()
         self._stage_active = False
+        self._count_transport = True
         after = self._species_totals()
         return {'gas': record, 'species_initial': before,
                 'species_final': after, 'legacy_fresh_cylinder': self.derived_legacy_fresh('cylinder'),
@@ -452,14 +477,14 @@ class P6IntegratedSystem:
         receiver[0] = validate_species(tuple(a+b for a,b in zip(receiver[0], dm)),
                                         fsum(receiver[0])+sum(dm))
         self._refresh_species_views()
-        if left in ('tr1', 'tr2') and right == 'cylinder' and mass_flux > 0:
+        if self._count_transport and left in ('tr1', 'tr2') and right == 'cylinder' and mass_flux > 0:
             fresh = sum(dm[:2])
             self.fresh_delivered += fresh
             if left == 'tr1':
                 self.fresh_delivered_tr1 += fresh
             else:
                 self.fresh_delivered_tr2 += fresh
-        if left == 'cylinder' and right == 'exhaust' and mass_flux > 0:
+        if self._count_transport and left == 'cylinder' and right == 'exhaust' and mass_flux > 0:
             self.fresh_short_circuit += sum(dm[:2])
 
     def snapshot(self):
