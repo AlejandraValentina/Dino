@@ -6,11 +6,11 @@
   "P6_F02": "unit transport PASS",
   "P6_F03": "unit donor/shared-flux PASS",
   "P6_F04": "unit reverse donor PASS; integrated heterogeneous fixture pending",
-  "P6_F05": "PARTIAL: two transfer stage traces available; heterogeneous integrated evidence pending",
-  "P6_F06": "PARTIAL: short-circuit primitive and reverse exclusion unit verified",
-  "P6_F07": "PENDING nontrivial full-topology species campaign",
-  "P6_F08": "PASS bounded composition checkpoint/replay fixture",
-  "P6_F09": "PASS deterministic bounded replay",
+  "P6_F05": "PASS bounded heterogeneous donor distinction; full physical campaign pending",
+  "P6_F06": "PASS donor/scavenging primitive and reverse exclusion; full physical campaign pending",
+  "P6_F07": "PENDING nontrivial full-topology campaign",
+  "P6_F08": "PASS referenced 7c1a205",
+  "P6_F09": "PASS referenced 7c1a205",
   "legacy_mY_derived": "PASS",
   "regression_test_count": 75,
   "openspec_strict": true,
@@ -21,5 +21,8 @@
   "stage2_donor_state": "PASS",
   "restart": "PASS bounded species+gas snapshot replay",
   "determinism": "PASS bounded replay",
-  "species_sum_mass_error": "PENDING full topology scaling"
+  "species_sum_mass_error": "PENDING scaled full-topology state",
+  "fresh_delivery_TR1": "PENDING physical stage campaign",
+  "fresh_delivery_TR2": "PENDING physical stage campaign",
+  "short_circuit": "PENDING physical stage campaign"
 }
