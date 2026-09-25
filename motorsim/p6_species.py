@@ -221,6 +221,12 @@ class P6IntegratedSystem:
         for stage, interfaces in enumerate(record['core_interfaces']):
             before_stage = {k: [tuple(x) for x in v] for k, v in self.species.items()}
             before_mass_stage = {k: [tuple(x) for x in v] for k, v in self.species_mass.items()}
+            face_groups = record.get('stage_face_fluxes', ((), ()))[stage]
+            for component, faces in zip(('intake', 'tr1', 'tr2'), face_groups):
+                self._transport_internal_faces(component, faces, dt * .5)
+            self._transport_internal_faces('exhaust',
+                                           record.get('stage_exhaust_faces', ((), ()))[stage],
+                                           dt * .5)
             interface_specs = ((interfaces[0], 'intake', 'crankcase'),
                                (interfaces[1], 'crankcase', 'tr1'),
                                                  (interfaces[2], 'crankcase', 'tr2'),
@@ -301,6 +307,26 @@ class P6IntegratedSystem:
         delta = tuple(dt * value for value in flux)
         target[index] = validate_species(tuple(a + b for a, b in zip(current, delta)),
                                          fsum(current) + sum(delta))
+        self._refresh_species_views()
+
+    def _transport_internal_faces(self, component, faces, dt):
+        cells = self.species_mass[component]
+        for index in range(1, len(faces) - 1):
+            mass_flux = float(faces[index][0])
+            if mass_flux == 0.0:
+                continue
+            donor_index = index - 1 if mass_flux > 0 else index
+            donor = cells[donor_index]
+            total = fsum(donor)
+            fractions = tuple(x / total for x in donor) if total else (0.0,) * 4
+            species_flux = tuple(mass_flux * x for x in fractions)
+            delta = tuple(dt * x for x in species_flux)
+            cells[index - 1] = validate_species(
+                tuple(a - b for a, b in zip(cells[index - 1], delta)),
+                fsum(cells[index - 1]) - sum(delta))
+            cells[index] = validate_species(
+                tuple(a + b for a, b in zip(cells[index], delta)),
+                fsum(cells[index]) + sum(delta))
         self._refresh_species_views()
 
     def _trace_interface(self, stage, left_name, right_name, flux, state):

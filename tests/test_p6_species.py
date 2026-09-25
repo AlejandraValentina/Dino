@@ -156,3 +156,19 @@ def test_conservative_species_mass_is_authoritative_through_step():
     inventory = system.inventory_snapshot()['global']
     assert inventory['species_sum'] == pytest.approx(inventory['gas_mass'])
     assert all(sum(cell) >= 0.0 for cells in system.species_mass.values() for cell in cells)
+
+
+def test_multicell_internal_species_transport_conserves_each_species():
+    system = P6IntegratedSystem(make_p5c_fixture(cells=3, port_area=0.0),
+                                capture_trace=True)
+    system.species['tr1'][:] = [(.8, .1, .1, 0.0), (.4, .2, .2, .2),
+                                 (.1, .2, .3, .4)]
+    system.species['tr2'][:] = [(.1, .3, .2, .4), (.2, .2, .3, .3),
+                                 (.7, .1, .1, .1)]
+    system.step(1e-7, angle=150.0)
+    before = system._species_totals()
+    for _ in range(4):
+        system.step(1e-7, angle=150.0)
+    after = system._species_totals()
+    assert after == pytest.approx(before, abs=1e-15)
+    assert system.inventory_snapshot()['global']['species_sum_minus_gas_mass'] == pytest.approx(0.0)

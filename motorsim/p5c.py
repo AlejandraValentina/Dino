@@ -121,18 +121,19 @@ class IntegratedP5C:
         rhs = tuple(tuple(-(faces[i + 1][k] - faces[i][k]) /
                           self.exhaust_mesh.volumes[i] for k in range(4))
                     for i in range(len(q)))
-        return rhs, face, faces[-1]
+        return rhs, face, faces[-1], tuple(faces)
 
     def _stage_rhs(self, state):
         core_state = state[:-1]
         core_rhs, trace = self.core._rhs(core_state, self.angle)
-        ex_rhs, port, external = self._exhaust_rhs(state[-1], state[1], 0.0)
+        ex_rhs, port, external, exhaust_faces = self._exhaust_rhs(state[-1], state[1], 0.0)
         # One cylinder RHS: P5-B TR1/TR2 terms plus this same exhaust flux.
         cyl = core_rhs[1]
         cyl = (cyl[0] - port['flux'][0],
                cyl[1] - port['flux'][2], cyl[2] - port['flux'][3])
         return (core_rhs[0], cyl, core_rhs[2], core_rhs[3], core_rhs[4], ex_rhs), {
             'core': trace, 'port': port, 'external': external,
+            'exhaust_faces': exhaust_faces,
             'cylinder_rhs': cyl, 'transfer_rhs': (core_rhs[1],),
             'cylinder_interfaces': (trace['interfaces'][3], trace['interfaces'][4],
                                     tuple(-x for x in port['flux'])),
@@ -201,8 +202,10 @@ class IntegratedP5C:
                   "stage_rhs": (t0['cylinder_rhs'], t1['cylinder_rhs']),
                   "stage_interfaces": (t0['cylinder_interfaces'], t1['cylinder_interfaces']),
                   "core_interfaces": (t0['core']['interfaces'], t1['core']['interfaces']),
+                  "stage_face_fluxes": (t0['core']['face_fluxes'], t1['core']['face_fluxes']),
                   "stage_external": (t0['core']['external'], t1['core']['external']),
                   "stage_exhaust_external": (t0['external'], t1['external']),
+                  "stage_exhaust_faces": (t0['exhaust_faces'], t1['exhaust_faces']),
                   "stage_work_rates": (t0['core']['work_rates'], t1['core']['work_rates']),
                   "totals": self.totals(), "dependency": self.dependency_status}
         self._last_external = {"mass": 0.5*(t0['core']['external'][0] + t1['core']['external'][0])*dt,
