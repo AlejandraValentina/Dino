@@ -1,6 +1,8 @@
 {
   "classification": "P6_IMPLEMENTATION_IN_PROGRESS_CONDITIONAL",
-  "HEAD": "eaaf4e8",
+  "HEAD": "be01937",
+  "environment_python": "Python 3.11.9 (.venv)",
+  "environment_pytest": "pytest 9.1.1",
   "ssprk2_species": "two stage traces consumed with current authoritative species state",
   "P6_F01": "unit primitive PASS",
   "P6_F02": "unit transport PASS",
@@ -13,6 +15,7 @@
   "P6_F09": "PASS referenced 7c1a205",
   "legacy_mY_derived": "PASS",
   "regression_test_count": 75,
+  "environment_smoke": "PASS: P6 10 tests; P5-B/P5-C integrated 47 tests",
   "openspec_strict": true,
   "P4_status": "BLOCKED / NOT_GRANTED",
   "dependency": "CONDITIONAL_ON_P4",
