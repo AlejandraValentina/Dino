@@ -92,3 +92,34 @@ def test_p6_heterogeneous_transfer_donors_and_scavenging_counter():
     tr2_after = tuple(system.species['cylinder'][0])
     assert tr1_after != tr2_after
     assert system.validate()
+
+
+def test_verification_trace_is_optional_and_shared_flux_consistent():
+    off = P6IntegratedSystem(make_p5c_fixture(port_area=0.0))
+    off.step(1e-7)
+    assert off.verification_trace == []
+
+    on = P6IntegratedSystem(make_p5c_fixture(port_area=0.0), capture_trace=True)
+    on.step(1e-7)
+    assert len(on.verification_trace) == 2
+    for stage in on.verification_trace:
+        for item in stage['interfaces']:
+            assert sum(item['species_fluxes'].values()) == pytest.approx(
+                item['gas_mass_flux'])
+            if item['closed']:
+                assert item['gas_mass_flux'] == 0.0
+                assert all(value == 0.0 for value in item['species_fluxes'].values())
+
+
+def test_verification_trace_donor_follows_flow_direction():
+    system = P6IntegratedSystem(make_p5c_fixture(port_area=0.0), capture_trace=True)
+    system.species['tr1'][0] = (.1, .2, .3, .4)
+    system.step(1e-7)
+    for stage in system.verification_trace:
+        for item in stage['interfaces']:
+            if item['gas_mass_flux'] > 0:
+                assert item['donor_component'] == item['left_component']
+            elif item['gas_mass_flux'] < 0:
+                assert item['donor_component'] == item['right_component']
+            else:
+                assert item['donor_component'] is None

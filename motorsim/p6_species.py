@@ -142,12 +142,15 @@ class P6IntegratedSystem:
     keeps authoritative species masses and evaluates donor fluxes from each
     stage trace before the corresponding gas stage is installed.
     """
-    def __init__(self, gas_system, *, component_species=None):
+    def __init__(self, gas_system, *, component_species=None, capture_trace=False):
         self.gas = gas_system
+        self.capture_trace = bool(capture_trace)
         self.species = component_species or self._default_state()
         self._initial = self._species_totals()
         self._external = [0.0] * 4
         self.fresh_delivered = 0.0
+        self.fresh_delivered_tr1 = 0.0
+        self.fresh_delivered_tr2 = 0.0
         self.fresh_short_circuit = 0.0
 
     def _default_state(self):
@@ -182,16 +185,29 @@ class P6IntegratedSystem:
         # Consume both stage traces.  Each stage reads the currently updated
         # authoritative species state; no legacy scalar is cached.
         self.stage_species = []
+        self.verification_trace = []
         for stage, interfaces in enumerate(record['core_interfaces']):
             before_stage = {k: [tuple(x) for x in v] for k, v in self.species.items()}
-            for flux, left_name, right_name in ((interfaces[1], 'crankcase', 'tr1'),
+            interface_specs = ((interfaces[0], 'intake', 'crankcase'),
+                               (interfaces[1], 'crankcase', 'tr1'),
                                                  (interfaces[2], 'crankcase', 'tr2'),
                                                  (interfaces[3], 'tr1', 'cylinder'),
-                                                 (interfaces[4], 'tr2', 'cylinder')):
+                                                 (interfaces[4], 'tr2', 'cylinder'))
+            stage_trace = []
+            for flux, left_name, right_name in interface_specs:
+                if self.capture_trace:
+                    stage_trace.append(self._trace_interface(stage, left_name, right_name,
+                                                             flux, before_stage))
                 self._exchange(flux[0], left_name, right_name, dt * .5)
             if stage < len(record.get('stage_interfaces', ())):
                 pflux = record['stage_interfaces'][stage][2]
+                if self.capture_trace:
+                    stage_trace.append(self._trace_interface(stage, 'cylinder', 'exhaust',
+                                                             pflux, before_stage))
                 self._exchange(pflux[0], 'cylinder', 'exhaust', dt * .5)
+            if self.capture_trace:
+                self.verification_trace.append({"step_index": len(getattr(self.gas, 'history', [])),
+                                                "stage_index": stage, "interfaces": stage_trace})
             self.stage_species.append({'before': before_stage,
                                        'after': {k: [tuple(x) for x in v]
                                                  for k, v in self.species.items()}})
@@ -200,7 +216,26 @@ class P6IntegratedSystem:
         return {'gas': record, 'species_initial': before,
                 'species_final': after, 'legacy_fresh_cylinder': self.derived_legacy_fresh('cylinder'),
                 'fresh_delivered': self.fresh_delivered,
+                'fresh_delivered_tr1': self.fresh_delivered_tr1,
+                'fresh_delivered_tr2': self.fresh_delivered_tr2,
                 'fresh_short_circuit': self.fresh_short_circuit}
+
+    def _trace_interface(self, stage, left_name, right_name, flux, state):
+        mass_flux = float(flux[0])
+        donor_name = left_name if mass_flux > 0 else right_name if mass_flux < 0 else None
+        donor = tuple(state[donor_name][0]) if donor_name else (0.0,) * 4
+        donor_mass = fsum(donor)
+        fractions = tuple(x / donor_mass for x in donor) if donor_mass else (0.0,) * 4
+        species_flux = tuple(mass_flux * x for x in fractions)
+        return {"stage_index": stage, "interface_name": f"{left_name}<->{right_name}",
+                "left_component": left_name, "right_component": right_name,
+                "gas_mass_flux": mass_flux,
+                "physical_flow_direction": "left_to_right" if mass_flux > 0 else
+                    "right_to_left" if mass_flux < 0 else "closed",
+                "donor_component": donor_name, "donor_mass": donor_mass,
+                "donor_species_fractions": dict(zip(SPECIES, fractions)),
+                "species_fluxes": dict(zip(SPECIES, species_flux)),
+                "closed": mass_flux == 0.0}
 
     def _exchange(self, mass_flux, left, right, dt):
         if mass_flux == 0.0: return
@@ -213,8 +248,13 @@ class P6IntegratedSystem:
                                      fsum(source)-sum(dm))
         receiver[0] = validate_species(tuple(a+b for a,b in zip(receiver[0], dm)),
                                         fsum(receiver[0])+sum(dm))
-        if right in ('tr1','tr2') and left == 'cylinder' and mass_flux < 0:
-            self.fresh_delivered += 0.0
+        if left in ('tr1', 'tr2') and right == 'cylinder' and mass_flux > 0:
+            fresh = sum(dm[:2])
+            self.fresh_delivered += fresh
+            if left == 'tr1':
+                self.fresh_delivered_tr1 += fresh
+            else:
+                self.fresh_delivered_tr2 += fresh
         if left == 'cylinder' and right == 'exhaust' and mass_flux > 0:
             self.fresh_short_circuit += sum(dm[:2])
 
@@ -222,6 +262,8 @@ class P6IntegratedSystem:
         return {'gas': self.gas.snapshot(),
                 'species': {k: [tuple(x) for x in v] for k,v in self.species.items()},
                 'external': list(self._external), 'fresh_delivered': self.fresh_delivered,
+                'fresh_delivered_tr1': self.fresh_delivered_tr1,
+                'fresh_delivered_tr2': self.fresh_delivered_tr2,
                 'fresh_short_circuit': self.fresh_short_circuit}
 
     def restore(self, snapshot):
@@ -229,6 +271,8 @@ class P6IntegratedSystem:
         self.species = {k: [tuple(x) for x in v] for k,v in snapshot['species'].items()}
         self._external = list(snapshot['external'])
         self.fresh_delivered = snapshot['fresh_delivered']
+        self.fresh_delivered_tr1 = snapshot.get('fresh_delivered_tr1', 0.0)
+        self.fresh_delivered_tr2 = snapshot.get('fresh_delivered_tr2', 0.0)
         self.fresh_short_circuit = snapshot['fresh_short_circuit']
 
     def species_sum_error(self):
