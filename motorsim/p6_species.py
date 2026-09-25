@@ -101,17 +101,38 @@ class P6SpeciesLedger:
         self.initial = tuple(fsum(c[i] for c in components) for i in range(4))
         self.current = list(self.initial)
         self.external = [0.0] * 4
+        self.steps = []
 
     def update(self, components, external_flux=(0.0, 0.0, 0.0, 0.0)):
+        before = tuple(self.current)
         self.current = [fsum(c[i] for c in components) for i in range(4)]
         self.external = [a + b for a, b in zip(self.external, external_flux)]
+        measured = tuple(b - a for a, b in zip(before, self.current))
+        residual = tuple(d - e for d, e in zip(measured, external_flux))
+        self.steps.append({
+            "inventory_before": before,
+            "inventory_after": tuple(self.current),
+            "integrated_external_exchange": tuple(external_flux),
+            "measured_inventory_change": measured,
+            "residual": residual,
+            "normalized_residual": tuple(r / max(1.0, abs(d), abs(e))
+                                         for r, d, e in zip(residual, measured, external_flux)),
+        })
 
     def report(self):
         delta = tuple(b - a for a, b in zip(self.initial, self.current))
         residual = tuple(d - e for d, e in zip(delta, self.external))
         return {name: {"initial": self.initial[i], "final": self.current[i],
-                       "external": self.external[i], "residual": residual[i]}
+                       "external": self.external[i], "residual": residual[i],
+                       "steps": [{k: v[i] if isinstance(v, tuple) else v
+                                  for k, v in step.items()}
+                                 for step in self.steps]}
                 for i, name in enumerate(SPECIES)}
+
+    def cumulative_residuals(self):
+        delta = tuple(b - a for a, b in zip(self.initial, self.current))
+        residual = tuple(d - e for d, e in zip(delta, self.external))
+        return {name: residual[i] for i, name in enumerate(SPECIES)}
 
 
 class P6IntegratedSystem:
