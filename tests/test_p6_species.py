@@ -64,3 +64,16 @@ def test_p6_integrates_on_p5c_and_derives_legacy_view():
     assert len(system.stage_species) == 2
     assert system.stage_species[0]['before'] != system.stage_species[1]['before'] or \
         system.stage_species[0]['after'] == system.stage_species[1]['before']
+
+
+def test_p6_restart_and_deterministic_replay():
+    a = P6IntegratedSystem(make_p5c_fixture(port_area=0.0))
+    a.step(1e-7)
+    snap = a.snapshot()
+    a.step(1e-7)
+    expected = a._species_totals(), a.gas.totals()
+    b = P6IntegratedSystem(make_p5c_fixture(port_area=0.0))
+    b.restore(snap)
+    b.step(1e-7)
+    assert b._species_totals() == expected[0]
+    assert b.gas.totals() == expected[1]

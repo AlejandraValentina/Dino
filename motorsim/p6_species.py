@@ -198,12 +198,18 @@ class P6IntegratedSystem:
             self.fresh_short_circuit += sum(dm[:2])
 
     def snapshot(self):
-        return {'species': {k: [tuple(x) for x in v] for k,v in self.species.items()},
+        return {'gas': self.gas.snapshot(),
+                'species': {k: [tuple(x) for x in v] for k,v in self.species.items()},
                 'external': list(self._external), 'fresh_delivered': self.fresh_delivered,
                 'fresh_short_circuit': self.fresh_short_circuit}
 
     def restore(self, snapshot):
+        self.gas.restore(snapshot['gas'])
         self.species = {k: [tuple(x) for x in v] for k,v in snapshot['species'].items()}
         self._external = list(snapshot['external'])
         self.fresh_delivered = snapshot['fresh_delivered']
         self.fresh_short_circuit = snapshot['fresh_short_circuit']
+
+    def species_sum_error(self):
+        """Cross-check authoritative species totals against gas mass."""
+        return sum(self._species_totals()) - self.gas.totals()['mass']
