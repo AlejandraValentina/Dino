@@ -186,6 +186,7 @@ class P6IntegratedSystem:
         # authoritative species state; no legacy scalar is cached.
         self.stage_species = []
         self.verification_trace = []
+        self.external_flux_trace = []
         for stage, interfaces in enumerate(record['core_interfaces']):
             before_stage = {k: [tuple(x) for x in v] for k, v in self.species.items()}
             interface_specs = ((interfaces[0], 'intake', 'crankcase'),
@@ -206,8 +207,12 @@ class P6IntegratedSystem:
                                                              pflux, before_stage))
                 self._exchange(pflux[0], 'cylinder', 'exhaust', dt * .5)
             if self.capture_trace:
+                rhs_trace = self._stage_rhs_trace(
+                    stage, interfaces, record['stage_interfaces'][stage][2], before_stage)
                 self.verification_trace.append({"step_index": len(getattr(self.gas, 'history', [])),
-                                                "stage_index": stage, "interfaces": stage_trace})
+                                                "stage_index": stage, "interfaces": stage_trace,
+                                                "rhs": rhs_trace})
+                self.external_flux_trace.append(self._external_trace(stage, record, before_stage))
             self.stage_species.append({'before': before_stage,
                                        'after': {k: [tuple(x) for x in v]
                                                  for k, v in self.species.items()}})
@@ -219,6 +224,29 @@ class P6IntegratedSystem:
                 'fresh_delivered_tr1': self.fresh_delivered_tr1,
                 'fresh_delivered_tr2': self.fresh_delivered_tr2,
                 'fresh_short_circuit': self.fresh_short_circuit}
+
+    def _external_trace(self, stage, record, state):
+        core = record['core_interfaces'][stage]
+        # P5-C stores the atmospheric inflow in the stage core trace and the
+        # exhaust outlet in the stage port trace; both are already resolved.
+        ext = record.get('stage_external', ((0.0, 0.0, 0.0, 0.0),
+                                            (0.0, 0.0, 0.0, 0.0)))[stage]
+        exhaust = record['stage_interfaces'][stage][2]
+        atmospheric = tuple(ext)
+        atmosphere_state = atmospheric_species()
+        intake_donor = state['intake'][0] if atmospheric[0] < 0 else atmosphere_state
+        inflow_species = tuple(atmospheric[0] * x / fsum(intake_donor)
+                               for x in intake_donor)
+        exhaust_donor = state['exhaust'][-1] if exhaust[0] > 0 else atmosphere_state
+        out_species = tuple(exhaust[0] * x / fsum(exhaust_donor)
+                            for x in exhaust_donor)
+        return {'stage_index': stage,
+                'atmosphere_intake': {'gas_mass_flux': atmospheric[0],
+                                      'donor_component': 'atmosphere' if atmospheric[0] >= 0 else 'intake',
+                                      'species_flux': dict(zip(SPECIES, inflow_species))},
+                'exhaust_atmosphere': {'gas_mass_flux': exhaust[0],
+                                       'donor_component': 'exhaust' if exhaust[0] >= 0 else 'atmosphere',
+                                      'species_flux': dict(zip(SPECIES, out_species))}}
 
     def _trace_interface(self, stage, left_name, right_name, flux, state):
         mass_flux = float(flux[0])
@@ -236,6 +264,83 @@ class P6IntegratedSystem:
                 "donor_species_fractions": dict(zip(SPECIES, fractions)),
                 "species_fluxes": dict(zip(SPECIES, species_flux)),
                 "closed": mass_flux == 0.0}
+
+    def _component_inventory(self, component):
+        """Read-only physical inventory, using gas geometry and species fractions."""
+        if component in ('crankcase', 'cylinder'):
+            chamber = getattr(self.gas.core, component)
+            mass = chamber.inventory(self.gas.eos)[0]
+            cells = [self.species[component][0]]
+            masses = [mass]
+        else:
+            path = {'intake': self.gas.core.intake,
+                    'tr1': self.gas.core.transfers[0],
+                    'tr2': self.gas.core.transfers[1],
+                    'exhaust': self.gas.exhaust}[component]
+            cells = self.species[component]
+            masses = [q[0] * v for q, v in zip(path.conservative(), path.mesh.volumes)]
+        species_mass = tuple(fsum(m * cell[i] for m, cell in zip(masses, cells))
+                             for i in range(4))
+        gas_mass = fsum(masses)
+        return {'gas_mass': gas_mass,
+                **{name + '_mass': species_mass[i] for i, name in enumerate(SPECIES)},
+                'species_sum': fsum(species_mass),
+                'species_sum_minus_gas_mass': fsum(species_mass) - gas_mass,
+                'cells': [{'gas_mass': m,
+                           **{name + '_mass': m * cell[i]
+                              for i, name in enumerate(SPECIES)},
+                           'species_sum_minus_gas_mass': m * fsum(cell) - m}
+                          for m, cell in zip(masses, cells)]}
+
+    def inventory_snapshot(self):
+        names = ('crankcase', 'cylinder', 'intake', 'tr1', 'tr2', 'exhaust')
+        components = {name: self._component_inventory(name) for name in names}
+        totals = {key: fsum(item[key] for item in components.values())
+                  for key in ('gas_mass', *(name + '_mass' for name in SPECIES),
+                              'species_sum')}
+        totals['species_sum_minus_gas_mass'] = totals['species_sum'] - totals['gas_mass']
+        return {'components': components, 'global': totals}
+
+    def _species_flux(self, flux, left, right, state):
+        mass = float(flux[0])
+        donor_name = left if mass > 0 else right if mass < 0 else None
+        donor = tuple(state[donor_name][0]) if donor_name else (0.0,) * 4
+        total = fsum(donor)
+        fractions = tuple(x / total for x in donor) if total else (0.0,) * 4
+        return tuple(mass * x for x in fractions)
+
+    def _stage_rhs_trace(self, stage, interfaces, port, before):
+        specs = ((interfaces[0], 'intake', 'crankcase'),
+                 (interfaces[1], 'crankcase', 'tr1'),
+                 (interfaces[2], 'crankcase', 'tr2'),
+                 (interfaces[3], 'tr1', 'cylinder'),
+                 (interfaces[4], 'tr2', 'cylinder'),
+                 (port, 'cylinder', 'exhaust'))
+        contributions = {name: [0.0] * 4 for name in ('crankcase', 'cylinder')}
+        records = []
+        for flux, left, right in specs:
+            sf = self._species_flux(flux, left, right, before)
+            records.append({'interface_name': f'{left}<->{right}',
+                            'species_flux': dict(zip(SPECIES, sf))})
+            if left == 'crankcase':
+                target = 'crankcase'
+                sign = 1.0
+            elif right == 'crankcase':
+                target = 'crankcase'
+                sign = -1.0
+            elif left == 'cylinder':
+                target = 'cylinder'
+                sign = 1.0
+            else:
+                target = 'cylinder'
+                sign = -1.0
+            for i, value in enumerate(sf):
+                contributions[target][i] += sign * value
+        return {'stage_index': stage, 'interfaces': records,
+                'crankcase': {'contributions': contributions['crankcase'][:],
+                              'assembled_rhs': contributions['crankcase'][:]},
+                'cylinder': {'contributions': contributions['cylinder'][:],
+                             'assembled_rhs': contributions['cylinder'][:]}}
 
     def _exchange(self, mass_flux, left, right, dt):
         if mass_flux == 0.0: return

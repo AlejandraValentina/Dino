@@ -123,3 +123,24 @@ def test_verification_trace_donor_follows_flow_direction():
                 assert item['donor_component'] == item['right_component']
             else:
                 assert item['donor_component'] is None
+
+
+def test_physical_component_inventory_uses_gas_mass_geometry():
+    system = P6IntegratedSystem(make_p5c_fixture(port_area=0.0))
+    snapshot = system.inventory_snapshot()
+    assert snapshot['global']['species_sum'] == pytest.approx(snapshot['global']['gas_mass'])
+    for component in snapshot['components'].values():
+        assert component['species_sum'] == pytest.approx(component['gas_mass'])
+        assert all(cell['species_sum_minus_gas_mass'] == pytest.approx(0.0)
+                   for cell in component['cells'])
+
+
+def test_rhs_trace_assembles_chamber_interface_species_contributions():
+    system = P6IntegratedSystem(make_p5c_fixture(port_area=0.0), capture_trace=True)
+    system.species['tr1'][0] = (.1, .2, .3, .4)
+    system.species['tr2'][0] = (.4, .3, .2, .1)
+    system.step(1e-7)
+    for stage in system.verification_trace:
+        rhs = stage['rhs']
+        assert len(rhs['crankcase']['assembled_rhs']) == 4
+        assert len(rhs['cylinder']['assembled_rhs']) == 4

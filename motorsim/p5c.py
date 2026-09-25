@@ -200,6 +200,8 @@ class IntegratedP5C:
                   "stage_rhs": (t0['cylinder_rhs'], t1['cylinder_rhs']),
                   "stage_interfaces": (t0['cylinder_interfaces'], t1['cylinder_interfaces']),
                   "core_interfaces": (t0['core']['interfaces'], t1['core']['interfaces']),
+                  "stage_external": (t0['core']['external'], t1['core']['external']),
+                  "stage_work_rates": (t0['core']['work_rates'], t1['core']['work_rates']),
                   "totals": self.totals(), "dependency": self.dependency_status}
         self._last_external = {"mass": 0.5*(t0['core']['external'][0] + t1['core']['external'][0])*dt,
                                "energy": 0.5*(t0['core']['external'][2] + t1['core']['external'][2])*dt,
