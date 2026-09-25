@@ -146,12 +146,15 @@ class P6IntegratedSystem:
         self.gas = gas_system
         self.capture_trace = bool(capture_trace)
         self.species = component_species or self._default_state()
+        self.species_mass = self._mass_state_from_views()
+        self._refresh_species_views()
         self._initial = self._species_totals()
         self._external = [0.0] * 4
         self.fresh_delivered = 0.0
         self.fresh_delivered_tr1 = 0.0
         self.fresh_delivered_tr2 = 0.0
         self.fresh_short_circuit = 0.0
+        self._stage_active = False
 
     def _default_state(self):
         fresh = atmospheric_species()
@@ -164,12 +167,38 @@ class P6IntegratedSystem:
         }
 
     def _species_totals(self):
-        return tuple(fsum(cell[i] for cells in self.species.values() for cell in cells)
+        return tuple(fsum(cell[i] for cells in self.species_mass.values() for cell in cells)
                      for i in range(4))
 
+    def _gas_component_masses(self, component):
+        if component in ('crankcase', 'cylinder'):
+            return [getattr(self.gas.core, component).inventory(self.gas.eos)[0]]
+        path = {'intake': self.gas.core.intake,
+                'tr1': self.gas.core.transfers[0],
+                'tr2': self.gas.core.transfers[1],
+                'exhaust': self.gas.exhaust}[component]
+        return [q[0] * v for q, v in zip(path.conservative(), path.mesh.volumes)]
+
+    def _mass_state_from_views(self):
+        return {name: [tuple(m * y for y in cell)
+                       for m, cell in zip(self._gas_component_masses(name), cells)]
+                for name, cells in self.species.items()}
+
+    def _refresh_species_views(self):
+        self.species = {
+            name: [tuple(x / fsum(mass) for x in mass) if fsum(mass) else (0.0,) * 4
+                   for mass in cells]
+            for name, cells in self.species_mass.items()}
+
+    def _sync_manual_views(self):
+        """Accept initialization-time compatibility edits, then own masses."""
+        self.species_mass = self._mass_state_from_views()
+        self._refresh_species_views()
+
     def validate(self):
-        for cells in self.species.values():
+        for cells in self.species_mass.values():
             for cell in cells: validate_species(cell, fsum(cell))
+        self._refresh_species_views()
         return True
 
     def derived_legacy_fresh(self, component):
@@ -180,6 +209,7 @@ class P6IntegratedSystem:
         """Advance gas and species with stage snapshots from the same P5-C RHS."""
         # Species are updated from the exact stage interface traces exposed by
         # P5-C; no independent gas flux solve or legacy mY state is evolved.
+        self._sync_manual_views()
         before = self._species_totals()
         record = self.gas.step(dt, angle=angle)
         # Consume both stage traces.  Each stage reads the currently updated
@@ -187,8 +217,10 @@ class P6IntegratedSystem:
         self.stage_species = []
         self.verification_trace = []
         self.external_flux_trace = []
+        self._stage_active = True
         for stage, interfaces in enumerate(record['core_interfaces']):
             before_stage = {k: [tuple(x) for x in v] for k, v in self.species.items()}
+            before_mass_stage = {k: [tuple(x) for x in v] for k, v in self.species_mass.items()}
             interface_specs = ((interfaces[0], 'intake', 'crankcase'),
                                (interfaces[1], 'crankcase', 'tr1'),
                                                  (interfaces[2], 'crankcase', 'tr2'),
@@ -206,6 +238,11 @@ class P6IntegratedSystem:
                     stage_trace.append(self._trace_interface(stage, 'cylinder', 'exhaust',
                                                              pflux, before_stage))
                 self._exchange(pflux[0], 'cylinder', 'exhaust', dt * .5)
+            self._boundary_exchange(record['stage_external'][stage][0], 'intake',
+                                    dt * .5, incoming=True)
+            self._boundary_exchange(record.get('stage_exhaust_external',
+                                               ((0.0, 0.0, 0.0, 0.0),) * 2)[stage][0],
+                                    'exhaust', dt * .5, incoming=False)
             if self.capture_trace:
                 rhs_trace = self._stage_rhs_trace(
                     stage, interfaces, record['stage_interfaces'][stage][2], before_stage)
@@ -215,8 +252,12 @@ class P6IntegratedSystem:
                 self.external_flux_trace.append(self._external_trace(stage, record, before_stage))
             self.stage_species.append({'before': before_stage,
                                        'after': {k: [tuple(x) for x in v]
-                                                 for k, v in self.species.items()}})
+                                                 for k, v in self.species.items()},
+                                       'species_mass_before': before_mass_stage,
+                                       'species_mass_after': {k: [tuple(x) for x in v]
+                                                              for k, v in self.species_mass.items()}})
         self.validate()
+        self._stage_active = False
         after = self._species_totals()
         return {'gas': record, 'species_initial': before,
                 'species_final': after, 'legacy_fresh_cylinder': self.derived_legacy_fresh('cylinder'),
@@ -248,6 +289,20 @@ class P6IntegratedSystem:
                                        'donor_component': 'exhaust' if exhaust[0] >= 0 else 'atmosphere',
                                       'species_flux': dict(zip(SPECIES, out_species))}}
 
+    def _boundary_exchange(self, mass_flux, component, dt, *, incoming):
+        if mass_flux == 0.0:
+            return
+        target = self.species_mass[component]
+        index = 0 if incoming else -1
+        current = target[index]
+        donor = atmospheric_species() if (mass_flux > 0) == incoming else self.species[component][index]
+        signed = mass_flux if incoming else -mass_flux
+        flux = tuple(signed * value / fsum(donor) for value in donor)
+        delta = tuple(dt * value for value in flux)
+        target[index] = validate_species(tuple(a + b for a, b in zip(current, delta)),
+                                         fsum(current) + sum(delta))
+        self._refresh_species_views()
+
     def _trace_interface(self, stage, left_name, right_name, flux, state):
         mass_flux = float(flux[0])
         donor_name = left_name if mass_flux > 0 else right_name if mass_flux < 0 else None
@@ -270,26 +325,24 @@ class P6IntegratedSystem:
         if component in ('crankcase', 'cylinder'):
             chamber = getattr(self.gas.core, component)
             mass = chamber.inventory(self.gas.eos)[0]
-            cells = [self.species[component][0]]
             masses = [mass]
         else:
             path = {'intake': self.gas.core.intake,
                     'tr1': self.gas.core.transfers[0],
                     'tr2': self.gas.core.transfers[1],
                     'exhaust': self.gas.exhaust}[component]
-            cells = self.species[component]
             masses = [q[0] * v for q, v in zip(path.conservative(), path.mesh.volumes)]
-        species_mass = tuple(fsum(m * cell[i] for m, cell in zip(masses, cells))
-                             for i in range(4))
+        cells = self.species_mass[component]
+        species_mass = tuple(fsum(cell[i] for cell in cells) for i in range(4))
         gas_mass = fsum(masses)
         return {'gas_mass': gas_mass,
                 **{name + '_mass': species_mass[i] for i, name in enumerate(SPECIES)},
                 'species_sum': fsum(species_mass),
                 'species_sum_minus_gas_mass': fsum(species_mass) - gas_mass,
                 'cells': [{'gas_mass': m,
-                           **{name + '_mass': m * cell[i]
+                           **{name + '_mass': cell[i]
                               for i, name in enumerate(SPECIES)},
-                           'species_sum_minus_gas_mass': m * fsum(cell) - m}
+                           'species_sum_minus_gas_mass': fsum(cell) - m}
                           for m, cell in zip(masses, cells)]}
 
     def inventory_snapshot(self):
@@ -304,7 +357,7 @@ class P6IntegratedSystem:
     def _species_flux(self, flux, left, right, state):
         mass = float(flux[0])
         donor_name = left if mass > 0 else right if mass < 0 else None
-        donor = tuple(state[donor_name][0]) if donor_name else (0.0,) * 4
+        donor = tuple(self.species_mass[donor_name][0]) if donor_name else (0.0,) * 4
         total = fsum(donor)
         fractions = tuple(x / total for x in donor) if total else (0.0,) * 4
         return tuple(mass * x for x in fractions)
@@ -344,8 +397,10 @@ class P6IntegratedSystem:
 
     def _exchange(self, mass_flux, left, right, dt):
         if mass_flux == 0.0: return
-        donor = self.species[left] if mass_flux > 0 else self.species[right]
-        receiver = self.species[right] if mass_flux > 0 else self.species[left]
+        if not self._stage_active:
+            self._sync_manual_views()
+        donor = self.species_mass[left] if mass_flux > 0 else self.species_mass[right]
+        receiver = self.species_mass[right] if mass_flux > 0 else self.species_mass[left]
         source = donor[0]
         flux = donor_species(mass_flux, source, receiver[0])
         dm = tuple(dt*x for x in flux)
@@ -353,6 +408,7 @@ class P6IntegratedSystem:
                                      fsum(source)-sum(dm))
         receiver[0] = validate_species(tuple(a+b for a,b in zip(receiver[0], dm)),
                                         fsum(receiver[0])+sum(dm))
+        self._refresh_species_views()
         if left in ('tr1', 'tr2') and right == 'cylinder' and mass_flux > 0:
             fresh = sum(dm[:2])
             self.fresh_delivered += fresh
@@ -365,7 +421,7 @@ class P6IntegratedSystem:
 
     def snapshot(self):
         return {'gas': self.gas.snapshot(),
-                'species': {k: [tuple(x) for x in v] for k,v in self.species.items()},
+                'species_mass': {k: [tuple(x) for x in v] for k,v in self.species_mass.items()},
                 'external': list(self._external), 'fresh_delivered': self.fresh_delivered,
                 'fresh_delivered_tr1': self.fresh_delivered_tr1,
                 'fresh_delivered_tr2': self.fresh_delivered_tr2,
@@ -373,7 +429,13 @@ class P6IntegratedSystem:
 
     def restore(self, snapshot):
         self.gas.restore(snapshot['gas'])
-        self.species = {k: [tuple(x) for x in v] for k,v in snapshot['species'].items()}
+        raw = snapshot.get('species_mass', snapshot.get('species'))
+        if 'species_mass' in snapshot:
+            self.species_mass = {k: [tuple(x) for x in v] for k,v in raw.items()}
+        else:
+            self.species = {k: [tuple(x) for x in v] for k,v in raw.items()}
+            self.species_mass = self._mass_state_from_views()
+        self._refresh_species_views()
         self._external = list(snapshot['external'])
         self.fresh_delivered = snapshot['fresh_delivered']
         self.fresh_delivered_tr1 = snapshot.get('fresh_delivered_tr1', 0.0)

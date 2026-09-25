@@ -144,3 +144,15 @@ def test_rhs_trace_assembles_chamber_interface_species_contributions():
         rhs = stage['rhs']
         assert len(rhs['crankcase']['assembled_rhs']) == 4
         assert len(rhs['cylinder']['assembled_rhs']) == 4
+
+
+def test_conservative_species_mass_is_authoritative_through_step():
+    system = P6IntegratedSystem(make_p5c_fixture(port_area=0.0), capture_trace=True)
+    system.species['tr1'][0] = (.7, .2, .1, 0.0)
+    system.species['tr2'][0] = (.1, .3, .2, .4)
+    system.step(1e-7, angle=150.0)
+    assert all(sum(cell) == pytest.approx(sum(cell))
+               for cells in system.species_mass.values() for cell in cells)
+    inventory = system.inventory_snapshot()['global']
+    assert inventory['species_sum'] == pytest.approx(inventory['gas_mass'])
+    assert all(sum(cell) >= 0.0 for cells in system.species_mass.values() for cell in cells)
