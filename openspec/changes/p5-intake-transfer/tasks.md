@@ -24,8 +24,9 @@
 - [x] Relevant P5-A/P5-B/P3 coupling/P4 exhaust focal regressions: 59 passed.
 - [x] P5-C resolved causal front: dominant positive dp/dt, predeclared windows, CFL 0.2/0.4 ordering PASS; precursor retained diagnostically.
 - [x] P5-C conditional closure evidence recorded in `results/p5c-conditional-20260924/causal-front-20260924.json`.
-- [ ] P6 four-species conservative transport and scavenging accounting.
+- [x] P6 four-species conservative transport and scavenging accounting.
 - [x] P6-A four-species state, donor semantics, legacy mapping and scavenging metrics.
 - [x] P6-B stage companion integrated with P5-C traces; authoritative species state and derived legacy fresh view.
-- [ ] P6-C full topology species fixture bank and independent ledgers.
-- [ ] P6-D restart/determinism and regressions.
+- [x] P6-C full topology species fixture bank and independent ledgers.
+- [x] P6-D restart/determinism and regressions.
+- [x] P6 conditional closure: F05-F09 PASS, four species ledgers and local/global species-mass gates PASS; evidence in `results/p6-species-20260925/final-campaign.json` and `evidence.json`; OpenSpec 1.3.1 strict PASS. Classification `P6_SPECIES_SCAVENGING_VERIFIED_CONDITIONAL`, dependency `CONDITIONAL_ON_P4`; P4 remains `BLOCKED / NOT_GRANTED`.
