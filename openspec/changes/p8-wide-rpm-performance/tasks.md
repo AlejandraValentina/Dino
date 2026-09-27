@@ -12,7 +12,7 @@
       restart, especies, fuente y CFL/admisibilidad.
 - [x] Ejecutar los cinco anclajes y guardar JSON/CSV durable en
       `results/p8-wide-rpm-20260927/`.
-- [ ] Ejecutar regresiones focales P7/P6/P5-C/P5-B/P5-A/P3 y coupling/exhaust P4
+- [x] Ejecutar regresiones focales P7/P6/P5-C/P5-B/P5-A/P3 y coupling/exhaust P4
       sin campañas periódicas P4.
 - [ ] Revisión puntual independiente pendiente; no declarar realizada sin evidencia.
 - [x] Cierre condicional sólo con P4 bloqueado, experimental no realizada y P9 detenido.

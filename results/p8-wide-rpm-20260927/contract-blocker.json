@@ -4,6 +4,13 @@
   "status": "RESOLVED_BY_HUMAN_REFERENCE_AUTHORIZATION",
   "prior_status": "P8_SCIENTIFIC_CONTRACT_REQUIRED",
   "campaign_executed": true,
+  "driver_correction": {
+    "authoritative_stability": "physical-time CFL from current intake/TR1/TR2/exhaust states",
+    "cfl_contract": 0.4,
+    "fixed_angle_step_authoritative": false,
+    "actual_dt_and_cfl_persisted": true,
+    "replay_and_restart_executed": true
+  },
   "resolution": "Human authorization permits the composite synthetic reference from the existing S2T-0D-01 recipe and frozen P5-C/P6/P7 fixture.",
   "reason": "No complete approved 2T reference configuration/mechanics was found.",
   "required_topology": "atmosphere-intake1D-crankcase0D-TR1/TR2-cylinder0D-exhaust1D-atmosphere",
