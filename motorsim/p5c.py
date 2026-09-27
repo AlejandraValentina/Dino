@@ -123,18 +123,24 @@ class IntegratedP5C:
                     for i in range(len(q)))
         return rhs, face, faces[-1], tuple(faces)
 
-    def _stage_rhs(self, state):
+    def _stage_rhs(self, state, *, stage_angle=None, source=None):
         core_state = state[:-1]
-        core_rhs, trace = self.core._rhs(core_state, self.angle)
+        core_rhs, trace = self.core._rhs(core_state, self.angle if stage_angle is None else stage_angle)
         ex_rhs, port, external, exhaust_faces = self._exhaust_rhs(state[-1], state[1], 0.0)
         # One cylinder RHS: P5-B TR1/TR2 terms plus this same exhaust flux.
         cyl = core_rhs[1]
         cyl = (cyl[0] - port['flux'][0],
                cyl[1] - port['flux'][2], cyl[2] - port['flux'][3])
+        prescribed = (0.0, 0.0, 0.0) if source is None else tuple(
+            source(self.angle if stage_angle is None else stage_angle, state[1], port))
+        if len(prescribed) != 3:
+            raise ValueError("cylinder source must return (dm, dU, dF)")
+        cyl = tuple(a + b for a, b in zip(cyl, prescribed))
         return (core_rhs[0], cyl, core_rhs[2], core_rhs[3], core_rhs[4], ex_rhs), {
             'core': trace, 'port': port, 'external': external,
             'exhaust_faces': exhaust_faces,
             'cylinder_rhs': cyl, 'transfer_rhs': (core_rhs[1],),
+            'prescribed_source': prescribed,
             'cylinder_interfaces': (trace['interfaces'][3], trace['interfaces'][4],
                                     tuple(-x for x in port['flux'])),
         }
@@ -182,16 +188,20 @@ class IntegratedP5C:
             for cell, q in zip(path.cells, values): cell.conservative = q
         for cell, q in zip(self.exhaust.cells, exhaust): cell.conservative = q
 
-    def step(self, dt, *, angle=None, port_area=None):
+    def step(self, dt, *, angle=None, port_area=None, source=None, angle_step=None):
         if not isinstance(dt, (int, float)) or not isfinite(dt) or dt <= 0:
             raise ValueError("dt must be positive")
         if port_area is not None:
             self.port_area = float(port_area)
-        self.angle = self.angle + float(dt) if angle is None else float(angle)
+        if angle is None:
+            self.angle += float(dt) if angle_step is None else float(angle_step)
+        else:
+            self.angle = float(angle)
         q0 = self._state()
-        r0, t0 = self._stage_rhs(q0)
+        stage_angle0 = self.angle - (float(dt) if angle_step is None else float(angle_step))
+        r0, t0 = self._stage_rhs(q0, stage_angle=stage_angle0, source=source)
         q1 = self._add_state(q0, r0, dt)
-        r1, t1 = self._stage_rhs(q1)
+        r1, t1 = self._stage_rhs(q1, stage_angle=self.angle, source=source)
         qn = self._blend(q0, q1, r1, dt)
         self._install(qn)
         self.admissible()
@@ -207,27 +217,32 @@ class IntegratedP5C:
                   "stage_exhaust_external": (t0['external'], t1['external']),
                   "stage_exhaust_faces": (t0['exhaust_faces'], t1['exhaust_faces']),
                   "stage_work_rates": (t0['core']['work_rates'], t1['core']['work_rates']),
+                  "prescribed_heat": 0.5 * (t0['prescribed_source'][1] + t1['prescribed_source'][1]) * dt,
                   "totals": self.totals(), "dependency": self.dependency_status}
         self._last_external = {"mass": 0.5*(t0['core']['external'][0] + t1['core']['external'][0])*dt,
                                "energy": 0.5*(t0['core']['external'][2] + t1['core']['external'][2])*dt,
                                "species": 0.5*(t0['core']['external'][3] + t1['core']['external'][3])*dt}
         for key in self._external_cumulative:
             self._external_cumulative[key] += self._last_external[key]
-        record['ledger'] = self.ledger_report()
+        record['ledger'] = self.ledger_report(record['prescribed_heat'])
         self.history.append(record)
         return record
 
-    def ledger_report(self):
+    def ledger_report(self, prescribed_heat=0.0):
         final = self.totals()
         delta = {k: final[k] - self._initial[k] for k in final}
         ext = dict(self._last_external)
         residual = {k: delta[k] - self._external_cumulative[k]
                     for k in ('mass','energy','species')}
+        residual['energy_without_prescribed_heat'] = residual['energy'] - prescribed_heat
         step_delta = {k: final[k] - self._previous_totals[k] for k in final}
         step_residual = {k: step_delta[k] - self._last_external[k]
                          for k in ('mass','energy','species')}
         self._previous_totals = dict(final)
-        return {"initial": dict(self._initial), "final": final, "delta": delta,
+        return {"prescribed_heat": prescribed_heat,
+                "energy_balance_terms": {"external_conservative_exchange": ext['energy'],
+                                           "prescribed_heat": prescribed_heat},
+                "initial": dict(self._initial), "final": final, "delta": delta,
                 "external": dict(self._external_cumulative), "step_external": ext,
                 "residual": residual, "step_delta": step_delta,
                 "step_residual": step_residual}

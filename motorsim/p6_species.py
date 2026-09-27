@@ -4,6 +4,7 @@ Species are bookkeeping fields only.  They do not alter the EOS or energy.
 """
 from dataclasses import dataclass
 from math import fsum, isfinite
+from .p7_prescribed import Q_F, burn_fraction, capture_event, restore_event, snapshot_event
 
 SPECIES = ("fresh_air", "fuel", "residual", "burned")
 
@@ -142,7 +143,8 @@ class P6IntegratedSystem:
     keeps authoritative species masses and evaluates donor fluxes from each
     stage trace before the corresponding gas stage is installed.
     """
-    def __init__(self, gas_system, *, component_species=None, capture_trace=False):
+    def __init__(self, gas_system, *, component_species=None, capture_trace=False,
+                 enable_p7=False, angular_rate_deg_s=18000.0):
         self.gas = gas_system
         self.capture_trace = bool(capture_trace)
         self.species = component_species or self._default_state()
@@ -158,6 +160,69 @@ class P6IntegratedSystem:
         self._count_transport = True
         self.verification_trace = []
         self.external_flux_trace = []
+        self.p7_event = None
+        self.p7_events = []
+        self.p7_source_delta = [0.0] * 4
+        self.p7_enabled = bool(enable_p7)
+        self.p7_angular_rate_deg_s = float(angular_rate_deg_s)
+        if self.p7_enabled and self.p7_angular_rate_deg_s <= 0:
+            raise ValueError("P7 angular rate must be positive")
+
+    def _p7_source(self, theta, cylinder_q, port):
+        if self.p7_event is None:
+            return (0.0, 0.0, 0.0)
+        if 350.0 < theta < 390.0 and port['area'] != 0.0:
+            raise ValueError("P7 heat event requires closed cylinder ports")
+        left, right = getattr(self, '_p7_active_interval', (theta, theta))
+        if right > left:
+            from .p7_prescribed import burn_fraction
+            dt = (right - left) / self.p7_angular_rate_deg_s
+            if self._p7_mass_rate is not None:
+                mass = self._p7_stage_mass(theta)
+            elif right >= self.p7_event.start + 40.0:
+                mass = sum(self.species_mass['cylinder'][0][:2])
+            else:
+                progress = burn_fraction(right, self.p7_event.start) - burn_fraction(
+                    left, self.p7_event.start)
+                mass = self.p7_event.fresh * progress
+            rate = mass / dt
+            rate = (-self.p7_event.alpha_air * rate,
+                    -self.p7_event.alpha_fuel * rate, 0.0, rate, Q_F * rate)
+        else:
+            rate = self.p7_event.source(theta, self.p7_angular_rate_deg_s)
+        # P5-C's legacy fresh scalar is not authoritative for P6.  Do not
+        # consume it here: P6 species_mass receives the source below with the
+        # same SSPRK2 stage weighting.  The gas hook contributes heat only.
+        return (0.0, rate[4], 0.0)
+
+    def _p7_species_source(self, theta):
+        left, right = self._p7_active_interval
+        from .p7_prescribed import burn_fraction
+        dt = (right - left) / self.p7_angular_rate_deg_s
+        if self._p7_mass_rate is not None:
+            rate = self._p7_stage_mass(theta) / dt
+        elif right >= self.p7_event.start + 40.0:
+            mass = sum(self.species_mass['cylinder'][0][:2])
+        else:
+            progress = burn_fraction(right, self.p7_event.start) - burn_fraction(
+                left, self.p7_event.start)
+            mass = self.p7_event.fresh * progress
+        if self._p7_mass_rate is None:
+            rate = mass / dt
+        return (-self.p7_event.alpha_air * rate,
+                -self.p7_event.alpha_fuel * rate, 0.0, rate,
+                Q_F * rate)
+
+    def _p7_stage_mass(self, theta):
+        """Return the bounded SSPRK2 stage increment for this segment."""
+        mass = self._p7_mass_rate * (
+            self._p7_active_interval[1] - self._p7_active_interval[0]) / self.p7_angular_rate_deg_s
+        terminal = (self._p7_active_interval[1] >= self.p7_event.start + 40.0 - 1e-9 and
+                    self.p7_event.ledger.burned_produced + mass >=
+                    self.p7_event.fresh - 1e-12)
+        if terminal and theta <= self._p7_active_interval[0] + 1e-12:
+            return 0.0
+        return 2.0 * mass if terminal else mass
 
     def _default_state(self):
         fresh = atmospheric_species()
@@ -217,14 +282,39 @@ class P6IntegratedSystem:
         cells = self.species[component]
         return fsum(legacy_fresh_mass(c) for c in cells)
 
-    def step(self, dt, *, angle=None):
+    def _step_segment(self, dt, *, angle=None):
         """Advance gas and species with stage snapshots from the same P5-C RHS."""
         # Species are updated from the exact stage interface traces exposed by
         # P5-C; no independent gas flux solve or legacy mY state is evolved.
         if not self._views_match_authoritative_state():
             self._sync_manual_views()
         before = self._species_totals()
-        record = self.gas.step(dt, angle=angle)
+        theta_end = (float(angle) if angle is not None else
+                     self.gas.angle + float(dt) * self.p7_angular_rate_deg_s)
+        theta_start = theta_end - float(dt) * self.p7_angular_rate_deg_s
+        p7_step = (float(dt) * self.p7_angular_rate_deg_s
+                   if self.p7_enabled else None)
+        if (self.p7_enabled and self.p7_event is None and
+                theta_start <= 350.0 < theta_end):
+            self.p7_event = capture_event(350.0, self.species_mass['cylinder'][0])
+            self.p7_events.append(self.p7_event)
+        self._p7_active_interval = (theta_start, theta_end)
+        self._p7_mass_rate = None
+        if self.p7_event is not None:
+            lo, hi = max(theta_start, self.p7_event.start), min(theta_end, self.p7_event.start + 40.0)
+            if hi > lo:
+                target = self.p7_event.fresh * burn_fraction(hi, self.p7_event.start)
+                available = sum(self.species_mass['cylinder'][0][:2])
+                # The same bounded increment is used by both SSPRK2 stages.
+                # In particular, do not replace it at the terminal boundary
+                # by the stage-local remainder: that would apply the final
+                # inventory twice before the SSPRK blend.
+                mass = min(available, max(0.0,
+                                          target - self.p7_event.ledger.burned_produced))
+                self._p7_mass_rate = mass / dt
+        record = self.gas.step(dt, angle=angle,
+                               source=self._p7_source if self.p7_enabled else None,
+                               angle_step=p7_step)
         # Consume both stage traces.  Each stage reads the currently updated
         # authoritative species state; no legacy scalar is cached.
         self.stage_species = []
@@ -239,6 +329,32 @@ class P6IntegratedSystem:
         for stage, interfaces in enumerate(record['core_interfaces']):
             before_stage = {k: [tuple(x) for x in v] for k, v in self.species.items()}
             before_mass_stage = {k: [tuple(x) for x in v] for k, v in self.species_mass.items()}
+            stage_angle = theta_start if stage == 0 else theta_end
+            if self.p7_event is not None and 350.0 <= stage_angle <= 390.0:
+                source = self._p7_species_source(stage_angle)
+                cylinder = self.species_mass['cylinder'][0]
+                delta = tuple(dt * source[i] for i in range(4))
+                updated = tuple(a + b for a, b in zip(cylinder, delta))
+                if updated[0] < 0.0 or updated[1] < 0.0:
+                    # Stage limiter: preserve the stage total while never
+                    # allowing either captured reactant below zero.  This is
+                    # only reachable at the terminal inventory boundary (or
+                    # its floating-point representation).
+                    consumed = max(0.0, cylinder[0]) - max(0.0, updated[0])
+                    consumed += max(0.0, cylinder[1]) - max(0.0, updated[1])
+                    updated = (max(0.0, updated[0]), max(0.0, updated[1]),
+                               updated[2], cylinder[3] + consumed)
+                    delta = tuple(a - b for a, b in zip(updated, cylinder))
+                    source = tuple(x / dt for x in delta) + (Q_F * consumed / dt,)
+                self.species_mass['cylinder'][0] = validate_species(
+                    updated, fsum(updated))
+                # SSPRK2 accumulated contribution is the stage-weighted half
+                # sum; the authoritative species state is blended below.
+                self.p7_event.record(tuple(0.5 * x for x in delta),
+                                     0.5 * dt * source[4])
+                for i, value in enumerate(delta):
+                    self.p7_source_delta[i] += 0.5 * value
+                self._refresh_species_views()
             face_groups = record.get('stage_face_fluxes', ((), ()))[stage]
             for component, faces in zip(('intake', 'tr1', 'tr2'), face_groups):
                 self._transport_internal_faces(component, faces, dt)
@@ -312,6 +428,29 @@ class P6IntegratedSystem:
                 'fresh_delivered_tr1': self.fresh_delivered_tr1,
                 'fresh_delivered_tr2': self.fresh_delivered_tr2,
                 'fresh_short_circuit': self.fresh_short_circuit}
+
+    def step(self, dt, *, angle=None):
+        """Advance one physical step, splitting P7 exactly at event bounds."""
+        if not isinstance(dt, (int, float)) or not isfinite(dt) or dt <= 0:
+            raise ValueError("dt must be positive")
+        if not self.p7_enabled:
+            return self._step_segment(dt, angle=angle)
+
+        start = float(self.gas.angle)
+        end = float(angle) if angle is not None else start + dt * self.p7_angular_rate_deg_s
+        if end < start:
+            raise ValueError("angle must not move backwards")
+        points = [start]
+        for boundary in (350.0, 390.0):
+            if start < boundary < end:
+                points.append(boundary)
+        points.append(end)
+        result = None
+        for left, right in zip(points, points[1:]):
+            segment_angle = right - left
+            segment_dt = segment_angle / self.p7_angular_rate_deg_s
+            result = self._step_segment(segment_dt, angle=right)
+        return result
 
     def _external_trace(self, stage, record, state):
         core = record['core_interfaces'][stage]
@@ -512,7 +651,11 @@ class P6IntegratedSystem:
                 'external': list(self._external), 'fresh_delivered': self.fresh_delivered,
                 'fresh_delivered_tr1': self.fresh_delivered_tr1,
                 'fresh_delivered_tr2': self.fresh_delivered_tr2,
-                'fresh_short_circuit': self.fresh_short_circuit}
+                'fresh_short_circuit': self.fresh_short_circuit,
+                'p7_event': snapshot_event(self.p7_event) if self.p7_event else None,
+                'p7_source_delta': list(self.p7_source_delta),
+                'p7_enabled': self.p7_enabled,
+                'p7_angular_rate_deg_s': self.p7_angular_rate_deg_s}
 
     def restore(self, snapshot):
         self.gas.restore(snapshot['gas'])
@@ -528,6 +671,12 @@ class P6IntegratedSystem:
         self.fresh_delivered_tr1 = snapshot.get('fresh_delivered_tr1', 0.0)
         self.fresh_delivered_tr2 = snapshot.get('fresh_delivered_tr2', 0.0)
         self.fresh_short_circuit = snapshot['fresh_short_circuit']
+        self.p7_event = restore_event(snapshot['p7_event']) if snapshot.get('p7_event') else None
+        self.p7_events = [self.p7_event] if self.p7_event else []
+        self.p7_source_delta = list(snapshot.get('p7_source_delta', [0.0] * 4))
+        self.p7_enabled = bool(snapshot.get('p7_enabled', self.p7_enabled))
+        self.p7_angular_rate_deg_s = float(snapshot.get('p7_angular_rate_deg_s',
+                                                          self.p7_angular_rate_deg_s))
 
     def species_sum_error(self):
         """Cross-check authoritative species totals against gas mass."""
