@@ -1,0 +1,13 @@
+{
+  "classification": "P7_PRESCRIBED_COMBUSTION_VERIFIED_CONDITIONAL",
+  "dependency": "CONDITIONAL_ON_P4",
+  "experimental_validation": "NOT_PERFORMED",
+  "independent_review": "INDEPENDENT_REVIEW_PENDING",
+  "resolutions": {
+    "10": {"burned_final": 6.0, "heat": 2399999.9999999995, "source_mass_residual": 5.412337245047638e-16, "heat_burn_residual": -3.965396899729967e-10},
+    "80": {"burned_final": 5.999999999999993, "heat": 2399999.999999998, "source_mass_residual": -1.0718422677191697e-14, "heat_burn_residual": 3.8604639485129155e-09}
+  },
+  "captured_fresh": 3.0,
+  "residual_unchanged": 0.0,
+  "note": "Bounded source primitive evidence; full topology remains conditional on P4."
+}
