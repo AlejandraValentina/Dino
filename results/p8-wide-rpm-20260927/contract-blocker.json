@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-27",
+  "authorization": "HUMAN_AUTHORIZATION_P8_WIDE_RPM_PERFORMANCE",
+  "status": "RESOLVED_BY_HUMAN_REFERENCE_AUTHORIZATION",
+  "prior_status": "P8_SCIENTIFIC_CONTRACT_REQUIRED",
+  "campaign_executed": true,
+  "resolution": "Human authorization permits the composite synthetic reference from the existing S2T-0D-01 recipe and frozen P5-C/P6/P7 fixture.",
+  "reason": "No complete approved 2T reference configuration/mechanics was found.",
+  "required_topology": "atmosphere-intake1D-crankcase0D-TR1/TR2-cylinder0D-exhaust1D-atmosphere",
+  "audited_references": [
+    {
+      "path": "motorsim/simulation_case.py",
+      "identifier": "S2T-0D-01",
+      "finding": "Explicitly synthetic and not measured; 0D prototype case."
+    },
+    {
+      "path": "motorsim/simulation.py",
+      "finding": "Legacy four-control-volume 0D model using RK4; not the approved full gasdynamic topology."
+    },
+    {
+      "path": "motorsim/p5c.py",
+      "finding": "P5-C fixtures contain test-only synthetic chamber/duct values and do not provide approved provenance."
+    },
+    {
+      "path": "motorsim/p6_species.py",
+      "finding": "P6 species layer exists, but no complete approved P5-C/P6/P7 2T reference case is connected to it."
+    },
+    {
+      "path": "motorsim/p7_prescribed.py",
+      "finding": "P7 prescribed event exists, but its use cannot establish missing approved mechanics/configuration provenance."
+    }
+  ],
+  "not_done": [
+    "five-anchor campaign",
+    "P8 JSON/CSV metrics",
+    "P6/P7/P5/P3/P4 regression closure",
+    "P8 conditional success classification",
+    "P9"
+  ],
+  "preserved_constraints": {
+    "p4": "BLOCKED / NOT_GRANTED",
+    "experimental_validation": "NOT_PERFORMED",
+    "periodic_convergence": "NOT_GRANTED_BY_P4"
+  },
+  "verification": {
+    "command": ".venv\\Scripts\\python.exe -m unittest tests.test_p8_performance -v",
+    "result": "PASS",
+    "tests": 6,
+    "openspec_command": "npx --yes --cache C:\\dino\\.npm-cache-openspec @fission-ai/openspec@1.3.1 validate p8-wide-rpm-performance --strict --no-interactive",
+    "openspec_result": "PASS: Change 'p8-wide-rpm-performance' is valid"
+  },
+  "independent_review": "INDEPENDENT_REVIEW_PENDING"
+}

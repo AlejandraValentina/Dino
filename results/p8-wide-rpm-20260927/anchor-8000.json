@@ -1,0 +1,194 @@
+{
+  "rpm": 8000,
+  "omega_deg_s": 48000.0,
+  "window_deg": [
+    180.0,
+    540.0
+  ],
+  "window_s": 0.0075,
+  "step_count": 7202,
+  "angle_step_deg": 0.05,
+  "W_cycle_J": 2562.496751919695,
+  "P_indicated_W": 341666.2335892926,
+  "T_indicated_Nm": 407.83402472494566,
+  "p_max_Pa": 124372900.57379207,
+  "prescribed_heat_J": 5327.689804720149,
+  "fresh_mass_delivered_kg": 0.0,
+  "fresh_short_circuit_mass_kg": 0.0,
+  "species_residual_kg": 3.8163916471489756e-17,
+  "mass_residual_kg": -0.002237374533929982,
+  "energy_residual_J": 1461.2555095784821,
+  "cfl": {
+    "min": null,
+    "max": null,
+    "diagnostic": "existing fixture CFL/event boundaries"
+  },
+  "gates": {
+    "finite": true,
+    "admissible": true,
+    "p7_one_event": true,
+    "species": true,
+    "deterministic_replay": true,
+    "restart": true,
+    "cfl": true
+  },
+  "inventory": {
+    "components": {
+      "crankcase": {
+        "gas_mass": 0.0007369543959121171,
+        "fresh_air_mass": 0.0007369543959121061,
+        "fuel_mass": 0.0,
+        "residual_mass": 0.0,
+        "burned_mass": 0.0,
+        "species_sum": 0.0007369543959121061,
+        "species_sum_minus_gas_mass": -1.0950441942103595e-17,
+        "cells": [
+          {
+            "gas_mass": 0.0007369543959121171,
+            "fresh_air_mass": 0.0007369543959121061,
+            "fuel_mass": 0.0,
+            "residual_mass": 0.0,
+            "burned_mass": 0.0,
+            "species_sum_minus_gas_mass": -1.0950441942103595e-17
+          }
+        ]
+      },
+      "cylinder": {
+        "gas_mass": 0.003725387721375805,
+        "fresh_air_mass": 9.574554394051782e-11,
+        "fuel_mass": 0.0,
+        "residual_mass": 0.0,
+        "burned_mass": 0.0037253876256302812,
+        "species_sum": 0.003725387721375825,
+        "species_sum_minus_gas_mass": 1.9949319973733282e-17,
+        "cells": [
+          {
+            "gas_mass": 0.003725387721375805,
+            "fresh_air_mass": 9.574554394051782e-11,
+            "fuel_mass": 0.0,
+            "residual_mass": 0.0,
+            "burned_mass": 0.0037253876256302812,
+            "species_sum_minus_gas_mass": 1.9949319973733282e-17
+          }
+        ]
+      },
+      "intake": {
+        "gas_mass": 0.0036841881936079974,
+        "fresh_air_mass": 0.0036841881936079974,
+        "fuel_mass": 0.0,
+        "residual_mass": 0.0,
+        "burned_mass": 0.0,
+        "species_sum": 0.0036841881936079974,
+        "species_sum_minus_gas_mass": 0.0,
+        "cells": [
+          {
+            "gas_mass": 0.001828886478370706,
+            "fresh_air_mass": 0.0018288864783707242,
+            "fuel_mass": 0.0,
+            "residual_mass": 0.0,
+            "burned_mass": 0.0,
+            "species_sum_minus_gas_mass": 1.8214596497756474e-17
+          },
+          {
+            "gas_mass": 0.0018553017152372917,
+            "fresh_air_mass": 0.0018553017152372734,
+            "fuel_mass": 0.0,
+            "residual_mass": 0.0,
+            "burned_mass": 0.0,
+            "species_sum_minus_gas_mass": -1.8214596497756474e-17
+          }
+        ]
+      },
+      "tr1": {
+        "gas_mass": 0.005064077441862223,
+        "fresh_air_mass": 0.004154654562316388,
+        "fuel_mass": 0.0,
+        "residual_mass": 0.0,
+        "burned_mass": 0.0009094228795458486,
+        "species_sum": 0.005064077441862236,
+        "species_sum_minus_gas_mass": 1.3010426069826053e-17,
+        "cells": [
+          {
+            "gas_mass": 0.0017206416299108457,
+            "fresh_air_mass": 0.0017144036182750936,
+            "fuel_mass": 0.0,
+            "residual_mass": 0.0,
+            "burned_mass": 6.238011635908027e-06,
+            "species_sum_minus_gas_mass": 1.5590827240341554e-16
+          },
+          {
+            "gas_mass": 0.0033434358119513773,
+            "fresh_air_mass": 0.002440250944041294,
+            "fuel_mass": 0.0,
+            "residual_mass": 0.0,
+            "burned_mass": 0.0009031848679099405,
+            "species_sum_minus_gas_mass": -1.4268100589909238e-16
+          }
+        ]
+      },
+      "tr2": {
+        "gas_mass": 0.005064077441862223,
+        "fresh_air_mass": 0.004154654562316388,
+        "fuel_mass": 0.0,
+        "residual_mass": 0.0,
+        "burned_mass": 0.0009094228795458486,
+        "species_sum": 0.005064077441862236,
+        "species_sum_minus_gas_mass": 1.3010426069826053e-17,
+        "cells": [
+          {
+            "gas_mass": 0.0017206416299108457,
+            "fresh_air_mass": 0.0017144036182750936,
+            "fuel_mass": 0.0,
+            "residual_mass": 0.0,
+            "burned_mass": 6.238011635908027e-06,
+            "species_sum_minus_gas_mass": 1.5590827240341554e-16
+          },
+          {
+            "gas_mass": 0.0033434358119513773,
+            "fresh_air_mass": 0.002440250944041294,
+            "fuel_mass": 0.0,
+            "residual_mass": 0.0,
+            "burned_mass": 0.0009031848679099405,
+            "species_sum_minus_gas_mass": -1.4268100589909238e-16
+          }
+        ]
+      },
+      "exhaust": {
+        "gas_mass": 6.0965132401262354e-05,
+        "fresh_air_mass": 1.5680554283877177e-12,
+        "fuel_mass": 0.0,
+        "residual_mass": 0.0,
+        "burned_mass": 6.096513083321246e-05,
+        "species_sum": 6.0965132401267884e-05,
+        "species_sum_minus_gas_mass": 5.5294310796760726e-18,
+        "cells": [
+          {
+            "gas_mass": 3.0417074111819187e-05,
+            "fresh_air_mass": 7.818159749363689e-13,
+            "fuel_mass": 0.0,
+            "residual_mass": 0.0,
+            "burned_mass": 3.0417073330009068e-05,
+            "species_sum_minus_gas_mass": 5.854691731421724e-18
+          },
+          {
+            "gas_mass": 3.0548058289443164e-05,
+            "fresh_air_mass": 7.862394534513487e-13,
+            "fuel_mass": 0.0,
+            "residual_mass": 0.0,
+            "burned_mass": 3.054805750320339e-05,
+            "species_sum_minus_gas_mass": -3.1848438816761693e-19
+          }
+        ]
+      }
+    },
+    "global": {
+      "gas_mass": 0.018335650327021627,
+      "fresh_air_mass": 0.012730451811466478,
+      "fuel_mass": 0.0,
+      "residual_mass": 0.0,
+      "burned_mass": 0.005605198515555191,
+      "species_sum": 0.01833565032702167,
+      "species_sum_minus_gas_mass": 4.163336342344337e-17
+    }
+  }
+}

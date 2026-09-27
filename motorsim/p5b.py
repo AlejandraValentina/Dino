@@ -836,13 +836,15 @@ class IntegratedIntakeTransfer:
     assembled from one common stage state before anything is updated.
     """
     def __init__(self, crankcase, cylinder, duct_states, *, eos=None,
-                 volume_rates=(0.0, 0.0), meshes=None, external_boundary=True):
+                 volume_rates=(0.0, 0.0), meshes=None, external_boundary=True,
+                 geometry_callback=None):
         if len(duct_states) != 3:
             raise ValueError("expected intake, transfer1 and transfer2 states")
         self.eos = eos or IdealGas()
         self.crankcase = crankcase
         self.cylinder = cylinder
         self.external_boundary = bool(external_boundary)
+        self.geometry_callback = geometry_callback
         def normalize(states):
             if isinstance(states, tuple) and len(states) == 4 and isinstance(states[0], (int, float)):
                 return (states,)
@@ -1015,7 +1017,18 @@ class IntegratedIntakeTransfer:
         intake_p = [self.eos.primitive(q) for q in intake_q]
         tr_p = [[self.eos.primitive(q) for q in duct]
                 for duct in (tr1_q, tr2_q)]
-        ai, at1, at2 = self._areas(angle)
+        if self.geometry_callback is None:
+            ai, at1, at2 = self._areas(angle)
+            rates = self.volume_rates
+        else:
+            geometry = self.geometry_callback(float(angle))
+            if isinstance(geometry, dict):
+                rates, areas = geometry['volume_rates'], geometry['areas']
+            else:
+                _, rates, areas = geometry
+            if len(rates) != 2 or len(areas) < 3:
+                raise ValueError('geometry callback requires two rates and three areas')
+            ai, at1, at2 = (float(x) for x in areas[:3])
         # The only external boundary. Its face flux is in the duct +x sign.
         if self.external_boundary:
             atmosphere = Boundary('reservoir', p0=101325.0, T0=300.0, Y0=0.0)
@@ -1055,8 +1068,8 @@ class IntegratedIntakeTransfer:
             return (fsum(flux[0] for flux in fluxes),
                     fsum(flux[2] for flux in fluxes) - pressure * rate,
                     fsum(flux[3] for flux in fluxes))
-        cc_rhs = chamber_rhs(cc, cc_fluxes, self.volume_rates[0])
-        cy_rhs = chamber_rhs(cy, cy_fluxes, self.volume_rates[1])
+        cc_rhs = chamber_rhs(cc, cc_fluxes, float(rates[0]))
+        cy_rhs = chamber_rhs(cy, cy_fluxes, float(rates[1]))
         return ((cc_rhs, cy_rhs, intake_rhs, transfer_rhs[0], transfer_rhs[1]),
                 {'angle': angle, 'areas': (ai, at1, at2), 'external': external_in,
                  'interfaces': (intake_cc['outward'], transfer[0][0]['outward'],
@@ -1066,8 +1079,8 @@ class IntegratedIntakeTransfer:
                                       transfer[1][0]['closed'], transfer[0][1]['closed'],
                                       transfer[1][1]['closed']),
                  'face_fluxes': (intake_faces, transfer_faces[0], transfer_faces[1]),
-                 'work_rates': (-cc.thermodynamics(self.eos)[1] * self.volume_rates[0],
-                                -cy.thermodynamics(self.eos)[1] * self.volume_rates[1])})
+                 'work_rates': (-cc.thermodynamics(self.eos)[1] * float(rates[0]),
+                                -cy.thermodynamics(self.eos)[1] * float(rates[1]))})
 
     @staticmethod
     def _combine(a, rhs, scale):
@@ -1105,17 +1118,32 @@ class IntegratedIntakeTransfer:
         start = self.angle
         self.angle = start + 360.0 * dt if angle is None else float(angle)
         stage_angles = (start if angle is None else self.angle, self.angle)
+        def stage_volumes(a):
+            if self.geometry_callback is None:
+                return None
+            g = self.geometry_callback(float(a))
+            return tuple(g['volumes'] if isinstance(g, dict) else g[0])
+        volumes0, volumes1 = (stage_volumes(stage_angles[0]),
+                              stage_volumes(stage_angles[1]))
         initial = self._state()
+        # Geometry is authoritative for the chamber storage volumes.  Install
+        # the theta0 values before assembling R0; volumes are ordered I,K,C,E.
+        if volumes0 is not None:
+            initial = ((*initial[0][:4], volumes0[1]),
+                       (*initial[1][:4], volumes0[2]), *initial[2:])
         rhs0, trace0 = self._rhs(initial, stage_angles[0])
         def euler_state(state, rhs):
             cc, cy, *ducts = state
             rcc, rcy, *rducts = rhs
             chambers = []
-            for q, r, rate in ((cc, rcc, self.volume_rates[0]),
-                               (cy, rcy, self.volume_rates[1])):
+            rates = self.volume_rates
+            for q, r, rate in ((cc, rcc, rates[0]), (cy, rcy, rates[1])):
                 chambers.append((q[0] + dt * r[0], q[1], q[2] + dt * r[1],
                                 q[3] + dt * r[2]) +
                                 (q[4] + dt * rate,))
+            if volumes1 is not None:
+                chambers[0] = (*chambers[0][:4], volumes1[1])
+                chambers[1] = (*chambers[1][:4], volumes1[2])
             return tuple(chambers) + tuple(tuple(self._combine(q, r, dt)
                                                   for q, r in zip(duct, rduct))
                                            for duct, rduct in zip(ducts, rducts))
@@ -1133,10 +1161,13 @@ class IntegratedIntakeTransfer:
                                 0.5 * (q[2] + p[2] + dt * r[1]),
                                 0.5 * (q[3] + p[3] + dt * r[2])) +
                                 (0.5 * (q[4] + p[4] + dt * rate),))
+            if volumes1 is not None:
+                chambers[0] = (*chambers[0][:4], volumes1[1])
+                chambers[1] = (*chambers[1][:4], volumes1[2])
             return tuple(chambers) + tuple(tuple(tuple(0.5 * (qv + pv + dt * rv)
                                                         for qv, pv, rv in zip(q, p, r))
                                                  for q, p, r in zip(duct, pred, rr))
-                                           for duct, pred, rr in zip(ducts, pducts, rducts))
+                                                 for duct, pred, rr in zip(ducts, pducts, rducts))
         final = heun_state(initial, stage1, rhs1)
         self._validate_state(final)
         applied = self._applied_increment(rhs0, rhs1, dt)

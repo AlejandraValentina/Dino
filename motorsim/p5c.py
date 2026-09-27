@@ -28,11 +28,12 @@ class IntegratedP5C:
     def __init__(self, crankcase, cylinder, duct_states, exhaust_states=None,
                  *, eos=None, meshes=None, exhaust_mesh=None,
                  exhaust_area=1.0e-4, port_area=0.0, volume_rates=(0.0, 0.0),
-                 external_boundary=False):
+                 external_boundary=False, geometry_callback=None):
         self.eos = eos or IdealGas()
         self.core = IntegratedIntakeTransfer(crankcase, cylinder, duct_states,
                                              eos=self.eos, meshes=meshes,
                                              volume_rates=volume_rates,
+                                             geometry_callback=geometry_callback,
                                              external_boundary=external_boundary)
         if exhaust_states is None:
             exhaust_states = ((1.0, 0.0, 100000.0, 0.0),) * 3
@@ -42,6 +43,7 @@ class IntegratedP5C:
         self.exhaust = _FinitePath(exhaust_states, self.exhaust_mesh, self.eos)
         self.exhaust_area = float(exhaust_area)
         self.port_area = float(port_area)
+        self.geometry_callback = geometry_callback
         self.angle = 0.0
         self.ledger = {"external_mass": 0.0, "external_energy": 0.0,
                        "external_species": 0.0, "port_mass": 0.0,
@@ -106,11 +108,22 @@ class IntegratedP5C:
     def _state(self):
         return self.core._state() + (self.exhaust.conservative(),)
 
-    def _exhaust_rhs(self, q, cyl_q, dt_angle):
+    def _exhaust_rhs(self, q, cyl_q, dt_angle, stage_angle=None):
         """Return exhaust duct RHS and its single cylinder-facing flux."""
         chamber = ChamberState(cyl_q[0], cyl_q[2], cyl_q[3], cyl_q[4])
         prim = [self.eos.primitive(x) for x in q]
-        face = port_flux(chamber, prim[0], self.port_area, self.exhaust_area,
+        exhaust_area = self.exhaust_area
+        if self.geometry_callback is not None:
+            geometry = self.geometry_callback(float(self.angle if stage_angle is None else stage_angle))
+            areas = geometry['areas'] if isinstance(geometry, dict) else geometry[2]
+            if len(areas) >= 4:
+                exhaust_area = float(areas[3])
+        # Legacy mode uses the historical explicit geometric ``port_area``.
+        # A geometry callback supplies the dynamic geometric exhaust area and
+        # the fixed constructor exhaust area remains the pipe limit.
+        geometric_area = exhaust_area if self.geometry_callback is not None else self.port_area
+        pipe_area = self.exhaust_area
+        face = port_flux(chamber, prim[0], geometric_area, pipe_area,
                          eos=self.eos)
         faces = [face['flux']]
         for a, b, area in zip(prim, prim[1:], self.exhaust_mesh.areas[1:]):
@@ -126,7 +139,8 @@ class IntegratedP5C:
     def _stage_rhs(self, state, *, stage_angle=None, source=None):
         core_state = state[:-1]
         core_rhs, trace = self.core._rhs(core_state, self.angle if stage_angle is None else stage_angle)
-        ex_rhs, port, external, exhaust_faces = self._exhaust_rhs(state[-1], state[1], 0.0)
+        ex_rhs, port, external, exhaust_faces = self._exhaust_rhs(
+            state[-1], state[1], 0.0, stage_angle)
         # One cylinder RHS: P5-B TR1/TR2 terms plus this same exhaust flux.
         cyl = core_rhs[1]
         cyl = (cyl[0] - port['flux'][0],
@@ -191,18 +205,34 @@ class IntegratedP5C:
     def step(self, dt, *, angle=None, port_area=None, source=None, angle_step=None):
         if not isinstance(dt, (int, float)) or not isfinite(dt) or dt <= 0:
             raise ValueError("dt must be positive")
+        previous_angle = float(self.angle)
         if port_area is not None:
             self.port_area = float(port_area)
         if angle is None:
             self.angle += float(dt) if angle_step is None else float(angle_step)
         else:
             self.angle = float(angle)
-        q0 = self._state()
         stage_angle0 = self.angle - (float(dt) if angle_step is None else float(angle_step))
+        q0 = self._state()
+        def install_volumes(state, volumes):
+            if volumes is None:
+                return state
+            cc, cy, *ducts = state
+            return ((*cc[:4], volumes[1]), (*cy[:4], volumes[2]), *ducts)
+        if self.geometry_callback is not None:
+            geometry0 = self.geometry_callback(float(stage_angle0))
+            volumes0 = geometry0['volumes'] if isinstance(geometry0, dict) else geometry0[0]
+            q0 = install_volumes(q0, volumes0)
         r0, t0 = self._stage_rhs(q0, stage_angle=stage_angle0, source=source)
         q1 = self._add_state(q0, r0, dt)
+        if self.geometry_callback is not None:
+            geometry = self.geometry_callback(float(self.angle))
+            volumes = geometry['volumes'] if isinstance(geometry, dict) else geometry[0]
+            q1 = install_volumes(q1, volumes)
         r1, t1 = self._stage_rhs(q1, stage_angle=self.angle, source=source)
         qn = self._blend(q0, q1, r1, dt)
+        if self.geometry_callback is not None:
+            qn = install_volumes(qn, volumes)
         self._install(qn)
         self.admissible()
         trace = {'flux': t1['port']['flux'], 'closed': t1['port']['area'] == 0.0,
@@ -224,6 +254,8 @@ class IntegratedP5C:
                                "species": 0.5*(t0['core']['external'][3] + t1['core']['external'][3])*dt}
         for key in self._external_cumulative:
             self._external_cumulative[key] += self._last_external[key]
+        record['dt'] = float(dt)
+        record['angle_start'] = previous_angle
         record['ledger'] = self.ledger_report(record['prescribed_heat'])
         self.history.append(record)
         return record
