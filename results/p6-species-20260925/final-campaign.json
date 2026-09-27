@@ -12,10 +12,10 @@
       },
       "final": {
         "gas_mass": 0.020003,
-        "fresh_air_mass": 0.006250599999999999,
+        "fresh_air_mass": 0.0062506,
         "fuel_mass": 0.0037503,
         "residual_mass": 0.0050007,
-        "burned_mass": 0.0050014,
+        "burned_mass": 0.0050014000000000005,
         "species_sum": 0.020003,
         "species_sum_minus_gas_mass": 0.0
       },
@@ -26,16 +26,16 @@
         0.0
       ],
       "measured_change": [
-        -8.673617379884035e-19,
         0.0,
         0.0,
-        -8.673617379884035e-19
+        0.0,
+        0.0
       ],
       "cumulative_residual": [
-        -8.673617379884035e-19,
         0.0,
         0.0,
-        -8.673617379884035e-19
+        0.0,
+        0.0
       ],
       "worst_per_step_residual": 8.673617379884035e-19
     },
@@ -69,47 +69,47 @@
           },
           {
             "stage_index": 0,
-            "interface_name": "crankcase<->tr1",
-            "left_component": "crankcase",
-            "right_component": "tr1",
+            "interface_name": "tr1<->crankcase",
+            "left_component": "tr1",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.0006525078196539585,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr1",
+            "donor_component": "crankcase",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.7,
-              "fuel": 0.2,
-              "residual": 0.05,
-              "burned": 0.05
+              "fresh_air": 0.55,
+              "fuel": 0.05,
+              "residual": 0.25,
+              "burned": 0.15
             },
             "species_fluxes": {
-              "fresh_air": -0.0004567554737577709,
-              "fuel": -0.0001305015639307917,
-              "residual": -3.2625390982697925e-05,
-              "burned": -3.2625390982697925e-05
+              "fresh_air": -0.00035887930080967723,
+              "fuel": -3.2625390982697925e-05,
+              "residual": -0.00016312695491348963,
+              "burned": -9.787617294809378e-05
             },
             "closed": false
           },
           {
             "stage_index": 0,
-            "interface_name": "crankcase<->tr2",
-            "left_component": "crankcase",
-            "right_component": "tr2",
+            "interface_name": "tr2<->crankcase",
+            "left_component": "tr2",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.0006525078196539585,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr2",
+            "donor_component": "crankcase",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.1,
-              "fuel": 0.3,
-              "residual": 0.2,
-              "burned": 0.4
+              "fresh_air": 0.55,
+              "fuel": 0.05,
+              "residual": 0.25,
+              "burned": 0.15
             },
             "species_fluxes": {
-              "fresh_air": -6.525078196539585e-05,
-              "fuel": -0.00019575234589618755,
-              "residual": -0.0001305015639307917,
-              "burned": -0.0002610031278615834
+              "fresh_air": -0.00035887930080967723,
+              "fuel": -3.2625390982697925e-05,
+              "residual": -0.00016312695491348963,
+              "burned": -9.787617294809378e-05
             },
             "closed": false
           },
@@ -123,16 +123,16 @@
             "donor_component": "tr1",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.7,
+              "fresh_air": 0.2,
               "fuel": 0.2,
-              "residual": 0.05,
-              "burned": 0.05
+              "residual": 0.3,
+              "burned": 0.3
             },
             "species_fluxes": {
-              "fresh_air": 0.0009185586535436919,
+              "fresh_air": 0.000262445329583912,
               "fuel": 0.000262445329583912,
-              "residual": 6.5611332395978e-05,
-              "burned": 6.5611332395978e-05
+              "residual": 0.00039366799437586794,
+              "burned": 0.00039366799437586794
             },
             "closed": false
           },
@@ -146,14 +146,14 @@
             "donor_component": "tr2",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.1,
-              "fuel": 0.3,
+              "fresh_air": 0.3,
+              "fuel": 0.1,
               "residual": 0.2,
               "burned": 0.4
             },
             "species_fluxes": {
-              "fresh_air": 0.000131222664791956,
-              "fuel": 0.00039366799437586794,
+              "fresh_air": 0.00039366799437586794,
+              "fuel": 0.000131222664791956,
               "residual": 0.000262445329583912,
               "burned": 0.000524890659167824
             },
@@ -196,39 +196,39 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr1",
+              "interface_name": "tr1<->crankcase",
               "species_flux": {
-                "fresh_air": -0.0004567554673712745,
-                "fuel": -0.0001305015575442953,
-                "residual": -3.262539949802646e-05,
-                "burned": -3.2625395240362195e-05
+                "fresh_air": -0.00035887930080967723,
+                "fuel": -3.262539098269793e-05,
+                "residual": -0.00016312695491348963,
+                "burned": -9.787617294809375e-05
               }
             },
             {
-              "interface_name": "crankcase<->tr2",
+              "interface_name": "tr2<->crankcase",
               "species_flux": {
-                "fresh_air": -6.525080112488507e-05,
-                "fuel": -0.00019575233525202687,
-                "residual": -0.00013050156605962386,
-                "burned": -0.0002610031172174228
+                "fresh_air": -0.00035887930080967723,
+                "fuel": -3.262539098269793e-05,
+                "residual": -0.00016312695491348963,
+                "burned": -9.787617294809375e-05
               }
             },
             {
               "interface_name": "tr1<->cylinder",
               "species_flux": {
-                "fresh_air": 0.0009185586407001204,
-                "fuel": 0.0002624453167403406,
-                "residual": 6.561134952073984e-05,
-                "burned": 6.561134095835892e-05
+                "fresh_air": 0.000262445329583912,
+                "fuel": 0.000262445329583912,
+                "residual": 0.00039366799437586794,
+                "burned": 0.00039366799437586794
               }
             },
             {
               "interface_name": "tr2<->cylinder",
               "species_flux": {
-                "fresh_air": 0.0001312227033226702,
-                "fuel": 0.0003936679729699156,
-                "residual": 0.0002624453338651025,
-                "burned": 0.0005248906377618717
+                "fresh_air": 0.00039366799437586794,
+                "fuel": 0.000131222664791956,
+                "residual": 0.000262445329583912,
+                "burned": 0.000524890659167824
               }
             },
             {
@@ -243,30 +243,30 @@
           ],
           "crankcase": {
             "contributions": [
-              -0.0005220062684961595,
-              -0.0003262538927963222,
-              -0.0001631269655576503,
-              -0.00029362851245778496
+              0.0007177586016193545,
+              6.525078196539586e-05,
+              0.00032625390982697925,
+              0.0001957523458961875
             ],
             "assembled_rhs": [
-              -0.0005220062684961595,
-              -0.0003262538927963222,
-              -0.0001631269655576503,
-              -0.00029362851245778496
+              0.0007177586016193545,
+              6.525078196539586e-05,
+              0.00032625390982697925,
+              0.0001957523458961875
             ]
           },
           "cylinder": {
             "contributions": [
-              -0.0010497813440227906,
-              -0.0006561132897102563,
-              -0.00032805668338584235,
-              -0.0005905019787202306
+              -0.00065611332395978,
+              -0.000393667994375868,
+              -0.00065611332395978,
+              -0.0009185586535436919
             ],
             "assembled_rhs": [
-              -0.0010497813440227906,
-              -0.0006561132897102563,
-              -0.00032805668338584235,
-              -0.0005905019787202306
+              -0.00065611332395978,
+              -0.000393667994375868,
+              -0.00065611332395978,
+              -0.0009185586535436919
             ]
           }
         }
@@ -300,47 +300,47 @@
           },
           {
             "stage_index": 1,
-            "interface_name": "crankcase<->tr1",
-            "left_component": "crankcase",
-            "right_component": "tr1",
+            "interface_name": "tr1<->crankcase",
+            "left_component": "tr1",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.0006525054826670133,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr1",
-            "donor_mass": 0.9999999999999999,
+            "donor_component": "crankcase",
+            "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.6999999902123833,
-              "fuel": 0.19999999021238338,
-              "residual": 0.05000001305015554,
-              "burned": 0.05000000652507777
+              "fresh_air": 0.55,
+              "fuel": 0.05000000000000001,
+              "residual": 0.25,
+              "burned": 0.14999999999999997
             },
             "species_fluxes": {
-              "fresh_air": -0.0004567538314804358,
-              "fuel": -0.00013050109014692916,
-              "residual": -3.262528264864871e-05,
-              "burned": -3.2625278390999686e-05
+              "fresh_air": -0.0003588780154668573,
+              "fuel": -3.262527413335067e-05,
+              "residual": -0.00016312637066675332,
+              "burned": -9.787582240005197e-05
             },
             "closed": false
           },
           {
             "stage_index": 1,
-            "interface_name": "crankcase<->tr2",
-            "left_component": "crankcase",
-            "right_component": "tr2",
+            "interface_name": "tr2<->crankcase",
+            "left_component": "tr2",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.0006525054826670133,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr2",
+            "donor_component": "crankcase",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.10000002936284998,
-              "fuel": 0.29999998368730557,
-              "residual": 0.20000000326253892,
-              "burned": 0.3999999836873056
+              "fresh_air": 0.55,
+              "fuel": 0.05000000000000001,
+              "residual": 0.25,
+              "burned": 0.14999999999999997
             },
             "species_fluxes": {
-              "fresh_air": -6.525056742612193e-05,
-              "fuel": -0.00019575163415598145,
-              "residual": -0.0001305010986622272,
-              "burned": -0.0002610021824226828
+              "fresh_air": -0.0003588780154668573,
+              "fuel": -3.262527413335067e-05,
+              "residual": -0.00016312637066675332,
+              "burned": -9.787582240005197e-05
             },
             "closed": false
           },
@@ -352,18 +352,18 @@
             "gas_mass_flux": 0.0013122262382979119,
             "physical_flow_direction": "left_to_right",
             "donor_component": "tr1",
-            "donor_mass": 0.9999999999999999,
+            "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.6999999902123833,
-              "fuel": 0.19999999021238338,
-              "residual": 0.05000001305015554,
-              "burned": 0.05000000652507777
+              "fresh_air": 0.2,
+              "fuel": 0.2,
+              "residual": 0.3,
+              "burned": 0.3
             },
             "species_fluxes": {
-              "fresh_air": 0.0009185583539649709,
-              "fuel": 0.00026244523481601503,
-              "residual": 6.561132903965211e-05,
-              "burned": 6.561132047727386e-05
+              "fresh_air": 0.0002624452476595824,
+              "fuel": 0.0002624452476595824,
+              "residual": 0.00039366787148937356,
+              "burned": 0.00039366787148937356
             },
             "closed": false
           },
@@ -377,16 +377,16 @@
             "donor_component": "tr2",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.10000002936284998,
-              "fuel": 0.29999998368730557,
-              "residual": 0.20000000326253892,
-              "burned": 0.3999999836873056
+              "fresh_air": 0.3,
+              "fuel": 0.1,
+              "residual": 0.2,
+              "burned": 0.4
             },
             "species_fluxes": {
-              "fresh_air": 0.00013122266236049337,
-              "fuel": 0.0003936678500834279,
-              "residual": 0.00026244525194077156,
-              "burned": 0.0005248904739132192
+              "fresh_air": 0.00039366787148937356,
+              "fuel": 0.0001312226238297912,
+              "residual": 0.0002624452476595824,
+              "burned": 0.0005248904953191648
             },
             "closed": false
           },
@@ -427,39 +427,39 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr1",
+              "interface_name": "tr1<->crankcase",
               "species_flux": {
-                "fresh_air": -0.0004567538250939851,
-                "fuel": -0.0001305010837604785,
-                "residual": -3.262529116391626e-05,
-                "burned": -3.262528264863347e-05
+                "fresh_air": -0.0003588780154668573,
+                "fuel": -3.262527413335066e-05,
+                "residual": -0.00016312637066675332,
+                "burned": -9.7875822400052e-05
               }
             },
             {
-              "interface_name": "crankcase<->tr2",
+              "interface_name": "tr2<->crankcase",
               "species_flux": {
-                "fresh_air": -6.525058658547389e-05,
-                "fuel": -0.00019575162351189693,
-                "residual": -0.00013050110079104404,
-                "burned": -0.0002610021717785983
+                "fresh_air": -0.0003588780154668573,
+                "fuel": -3.262527413335066e-05,
+                "residual": -0.00016312637066675332,
+                "burned": -9.7875822400052e-05
               }
             },
             {
               "interface_name": "tr1<->cylinder",
               "species_flux": {
-                "fresh_air": 0.0009185583411214495,
-                "fuel": 0.00026244522197249365,
-                "residual": 6.561134616434731e-05,
-                "burned": 6.561132903962146e-05
+                "fresh_air": 0.0002624452476597081,
+                "fuel": 0.00026244524765964527,
+                "residual": 0.0003936678714893106,
+                "burned": 0.00039366787148924784
               }
             },
             {
               "interface_name": "tr2<->cylinder",
               "species_flux": {
-                "fresh_air": 0.00013122270089105753,
-                "fuel": 0.00039366782867755875,
-                "residual": 0.0002624452562219453,
-                "burned": 0.0005248904525073501
+                "fresh_air": 0.0003936678714893106,
+                "fuel": 0.00013122262382985405,
+                "residual": 0.00026244524765964527,
+                "burned": 0.0005248904953191019
               }
             },
             {
@@ -474,30 +474,30 @@
           ],
           "crankcase": {
             "contributions": [
-              -0.000522004411679459,
-              -0.0003262527072723754,
-              -0.0001631263919549603,
-              -0.0002936274544272318
+              0.0007177560309337146,
+              6.525054826670133e-05,
+              0.00032625274133350665,
+              0.000195751644800104
             ],
             "assembled_rhs": [
-              -0.000522004411679459,
-              -0.0003262527072723754,
-              -0.0001631263919549603,
-              -0.0002936274544272318
+              0.0007177560309337146,
+              6.525054826670133e-05,
+              0.00032625274133350665,
+              0.000195751644800104
             ]
           },
           "cylinder": {
             "contributions": [
-              -0.001049781042012507,
-              -0.0006561130506500523,
-              -0.0003280566023862926,
-              -0.0005905017815469716
+              -0.0006561131191490187,
+              -0.0003936678714894993,
+              -0.0006561131191489559,
+              -0.0009185583668083497
             ],
             "assembled_rhs": [
-              -0.001049781042012507,
-              -0.0006561130506500523,
-              -0.0003280566023862926,
-              -0.0005905017815469716
+              -0.0006561131191490187,
+              -0.0003936678714894993,
+              -0.0006561131191489559,
+              -0.0009185583668083497
             ]
           }
         }
@@ -531,47 +531,47 @@
           },
           {
             "stage_index": 0,
-            "interface_name": "crankcase<->tr1",
-            "left_component": "crankcase",
-            "right_component": "tr1",
+            "interface_name": "tr1<->crankcase",
+            "left_component": "tr1",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.0006525054826710809,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr1",
+            "donor_component": "crankcase",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.6999999902124014,
-              "fuel": 0.19999999021240153,
-              "residual": 0.05000001305013132,
-              "burned": 0.05000000652506566
+              "fresh_air": 0.55,
+              "fuel": 0.05,
+              "residual": 0.25,
+              "burned": 0.15
             },
             "species_fluxes": {
-              "fresh_air": -0.00045675383148329493,
-              "fuel": -0.0001305010901477545,
-              "residual": -3.262528264883628e-05,
-              "burned": -3.262527839119516e-05
+              "fresh_air": -0.0003588780154690945,
+              "fuel": -3.2625274133554046e-05,
+              "residual": -0.00016312637066777022,
+              "burned": -9.787582240066213e-05
             },
             "closed": false
           },
           {
             "stage_index": 0,
-            "interface_name": "crankcase<->tr2",
-            "left_component": "crankcase",
-            "right_component": "tr2",
+            "interface_name": "tr2<->crankcase",
+            "left_component": "tr2",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.0006525054826710809,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr2",
+            "donor_component": "crankcase",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.10000002936279548,
-              "fuel": 0.2999999836873358,
-              "residual": 0.20000000326253284,
-              "burned": 0.3999999836873359
+              "fresh_air": 0.55,
+              "fuel": 0.05,
+              "residual": 0.25,
+              "burned": 0.15
             },
             "species_fluxes": {
-              "fresh_air": -6.525056742649312e-05,
-              "fuel": -0.00019575163415722145,
-              "residual": -0.00013050109866303674,
-              "burned": -0.0002610021824243296
+              "fresh_air": -0.0003588780154690945,
+              "fuel": -3.2625274133554046e-05,
+              "residual": -0.00016312637066777022,
+              "burned": -9.787582240066213e-05
             },
             "closed": false
           },
@@ -585,16 +585,16 @@
             "donor_component": "tr1",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.6999999902124014,
-              "fuel": 0.19999999021240153,
-              "residual": 0.05000001305013132,
-              "burned": 0.05000000652506566
+              "fresh_air": 0.20000000000004792,
+              "fuel": 0.200000000000024,
+              "residual": 0.29999999999997606,
+              "burned": 0.2999999999999521
             },
             "species_fluxes": {
-              "fresh_air": 0.0009185583539648409,
-              "fuel": 0.0002624452348159949,
-              "residual": 6.561132903960934e-05,
-              "burned": 6.561132047724697e-05
+              "fresh_air": 0.0002624452476596013,
+              "fuel": 0.0002624452476595699,
+              "residual": 0.00039366787148927625,
+              "burned": 0.0003936678714892448
             },
             "closed": false
           },
@@ -606,18 +606,18 @@
             "gas_mass_flux": 0.0013122262382976922,
             "physical_flow_direction": "left_to_right",
             "donor_component": "tr2",
-            "donor_mass": 1.0,
+            "donor_mass": 0.9999999999999999,
             "donor_species_fractions": {
-              "fresh_air": 0.10000002936279548,
-              "fuel": 0.2999999836873358,
-              "residual": 0.20000000326253284,
-              "burned": 0.3999999836873359
+              "fresh_air": 0.29999999999997606,
+              "fuel": 0.10000000000002396,
+              "residual": 0.20000000000002396,
+              "burned": 0.3999999999999761
             },
             "species_fluxes": {
-              "fresh_air": 0.00013122266236039988,
-              "fuel": 0.0003936678500834017,
-              "residual": 0.00026244525194071963,
-              "burned": 0.000524890473913171
+              "fresh_air": 0.00039366787148927625,
+              "fuel": 0.00013122262382980065,
+              "residual": 0.00026244524765956987,
+              "burned": 0.0005248904953190455
             },
             "closed": false
           },
@@ -658,39 +658,39 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr1",
+              "interface_name": "tr1<->crankcase",
               "species_flux": {
-                "fresh_air": -0.0004567538250968442,
-                "fuel": -0.00013050108376130384,
-                "residual": -3.262529116410383e-05,
-                "burned": -3.2625282648828943e-05
+                "fresh_air": -0.0003588780154690945,
+                "fuel": -3.262527413355404e-05,
+                "residual": -0.00016312637066777022,
+                "burned": -9.787582240066213e-05
               }
             },
             {
-              "interface_name": "crankcase<->tr2",
+              "interface_name": "tr2<->crankcase",
               "species_flux": {
-                "fresh_air": -6.52505865858451e-05,
-                "fuel": -0.00019575162351313696,
-                "residual": -0.0001305011007918536,
-                "burned": -0.00026100217178024517
+                "fresh_air": -0.0003588780154690945,
+                "fuel": -3.262527413355404e-05,
+                "residual": -0.00016312637066777022,
+                "burned": -9.787582240066213e-05
               }
             },
             {
               "interface_name": "tr1<->cylinder",
               "species_flux": {
-                "fresh_air": 0.0009185583411213195,
-                "fuel": 0.00026244522197247354,
-                "residual": 6.561134616430454e-05,
-                "burned": 6.561132903959458e-05
+                "fresh_air": 0.0002624452476597271,
+                "fuel": 0.0002624452476596328,
+                "residual": 0.0003936678714892133,
+                "burned": 0.00039366787148911904
               }
             },
             {
               "interface_name": "tr2<->cylinder",
               "species_flux": {
-                "fresh_air": 0.00013122270089096404,
-                "fuel": 0.00039366782867753257,
-                "residual": 0.0002624452562218934,
-                "burned": 0.0005248904525073021
+                "fresh_air": 0.0003936678714892133,
+                "fuel": 0.00013122262382986354,
+                "residual": 0.0002624452476596328,
+                "burned": 0.0005248904953189826
               }
             },
             {
@@ -705,30 +705,30 @@
           ],
           "crankcase": {
             "contributions": [
-              -0.0005220044116826893,
-              -0.0003262527072744408,
-              -0.00016312639195595745,
-              -0.0002936274544290741
+              0.000717756030938189,
+              6.525054826710808e-05,
+              0.00032625274133554045,
+              0.00019575164480132426
             ],
             "assembled_rhs": [
-              -0.0005220044116826893,
-              -0.0003262527072744408,
-              -0.00016312639195595745,
-              -0.0002936274544290741
+              0.000717756030938189,
+              6.525054826710808e-05,
+              0.00032625274133554045,
+              0.00019575164480132426
             ]
           },
           "cylinder": {
             "contributions": [
-              -0.0010497810420122835,
-              -0.0006561130506500062,
-              -0.00032805660238619796,
-              -0.0005905017815468966
+              -0.0006561131191489403,
+              -0.00039366787148949634,
+              -0.0006561131191488461,
+              -0.0009185583668081017
             ],
             "assembled_rhs": [
-              -0.0010497810420122835,
-              -0.0006561130506500062,
-              -0.00032805660238619796,
-              -0.0005905017815468966
+              -0.0006561131191489403,
+              -0.00039366787148949634,
+              -0.0006561131191488461,
+              -0.0009185583668081017
             ]
           }
         }
@@ -762,47 +762,47 @@
           },
           {
             "stage_index": 1,
-            "interface_name": "crankcase<->tr1",
-            "left_component": "crankcase",
-            "right_component": "tr1",
+            "interface_name": "tr1<->crankcase",
+            "left_component": "tr1",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.000652503145691999,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr1",
-            "donor_mass": 0.9999999999999999,
+            "donor_component": "crankcase",
+            "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.6999999804248199,
-              "fuel": 0.19999998042481995,
-              "residual": 0.05000002610024014,
-              "burned": 0.05000001305012008
+              "fresh_air": 0.55,
+              "fuel": 0.049999999999999996,
+              "residual": 0.25,
+              "burned": 0.15
             },
             "species_fluxes": {
-              "fresh_air": -0.0004567521892115327,
-              "fuel": -0.00013050061636553324,
-              "residual": -3.2625174315088744e-05,
-              "burned": -3.2625165799844354e-05
+              "fresh_air": -0.0003588767301305995,
+              "fuel": -3.262515728459994e-05,
+              "residual": -0.00016312578642299974,
+              "burned": -9.787547185379984e-05
             },
             "closed": false
           },
           {
             "stage_index": 1,
-            "interface_name": "crankcase<->tr2",
-            "left_component": "crankcase",
-            "right_component": "tr2",
+            "interface_name": "tr2<->crankcase",
+            "left_component": "tr2",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.000652503145691999,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr2",
-            "donor_mass": 0.9999999999999999,
+            "donor_component": "crankcase",
+            "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.1000000587255403,
-              "fuel": 0.29999996737469975,
-              "residual": 0.20000000652506003,
-              "burned": 0.39999996737469995
+              "fresh_air": 0.55,
+              "fuel": 0.049999999999999996,
+              "residual": 0.25,
+              "burned": 0.15
             },
             "species_fluxes": {
-              "fresh_air": -6.525035288779967e-05,
-              "fuel": -0.00019575092241948865,
-              "residual": -0.000130500633396022,
-              "burned": -0.0002610012369886887
+              "fresh_air": -0.0003588767301305995,
+              "fuel": -3.262515728459994e-05,
+              "residual": -0.00016312578642299974,
+              "burned": -9.787547185379984e-05
             },
             "closed": false
           },
@@ -814,18 +814,18 @@
             "gas_mass_flux": 0.0013122258286754288,
             "physical_flow_direction": "left_to_right",
             "donor_component": "tr1",
-            "donor_mass": 0.9999999999999999,
+            "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.6999999804248199,
-              "fuel": 0.19999998042481995,
-              "residual": 0.05000002610024014,
-              "burned": 0.05000001305012008
+              "fresh_air": 0.20000000000014373,
+              "fuel": 0.2000000000000719,
+              "residual": 0.2999999999999281,
+              "burned": 0.29999999999985627
             },
             "species_fluxes": {
-              "fresh_air": 0.0009185580543857433,
-              "fuel": 0.0002624451400480289,
-              "residual": 6.561132568318068e-05,
-              "burned": 6.561130855847607e-05
+              "fresh_air": 0.0002624451657352744,
+              "fuel": 0.0002624451657351801,
+              "residual": 0.0003936677486025343,
+              "burned": 0.00039366774860244
             },
             "closed": false
           },
@@ -837,18 +837,18 @@
             "gas_mass_flux": 0.0013122258286754288,
             "physical_flow_direction": "left_to_right",
             "donor_component": "tr2",
-            "donor_mass": 0.9999999999999999,
+            "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.1000000587255403,
-              "fuel": 0.29999996737469975,
-              "residual": 0.20000000652506003,
-              "burned": 0.39999996737469995
+              "fresh_air": 0.2999999999999281,
+              "fuel": 0.10000000000007186,
+              "residual": 0.2000000000000719,
+              "burned": 0.3999999999999282
             },
             "species_fluxes": {
-              "fresh_air": 0.00013122265992871366,
-              "fuel": 0.000393667705790867,
-              "residual": 0.00026244517429743807,
-              "burned": 0.0005248902886584102
+              "fresh_air": 0.0003936677486025343,
+              "fuel": 0.0001312225828676372,
+              "residual": 0.0002624451657351801,
+              "burned": 0.0005248903314700773
             },
             "closed": false
           },
@@ -889,39 +889,39 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr1",
+              "interface_name": "tr1<->crankcase",
               "species_flux": {
-                "fresh_air": -0.0004567521828251278,
-                "fuel": -0.00013050060997912827,
-                "residual": -3.2625182830295296e-05,
-                "burned": -3.262517005744762e-05
+                "fresh_air": -0.0003588767301305995,
+                "fuel": -3.262515728459995e-05,
+                "residual": -0.00016312578642299977,
+                "burned": -9.787547185379984e-05
               }
             },
             {
-              "interface_name": "crankcase<->tr2",
+              "interface_name": "tr2<->crankcase",
               "species_flux": {
-                "fresh_air": -6.525037204701443e-05,
-                "fuel": -0.00019575091177548046,
-                "residual": -0.0001305006355248236,
-                "burned": -0.00026100122634468043
+                "fresh_air": -0.0003588767301305995,
+                "fuel": -3.262515728459995e-05,
+                "residual": -0.00016312578642299977,
+                "burned": -9.787547185379984e-05
               }
             },
             {
               "interface_name": "tr1<->cylinder",
               "species_flux": {
-                "fresh_air": 0.0009185580415422719,
-                "fuel": 0.0002624451272045574,
-                "residual": 6.56113428078092e-05,
-                "burned": 6.561131712079033e-05
+                "fresh_air": 0.0002624451657355258,
+                "fuel": 0.0002624451657353059,
+                "residual": 0.00039366774860240863,
+                "burned": 0.0003936677486021886
               }
             },
             {
               "interface_name": "tr2<->cylinder",
               "species_flux": {
-                "fresh_air": 0.00013122269845912784,
-                "fuel": 0.00039366768438508137,
-                "residual": 0.00026244517857859515,
-                "burned": 0.0005248902672526244
+                "fresh_air": 0.0003936677486024086,
+                "fuel": 0.00013122258286776288,
+                "residual": 0.0002624451657353058,
+                "burned": 0.0005248903314699515
               }
             },
             {
@@ -936,30 +936,30 @@
           ],
           "crankcase": {
             "contributions": [
-              -0.0005220025548721422,
-              -0.00032625152175460876,
-              -0.0001631258183551189,
-              -0.00029362639640212804
+              0.000717753460261199,
+              6.52503145691999e-05,
+              0.00032625157284599954,
+              0.00019575094370759968
             ],
             "assembled_rhs": [
-              -0.0005220025548721422,
-              -0.00032625152175460876,
-              -0.0001631258183551189,
-              -0.00029362639640212804
+              0.000717753460261199,
+              6.52503145691999e-05,
+              0.00032625157284599954,
+              0.00019575094370759968
             ]
           },
           "cylinder": {
             "contributions": [
-              -0.0010497807400013997,
-              -0.0006561128115896387,
-              -0.00032805652138640434,
-              -0.0005905015843734147
+              -0.0006561129143379344,
+              -0.00039366774860306875,
+              -0.0006561129143377144,
+              -0.0009185580800721401
             ],
             "assembled_rhs": [
-              -0.0010497807400013997,
-              -0.0006561128115896387,
-              -0.00032805652138640434,
-              -0.0005905015843734147
+              -0.0006561129143379344,
+              -0.00039366774860306875,
+              -0.0006561129143377144,
+              -0.0009185580800721401
             ]
           }
         }
@@ -993,47 +993,47 @@
           },
           {
             "stage_index": 0,
-            "interface_name": "crankcase<->tr1",
-            "left_component": "crankcase",
-            "right_component": "tr1",
+            "interface_name": "tr1<->crankcase",
+            "left_component": "tr1",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.0006525031456960665,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr1",
-            "donor_mass": 1.0,
+            "donor_component": "crankcase",
+            "donor_mass": 0.9999999999999999,
             "donor_species_fractions": {
-              "fresh_air": 0.699999980424838,
-              "fuel": 0.1999999804248381,
-              "residual": 0.05000002610021591,
-              "burned": 0.05000001305010795
+              "fresh_air": 0.55,
+              "fuel": 0.05,
+              "residual": 0.25000000000000006,
+              "burned": 0.15
             },
             "species_fluxes": {
-              "fresh_air": -0.00045675218921439176,
-              "fuel": -0.0001305006163663586,
-              "residual": -3.2625174315276305e-05,
-              "burned": -3.262516580003981e-05
+              "fresh_air": -0.00035887673013283657,
+              "fuel": -3.2625157284803325e-05,
+              "residual": -0.00016312578642401664,
+              "burned": -9.787547185440996e-05
             },
             "closed": false
           },
           {
             "stage_index": 0,
-            "interface_name": "crankcase<->tr2",
-            "left_component": "crankcase",
-            "right_component": "tr2",
+            "interface_name": "tr2<->crankcase",
+            "left_component": "tr2",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.0006525031456960665,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr2",
-            "donor_mass": 1.0,
+            "donor_component": "crankcase",
+            "donor_mass": 0.9999999999999999,
             "donor_species_fractions": {
-              "fresh_air": 0.1000000587254858,
-              "fuel": 0.2999999673747301,
-              "residual": 0.20000000652505398,
-              "burned": 0.3999999673747302
+              "fresh_air": 0.55,
+              "fuel": 0.05,
+              "residual": 0.25000000000000006,
+              "burned": 0.15
             },
             "species_fluxes": {
-              "fresh_air": -6.525035288817086e-05,
-              "fuel": -0.0001957509224207287,
-              "residual": -0.00013050063339683154,
-              "burned": -0.0002610012369903354
+              "fresh_air": -0.00035887673013283657,
+              "fuel": -3.2625157284803325e-05,
+              "residual": -0.00016312578642401664,
+              "burned": -9.787547185440996e-05
             },
             "closed": false
           },
@@ -1047,16 +1047,16 @@
             "donor_component": "tr1",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.699999980424838,
-              "fuel": 0.1999999804248381,
-              "residual": 0.05000002610021591,
-              "burned": 0.05000001305010795
+              "fresh_air": 0.2000000000001916,
+              "fuel": 0.20000000000009585,
+              "residual": 0.2999999999999041,
+              "burned": 0.29999999999980836
             },
             "species_fluxes": {
-              "fresh_air": 0.0009185580543856108,
-              "fuel": 0.0002624451400480081,
-              "residual": 6.561132568313773e-05,
-              "burned": 6.561130855844901e-05
+              "fresh_air": 0.00026244516573529255,
+              "fuel": 0.0002624451657351669,
+              "residual": 0.0003936677486024359,
+              "burned": 0.00039366774860231024
             },
             "closed": false
           },
@@ -1070,16 +1070,16 @@
             "donor_component": "tr2",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.1000000587254858,
-              "fuel": 0.2999999673747301,
-              "residual": 0.20000000652505398,
-              "burned": 0.3999999673747302
+              "fresh_air": 0.2999999999999041,
+              "fuel": 0.1000000000000958,
+              "residual": 0.20000000000009585,
+              "burned": 0.3999999999999042
             },
             "species_fluxes": {
-              "fresh_air": 0.00013122265992861985,
-              "fuel": 0.0003936677057908399,
-              "residual": 0.0002624451742973855,
-              "burned": 0.0005248902886583605
+              "fresh_air": 0.0003936677486024359,
+              "fuel": 0.00013122258286764628,
+              "residual": 0.0002624451657351669,
+              "burned": 0.0005248903314699566
             },
             "closed": false
           },
@@ -1120,39 +1120,39 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr1",
+              "interface_name": "tr1<->crankcase",
               "species_flux": {
-                "fresh_air": -0.0004567521828279869,
-                "fuel": -0.00013050060997995365,
-                "residual": -3.262518283048286e-05,
-                "burned": -3.262517005764309e-05
+                "fresh_air": -0.0003588767301328365,
+                "fuel": -3.2625157284803325e-05,
+                "residual": -0.00016312578642401664,
+                "burned": -9.787547185440996e-05
               }
             },
             {
-              "interface_name": "crankcase<->tr2",
+              "interface_name": "tr2<->crankcase",
               "species_flux": {
-                "fresh_air": -6.525037204738562e-05,
-                "fuel": -0.00019575091177672052,
-                "residual": -0.00013050063552563318,
-                "burned": -0.0002610012263463272
+                "fresh_air": -0.0003588767301328365,
+                "fuel": -3.2625157284803325e-05,
+                "residual": -0.00016312578642401664,
+                "burned": -9.787547185440996e-05
               }
             },
             {
               "interface_name": "tr1<->cylinder",
               "species_flux": {
-                "fresh_air": 0.0009185580415421396,
-                "fuel": 0.00026244512720453666,
-                "residual": 6.561134280776626e-05,
-                "burned": 6.561131712076326e-05
+                "fresh_air": 0.00026244516573554403,
+                "fuel": 0.00026244516573529266,
+                "residual": 0.00039366774860231024,
+                "burned": 0.00039366774860205876
               }
             },
             {
               "interface_name": "tr2<->cylinder",
               "species_flux": {
-                "fresh_air": 0.00013122269845903403,
-                "fuel": 0.00039366768438505427,
-                "residual": 0.0002624451785785426,
-                "burned": 0.0005248902672525749
+                "fresh_air": 0.0003936677486023102,
+                "fuel": 0.00013122258286777196,
+                "residual": 0.0002624451657352926,
+                "burned": 0.0005248903314698308
               }
             },
             {
@@ -1167,30 +1167,30 @@
           ],
           "crankcase": {
             "contributions": [
-              -0.0005220025548753726,
-              -0.00032625152175667417,
-              -0.00016312581835611605,
-              -0.0002936263964039703
+              0.000717753460265673,
+              6.525031456960665e-05,
+              0.0003262515728480333,
+              0.00019575094370881993
             ],
             "assembled_rhs": [
-              -0.0005220025548753726,
-              -0.00032625152175667417,
-              -0.00016312581835611605,
-              -0.0002936263964039703
+              0.000717753460265673,
+              6.525031456960665e-05,
+              0.0003262515728480333,
+              0.00019575094370881993
             ]
           },
           "cylinder": {
             "contributions": [
-              -0.0010497807400011736,
-              -0.0006561128115895909,
-              -0.0003280565213863089,
-              -0.0005905015843733381
+              -0.0006561129143378543,
+              -0.0003936677486030646,
+              -0.0006561129143376028,
+              -0.0009185580800718895
             ],
             "assembled_rhs": [
-              -0.0010497807400011736,
-              -0.0006561128115895909,
-              -0.0003280565213863089,
-              -0.0005905015843733381
+              -0.0006561129143378543,
+              -0.0003936677486030646,
+              -0.0006561129143376028,
+              -0.0009185580800718895
             ]
           }
         }
@@ -1224,47 +1224,47 @@
           },
           {
             "stage_index": 1,
-            "interface_name": "crankcase<->tr1",
-            "left_component": "crankcase",
-            "right_component": "tr1",
+            "interface_name": "tr1<->crankcase",
+            "left_component": "tr1",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.0006525008087248497,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr1",
+            "donor_component": "crankcase",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.6999999706372916,
-              "fuel": 0.19999997063729152,
-              "residual": 0.05000003915027799,
-              "burned": 0.050000019575138985
+              "fresh_air": 0.5499999999999999,
+              "fuel": 0.05,
+              "residual": 0.25000000000000006,
+              "burned": 0.15
             },
             "species_fluxes": {
-              "fresh_air": -0.00045675054694820376,
-              "fuel": -0.0001305001425857789,
-              "residual": -3.2625065981830534e-05,
-              "burned": -3.26250532090365e-05
+              "fresh_air": -0.0003588754447986673,
+              "fuel": -3.262504043624248e-05,
+              "residual": -0.00016312520218121244,
+              "burned": -9.787512130872745e-05
             },
             "closed": false
           },
           {
             "stage_index": 1,
-            "interface_name": "crankcase<->tr2",
-            "left_component": "crankcase",
-            "right_component": "tr2",
+            "interface_name": "tr2<->crankcase",
+            "left_component": "tr2",
+            "right_component": "crankcase",
             "gas_mass_flux": -0.0006525008087248497,
             "physical_flow_direction": "right_to_left",
-            "donor_component": "tr2",
+            "donor_component": "crankcase",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.10000008808812548,
-              "fuel": 0.29999995106215255,
-              "residual": 0.2000000097875695,
-              "burned": 0.3999999510621526
+              "fresh_air": 0.5499999999999999,
+              "fuel": 0.05,
+              "residual": 0.25000000000000006,
+              "burned": 0.15
             },
             "species_fluxes": {
-              "fresh_air": -6.525013835005808e-05,
-              "fuel": -0.00019575021068546984,
-              "residual": -0.00013050016813136693,
-              "burned": -0.00026100029155795486
+              "fresh_air": -0.0003588754447986673,
+              "fuel": -3.262504043624248e-05,
+              "residual": -0.00016312520218121244,
+              "burned": -9.787512130872745e-05
             },
             "closed": false
           },
@@ -1278,16 +1278,16 @@
             "donor_component": "tr1",
             "donor_mass": 1.0,
             "donor_species_fractions": {
-              "fresh_air": 0.6999999706372916,
-              "fuel": 0.19999997063729152,
-              "residual": 0.05000003915027799,
-              "burned": 0.050000019575138985
+              "fresh_air": 0.20000000000038323,
+              "fuel": 0.20000000000019166,
+              "residual": 0.29999999999980836,
+              "burned": 0.29999999999961674
             },
             "species_fluxes": {
-              "fresh_air": 0.0009185577548061381,
-              "fuel": 0.00026244504527997344,
-              "residual": 6.56113223266064e-05,
-              "burned": 6.561129663961143e-05
+              "fresh_air": 0.00026244508381096873,
+              "fuel": 0.00026244508381071736,
+              "residual": 0.00039366762571544733,
+              "burned": 0.00039366762571519585
             },
             "closed": false
           },
@@ -1299,18 +1299,18 @@
             "gas_mass_flux": 0.0013122254190523293,
             "physical_flow_direction": "left_to_right",
             "donor_component": "tr2",
-            "donor_mass": 1.0,
+            "donor_mass": 0.9999999999999999,
             "donor_species_fractions": {
-              "fresh_air": 0.10000008808812548,
-              "fuel": 0.29999995106215255,
-              "residual": 0.2000000097875695,
-              "burned": 0.3999999510621526
+              "fresh_air": 0.29999999999980836,
+              "fuel": 0.1000000000001916,
+              "residual": 0.20000000000019166,
+              "burned": 0.3999999999998084
             },
             "species_fluxes": {
-              "fresh_air": 0.0001312226574967103,
-              "fuel": 0.0003936675614982114,
-              "residual": 0.0002624450966539633,
-              "burned": 0.0005248901034034444
+              "fresh_air": 0.00039366762571544733,
+              "fuel": 0.00013122254190548436,
+              "residual": 0.00026244508381071736,
+              "burned": 0.0005248901676206803
             },
             "closed": false
           },
@@ -1351,39 +1351,39 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr1",
+              "interface_name": "tr1<->crankcase",
               "species_flux": {
-                "fresh_air": -0.00045675054056184454,
-                "fuel": -0.00013050013619941972,
-                "residual": -3.26250744969761e-05,
-                "burned": -3.262505746660929e-05
+                "fresh_air": -0.0003588754447986673,
+                "fuel": -3.262504043624248e-05,
+                "residual": -0.0001631252021812124,
+                "burned": -9.787512130872742e-05
               }
             },
             {
-              "interface_name": "crankcase<->tr2",
+              "interface_name": "tr2<->crankcase",
               "species_flux": {
-                "fresh_air": -6.525015750913562e-05,
-                "fuel": -0.00019575020004153787,
-                "residual": -0.0001305001702601533,
-                "burned": -0.00026100028091402284
+                "fresh_air": -0.0003588754447986673,
+                "fuel": -3.262504043624248e-05,
+                "residual": -0.0001631252021812124,
+                "burned": -9.787512130872742e-05
               }
             },
             {
               "interface_name": "tr1<->cylinder",
               "species_flux": {
-                "fresh_air": 0.0009185577419627166,
-                "fuel": 0.000262445032436552,
-                "residual": 6.561133945116826e-05,
-                "burned": 6.561130520189236e-05
+                "fresh_air": 0.00026244508381134587,
+                "fuel": 0.0002624450838109059,
+                "residual": 0.00039366762571525874,
+                "burned": 0.00039366762571481866
               }
             },
             {
               "interface_name": "tr2<->cylinder",
               "species_flux": {
-                "fresh_air": 0.00013122269602697448,
-                "fuel": 0.000393667540092509,
-                "residual": 0.0002624451009351038,
-                "burned": 0.000524890081997742
+                "fresh_air": 0.00039366762571525874,
+                "fuel": 0.00013122254190567293,
+                "residual": 0.0002624450838109059,
+                "burned": 0.0005248901676204918
               }
             },
             {
@@ -1398,42 +1398,42 @@
           ],
           "crankcase": {
             "contributions": [
-              -0.0005220006980709801,
-              -0.0003262503362409576,
-              -0.0001631252447571294,
-              -0.00029362533838063216
+              0.0007177508895973346,
+              6.525008087248497e-05,
+              0.0003262504043624248,
+              0.00019575024261745484
             ],
             "assembled_rhs": [
-              -0.0005220006980709801,
-              -0.0003262503362409576,
-              -0.0001631252447571294,
-              -0.00029362533838063216
+              0.0007177508895973346,
+              6.525008087248497e-05,
+              0.0003262504043624248,
+              0.00019575024261745484
             ]
           },
           "cylinder": {
             "contributions": [
-              -0.0010497804379896911,
-              -0.000656112572529061,
-              -0.00032805644038627206,
-              -0.0005905013871996343
+              -0.0006561127095266046,
+              -0.0003936676257165788,
+              -0.0006561127095261646,
+              -0.0009185577933353104
             ],
             "assembled_rhs": [
-              -0.0010497804379896911,
-              -0.000656112572529061,
-              -0.00032805644038627206,
-              -0.0005905013871996343
+              -0.0006561127095266046,
+              -0.0003936676257165788,
+              -0.0006561127095261646,
+              -0.0009185577933353104
             ]
           }
         }
       }
     ],
     "counters": {
-      "fresh_delivery_TR1_trace": 3.543010174821464e-10,
-      "fresh_delivery_TR2_trace": 1.5746713172447544e-10,
-      "fresh_delivery_total_trace": 5.117681492066218e-10,
-      "fresh_delivery_TR1_counter": 3.543010174821464e-10,
-      "fresh_delivery_TR2_counter": 1.5746713172447544e-10,
-      "fresh_delivery_total_counter": 5.117681492066218e-10,
+      "fresh_delivery_TR1_trace": 1.57467124018438e-10,
+      "fresh_delivery_TR2_trace": 1.5746712401836252e-10,
+      "fresh_delivery_total_trace": 3.1493424803680053e-10,
+      "fresh_delivery_TR1_counter": 1.57467124018438e-10,
+      "fresh_delivery_TR2_counter": 1.5746712401836252e-10,
+      "fresh_delivery_total_counter": 3.1493424803680053e-10,
       "short_circuit_trace": 0.0,
       "short_circuit_counter": 0.0
     }
@@ -1508,9 +1508,9 @@
           },
           {
             "stage_index": 0,
-            "interface_name": "crankcase<->tr1",
-            "left_component": "crankcase",
-            "right_component": "tr1",
+            "interface_name": "tr1<->crankcase",
+            "left_component": "tr1",
+            "right_component": "crankcase",
             "gas_mass_flux": 0.0,
             "physical_flow_direction": "closed",
             "donor_component": null,
@@ -1531,9 +1531,9 @@
           },
           {
             "stage_index": 0,
-            "interface_name": "crankcase<->tr2",
-            "left_component": "crankcase",
-            "right_component": "tr2",
+            "interface_name": "tr2<->crankcase",
+            "left_component": "tr2",
+            "right_component": "crankcase",
             "gas_mass_flux": 0.0,
             "physical_flow_direction": "closed",
             "donor_component": null,
@@ -1635,7 +1635,7 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr1",
+              "interface_name": "tr1<->crankcase",
               "species_flux": {
                 "fresh_air": 0.0,
                 "fuel": 0.0,
@@ -1644,7 +1644,7 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr2",
+              "interface_name": "tr2<->crankcase",
               "species_flux": {
                 "fresh_air": 0.0,
                 "fuel": 0.0,
@@ -1739,9 +1739,9 @@
           },
           {
             "stage_index": 1,
-            "interface_name": "crankcase<->tr1",
-            "left_component": "crankcase",
-            "right_component": "tr1",
+            "interface_name": "tr1<->crankcase",
+            "left_component": "tr1",
+            "right_component": "crankcase",
             "gas_mass_flux": 0.0,
             "physical_flow_direction": "closed",
             "donor_component": null,
@@ -1762,9 +1762,9 @@
           },
           {
             "stage_index": 1,
-            "interface_name": "crankcase<->tr2",
-            "left_component": "crankcase",
-            "right_component": "tr2",
+            "interface_name": "tr2<->crankcase",
+            "left_component": "tr2",
+            "right_component": "crankcase",
             "gas_mass_flux": 0.0,
             "physical_flow_direction": "closed",
             "donor_component": null,
@@ -1866,7 +1866,7 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr1",
+              "interface_name": "tr1<->crankcase",
               "species_flux": {
                 "fresh_air": 0.0,
                 "fuel": 0.0,
@@ -1875,7 +1875,7 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr2",
+              "interface_name": "tr2<->crankcase",
               "species_flux": {
                 "fresh_air": 0.0,
                 "fuel": 0.0,
@@ -1970,9 +1970,9 @@
           },
           {
             "stage_index": 0,
-            "interface_name": "crankcase<->tr1",
-            "left_component": "crankcase",
-            "right_component": "tr1",
+            "interface_name": "tr1<->crankcase",
+            "left_component": "tr1",
+            "right_component": "crankcase",
             "gas_mass_flux": 0.0,
             "physical_flow_direction": "closed",
             "donor_component": null,
@@ -1993,9 +1993,9 @@
           },
           {
             "stage_index": 0,
-            "interface_name": "crankcase<->tr2",
-            "left_component": "crankcase",
-            "right_component": "tr2",
+            "interface_name": "tr2<->crankcase",
+            "left_component": "tr2",
+            "right_component": "crankcase",
             "gas_mass_flux": 0.0,
             "physical_flow_direction": "closed",
             "donor_component": null,
@@ -2097,7 +2097,7 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr1",
+              "interface_name": "tr1<->crankcase",
               "species_flux": {
                 "fresh_air": 0.0,
                 "fuel": 0.0,
@@ -2106,7 +2106,7 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr2",
+              "interface_name": "tr2<->crankcase",
               "species_flux": {
                 "fresh_air": 0.0,
                 "fuel": 0.0,
@@ -2201,9 +2201,9 @@
           },
           {
             "stage_index": 1,
-            "interface_name": "crankcase<->tr1",
-            "left_component": "crankcase",
-            "right_component": "tr1",
+            "interface_name": "tr1<->crankcase",
+            "left_component": "tr1",
+            "right_component": "crankcase",
             "gas_mass_flux": 0.0,
             "physical_flow_direction": "closed",
             "donor_component": null,
@@ -2224,9 +2224,9 @@
           },
           {
             "stage_index": 1,
-            "interface_name": "crankcase<->tr2",
-            "left_component": "crankcase",
-            "right_component": "tr2",
+            "interface_name": "tr2<->crankcase",
+            "left_component": "tr2",
+            "right_component": "crankcase",
             "gas_mass_flux": 0.0,
             "physical_flow_direction": "closed",
             "donor_component": null,
@@ -2328,7 +2328,7 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr1",
+              "interface_name": "tr1<->crankcase",
               "species_flux": {
                 "fresh_air": 0.0,
                 "fuel": 0.0,
@@ -2337,7 +2337,7 @@
               }
             },
             {
-              "interface_name": "crankcase<->tr2",
+              "interface_name": "tr2<->crankcase",
               "species_flux": {
                 "fresh_air": 0.0,
                 "fuel": 0.0,
@@ -2445,9 +2445,9 @@
             },
             {
               "stage_index": 0,
-              "interface_name": "crankcase<->tr1",
-              "left_component": "crankcase",
-              "right_component": "tr1",
+              "interface_name": "tr1<->crankcase",
+              "left_component": "tr1",
+              "right_component": "crankcase",
               "gas_mass_flux": 0.0,
               "physical_flow_direction": "closed",
               "donor_component": null,
@@ -2468,9 +2468,9 @@
             },
             {
               "stage_index": 0,
-              "interface_name": "crankcase<->tr2",
-              "left_component": "crankcase",
-              "right_component": "tr2",
+              "interface_name": "tr2<->crankcase",
+              "left_component": "tr2",
+              "right_component": "crankcase",
               "gas_mass_flux": 0.0,
               "physical_flow_direction": "closed",
               "donor_component": null,
@@ -2572,7 +2572,7 @@
                 }
               },
               {
-                "interface_name": "crankcase<->tr1",
+                "interface_name": "tr1<->crankcase",
                 "species_flux": {
                   "fresh_air": 0.0,
                   "fuel": 0.0,
@@ -2581,7 +2581,7 @@
                 }
               },
               {
-                "interface_name": "crankcase<->tr2",
+                "interface_name": "tr2<->crankcase",
                 "species_flux": {
                   "fresh_air": 0.0,
                   "fuel": 0.0,
@@ -2610,10 +2610,10 @@
               {
                 "interface_name": "cylinder<->exhaust",
                 "species_flux": {
-                  "fresh_air": -0.0005081331596952086,
-                  "fuel": -0.0005081331596952086,
-                  "residual": -0.0015236260597629074,
-                  "burned": -0.002538861153389701
+                  "fresh_air": -0.0005078753532543026,
+                  "fuel": -0.0005078753532543026,
+                  "residual": -0.001523626059762908,
+                  "burned": -0.002539376766271513
                 }
               }
             ],
@@ -2633,16 +2633,16 @@
             },
             "cylinder": {
               "contributions": [
-                -0.0005081331596952086,
-                -0.0005081331596952086,
-                -0.0015236260597629074,
-                -0.002538861153389701
+                -0.0005078753532543026,
+                -0.0005078753532543026,
+                -0.001523626059762908,
+                -0.002539376766271513
               ],
               "assembled_rhs": [
-                -0.0005081331596952086,
-                -0.0005081331596952086,
-                -0.0015236260597629074,
-                -0.002538861153389701
+                -0.0005078753532543026,
+                -0.0005078753532543026,
+                -0.001523626059762908,
+                -0.002539376766271513
               ]
             }
           }
@@ -2676,9 +2676,9 @@
             },
             {
               "stage_index": 1,
-              "interface_name": "crankcase<->tr1",
-              "left_component": "crankcase",
-              "right_component": "tr1",
+              "interface_name": "tr1<->crankcase",
+              "left_component": "tr1",
+              "right_component": "crankcase",
               "gas_mass_flux": 0.0,
               "physical_flow_direction": "closed",
               "donor_component": null,
@@ -2699,9 +2699,9 @@
             },
             {
               "stage_index": 1,
-              "interface_name": "crankcase<->tr2",
-              "left_component": "crankcase",
-              "right_component": "tr2",
+              "interface_name": "tr2<->crankcase",
+              "left_component": "tr2",
+              "right_component": "crankcase",
               "gas_mass_flux": 0.0,
               "physical_flow_direction": "closed",
               "donor_component": null,
@@ -2774,18 +2774,18 @@
               "gas_mass_flux": -0.005079133406727189,
               "physical_flow_direction": "right_to_left",
               "donor_component": "exhaust",
-              "donor_mass": 0.9999999999999999,
+              "donor_mass": 1.0,
               "donor_species_fractions": {
-                "fresh_air": 0.10005076175468136,
-                "fuel": 0.10005076175468136,
-                "residual": 0.3,
-                "burned": 0.49989847649063734
+                "fresh_air": 0.1,
+                "fuel": 0.1,
+                "residual": 0.30000000000000004,
+                "burned": 0.5
               },
               "species_fluxes": {
-                "fresh_air": -0.0005081711663967051,
-                "fuel": -0.0005081711663967051,
-                "residual": -0.0015237400220181566,
-                "burned": -0.0025390510519156225
+                "fresh_air": -0.0005079133406727189,
+                "fuel": -0.0005079133406727189,
+                "residual": -0.0015237400220181568,
+                "burned": -0.0025395667033635944
               },
               "closed": false
             }
@@ -2803,7 +2803,7 @@
                 }
               },
               {
-                "interface_name": "crankcase<->tr1",
+                "interface_name": "tr1<->crankcase",
                 "species_flux": {
                   "fresh_air": 0.0,
                   "fuel": 0.0,
@@ -2812,7 +2812,7 @@
                 }
               },
               {
-                "interface_name": "crankcase<->tr2",
+                "interface_name": "tr2<->crankcase",
                 "species_flux": {
                   "fresh_air": 0.0,
                   "fuel": 0.0,
@@ -2841,10 +2841,10 @@
               {
                 "interface_name": "cylinder<->exhaust",
                 "species_flux": {
-                  "fresh_air": -0.0005084298427993049,
-                  "fuel": -0.0005084287486446484,
-                  "residual": -0.0015237389278635,
-                  "burned": -0.002538535887419736
+                  "fresh_air": -0.0005079144364953428,
+                  "fuel": -0.0005079133406727189,
+                  "residual": -0.0015237389261955326,
+                  "burned": -0.0025395667033635944
                 }
               }
             ],
@@ -2864,16 +2864,16 @@
             },
             "cylinder": {
               "contributions": [
-                -0.0005084298427993049,
-                -0.0005084287486446484,
-                -0.0015237389278635,
-                -0.002538535887419736
+                -0.0005079144364953428,
+                -0.0005079133406727189,
+                -0.0015237389261955326,
+                -0.0025395667033635944
               ],
               "assembled_rhs": [
-                -0.0005084298427993049,
-                -0.0005084287486446484,
-                -0.0015237389278635,
-                -0.002538535887419736
+                -0.0005079144364953428,
+                -0.0005079133406727189,
+                -0.0015237389261955326,
+                -0.0025395667033635944
               ]
             }
           }
@@ -2907,9 +2907,9 @@
             },
             {
               "stage_index": 0,
-              "interface_name": "crankcase<->tr1",
-              "left_component": "crankcase",
-              "right_component": "tr1",
+              "interface_name": "tr1<->crankcase",
+              "left_component": "tr1",
+              "right_component": "crankcase",
               "gas_mass_flux": 0.0,
               "physical_flow_direction": "closed",
               "donor_component": null,
@@ -2930,9 +2930,9 @@
             },
             {
               "stage_index": 0,
-              "interface_name": "crankcase<->tr2",
-              "left_component": "crankcase",
-              "right_component": "tr2",
+              "interface_name": "tr2<->crankcase",
+              "left_component": "tr2",
+              "right_component": "crankcase",
               "gas_mass_flux": 0.0,
               "physical_flow_direction": "closed",
               "donor_component": null,
@@ -3007,16 +3007,16 @@
               "donor_component": "exhaust",
               "donor_mass": 1.0,
               "donor_species_fractions": {
-                "fresh_air": 0.10005087136297436,
-                "fuel": 0.10005076359741867,
-                "residual": 0.2999998922344443,
-                "burned": 0.49989847280516264
+                "fresh_air": 0.1000001078202593,
+                "fuel": 0.1,
+                "residual": 0.29999989217974066,
+                "burned": 0.5
               },
               "species_fluxes": {
-                "fresh_air": -0.0005081713151894469,
-                "fuel": -0.0005081707678342523,
-                "residual": -0.0015237382515179902,
-                "burned": -0.0025390489950355933
+                "fresh_air": -0.0005079134805907696,
+                "fuel": -0.0005079129329577283,
+                "residual": -0.0015237382512401432,
+                "burned": -0.0025395646647886415
               },
               "closed": false
             }
@@ -3034,7 +3034,7 @@
                 }
               },
               {
-                "interface_name": "crankcase<->tr1",
+                "interface_name": "tr1<->crankcase",
                 "species_flux": {
                   "fresh_air": 0.0,
                   "fuel": 0.0,
@@ -3043,7 +3043,7 @@
                 }
               },
               {
-                "interface_name": "crankcase<->tr2",
+                "interface_name": "tr2<->crankcase",
                 "species_flux": {
                   "fresh_air": 0.0,
                   "fuel": 0.0,
@@ -3072,10 +3072,10 @@
               {
                 "interface_name": "cylinder<->exhaust",
                 "species_flux": {
-                  "fresh_air": -0.0005084299880731835,
-                  "fuel": -0.0005084283493842425,
-                  "residual": -0.001523737160184244,
-                  "burned": -0.0025385338319356123
+                  "fresh_air": -0.0005079145738663712,
+                  "fuel": -0.0005079129329577284,
+                  "residual": -0.001523737157964542,
+                  "burned": -0.0025395646647886415
                 }
               }
             ],
@@ -3095,16 +3095,16 @@
             },
             "cylinder": {
               "contributions": [
-                -0.0005084299880731835,
-                -0.0005084283493842425,
-                -0.001523737160184244,
-                -0.0025385338319356123
+                -0.0005079145738663712,
+                -0.0005079129329577284,
+                -0.001523737157964542,
+                -0.0025395646647886415
               ],
               "assembled_rhs": [
-                -0.0005084299880731835,
-                -0.0005084283493842425,
-                -0.001523737160184244,
-                -0.0025385338319356123
+                -0.0005079145738663712,
+                -0.0005079129329577284,
+                -0.001523737157964542,
+                -0.0025395646647886415
               ]
             }
           }
@@ -3138,9 +3138,9 @@
             },
             {
               "stage_index": 1,
-              "interface_name": "crankcase<->tr1",
-              "left_component": "crankcase",
-              "right_component": "tr1",
+              "interface_name": "tr1<->crankcase",
+              "left_component": "tr1",
+              "right_component": "crankcase",
               "gas_mass_flux": 0.0,
               "physical_flow_direction": "closed",
               "donor_component": null,
@@ -3161,9 +3161,9 @@
             },
             {
               "stage_index": 1,
-              "interface_name": "crankcase<->tr2",
-              "left_component": "crankcase",
-              "right_component": "tr2",
+              "interface_name": "tr2<->crankcase",
+              "left_component": "tr2",
+              "right_component": "crankcase",
               "gas_mass_flux": 0.0,
               "physical_flow_direction": "closed",
               "donor_component": null,
@@ -3236,18 +3236,18 @@
               "gas_mass_flux": -0.0050794997473987994,
               "physical_flow_direction": "right_to_left",
               "donor_component": "exhaust",
-              "donor_mass": 0.9999999999999999,
+              "donor_mass": 1.0,
               "donor_species_fractions": {
-                "fresh_air": 0.10010179995072074,
-                "fuel": 0.1001014773188611,
-                "residual": 0.2999996773681404,
-                "burned": 0.49979704536227776
+                "fresh_air": 0.10000032306888376,
+                "fuel": 0.10000000000000003,
+                "residual": 0.2999996769311163,
+                "burned": 0.5
               },
               "species_fluxes": {
-                "fresh_air": -0.0005084670675638512,
-                "fuel": -0.0005084654287554016,
-                "residual": -0.0015238482854111907,
-                "burned": -0.002538718965668356
+                "fresh_air": -0.0005079516157681934,
+                "fuel": -0.0005079499747398801,
+                "residual": -0.0015238482831913267,
+                "burned": -0.0025397498736993997
               },
               "closed": false
             }
@@ -3265,7 +3265,7 @@
                 }
               },
               {
-                "interface_name": "crankcase<->tr1",
+                "interface_name": "tr1<->crankcase",
                 "species_flux": {
                   "fresh_air": 0.0,
                   "fuel": 0.0,
@@ -3274,7 +3274,7 @@
                 }
               },
               {
-                "interface_name": "crankcase<->tr2",
+                "interface_name": "tr2<->crankcase",
                 "species_flux": {
                   "fresh_air": 0.0,
                   "fuel": 0.0,
@@ -3303,10 +3303,10 @@
               {
                 "interface_name": "cylinder<->exhaust",
                 "species_flux": {
-                  "fresh_air": -0.0005087266010932696,
-                  "fuel": -0.0005087227838088546,
-                  "residual": -0.001523846106935235,
-                  "burned": -0.0025382042555614397
+                  "fresh_air": -0.0005079538006153863,
+                  "fuel": -0.00050794997473988,
+                  "residual": -0.001523846098344144,
+                  "burned": -0.0025397498736993897
                 }
               }
             ],
@@ -3326,16 +3326,16 @@
             },
             "cylinder": {
               "contributions": [
-                -0.0005087266010932696,
-                -0.0005087227838088546,
-                -0.001523846106935235,
-                -0.0025382042555614397
+                -0.0005079538006153863,
+                -0.00050794997473988,
+                -0.001523846098344144,
+                -0.0025397498736993897
               ],
               "assembled_rhs": [
-                -0.0005087266010932696,
-                -0.0005087227838088546,
-                -0.001523846106935235,
-                -0.0025382042555614397
+                -0.0005079538006153863,
+                -0.00050794997473988,
+                -0.001523846098344144,
+                -0.0025397498736993897
               ]
             }
           }
@@ -3353,10 +3353,10 @@
         },
         "final": {
           "gas_mass": 0.02000300000000001,
-          "fresh_air_mass": 0.006250600000000011,
+          "fresh_air_mass": 0.00625060000000001,
           "fuel_mass": 0.0037503000000000002,
-          "residual_mass": 0.0050007,
-          "burned_mass": 0.0050014000000000005,
+          "residual_mass": 0.005000699999999999,
+          "burned_mass": 0.0050014,
           "species_sum": 0.02000300000000001,
           "species_sum_minus_gas_mass": 0.0
         },
@@ -3367,16 +3367,16 @@
           0.0
         ],
         "measured_change": [
-          1.0408340855860843e-17,
+          9.540979117872439e-18,
           4.336808689942018e-19,
-          0.0,
-          0.0
+          -8.673617379884035e-19,
+          -8.673617379884035e-19
         ],
         "cumulative_residual": [
-          2.202019624419906e-19,
+          -6.471597755464129e-19,
           4.336808689942018e-19,
-          0.0,
-          0.0
+          -8.673617379884035e-19,
+          -8.673617379884035e-19
         ],
         "worst_per_step_residual": 8.673617379884035e-19
       },
@@ -3405,8 +3405,8 @@
       },
       "final": {
         "gas_mass": 0.02053348780513136,
-        "fresh_air_mass": 0.0065688926831801425,
-        "fuel_mass": 0.003821031707317074,
+        "fresh_air_mass": 0.006568892683180143,
+        "fuel_mass": 0.0038210317073170737,
         "residual_mass": 0.005089114634146342,
         "burned_mass": 0.005054448780487805,
         "species_sum": 0.020533487805131364,
@@ -3419,18 +3419,18 @@
         0.0
       ],
       "measured_change": [
-        2.5331299557951326e-13,
-        8.673617379884035e-19,
+        2.5331386294125124e-13,
+        4.336808689942018e-19,
         0.0,
         0.0
       ],
       "cumulative_residual": [
-        -1.249491492651705e-19,
-        8.673617379884035e-19,
+        7.424125887232331e-19,
+        4.336808689942018e-19,
         0.0,
         0.0
       ],
-      "worst_per_step_residual": 8.673617379884035e-19
+      "worst_per_step_residual": 7.220744257409742e-19
     },
     "external_trace": [
       {
@@ -3664,9 +3664,9 @@
         }
       }
     ],
-    "worst_local_species_sum_error": 1.772318331590833e-10,
+    "worst_local_species_sum_error": 1.734723475976807e-18,
     "worst_local_species_sum_location": [
-      "crankcase",
+      "cylinder",
       0
     ],
     "gas_mass_initial": 0.02053348780487805,

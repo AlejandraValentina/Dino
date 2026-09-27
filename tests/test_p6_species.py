@@ -84,10 +84,13 @@ def test_p6_heterogeneous_transfer_donors_and_scavenging_counter():
     system.species['tr1'][0] = (.7, .2, .1, 0.0)
     system.species['tr2'][0] = (.1, .3, .2, .4)
     system.species['cylinder'][0] = (.2, .1, .4, .3)
+    system._sync_manual_views()
     before = tuple(system.species['cylinder'][0])
     system._exchange(.01, 'tr1', 'cylinder', 1e-3)
     tr1_after = tuple(system.species['cylinder'][0])
-    system.species['cylinder'][0] = before
+    cylinder_mass = sum(system.species_mass['cylinder'][0])
+    system.species_mass['cylinder'][0] = tuple(cylinder_mass * value for value in before)
+    system._refresh_species_views()
     system._exchange(.01, 'tr2', 'cylinder', 1e-3)
     tr2_after = tuple(system.species['cylinder'][0])
     assert tr1_after != tr2_after

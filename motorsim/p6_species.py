@@ -246,8 +246,8 @@ class P6IntegratedSystem:
                                            record.get('stage_exhaust_faces', ((), ()))[stage],
                                            dt)
             interface_specs = ((interfaces[0], 'intake', 'crankcase'),
-                               (interfaces[1], 'crankcase', 'tr1'),
-                                                 (interfaces[2], 'crankcase', 'tr2'),
+                               (interfaces[1], 'tr1', 'crankcase'),
+                                                 (interfaces[2], 'tr2', 'crankcase'),
                                                  (interfaces[3], 'tr1', 'cylinder'),
                                                  (interfaces[4], 'tr2', 'cylinder'))
             stage_trace = []
@@ -374,7 +374,9 @@ class P6IntegratedSystem:
     def _trace_interface(self, stage, left_name, right_name, flux, state):
         mass_flux = float(flux[0])
         donor_name = left_name if mass_flux > 0 else right_name if mass_flux < 0 else None
-        donor = tuple(state[donor_name][0]) if donor_name else (0.0,) * 4
+        donor_other = right_name if donor_name == left_name else left_name
+        donor_index = self._endpoint_index(donor_name, donor_other) if donor_name else 0
+        donor = tuple(state[donor_name][donor_index]) if donor_name else (0.0,) * 4
         donor_mass = fsum(donor)
         fractions = tuple(x / donor_mass for x in donor) if donor_mass else (0.0,) * 4
         species_flux = tuple(mass_flux * x for x in fractions)
@@ -425,15 +427,17 @@ class P6IntegratedSystem:
     def _species_flux(self, flux, left, right, state):
         mass = float(flux[0])
         donor_name = left if mass > 0 else right if mass < 0 else None
-        donor = tuple(self.species_mass[donor_name][0]) if donor_name else (0.0,) * 4
+        donor_other = right if donor_name == left else left
+        donor_index = self._endpoint_index(donor_name, donor_other) if donor_name else 0
+        donor = tuple(self.species_mass[donor_name][donor_index]) if donor_name else (0.0,) * 4
         total = fsum(donor)
         fractions = tuple(x / total for x in donor) if total else (0.0,) * 4
         return tuple(mass * x for x in fractions)
 
     def _stage_rhs_trace(self, stage, interfaces, port, before):
         specs = ((interfaces[0], 'intake', 'crankcase'),
-                 (interfaces[1], 'crankcase', 'tr1'),
-                 (interfaces[2], 'crankcase', 'tr2'),
+                 (interfaces[1], 'tr1', 'crankcase'),
+                 (interfaces[2], 'tr2', 'crankcase'),
                  (interfaces[3], 'tr1', 'cylinder'),
                  (interfaces[4], 'tr2', 'cylinder'),
                  (port, 'cylinder', 'exhaust'))
@@ -465,18 +469,33 @@ class P6IntegratedSystem:
 
     def _exchange(self, mass_flux, left, right, dt):
         if mass_flux == 0.0: return
-        if not self._stage_active:
+        if not self._stage_active and not self._views_match_authoritative_state():
             self._sync_manual_views()
-        donor = self.species_mass[left] if mass_flux > 0 else self.species_mass[right]
-        receiver = self.species_mass[right] if mass_flux > 0 else self.species_mass[left]
-        source = donor[0]
-        flux = donor_species(mass_flux, source, receiver[0])
+        donor_name = left if mass_flux > 0 else right
+        donor = self.species_mass[donor_name]
+        donor_index = self._endpoint_index(donor_name, right if donor_name == left else left)
+        source = donor[donor_index]
+        flux = tuple(mass_flux * x / fsum(source) for x in source) if fsum(source) else (0.0,) * 4
         dm = tuple(dt*x for x in flux)
-        donor[0] = validate_species(tuple(a-b for a,b in zip(source, dm)),
-                                     fsum(source)-sum(dm))
-        receiver[0] = validate_species(tuple(a+b for a,b in zip(receiver[0], dm)),
-                                        fsum(receiver[0])+sum(dm))
+        left_index = self._endpoint_index(left, right)
+        right_index = self._endpoint_index(right, left)
+        self.species_mass[left][left_index] = validate_species(
+            tuple(a-b for a,b in zip(self.species_mass[left][left_index], dm)),
+            fsum(self.species_mass[left][left_index])-sum(dm))
+        self.species_mass[right][right_index] = validate_species(
+            tuple(a+b for a,b in zip(self.species_mass[right][right_index], dm)),
+            fsum(self.species_mass[right][right_index])+sum(dm))
         self._refresh_species_views()
+
+    @staticmethod
+    def _endpoint_index(component, other):
+        if component == 'intake' and other == 'crankcase':
+            return -1
+        if component in ('tr1', 'tr2'):
+            return -1 if other == 'cylinder' else 0
+        if component == 'exhaust' and other == 'cylinder':
+            return 0
+        return 0
         if self._count_transport and left in ('tr1', 'tr2') and right == 'cylinder' and mass_flux > 0:
             fresh = sum(dm[:2])
             self.fresh_delivered += fresh
