@@ -1,9 +1,10 @@
 import unittest
 
 from dev_orchestrator.p4_c3_return_audit import (
-    _momentum_audit, _recompute_stage, _riemann_audit, classify, _physical_flux,
+    _momentum_audit, _recompute_stage, _riemann_audit,
+    classify, _physical_flux,
 )
-from dev_orchestrator.p4_sci_04b import C2_AREA, EOS
+from dev_orchestrator.p4_sci_04b import C2_AREA, C2_VOLUME, EOS
 from dev_orchestrator.p4_sci_04b import solve_c2_one
 from dev_orchestrator.reference.exact_riemann import ExactRiemann
 
@@ -82,6 +83,7 @@ class P4C3ReturnAuditTests(unittest.TestCase):
         self.assertTrue(audited)
         _, info = audited[0]
         stages = info["audit_stages"]
+        stage_a = stages["stage_a"]
         self.assertNotEqual(stages["stage_a"]["conservative"],
                             stages["after"]["conservative"])
         self.assertNotEqual(stages["stage_a"]["chamber_state"],
@@ -93,7 +95,13 @@ class P4C3ReturnAuditTests(unittest.TestCase):
             derived = EOS.primitive(tuple(value / volume for value in row))
             for actual, expected in zip(primitive, derived):
                 self.assertAlmostEqual(actual, expected, places=12)
-
+        expected_pressure = (EOS.gamma - 1.0) * stage_a["chamber_state"][1] / C2_VOLUME
+        self.assertAlmostEqual(info["p_chamber"], expected_pressure, places=12)
+        self.assertEqual(info["chamber_state"], stage_a["chamber_state"])
+        self.assertEqual(info["first_cell_state"], stage_a["conservative"][0])
+        self.assertEqual(info["sample_time_pre_step"], stage_a["time"])
+        self.assertGreater(info["history_record_time_post_step"],
+                           info["sample_time_pre_step"])
 
 if __name__ == "__main__":
     unittest.main()

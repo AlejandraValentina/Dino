@@ -532,47 +532,37 @@ Commits previos:84b36b9 deltaR2,4747eb2 fuente previa,a3087ba medición/STOP.
 
 ## P4-C3-R3 — corrección de auditoría supervisada (2026-09-28)
 
-#### Revisión posterior de captura pre/post (HEAD 174b261 invalidado)
-
-- [x] Corregir `stage_a` para conservar `pre_cells`, `pre_z` y `pre_t` antes
-  del commit; mantener `op0/stage_a` para primitiva y flujos observados,
-  `cells1/z1/op1` para `stage_b` y `cells_new/z_new/ws_new` para `after`.
-- [x] Añadir prueba de un paso evolutivo real: `stage_a` difiere de `after`
-  en conservativos y cámara, y `primitive` coincide con
-  `EOS.primitive(conservative/mesh.volumes)`.
-- [x] Regenerar `results/p4-c3-r3-20260928`. Los números de `174b261` quedan
-  invalidados por mezcla de captura pre/post; la física y el solver no cambian.
-- [x] Resultado corregido: retorno `0.0026543865163682658 s`; ExactRiemann
-  `INCONCLUSIVE`, errores relativos
-  `(1.7797458457669132e-07, 3.4548877071827627e-06,
-  6.581792616275487e-04, 8.898729228831856e-08)`, máximo
-  `6.581792616275487e-04`; momento `max_abs_residual =
-  5.840234051652552e-06`, `max_relative_residual =
-  1.9399428518812518`, `median_relative_residual =
-  0.018615083342715104`.
-- [x] C3 permanece `P4_SCI_C3_INCONCLUSIVE`; no se inventó threshold y E13
-  no se ejecutó. P9 permanece `STOPPED`.
-
-- [x] Corregir alineación del Riemann audit: `interface_flux_observed` de
-  `op0` se compara con `audit_stages.stage_a`.
-- [x] Reconstruir la pared con ghost físico `(rho,-u,p,Y)` y
+- [x] Corregir la captura pre/post: `stage_a` conserva `pre_cells`, `pre_z` y
+  `pre_t` antes del commit; `op0/stage_a` aporta primitiva y flujos observados,
+  `cells1/z1/op1` aporta `stage_b`, y `cells_new/z_new/ws_new` aporta `after`.
+- [x] Alinear `interface_info` con `stage_a/op0`: `p_chamber`, cámara,
+  primera celda y `sample_time_pre_step` son pre-step; se conserva
+  `history_record_time_post_step` para el commit-time del historial.
+- [x] Añadir prueba real de un paso: estados pre/post distintos, primitiva
+  derivada consistente, presión de cámara derivada de `stage_a`, cámara y
+  primera celda alineadas, y ambos tiempos ordenados. Los seis tests focales
+  existentes permanecen PASS.
+- [x] Alinear la selección causal de retorno con `sample_time_pre_step`, con
+  fallback al timestamp externo para compatibilidad.
+- [x] Auditar la interfaz con `ExactRiemann` independiente y reconstruir la
+  pared como ghost reflectante físico `(rho,-u,p,Y)` mediante
   `ExactRiemann(last, ghost, EOS).sample(0)`; conservar `C2_VOLUME` y no usar
   HLLC productivo en el auditor.
-- [x] Añadir pruebas focales de alineación, pared exacta para `u != 0` y
-  aislamiento frente a `momentum_face_fluxes`/`momentum_source_sum`.
-- [x] Regenerar `results/p4-c3-r3-20260928` desde el fixture único. La captura de
-  `174b261` quedó invalidada por captura post-step de `stage_a`; se corrigió para
-  conservar la referencia pre-step antes del commit y sus números no se conservan.
-- [x] Resultado regenerado: retorno `PASS` en
-  `0.0026543865163682658 s`; Riemann `INCONCLUSIVE`, errores relativos
-  `(1.7797458457669132e-07, 3.4548877071827627e-06,
+- [x] Regenerar `results/p4-c3-r3-20260928` desde el fixture único. Los números
+  de `174b261` quedan `SUPERSEDED/INVALIDATED` por mezcla de captura pre/post;
+  la física y el solver no cambian.
+- [x] Resultado vigente: retorno `PASS`, `selected_time` pre-step
+  `0.0026532366020821743 s`, flujo `0.0002698587123830558 kg/s`, y registro
+  post-step `0.0026543865163682658 s`; ExactRiemann `INCONCLUSIVE`, errores
+  relativos `(1.7797458457669132e-07, 3.4548877071827627e-06,
   6.581792616275487e-04, 8.898729228831856e-08)`, máximo
   `6.581792616275487e-04`; momento `max_abs_residual =
   5.840234051652552e-06`, `max_relative_residual = 1.9399428518812518`,
   `median_relative_residual = 0.018615083342715104`. Conservación `PASS`,
-  residuo máximo `1.3929103469155642e-15`. C3 sigue `INCONCLUSIVE`: no existe
-  threshold aprobado y no se inventó ninguno; las métricas relativas son
-  diagnósticas, no gate.
+  residuo máximo `1.3929103469155642e-15`.
+- [x] C3 permanece `P4_SCI_C3_INCONCLUSIVE`: no existe threshold aprobado y
+  no se inventó ninguno; momentum max_abs/max_relative/median_relative son
+  diagnósticos, no gate. E13 `NO EJECUTADO`; P9 `STOPPED`.
 
 ### P4_R3_COMPILED_BACKEND_DECISION_REQUIRED
 

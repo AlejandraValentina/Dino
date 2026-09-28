@@ -531,13 +531,15 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
                        "chamber_state": list(z_new)},
         }
         interface_info = {
-            "p_chamber":p_c,
+            "p_chamber":op0["chamber_p"],
             "mass_flux":op0["outward"][0],
             "energy_flux":op0["outward"][2],
             "species_flux":op0["outward"][3],
             "velocity_star":sm,
-            "chamber_state": list(z),
-            "first_cell_state": list(cells[0]),
+            "chamber_state": list(pre_z),
+            "first_cell_state": list(pre_cells[0]),
+            "sample_time_pre_step": pre_t,
+            "history_record_time_post_step": t,
             "interface_area": C2_AREA,
             "interface_normal": -1.0,
             "interface_flux_observed":list(op0["flux_left"]),

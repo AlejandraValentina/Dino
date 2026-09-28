@@ -39,9 +39,12 @@ def _state_from_chamber(chamber):
 
 def _select_return(history, expected_time):
     window = (0.5 * expected_time, 1.5 * expected_time)
-    candidates = [row for row in history
-                  if window[0] <= row[0] <= window[1]
-                  and row[1]["mass_flux"] > 0.0]
+    candidates = []
+    for external_time, info in history:
+        sample_time = info.get("sample_time_pre_step", external_time)
+        if (window[0] <= sample_time <= window[1]
+                and info["mass_flux"] > 0.0):
+            candidates.append((sample_time, info))
     return (candidates[0], window) if candidates else (None, window)
 
 

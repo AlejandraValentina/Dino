@@ -3640,17 +3640,18 @@
       }
     },
     "chamber_state": [
-      0.00011971113150311781,
-      35.34153718270524,
-      5.9855565751558904e-05
+      0.00011971044461453126,
+      35.34126273228375,
+      5.985522230726563e-05
     ],
     "energy_flux": 107.68128798014635,
     "first_cell_state": [
-      1.8902765501582954e-06,
-      -5.1966143844388275e-06,
-      0.5595388896101496,
-      9.451382750787755e-07
+      1.8816403942055994e-06,
+      -1.8694569775556216e-06,
+      0.5560249022574544,
+      9.408201971024316e-07
     ],
+    "history_record_time_post_step": 0.0026543865163682658,
     "interface_area": 0.0003141592653589793,
     "interface_flux_observed": [
       -0.0002698587123830558,
@@ -3662,12 +3663,13 @@
     "mass_energy_species_flux_source": "op0/stage_a pre-step",
     "mass_flux": 0.0002698587123830558,
     "observed_flux_source": "op0/stage_a pre-step",
-    "p_chamber": 123695.38013946837,
+    "p_chamber": 123694.41956299316,
+    "sample_time_pre_step": 0.0026532366020821743,
     "species_flux": 0.00013492935619147513,
     "velocity_star": -0.7165532839342933,
     "wave_speed_middle": -0.7165532839342933
   },
   "selection": "first admissible sample in window with positive mass flux",
   "status": "PASS",
-  "time": 0.0026543865163682658
+  "time": 0.0026532366020821743
 }

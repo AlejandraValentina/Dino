@@ -27,16 +27,21 @@ La revisión supervisora detectó antes del cierre definitivo que los números d
 `stage_a.primitive` y el flujo observado eran de `op0` pre-step. Esos números
 quedan invalidados por revisión de captura pre/post. La regeneración también
 conserva `stage_b = cells1/z1/op1` y `after = cells_new/z_new/ws_new`.
-La reconstrucción de pared usa la reacción reflectante de Riemann. No se
-modificaron física, operador, malla, CFL, eventos, umbrales ni camino
-productivo. Artefactos vigentes: `results/p4-c3-r3-20260928/`.
+La pared se reconstruye como ghost reflectante físico `(rho,-u,p,Y)` y se
+resuelve con `ExactRiemann(last, ghost, EOS).sample(0)`; el auditor no usa el
+HLLC productivo para esa cara. No se modificaron física, operador, malla, CFL,
+eventos, umbrales ni camino productivo. Artefactos vigentes:
+`results/p4-c3-r3-20260928/`; los números de `174b261` están explícitamente
+invalidados por la mezcla pre/post-step.
 
 `interface_flux_observed`, `mass_flux`, `energy_flux` y `species_flux` son
 cantidades de `op0/stage_a` pre-step; el auditor independiente los compara con
 el mismo `stage_a`.
 
-* Retorno: `PASS`; primer sample admisible en `t=0,0026543865163682658 s`, con
-  flujo de masa positivo `0,0002698587123830558 kg/s`.
+* Retorno: `PASS`; primer sample admisible seleccionado en
+  `sample_time_pre_step=0,0026532366020821743 s`, con flujo de masa positivo
+  `0,0002698587123830558 kg/s`; el registro histórico se confirma en
+  `history_record_time_post_step=0,0026543865163682658 s`.
 * Conservación: `PASS`; residuo normalizado máximo
   `1,3929103469155642e-15`, frente al criterio existente `1e-10`.
 * Admisibilidad: `PASS`.
