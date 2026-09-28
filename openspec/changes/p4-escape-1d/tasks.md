@@ -769,3 +769,5 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [ ] Revisión independiente final R5 sin hallazgos bloqueantes.
 - [ ] Ejecutar exactamente una adquisición focal C3-R5 y persistir evidencia;
   no ejecutar E13/G2 ni P9.
+- [x] Revisión independiente final R5 sin hallazgos bloqueantes; 26 tests focales, regresiones relacionadas y OpenSpec strict PASS.
+- [x] Una única adquisición focal C3-R5 ejecutada y evaluada; evidencia en `results/p4-c3-r5-20260928/`.
