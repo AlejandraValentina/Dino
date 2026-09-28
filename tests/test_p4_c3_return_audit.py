@@ -1,7 +1,7 @@
 import unittest
 
 from dev_orchestrator.p4_c3_return_audit import (
-    _momentum_audit, _recompute_stage, _riemann_audit,
+    _momentum_audit, _recompute_stage, _riemann_audit, _select_return,
     classify, _physical_flux,
 )
 from dev_orchestrator.p4_sci_04b import C2_AREA, C2_VOLUME, EOS
@@ -74,6 +74,18 @@ class P4C3ReturnAuditTests(unittest.TestCase):
         flux = _physical_flux((2.0, 3.0, 5.0, 0.25))
         self.assertEqual(flux[0], 6.0)
         self.assertEqual(flux[3], 1.5)
+
+    def test_return_selection_uses_pre_step_sample_time(self):
+        history = [(0.004, {"mass_flux": 1.0,
+                            "sample_time_pre_step": 0.002})]
+        selected, window = _select_return(history, 0.002)
+        self.assertEqual(selected[0], 0.002)
+        self.assertEqual(window, (0.001, 0.003))
+
+        fallback_history = [(0.0025, {"mass_flux": 1.0})]
+        selected, window = _select_return(fallback_history, 0.0025)
+        self.assertEqual(selected[0], 0.0025)
+        self.assertEqual(window, (0.00125, 0.00375))
 
     def test_real_step_captures_stage_a_pre_step_and_primitive_consistently(self):
         result = solve_c2_one(12, 0.2, 200000.0, 400.0, 0.5,

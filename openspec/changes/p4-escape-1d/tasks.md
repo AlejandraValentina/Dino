@@ -540,7 +540,7 @@ Commits previos:84b36b9 deltaR2,4747eb2 fuente previa,a3087ba medición/STOP.
   `history_record_time_post_step` para el commit-time del historial.
 - [x] Añadir prueba real de un paso: estados pre/post distintos, primitiva
   derivada consistente, presión de cámara derivada de `stage_a`, cámara y
-  primera celda alineadas, y ambos tiempos ordenados. Los seis tests focales
+  primera celda alineadas, y ambos tiempos ordenados. Los siete tests focales
   existentes permanecen PASS.
 - [x] Alinear la selección causal de retorno con `sample_time_pre_step`, con
   fallback al timestamp externo para compatibilidad.
