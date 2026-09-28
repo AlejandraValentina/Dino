@@ -44,7 +44,9 @@ def _select_return(history, expected_time):
 
 
 def _riemann_audit(info):
-    stage = info["audit_stages"]["stage_b"]
+    # interface_flux_observed is captured from op0, i.e. stage_a.  Keep the
+    # independently reconstructed state aligned with that same stage.
+    stage = info["audit_stages"]["stage_a"]
     left = _state_from_chamber(stage["chamber_state"])
     right = tuple(stage["primitive"][0])
     reference = ExactRiemann(left, right, EOS)
@@ -75,7 +77,14 @@ def _recompute_stage(stage, geometry):
     left_state = _state_from_chamber(stage["chamber_state"])
     left_flux = C2_AREA * _physical_flux(
         ExactRiemann(left_state, primitive[0], EOS).sample(0.0))[1]
-    right_flux = areas[-1] * primitive[-1][2]
+    # The production C2 fixture uses an exact reflective wall state, not a
+    # static-pressure face.  Rebuild the physical ghost from the last cell and
+    # solve that wall Riemann problem independently of productive HLLC.
+    last = primitive[-1]
+    ghost = (last[0], -last[1], last[2], last[3])
+    wall_reference = ExactRiemann(last, ghost, EOS)
+    wall_sample = wall_reference.sample(0.0)
+    right_flux = areas[-1] * _physical_flux(wall_sample)[1]
     source = fsum(w[2] * (areas[i + 1] - areas[i])
                    for i, w in enumerate(primitive))
     return {"left": left_flux, "right": right_flux, "source": source,

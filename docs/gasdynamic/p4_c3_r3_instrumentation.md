@@ -21,18 +21,27 @@ presión; `p_star` sólo aparece como el valor separado de ExactRiemann.
 
 ## Resultado de la única adquisición
 
-Artefactos: `results/p4-c3-r3-20260928/`.
+La revisión supervisora detectó antes del cierre definitivo que el primer
+cálculo de auditoría era inválido: el comparador mezclaba `stage_b` con el
+flujo observado de `stage_a`, y la reconstrucción de la pared usaba `A*p_last`
+en vez de la reacción de pared reflectante de Riemann. Sus números no son
+resultados finales y fueron regenerados tras corregir ambos defectos. No se
+modificaron física, operador, malla, CFL, eventos, umbrales ni camino
+productivo. Artefactos vigentes: `results/p4-c3-r3-20260928/`.
 
 * Retorno: `PASS`; primer sample admisible en `t=0,00265438651636827 s`, con
   flujo de masa positivo `0,000269858712383056 kg/s`.
 * Conservación: `PASS`; residuo normalizado máximo
   `1,3929103469155642e-15`, frente al criterio existente `1e-10`.
 * Admisibilidad: `PASS`.
-* ExactRiemann: `INCONCLUSIVE`; error relativo máximo reportado
-  `0,709291097775824`. No existe un threshold contractual aprobado para
+* ExactRiemann: `INCONCLUSIVE`; errores relativos por componente
+  `(mass,momentum,energy,species)` =
+  `(2,258600676877695e-07, 4,112451082484666e-07,
+  8,368494691992387e-04, 1,129300338438305e-07)` y máximo
+  `8,36849469199239e-04`. No existe un threshold contractual aprobado para
   igualdad HLLC–ExactRiemann y no se inventó uno.
 * Balance independiente de momento: `INCONCLUSIVE`; residuo absoluto máximo
-  reconstruido `4,44382539464402e-05`. No existe threshold cuantitativo
+  reconstruido `4,437570053531734e-05`. No existe threshold cuantitativo
   aprobado para este cierre y no se inventó uno.
 
 ## Decisión

@@ -530,6 +530,26 @@ Commits previos:84b36b9 deltaR2,4747eb2 fuente previa,a3087ba medición/STOP.
 - [ ] Performance<=20s/ciclo, proyección30<=600s con margen.
 - [ ] Reanudar periodicidad/G2 sólo con performance PASS.
 
+## P4-C3-R3 — corrección de auditoría supervisada (2026-09-28)
+
+- [x] Corregir alineación del Riemann audit: `interface_flux_observed` de
+  `op0` se compara con `audit_stages.stage_a`.
+- [x] Reconstruir la pared con ghost físico `(rho,-u,p,Y)` y
+  `ExactRiemann(last, ghost, EOS).sample(0)`; conservar `C2_VOLUME` y no usar
+  HLLC productivo en el auditor.
+- [x] Añadir pruebas focales de alineación, pared exacta para `u != 0` y
+  aislamiento frente a `momentum_face_fluxes`/`momentum_source_sum`.
+- [x] Regenerar `results/p4-c3-r3-20260928` desde el fixture único. La primera
+  auditoría fue invalidada por revisión supervisora antes del cierre definitivo;
+  sus números no se conservan como finales.
+- [x] Resultado regenerado: retorno `PASS` en
+  `0.00265438651636827 s`; Riemann `INCONCLUSIVE`, errores relativos
+  `(2.258600676877695e-07, 4.112451082484666e-07,
+  8.368494691992387e-04, 1.129300338438305e-07)`, máximo
+  `8.36849469199239e-04`; residuo de momento máximo
+  `4.437570053531734e-05`. C3 sigue `INCONCLUSIVE`: no existe threshold
+  aprobado y no se inventó ninguno.
+
 ### P4_R3_COMPILED_BACKEND_DECISION_REQUIRED
 
 R2/P4B aceptados por la usuaria, recibo docs/gasdynamic/p4_r3_acceptance.json.
