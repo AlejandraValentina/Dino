@@ -132,7 +132,7 @@ def test_real_detached_fake_autonomy_proof(tmp_path):
         deadline = time.time() + 10
         first = None
         while time.time() < deadline:
-            candidate = json.loads((results / "supervisor_state.json").read_text())
+            candidate = supervisor.read(results / "supervisor_state.json", {})
             if candidate.get("child_pid") and supervisor.pid_alive(candidate["child_pid"]):
                 first = candidate
                 break
@@ -145,7 +145,7 @@ def test_real_detached_fake_autonomy_proof(tmp_path):
         assert (results / "LIVE_STATUS.md").read_text() != first_status
         second = None
         while time.time() < deadline:
-            state = json.loads((results / "supervisor_state.json").read_text())
+            state = supervisor.read(results / "supervisor_state.json", {})
             if (results / "calls").exists() and (results / "calls").read_text() == "2" and state.get("child_pid"):
                 second = state
                 break
