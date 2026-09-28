@@ -471,6 +471,11 @@ def evaluate_c3_r5(acquisition, geometry, *, expected_runtime=None, eos=EOS):
 
     max_global_resid = acquisition.get("max_global_resid")
     solver_status = acquisition.get("solver_status")
+    if (isinstance(solver_status, str)
+            and solver_status in EXPLICIT_SOLVER_FAILURES):
+        return {"classification": "P4_SCI_C3_FAIL",
+                "reason": "solver_admissibility_failed",
+                "solver_status": solver_status}
     if (not _finite_number(max_global_resid)
             or float(max_global_resid) < 0.0
             or solver_status is None):
@@ -493,11 +498,6 @@ def evaluate_c3_r5(acquisition, geometry, *, expected_runtime=None, eos=EOS):
                 "reason": "solver_completion_truncated",
                 "solver_time": float(solver_time),
                 "target_final_time": float(target_final_time)}
-    if (isinstance(solver_status, str)
-            and solver_status in EXPLICIT_SOLVER_FAILURES):
-        return {"classification": "P4_SCI_C3_FAIL",
-                "reason": "solver_admissibility_failed",
-                "solver_status": solver_status}
     if solver_status != "completed":
         return {"classification": "P4_SCI_C3_INCONCLUSIVE",
                 "reason": "solver_completion_not_verified",

@@ -220,6 +220,15 @@ class P4C3R5AuditTests(unittest.TestCase):
         self.assertEqual(report["classification"], "P4_SCI_C3_INCONCLUSIVE")
         self.assertEqual(report["reason"], "existing_physical_evidence_missing")
 
+    def test_explicit_solver_failure_dominates_missing_conservation_metric(self):
+        acquisition = _passing_acquisition()
+        acquisition["solver_status"] = "failed_numerically"
+        del acquisition["max_global_resid"]
+        report = evaluate_c3_r5(acquisition, GEOMETRY,
+                                 expected_runtime=acquisition["runtime"])
+        self.assertEqual(report["classification"], "P4_SCI_C3_FAIL")
+        self.assertEqual(report["reason"], "solver_admissibility_failed")
+
     def test_negative_conservation_residual_is_inconclusive(self):
         acquisition = _passing_acquisition()
         acquisition["max_global_resid"] = -1.0
