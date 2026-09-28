@@ -46,11 +46,7 @@ def reconstruct_external_faces(states, geometry, eos=EOS):
     left_ghost = first
     right_ghost = (last[0], -last[1], last[2], last[3])
 
-    def face_pair(i, outside, x_outside):
-        left = states[i - 1] if i else outside
-        xl = centers[i - 1] if i else x_outside
-        right = states[i + 1] if i + 1 < len(states) else outside
-        xr = centers[i + 1] if i + 1 < len(states) else x_outside
+    def face_pair(i, left, xl, right, xr):
         x = centers[i]
         slopes = [_minmod((v - l) / (x - xl), (r - v) / (xr - x))
                   for l, v, r in zip(left, states[i], right)]
@@ -68,10 +64,17 @@ def reconstruct_external_faces(states, geometry, eos=EOS):
             downgraded = True
         return left, right, downgraded
 
-    left_face, _, left_downgraded = face_pair(
-        0, left_ghost, 2.0 * faces[0] - centers[0])
-    _, right_face, right_downgraded = face_pair(
-        len(states) - 1, right_ghost, 2.0 * faces[-1] - centers[-1])
+    left_ghost_x = 2.0 * faces[0] - centers[0]
+    right_ghost_x = 2.0 * faces[-1] - centers[-1]
+    if len(states) == 1:
+        left_face, right_face, downgraded = face_pair(
+            0, left_ghost, left_ghost_x, right_ghost, right_ghost_x)
+        left_downgraded = right_downgraded = downgraded
+    else:
+        left_face, _, left_downgraded = face_pair(
+            0, left_ghost, left_ghost_x, states[1], centers[1])
+        _, right_face, right_downgraded = face_pair(
+            len(states) - 1, states[-2], centers[-2], right_ghost, right_ghost_x)
     wall_right = (right_face[0], -right_face[1], right_face[2], right_face[3])
     downgraded_cells = []
     if left_downgraded:
@@ -83,7 +86,7 @@ def reconstruct_external_faces(states, geometry, eos=EOS):
             "downgraded": {
                 "cells": downgraded_cells,
                 "sides": {
-                    "interface": {"left": left_downgraded},
+                    "interface": {"right": left_downgraded},
                     "wall": {"left": right_downgraded,
                              "right": right_downgraded},
                 },

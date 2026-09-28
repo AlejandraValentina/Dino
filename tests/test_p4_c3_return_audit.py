@@ -14,6 +14,9 @@ from dev_orchestrator.reference.exact_riemann import ExactRiemann
 from dev_orchestrator.reference.hllc_audit import hllc as audit_hllc
 from dev_orchestrator.reference.hllc_audit import hlle_flux as audit_hlle_flux
 from motorsim.gas1d.riemann import hllc_flux as product_hllc
+from motorsim.gas1d.boundary import Boundary
+from motorsim.gas1d.mesh import uniform_mesh
+from motorsim.gas1d.second_order import reconstruct as production_reconstruct
 
 
 def _stage(states, geometry, dt=0.1):
@@ -82,6 +85,8 @@ class P4C3ReturnAuditTests(unittest.TestCase):
                          [states[-1][0], -states[-1][1],
                           states[-1][2], states[-1][3]])
         self.assertEqual(faces["downgraded"]["cells"], [1])
+        self.assertFalse(faces["downgraded"]["sides"]["interface"]["right"])
+        self.assertNotIn("left", faces["downgraded"]["sides"]["interface"])
         self.assertTrue(faces["downgraded"]["sides"]["wall"]["left"])
         self.assertTrue(faces["downgraded"]["sides"]["wall"]["right"])
 
@@ -91,6 +96,23 @@ class P4C3ReturnAuditTests(unittest.TestCase):
             "centers": [0.5, 1.5]}, FaceGuardEOS(False))
         self.assertEqual(admissible["downgraded"]["cells"], [])
         self.assertNotEqual(admissible["wall"]["left"], list(states[-1]))
+
+    def test_b0_one_cell_matches_production_muscl_boundary_faces(self):
+        state = (1.0, 30.0, 100000.0, 0.2)
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0],
+                    "centers": [0.5]}
+        audited = reconstruct_external_faces([state], geometry)
+        mesh = uniform_mesh(1)
+        left, right, downgraded = production_reconstruct(
+            mesh, [state], (Boundary("outflow"), Boundary("wall")), EOS)
+
+        self.assertEqual(audited["interface"]["right"], list(left[0]))
+        self.assertEqual(audited["wall"]["left"], list(right[0]))
+        self.assertEqual(audited["wall"]["right"],
+                         [right[0][0], -right[0][1], right[0][2], right[0][3]])
+        self.assertEqual(audited["downgraded"]["cells"], downgraded)
+        self.assertIn("right", audited["downgraded"]["sides"]["interface"])
+        self.assertNotIn("left", audited["downgraded"]["sides"]["interface"])
 
     def test_b1_microcases_are_independent_and_frozen_by_identities(self):
         from dev_orchestrator.reference import hllc_audit
