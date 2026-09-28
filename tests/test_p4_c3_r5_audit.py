@@ -220,6 +220,27 @@ class P4C3R5AuditTests(unittest.TestCase):
         self.assertEqual(report["classification"], "P4_SCI_C3_INCONCLUSIVE")
         self.assertEqual(report["reason"], "existing_physical_evidence_missing")
 
+    def test_negative_conservation_residual_is_inconclusive(self):
+        acquisition = _passing_acquisition()
+        acquisition["max_global_resid"] = -1.0
+        report = evaluate_c3_r5(acquisition, GEOMETRY,
+                                 expected_runtime=acquisition["runtime"])
+        self.assertEqual(report["classification"], "P4_SCI_C3_INCONCLUSIVE")
+        self.assertEqual(report["reason"], "existing_physical_evidence_missing")
+
+    def test_valid_fallback_with_none_middle_wave_is_semantic_fail(self):
+        acquisition = _passing_acquisition()
+        record = acquisition["history"][0]
+        product = record["audit_stages"]["stage_a"]["r5_momentum"]["riemann"][0]
+        product["reason"] = "synthetic-fallback"
+        product["waves"] = [-1.0, None, 1.0]
+        per_area = tuple(value / GEOMETRY["areas"][0] for value in product["flux"])
+        with patch("dev_orchestrator.p4_c3_r5_audit.audit_hllc",
+                   return_value=(per_area, (-1.0, None, 1.0), "synthetic-fallback")):
+            report = audit_a(record)
+        self.assertEqual(report["status"], "FAIL")
+        self.assertFalse(report["checks"]["no_unexpected_fallback"])
+
     def test_existing_conservation_and_solver_status_fail_physically(self):
         acquisition = _passing_acquisition()
         acquisition["max_global_resid"] = 1e-9

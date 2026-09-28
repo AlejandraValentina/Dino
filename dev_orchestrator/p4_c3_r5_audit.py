@@ -409,9 +409,11 @@ def audit_a(return_info, *, eos=EOS):
             "product_flux_finite": all(math.isfinite(value) for value in observed),
             "product_reason_matches": product.get("reason") == audit_reason,
             "no_unexpected_fallback": product.get("reason") is None and audit_reason is None,
-            "product_waves_ordered": (product["waves"][0] < product["waves"][1]
+            "product_waves_ordered": (_finite_number(product["waves"][1])
+                                      and product["waves"][0] < product["waves"][1]
                                       < product["waves"][2]),
-            "audit_waves_ordered": audit_waves[0] < audit_waves[1] < audit_waves[2],
+            "audit_waves_ordered": (_finite_number(audit_waves[1])
+                                    and audit_waves[0] < audit_waves[1] < audit_waves[2]),
             "exact_waves_ordered": exact_waves_ordered,
             "direction_matches": _sign(observed[0]) == _sign(audit_flux[0]) == _sign(exact.ustar),
         }
@@ -469,8 +471,8 @@ def evaluate_c3_r5(acquisition, geometry, *, expected_runtime=None, eos=EOS):
 
     max_global_resid = acquisition.get("max_global_resid")
     solver_status = acquisition.get("solver_status")
-    if (not isinstance(max_global_resid, (int, float))
-            or not math.isfinite(float(max_global_resid))
+    if (not _finite_number(max_global_resid)
+            or float(max_global_resid) < 0.0
             or solver_status is None):
         return {"classification": "P4_SCI_C3_INCONCLUSIVE",
                 "reason": "existing_physical_evidence_missing"}

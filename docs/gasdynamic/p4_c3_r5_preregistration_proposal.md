@@ -135,7 +135,7 @@ contrato, todos los siguientes gates están acreditados en una única adquisici�
 focal:
 
 - retorno causal seleccionado internamente por la regla preregistrada;
-- conservación global `max_global_resid <= 1e-10` bajo el criterio P4/C2 ya
+- conservación global `0 <= max_global_resid <= 1e-10` bajo el criterio P4/C2 ya
   vigente, `solver_status == completed`, y evidencia finita de
   `solver_time >= target_final_time`;
 - A PASS bajo la semántica cualitativa C1 reutilizada;

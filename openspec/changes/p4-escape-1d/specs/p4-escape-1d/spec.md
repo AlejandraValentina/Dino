@@ -40,7 +40,7 @@ flux-vector, wave and fallback-reason identity. B2 SHALL independently replay
 `q_new=0.5*q0+0.5*q2` bitwise at declared checkpoints.
 
 #### Scenario: Diagnostic parity
-- **WHEN** A/B0/B1/B2 pass, `max_global_resid <= 1e-10`, and solver status is
+- **WHEN** A/B0/B1/B2 pass, `0 <= max_global_resid <= 1e-10`, and solver status is
   `completed` under the same runtime and acquisition
 - **THEN** the auditor may classify C3 `P4_SCI_C3_PASS`; HLLC-vs-Exact
   magnitudes and control-volume residuals remain diagnostic only.
