@@ -1,34 +1,53 @@
 {
-  "current_phase": "P6",
-  "current_subphase": "P6-C",
-  "base_commit": "854e59e",
-  "latest_commit": "pending",
-  "worktree_checkpoint": "P5B-14 complete fixture and gate state committed locally",
-  "classification": "P6_IMPLEMENTATION_IN_PROGRESS_CONDITIONAL",
+  "current_phase": "P8",
+  "current_subphase": null,
+  "base_commit": "f782e6bb7fa9dfb7624f10179442da69f53075b5",
+  "latest_commit": "437a66fa4cbdf58c3393e7aaf81ca426c5419ebe",
+  "classification": "P8_WIDE_RPM_PERFORMANCE_VERIFIED_CONDITIONAL",
   "attempt": 0,
   "gates": {
-    "implementation": "PASS",
-    "numerical": "PASS",
-    "regression": "PASS",
-    "openspec": "PASS",
-    "fixtures": "PASS",
+    "campaign": "PASS",
+    "anchors": "PASS",
+    "anchor_files": "PASS",
+    "csv_consistency": "PASS",
     "restart": "PASS",
     "determinism": "PASS",
-    "causality": "PASS",
-    "backflow": "PENDING",
-    "stage_coherent_rhs": "PASS",
-    "species_unit": "PASS",
-    "species_stage_coherent": "PARTIAL_PASS",
-    "stage_two_donor": "PASS"
+    "p7_nonvacuous": "PASS",
+    "measured_gates": "PASS",
+    "p4": "NOT_GRANTED",
+    "p9": "STOPPED",
+    "independent_review": "PENDING"
   },
   "blockers": [
-    "P4 remains BLOCKED / NOT_GRANTED; all P6 evidence conditional"
+    "P4 remains BLOCKED / NOT_GRANTED",
+    "Independent review remains pending",
+    "P9 is not authorized"
   ],
   "dependencies": {
     "P4": "UNRESOLVED",
-    "P5": "CONDITIONAL"
+    "P7": "CONDITIONAL_VERIFIED"
   },
-  "started_at": "2026-09-23T16:18:57.340428+00:00",
-  "completed_at": "2026-09-23T16:18:57.340428+00:00",
-  "next_action": "Complete integrated F05-F09 species fixtures and ledgers"
+  "started_at": "2026-09-27T22:34:04-03:00",
+  "completed_at": "2026-09-27T22:34:04-03:00",
+  "next_action": "Keep P8 closed; require explicit human authorization and a new P9 contract before experimental validation",
+  "evidence": {
+    "consolidated": "results\\p8-wide-rpm-20260927\\p8-wide-rpm.json",
+    "csv": "results\\p8-wide-rpm-20260927\\p8-wide-rpm.csv",
+    "audit": {
+      "evidence_present": true,
+      "anchors_complete": true,
+      "anchor_files_equal": true,
+      "csv_equal": true,
+      "gates_ok": true,
+      "restart_ok": true,
+      "replay_ok": true,
+      "p7_nonvacuous": true,
+      "p4_blocked": true,
+      "p9_stopped": true,
+      "status_ok": true,
+      "no_failures": true,
+      "closure_ok": true
+    },
+    "reported_closure": "P8_READY_FOR_P9_DATA"
+  }
 }
