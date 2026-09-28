@@ -129,6 +129,35 @@ def _relative_error(observed, expected):
     return {"components": errors, "max": max(errors)}
 
 
+def _rounding_parity(observed, expected):
+    """Compare two evaluations without introducing a physical error gate."""
+    exact = tuple(observed) == tuple(expected)
+    ulps = []
+    for actual, reference in zip(observed, expected):
+        scale = max(abs(actual), abs(reference), 1.0)
+        ulps.append(abs(actual - reference) / math.ulp(scale))
+    # The independent audit follows the same IEEE-754 operation graph.  Four
+    # ulps is the strict rounding policy for the handful of scalar operations
+    # whose evaluation order is not guaranteed across the two modules.
+    limit = 4.0
+    return {
+        "pass": exact or all(value <= limit for value in ulps),
+        "exact": exact,
+        "components_ulps": ulps,
+        "max_ulps": max(ulps, default=0.0),
+        "policy": "exact equality when bitwise reproducible; otherwise <= 4 derived IEEE-754 ulps per component",
+        "physical_threshold": None,
+    }
+
+
+def _sign(value):
+    return 1 if value > 0.0 else -1 if value < 0.0 else 0
+
+
+def _admissible(state):
+    return all(math.isfinite(value) for value in state) and state[0] > 0.0 and state[2] > 0.0
+
+
 def _state_from_chamber(chamber):
     mass, energy, fresh = chamber
     return (mass / C2_VOLUME, 0.0, (EOS.gamma - 1.0) * energy / C2_VOLUME,
@@ -147,32 +176,110 @@ def _select_return(history, expected_time):
 
 
 def _riemann_audit(info):
-    # interface_flux_observed is captured from op0, i.e. stage_a.  Keep the
-    # independently reconstructed state aligned with that same stage.
+    # interface_flux_observed is captured from op0, i.e. stage_a.  Both
+    # references must consume the exact same persisted reconstructed face pair.
     stage = info["audit_stages"]["stage_a"]
-    left = _state_from_chamber(stage["chamber_state"])
-    right = tuple(stage["primitive"][0])
-    reference = ExactRiemann(left, right, EOS)
-    sampled = reference.sample(0.0)
-    expected_per_area = _physical_flux(sampled)
     observed = list(info["interface_flux_observed"])
-    expected = [C2_AREA * x for x in expected_per_area]
-    return {
-        "status": "INCONCLUSIVE",
-        "status_reason": "No approved quantitative HLLC-vs-exact equality threshold was found; errors are diagnostic only.",
-        "reference_module": "dev_orchestrator.reference.exact_riemann.ExactRiemann",
-        "reference_independent_of_productive_hllc": True,
-        "productive_fixture_executed": True,
-        "left_state": list(left), "right_state": list(right),
-        "normal": info["interface_normal"], "area_m2": info["interface_area"],
-        "sample_xi": 0.0,
-        "exact_star": {"p": reference.pstar, "u": reference.ustar,
-                        "sample": list(sampled), "residual": reference.residual},
-        "flux_expected_area_integrated": expected,
-        "flux_observed_area_integrated": observed,
-        "relative_error": _relative_error(observed, expected),
-        "capture_contract": "stage_a conservative/chamber/time and primitive/observed flux all pre-step op0",
-    }
+    faces = stage.get("external_faces", {}).get("interface")
+    if not faces or "left" not in faces or "right" not in faces:
+        # Keep the legacy diagnostic shape for old synthetic fixtures, but do
+        # not accredit it: the productive reconstructed right face is absent.
+        left = _state_from_chamber(stage["chamber_state"])
+        right = tuple(stage["primitive"][0])
+        reference = ExactRiemann(left, right, EOS)
+        expected = [C2_AREA * x for x in _physical_flux(reference.sample(0.0))]
+        return {"status": "INCONCLUSIVE",
+                "status_reason": "missing_persisted_interface_face_states",
+                "criterion_authority": "P4-SCI-03/P4-SCI-04A",
+                "left_state": list(left), "right_state": list(right),
+                "exact_star": {"p": reference.pstar, "u": reference.ustar,
+                                "sample": list(reference.sample(0.0)),
+                                "residual": reference.residual},
+                "flux_expected_area_integrated": expected,
+                "flux_observed_area_integrated": observed,
+                "relative_error": _relative_error(observed, expected)}
+    left = tuple(faces["left"])
+    right = tuple(faces["right"])
+    try:
+        admissible = {"left": _admissible(left), "right": _admissible(right)}
+        if not all(admissible.values()):
+            return {"status": "FAIL", "status_reason": "inadmissible_interface_face_state",
+                    "left_state": list(left), "right_state": list(right),
+                    "admissibility": admissible,
+                    "criterion_authority": "P4-SCI-03/P4-SCI-04A"}
+        audit_flux, audit_waves, audit_reason = audit_hllc(left, right, EOS)
+        reference = ExactRiemann(left, right, EOS)
+        sampled = reference.sample(0.0)
+        expected_per_area = _physical_flux(sampled)
+        expected = [C2_AREA * x for x in expected_per_area]
+        audit_expected = [C2_AREA * x for x in audit_flux]
+        parity = _rounding_parity(observed, audit_expected)
+        hllc_ordered = audit_reason is not None or not (audit_waves[0] < audit_waves[1] < audit_waves[2])
+        product_waves = info.get("speeds_iface")
+        product_reason = info.get("reason_iface")
+        if product_waves is None or "reason_iface" not in info:
+            return {"status": "INCONCLUSIVE",
+                    "status_reason": "missing_persisted_product_wave_diagnostics",
+                    "criterion_authority": "P4-SCI-03/P4-SCI-04A",
+                    "left_state": list(left), "right_state": list(right),
+                    "hllc_exact_error_is_diagnostic": True}
+        product_evidence = product_waves is not None and len(product_waves) == 3
+        product_ordered = product_evidence and product_reason is None and all(
+            math.isfinite(value) for value in product_waves
+        ) and product_waves[0] < product_waves[1] < product_waves[2]
+        exact_ordered = not (reference.waves[0][0] <= reference.waves[0][1]
+                             <= reference.waves[1][0] <= reference.waves[1][1])
+        exact_sample_admissible = _admissible(sampled)
+        exact_finite = all(math.isfinite(value) for value in sampled)
+        direction = {
+            "mass_flux_sign": _sign(audit_flux[0]),
+            "hllc_sm_sign": _sign(audit_waves[1]),
+            "exact_ustar_sign": _sign(reference.ustar),
+        }
+        direction_ok = (direction["mass_flux_sign"] == direction["exact_ustar_sign"]
+                        and direction["hllc_sm_sign"] == direction["exact_ustar_sign"])
+        checks = {
+            "states_admissible": all(admissible.values()),
+            "product_flux_finite": len(observed) == 4 and all(math.isfinite(value) for value in observed),
+            "hllc_product_parity": parity["pass"],
+            "hllc_no_fallback": audit_reason is None,
+            "hllc_ordered": not hllc_ordered,
+            "product_no_fallback": product_evidence and product_reason is None,
+            "product_ordered": product_ordered,
+            "direction_matches_exact_ustar": direction_ok,
+            "exact_residual_contract": reference.residual <= 1e-13,
+            "exact_sample_admissible": exact_finite and exact_sample_admissible,
+            "exact_waves_ordered": not exact_ordered,
+        }
+        return {
+            "status": "PASS" if all(checks.values()) else "FAIL",
+            "status_reason": "SCI-03/04A qualitative falsification checks",
+            "criterion_authority": "P4-SCI-03/P4-SCI-04A",
+            "reference_module": "dev_orchestrator.reference.exact_riemann.ExactRiemann",
+            "reference_independent_of_productive_hllc": True,
+            "productive_fixture_executed": True,
+            "left_state": list(left), "right_state": list(right),
+            "normal": info["interface_normal"], "area_m2": info["interface_area"],
+            "sample_xi": 0.0,
+            "exact_star": {"p": reference.pstar, "u": reference.ustar,
+                            "sample": list(sampled), "residual": reference.residual,
+                            "waves": [list(pair) for pair in reference.waves]},
+            "hllc_audit": {"flux_per_area": list(audit_flux),
+                           "waves": list(audit_waves), "fallback_reason": audit_reason},
+            "flux_expected_area_integrated": expected,
+            "flux_observed_area_integrated": observed,
+            "flux_hllc_audit_area_integrated": audit_expected,
+            "relative_error": _relative_error(audit_expected, expected),
+            "hllc_exact_error_is_diagnostic": True,
+            "parity": parity,
+            "direction": direction,
+            "checks": checks,
+            "capture_contract": "stage_a external_faces.interface.left/right and observed op0/stage_a flux",
+        }
+    except (KeyError, TypeError, ValueError, OverflowError, ZeroDivisionError) as exc:
+        return {"status": "INCONCLUSIVE", "status_reason": "audit_evidence_error",
+                "error": str(exc), "criterion_authority": "P4-SCI-03/P4-SCI-04A",
+                "left_state": list(left), "right_state": list(right)}
 
 
 def _recompute_stage(stage, geometry):

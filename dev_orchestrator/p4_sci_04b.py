@@ -440,7 +440,8 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
         # need to ensure speeds length matches mesh.n+1 (n=100 -> 101 speeds) we have 1+ (n-1)=n +1 wall = n+1 correct
         return {"dq":dq, "dz":dz, "limit":limit, "unit":unit, "limiting":limiting,
                 "flux_left":flux_left, "outward":outward,
-                "speeds_iface":speeds_iface, "reason":reason_iface, "ws":ws,
+                "speeds_iface":speeds_iface, "reason":reason_iface,
+                "reason_iface":reason_iface, "ws":ws,
                 "chamber_p":p_c,
                 # Diagnostic inputs only: these are the states actually passed
                 # to the two exterior Riemann evaluations in this operator.
@@ -557,6 +558,8 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
             "observed_flux_source": "op0/stage_a pre-step",
             "mass_energy_species_flux_source": "op0/stage_a pre-step",
             "wave_speed_middle":sm,
+            "speeds_iface":list(op0["speeds_iface"]),
+            "reason_iface":op0["reason_iface"],
             "audit_stages": audit_stages,
         }
         record(z, cells, ws, t, flux_info=interface_info)
