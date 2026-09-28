@@ -1,19 +1,19 @@
 # MotorSim roadmap supervisor live status
 
-- Current UTC: not started
-- Current local: not started
-- Supervisor: STOPPED / PID none (not alive)
+- Current UTC: not running
+- Current local: not running
+- Supervisor: STOPPED / PID none
 - Heartbeat age: unknown
 - Child PID: none
-- Phase/task: P5_B / P5B-15
-- DONE/total: 14/20
+- Phase/task: P8 / none
+- DONE/total: 20/20
 - Invocation: none (count 0)
 - Elapsed agent time: 0.0s
-- HEAD: unknown
+- HEAD: resolved dynamically by status command
 - No-progress count: 0
-- Terminal reason: none
+- Terminal reason: ROADMAP_NO_ACTIVE_TASKS
 
-## Current Codex stdout (last readable lines)
+## Current Codex stdout
 
 ```text
 (no active invocation)

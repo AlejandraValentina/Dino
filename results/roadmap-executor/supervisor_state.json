@@ -1,12 +1,17 @@
 {
-  "status": "RUNNING",
-  "pid": 11864,
-  "started_at": "2026-09-23T16:50:31.711509+00:00",
-  "last_heartbeat": "2026-09-23T17:01:44.515768+00:00",
-  "invocation_count": 3,
-  "current_invocation": "8846287d7c",
-  "current_phase": "P5_B",
-  "current_task": "P5B-07 mass_global_ledger",
-  "HEAD": "2f47efbbeb58f0cfa7797e793e0e14417f5bbd31",
-  "terminal_reason": null
+  "status": "STOPPED",
+  "pid": null,
+  "child_pid": null,
+  "started_at": null,
+  "last_heartbeat": null,
+  "invocation_count": 0,
+  "current_invocation": null,
+  "current_phase": "P8",
+  "current_task": null,
+  "done": 20,
+  "total": 20,
+  "HEAD": null,
+  "no_progress_count": 0,
+  "agent_started_at": null,
+  "terminal_reason": "ROADMAP_NO_ACTIVE_TASKS"
 }

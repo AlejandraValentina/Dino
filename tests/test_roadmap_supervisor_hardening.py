@@ -166,7 +166,7 @@ def test_real_detached_fake_autonomy_proof(tmp_path):
                     "same_supervisor_pid": supervisor_pid, "clean_stop": True,
                     "lock_removed": True, "live_status_updated_while_child_running": True,
                     "first_status": first_status, "fake_call_count": 2}
-        proof = Path(__file__).resolve().parents[1] / "results" / "roadmap-executor" / "fake-autonomy-proof.json"
+        proof = results / "fake-autonomy-proof.json"
         proof.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
     finally:
         if supervisor.pid_alive(supervisor_pid):
