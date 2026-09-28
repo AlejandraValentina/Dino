@@ -109,14 +109,10 @@ def _b0_audit_stage(stage, geometry):
         return {"status": "FAIL", "reason": "missing_persisted_external_faces",
                 "expected": expected}
     reconstruction = captured.get("reconstruction")
-    def face_state_match(actual, reference):
-        # Allow only representation-level roundoff from chamber inversion;
-        # this is metadata parity, not a physical acceptance threshold.
-        return all(a == b or abs(a - b) <= 2.0 * math.ulp(max(abs(a), abs(b), 1.0))
-                   for a, b in zip(actual, reference))
     checks = {
-        "interface_left": face_state_match(captured["interface"]["left"],
-                                            expected["interface"]["left"]),
+        # Both values are derived from the same persisted chamber state with
+        # the same algebra; this is metadata identity, not a scientific gate.
+        "interface_left": captured["interface"]["left"] == expected["interface"]["left"],
         "interface_right": captured["interface"]["right"] == expected["interface"]["right"],
         "wall_left": captured["wall"]["left"] == expected["wall"]["left"],
         "wall_right": captured["wall"]["right"] == expected["wall"]["right"],

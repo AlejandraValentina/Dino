@@ -36,9 +36,11 @@ def _stage(states, geometry, dt=0.1):
         (rho, 0.0, pressure, species))
     interface = stage["external_faces"]["interface"]
     wall = stage["external_faces"]["wall"]
-    interface_result = audit_hllc(tuple(interface["left"]),
-                                  tuple(interface["right"]), EOS)
-    wall_result = audit_hllc(tuple(wall["left"]), tuple(wall["right"]), EOS)
+    # Persisted Riemann metadata represents the PRODUCT path.  The audit
+    # implementation is evaluated later and compared against these values.
+    interface_result = product_hllc(tuple(interface["left"]),
+                                    tuple(interface["right"]), EOS)
+    wall_result = product_hllc(tuple(wall["left"]), tuple(wall["right"]), EOS)
     stage["external_faces"]["riemann"] = {
         "interface": {"speeds": list(interface_result[1]),
                        "reason": interface_result[2]},
@@ -249,11 +251,6 @@ class P4C3ReturnAuditTests(unittest.TestCase):
         geometry = {"areas": [1.0, 1.0], "faces": [0., 1.], "centers": [.5]}
         stage = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry)
         stage["conservative"] = [[1., 0., 250000., .2]]
-        faces = stage["external_faces"]
-        iface = audit_hllc(tuple(faces["interface"]["left"]), tuple(faces["interface"]["right"]), EOS)
-        wall = audit_hllc(tuple(faces["wall"]["left"]), tuple(faces["wall"]["right"]), EOS)
-        faces["riemann"] = {"interface": {"speeds": list(iface[1]), "reason": iface[2]},
-                             "wall": {"speeds": list(wall[1]), "reason": wall[2]}}
         info = {"audit_stages": {"stage_a": stage, "stage_b": stage,
                                  "after": {"conservative": stage["conservative"]}},
                 "interface_flux_observed": [1e99] * 4,
