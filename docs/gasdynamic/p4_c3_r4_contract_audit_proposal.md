@@ -10,16 +10,23 @@ una campaña.
 
 ## Dictamen
 
+C3 sigue **INCONCLUSIVE**. Esta propuesta no autoriza una nueva corrida, no
+adopta un contrato ni cambia `tasks.md`, OpenSpec o los artefactos de resultados.
+E13/P9 permanecen sin cambio.
+
 C3 contiene dos verificaciones distintas:
 
 * **A — referencia de retorno:** comprobar, en el snapshot causal preregistrado,
-  que el estado/flujo de interfaz productivo es consistente con una solución
-  Exact Riemann independiente. Esto mide discrepancia de modelo numérico
-  HLLC frente a la referencia exacta, no cierre de la actualización discreta.
+  el flujo HLLC frente a ExactRiemann usando exactamente los mismos estados de
+  cara reconstruidos. Así se aísla el solver de Riemann y se mide discrepancia
+  de modelo numérico, no cierre de la actualización discreta. En el snapshot
+  seleccionado, la cara izquierda reconstruida coincide con la celda; la pared
+  no coincide, por lo que no es válido sustituir allí el estado reconstruido por
+  el estado de celda.
 * **B — balance de momento:** comprobar que el cambio de momento almacenado en el
   volumen de control coincide con los flujos de momento y la fuente geométrica
   que realmente definen el update productivo, en ambas etapas SSPRK2. Esto mide
-  identidad de conservación discreta.
+  identidad de conservación discreta, pero debe auditarse por capas separadas.
 
 El auditor R3 mezcla esos objetivos en B. `_recompute_stage` usa ExactRiemann
 en la interfaz y en la pared, mientras `p4_sci_04b.py` actualiza con HLLC. Además,
@@ -57,53 +64,75 @@ los estados primitivos/reconstruidos necesarios para reevaluar HLLC y Exact
 con las mismas entradas. Por tanto no se atribuye ese máximo a HLLC, Exact o
 reconstrucción sin evidencia adicional.
 
-## Qué debería demostrar B
+## Qué debería demostrar B por capas
 
-B debe usar, por etapa, los estados pre-step y el mismo volumen, áreas, fuente
-`p_i (A_{i+1}-A_i)`, signos y combinación SSPRK2 del update. Para acreditar
-identidad discreta, la evaluación debe producir los flujos HLLC desde estados
-reconstruidos independientes, sin leer campos de flujo del operador productivo.
-No debe reutilizar `interface_flux_observed` ni otro término ya calculado por
-el productor.
+B debe distinguir explícitamente estas capas, por etapa:
 
-“Independiente” no exige un tercer modelo físico: exige una segunda evaluación
-del mismo contrato numérico. La implementación auditora puede compartir EOS,
-geometría y definición de reconstrucción, pero debe tener una ruta HLLC
-separada, con tests de paridad y sin importar/reusar el resultado de la ruta
-productiva. ExactRiemann queda reservado para A y como diagnóstico comparativo.
+* **B0 — inputs de estado de cara:** obtener o recibir los estados pre-step
+  reconstruidos de las caras auditadas, además del ghost de pared cuando
+  corresponda. B0 verifica por separado que esos inputs representan la
+  reconstrucción declarada; no calcula ni valida todavía el flujo HLLC.
+* **B1 — HLLC independiente:** evaluar HLLC sobre exactamente los estados de
+  cara de B0, para la interfaz y la pared, en una ruta auditora independiente.
+  B1 jamás lee `interface_flux_observed` ni ningún flujo u otro output calculado
+  por el operador productivo.
+* **B2 — balance SSPRK2:** combinar los flujos producidos por B1 con el mismo
+  volumen, áreas, fuente `p_i (A_{i+1}-A_i)`, signos, `dt`, momento almacenado
+  antes/después y orden de las dos etapas SSPRK2. B2 comprueba el balance; no
+  vuelve a reconstruir estados ni sustituye los flujos de B1 por outputs
+  productivos.
+
+Para B0 hay dos opciones válidas y mutuamente excluyentes de implementación:
+
+1. una reconstrucción externa independiente mínima, limitada a las caras
+   auditadas; o
+2. persistir los estados de cara productivos como inputs y verificar su
+   reconstrucción mediante un subgate separado.
+
+En ambos casos B1 debe consumir esos estados explícitos y jamás leer outputs de
+flujo productivos. Compartir una definición abstracta de reconstrucción no basta
+ni sustituye esta separación de inputs, ruta HLLC y outputs. “Independiente” no
+exige un tercer modelo físico: exige una segunda evaluación del mismo contrato
+numérico. EOS y geometría pueden ser comunes; la evaluación HLLC y sus entradas
+deben quedar separadas. ExactRiemann queda reservado para A y como diagnóstico
+comparativo.
 
 ## Siguiente paso propuesto, sin cambiar la física
 
-1. Añadir instrumentación durable de estados pre-step por etapa, incluyendo
-   estados reconstruidos de las dos caras externas, ghost de pared, `dt`, áreas,
-   fuente y momento antes/después. Esto no cambia el solver.
-2. Implementar en el auditor una evaluación HLLC independiente para interfaz y
-   pared. Calcular B desde esos resultados y desde los estados almacenados, no
-   desde campos productivos.
-3. Probar la independencia con: (a) paridad contra una tabla congelada de
-   microestados HLLC, (b) mutación controlada del flujo productivo que no cambie
-   el auditor, y (c) comparación de entradas y salidas sin aliasing ni lectura
-   de nombres de campos productivos.
-4. Mantener A separado: ExactRiemann contra el flujo observado HLLC, con la
-   selección causal de snapshot ya fijada.
+1. Fijar B0 mediante una de sus dos opciones válidas: instrumentación durable
+   de estados de cara reconstruidos por etapa, o reconstrucción externa mínima.
+   En ambos casos conservar también ghost de pared, `dt`, áreas, fuente y
+   momento antes/después. Esto no cambia el solver.
+2. Implementar B1 como evaluación HLLC independiente sobre los inputs B0 para
+   interfaz y pared. Calcular B2 desde esos resultados y los estados almacenados,
+   no desde campos productivos.
+3. Probar la separación con: (a) paridad B1 contra una tabla congelada de
+   microestados HLLC, (b) mutación controlada de un flujo productivo que no
+   cambie B1/B2, y (c) comparación de entradas y salidas sin aliasing ni lectura
+   de nombres de campos productivos. Verificar B0 con su subgate propio.
+4. Mantener A separado: ExactRiemann y HLLC sobre los mismos estados de cara
+   reconstruidos, con la selección causal de snapshot ya fijada.
 
-La parte objetiva de B es la consistencia algebraica del balance, incluyendo
-identidad de entradas, signos, etapas y orden de redondeo documentado. La parte
-que sigue requiriendo decisión humana es qué magnitud de discrepancia numérica
-es aceptable para el objetivo científico y cómo se relaciona con refinamiento,
-CFL y el benchmark de referencia. No se propone ningún valor de threshold
+La parte objetiva de B puede ser una consistencia discreta con una política
+preregistrada de redondeo, backward-error y/o ULP, incluyendo identidad de
+inputs, signos, etapas y orden de redondeo documentado. Esa política no es un
+threshold físico calibrado al resultado observado. A, en cambio, todavía
+requiere un criterio científico preregistrado —benchmark y/o refinamiento— con
+reglas fijadas antes de observar resultados; no se puede introducir un threshold
 post-hoc.
 
 ## Criterio preregistrable alternativo
 
-Antes de una nueva ejecución, registrar una de estas opciones: (i) identidad
-discreta HLLC en un conjunto de microcasos y en el fixture C3 a varias etapas,
-con tolerancia derivada de una auditoría de redondeo; (ii) estudio de
-refinamiento temporal/espacial del residuo B usando la misma implementación
-independiente; o (iii) benchmark separado de HLLC-vs-Exact para A y balance
-HLLC para B, con reglas de fallo fijadas antes de observar resultados. La
-elección y cualquier threshold pertenecen al gate humano; esta propuesta no
-los adopta.
+Antes de cualquier nueva ejecución, registrar por separado: (i) para A, un
+benchmark HLLC-vs-Exact y/o estudio de refinamiento con reglas de fallo fijadas
+antes de observar resultados; y (ii) para B, identidad discreta HLLC en un
+conjunto de microcasos y en el fixture C3 a varias etapas, con política de
+redondeo/backward-error/ULP preregistrada. Un estudio de refinamiento del
+residuo B puede ser diagnóstico adicional, pero no reemplaza B0/B1/B2. La
+elección pertenece al gate humano; esta propuesta no adopta un threshold físico
+ni autoriza ejecución.
 
 Este documento no modifica `tasks.md`, OpenSpec, contratos aprobados ni
-artefactos de resultados. Es una propuesta de siguiente paso solamente.
+artefactos de resultados. C3 sigue INCONCLUSIVE y E13/P9 siguen sin cambio; es
+una propuesta de siguiente paso solamente, sin autorización de nueva corrida ni
+de contrato.
