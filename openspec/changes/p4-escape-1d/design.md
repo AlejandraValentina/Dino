@@ -96,7 +96,10 @@ reproduce sólo momentum. Las identidades son exactas y están vinculadas a
 Python/plataforma/arquitectura/`sys.float_info` y hashes de fuente; no hay
 fallback ULP ni threshold de magnitud HLLC-vs-Exact. A selecciona internamente
 el primer retorno causal positivo en la ventana preregistrada y valida el ledger
-existente (`max_global_resid <= 1e-10`, solver `completed`). La única corrida
+existente (`max_global_resid <= 1e-10`, solver `completed`, y `solver_time` y
+`target_final_time` finitos con `solver_time >= target_final_time`). Evidencia
+truncada o malformada queda `INCONCLUSIVE`; sólo un estado explícito de fallo
+del solver es `FAIL`. La única corrida
 focal C3-R5 autorizada queda condicionada a revisión independiente limpia;
 E13/G2 y P9 permanecen fuera de alcance.
 

@@ -11,6 +11,21 @@ remain `P4_SCI_C3_INCONCLUSIVE` before that acquisition is executed.
 - **THEN** the result is `INCONCLUSIVE` and no accidental `PASS` is emitted;
   a physical or semantic contradiction is `FAIL`.
 
+#### Scenario: Solver completion evidence
+- **WHEN** `solver_status` is `completed`
+- **THEN** the acquisition SHALL contain finite numeric `solver_time` and
+  `target_final_time`, with `solver_time >= target_final_time`; missing,
+  non-finite, or truncated completion evidence is `INCONCLUSIVE`.
+- **WHEN** the solver status explicitly reports a solver failure
+- **THEN** the physical result is `FAIL`; timeout or otherwise incomplete
+  evidence without an explicit solver failure remains `INCONCLUSIVE`.
+
+#### Scenario: Malformed persisted audit evidence
+- **WHEN** persisted A/B0/B1 faces, flux vectors, waves, or related fields are
+  missing, short, non-numeric, or otherwise malformed
+- **THEN** the audit SHALL return `INCONCLUSIVE` without raising an exception;
+  a valid semantic `fallback_reason` contradiction remains `FAIL`.
+
 ### Requirement: C3-R5 identity gates
 The auditor SHALL select A internally from the same acquisition history as the
 first `mass_flux > 0` record whose `sample_time_pre_step` lies in

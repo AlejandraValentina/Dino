@@ -136,15 +136,17 @@ focal:
 
 - retorno causal seleccionado internamente por la regla preregistrada;
 - conservación global `max_global_resid <= 1e-10` bajo el criterio P4/C2 ya
-  vigente y `solver_status == completed`;
+  vigente, `solver_status == completed`, y evidencia finita de
+  `solver_time >= target_final_time`;
 - A PASS bajo la semántica cualitativa C1 reutilizada;
 - B0 PASS por identidad de reconstrucción;
 - B1 PASS por paridad exacta HLLC/HLLE;
 - B2 PASS por replay exacto SSPRK2 de momentum.
 
-Un FAIL físico/semántico sigue siendo FAIL. Evidencia faltante, diferencia de
-implementación o imposibilidad de demostrar identidad permanece INCONCLUSIVE;
-no se convierte en PASS mediante tolerancia posterior.
+Un FAIL físico/semántico sigue siendo FAIL. Evidencia faltante, truncada o
+malformada, diferencia de implementación o imposibilidad de demostrar identidad
+permanece INCONCLUSIVE; sólo un fallo explícito del solver se clasifica como
+fallo físico de solver; no se convierte en PASS mediante tolerancia posterior.
 
 ## Implementación permitida solo después de aprobación
 

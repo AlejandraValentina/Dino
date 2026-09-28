@@ -22,6 +22,9 @@ CONTRACT = "P4-C3-R5"
 INCONCLUSIVE = "INCONCLUSIVE"
 CONSERVATION_THRESHOLD = 1e-10  # existing P4/C2 ledger criterion
 EOS = IdealGas(R=287.0, gamma=1.35)
+EXPLICIT_SOLVER_FAILURES = frozenset({
+    "failed", "failed_numerically", "solver_failed", "error", "exception",
+})
 
 
 def runtime_binding(source_paths=None):
@@ -135,6 +138,8 @@ def reconstruct_all_faces(states, geometry, chamber_state, *, eos=EOS):
 
 
 def audit_b0(stage, geometry, *, eos=EOS):
+    if not isinstance(stage, dict):
+        return {"status": INCONCLUSIVE, "reason": "missing_b0_stage_evidence"}
     captured = stage.get("r5_momentum")
     if (not isinstance(captured, dict)
             or not isinstance(captured.get("faces"), list)
@@ -143,14 +148,26 @@ def audit_b0(stage, geometry, *, eos=EOS):
     try:
         expected = reconstruct_all_faces(stage["primitive"], geometry,
                                          stage["chamber_state"], eos=eos)
-    except (KeyError, TypeError, ValueError, ZeroDivisionError, OverflowError) as exc:
+    except (KeyError, IndexError, TypeError, ValueError, ZeroDivisionError,
+            OverflowError, AttributeError, struct.error) as exc:
         return {"status": INCONCLUSIVE, "reason": "b0_reconstruction_error", "error": str(exc)}
-    face_identity = (len(captured["faces"]) == len(expected["faces"])
-                     and all(a.get("index") == b.get("index")
-                             and a.get("kind") == b.get("kind")
-                             and _exact_float_sequence(a.get("left", ()), b.get("left", ()))
-                             and _exact_float_sequence(a.get("right", ()), b.get("right", ()))
-                             for a, b in zip(captured["faces"], expected["faces"])))
+    try:
+        if (len(captured["faces"]) != len(expected["faces"])
+                or not all(isinstance(face, dict) for face in captured["faces"])
+                or not all(_valid_float_sequence(face.get("left"), 4)
+                           and _valid_float_sequence(face.get("right"), 4)
+                           for face in captured["faces"])):
+            return {"status": INCONCLUSIVE, "reason": "malformed_b0_face_values",
+                    "expected": expected, "captured": captured}
+        face_identity = all(
+            a.get("index") == b.get("index")
+            and a.get("kind") == b.get("kind")
+            and _exact_float_sequence(a["left"], b["left"])
+            and _exact_float_sequence(a["right"], b["right"])
+            for a, b in zip(captured["faces"], expected["faces"]))
+    except (KeyError, IndexError, TypeError, ValueError, OverflowError, struct.error) as exc:
+        return {"status": INCONCLUSIVE, "reason": "malformed_b0_face_values",
+                "error": str(exc), "expected": expected, "captured": captured}
     checks = {
         "face_states_exact": face_identity,
         "downgraded_cells_exact": captured.get("downgraded_cells") == expected["downgraded_cells"],
@@ -180,8 +197,12 @@ def audit_b1(stage, geometry, *, eos=EOS):
         return {"status": INCONCLUSIVE, "reason": "b1_face_count_mismatch", "b0": b0}
     rows = []
     for face, product in zip(b0["expected"]["faces"], captured):
-        if not all(key in product for key in ("index", "kind", "flux", "waves", "reason")):
-            return {"status": INCONCLUSIVE, "reason": "missing_b1_face_fields", "b0": b0}
+        if (not isinstance(product, dict)
+                or not all(key in product for key in ("index", "kind", "flux", "waves", "reason"))
+                or not _valid_float_sequence(product.get("flux"), 4)
+                or not _valid_wave_sequence(product.get("waves"))
+                or not _valid_reason(product.get("reason"))):
+            return {"status": INCONCLUSIVE, "reason": "malformed_b1_face_values", "b0": b0}
         try:
             flux, waves, reason = audit_hllc(tuple(face["left"]), tuple(face["right"]), eos)
             face_with_area = dict(face, area=geometry["areas"][face["index"]])
@@ -193,7 +214,7 @@ def audit_b1(stage, geometry, *, eos=EOS):
         rows.append({"index": face["index"], "checks": {
             "index_kind": product.get("index") == expected["index"] and product.get("kind") == expected["kind"],
             "flux_exact": _exact_float_sequence(product.get("flux", ()), expected["flux"]),
-            "waves_exact": _exact_float_sequence(product.get("waves", ()), expected["waves"]),
+            "waves_exact": _exact_wave_sequence(product.get("waves", ()), expected["waves"]),
             "fallback_reason_exact": product.get("reason") == expected["reason"],
         }, "expected": expected, "product": product})
     checks = [row["checks"] for row in rows]
@@ -205,7 +226,43 @@ def audit_b1(stage, geometry, *, eos=EOS):
 
 
 def _exact_float_sequence(actual, expected):
-    return canonical_binary64(actual) == canonical_binary64(expected)
+    try:
+        return canonical_binary64(actual) == canonical_binary64(expected)
+    except (TypeError, ValueError, OverflowError, struct.error):
+        return False
+
+
+def _exact_wave_sequence(actual, expected):
+    if not _valid_wave_sequence(actual) or not _valid_wave_sequence(expected):
+        return False
+    for left, right in zip(actual, expected):
+        if left is None or right is None:
+            if left is not None or right is not None:
+                return False
+        elif not _exact_float_sequence([left], [right]):
+            return False
+    return True
+
+
+def _finite_number(value):
+    return (isinstance(value, (int, float)) and not isinstance(value, bool)
+            and math.isfinite(float(value)))
+
+
+def _valid_float_sequence(values, length):
+    return (isinstance(values, (list, tuple))
+            and len(values) == length
+            and all(_finite_number(value) for value in values))
+
+
+def _valid_wave_sequence(values):
+    return (isinstance(values, (list, tuple)) and len(values) == 3
+            and _finite_number(values[0]) and _finite_number(values[2])
+            and (values[1] is None or _finite_number(values[1])))
+
+
+def _valid_reason(value):
+    return value is None or isinstance(value, str)
 
 
 def audit_b2(stage_a, stage_b, after, geometry, *, eos=EOS):
@@ -302,8 +359,15 @@ def _sign(value):
 
 def audit_a(return_info, *, eos=EOS):
     """C1 qualitative A gate over one persisted reconstructed interface pair."""
-    stage = return_info.get("audit_stages", {}).get("stage_a", {})
+    if not isinstance(return_info, dict):
+        return {"status": INCONCLUSIVE, "reason": "malformed_a_evidence"}
+    stages = return_info.get("audit_stages")
+    if not isinstance(stages, dict) or not isinstance(stages.get("stage_a"), dict):
+        return {"status": INCONCLUSIVE, "reason": "malformed_a_evidence"}
+    stage = stages["stage_a"]
     momentum = stage.get("r5_momentum", {})
+    if not isinstance(momentum, dict):
+        return {"status": INCONCLUSIVE, "reason": "malformed_a_evidence"}
     faces = momentum.get("faces", [])
     interface_rows = ([face for face in faces
                        if isinstance(face, dict) and face.get("kind") == "interface"]
@@ -318,12 +382,21 @@ def audit_a(return_info, *, eos=EOS):
                 "reason": "mixed_or_missing_interface_provenance"}
     interface = interface_rows[0]
     product = product_rows[0]
+    if (not _valid_float_sequence(interface.get("left"), 4)
+            or not _valid_float_sequence(interface.get("right"), 4)
+            or not _valid_float_sequence(product.get("flux"), 4)
+            or not _valid_wave_sequence(product.get("waves"))
+            or not _valid_reason(product.get("reason"))):
+        return {"status": INCONCLUSIVE, "reason": "malformed_a_evidence"}
     try:
         left, right = tuple(interface["left"]), tuple(interface["right"])
         audit_flux, audit_waves, audit_reason = audit_hllc(left, right, eos)
         exact = ExactRiemann(left, right, eos)
         sampled = exact.sample(0.0)
         observed = product["flux"]
+        if (not _valid_float_sequence(observed, 4)
+                or not _valid_wave_sequence(product.get("waves"))):
+            return {"status": INCONCLUSIVE, "reason": "malformed_a_flux_or_waves"}
         exact_flux = eos.flux(sampled)
         # ExactRiemann stores each wave as (outer/head, inner/tail).
         # The right rarefaction tuple is therefore descending numerically.
@@ -347,7 +420,8 @@ def audit_a(return_info, *, eos=EOS):
                 "hllc_exact_error_is_diagnostic": True,
                 "hllc_flux": list(audit_flux), "exact_flux": list(exact_flux),
                 "exact_star": {"p": exact.pstar, "u": exact.ustar}}
-    except (KeyError, TypeError, ValueError, OverflowError, ZeroDivisionError) as exc:
+    except (KeyError, IndexError, TypeError, ValueError, OverflowError,
+            ZeroDivisionError, struct.error) as exc:
         return {"status": INCONCLUSIVE, "reason": "a_evidence_error", "error": str(exc)}
 
 
@@ -404,9 +478,27 @@ def evaluate_c3_r5(acquisition, geometry, *, expected_runtime=None, eos=EOS):
         return {"classification": "P4_SCI_C3_FAIL",
                 "reason": "global_conservation_failed",
                 "max_global_resid": float(max_global_resid)}
-    if solver_status != "completed":
+    solver_time = acquisition.get("solver_time")
+    target_final_time = acquisition.get("target_final_time")
+    finite_completion_times = (
+        _finite_number(solver_time) and _finite_number(target_final_time)
+        and float(solver_time) >= 0.0 and float(target_final_time) > 0.0)
+    if solver_status == "completed" and not finite_completion_times:
+        return {"classification": "P4_SCI_C3_INCONCLUSIVE",
+                "reason": "solver_completion_time_missing_or_invalid"}
+    if solver_status == "completed" and float(solver_time) < float(target_final_time):
+        return {"classification": "P4_SCI_C3_INCONCLUSIVE",
+                "reason": "solver_completion_truncated",
+                "solver_time": float(solver_time),
+                "target_final_time": float(target_final_time)}
+    if (isinstance(solver_status, str)
+            and solver_status in EXPLICIT_SOLVER_FAILURES):
         return {"classification": "P4_SCI_C3_FAIL",
                 "reason": "solver_admissibility_failed",
+                "solver_status": solver_status}
+    if solver_status != "completed":
+        return {"classification": "P4_SCI_C3_INCONCLUSIVE",
+                "reason": "solver_completion_not_verified",
                 "solver_status": solver_status}
 
     selection = select_causal_return(history, acquisition.get("expected_return_time"))
@@ -452,8 +544,10 @@ def evaluate_c3_r5(acquisition, geometry, *, expected_runtime=None, eos=EOS):
     return {"classification": classification, "contract": CONTRACT,
             "runtime": actual_runtime, "return_selection": selection_public,
             "physical": {"max_global_resid": float(max_global_resid),
-                         "conservation_threshold": CONSERVATION_THRESHOLD,
-                         "solver_status": solver_status},
+                          "conservation_threshold": CONSERVATION_THRESHOLD,
+                          "solver_status": solver_status,
+                          "solver_time": float(solver_time),
+                          "target_final_time": float(target_final_time)},
             "a": a_report, "reports": reports,
             "gates": {"A": a_report.get("status", INCONCLUSIVE),
                       "B0": "evaluated", "B1": "evaluated",

@@ -47,9 +47,10 @@ def _passing_acquisition():
             "audit_stages": {"stage_a": stage_a, "stage_b": stage_b,
                              "after": after}}
     return {"contract": CONTRACT, "acquisition_kind": "focal_c3_r5",
-            "runtime": runtime_binding(), "max_global_resid": 0.0,
-            "solver_status": "completed",
-            "expected_return_time": 1.0, "history": [item]}
+             "runtime": runtime_binding(), "max_global_resid": 0.0,
+             "solver_status": "completed",
+             "solver_time": 1.0, "target_final_time": 1.0,
+             "expected_return_time": 1.0, "history": [item]}
 
 
 class P4C3R5AuditTests(unittest.TestCase):
@@ -73,6 +74,18 @@ class P4C3R5AuditTests(unittest.TestCase):
         mutated["r5_momentum"]["faces"][0]["right"][2] += 1.0
         self.assertEqual(audit_b0(mutated, GEOMETRY)["status"], "INCONCLUSIVE")
 
+    def test_malformed_b0_face_values_are_inconclusive(self):
+        stage = _stage()
+        stage["r5_momentum"]["faces"][0]["left"] = [1.0, 0.0]
+        self.assertEqual(audit_b0(stage, GEOMETRY)["status"], "INCONCLUSIVE")
+
+    def test_malformed_a_waves_are_inconclusive(self):
+        acquisition = _passing_acquisition()
+        product = acquisition["history"][0]["audit_stages"]["stage_a"][
+            "r5_momentum"]["riemann"][0]
+        product["waves"] = [0.0, 1.0]
+        self.assertEqual(audit_a(acquisition["history"][0])["status"], "INCONCLUSIVE")
+
     def test_b1_requires_exact_full_vector_waves_and_reason(self):
         stage = _stage()
         self.assertEqual(audit_b1(stage, GEOMETRY)["status"], "PASS")
@@ -80,6 +93,12 @@ class P4C3R5AuditTests(unittest.TestCase):
         mutated["r5_momentum"]["riemann"][0]["flux"][1] = struct.unpack(
             "<d", struct.pack("<d", 2.0 + 2.0 ** -50))[0]
         self.assertEqual(audit_b1(mutated, GEOMETRY)["status"], "INCONCLUSIVE")
+
+    def test_malformed_b1_flux_or_waves_are_inconclusive(self):
+        for field, value in (("flux", [0.0]), ("waves", [0.0, "bad", 1.0])):
+            stage = _stage()
+            stage["r5_momentum"]["riemann"][0][field] = value
+            self.assertEqual(audit_b1(stage, GEOMETRY)["status"], "INCONCLUSIVE")
 
     def test_b2_analytic_case_has_manual_expected_result(self):
         stage_a = _stage(q0=3.0)
@@ -214,6 +233,37 @@ class P4C3R5AuditTests(unittest.TestCase):
                                  expected_runtime=acquisition["runtime"])
         self.assertEqual(report["classification"], "P4_SCI_C3_FAIL")
         self.assertEqual(report["reason"], "solver_admissibility_failed")
+
+    def test_completed_solver_requires_finite_target_and_reaches_it(self):
+        for field in ("solver_time", "target_final_time"):
+            acquisition = _passing_acquisition()
+            del acquisition[field]
+            report = evaluate_c3_r5(acquisition, GEOMETRY,
+                                    expected_runtime=acquisition["runtime"])
+            self.assertEqual(report["classification"], "P4_SCI_C3_INCONCLUSIVE")
+        acquisition = _passing_acquisition()
+        del acquisition["target_final_time"]
+        report = evaluate_c3_r5(acquisition, GEOMETRY,
+                                 expected_runtime=acquisition["runtime"])
+        self.assertEqual(report["classification"], "P4_SCI_C3_INCONCLUSIVE")
+        acquisition = _passing_acquisition()
+        acquisition["solver_time"] = 0.5
+        report = evaluate_c3_r5(acquisition, GEOMETRY,
+                                 expected_runtime=acquisition["runtime"])
+        self.assertEqual(report["classification"], "P4_SCI_C3_INCONCLUSIVE")
+        self.assertEqual(report["reason"], "solver_completion_truncated")
+
+    def test_timeout_truncation_is_inconclusive_but_explicit_failure_is_fail(self):
+        acquisition = _passing_acquisition()
+        acquisition["solver_status"] = "timeout"
+        acquisition["solver_time"] = 0.5
+        report = evaluate_c3_r5(acquisition, GEOMETRY,
+                                 expected_runtime=acquisition["runtime"])
+        self.assertEqual(report["classification"], "P4_SCI_C3_INCONCLUSIVE")
+        acquisition["solver_status"] = "failed_numerically"
+        report = evaluate_c3_r5(acquisition, GEOMETRY,
+                                 expected_runtime=acquisition["runtime"])
+        self.assertEqual(report["classification"], "P4_SCI_C3_FAIL")
 
     def test_runtime_binding_hashes_all_r5_reference_sources(self):
         names = {name.replace("\\", "/").split("/")[-1]
