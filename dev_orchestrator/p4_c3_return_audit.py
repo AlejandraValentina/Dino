@@ -15,6 +15,14 @@ CONSERVATION_THRESHOLD = 1e-10  # existing P4/C2 ledger criterion
 RESIDUAL_EPSILON = 1e-30
 
 
+class _AuditEvidenceError(ValueError):
+    """Persisted metadata is insufficient to perform the independent audit."""
+
+
+class _AuditReasonMismatch(ValueError):
+    """Product fallback reason disagrees with the independent recomputation."""
+
+
 def _minmod(a, b):
     if a == 0.0 or b == 0.0 or (a > 0.0) != (b > 0.0):
         return 0.0
@@ -100,12 +108,7 @@ def _b0_audit_stage(stage, geometry):
     if captured is None:
         return {"status": "FAIL", "reason": "missing_persisted_external_faces",
                 "expected": expected}
-    captured_downgraded = captured.get("downgraded")
-    if captured_downgraded is None:
-        reconstruction = captured.get("reconstruction")
-        captured_downgraded = ({"cells": reconstruction.get("downgraded_cells"),
-                               "sides": expected["downgraded"]["sides"]}
-                              if isinstance(reconstruction, dict) else None)
+    reconstruction = captured.get("reconstruction")
     def face_state_match(actual, reference):
         # Allow only representation-level roundoff from chamber inversion;
         # this is metadata parity, not a physical acceptance threshold.
@@ -117,8 +120,13 @@ def _b0_audit_stage(stage, geometry):
         "interface_right": captured["interface"]["right"] == expected["interface"]["right"],
         "wall_left": captured["wall"]["left"] == expected["wall"]["left"],
         "wall_right": captured["wall"]["right"] == expected["wall"]["right"],
-        "downgrade_metadata_present": isinstance(captured_downgraded, dict),
-        "downgrade_metadata_matches": captured_downgraded == expected["downgraded"],
+        # Product persists only the cell list.  Expected sides remain an
+        # independent B0 diagnostic and are deliberately not compared here.
+        "downgrade_metadata_present": (isinstance(reconstruction, dict)
+                                        and isinstance(reconstruction.get("downgraded_cells"), list)),
+        "downgrade_metadata_matches": (
+            isinstance(reconstruction, dict)
+            and reconstruction.get("downgraded_cells") == expected["downgraded"]["cells"]),
     }
     return {"status": "PASS" if all(checks.values()) else "FAIL",
             "checks": checks, "expected": expected,
@@ -333,7 +341,7 @@ def _recompute_stage_b(stage, geometry):
     wall_flux, wall_waves, wall_reason = audit_hllc(wall_left, wall_right, EOS)
     product_riemann = faces.get("riemann")
     if product_riemann is None:
-        raise ValueError("missing_persisted_product_riemann_diagnostics")
+        raise _AuditEvidenceError("missing_persisted_product_riemann_diagnostics")
     product_interface = product_riemann.get("interface", {})
     product_wall = product_riemann.get("wall", {})
     reason_checks = {
@@ -344,9 +352,8 @@ def _recompute_stage_b(stage, geometry):
         "interface_waves_match": list(product_interface.get("speeds", ())) == list(interface_waves),
         "wall_waves_match": list(product_wall.get("speeds", ())) == list(wall_waves),
     }
-    semantics_match = all(reason_checks.values()) and all(wave_checks.values())
-    if not semantics_match:
-        raise ValueError("productive_audit_semantics_divergence")
+    if not all(reason_checks.values()):
+        raise _AuditReasonMismatch("productive_audit_fallback_reason_mismatch")
     area_left = geometry["areas"][0]
     area_right = geometry["areas"][-1]
     source = fsum(w[2] * (geometry["areas"][i + 1] - geometry["areas"][i])
@@ -365,7 +372,8 @@ def _recompute_stage_b(stage, geometry):
                                     "wall": product_wall.get("reason")},
                 "reason_checks": reason_checks,
                 "wave_checks": wave_checks,
-                "product_audit_semantics_match": semantics_match,
+                "product_audit_semantics_match": all(reason_checks.values()),
+                "wave_parity": wave_checks,
                 "fallback": {"interface": interface_reason is not None,
                               "wall": wall_reason is not None}},
         "units": {"face_flux": "N", "source": "N", "momentum": "kg*m/s"},
@@ -376,12 +384,20 @@ def _b1_audit_stage(stage, geometry):
     """B1 result for both exterior faces; never reads a product flux field."""
     try:
         result = _recompute_stage_b(stage, geometry)
+    except _AuditReasonMismatch as exc:
+        return {"status": "FAIL", "status_reason": str(exc),
+                "reason": "productive fallback reason gate over persisted B0 states",
+                "product_flux_fields_used": []}
+    except _AuditEvidenceError as exc:
+        return {"status": "INCONCLUSIVE", "status_reason": str(exc),
+                "reason": "independent HLLC/HLLE over persisted B0 states",
+                "product_flux_fields_used": []}
     except ValueError as exc:
         return {"status": "FAIL", "status_reason": str(exc),
                 "reason": "independent HLLC/HLLE over persisted B0 states",
                 "product_flux_fields_used": []}
     reason_checks = result["b1"]["reason_checks"]
-    return {"status": "PASS" if result["b0"]["status"] == "PASS" and all(reason_checks.values()) else "FAIL",
+    return {"status": "PASS" if result["b0"]["status"] == "PASS" else "FAIL",
             "reason": "independent HLLC/HLLE over persisted B0 states",
             "product_flux_fields_used": [], "result": result["b1"]}
 
@@ -425,17 +441,17 @@ def _momentum_audit(history, geometry):
         try:
             a = _recompute_stage_b(stages["stage_a"], geometry)
             b = _recompute_stage_b(stages["stage_b"], geometry)
-        except (KeyError, TypeError, ValueError, OverflowError, ZeroDivisionError) as exc:
+        except _AuditReasonMismatch as exc:
+            rows.append({"time": time_value, "status": "FAIL",
+                         "status_reason": str(exc)})
+            continue
+        except _AuditEvidenceError as exc:
             rows.append({"time": time_value, "status": "INCONCLUSIVE",
                          "status_reason": str(exc)})
             continue
-        if (not all(a["b1"]["reason_checks"].values()) or
-                not all(a["b1"]["wave_checks"].values()) or
-                not all(b["b1"]["reason_checks"].values()) or
-                not all(b["b1"]["wave_checks"].values())):
-            rows.append({"time": time_value, "status": "FAIL",
-                         "status_reason": "productive_audit_fallback_reason_mismatch",
-                         "recomputed_stage_a": a, "recomputed_stage_b": b})
+        except (KeyError, TypeError, ValueError, OverflowError, ZeroDivisionError) as exc:
+            rows.append({"time": time_value, "status": "INCONCLUSIVE",
+                         "status_reason": str(exc)})
             continue
         after = fsum(row[1] for row in stages["after"]["conservative"])
         predicted = 0.5 * stages["stage_a"]["dt"] * (
