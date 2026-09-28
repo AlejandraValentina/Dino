@@ -84,6 +84,22 @@ histórico; los otros gates permanecen intactos.
 Configuración, transformación de especie, malla, periodicidad y guard operativo:
 docs/gasdynamic/p4c_hybrid.md. Esta definición se registra antes de medir un ciclo.
 
+## P4-C3-R5 — contrato aprobado, instrumentación pendiente de adquisición
+
+La aprobación humana del 2026-09-28 congela A/B0/B1/B2 bajo el recibo
+`docs/gasdynamic/p4_c3_r5_preregistration_proposal.md`. La instrumentación se
+mantiene fuera de las ecuaciones productivas: captura los `N+1` pares de cara,
+flux vectorial completo, ondas, razón de fallback, `down`, fuente/RHS de
+momentum y el estado provisional SSPRK2 por etapa. El auditor reconstruye el
+esténcil MUSCL/minmod en código separado, evalúa HLLC/HLLE sobre los literales y
+reproduce sólo momentum. Las identidades son exactas y están vinculadas a
+Python/plataforma/arquitectura/`sys.float_info` y hashes de fuente; no hay
+fallback ULP ni threshold de magnitud HLLC-vs-Exact. A selecciona internamente
+el primer retorno causal positivo en la ventana preregistrada y valida el ledger
+existente (`max_global_resid <= 1e-10`, solver `completed`). La única corrida
+focal C3-R5 autorizada queda condicionada a revisión independiente limpia;
+E13/G2 y P9 permanecen fuera de alcance.
+
 ## P4-R3 computacional
 La orden5e36dbe4 acepta R2/P4B, sin aceptar P4. Ciencia y referencia escalar
 intactas. Perfil, bloques equivalentes y evidencia de coste en

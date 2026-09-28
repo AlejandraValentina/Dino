@@ -737,3 +737,24 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [x] Tests R13A/R13/R12: 15 PASS; OpenSpec estricto PASS.
 - [x] No se repitieron 55/56 de R13, no se ejecutaron 61+, E13-R1, P4 PASS ni P5.
 - [x] 23/09/2026 — Decisión humana: P4 BLOCKED/NOT_GRANTED y P5 AUTHORIZED_CONDITIONAL; documentación actualizada. No se implementó P5 ni se reabrió P4.
+
+## P4-C3-R5 — contrato aprobado 2026-09-28 (sin adquisición)
+
+- [x] Congelar recibo aprobado A/B0/B1/B2 en `p4_c3_r5_preregistration_proposal.md`;
+  C3 sigue `P4_SCI_C3_INCONCLUSIVE`, E13/G2 `NOT_EXECUTED`, P9 `STOPPED`.
+- [x] Capturar diagnósticamente todas las caras de momentum de stage A/B:
+  estados reconstruidos, flux vectorial completo, ondas, fallback y `down`.
+- [x] Auditar B0 independiente con identidad exacta de caras y
+  `downgraded_cells`; cualquier ausencia/diferencia bloquea B1/B2.
+- [x] Auditar B1 independiente HLLC/HLLE con paridad exacta de vector, ondas y
+  razón; no usar ULP ni umbral de magnitud frente a ExactRiemann.
+- [x] Auditar B2 con replay bitwise de fuente, RHS, `q1`, `q2` y combinación
+  SSPRK2 en checkpoints declarados; conservar residual de volumen como métrica.
+- [x] Añadir pruebas sintéticas de independencia, mutación, fallback, runtime,
+  serialización/hash y un caso analítico B2 no fabricado por el helper.
+- [x] Ejecutar sólo tests focales y OpenSpec estricto; no ejecutar adquisición
+  C3-R5, E13/G2, P9 ni campañas costosas.
+
+- [ ] Revisión independiente final R5 sin hallazgos bloqueantes.
+- [ ] Ejecutar exactamente una adquisición focal C3-R5 y persistir evidencia;
+  no ejecutar E13/G2 ni P9.

@@ -1,13 +1,16 @@
-# P4-C3-R5 — PROPOSAL / NOT APPROVED / NO EXECUTION AUTHORIZATION
+# P4-C3-R5 — APPROVED CONTRACT / NO ACQUISITION EXECUTION
 
-Fecha: 2026-09-28  
+Fecha: 2026-09-28
 Base técnica: `a6981b73773e3f0e60440a605c39aef83c012d31`
+Autoridad aprobatoria: `HEAD 86005373`; aprobación humana explícita: 2026-09-28.
 
 ## Estado
 
-C3 permanece `P4_SCI_C3_INCONCLUSIVE`. Esta propuesta no cambia OpenSpec,
-`tasks.md`, física, solver, malla, CFL, criterios aceptados ni resultados
-históricos. No autoriza ejecutar C3-R4, E13/G2 ni P9.
+C3 permanece `P4_SCI_C3_INCONCLUSIVE` hasta una única adquisición focal R5.
+Este documento es ahora el recibo del contrato aprobado: no cambia física,
+solver, malla, CFL, criterios aceptados ni resultados históricos. Autoriza la
+implementación de instrumentación/auditoría y la revisión técnica posterior,
+pero no ejecutar C3-R5 ahora. E13/G2 sigue `NOT_EXECUTED` y P9 `STOPPED`.
 
 El objetivo es fijar antes de cualquier nueva adquisición cómo cerrar las dos
 deudas de C3 sin introducir tolerancias post-hoc:
@@ -33,6 +36,11 @@ diferencias HLLC-vs-Exact como diagnóstico.
 A reutilizaría explícitamente la semántica ya verificada por C1 sobre el
 snapshot causal de retorno de C3. HLLC auditor y ExactRiemann MUST consumir
 exactamente el mismo par de estados de cara reconstruidos y persistidos.
+
+La selección causal R5 se realiza dentro del auditor sobre la misma `history`: se
+toma el primer registro con `mass_flux > 0` cuyo `sample_time_pre_step` cae en la
+ventana preregistrada `[0.5, 1.5] * expected_return_time`, preservando la regla
+de R4. No se acepta un `return_record` externo como autoridad de A.
 
 A PASS requeriría simultáneamente:
 
@@ -126,8 +134,9 @@ introduce una tolerancia después de observar la diferencia.
 contrato, todos los siguientes gates están acreditados en una única adquisición
 focal:
 
-- retorno causal presente;
-- conservación y admisibilidad vigentes;
+- retorno causal seleccionado internamente por la regla preregistrada;
+- conservación global `max_global_resid <= 1e-10` bajo el criterio P4/C2 ya
+  vigente y `solver_status == completed`;
 - A PASS bajo la semántica cualitativa C1 reutilizada;
 - B0 PASS por identidad de reconstrucción;
 - B1 PASS por paridad exacta HLLC/HLLE;
@@ -151,10 +160,9 @@ La implementación R5 quedaría limitada a instrumentación y auditoría:
 
 No se modifica la física del motor, no se calibra HLLC y no se reabre P8.
 
-## Decisión humana requerida
+## Recibo de decisión humana — aprobado 2026-09-28
 
-Antes de modificar OpenSpec, `tasks.md` o ejecutar otra integración se requiere
-una orden explícita que apruebe o rechace conjuntamente:
+La usuaria aprobó conjuntamente, sin modificar el alcance científico:
 
 1. reutilizar en C3-A la semántica cualitativa ya aceptada de C1;
 2. adoptar igualdad bit a bit como gate conservador B0/B1;
@@ -162,14 +170,15 @@ una orden explícita que apruebe o rechace conjuntamente:
 4. autorizar la instrumentación R5 y, tras revisión técnica, una única corrida
    focal C3 bajo esos criterios congelados.
 
-Hasta esa decisión:
+Hasta la adquisición focal autorizada en una tarea posterior:
 
 - C3 = `P4_SCI_C3_INCONCLUSIVE`;
 - P4 = `BLOCKED / NOT_GRANTED`;
 - E13/G2 = `NOT_EXECUTED`;
 - P9 = `STOPPED / NOT_AUTHORIZED`.
 
-Esta propuesta no constituye aceptación humana ni autorización de ejecución.
+La aprobación no es un resultado de C3 ni autorización para lanzar la adquisición
+en esta tarea. Hasta ejecutar esa corrida, C3 se mantiene `INCONCLUSIVE`.
 
 ## Vinculación de runtime y evidencia durable
 

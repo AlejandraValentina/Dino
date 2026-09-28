@@ -438,6 +438,24 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
         limit, limiting, unit = cfl_step(mesh, ws, speeds, eos, cfl)
         # cfl_step expects speeds length n+1, we have n+1 (1 interface + n-1 interior +1 wall) = n+1 good
         # need to ensure speeds length matches mesh.n+1 (n=100 -> 101 speeds) we have 1+ (n-1)=n +1 wall = n+1 correct
+        # R5 diagnostic capture only.  This is assembled from values already
+        # used by the product RHS; it does not feed any product calculation.
+        face_states = [{"index": 0, "kind": "interface",
+                        "left": list(left_c), "right": list(right_d)}]
+        face_riemann = [{"index": 0, "kind": "interface",
+                         "flux": list(flux_left), "waves": list(speeds_iface),
+                         "reason": reason_iface}]
+        for i, (f, s, reason) in enumerate(interior_data, start=1):
+            face_states.append({"index": i, "kind": "interior",
+                                "left": list(rf[i-1]), "right": list(lf[i])})
+            face_riemann.append({"index": i, "kind": "interior",
+                                 "flux": list(tuple(area*v for v in f)),
+                                 "waves": list(s), "reason": reason})
+        face_states.append({"index": mesh.n, "kind": "wall",
+                            "left": list(w_last), "right": list(ghost)})
+        face_riemann.append({"index": mesh.n, "kind": "wall",
+                             "flux": list(flux_wall), "waves": list(s_wall),
+                             "reason": reason_wall})
         return {"dq":dq, "dz":dz, "limit":limit, "unit":unit, "limiting":limiting,
                 "flux_left":flux_left, "outward":outward,
                 "speeds_iface":speeds_iface, "reason":reason_iface,
@@ -445,7 +463,7 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
                 "chamber_p":p_c,
                 # Diagnostic inputs only: these are the states actually passed
                 # to the two exterior Riemann evaluations in this operator.
-                "external_faces": {
+                 "external_faces": {
                     "interface": {"left": list(left_c), "right": list(right_d)},
                     "wall": {"left": list(w_last), "right": list(ghost)},
                     # Diagnostic metadata mirrors reconstruct() exactly:
@@ -456,8 +474,15 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
                                        "reason": reason_iface},
                         "wall": {"speeds": list(s_wall),
                                  "reason": reason_wall},
-                    },
-                }}
+                     },
+                 },
+                 "r5_momentum": {
+                     "faces": face_states,
+                     "riemann": face_riemann,
+                     "downgraded_cells": list(down),
+                     "source": list(source),
+                     "rhs": [row[1] for row in dq],
+                 }}
     # time loop SSPRK2
     t=0.0; step=0; rejections=0; history=[]
     # initial operator for limit
@@ -541,12 +566,15 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
                         "conservative": [list(row) for row in pre_cells],
                         "primitive": [list(w) for w in op0["ws"]],
                         "chamber_state": list(pre_z),
-                        "external_faces": op0["external_faces"]},
+                        "external_faces": op0["external_faces"],
+                        "r5_momentum": op0["r5_momentum"]},
             "stage_b": {"time": t, "dt": dt,
                         "conservative": [list(row) for row in cells1],
                         "primitive": [list(w) for w in op1["ws"]],
                         "chamber_state": list(z1),
-                        "external_faces": op1["external_faces"]},
+                        "external_faces": op1["external_faces"],
+                        "provisional": [list(row) for row in cells2],
+                        "r5_momentum": op1["r5_momentum"]},
             "after": {"conservative": [list(row) for row in cells_new],
                        "primitive": [list(w) for w in ws_new],
                        "chamber_state": list(z_new)},
@@ -594,7 +622,8 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
         "interface_history":interface_hist,
         "audit_geometry": {"areas": list(mesh.areas), "volumes": list(mesh.volumes),
                             "faces": list(mesh.faces), "centers": list(mesh.centers),
-                            "duct_length": C2_L_DUCT, "area_m2": C2_AREA},
+                            "duct_length": C2_L_DUCT, "area_m2": C2_AREA,
+                            "chamber_volume": C2_VOLUME},
         "cells":cells,"chamber_state":z, "mesh_n":mesh.n, "dt_min":None, # not tracked per se
     }
 

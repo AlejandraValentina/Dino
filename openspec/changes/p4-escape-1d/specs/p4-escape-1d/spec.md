@@ -1,4 +1,35 @@
 ## ADDED Requirements
+
+### Requirement: P4-C3-R5 approved audit contract
+The C3-R5 diagnostic path SHALL preserve the frozen product equations and SHALL
+evaluate A, B0, B1 and B2 only from one declared focal acquisition. C3 SHALL
+remain `P4_SCI_C3_INCONCLUSIVE` before that acquisition is executed.
+
+#### Scenario: Missing or mixed evidence
+- **WHEN** evidence is missing, runtimes differ, or any persisted binary64
+  identity differs
+- **THEN** the result is `INCONCLUSIVE` and no accidental `PASS` is emitted;
+  a physical or semantic contradiction is `FAIL`.
+
+### Requirement: C3-R5 identity gates
+The auditor SHALL select A internally from the same acquisition history as the
+first `mass_flux > 0` record whose `sample_time_pre_step` lies in
+`[0.5,1.5] * expected_return_time`; external `gate_a`/`return_record` fields
+SHALL NOT authorize A. The auditor SHALL consume the same persisted reconstructed
+interface pair for the A HLLC/ExactRiemann comparison. B0 SHALL independently reconstruct every
+momentum face for both SSPRK2 stages without importing or calling product
+`reconstruct()`, and SHALL require exact face and downgrade identity. B1 SHALL
+independently evaluate HLLC/HLLE on those literal faces and require exact full
+flux-vector, wave and fallback-reason identity. B2 SHALL independently replay
+`p_i*(A_R-A_L)`, momentum RHS, both stage updates and
+`q_new=0.5*q0+0.5*q2` bitwise at declared checkpoints.
+
+#### Scenario: Diagnostic parity
+- **WHEN** A/B0/B1/B2 pass, `max_global_resid <= 1e-10`, and solver status is
+  `completed` under the same runtime and acquisition
+- **THEN** the auditor may classify C3 `P4_SCI_C3_PASS`; HLLC-vs-Exact
+  magnitudes and control-volume residuals remain diagnostic only.
+
 ### Requirement: Puerto ideal conservativo
 El camino experimental SHALL usar Aeff=min(Aport,Apipe), Cd1, ley geométrica
 existente y un único flujoP3, con pared reflectiva sobre área complementaria.
