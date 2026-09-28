@@ -465,9 +465,9 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
         # Freeze the state used by op0 before attempting/committing this step.
         # stage_a primitives and observed interface fluxes are from op0, so its
         # conservative and chamber states must remain pre-step as well.
-        pre_cells = tuple(tuple(row) for row in cells)
-        pre_z = tuple(z)
-        pre_t=t
+        pre_cells = cells
+        pre_z = list(z)
+        pre_t = t
         # SSPRK2 with chamber
         accepted=False
         for attempt in range(13):
