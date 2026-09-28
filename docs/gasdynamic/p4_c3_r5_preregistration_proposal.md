@@ -146,7 +146,8 @@ focal:
 Un FAIL físico/semántico sigue siendo FAIL. Evidencia faltante, truncada o
 malformada, diferencia de implementación o imposibilidad de demostrar identidad
 permanece INCONCLUSIVE; sólo un fallo explícito del solver se clasifica como
-fallo físico de solver; no se convierte en PASS mediante tolerancia posterior.
+fallo físico de solver. Nada de lo anterior se convierte en PASS mediante
+tolerancia posterior.
 
 ## Implementación permitida solo después de aprobación
 
