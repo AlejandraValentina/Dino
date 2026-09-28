@@ -284,13 +284,17 @@ def audit_b2(stage_a, stage_b, after, geometry, *, eos=EOS):
             conservative = stage.get("conservative")
             momentum = stage.get("r5_momentum")
             if (not isinstance(primitive, list) or len(primitive) != n
+                    or not all(_valid_float_sequence(row, 4) for row in primitive)
                     or not isinstance(conservative, list) or len(conservative) != n
                     or not all(isinstance(row, (list, tuple)) and len(row) >= 2
+                               and all(_finite_number(value) for value in row)
                                for row in conservative)
                     or not isinstance(momentum, dict)
                     or not isinstance(momentum.get("source"), list)
                     or not isinstance(momentum.get("rhs"), list)
-                    or len(momentum["source"]) != n or len(momentum["rhs"]) != n):
+                    or len(momentum["source"]) != n or len(momentum["rhs"]) != n
+                    or not all(_finite_number(value) for value in momentum["source"])
+                    or not all(_finite_number(value) for value in momentum["rhs"])):
                 return {"status": INCONCLUSIVE,
                         "reason": f"malformed_{label}_b2_evidence"}
         provisional = stage_b.get("provisional")
@@ -298,6 +302,7 @@ def audit_b2(stage_a, stage_b, after, geometry, *, eos=EOS):
         if (not isinstance(provisional, list) or len(provisional) != n
                 or not isinstance(final_rows, list) or len(final_rows) != n
                 or not all(isinstance(row, (list, tuple)) and len(row) >= 2
+                           and all(_finite_number(value) for value in row)
                            for row in provisional + final_rows)):
             return {"status": INCONCLUSIVE, "reason": "malformed_b2_output_state"}
         return _audit_b2_impl(stage_a, stage_b, after, geometry, eos=eos)

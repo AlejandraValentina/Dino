@@ -100,6 +100,21 @@ class P4C3R5AuditTests(unittest.TestCase):
             stage["r5_momentum"]["riemann"][0][field] = value
             self.assertEqual(audit_b1(stage, GEOMETRY)["status"], "INCONCLUSIVE")
 
+    def test_nonfinite_b2_state_and_replay_values_are_inconclusive(self):
+        stage_a = _stage(q0=3.0)
+        stage_b = _stage(q0=3.0)
+        stage_b["provisional"] = copy.deepcopy(stage_b["conservative"])
+        after = {"conservative": copy.deepcopy(stage_b["conservative"])}
+        cases = []
+        broken = copy.deepcopy(stage_a); broken["conservative"][0][1] = float("nan"); cases.append((broken, stage_b, after))
+        broken = copy.deepcopy(stage_a); broken["primitive"][0][2] = float("inf"); cases.append((broken, stage_b, after))
+        broken = copy.deepcopy(stage_a); broken["r5_momentum"]["rhs"][0] = float("nan"); cases.append((broken, stage_b, after))
+        broken_b = copy.deepcopy(stage_b); broken_b["provisional"][0][1] = float("nan"); cases.append((stage_a, broken_b, after))
+        broken_after = copy.deepcopy(after); broken_after["conservative"][0][1] = float("inf"); cases.append((stage_a, stage_b, broken_after))
+        for a, b, end in cases:
+            with self.subTest(a=a is not stage_a, b=b is not stage_b, end=end is not after):
+                self.assertEqual(audit_b2(a, b, end, GEOMETRY)["status"], "INCONCLUSIVE")
+
     def test_b2_analytic_case_has_manual_expected_result(self):
         stage_a = _stage(q0=3.0)
         stage_b = _stage(q0=3.0)
