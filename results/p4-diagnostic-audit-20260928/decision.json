@@ -8,8 +8,7 @@
   "classification": "SCIENTIFIC_CHANGE_REQUIRED",
   "blocking_gates": {
     "C3": "INCONCLUSIVE",
-    "E13_G2": "NOT_CLOSED_UNDER_CURRENT_CONTRACT",
-    "P4_R4_PERFORMANCE": "NATIVE_EXTENSION_DECISION_REQUIRED"
+    "E13_G2": "NOT_CLOSED_UNDER_CURRENT_CONTRACT"
   },
   "diagnosis": {
     "numerical_defect": "NOT_IDENTIFIED",
@@ -35,7 +34,18 @@
     "R10A corrected the spatial metric and found mixed localized/distributed nonclosure, not a single sensor bug.",
     "R11-R13A support a reproducible period-2 response across mesh/CFL/backend checks, but R12 exposed branch nonclosure and R13A only established eventual N400 even closure.",
     "C3 lacks the contractual exact-Riemann return comparison and independent momentum-face terms, so the coupling return gate is not established.",
-    "P4-R4 measured 26.599 s for the second hot G1 cycle, above the <=20 s target; this is an operational performance block, not evidence to alter physics."
+    "P4-R4 measured 26.599 s for the second hot G1 cycle, but that result is historical and was superseded by P4-R5 NUMBA_FUSED performance PASS: 19.519/19.223 s wall, median approximately 19.164 s/cycle; the latest gate matrix marks performance PASS."
   ],
+  "p8_cross_campaign": {
+    "comparison": "results/p8-audit-20260928 vs results/p8-wide-rpm-20260927",
+    "byte_identical_anchors": [5000, 8000, 11000, 15000],
+    "roundoff_only_anchor": {
+      "rpm": 2500,
+      "delta_W_cycle_J": 9.769962616701378e-14,
+      "delta_P_indicated_W": 4.064304448547773e-12,
+      "delta_p_max_Pa": -2.3283064365386963e-09
+    },
+    "contract_assessment": "No determinism contract contradiction: replay/restart are exact within each run; cross-campaign bitwise identity is not required. No gate relaxed."
+  },
   "next_scientific_action": "Obtain an explicitly authorized C3 evidence run/instrumentation that records the exact-Riemann return and independent momentum balance, or make an explicit human scientific decision on the E13 periodicity contract. Do not change physics or authorize P4/P9 from this audit."
 }

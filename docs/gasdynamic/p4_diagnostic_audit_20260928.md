@@ -30,9 +30,12 @@ The durable P4 record has three distinct conclusions:
    momentum-face terms. Therefore the return-coupling gate is unproven, not
    passed and not disproven by a localized numerical bug.
 
-The latest R4 performance result is a separate operational blocker: the second
-hot G1 measurement is 26.599 s against the <=20 s target. It cannot justify a
-scientific change or be reclassified as a P4 physics pass.
+R4 performance is historical, not an active blocker. P4-R5 superseded the R4
+measurement with two independent `NUMBA_FUSED` hot G1 runs of 19.519/19.223 s
+wall (19.141/19.187 s cycle), median approximately 19.164 s/cycle, and the
+`P4_R5_NUMBA_FUSED_PERFORMANCE_PASS` result. The latest P4 gate matrix also
+marks performance `PASS`. R4's 26.599 s measurement remains useful context only;
+it must not be used to classify the current P4 state.
 
 ## Classification
 
@@ -44,9 +47,25 @@ scientific change or be reclassified as a P4 physics pass.
 | Métrica de cierre defectuosa | Not identified after R10A corrections |
 | Evidencia insuficiente | Yes, for C3 exact return/momentum and for the required E13-R1 closure |
 
-The appropriate blocker is therefore scientific-contractual evidence
-insufficiency, with a separate performance decision pending. A bugfix or a
-threshold relaxation would conceal the unresolved scientific choice.
+The active blockers are therefore only the unresolved C3 coupling evidence and
+the unclosed E13 periodicity contract (including the required periodic/return
+evidence). Performance is closed by R5. A bugfix or a threshold relaxation
+would conceal the unresolved scientific choice.
+
+## P8 cross-campaign determinism
+
+The five anchors in `results/p8-audit-20260928/` were compared with
+`results/p8-wide-rpm-20260927/`. The 5000, 8000, 11000 and 15000 rpm anchor JSON
+files are byte-identical. At 2500 rpm, the only observed metric deltas are
+roundoff-sized: `ΔW = 9.769962616701378e-14 J`, `ΔP =
+4.064304448547773e-12 W`, and `Δpmax = -2.3283064365386963e-09 Pa` (with a
+same-order torque delta); the measured gates remain true.
+
+This does not contradict a determinism contract. The P8 contract requires
+deterministic replay and exact restart within a run, and those remain true for
+all five anchors. It does not require bitwise identity between separately
+launched campaigns. Accordingly, this is a cross-campaign reproducibility note,
+not a replay/restart determinism failure; no gate is relaxed or reclassified.
 
 ## Next action
 
