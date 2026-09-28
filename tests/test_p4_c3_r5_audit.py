@@ -219,7 +219,8 @@ class P4C3R5AuditTests(unittest.TestCase):
         names = {name.replace("\\", "/").split("/")[-1]
                  for name in runtime_binding()["source_sha256"]}
         self.assertTrue({"p4_sci_04b.py", "p4_c3_r5_audit.py",
-                         "hllc_audit.py", "exact_riemann.py"}.issubset(names))
+                         "hllc_audit.py", "exact_riemann.py",
+                         "second_order.py", "riemann.py", "eos.py"}.issubset(names))
 
     def test_runtime_binding_is_required_and_different_runtime_is_inconclusive(self):
         runtime = runtime_binding()

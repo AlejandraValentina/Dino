@@ -29,9 +29,12 @@ def runtime_binding(source_paths=None):
     if source_paths is None:
         source_paths = (
             "dev_orchestrator/p4_sci_04b.py",
-            __file__,
+            "dev_orchestrator/p4_c3_r5_audit.py",
             "dev_orchestrator/reference/hllc_audit.py",
             "dev_orchestrator/reference/exact_riemann.py",
+            "motorsim/gas1d/second_order.py",
+            "motorsim/gas1d/riemann.py",
+            "motorsim/gas1d/eos.py",
         )
     hashes = {}
     for path in source_paths:

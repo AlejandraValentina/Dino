@@ -558,7 +558,8 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
         ws=primitive(cells)
         # Diagnostic capture only.  The independent auditor receives the
         # conservative/primitive states and geometry, then recomputes face
-        # terms offline; no operator-produced momentum term is exported.
+        # terms offline and checks exact parity against these persisted
+        # product face/source/RHS values; none feed back into the update.
         audit_stages = {
             # interface_flux_observed and mass/energy/species fluxes below are
             # op0/stage_a quantities, all aligned to this pre-step state.
