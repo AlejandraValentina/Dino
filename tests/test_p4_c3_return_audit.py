@@ -2,6 +2,7 @@ import unittest
 import inspect
 import ast
 import copy
+from unittest.mock import patch
 
 from dev_orchestrator.p4_c3_return_audit import (
     _momentum_audit, _recompute_stage, _riemann_audit, _select_return,
@@ -29,8 +30,20 @@ def _stage(states, geometry, dt=0.1):
     stage = {"dt": dt, "primitive": [list(state) for state in states],
              "conservative": rows, "chamber_state": chamber}
     stage["external_faces"] = reconstruct_external_faces(states, geometry)
+    stage["external_faces"]["reconstruction"] = {
+        "downgraded_cells": list(stage["external_faces"]["downgraded"]["cells"])}
     stage["external_faces"]["interface"]["left"] = list(
         (rho, 0.0, pressure, species))
+    interface = stage["external_faces"]["interface"]
+    wall = stage["external_faces"]["wall"]
+    interface_result = audit_hllc(tuple(interface["left"]),
+                                  tuple(interface["right"]), EOS)
+    wall_result = audit_hllc(tuple(wall["left"]), tuple(wall["right"]), EOS)
+    stage["external_faces"]["riemann"] = {
+        "interface": {"speeds": list(interface_result[1]),
+                       "reason": interface_result[2]},
+        "wall": {"speeds": list(wall_result[1]), "reason": wall_result[2]},
+    }
     return stage
 
 
@@ -43,6 +56,8 @@ class P4C3ReturnAuditTests(unittest.TestCase):
         stage = info["audit_stages"]["stage_a"]
         self.assertEqual(_b0_audit_stage(stage, result["audit_geometry"])["status"], "PASS")
         captured = stage["external_faces"]
+        self.assertIsInstance(captured["reconstruction"]["downgraded_cells"], list)
+        self.assertNotIn("sides", captured["reconstruction"])
         self.assertEqual(captured["wall"]["right"],
                          [captured["wall"]["left"][0],
                           -captured["wall"]["left"][1],
@@ -206,10 +221,19 @@ class P4C3ReturnAuditTests(unittest.TestCase):
                   (1.1, 8.0, 98000.0, 0.25)]
         a = _stage(states, geo)
         b = copy.deepcopy(a)
-        fa = _recompute_stage_b(a, geo)
-        fb = _recompute_stage_b(b, geo)
-        force_a = fa["left"] - fa["right"] + fa["source"]
-        force_b = fb["left"] - fb["right"] + fb["source"]
+        def independent_terms(stage):
+            faces = stage["external_faces"]
+            iface = audit_hllc(tuple(faces["interface"]["left"]),
+                               tuple(faces["interface"]["right"]), EOS)[0]
+            wall = audit_hllc(tuple(faces["wall"]["left"]),
+                              tuple(faces["wall"]["right"]), EOS)[0]
+            source = sum(state[2] * (geo["areas"][i + 1] - geo["areas"][i])
+                         for i, state in enumerate(stage["primitive"]))
+            return geo["areas"][0] * iface[1], geo["areas"][-1] * wall[1], source
+        fa = independent_terms(a)
+        fb = independent_terms(b)
+        force_a = fa[0] - fa[1] + fa[2]
+        force_b = fb[0] - fb[1] + fb[2]
         self.assertNotEqual(force_a, 0.0)
         predicted = 0.5 * a["dt"] * (force_a + force_b)
         after_rows = copy.deepcopy(a["conservative"])
@@ -228,11 +252,13 @@ class P4C3ReturnAuditTests(unittest.TestCase):
 
     def test_b2_ignores_poisoned_product_flux_fields(self):
         geometry = {"areas": [1.0, 1.0], "faces": [0., 1.], "centers": [.5]}
-        stage = {"dt": 0.1, "primitive": [[1., 0., 100000., .2]],
-                 "conservative": [[1., 0., 250000., .2]],
-                 "chamber_state": [.0001, 100000. * .0001 / (EOS.gamma - 1), .00002]}
-        stage["external_faces"] = reconstruct_external_faces(stage["primitive"], geometry)
-        stage["external_faces"]["interface"]["left"] = [1.0, 0.0, 100000.0, 0.2]
+        stage = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry)
+        stage["conservative"] = [[1., 0., 250000., .2]]
+        faces = stage["external_faces"]
+        iface = audit_hllc(tuple(faces["interface"]["left"]), tuple(faces["interface"]["right"]), EOS)
+        wall = audit_hllc(tuple(faces["wall"]["left"]), tuple(faces["wall"]["right"]), EOS)
+        faces["riemann"] = {"interface": {"speeds": list(iface[1]), "reason": iface[2]},
+                             "wall": {"speeds": list(wall[1]), "reason": wall[2]}}
         info = {"audit_stages": {"stage_a": stage, "stage_b": stage,
                                  "after": {"conservative": stage["conservative"]}},
                 "interface_flux_observed": [1e99] * 4,
@@ -297,9 +323,82 @@ class P4C3ReturnAuditTests(unittest.TestCase):
 
     def test_no_unapproved_equality_threshold_can_pass_c3(self):
         self.assertEqual(classify(True, True, True,
-                                  {"status": "INCONCLUSIVE"},
-                                  {"status": "INCONCLUSIVE"}),
+                                  {"status": "PASS"},
+                                  {"status": "PASS"}),
                          "P4_SCI_C3_INCONCLUSIVE")
+
+    def test_b1_consumes_persisted_interface_left_and_verifies_fallback_reasons(self):
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0], "centers": [0.5]}
+        stage = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry)
+        # A changed chamber must not change B1's literal B0 input.
+        stage["chamber_state"] = [0.2, 30000.0, 0.04]
+        stage["external_faces"]["riemann"]["interface"]["reason"] = "forced_hlle"
+        stage["external_faces"]["riemann"]["wall"]["reason"] = "forced_hlle"
+        stage["external_faces"]["riemann"]["interface"]["speeds"] = [-1.0, 0.0, 1.0]
+        stage["external_faces"]["riemann"]["wall"]["speeds"] = [-1.0, 0.0, 1.0]
+        stage["external_faces"]["riemann"]["interface"]["speeds"] = [-1.0, 0.0, 1.0]
+        stage["external_faces"]["riemann"]["wall"]["speeds"] = [-1.0, 0.0, 1.0]
+        b0 = {"status": "PASS", "captured": stage["external_faces"]}
+        with patch("dev_orchestrator.p4_c3_return_audit._b0_audit_stage",
+                   return_value=b0), patch(
+                "dev_orchestrator.p4_c3_return_audit.audit_hllc",
+                return_value=((0.0, 1.0, 0.0, 0.0), (-1.0, 0.0, 1.0), "forced_hlle")):
+            result = _b1_audit_stage(stage, geometry)
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["result"]["fallback"],
+                         {"interface": True, "wall": True})
+        self.assertEqual(result["result"]["reason_checks"],
+                         {"interface_reason_matches": True,
+                          "wall_reason_matches": True})
+
+    def test_b2_rejects_dt_mismatch_before_balance(self):
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0], "centers": [0.5]}
+        a = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry, dt=0.1)
+        b = copy.deepcopy(a)
+        b["dt"] = 0.2
+        report = _momentum_audit([(0.1, {"audit_stages": {
+            "stage_a": a, "stage_b": b,
+            "after": {"conservative": copy.deepcopy(a["conservative"])}
+        }})], geometry)
+        self.assertEqual(report["status"], "FAIL")
+        self.assertEqual(report["rows"][0]["status_reason"], "stage_dt_mismatch")
+        self.assertIn("Invalid audit evidence", report["status_reason"])
+
+    def test_invalid_row_does_not_break_metric_aggregates(self):
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0], "centers": [0.5]}
+        valid = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry)
+        invalid = copy.deepcopy(valid)
+        invalid["dt"] = 0.2
+        history = [(0.1, {"audit_stages": {
+            "stage_a": valid, "stage_b": valid,
+            "after": {"conservative": copy.deepcopy(valid["conservative"])}}}),
+                   (0.2, {"audit_stages": {
+            "stage_a": valid, "stage_b": invalid,
+            "after": {"conservative": copy.deepcopy(valid["conservative"])}}})]
+        report = _momentum_audit(history, geometry)
+        self.assertEqual(report["status_counts"], {"FAIL": 1, "METRIC_ONLY": 1})
+        self.assertEqual(report["max_abs_residual"],
+                         abs(report["rows"][0]["residual"]))
+
+    def test_productive_reason_mismatch_blocks_b2_before_balance(self):
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0], "centers": [0.5]}
+        stage = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry)
+        stage["external_faces"]["riemann"]["interface"]["reason"] = "wrong"
+        info = {"audit_stages": {"stage_a": stage, "stage_b": copy.deepcopy(stage),
+                                 "after": {"conservative": copy.deepcopy(stage["conservative"])}}}
+        report = _momentum_audit([(0.1, info)], geometry)
+        self.assertEqual(report["status"], "INCONCLUSIVE")
+        self.assertNotIn("residual", report["rows"][0])
+        self.assertIn("productive_audit_semantics_divergence",
+                      report["rows"][0]["status_reason"])
+
+    def test_real_wall_fallback_is_preserved_and_checked(self):
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0], "centers": [0.5]}
+        stage = _stage([(1.0, -1000.0, 0.9999999999999999, 0.2)], geometry)
+        result = _recompute_stage_b(stage, geometry)
+        self.assertTrue(result["b1"]["fallback"]["wall"])
+        self.assertEqual(result["b1"]["product_reasons"]["wall"],
+                         result["b1"]["wall_reason"])
 
     def test_physical_flux_has_conservative_energy_and_species(self):
         flux = _physical_flux((2.0, 3.0, 5.0, 0.25))

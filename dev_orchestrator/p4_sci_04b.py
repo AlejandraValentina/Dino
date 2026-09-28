@@ -448,6 +448,15 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
                 "external_faces": {
                     "interface": {"left": list(left_c), "right": list(right_d)},
                     "wall": {"left": list(w_last), "right": list(ghost)},
+                    # Diagnostic metadata mirrors reconstruct() exactly:
+                    # `down` is the only productive downgrade evidence.
+                    "reconstruction": {"downgraded_cells": list(down)},
+                    "riemann": {
+                        "interface": {"speeds": list(speeds_iface),
+                                       "reason": reason_iface},
+                        "wall": {"speeds": list(s_wall),
+                                 "reason": reason_wall},
+                    },
                 }}
     # time loop SSPRK2
     t=0.0; step=0; rejections=0; history=[]

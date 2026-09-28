@@ -100,11 +100,25 @@ def _b0_audit_stage(stage, geometry):
     if captured is None:
         return {"status": "FAIL", "reason": "missing_persisted_external_faces",
                 "expected": expected}
+    captured_downgraded = captured.get("downgraded")
+    if captured_downgraded is None:
+        reconstruction = captured.get("reconstruction")
+        captured_downgraded = ({"cells": reconstruction.get("downgraded_cells"),
+                               "sides": expected["downgraded"]["sides"]}
+                              if isinstance(reconstruction, dict) else None)
+    def face_state_match(actual, reference):
+        # Allow only representation-level roundoff from chamber inversion;
+        # this is metadata parity, not a physical acceptance threshold.
+        return all(a == b or abs(a - b) <= 2.0 * math.ulp(max(abs(a), abs(b), 1.0))
+                   for a, b in zip(actual, reference))
     checks = {
-        "interface_left": captured["interface"]["left"] == expected["interface"]["left"],
+        "interface_left": face_state_match(captured["interface"]["left"],
+                                            expected["interface"]["left"]),
         "interface_right": captured["interface"]["right"] == expected["interface"]["right"],
         "wall_left": captured["wall"]["left"] == expected["wall"]["left"],
         "wall_right": captured["wall"]["right"] == expected["wall"]["right"],
+        "downgrade_metadata_present": isinstance(captured_downgraded, dict),
+        "downgrade_metadata_matches": captured_downgraded == expected["downgraded"],
     }
     return {"status": "PASS" if all(checks.values()) else "FAIL",
             "checks": checks, "expected": expected,
@@ -130,22 +144,20 @@ def _relative_error(observed, expected):
 
 
 def _rounding_parity(observed, expected):
-    """Compare two evaluations without introducing a physical error gate."""
+    """Report exact/ULP parity as a diagnostic metric, never as a gate."""
     exact = tuple(observed) == tuple(expected)
     ulps = []
     for actual, reference in zip(observed, expected):
         scale = max(abs(actual), abs(reference), 1.0)
         ulps.append(abs(actual - reference) / math.ulp(scale))
-    # The independent audit follows the same IEEE-754 operation graph.  Four
-    # ulps is the strict rounding policy for the handful of scalar operations
-    # whose evaluation order is not guaranteed across the two modules.
     limit = 4.0
     return {
-        "pass": exact or all(value <= limit for value in ulps),
         "exact": exact,
+        "within_4_ulp_metric": exact or all(value <= limit for value in ulps),
         "components_ulps": ulps,
         "max_ulps": max(ulps, default=0.0),
-        "policy": "exact equality when bitwise reproducible; otherwise <= 4 derived IEEE-754 ulps per component",
+        "classification": "METRIC_ONLY",
+        "policy": "exact/parity report; 4 ULP is not a preregistered scientific gate",
         "physical_threshold": None,
     }
 
@@ -241,7 +253,8 @@ def _riemann_audit(info):
         checks = {
             "states_admissible": all(admissible.values()),
             "product_flux_finite": len(observed) == 4 and all(math.isfinite(value) for value in observed),
-            "hllc_product_parity": parity["pass"],
+            "observed_flux_signs_match": all(_sign(a) == _sign(b)
+                                             for a, b in zip(observed, audit_expected)),
             "hllc_no_fallback": audit_reason is None,
             "hllc_ordered": not hllc_ordered,
             "product_no_fallback": product_evidence and product_reason is None,
@@ -252,7 +265,7 @@ def _riemann_audit(info):
             "exact_waves_ordered": not exact_ordered,
         }
         return {
-            "status": "PASS" if all(checks.values()) else "FAIL",
+            "status": "QUALITATIVE_PASS" if all(checks.values()) else "FAIL",
             "status_reason": "SCI-03/04A qualitative falsification checks",
             "criterion_authority": "P4-SCI-03/P4-SCI-04A",
             "reference_module": "dev_orchestrator.reference.exact_riemann.ExactRiemann",
@@ -309,13 +322,31 @@ def _recompute_stage_b(stage, geometry):
     if b0["status"] != "PASS":
         raise ValueError("B0 audit failed; B1/B2 are not evaluated")
     faces = b0["captured"]
-    chamber = _state_from_chamber(stage["chamber_state"])
+    # B1 consumes the four literal B0 states.  In particular, do not rebuild
+    # the interface-left state from chamber_state here.
+    interface_left = tuple(faces["interface"]["left"])
     interface_right = tuple(faces["interface"]["right"])
     wall_left = tuple(faces["wall"]["left"])
     wall_right = tuple(faces["wall"]["right"])
     interface_flux, interface_waves, interface_reason = audit_hllc(
-        chamber, interface_right, EOS)
+        interface_left, interface_right, EOS)
     wall_flux, wall_waves, wall_reason = audit_hllc(wall_left, wall_right, EOS)
+    product_riemann = faces.get("riemann")
+    if product_riemann is None:
+        raise ValueError("missing_persisted_product_riemann_diagnostics")
+    product_interface = product_riemann.get("interface", {})
+    product_wall = product_riemann.get("wall", {})
+    reason_checks = {
+        "interface_reason_matches": product_interface.get("reason") == interface_reason,
+        "wall_reason_matches": product_wall.get("reason") == wall_reason,
+    }
+    wave_checks = {
+        "interface_waves_match": list(product_interface.get("speeds", ())) == list(interface_waves),
+        "wall_waves_match": list(product_wall.get("speeds", ())) == list(wall_waves),
+    }
+    semantics_match = all(reason_checks.values()) and all(wave_checks.values())
+    if not semantics_match:
+        raise ValueError("productive_audit_semantics_divergence")
     area_left = geometry["areas"][0]
     area_right = geometry["areas"][-1]
     source = fsum(w[2] * (geometry["areas"][i + 1] - geometry["areas"][i])
@@ -328,26 +359,84 @@ def _recompute_stage_b(stage, geometry):
         "source": source,
         "momentum_before": before,
         "b1": {"interface_waves": interface_waves, "wall_waves": wall_waves,
-               "interface_reason": interface_reason, "wall_reason": wall_reason,
-               "interface_flux": list(interface_flux), "wall_flux": list(wall_flux)},
+                "interface_reason": interface_reason, "wall_reason": wall_reason,
+                "interface_flux": list(interface_flux), "wall_flux": list(wall_flux),
+                "product_reasons": {"interface": product_interface.get("reason"),
+                                    "wall": product_wall.get("reason")},
+                "reason_checks": reason_checks,
+                "wave_checks": wave_checks,
+                "product_audit_semantics_match": semantics_match,
+                "fallback": {"interface": interface_reason is not None,
+                              "wall": wall_reason is not None}},
         "units": {"face_flux": "N", "source": "N", "momentum": "kg*m/s"},
     }
 
 
 def _b1_audit_stage(stage, geometry):
     """B1 result for both exterior faces; never reads a product flux field."""
-    result = _recompute_stage_b(stage, geometry)
-    return {"status": "PASS" if result["b0"]["status"] == "PASS" else "FAIL",
+    try:
+        result = _recompute_stage_b(stage, geometry)
+    except ValueError as exc:
+        return {"status": "FAIL", "status_reason": str(exc),
+                "reason": "independent HLLC/HLLE over persisted B0 states",
+                "product_flux_fields_used": []}
+    reason_checks = result["b1"]["reason_checks"]
+    return {"status": "PASS" if result["b0"]["status"] == "PASS" and all(reason_checks.values()) else "FAIL",
             "reason": "independent HLLC/HLLE over persisted B0 states",
             "product_flux_fields_used": [], "result": result["b1"]}
+
+
+def _validate_b2_inputs(stage_a, stage_b, after):
+    """Validate the stage contract before doing any balance arithmetic."""
+    dt_a = stage_a.get("dt")
+    dt_b = stage_b.get("dt")
+    if not isinstance(dt_a, (int, float)) or not isinstance(dt_b, (int, float)):
+        return "INCONCLUSIVE", "missing_or_non_numeric_stage_dt"
+    if not math.isfinite(dt_a) or not math.isfinite(dt_b) or dt_a <= 0.0 or dt_b <= 0.0:
+        return "FAIL", "stage_dt_must_be_finite_and_positive"
+    if dt_a != dt_b:
+        return "FAIL", "stage_dt_mismatch"
+    for name, rows in (("stage_a", stage_a.get("conservative")),
+                       ("stage_b", stage_b.get("conservative")),
+                       ("after", after.get("conservative"))):
+        if rows is None:
+            return "INCONCLUSIVE", f"missing_{name}_conservative_state"
+        if not all(math.isfinite(value) for row in rows for value in row):
+            return "FAIL", f"non_finite_{name}_conservative_state"
+    for name, states in (("stage_a", stage_a.get("primitive")),
+                         ("stage_b", stage_b.get("primitive"))):
+        if states is None:
+            return "INCONCLUSIVE", f"missing_{name}_primitive_state"
+        if not all(_admissible(tuple(state)) for state in states):
+            return "FAIL", f"inadmissible_{name}_primitive_state"
+    return None, None
 
 
 def _momentum_audit(history, geometry):
     rows = []
     for time_value, info in history:
         stages = info["audit_stages"]
-        a = _recompute_stage_b(stages["stage_a"], geometry)
-        b = _recompute_stage_b(stages["stage_b"], geometry)
+        input_status, input_reason = _validate_b2_inputs(
+            stages["stage_a"], stages["stage_b"], stages["after"])
+        if input_status is not None:
+            rows.append({"time": time_value, "status": input_status,
+                         "status_reason": input_reason})
+            continue
+        try:
+            a = _recompute_stage_b(stages["stage_a"], geometry)
+            b = _recompute_stage_b(stages["stage_b"], geometry)
+        except (KeyError, TypeError, ValueError, OverflowError, ZeroDivisionError) as exc:
+            rows.append({"time": time_value, "status": "INCONCLUSIVE",
+                         "status_reason": str(exc)})
+            continue
+        if (not all(a["b1"]["reason_checks"].values()) or
+                not all(a["b1"]["wave_checks"].values()) or
+                not all(b["b1"]["reason_checks"].values()) or
+                not all(b["b1"]["wave_checks"].values())):
+            rows.append({"time": time_value, "status": "FAIL",
+                         "status_reason": "productive_audit_fallback_reason_mismatch",
+                         "recomputed_stage_a": a, "recomputed_stage_b": b})
+            continue
         after = fsum(row[1] for row in stages["after"]["conservative"])
         predicted = 0.5 * stages["stage_a"]["dt"] * (
             a["left"] - a["right"] + a["source"] +
@@ -356,27 +445,49 @@ def _momentum_audit(history, geometry):
         residual = observed - predicted
         relative_residual = abs(residual) / max(abs(predicted), abs(observed),
                                                RESIDUAL_EPSILON)
-        rows.append({"time": time_value, "dt": stages["stage_a"]["dt"],
+        rows.append({"time": time_value, "status": "METRIC_ONLY",
+                     "dt": stages["stage_a"]["dt"],
                      "recomputed_stage_a": a, "recomputed_stage_b": b,
                      "momentum_after": after, "predicted_delta": predicted,
                      "observed_delta": observed, "residual": residual,
                      "relative_residual": relative_residual})
+    row_statuses = [row["status"] for row in rows]
+    metric_rows = [row for row in rows if "residual" in row]
+    status_counts = {status: row_statuses.count(status)
+                     for status in sorted(set(row_statuses))}
+    overall_status = ("FAIL" if "FAIL" in row_statuses else
+                      "INCONCLUSIVE" if "INCONCLUSIVE" in row_statuses else
+                      "METRIC_ONLY")
+    invalid_reasons = [row["status_reason"] for row in rows
+                       if "residual" not in row]
+    if overall_status == "FAIL":
+        status_reason = ("Invalid audit evidence or semantic divergence blocked "
+                         "B2: " + "; ".join(invalid_reasons))
+    elif overall_status == "INCONCLUSIVE":
+        status_reason = ("Incomplete or semantically divergent audit evidence "
+                         "blocked B2: " + "; ".join(invalid_reasons))
+    else:
+        status_reason = ("Metric-only balance; no rigorous IEEE-754 backward-error "
+                         "bound has been derived for the full primitive "
+                         "reconstruction, EOS and HLLC operation graph; no "
+                         "physical tolerance is introduced.")
     return {
-        "status": "METRIC_ONLY",
-        "status_reason": "No rigorous IEEE-754 backward-error bound has been derived for the full primitive reconstruction, EOS and HLLC operation graph; no physical tolerance is introduced.",
+        "status": overall_status,
+        "status_reason": status_reason,
         "control_volume": "all duct cells, chamber excluded",
         "sign_convention": "+x duct direction; left enters, right exits; source=sum[p_i*(A_right-A_left)]",
         "interior_faces": "telescoped by control-volume definition; no productive interior flux array is read",
         "independent_inputs": ["stored conservative states", "stored primitive states",
                                "persisted B0 external face states", "stored areas/faces/volumes", "stage dt"],
         "product_field_names_used": [], "steps": len(rows), "rows": rows,
-        "max_abs_residual": max((abs(r["residual"]) for r in rows), default=0.0),
+        "status_counts": status_counts,
+        "max_abs_residual": max((abs(r["residual"]) for r in metric_rows), default=0.0),
         "relative_residual_scale": "max(abs(predicted_delta), abs(observed_delta), epsilon)",
         "relative_residual_epsilon": RESIDUAL_EPSILON,
-        "max_relative_residual": max((r["relative_residual"] for r in rows),
+        "max_relative_residual": max((r["relative_residual"] for r in metric_rows),
                                       default=0.0),
         "median_relative_residual": statistics.median(
-            [r["relative_residual"] for r in rows]) if rows else 0.0,
+            [r["relative_residual"] for r in metric_rows]) if metric_rows else 0.0,
         "rounding_policy": {
             "classification": "metric-only",
             "residual_is": "observed SSPRK2 momentum delta minus independently recomputed B1 face/source prediction",
@@ -389,8 +500,10 @@ def _momentum_audit(history, geometry):
 def classify(return_ok, conservation_ok, admissibility_ok, riemann, momentum):
     if not return_ok or not conservation_ok or not admissibility_ok:
         return "P4_SCI_C3_FAIL"
-    if riemann["status"] == "PASS" and momentum["status"] == "PASS":
-        return "P4_SCI_C3_PASS"
+    if riemann.get("status") == "FAIL" or momentum.get("status") == "FAIL":
+        return "P4_SCI_C3_FAIL"
+    # No scientific authorization/gate exists in this revision.  The function
+    # deliberately has no implicit PASS path, even when two reports say PASS.
     return "P4_SCI_C3_INCONCLUSIVE"
 
 
@@ -440,7 +553,7 @@ def main():
         "exact_riemann": riemann["status"], "momentum_balance": momentum["status"],
         "single_run": True, "wall_seconds": time.perf_counter() - started,
         "capture_contract": capture_contract,
-        "e13": "NOT_EXECUTED_C3_NOT_PASS",
+        "e13": "NOT_EXECUTED",
         "p9": "STOPPED"})
 
 

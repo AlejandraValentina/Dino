@@ -66,6 +66,7 @@ def run_r4(result, output=R4_OUTPUT, allow_existing=False):
     # B2 is intentionally metric-only; therefore global C3 cannot close here.
     decision = {
         "classification": "P4_SCI_C3_INCONCLUSIVE",
+        "global_status": "INCONCLUSIVE",
         "a_status": a["status"],
         "b2_status": "METRIC_ONLY",
         "b2_metric_only": True,
