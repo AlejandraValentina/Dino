@@ -54,17 +54,40 @@ def reconstruct_external_faces(states, geometry, eos=EOS):
         x = centers[i]
         slopes = [_minmod((v - l) / (x - xl), (r - v) / (xr - x))
                   for l, v, r in zip(left, states[i], right)]
-        return (tuple(v + s * (faces[i] - x) for v, s in zip(states[i], slopes)),
-                tuple(v + s * (faces[i + 1] - x) for v, s in zip(states[i], slopes)))
+        cell = tuple(states[i])
+        left = tuple(v + s * (faces[i] - x) for v, s in zip(cell, slopes))
+        right = tuple(v + s * (faces[i + 1] - x) for v, s in zip(cell, slopes))
+        downgraded = False
+        try:
+            # Production reconstruct() validates both reconstructed faces and
+            # downgrades the complete cell if either face is inadmissible.
+            eos.validate(left)
+            eos.validate(right)
+        except (ValueError, OverflowError, ZeroDivisionError):
+            left = right = cell
+            downgraded = True
+        return left, right, downgraded
 
-    left_face, _ = face_pair(0, left_ghost, 2.0 * faces[0] - centers[0])
-    _, right_face = face_pair(len(states) - 1, right_ghost,
-                              2.0 * faces[-1] - centers[-1])
-    eos.validate(left_face)
-    eos.validate(right_face)
+    left_face, _, left_downgraded = face_pair(
+        0, left_ghost, 2.0 * faces[0] - centers[0])
+    _, right_face, right_downgraded = face_pair(
+        len(states) - 1, right_ghost, 2.0 * faces[-1] - centers[-1])
     wall_right = (right_face[0], -right_face[1], right_face[2], right_face[3])
+    downgraded_cells = []
+    if left_downgraded:
+        downgraded_cells.append(0)
+    if right_downgraded and len(states) - 1 not in downgraded_cells:
+        downgraded_cells.append(len(states) - 1)
     return {"interface": {"right": list(left_face)},
-            "wall": {"left": list(right_face), "right": list(wall_right)}}
+            "wall": {"left": list(right_face), "right": list(wall_right)},
+            "downgraded": {
+                "cells": downgraded_cells,
+                "sides": {
+                    "interface": {"left": left_downgraded},
+                    "wall": {"left": right_downgraded,
+                             "right": right_downgraded},
+                },
+            }}
 
 
 def _b0_audit_stage(stage, geometry):
@@ -180,8 +203,9 @@ def _recompute_stage_b(stage, geometry):
     interface_right = tuple(faces["interface"]["right"])
     wall_left = tuple(faces["wall"]["left"])
     wall_right = tuple(faces["wall"]["right"])
-    interface_flux, interface_waves = audit_hllc(chamber, interface_right, EOS)
-    wall_flux, wall_waves = audit_hllc(wall_left, wall_right, EOS)
+    interface_flux, interface_waves, interface_reason = audit_hllc(
+        chamber, interface_right, EOS)
+    wall_flux, wall_waves, wall_reason = audit_hllc(wall_left, wall_right, EOS)
     area_left = geometry["areas"][0]
     area_right = geometry["areas"][-1]
     source = fsum(w[2] * (geometry["areas"][i + 1] - geometry["areas"][i])
@@ -194,6 +218,7 @@ def _recompute_stage_b(stage, geometry):
         "source": source,
         "momentum_before": before,
         "b1": {"interface_waves": interface_waves, "wall_waves": wall_waves,
+               "interface_reason": interface_reason, "wall_reason": wall_reason,
                "interface_flux": list(interface_flux), "wall_flux": list(wall_flux)},
         "units": {"face_flux": "N", "source": "N", "momentum": "kg*m/s"},
     }
@@ -203,7 +228,7 @@ def _b1_audit_stage(stage, geometry):
     """B1 result for both exterior faces; never reads a product flux field."""
     result = _recompute_stage_b(stage, geometry)
     return {"status": "PASS" if result["b0"]["status"] == "PASS" else "FAIL",
-            "reason": "independent HLLC over persisted B0 states",
+            "reason": "independent HLLC/HLLE over persisted B0 states",
             "product_flux_fields_used": [], "result": result["b1"]}
 
 

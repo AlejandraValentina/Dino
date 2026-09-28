@@ -12,6 +12,8 @@ from dev_orchestrator.p4_sci_04b import C2_AREA, C2_VOLUME, EOS
 from dev_orchestrator.p4_sci_04b import solve_c2_one
 from dev_orchestrator.reference.exact_riemann import ExactRiemann
 from dev_orchestrator.reference.hllc_audit import hllc as audit_hllc
+from dev_orchestrator.reference.hllc_audit import hlle_flux as audit_hlle_flux
+from motorsim.gas1d.riemann import hllc_flux as product_hllc
 
 
 def _stage(states, geometry, dt=0.1):
@@ -59,27 +61,76 @@ class P4C3ReturnAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "B0 audit failed"):
             _recompute_stage_b(stage, geometry)
 
+    def test_b0_external_face_downgrade_is_all_component_and_wall_reflects_it(self):
+        class FaceGuardEOS:
+            def __init__(self, reject=False):
+                self.reject = reject
+
+            def validate(self, state):
+                if self.reject and abs(state[1]) < 1.0:
+                    raise ValueError("synthetic inadmissible external face")
+                return state
+
+        geometry = {"areas": [1.0, 1.0, 1.0],
+                    "faces": [0.0, 1.0, 10000.0],
+                    "centers": [0.5, 1.5]}
+        states = [(1.0, 30.0, 100000.0, 0.2),
+                  (1.0, 10.0, 100000.0, 0.2)]
+        faces = reconstruct_external_faces(states, geometry, FaceGuardEOS(True))
+        self.assertEqual(faces["wall"]["left"], list(states[-1]))
+        self.assertEqual(faces["wall"]["right"],
+                         [states[-1][0], -states[-1][1],
+                          states[-1][2], states[-1][3]])
+        self.assertEqual(faces["downgraded"]["cells"], [1])
+        self.assertTrue(faces["downgraded"]["sides"]["wall"]["left"])
+        self.assertTrue(faces["downgraded"]["sides"]["wall"]["right"])
+
+        admissible = reconstruct_external_faces(states, {
+            "areas": [1.0, 1.0, 1.0],
+            "faces": [0.0, 1.0, 2.0],
+            "centers": [0.5, 1.5]}, FaceGuardEOS(False))
+        self.assertEqual(admissible["downgraded"]["cells"], [])
+        self.assertNotEqual(admissible["wall"]["left"], list(states[-1]))
+
     def test_b1_microcases_are_independent_and_frozen_by_identities(self):
         from dev_orchestrator.reference import hllc_audit
         source = inspect.getsource(hllc_audit)
         tree = ast.parse(source)
-        imported = [node for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)]
+        imported = [node for node in ast.walk(tree)
+                    if isinstance(node, (ast.ImportFrom, ast.Import))]
         called = [node for node in ast.walk(tree) if isinstance(node, ast.Call)]
-        self.assertFalse(any("motorsim.gas1d.riemann" in alias.name
-                             for node in imported for alias in node.names))
-        self.assertFalse(any(getattr(node.func, "attr", None) == "hllc"
-                             and "motorsim" in ast.unparse(node.func)
-                             for node in called))
+        forbidden = ("motorsim.gas1d.riemann", "hllc_flux", "hlle_flux",
+                     "estimate_wave_speeds")
+        for node in imported:
+            if isinstance(node, ast.ImportFrom):
+                self.assertFalse(node.module == forbidden[0]
+                                 or (node.module or "").startswith(forbidden[0] + "."))
+            else:
+                self.assertFalse(any(alias.name == forbidden[0]
+                                     or alias.name.startswith(forbidden[0] + ".")
+                                     for alias in node.names))
+        forbidden_import_names = {alias.asname or alias.name.split(".")[-1]
+                                  for node in imported for alias in node.names
+                                  if alias.name.split(".")[-1] in forbidden[1:]}
+        self.assertFalse(any(isinstance(node, ast.Name)
+                             and node.id in forbidden_import_names
+                             for node in ast.walk(tree)))
+        self.assertFalse(any(isinstance(node, ast.Attribute)
+                             and node.attr in forbidden[1:]
+                             for node in ast.walk(tree)))
         uniform = (1.0, 0.0, 100000.0, 0.2)
-        flux, waves = audit_hllc(uniform, uniform, EOS)
+        flux, waves, reason = audit_hllc(uniform, uniform, EOS)
+        self.assertIsNone(reason)
         self.assertEqual(flux, EOS.flux(uniform))
         self.assertLess(waves[0], waves[1])
         contact = (0.8, 0.0, 100000.0, 0.4)
-        flux, waves = audit_hllc(uniform, contact, EOS)
+        flux, waves, reason = audit_hllc(uniform, contact, EOS)
+        self.assertIsNone(reason)
         self.assertEqual(flux, (0.0, 100000.0, 0.0, 0.0))
         self.assertEqual(waves[1], 0.0)
-        wall_flux, wall_waves = audit_hllc((1.2, 35., 100000., .25),
-                                           (1.2, -35., 100000., .25), EOS)
+        wall_flux, wall_waves, reason = audit_hllc((1.2, 35., 100000., .25),
+                                                   (1.2, -35., 100000., .25), EOS)
+        self.assertIsNone(reason)
         self.assertEqual(wall_flux[0], 0.0)
         self.assertAlmostEqual(wall_flux[2], 0.0, places=6)
         self.assertEqual(wall_waves[1], 0.0)
@@ -88,12 +139,42 @@ class P4C3ReturnAuditTests(unittest.TestCase):
         for left, right in (
                 ((1.0, 20.0, 110000.0, .2), (.9, -10.0, 100000.0, .3)),
                 ((1.0, -20.0, 100000.0, .2), (.9, 10.0, 110000.0, .3))):
-            flux, waves = audit_hllc(left, right, EOS)
+            flux, waves, reason = audit_hllc(left, right, EOS)
+            self.assertIsNone(reason)
             exact = ExactRiemann(left, right, EOS)
             self.assertLess(waves[0], waves[1])
             self.assertLess(waves[1], waves[2])
             self.assertTrue(all(abs(value) < float("inf") for value in flux))
             self.assertEqual(flux[0] > 0.0, exact.ustar > 0.0)
+
+    def test_b1_hlle_helper_identity_and_supplemental_parity(self):
+        # Supplemental parity: the independent implementation is checked
+        # against production only for ordinary, non-fallback states.
+        pairs = (
+            ((1.0, 20.0, 110000.0, .2), (.9, -10.0, 100000.0, .3)),
+            ((1.0, -20.0, 100000.0, .2), (.9, 10.0, 110000.0, .3)),
+            ((1.1, 4.0, 90000.0, .1), (.8, 12.0, 130000.0, .7)),
+            ((.7, -8.0, 140000.0, .6), (1.3, -2.0, 95000.0, .2)),
+        )
+        for left, right in pairs:
+            audited = audit_hllc(left, right, EOS)
+            product = product_hllc(left, right, EOS)
+            self.assertIsNone(audited[2])
+            self.assertIsNone(product[2])
+            for actual, expected in zip(audited[:2], product[:2]):
+                for a, b in zip(actual, expected):
+                    self.assertAlmostEqual(a, b, places=12,
+                                           msg="supplemental parity")
+
+        left = (1.0, 20.0, 110000.0, .2)
+        right = (.9, -10.0, 100000.0, .3)
+        sl, sr = -300.0, 300.0
+        actual = audit_hlle_flux(left, right, EOS, (sl, sr))
+        fl, fr = EOS.flux(left), EOS.flux(right)
+        ql, qr = EOS.conservative(left), EOS.conservative(right)
+        expected = tuple((sr * l - sl * r + sl * sr * (b - a)) / (sr - sl)
+                         for l, r, a, b in zip(fl, fr, ql, qr))
+        self.assertEqual(actual, expected)
 
     def test_b2_synthetic_one_cell_and_variable_area_balance(self):
         geo = {"areas": [1.0, 2.0, 3.0, 4.0], "faces": [0., 1., 2., 3.],
