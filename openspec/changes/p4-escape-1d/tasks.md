@@ -769,5 +769,10 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [ ] Revisión independiente final R5 sin hallazgos bloqueantes.
 - [ ] Ejecutar exactamente una adquisición focal C3-R5 y persistir evidencia;
   no ejecutar E13/G2 ni P9.
-- [x] Revisión independiente final R5 sin hallazgos bloqueantes; 26 tests focales, regresiones relacionadas y OpenSpec strict PASS.
+- [ ] Revisión independiente final R5 sin hallazgos bloqueantes (pendiente de reviewer conectado); 26 tests focales, regresiones relacionadas y OpenSpec strict PASS.
 - [x] Una única adquisición focal C3-R5 ejecutada y evaluada; evidencia en `results/p4-c3-r5-20260928/`.
+
+## Auditoría C3-R5 y E13/G2 — 2026-09-28
+- [x] C3-R5 formalizado como `P4_SCI_C3_PASS` con una única adquisición y recibo `results/p4-c3-r5-20260928/c3-closure-receipt.json`. La revisión independiente conectada sigue pendiente; la autorrevisión no se presenta como independiente.
+- [x] Auditoría R6/R7/R10/R10A/R11/R12/R13/R13A y OpenSpec: `E13_CONTRACT_ALREADY_SUPPORTS_PERIOD2`; G2 histórico 1–30 permanece `P4_G2_MAX30_WITHOUT_E13_CONVERGENCE` (rama B sin cierre). P4 sigue BLOCKED/NOT_GRANTED; no se ejecutaron campañas nuevas, P5 ni P9.
+- [x] Detalle: `docs/gasdynamic/p4_e13_g2_contract_audit_20260928.md`.
