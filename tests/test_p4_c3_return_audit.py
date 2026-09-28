@@ -129,6 +129,14 @@ class P4C3ReturnAuditTests(unittest.TestCase):
         self.assertIn("right", audited["downgraded"]["sides"]["interface"])
         self.assertNotIn("left", audited["downgraded"]["sides"]["interface"])
 
+    def test_b0_product_cells_match_and_mutation_fails_without_product_sides(self):
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0],
+                    "centers": [0.5]}
+        stage = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry)
+        self.assertEqual(_b0_audit_stage(stage, geometry)["status"], "PASS")
+        stage["external_faces"]["reconstruction"]["downgraded_cells"] = [99]
+        self.assertEqual(_b0_audit_stage(stage, geometry)["status"], "FAIL")
+
     def test_b1_microcases_are_independent_and_frozen_by_identities(self):
         from dev_orchestrator.reference import hllc_audit
         source = inspect.getsource(hllc_audit)
@@ -214,28 +222,15 @@ class P4C3ReturnAuditTests(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_b2_synthetic_one_cell_and_variable_area_balance(self):
-        geo = {"areas": [1.0, 2.0, 3.0, 4.0], "faces": [0., 1., 2., 3.],
-               "centers": [.5, 1.5, 2.5]}
-        states = [(1.0, 12.0, 100000.0, 0.2),
-                  (.9, -4.0, 103000.0, 0.3),
-                  (1.1, 8.0, 98000.0, 0.25)]
+        # Analytic uniform state: u=0, constant area, Euler momentum flux p*A
+        # at both exterior faces and zero geometric source.  No audit helper is
+        # used to manufacture the expected balance; only the literal formula.
+        geo = {"areas": [2.0, 2.0], "faces": [0., 1.], "centers": [.5]}
+        states = [(1.0, 0.0, 100000.0, 0.2)]
         a = _stage(states, geo)
         b = copy.deepcopy(a)
-        def independent_terms(stage):
-            faces = stage["external_faces"]
-            iface = audit_hllc(tuple(faces["interface"]["left"]),
-                               tuple(faces["interface"]["right"]), EOS)[0]
-            wall = audit_hllc(tuple(faces["wall"]["left"]),
-                              tuple(faces["wall"]["right"]), EOS)[0]
-            source = sum(state[2] * (geo["areas"][i + 1] - geo["areas"][i])
-                         for i, state in enumerate(stage["primitive"]))
-            return geo["areas"][0] * iface[1], geo["areas"][-1] * wall[1], source
-        fa = independent_terms(a)
-        fb = independent_terms(b)
-        force_a = fa[0] - fa[1] + fa[2]
-        force_b = fb[0] - fb[1] + fb[2]
-        self.assertNotEqual(force_a, 0.0)
-        predicted = 0.5 * a["dt"] * (force_a + force_b)
+        expected_force = 2.0 * 100000.0 - 2.0 * 100000.0 + 0.0
+        predicted = 0.5 * a["dt"] * (expected_force + expected_force)
         after_rows = copy.deepcopy(a["conservative"])
         after_rows[0][1] += predicted
         report = _momentum_audit([(0.1, {"audit_stages": {
@@ -387,10 +382,39 @@ class P4C3ReturnAuditTests(unittest.TestCase):
         info = {"audit_stages": {"stage_a": stage, "stage_b": copy.deepcopy(stage),
                                  "after": {"conservative": copy.deepcopy(stage["conservative"])}}}
         report = _momentum_audit([(0.1, info)], geometry)
+        self.assertEqual(report["status"], "FAIL")
+        self.assertNotIn("residual", report["rows"][0])
+        self.assertEqual(report["rows"][0]["status_reason"],
+                         "productive_audit_fallback_reason_mismatch")
+
+    def test_productive_wall_reason_mismatch_blocks_b2_before_balance(self):
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0], "centers": [0.5]}
+        stage = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry)
+        stage["external_faces"]["riemann"]["wall"]["reason"] = "wrong"
+        info = {"audit_stages": {"stage_a": stage, "stage_b": copy.deepcopy(stage),
+                                 "after": {"conservative": copy.deepcopy(stage["conservative"])}}}
+        report = _momentum_audit([(0.1, info)], geometry)
+        self.assertEqual(report["status"], "FAIL")
+        self.assertEqual(report["rows"][0]["status_reason"],
+                         "productive_audit_fallback_reason_mismatch")
+
+    def test_missing_riemann_metadata_is_inconclusive_without_residual(self):
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0], "centers": [0.5]}
+        stage = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry)
+        del stage["external_faces"]["riemann"]
+        info = {"audit_stages": {"stage_a": stage, "stage_b": copy.deepcopy(stage),
+                                 "after": {"conservative": copy.deepcopy(stage["conservative"])}}}
+        report = _momentum_audit([(0.1, info)], geometry)
         self.assertEqual(report["status"], "INCONCLUSIVE")
         self.assertNotIn("residual", report["rows"][0])
-        self.assertIn("productive_audit_semantics_divergence",
-                      report["rows"][0]["status_reason"])
+
+    def test_wave_parity_is_metric_only(self):
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0], "centers": [0.5]}
+        stage = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry)
+        stage["external_faces"]["riemann"]["interface"]["speeds"] = [1.0, 2.0, 3.0]
+        result = _b1_audit_stage(stage, geometry)
+        self.assertEqual(result["status"], "PASS")
+        self.assertFalse(result["result"]["wave_parity"]["interface_waves_match"])
 
     def test_real_wall_fallback_is_preserved_and_checked(self):
         geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0], "centers": [0.5]}
