@@ -438,7 +438,7 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
         limit, limiting, unit = cfl_step(mesh, ws, speeds, eos, cfl)
         # cfl_step expects speeds length n+1, we have n+1 (1 interface + n-1 interior +1 wall) = n+1 good
         # need to ensure speeds length matches mesh.n+1 (n=100 -> 101 speeds) we have 1+ (n-1)=n +1 wall = n+1 correct
-        return {"dq":dq, "dz":dz, "limit":limit, "unit":unit, "limiting":limiting, "flux_left":flux_left, "outward":outward, "speeds_iface":speeds_iface, "reason":reason_iface, "lf0":lf[0], "ws":ws, "chamber_p":p_c, "chamber_u":0.0, "interface_p":left_c[2] if outward[0]==0 else None}
+        return {"dq":dq, "dz":dz, "limit":limit, "unit":unit, "limiting":limiting, "flux_left":flux_left, "outward":outward, "speeds_iface":speeds_iface, "reason":reason_iface, "ws":ws, "chamber_p":p_c}
     # time loop SSPRK2
     t=0.0; step=0; rejections=0; history=[]
     # initial operator for limit
@@ -503,19 +503,27 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
         # commit
         cells=cells_new; z=z_new; t+=dt; step+=1
         # record
-        # need flux info for interface trace: use op0 outward or average? Use average of op0 and op1 outward for stage
-        # approximate interface pressure as p_c star? Use chamber p
         rho_c,p_c,T_c,Y_c,_,_,_=chamber_thermo(z)
-        # interface velocity approximate as SM from op0 speeds
-        # extract SM if available
         sm = op0["speeds_iface"][1] if op0["speeds_iface"][1] is not None else 0.0
-        # p_star approximate via chamber p? we can store chamber p and first cell p
         ws=primitive(cells)
-        p_interface = p_c  # not exact star, but chamber pressure
-        # alternative star pressure from flux? we can compute via flux_iface? For simplicity use chamber p
+        # Diagnostic capture only.  The independent auditor receives the
+        # conservative/primitive states and geometry, then recomputes face
+        # terms offline; no operator-produced momentum term is exported.
+        audit_stages = {
+            "stage_a": {"time": t-dt, "dt": dt,
+                        "conservative": [list(row) for row in cells],
+                        "primitive": [list(w) for w in op0["ws"]],
+                        "chamber_state": list(z)},
+            "stage_b": {"time": t, "dt": dt,
+                        "conservative": [list(row) for row in cells1],
+                        "primitive": [list(w) for w in op1["ws"]],
+                        "chamber_state": list(z1)},
+            "after": {"conservative": [list(row) for row in cells_new],
+                       "primitive": [list(w) for w in ws_new],
+                       "chamber_state": list(z_new)},
+        }
         interface_info = {
             "p_chamber":p_c,
-            "p_interface_star":op0["speeds_iface"][1], # placeholder
             "mass_flux":op0["outward"][0],
             "energy_flux":op0["outward"][2],
             "species_flux":op0["outward"][3],
@@ -524,6 +532,9 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
             "first_cell_state": list(cells[0]),
             "interface_area": C2_AREA,
             "interface_normal": -1.0,
+            "interface_flux_observed":list(op0["flux_left"]),
+            "wave_speed_middle":sm,
+            "audit_stages": audit_stages,
         }
         record(z, cells, ws, t, flux_info=interface_info)
         max_cfl=max(max_cfl, dt/op0["unit"], dt/op1["unit"])
@@ -546,6 +557,9 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
         "max_global_resid":max_global_resid,"max_cfl":max_cfl,
         "chamber_history":chamber_hist,"sensor_history":sensor_hist,"duct_history":duct_hist,
         "interface_history":interface_hist,
+        "audit_geometry": {"areas": list(mesh.areas), "volumes": list(mesh.volumes),
+                            "faces": list(mesh.faces), "centers": list(mesh.centers),
+                            "duct_length": C2_L_DUCT, "area_m2": C2_AREA},
         "cells":cells,"chamber_state":z, "mesh_n":mesh.n, "dt_min":None, # not tracked per se
     }
 

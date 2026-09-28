@@ -1,0 +1,6 @@
+{
+  "admissibility": true,
+  "max_global_resid": 1.3929103469155642e-15,
+  "status": "PASS",
+  "threshold": 1e-10
+}

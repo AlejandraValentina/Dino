@@ -1,0 +1,10 @@
+{
+  "admissibility": "PASS",
+  "classification": "P4_SCI_C3_INCONCLUSIVE",
+  "conservation": "PASS",
+  "exact_riemann": "INCONCLUSIVE",
+  "momentum_balance": "INCONCLUSIVE",
+  "return_snapshot": "PASS",
+  "single_run": true,
+  "wall_seconds": 12.042167899984634
+}

@@ -1,0 +1,54 @@
+{
+  "area_m2": 0.0003141592653589793,
+  "exact_star": {
+    "p": 124794.24129582288,
+    "residual": 8.358506098098436e-15,
+    "sample": [
+      1.2042628898885097,
+      -2.449449606727332,
+      124794.24129582288,
+      0.4999999999998031
+    ],
+    "u": -2.449449606727332
+  },
+  "flux_expected_area_integrated": [
+    -0.0009267011142501996,
+    39.20753707420677,
+    -370.40932409118136,
+    -0.00046335055712491734
+  ],
+  "flux_observed_area_integrated": [
+    -0.0002698587123830558,
+    38.96090451400843,
+    -107.68128798014635,
+    -0.00013492935619147513
+  ],
+  "left_state": [
+    1.1971075492891985,
+    0.0,
+    123694.85294787305,
+    0.5
+  ],
+  "normal": -1.0,
+  "productive_fixture_executed": true,
+  "reference_independent_of_productive_hllc": true,
+  "reference_module": "dev_orchestrator.reference.exact_riemann.ExactRiemann",
+  "relative_error": {
+    "components": [
+      0.0006568424018671439,
+      0.006290437466947812,
+      0.709291097775824,
+      0.0003284212009334422
+    ],
+    "max": 0.709291097775824
+  },
+  "right_state": [
+    1.2033493708009613,
+    -2.7332648960114385,
+    124666.46008842559,
+    0.4999999999998031
+  ],
+  "sample_xi": 0.0,
+  "status": "INCONCLUSIVE",
+  "status_reason": "No approved quantitative HLLC-vs-exact equality threshold was found; errors are diagnostic only."
+}

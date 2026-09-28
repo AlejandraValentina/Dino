@@ -1,0 +1,15 @@
+{
+  "CFL": 0.2,
+  "N": 100,
+  "acquisition": "single focal run",
+  "area": 0.0003141592653589793,
+  "backend": "existing C2 fixture",
+  "conservation_threshold": 1e-10,
+  "duct_length": 0.5,
+  "expected_return": 0.002933131540824748,
+  "return_window": [
+    0.001466565770412374,
+    0.004399697311237122
+  ],
+  "t_final": 0.004
+}
