@@ -1,18 +1,76 @@
 import math
 import unittest
 
-from motorsim.p8_performance import (P8_ANCHORS, cycle_duration_s,
+from motorsim.p8_performance import (P8_ANCHORS, PREPARATION_CYCLES,
+                                      PREPARATION_END_DEG, cycle_duration_s,
                                       indicated_metrics, omega_deg_s,
                                       validate_p8_rpm, work_from_pressure_volume)
 from motorsim.project import ProjectError
 from motorsim.p5c import make_p5c_fixture
 from motorsim.p8_performance import model_geometry_callback
+from motorsim.p8_performance import build_event_cuts
+from motorsim.simulation_case import SyntheticCase
+from motorsim.p8_performance import event_cuts, run_campaign
 from motorsim.coupling import ChamberState
 from motorsim.exhaust_port import port_flux
 from motorsim.gas1d.eos import IdealGas
 
 
 class P8ContractTests(unittest.TestCase):
+    def test_campaign_is_nonvacuous_and_writes_consistent_anchor_evidence(self):
+        import json, tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            result = run_campaign(directory)
+            self.assertEqual(result['status'], 'P8_WIDE_RPM_PERFORMANCE_VERIFIED_CONDITIONAL')
+            self.assertEqual(result['failures'], [])
+            consolidated = json.load(open(directory + '/p8-wide-rpm.json', encoding='utf-8'))
+            for anchor in consolidated['anchors']:
+                per = json.load(open(f"{directory}/anchor-{anchor['rpm']}.json", encoding='utf-8'))
+                self.assertEqual(per, anchor)
+                self.assertEqual(anchor['preparation']['cycles'], 2)
+                self.assertEqual(anchor['preparation']['start_angle_deg'], 180.0)
+                self.assertEqual(anchor['preparation']['end_angle_deg'], 900.0)
+                self.assertEqual(anchor['preparation']['prescribed_heat_J'], 0.0)
+                self.assertFalse(anchor['preparation']['p7_enabled'])
+                self.assertTrue(anchor['gates']['prepared_initial_state'])
+                self.assertTrue(anchor['gates']['deterministic_replay'])
+            required = {'finite', 'geometry_rebased', 'admissible', 'species',
+                        'p7_one_event', 'p7_nonvacuous', 'p7_source_admissible',
+                        'p7_heat_consistent', 'cfl', 'source_heat_consistent',
+                        'prescribed_heat_matches_ledger', 'global_mass_conservation',
+                        'global_energy_conservation', 'prepared_initial_state',
+                        'restart', 'deterministic_replay'}
+            for anchor in consolidated['anchors']:
+                self.assertTrue(required <= set(anchor['gates']))
+                self.assertTrue(all(anchor['gates'][name] for name in required))
+                self.assertGreater(anchor['prescribed_heat_J'], 0.0)
+            self.assertTrue(all(a['gates']['p7_nonvacuous'] for a in consolidated['anchors']))
+            self.assertTrue(all(a['gates']['prescribed_heat_matches_ledger'] for a in consolidated['anchors']))
+            self.assertTrue(all(a['gates']['source_heat_consistent'] for a in consolidated['anchors']))
+    def test_p7_hooks_are_zero_after_the_fixed_event(self):
+        from motorsim.p8_performance import _new_system
+        from motorsim.p7_prescribed import capture_event
+        _, system = _new_system(2500, enable_p7=True)
+        system.p7_event = capture_event(350.0, system.species_mass['cylinder'][0])
+        system._p7_active_interval = (390.0, 391.0)
+        system._p7_mass_rate = None
+        assert system._p7_source(390.5, None, {'area': 0.0}) == (0.0, 0.0, 0.0)
+        assert system._p7_species_source(390.5) == (0.0, 0.0, 0.0, 0.0, 0.0)
+
+    def test_event_cuts_repeat_mechanics_and_p7_boundaries(self):
+        from motorsim.simulation_case import SyntheticCase
+        cuts = event_cuts(SyntheticCase(), 180.0, 900.0)
+        self.assertIn(350.0, cuts)
+        self.assertIn(390.0, cuts)
+        for expected in (430.1050607703571, 450.0, 472.2040961002297,
+                         477.3344439797084, 514.489936176896):
+            self.assertTrue(any(abs(value - expected) < 1e-12 for value in cuts))
+        self.assertIn(710.0, cuts)
+        self.assertIn(750.0, cuts)
+        measured = build_event_cuts(SyntheticCase(), 180.0, 540.0,
+                                    p7_enabled=True, restart_probe=True)
+        self.assertIn(370.0, measured)
+
     def test_domain_and_timing(self):
         self.assertEqual(P8_ANCHORS, (2500, 5000, 8000, 11000, 15000))
         self.assertEqual(omega_deg_s(2500), 15000.0)
@@ -79,6 +137,12 @@ class P8ContractTests(unittest.TestCase):
         pipe = (1.0, 0.0, 100000.0, 0.0)
         face = port_flux(chamber, pipe, 3e-4, 1e-4, eos=eos)
         self.assertEqual(face['area'], 1e-4)
+
+    def test_absolute_event_cuts_repeat_after_one_turn(self):
+        cuts = build_event_cuts(SyntheticCase(), 360.0, 540.0, p7_enabled=True)
+        for phase in (430.10506077035714, 450.0, 472.2040961002297,
+                      477.3344439797084, 514.489936176896, 540.0):
+            self.assertIn(phase, cuts)
 
 
 if __name__ == "__main__":

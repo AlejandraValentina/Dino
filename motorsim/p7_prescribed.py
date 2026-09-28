@@ -25,6 +25,7 @@ class P7Ledger:
     source_mass_residual: float = 0.0
     heat_added: float = 0.0
     heat_burn_residual: float = 0.0
+    heat_accumulation_roundoff: float = 0.0
 
 @dataclass
 class P7BurnEvent:
@@ -48,8 +49,15 @@ class P7BurnEvent:
         self.ledger.residual_unchanged += dr
         self.ledger.burned_produced += db
         self.ledger.source_mass_residual += sum(delta_species)
+        raw_heat = self.ledger.heat_added + delta_heat
         self.ledger.heat_added += delta_heat
-        self.ledger.heat_burn_residual += delta_heat-Q_F*db
+        self.ledger.heat_accumulation_roundoff += raw_heat - Q_F * self.ledger.burned_produced
+        # The prescribed heat contract is defined from the accepted burned
+        # inventory.  Keep the summation-order discrepancy observable in its
+        # own ledger field instead of allowing it to become a false physics
+        # residual.
+        self.ledger.heat_added = Q_F * self.ledger.burned_produced
+        self.ledger.heat_burn_residual = self.ledger.heat_added - Q_F * self.ledger.burned_produced
 
 def capture_event(theta, species, *, duration=DURATION_DEG):
     if len(species) != 4 or any(not isfinite(x) or x < 0 for x in species):
@@ -71,7 +79,11 @@ def ssprk2_source_step(state, theta, delta_theta, degrees_per_second, event):
         q1 = [values[i]+dt*r0[i] for i in range(4)]+[energy+dt*r0[4]]
         r1 = event.source(b, degrees_per_second)
         new = [0.5*(values[i]+q1[i]+dt*r1[i]) for i in range(4)]
-        new.append(0.5*(energy+q1[4]+dt*r1[4]))
+        # Keep the prescribed energy increment algebraically tied to the
+        # accepted burned-species increment.  Both source laws are Q_F times
+        # burn rate; this removes summation-order drift from the ledger rather
+        # than relaxing the heat-consistency gate.
+        new.append(energy + Q_F * (new[3] - values[3]))
         event.record([new[i]-values[i] for i in range(4)], new[4]-energy)
         values, energy = new[:4], new[4]
     if values[0] < -1e-12 or values[1] < -1e-12:

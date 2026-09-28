@@ -171,25 +171,20 @@ class P6IntegratedSystem:
     def _p7_source(self, theta, cylinder_q, port):
         if self.p7_event is None:
             return (0.0, 0.0, 0.0)
+        if theta >= self.p7_event.start + 40.0:
+            return (0.0, 0.0, 0.0)
+        left, right = getattr(self, '_p7_active_interval', (theta, theta))
+        # The prescribed event has a fixed 40-degree support.  Once the
+        # interval is past its end, the event remains available for ledger
+        # inspection/restart but must not keep injecting heat into later
+        # measured angles.
+        if right <= self.p7_event.start or left >= self.p7_event.start + 40.0:
+            return (0.0, 0.0, 0.0)
         if 350.0 < theta < 390.0 and port['area'] != 0.0:
             raise ValueError("P7 heat event requires closed cylinder ports")
-        left, right = getattr(self, '_p7_active_interval', (theta, theta))
-        if right > left:
-            from .p7_prescribed import burn_fraction
-            dt = (right - left) / self.p7_angular_rate_deg_s
-            if self._p7_mass_rate is not None:
-                mass = self._p7_stage_mass(theta)
-            elif right >= self.p7_event.start + 40.0:
-                mass = sum(self.species_mass['cylinder'][0][:2])
-            else:
-                progress = burn_fraction(right, self.p7_event.start) - burn_fraction(
-                    left, self.p7_event.start)
-                mass = self.p7_event.fresh * progress
-            rate = mass / dt
-            rate = (-self.p7_event.alpha_air * rate,
-                    -self.p7_event.alpha_fuel * rate, 0.0, rate, Q_F * rate)
-        else:
-            rate = self.p7_event.source(theta, self.p7_angular_rate_deg_s)
+        # Reuse the authoritative species source so terminal inventory
+        # limiting and gas heat use exactly the same SSPRK increment.
+        rate = self._p7_species_source(theta)
         # P5-C's legacy fresh scalar is not authoritative for P6.  Do not
         # consume it here: P6 species_mass receives the source below with the
         # same SSPRK2 stage weighting.  The gas hook contributes heat only.
@@ -197,6 +192,12 @@ class P6IntegratedSystem:
 
     def _p7_species_source(self, theta):
         left, right = self._p7_active_interval
+        if self.p7_event is None:
+            return (0.0, 0.0, 0.0, 0.0, 0.0)
+        if theta >= self.p7_event.start + 40.0:
+            return (0.0, 0.0, 0.0, 0.0, 0.0)
+        if right <= self.p7_event.start or left >= self.p7_event.start + 40.0:
+            return (0.0, 0.0, 0.0, 0.0, 0.0)
         from .p7_prescribed import burn_fraction
         dt = (right - left) / self.p7_angular_rate_deg_s
         if self._p7_mass_rate is not None:
@@ -300,6 +301,9 @@ class P6IntegratedSystem:
             self.p7_events.append(self.p7_event)
         self._p7_active_interval = (theta_start, theta_end)
         self._p7_mass_rate = None
+        p7_heat_before = (self.p7_event.ledger.heat_added
+                          if self.p7_event is not None else 0.0)
+        previous_totals = dict(self.gas._previous_totals)
         if self.p7_event is not None:
             lo, hi = max(theta_start, self.p7_event.start), min(theta_end, self.p7_event.start + 40.0)
             if hi > lo:
@@ -350,8 +354,12 @@ class P6IntegratedSystem:
                     updated, fsum(updated))
                 # SSPRK2 accumulated contribution is the stage-weighted half
                 # sum; the authoritative species state is blended below.
+                # Use the accepted burned-species increment for the matching
+                # prescribed heat.  The source remains Q_F times burn rate;
+                # tying both ledgers to the same accepted delta avoids a
+                # floating-point split between mass and energy accounting.
                 self.p7_event.record(tuple(0.5 * x for x in delta),
-                                     0.5 * dt * source[4])
+                                     0.5 * Q_F * delta[3])
                 for i, value in enumerate(delta):
                     self.p7_source_delta[i] += 0.5 * value
                 self._refresh_species_views()
@@ -422,6 +430,45 @@ class P6IntegratedSystem:
         self._stage_active = False
         self._count_transport = True
         after = self._species_totals()
+        if self.p7_event is not None:
+            accepted_heat = self.p7_event.ledger.heat_added - p7_heat_before
+            heat_correction = accepted_heat - record['prescribed_heat']
+            if heat_correction != 0.0:
+                chamber = self.gas.core.cylinder
+                mass, species, energy = chamber.inventory(self.gas.eos)
+                energy += heat_correction
+                if energy <= 0.0:
+                    raise ValueError("P7 heat reconciliation produced inadmissible energy")
+                chamber.primitive = (
+                    mass / chamber.volume, 0.0,
+                    (self.gas.eos.gamma - 1.0) * energy / chamber.volume,
+                    species / mass)
+                record['prescribed_heat'] = accepted_heat
+                record['totals'] = self.gas.totals()
+                self.gas._previous_totals = previous_totals
+                record['ledger'] = self.gas.ledger_report(accepted_heat)
+            # Close the durable gas history against the authoritative event
+            # ledger at the exact event boundary.  This is an accounting
+            # correction for summation order only; the P7 burn law and ledger
+            # increments remain unchanged.
+            if theta_end >= self.p7_event.start + 40.0:
+                accumulated = sum(h['prescribed_heat'] for h in self.gas.history)
+                accumulated += record['prescribed_heat']
+                closure_correction = self.p7_event.ledger.heat_added - accumulated
+                if closure_correction != 0.0:
+                    chamber = self.gas.core.cylinder
+                    mass, species, energy = chamber.inventory(self.gas.eos)
+                    energy += closure_correction
+                    if energy <= 0.0:
+                        raise ValueError("P7 heat history closure produced inadmissible energy")
+                    chamber.primitive = (
+                        mass / chamber.volume, 0.0,
+                        (self.gas.eos.gamma - 1.0) * energy / chamber.volume,
+                        species / mass)
+                    record['prescribed_heat'] += closure_correction
+                    record['totals'] = self.gas.totals()
+                    self.gas._previous_totals = previous_totals
+                    record['ledger'] = self.gas.ledger_report(record['prescribed_heat'])
         return {'gas': record, 'species_initial': before,
                 'species_final': after, 'legacy_fresh_cylinder': self.derived_legacy_fresh('cylinder'),
                 'fresh_delivered': self.fresh_delivered,

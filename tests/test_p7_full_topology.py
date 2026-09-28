@@ -101,6 +101,9 @@ def test_p7_full_window_3000rpm_authoritative_species_and_energy_closure():
     assert event.ledger.fresh_air_converted == pytest.approx(initial[0], abs=2e-7)
     assert event.ledger.fuel_converted == pytest.approx(initial[1], abs=2e-12)
     assert event.ledger.heat_added == pytest.approx(Q_F * event.ledger.burned_produced, rel=2e-7)
+    cumulative_heat = sum(h['prescribed_heat'] for h in system.gas.history)
+    assert cumulative_heat == pytest.approx(event.ledger.heat_added, abs=1e-12)
+    assert cumulative_heat == pytest.approx(Q_F * event.ledger.burned_produced, abs=1e-12)
     assert system.species_mass['cylinder'][0][0] == pytest.approx(0.0, abs=2e-7)
     assert system.species_mass['cylinder'][0][3] == pytest.approx(initial[3] + event.fresh, abs=2e-7)
     assert system.species_mass['cylinder'][0][2] == pytest.approx(initial[2], abs=2e-12)
@@ -108,3 +111,13 @@ def test_p7_full_window_3000rpm_authoritative_species_and_energy_closure():
     ledger = system.gas.history[-1]['ledger']
     assert ledger['residual']['energy_without_prescribed_heat'] == pytest.approx(
         ledger['residual']['energy'] - ledger['prescribed_heat'], abs=1e-12)
+
+def test_p7_source_has_no_heat_support_after_fixed_event():
+    system = full_system()
+    system.gas.angle = 350.0
+    system.step(1.0e-7, angle=350.0 + 1.0e-7 * 18000.0)
+    assert system.p7_event is not None
+    before = system.p7_event.ledger.heat_added
+    system.step(1.0e-7, angle=391.0)
+    assert system.gas.history[-1]['prescribed_heat'] == pytest.approx(0.0, abs=1e-15)
+    assert system.p7_event.ledger.heat_added == pytest.approx(before, abs=1e-15)

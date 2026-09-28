@@ -3,51 +3,90 @@
 ## ADDED Requirements
 
 ### Requirement: bounded RPM contract
-La implementación MUST aceptar sólo RPM enteros en [2500, 15000], usar
-`omega_deg_s = 6*rpm` y completar una ventana de 360 grados equivalente a
-`60/rpm` segundos, con CFL y cortes de eventos exactos.
+
+The implementation MUST accept only integer RPM in [2500, 15000], use
+`omega_deg_s = 6*rpm`, complete one measured 360-degree window equal to
+`60/rpm` seconds, use CFL 0.4, and cut at exact repeated mechanical events.
 
 #### Scenario: domain and timing
+
 Given 2500, 5000, 8000, 11000 and 15000 rpm, each run uses the exact angular
 rate and cycle duration; values outside the range or non-integers are rejected.
 
+### Requirement: deterministic preparation and rebase
+
+Each anchor MUST execute exactly two fixed unmeasured preparation cycles 180->900
+with P7 disabled and zero heat/burn, then reset measurement accounting while
+preserving gas/species state and rebase 900->180 only after proving equal
+volumes, volume rates and areas. Preparation MUST use CFL 0.4 and the same
+repeated authoritative mechanical event cuts as measurement, with no fixed-angle
+stepping. Preparation MUST NOT be described as periodic convergence or steady
+state.
+
+#### Scenario: two fixed preparation cycles
+
+Given an anchor RPM, preparation advances exactly from 180 to 900 with P7
+disabled and zero preparation heat, then the measured accounting baseline is
+reset and the physical state is rebased from 900 to 180 without changing gas/species
+state or periodicity claims.
+
+### Requirement: shared authoritative event scheduler
+
+Preparation, uninterrupted measurement and restart continuation MUST use one
+builder that repeats every authoritative `Model(case).events` phase by 360*k
+across the full absolute interval. Measurement/restart MUST additionally cut at
+P7 350/390 and the exact checkpoint probe inside P7. P7 MUST be enabled only
+for measurement.
+
+#### Scenario: repeated cuts and restart cut
+
+Given an absolute interval crossing 360 degrees, the preparation and measured
+cut lists contain every `Model(case).events + 360*k` phase in that interval;
+the measured/restart list also contains 350, 390 and the exact 370 checkpoint
+cut, and continuation uses the same list.
+
 ### Requirement: authoritative full topology
-La campaña MUST reutilizar la mecánica/configuración 2T aprobada y la topología
-atmósfera-intake-crankcase-transfer-cylinder-exhaust-atmósfera con P6/P7.
-No MUST inventar geometría, timing, leyes ni soporte recurrente.
 
-#### Scenario: provenance
-Given an existing approved reference configuration, the evidence records its
-exact provenance and all five anchors use it; otherwise closure is blocked by
-`P8_SCIENTIFIC_CONTRACT_REQUIRED`.
+The campaign MUST reuse the approved S2T-0D-01 mechanics and frozen
+atmosphere-intake-crankcase-transfer-cylinder-exhaust-atmosphere P5-C/P6/P7
+fixture. It MUST not invent geometry, timing, physical laws or periodic support.
 
-### Requirement: indicated metrics and sign
-La implementación MUST calcular trabajo de cilindro `integral(p dV)`, potencia,
-par y pmax sobre la misma ventana, y probar previamente el signo con una cámara
-cerrada. Debe registrar calor prescrito, residuales de masa/energía/especies,
-masa fresca entregada y short-circuit definidos por P6/P7.
+#### Scenario: provenance and topology
 
-#### Scenario: work formulas
-Given known work and rpm, power equals `W*rpm/60` and torque equals `W/(2*pi)`;
-expansion is positive and compression negative under the verified convention.
+Given an existing approved S2T-0D-01 reference, all five anchors record the
+same frozen P5-C/P6/P7 topology and synthetic/not-measured provenance; without
+that provenance closure is blocked.
 
-### Requirement: admissibility and determinism gates
-Cada anclaje final MUST completar sin NaN/Inf ni estados inadmisibles, conservar
-las tolerancias existentes, registrar CFL mínimo/máximo y pasos, y pasar replay
-determinista, restart dentro de un ciclo, suma de especies P6 y admisibilidad de
-fuente P7. No se permite clipping silencioso ni retirar un anclaje fallido.
+### Requirement: measured gates and accounting
 
-#### Scenario: five-point evidence
-Given all five anchors, the JSON records per-RPM metrics and gates plus exact
-window, initialization, contract version, regression counts and limitations.
+The measured cycle MUST contain exactly one P7 event and require captured fresh
+mass > 0, burned produced mass > 0, prescribed heat > 0, source/heat
+consistency, species conservation, admissibility, CFL <= 0.4, deterministic
+replay, and exact restart from a checkpoint inside P7. It MUST report work,
+power, torque, pmax, mass residual, energy residual, and all ledger terms.
+Global mass and energy residuals MUST use the correct intake-minus-exhaust
+external ledger, accepted P7 heat, and both chamber `-p*dV` terms. A lower-phase
+conservation defect MUST block closure rather than be masked.
+
+#### Scenario: measured accounting gates
+
+Given a measured anchor, positive captured fresh, burned mass and accepted heat
+are required; the evidence also records source/heat consistency, exact restart,
+CFL, species, admissibility and mass/energy residual terms. Any failed gate
+keeps the campaign numerically blocked.
 
 ### Requirement: conditional evidence
-La evidencia MUST declarar `steady_state=false`,
-`periodic_convergence=NOT_GRANTED_BY_P4`, `metric_semantics=BOUNDED_TRANSIENT_INDICATED`,
-`conditional_on_p4=true`, `experimental_validation=NOT_PERFORMED` e
-`independent_review=INDEPENDENT_REVIEW_PENDING`. No afirma validación ni P9.
+
+Evidence MUST declare `steady_state=false`,
+`periodic_convergence=NOT_GRANTED_BY_P4`,
+`metric_semantics=BOUNDED_TRANSIENT_INDICATED`, `conditional_on_p4=true`,
+`experimental_validation=NOT_PERFORMED`, and
+`independent_review=INDEPENDENT_REVIEW_PENDING`. It MUST retain P4 blocked and
+P9 stopped. If any anchor fails a measured gate, status MUST remain
+`P8_NUMERICAL_GATE_BLOCKED` and conditional closure MUST NOT be claimed.
 
 #### Scenario: conditional closure
-Given passing bounded gates, closure is `P8_WIDE_RPM_PERFORMANCE_VERIFIED_CONDITIONAL`
-and `P8_READY_FOR_P9_DATA`, while P4 remains blocked and P9 remains stopped.
 
+Given all five anchors pass all measured gates, closure is
+`P8_WIDE_RPM_PERFORMANCE_VERIFIED_CONDITIONAL` and
+`P8_READY_FOR_P9_DATA`; this scenario is not satisfied by a blocked anchor.

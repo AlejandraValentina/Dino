@@ -249,9 +249,16 @@ class IntegratedP5C:
                   "stage_work_rates": (t0['core']['work_rates'], t1['core']['work_rates']),
                   "prescribed_heat": 0.5 * (t0['prescribed_source'][1] + t1['prescribed_source'][1]) * dt,
                   "totals": self.totals(), "dependency": self.dependency_status}
-        self._last_external = {"mass": 0.5*(t0['core']['external'][0] + t1['core']['external'][0])*dt,
-                               "energy": 0.5*(t0['core']['external'][2] + t1['core']['external'][2])*dt,
-                               "species": 0.5*(t0['core']['external'][3] + t1['core']['external'][3])*dt}
+        # The coupled system has two external boundaries: the atmospheric
+        # intake in the P5-C core trace and the exhaust outlet trace.  The
+        # The core trace is positive into the stored topology.  The exhaust
+        # outlet trace is positive out of it, so it enters the stored-system
+        # exchange with the opposite sign.  Internal interfaces still cancel.
+        self._last_external = {
+            key: 0.5 * (t0['core']['external'][index] +
+                        t1['core']['external'][index] -
+                        t0['external'][index] - t1['external'][index]) * dt
+            for key, index in (("mass", 0), ("energy", 2), ("species", 3))}
         for key in self._external_cumulative:
             self._external_cumulative[key] += self._last_external[key]
         record['dt'] = float(dt)

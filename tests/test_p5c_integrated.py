@@ -1,4 +1,5 @@
 import copy
+import pytest
 
 from motorsim.p5c import IntegratedP5C, make_p5c_fixture
 
@@ -68,3 +69,33 @@ def test_p5c_controlled_internal_backflow_uses_resolved_flux():
     # Interface index 1 is crankcase -> TR1 in the established trace order.
     assert s.history[-1]["core_interfaces"][0][1][0] < 0.0
     assert s.admissible()
+
+
+def test_p5c_external_ledger_includes_intake_and_exhaust():
+    """The global ledger contains both atmospheric boundary traces."""
+    s = __import__('motorsim.p5c', fromlist=['make_p5c_full_fixture']).make_p5c_full_fixture()
+    before = s.totals()
+    record = s.step(1.0e-7, angle=0.0)
+    after = s.totals()
+
+    expected = {
+        key: 0.5 * sum(
+            record["stage_external"][stage][index] -
+            record["stage_exhaust_external"][stage][index]
+            for stage in (0, 1)) * record["dt"]
+        for key, index in (("mass", 0), ("energy", 2), ("species", 3))
+    }
+    assert s._last_external == expected
+    for key in expected:
+        assert abs((after[key] - before[key]) - expected[key]) < 1e-10
+
+
+def test_p5c_external_ledger_closes_global_inventory_with_both_boundaries():
+    s = __import__('motorsim.p5c', fromlist=['make_p5c_full_fixture']).make_p5c_full_fixture()
+    before = s.totals()
+    for angle in (0.0, 30.0, 60.0):
+        s.step(1.0e-7, angle=angle)
+    after = s.totals()
+    for key in ("mass", "energy", "species"):
+        assert after[key] - before[key] == pytest.approx(
+            s._external_cumulative[key], abs=1e-10)

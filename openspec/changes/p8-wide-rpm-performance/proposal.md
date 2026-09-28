@@ -1,16 +1,21 @@
 # P8 wide-RPM indicated performance
 
-## Autorización humana
+## Human authorization
 
-El 2026-09-27 la usuaria autoriza explícitamente implementar y verificar P8
-wide-RPM performance. Esta autorización abre sólo este cambio, mantiene P4
-`P4_FINAL_BLOCKED_C3_INCONCLUSIVE` / `BLOCKED` / `NOT_GRANTED`, y no autoriza
-P9, validación experimental, publicación ni infraestructura supervisor.
+On 2026-09-27 the supervisor authorizes only the P8 correction in this change.
+P4 remains `BLOCKED / NOT_GRANTED`; P9, experimental validation, publication,
+packaging and supervisor infrastructure remain unauthorized.
 
-## Alcance
+## Scope
 
-Verificar una campaña transitoria acotada de un ciclo en la topología 2T
-integrada aprobada por P5-C/P6/P7, en los anclajes enteros 2500, 5000, 8000,
-11000 y 15000 rpm. El resultado informa magnitudes indicadas, no estado
-periódico, predicción de freno ni acuerdo experimental.
+Each integer anchor 2500, 5000, 8000, 11000 and 15000 rpm executes exactly two
+deterministic, unmeasured preparation cycles from 180 to 900 degrees with the
+frozen P5-C/P6 topology and P7 disabled. The state is then rebased from 900 to
+180 only because geometry is exactly periodic, accounting is reset, and exactly
+one 360-degree measured cycle from 180 to 540 runs with P7 enabled.
 
+Preparation is a fixed transient, not periodic convergence or a steady-state
+claim. Evidence retains `steady_state=false`,
+`periodic_convergence=NOT_GRANTED_BY_P4`, `conditional_on_p4=true`,
+`experimental_validation=NOT_PERFORMED` and
+`independent_review=INDEPENDENT_REVIEW_PENDING`.
