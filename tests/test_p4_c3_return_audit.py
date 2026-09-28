@@ -1,5 +1,7 @@
 import unittest
 import inspect
+import ast
+import copy
 
 from dev_orchestrator.p4_c3_return_audit import (
     _momentum_audit, _recompute_stage, _riemann_audit, _select_return,
@@ -12,6 +14,21 @@ from dev_orchestrator.reference.exact_riemann import ExactRiemann
 from dev_orchestrator.reference.hllc_audit import hllc as audit_hllc
 
 
+def _stage(states, geometry, dt=0.1):
+    rows = [list(area * value for value in EOS.conservative(state))
+            for state, area in zip(states, geometry["areas"][:-1])]
+    rho, velocity, pressure, species = states[0]
+    conservative = EOS.conservative((rho, 0.0, pressure, species))
+    chamber = [rho * C2_VOLUME, conservative[2] * C2_VOLUME,
+                rho * species * C2_VOLUME]
+    stage = {"dt": dt, "primitive": [list(state) for state in states],
+             "conservative": rows, "chamber_state": chamber}
+    stage["external_faces"] = reconstruct_external_faces(states, geometry)
+    stage["external_faces"]["interface"]["left"] = list(
+        (rho, 0.0, pressure, species))
+    return stage
+
+
 class P4C3ReturnAuditTests(unittest.TestCase):
     def test_b0_persists_used_external_faces_and_detects_mutation(self):
         result = solve_c2_one(12, 0.2, 200000.0, 400.0, 0.5,
@@ -20,64 +37,91 @@ class P4C3ReturnAuditTests(unittest.TestCase):
                        if "audit_stages" in item[1])
         stage = info["audit_stages"]["stage_a"]
         self.assertEqual(_b0_audit_stage(stage, result["audit_geometry"])["status"], "PASS")
-        stage["external_faces"]["interface"]["right"][1] += 1.0
-        self.assertEqual(_b0_audit_stage(stage, result["audit_geometry"])["status"], "FAIL")
+        captured = stage["external_faces"]
+        self.assertEqual(captured["wall"]["right"],
+                         [captured["wall"]["left"][0],
+                          -captured["wall"]["left"][1],
+                          captured["wall"]["left"][2],
+                          captured["wall"]["left"][3]])
+        for path in (("interface", "left"), ("interface", "right"),
+                     ("wall", "right")):
+            original = captured[path[0]][path[1]][1]
+            captured[path[0]][path[1]][1] += 1.0
+            self.assertEqual(_b0_audit_stage(stage, result["audit_geometry"])["status"],
+                             "FAIL", path)
+            captured[path[0]][path[1]][1] = original
+
+    def test_b0_failure_fails_fast_before_b1_or_b2(self):
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0],
+                    "centers": [0.5]}
+        stage = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry)
+        stage["external_faces"]["wall"]["right"][0] += 1.0
+        with self.assertRaisesRegex(ValueError, "B0 audit failed"):
+            _recompute_stage_b(stage, geometry)
 
     def test_b1_microcases_are_independent_and_frozen_by_identities(self):
         from dev_orchestrator.reference import hllc_audit
-        self.assertNotIn("motorsim.gas1d.riemann", inspect.getsource(hllc_audit))
+        source = inspect.getsource(hllc_audit)
+        tree = ast.parse(source)
+        imported = [node for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)]
+        called = [node for node in ast.walk(tree) if isinstance(node, ast.Call)]
+        self.assertFalse(any("motorsim.gas1d.riemann" in alias.name
+                             for node in imported for alias in node.names))
+        self.assertFalse(any(getattr(node.func, "attr", None) == "hllc"
+                             and "motorsim" in ast.unparse(node.func)
+                             for node in called))
         uniform = (1.0, 0.0, 100000.0, 0.2)
         flux, waves = audit_hllc(uniform, uniform, EOS)
         self.assertEqual(flux, EOS.flux(uniform))
         self.assertLess(waves[0], waves[1])
         contact = (0.8, 0.0, 100000.0, 0.4)
         flux, waves = audit_hllc(uniform, contact, EOS)
-        self.assertAlmostEqual(flux[0], 0.0, places=12)
-        self.assertAlmostEqual(flux[1], 100000.0, places=8)
-        self.assertAlmostEqual(flux[2], 0.0, places=6)
-        shock = audit_hllc((1.0, 0., 120000., .2), (.8, 0., 100000., .4), EOS)
-        rare = audit_hllc((1.0, 0., 100000., .2), (.8, 0., 120000., .4), EOS)
-        self.assertAlmostEqual(shock[0][1], 109575.28957528957, places=7)
-        self.assertAlmostEqual(rare[0][1], 111573.47204161249, places=7)
+        self.assertEqual(flux, (0.0, 100000.0, 0.0, 0.0))
+        self.assertEqual(waves[1], 0.0)
         wall_flux, wall_waves = audit_hllc((1.2, 35., 100000., .25),
                                            (1.2, -35., 100000., .25), EOS)
-        self.assertAlmostEqual(wall_flux[0], 0.0, places=12)
-        self.assertAlmostEqual(wall_flux[2], 0.0, places=5)
-        self.assertAlmostEqual(wall_waves[1], 0.0, places=12)
+        self.assertEqual(wall_flux[0], 0.0)
+        self.assertAlmostEqual(wall_flux[2], 0.0, places=6)
+        self.assertEqual(wall_waves[1], 0.0)
+        self.assertLess(wall_waves[0], wall_waves[1])
+        self.assertLess(wall_waves[1], wall_waves[2])
+        for left, right in (
+                ((1.0, 20.0, 110000.0, .2), (.9, -10.0, 100000.0, .3)),
+                ((1.0, -20.0, 100000.0, .2), (.9, 10.0, 110000.0, .3))):
+            flux, waves = audit_hllc(left, right, EOS)
+            exact = ExactRiemann(left, right, EOS)
+            self.assertLess(waves[0], waves[1])
+            self.assertLess(waves[1], waves[2])
+            self.assertTrue(all(abs(value) < float("inf") for value in flux))
+            self.assertEqual(flux[0] > 0.0, exact.ustar > 0.0)
 
     def test_b2_synthetic_one_cell_and_variable_area_balance(self):
-        def make_stage(states, geometry, dt=0.1):
-            rows = []
-            for w, area in zip(states, geometry["areas"][:-1]):
-                rows.append(list(area * value for value in EOS.conservative(w)))
-            stage = {"dt": dt, "primitive": [list(w) for w in states],
-                     "conservative": rows,
-                     "chamber_state": [0.0001, 100000.0 * 0.0001 / (EOS.gamma - 1), 0.00002]}
-            stage["external_faces"] = reconstruct_external_faces(states, geometry)
-            stage["external_faces"]["interface"]["left"] = [1.0, 0.0, 100000.0, 0.2]
-            return stage
-
-        one_geo = {"areas": [1.0, 1.0], "faces": [0.0, 1.0], "centers": [0.5]}
-        one = make_stage([(1.0, 0.0, 100000.0, 0.2)], one_geo)
-        one_b = make_stage([(1.0, 0.0, 100000.0, 0.2)], one_geo)
-        one["after"] = {"conservative": one["conservative"]}
-        one_b["after"] = {"conservative": one_b["conservative"]}
-        report = _momentum_audit([(0.1, {"audit_stages": {
-            "stage_a": one, "stage_b": one_b, "after": one}})], one_geo)
-        self.assertAlmostEqual(report["rows"][0]["residual"], 0.0, places=12)
-
         geo = {"areas": [1.0, 2.0, 3.0, 4.0], "faces": [0., 1., 2., 3.],
                "centers": [.5, 1.5, 2.5]}
-        states = [(1.0, 0.0, 100000.0, 0.2)] * 3
-        a = make_stage(states, geo)
-        b = make_stage(states, geo)
-        predicted = _recompute_stage_b(a, geo)["left"] - _recompute_stage_b(a, geo)["right"] + _recompute_stage_b(a, geo)["source"]
-        b["after"] = {"conservative": [list(row) for row in b["conservative"]]}
-        b["after"]["conservative"][0][1] += 0.1 * predicted
+        states = [(1.0, 12.0, 100000.0, 0.2),
+                  (.9, -4.0, 103000.0, 0.3),
+                  (1.1, 8.0, 98000.0, 0.25)]
+        a = _stage(states, geo)
+        b = copy.deepcopy(a)
+        fa = _recompute_stage_b(a, geo)
+        fb = _recompute_stage_b(b, geo)
+        force_a = fa["left"] - fa["right"] + fa["source"]
+        force_b = fb["left"] - fb["right"] + fb["source"]
+        self.assertNotEqual(force_a, 0.0)
+        predicted = 0.5 * a["dt"] * (force_a + force_b)
+        after_rows = copy.deepcopy(a["conservative"])
+        after_rows[0][1] += predicted
         report = _momentum_audit([(0.1, {"audit_stages": {
-            "stage_a": a, "stage_b": b, "after": b}})], geo)
-        self.assertAlmostEqual(report["rows"][0]["residual"], 0.0, places=10)
-        self.assertGreater(report["rows"][0]["recomputed_stage_a"]["source"], 0.0)
+            "stage_a": a, "stage_b": b,
+            "after": {"conservative": after_rows}}})], geo)
+        self.assertAlmostEqual(report["rows"][0]["residual"], 0.0, places=12)
+        delta = 1e-6
+        after_rows[0][1] += delta
+        report = _momentum_audit([(0.1, {"audit_stages": {
+            "stage_a": a, "stage_b": b,
+            "after": {"conservative": after_rows}}})], geo)
+        self.assertAlmostEqual(report["rows"][0]["residual"], delta, places=12)
+        self.assertNotEqual(report["rows"][0]["residual"], 0.0)
 
     def test_b2_ignores_poisoned_product_flux_fields(self):
         geometry = {"areas": [1.0, 1.0], "faces": [0., 1.], "centers": [.5]}
@@ -132,14 +176,14 @@ class P4C3ReturnAuditTests(unittest.TestCase):
         self.assertNotAlmostEqual(audited["right"], 2.0 * last[2], places=6)
 
     def test_momentum_audit_rejects_productive_terms(self):
-        stage = {
-            "dt": 0.1,
-            "primitive": [[1.0, 0.0, 100000.0, 0.2]],
-            "conservative": [[1.0, 0.0, 250000.0, 0.2]],
-            "chamber_state": [0.1, 25000.0, 0.02],
-        }
-        info = {"audit_stages": {"stage_a": stage, "stage_b": stage,
-                                 "after": stage}}
+        geometry = {"areas": [1.0, 1.0], "faces": [0.0, 1.0],
+                    "centers": [0.5]}
+        stage = _stage([(1.0, 0.0, 100000.0, 0.2)], geometry)
+        info = {"audit_stages": {
+            "stage_a": stage,
+            "stage_b": stage,
+            "after": {"conservative": copy.deepcopy(stage["conservative"])}
+        }}
         geometry = {"areas": [1.0, 1.0]}
         # Poisoned names must not be read by the independent auditor.
         info["momentum_face_fluxes"] = {"left": 1e99, "right": -1e99}

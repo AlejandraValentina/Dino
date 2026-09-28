@@ -62,8 +62,9 @@ def reconstruct_external_faces(states, geometry, eos=EOS):
                               2.0 * faces[-1] - centers[-1])
     eos.validate(left_face)
     eos.validate(right_face)
+    wall_right = (right_face[0], -right_face[1], right_face[2], right_face[3])
     return {"interface": {"right": list(left_face)},
-            "wall": {"left": list(right_face), "right": list(right_ghost)}}
+            "wall": {"left": list(right_face), "right": list(wall_right)}}
 
 
 def _b0_audit_stage(stage, geometry):
@@ -172,7 +173,9 @@ def _recompute_stage(stage, geometry):
 def _recompute_stage_b(stage, geometry):
     """Recompute one B2 stage from B0 states and independent B1 HLLC only."""
     b0 = _b0_audit_stage(stage, geometry)
-    faces = b0.get("captured", b0["expected"])
+    if b0["status"] != "PASS":
+        raise ValueError("B0 audit failed; B1/B2 are not evaluated")
+    faces = b0["captured"]
     chamber = _state_from_chamber(stage["chamber_state"])
     interface_right = tuple(faces["interface"]["right"])
     wall_left = tuple(faces["wall"]["left"])
