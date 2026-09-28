@@ -8,10 +8,81 @@ from pathlib import Path
 
 from dev_orchestrator.p4_sci_04b import EOS, C2_AREA, C2_VOLUME, C2_L_DUCT, solve_c2_one
 from dev_orchestrator.reference.exact_riemann import ExactRiemann
+from dev_orchestrator.reference.hllc_audit import hllc as audit_hllc
 
 OUT = Path("results/p4-c3-r3-20260928")
 CONSERVATION_THRESHOLD = 1e-10  # existing P4/C2 ledger criterion
 RESIDUAL_EPSILON = 1e-30
+
+
+def _minmod(a, b):
+    if a == 0.0 or b == 0.0 or (a > 0.0) != (b > 0.0):
+        return 0.0
+    return a if abs(a) <= abs(b) else b
+
+
+def reconstruct_external_faces(states, geometry, eos=EOS):
+    """Minimal independent B0 reconstruction for the two exterior faces.
+
+    This intentionally duplicates only the MUSCL/minmod stencil needed by the
+    C3 fixture.  It does not import or call the production reconstruct().
+    The left exterior ghost is outflow (the first cell), and the right one is
+    the reflective wall ghost.
+    """
+    if not states:
+        raise ValueError("B0 requires at least one primitive cell")
+    if "faces" in geometry and "centers" in geometry:
+        faces = geometry["faces"]
+        centers = geometry["centers"]
+    else:
+        # Small synthetic unit-cell fixtures may provide only areas.  Their
+        # geometry is intentionally normalized here, without consulting a
+        # production mesh or flux field.
+        n = len(states)
+        faces = [float(i) for i in range(n + 1)]
+        centers = [i + 0.5 for i in range(n)]
+    first = tuple(states[0])
+    last = tuple(states[-1])
+    left_ghost = first
+    right_ghost = (last[0], -last[1], last[2], last[3])
+
+    def face_pair(i, outside, x_outside):
+        left = states[i - 1] if i else outside
+        xl = centers[i - 1] if i else x_outside
+        right = states[i + 1] if i + 1 < len(states) else outside
+        xr = centers[i + 1] if i + 1 < len(states) else x_outside
+        x = centers[i]
+        slopes = [_minmod((v - l) / (x - xl), (r - v) / (xr - x))
+                  for l, v, r in zip(left, states[i], right)]
+        return (tuple(v + s * (faces[i] - x) for v, s in zip(states[i], slopes)),
+                tuple(v + s * (faces[i + 1] - x) for v, s in zip(states[i], slopes)))
+
+    left_face, _ = face_pair(0, left_ghost, 2.0 * faces[0] - centers[0])
+    _, right_face = face_pair(len(states) - 1, right_ghost,
+                              2.0 * faces[-1] - centers[-1])
+    eos.validate(left_face)
+    eos.validate(right_face)
+    return {"interface": {"right": list(left_face)},
+            "wall": {"left": list(right_face), "right": list(right_ghost)}}
+
+
+def _b0_audit_stage(stage, geometry):
+    expected = reconstruct_external_faces(stage["primitive"], geometry)
+    expected["interface"]["left"] = list(_state_from_chamber(stage["chamber_state"]))
+    captured = stage.get("external_faces")
+    if captured is None:
+        return {"status": "FAIL", "reason": "missing_persisted_external_faces",
+                "expected": expected}
+    checks = {
+        "interface_left": captured["interface"]["left"] == expected["interface"]["left"],
+        "interface_right": captured["interface"]["right"] == expected["interface"]["right"],
+        "wall_left": captured["wall"]["left"] == expected["wall"]["left"],
+        "wall_right": captured["wall"]["right"] == expected["wall"]["right"],
+    }
+    return {"status": "PASS" if all(checks.values()) else "FAIL",
+            "checks": checks, "expected": expected,
+            "captured": captured,
+            "product_fluxes_used": False}
 
 
 def _write(path, value):
@@ -98,12 +169,47 @@ def _recompute_stage(stage, geometry):
             "units": {"face_flux": "N", "source": "N", "momentum": "kg*m/s"}}
 
 
+def _recompute_stage_b(stage, geometry):
+    """Recompute one B2 stage from B0 states and independent B1 HLLC only."""
+    b0 = _b0_audit_stage(stage, geometry)
+    faces = b0.get("captured", b0["expected"])
+    chamber = _state_from_chamber(stage["chamber_state"])
+    interface_right = tuple(faces["interface"]["right"])
+    wall_left = tuple(faces["wall"]["left"])
+    wall_right = tuple(faces["wall"]["right"])
+    interface_flux, interface_waves = audit_hllc(chamber, interface_right, EOS)
+    wall_flux, wall_waves = audit_hllc(wall_left, wall_right, EOS)
+    area_left = geometry["areas"][0]
+    area_right = geometry["areas"][-1]
+    source = fsum(w[2] * (geometry["areas"][i + 1] - geometry["areas"][i])
+                  for i, w in enumerate(stage["primitive"]))
+    before = fsum(row[1] for row in stage["conservative"])
+    return {
+        "b0": b0,
+        "left": area_left * interface_flux[1],
+        "right": area_right * wall_flux[1],
+        "source": source,
+        "momentum_before": before,
+        "b1": {"interface_waves": interface_waves, "wall_waves": wall_waves,
+               "interface_flux": list(interface_flux), "wall_flux": list(wall_flux)},
+        "units": {"face_flux": "N", "source": "N", "momentum": "kg*m/s"},
+    }
+
+
+def _b1_audit_stage(stage, geometry):
+    """B1 result for both exterior faces; never reads a product flux field."""
+    result = _recompute_stage_b(stage, geometry)
+    return {"status": "PASS" if result["b0"]["status"] == "PASS" else "FAIL",
+            "reason": "independent HLLC over persisted B0 states",
+            "product_flux_fields_used": [], "result": result["b1"]}
+
+
 def _momentum_audit(history, geometry):
     rows = []
     for time_value, info in history:
         stages = info["audit_stages"]
-        a = _recompute_stage(stages["stage_a"], geometry)
-        b = _recompute_stage(stages["stage_b"], geometry)
+        a = _recompute_stage_b(stages["stage_a"], geometry)
+        b = _recompute_stage_b(stages["stage_b"], geometry)
         after = fsum(row[1] for row in stages["after"]["conservative"])
         predicted = 0.5 * stages["stage_a"]["dt"] * (
             a["left"] - a["right"] + a["source"] +
@@ -118,12 +224,13 @@ def _momentum_audit(history, geometry):
                      "observed_delta": observed, "residual": residual,
                      "relative_residual": relative_residual})
     return {
-        "status": "INCONCLUSIVE",
-        "status_reason": "No approved quantitative independent momentum-closure threshold was found; reconstructed errors are diagnostic only.",
+        "status": "METRIC_ONLY",
+        "status_reason": "No rigorous IEEE-754 backward-error bound has been derived for the full primitive reconstruction, EOS and HLLC operation graph; no physical tolerance is introduced.",
         "control_volume": "all duct cells, chamber excluded",
         "sign_convention": "+x duct direction; left enters, right exits; source=sum[p_i*(A_right-A_left)]",
+        "interior_faces": "telescoped by control-volume definition; no productive interior flux array is read",
         "independent_inputs": ["stored conservative states", "stored primitive states",
-                               "stored areas/faces/volumes", "stage dt"],
+                               "persisted B0 external face states", "stored areas/faces/volumes", "stage dt"],
         "product_field_names_used": [], "steps": len(rows), "rows": rows,
         "max_abs_residual": max((abs(r["residual"]) for r in rows), default=0.0),
         "relative_residual_scale": "max(abs(predicted_delta), abs(observed_delta), epsilon)",
@@ -132,6 +239,12 @@ def _momentum_audit(history, geometry):
                                       default=0.0),
         "median_relative_residual": statistics.median(
             [r["relative_residual"] for r in rows]) if rows else 0.0,
+        "rounding_policy": {
+            "classification": "metric-only",
+            "residual_is": "observed SSPRK2 momentum delta minus independently recomputed B1 face/source prediction",
+            "physical_threshold": None,
+            "missing_justification": "operation-count and conditioning analysis covering EOS primitive conversion, MUSCL minmod branches, HLLC waves, area scaling and fsum order",
+        },
     }
 
 

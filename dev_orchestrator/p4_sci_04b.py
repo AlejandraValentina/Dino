@@ -438,7 +438,16 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
         limit, limiting, unit = cfl_step(mesh, ws, speeds, eos, cfl)
         # cfl_step expects speeds length n+1, we have n+1 (1 interface + n-1 interior +1 wall) = n+1 good
         # need to ensure speeds length matches mesh.n+1 (n=100 -> 101 speeds) we have 1+ (n-1)=n +1 wall = n+1 correct
-        return {"dq":dq, "dz":dz, "limit":limit, "unit":unit, "limiting":limiting, "flux_left":flux_left, "outward":outward, "speeds_iface":speeds_iface, "reason":reason_iface, "ws":ws, "chamber_p":p_c}
+        return {"dq":dq, "dz":dz, "limit":limit, "unit":unit, "limiting":limiting,
+                "flux_left":flux_left, "outward":outward,
+                "speeds_iface":speeds_iface, "reason":reason_iface, "ws":ws,
+                "chamber_p":p_c,
+                # Diagnostic inputs only: these are the states actually passed
+                # to the two exterior Riemann evaluations in this operator.
+                "external_faces": {
+                    "interface": {"left": list(left_c), "right": list(right_d)},
+                    "wall": {"left": list(w_last), "right": list(ghost)},
+                }}
     # time loop SSPRK2
     t=0.0; step=0; rejections=0; history=[]
     # initial operator for limit
@@ -521,11 +530,13 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
             "stage_a": {"time": pre_t, "dt": dt,
                         "conservative": [list(row) for row in pre_cells],
                         "primitive": [list(w) for w in op0["ws"]],
-                        "chamber_state": list(pre_z)},
+                        "chamber_state": list(pre_z),
+                        "external_faces": op0["external_faces"]},
             "stage_b": {"time": t, "dt": dt,
                         "conservative": [list(row) for row in cells1],
                         "primitive": [list(w) for w in op1["ws"]],
-                        "chamber_state": list(z1)},
+                        "chamber_state": list(z1),
+                        "external_faces": op1["external_faces"]},
             "after": {"conservative": [list(row) for row in cells_new],
                        "primitive": [list(w) for w in ws_new],
                        "chamber_state": list(z_new)},
