@@ -4,6 +4,7 @@ from dev_orchestrator.p4_c3_return_audit import (
     _momentum_audit, _recompute_stage, _riemann_audit, classify, _physical_flux,
 )
 from dev_orchestrator.p4_sci_04b import C2_AREA, EOS
+from dev_orchestrator.p4_sci_04b import solve_c2_one
 from dev_orchestrator.reference.exact_riemann import ExactRiemann
 
 
@@ -72,6 +73,26 @@ class P4C3ReturnAuditTests(unittest.TestCase):
         flux = _physical_flux((2.0, 3.0, 5.0, 0.25))
         self.assertEqual(flux[0], 6.0)
         self.assertEqual(flux[3], 1.5)
+
+    def test_real_step_captures_stage_a_pre_step_and_primitive_consistently(self):
+        result = solve_c2_one(12, 0.2, 200000.0, 400.0, 0.5,
+                              100000.0, 300.0, 0.2, t_final=1e-5)
+        audited = [(time_value, info) for time_value, info in
+                    result["interface_history"] if "audit_stages" in info]
+        self.assertTrue(audited)
+        _, info = audited[0]
+        stages = info["audit_stages"]
+        self.assertNotEqual(stages["stage_a"]["conservative"],
+                            stages["after"]["conservative"])
+        self.assertNotEqual(stages["stage_a"]["chamber_state"],
+                            stages["after"]["chamber_state"])
+        for row, primitive, volume in zip(
+                stages["stage_a"]["conservative"],
+                stages["stage_a"]["primitive"],
+                result["audit_geometry"]["volumes"]):
+            derived = EOS.primitive(tuple(value / volume for value in row))
+            for actual, expected in zip(primitive, derived):
+                self.assertAlmostEqual(actual, expected, places=12)
 
 
 if __name__ == "__main__":

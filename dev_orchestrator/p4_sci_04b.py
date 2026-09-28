@@ -462,6 +462,12 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
             break
         op0=operator(cells, z, t)
         dt=event_step(op0["limit"], t_final-t)
+        # Freeze the state used by op0 before attempting/committing this step.
+        # stage_a primitives and observed interface fluxes are from op0, so its
+        # conservative and chamber states must remain pre-step as well.
+        pre_cells = tuple(tuple(row) for row in cells)
+        pre_z = tuple(z)
+        pre_t=t
         # SSPRK2 with chamber
         accepted=False
         for attempt in range(13):
@@ -510,10 +516,12 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
         # conservative/primitive states and geometry, then recomputes face
         # terms offline; no operator-produced momentum term is exported.
         audit_stages = {
-            "stage_a": {"time": t-dt, "dt": dt,
-                        "conservative": [list(row) for row in cells],
+            # interface_flux_observed and mass/energy/species fluxes below are
+            # op0/stage_a quantities, all aligned to this pre-step state.
+            "stage_a": {"time": pre_t, "dt": dt,
+                        "conservative": [list(row) for row in pre_cells],
                         "primitive": [list(w) for w in op0["ws"]],
-                        "chamber_state": list(z)},
+                        "chamber_state": list(pre_z)},
             "stage_b": {"time": t, "dt": dt,
                         "conservative": [list(row) for row in cells1],
                         "primitive": [list(w) for w in op1["ws"]],
@@ -533,6 +541,8 @@ def solve_c2_one(N, cfl, p_chamber, T_chamber, Y_chamber, p_duct, T_duct, Y_duct
             "interface_area": C2_AREA,
             "interface_normal": -1.0,
             "interface_flux_observed":list(op0["flux_left"]),
+            "observed_flux_source": "op0/stage_a pre-step",
+            "mass_energy_species_flux_source": "op0/stage_a pre-step",
             "wave_speed_middle":sm,
             "audit_stages": audit_stages,
         }

@@ -532,6 +532,27 @@ Commits previos:84b36b9 deltaR2,4747eb2 fuente previa,a3087ba medición/STOP.
 
 ## P4-C3-R3 — corrección de auditoría supervisada (2026-09-28)
 
+#### Revisión posterior de captura pre/post (HEAD 174b261 invalidado)
+
+- [x] Corregir `stage_a` para conservar `pre_cells`, `pre_z` y `pre_t` antes
+  del commit; mantener `op0/stage_a` para primitiva y flujos observados,
+  `cells1/z1/op1` para `stage_b` y `cells_new/z_new/ws_new` para `after`.
+- [x] Añadir prueba de un paso evolutivo real: `stage_a` difiere de `after`
+  en conservativos y cámara, y `primitive` coincide con
+  `EOS.primitive(conservative/mesh.volumes)`.
+- [x] Regenerar `results/p4-c3-r3-20260928`. Los números de `174b261` quedan
+  invalidados por mezcla de captura pre/post; la física y el solver no cambian.
+- [x] Resultado corregido: retorno `0.0026543865163682658 s`; ExactRiemann
+  `INCONCLUSIVE`, errores relativos
+  `(1.7797458457669132e-07, 3.4548877071827627e-06,
+  6.581792616275487e-04, 8.898729228831856e-08)`, máximo
+  `6.581792616275487e-04`; momento `max_abs_residual =
+  5.840234051652552e-06`, `max_relative_residual =
+  1.9399428518812518`, `median_relative_residual =
+  0.018615083342715104`.
+- [x] C3 permanece `P4_SCI_C3_INCONCLUSIVE`; no se inventó threshold y E13
+  no se ejecutó. P9 permanece `STOPPED`.
+
 - [x] Corregir alineación del Riemann audit: `interface_flux_observed` de
   `op0` se compara con `audit_stages.stage_a`.
 - [x] Reconstruir la pared con ghost físico `(rho,-u,p,Y)` y
@@ -539,16 +560,19 @@ Commits previos:84b36b9 deltaR2,4747eb2 fuente previa,a3087ba medición/STOP.
   HLLC productivo en el auditor.
 - [x] Añadir pruebas focales de alineación, pared exacta para `u != 0` y
   aislamiento frente a `momentum_face_fluxes`/`momentum_source_sum`.
-- [x] Regenerar `results/p4-c3-r3-20260928` desde el fixture único. La primera
-  auditoría fue invalidada por revisión supervisora antes del cierre definitivo;
-  sus números no se conservan como finales.
+- [x] Regenerar `results/p4-c3-r3-20260928` desde el fixture único. La captura de
+  `174b261` quedó invalidada por captura post-step de `stage_a`; se corrigió para
+  conservar la referencia pre-step antes del commit y sus números no se conservan.
 - [x] Resultado regenerado: retorno `PASS` en
-  `0.00265438651636827 s`; Riemann `INCONCLUSIVE`, errores relativos
-  `(2.258600676877695e-07, 4.112451082484666e-07,
-  8.368494691992387e-04, 1.129300338438305e-07)`, máximo
-  `8.36849469199239e-04`; residuo de momento máximo
-  `4.437570053531734e-05`. C3 sigue `INCONCLUSIVE`: no existe threshold
-  aprobado y no se inventó ninguno.
+  `0.0026543865163682658 s`; Riemann `INCONCLUSIVE`, errores relativos
+  `(1.7797458457669132e-07, 3.4548877071827627e-06,
+  6.581792616275487e-04, 8.898729228831856e-08)`, máximo
+  `6.581792616275487e-04`; momento `max_abs_residual =
+  5.840234051652552e-06`, `max_relative_residual = 1.9399428518812518`,
+  `median_relative_residual = 0.018615083342715104`. Conservación `PASS`,
+  residuo máximo `1.3929103469155642e-15`. C3 sigue `INCONCLUSIVE`: no existe
+  threshold aprobado y no se inventó ninguno; las métricas relativas son
+  diagnósticas, no gate.
 
 ### P4_R3_COMPILED_BACKEND_DECISION_REQUIRED
 

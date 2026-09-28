@@ -1,6 +1,7 @@
 """Single-run C3 audit with independent offline momentum reconstruction."""
 import json
 import math
+import statistics
 import time
 from math import fsum
 from pathlib import Path
@@ -10,6 +11,7 @@ from dev_orchestrator.reference.exact_riemann import ExactRiemann
 
 OUT = Path("results/p4-c3-r3-20260928")
 CONSERVATION_THRESHOLD = 1e-10  # existing P4/C2 ledger criterion
+RESIDUAL_EPSILON = 1e-30
 
 
 def _write(path, value):
@@ -68,6 +70,7 @@ def _riemann_audit(info):
         "flux_expected_area_integrated": expected,
         "flux_observed_area_integrated": observed,
         "relative_error": _relative_error(observed, expected),
+        "capture_contract": "stage_a conservative/chamber/time and primitive/observed flux all pre-step op0",
     }
 
 
@@ -103,10 +106,14 @@ def _momentum_audit(history, geometry):
             a["left"] - a["right"] + a["source"] +
             b["left"] - b["right"] + b["source"])
         observed = after - a["momentum_before"]
+        residual = observed - predicted
+        relative_residual = abs(residual) / max(abs(predicted), abs(observed),
+                                               RESIDUAL_EPSILON)
         rows.append({"time": time_value, "dt": stages["stage_a"]["dt"],
                      "recomputed_stage_a": a, "recomputed_stage_b": b,
                      "momentum_after": after, "predicted_delta": predicted,
-                     "observed_delta": observed, "residual": observed - predicted})
+                     "observed_delta": observed, "residual": residual,
+                     "relative_residual": relative_residual})
     return {
         "status": "INCONCLUSIVE",
         "status_reason": "No approved quantitative independent momentum-closure threshold was found; reconstructed errors are diagnostic only.",
@@ -116,6 +123,12 @@ def _momentum_audit(history, geometry):
                                "stored areas/faces/volumes", "stage dt"],
         "product_field_names_used": [], "steps": len(rows), "rows": rows,
         "max_abs_residual": max((abs(r["residual"]) for r in rows), default=0.0),
+        "relative_residual_scale": "max(abs(predicted_delta), abs(observed_delta), epsilon)",
+        "relative_residual_epsilon": RESIDUAL_EPSILON,
+        "max_relative_residual": max((r["relative_residual"] for r in rows),
+                                      default=0.0),
+        "median_relative_residual": statistics.median(
+            [r["relative_residual"] for r in rows]) if rows else 0.0,
     }
 
 
@@ -146,10 +159,18 @@ def main():
     conservation_ok = result["max_global_resid"] <= CONSERVATION_THRESHOLD
     admissibility_ok = result["status"] == "completed"
     classification = classify(return_ok, conservation_ok, admissibility_ok, riemann, momentum)
+    capture_contract = {
+        "stage_a": "pre-step cells/z/t copied before commit; primitive and observed flux from op0",
+        "stage_b": "cells1/z1/op1 primitive",
+        "after": "cells_new/z_new/ws_new",
+        "invalidated_revision": "174b261",
+        "invalidated_reason": "stage_a conservative/chamber captured post-step while primitive/flux were pre-step",
+    }
     _write(OUT / "configuration.json", {"N": 100, "CFL": 0.2, "t_final": 0.004,
         "area": C2_AREA, "duct_length": C2_L_DUCT, "backend": "existing C2 fixture",
         "acquisition": "single focal run", "expected_return": expected_time,
-        "return_window": window, "conservation_threshold": CONSERVATION_THRESHOLD})
+        "return_window": window, "conservation_threshold": CONSERVATION_THRESHOLD,
+        "capture_contract": capture_contract})
     _write(OUT / "return_snapshot.json", {"status": "PASS" if return_ok else "FAIL",
         "time": selected_time, "interface": selected_info,
         "selection": "first admissible sample in window with positive mass flux"})
@@ -163,7 +184,10 @@ def main():
         "conservation": "PASS" if conservation_ok else "FAIL",
         "admissibility": "PASS" if admissibility_ok else "FAIL",
         "exact_riemann": riemann["status"], "momentum_balance": momentum["status"],
-        "single_run": True, "wall_seconds": time.perf_counter() - started})
+        "single_run": True, "wall_seconds": time.perf_counter() - started,
+        "capture_contract": capture_contract,
+        "e13": "NOT_EXECUTED_C3_NOT_PASS",
+        "p9": "STOPPED"})
 
 
 if __name__ == "__main__":
