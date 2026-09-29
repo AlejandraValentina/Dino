@@ -776,3 +776,9 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [x] C3-R5 formalizado como `P4_SCI_C3_PASS` con una única adquisición y recibo `results/p4-c3-r5-20260928/c3-closure-receipt.json`. La revisión independiente conectada sigue pendiente; la autorrevisión no se presenta como independiente.
 - [x] Auditoría R6/R7/R10/R10A/R11/R12/R13/R13A y OpenSpec: `E13_CONTRACT_ALREADY_SUPPORTS_PERIOD2`; G2 histórico 1–30 permanece `P4_G2_MAX30_WITHOUT_E13_CONVERGENCE` (rama B sin cierre). P4 sigue BLOCKED/NOT_GRANTED; no se ejecutaron campañas nuevas, P5 ni P9.
 - [x] Detalle: `docs/gasdynamic/p4_e13_g2_contract_audit_20260928.md`.
+
+## Auditoría causal G2 — 2026-09-29
+- [x] Se revisaron continuidad, emparejamiento lag-2, identidad de ramas, conservación, admisibilidad, CFL, backend, malla y checkpoints; no se identificó defecto técnico reproducible.
+- [x] Rama A cerró (streak 5); rama B falló 14/14 comparaciones y terminó en `sensor_max=0.0290580`; resultado contractual `E13_G2_FAIL` bajo `max_cycles=30`.
+- [ ] Decisión humana si se desea cambiar el horizonte contractual; no se ejecutaron ciclos 31+, no se cambiaron thresholds ni física.
+- [x] Auditoría detallada: `docs/gasdynamic/p4_g2_root_cause_audit_20260929.md`.
