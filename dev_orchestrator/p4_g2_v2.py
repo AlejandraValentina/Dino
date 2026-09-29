@@ -45,9 +45,9 @@ def compact(row, cycle, branch, lag1, lag2, detector, elapsed):
     return {
         "cycle": cycle, "branch": branch,
         "begin": row["begin"], "end": row["end"],
-        "lag1_status": lag1.get("status"), "lag1_passed": bool(lag1.get("passed")),
+        "lag1_status": "PASS" if lag1.get("passed") else "FAIL", "lag1_passed": bool(lag1.get("passed")),
         "lag1_sensor_max": lag1.get("sensor_max"),
-        "lag2_status": lag2.get("status"), "lag2_passed": bool(lag2.get("passed")),
+        "lag2_status": "PASS" if lag2.get("passed") else "FAIL", "lag2_passed": bool(lag2.get("passed")),
         "lag2_sensor_max": lag2.get("sensor_max"),
         "lag2_work": lag2.get("work"), "lag2_cylinder": lag2.get("cylinder"),
         "lag2_port": lag2.get("port"), "lag2_inventories": lag2.get("inventories"),
@@ -57,7 +57,7 @@ def compact(row, cycle, branch, lag1, lag2, detector, elapsed):
         "detected_period": detector.detected_period,
         "conservation": row.get("checks", {}).get("conservation"),
         "admissibility": row.get("checks", {}).get("positive"),
-        "cfl": row.get("checks", {}).get("cfl"),
+        "cfl": row.get("checks", {}).get("CFL"),
         "cycle_wall_seconds": row.get("cycle_wall_seconds"),
         "elapsed_seconds": elapsed,
     }
