@@ -16,6 +16,7 @@ from pathlib import Path
 
 SCHEMA = "G2_V2_DURABLE_V1"
 DETECTOR_SCHEMA = "E13_R1_DETECTOR_V1"
+CONSERVATION_LEDGER_SCHEMA = "G2_CONSERVATION_LEDGER_V1"
 EXPECTED_THRESHOLDS = {"work": .005, "cylinder": .005, "sensor_max": .005,
                        "port": .002, "inventories": .002}
 EXPECTED_MAX_CYCLES = 400
@@ -169,7 +170,195 @@ def compare(a: dict | None, b: dict) -> dict:
     return metrics
 
 
-def gates(inputs: dict) -> dict:
+def same_number(a, b, label: str) -> None:
+    require(type(a) in (int, float) and type(b) in (int, float)
+            and math.isfinite(a) and math.isfinite(b)
+            and math.isclose(a, b, rel_tol=2e-12, abs_tol=2e-14),
+            f"CONSERVATION_DIAGNOSTIC_MISMATCH_{label}")
+
+
+def same_vector(a, b, label: str) -> None:
+    require(type(a) is list and type(b) is list and len(a) == len(b),
+            f"MALFORMED_{label}")
+    for value in a+b:
+        number(value, label)
+    for left, right in zip(a, b):
+        same_number(left, right, label)
+
+
+def terminal_inventory(state, cells) -> list[float]:
+    numeric_list(state, 9, "LEDGER_TERMINAL_STATE")
+    require(type(cells) is list and bool(cells), "MALFORMED_LEDGER_TERMINAL_CELLS")
+    for cell in cells:
+        numeric_list(cell, 4, "LEDGER_TERMINAL_CELL")
+    pipe = [math.fsum(cell[j] for cell in cells) for j in (0, 2, 3)]
+    return [math.fsum(state[k::3]) + pipe[i] for i, k in enumerate((0, 1, 2))]
+
+
+def recompute_conservation(inputs: dict, previous_inputs: dict | None = None) -> dict:
+    """Recompute cycle and SSPRK balances from persisted primary ledger terms."""
+    ledger = inputs["conservation_ledger"]
+    require(type(ledger) is dict and ledger.get("schema") == CONSERVATION_LEDGER_SCHEMA,
+            "MALFORMED_CONSERVATION_LEDGER")
+    require(all(k in ledger for k in ("control_volume", "identity", "components",
+            "cycle_interval_deg", "initial_inventory", "final_inventory",
+            "external_exchange", "global_balance",
+            "analytical_burn_species_correction", "segments")),
+            "MISSING_CONSERVATION_TERM")
+    require(ledger.get("control_volume") == inputs["identity"]["geometry"]
+            and ledger.get("identity") == inputs["identity"],
+            "CONSERVATION_CONTROL_VOLUME_MISMATCH")
+    require(ledger.get("components") ==
+            ["mass_kg", "energy_J", "fresh_species_mass_kg"],
+            "CONSERVATION_COMPONENT_MISMATCH")
+    _interval = ledger["cycle_interval_deg"]
+    numeric_list(_interval, 2, "CONSERVATION_CYCLE_INTERVAL")
+    require(_interval == [inputs["begin"], inputs["end"]],
+            "CONSERVATION_CYCLE_INTERVAL_MISMATCH")
+    diagnostics = inputs["gate_inputs"]["segments"]
+    segments = ledger["segments"]
+    require(type(segments) is list and len(segments) == len(diagnostics) == 3,
+            "MISSING_CONSERVATION_SEGMENTS")
+
+    cycle_initial = None
+    prior_segment_final = None
+    expected_start = inputs["begin"]
+    external_total = [0., 0., 0.]
+    all_physical = []
+    max_stage_residual = 0.
+    max_global_residual = 0.
+    for index, segment in enumerate(segments):
+        require(type(segment) is dict, "MALFORMED_CONSERVATION_SEGMENT")
+        require(all(k in segment for k in ("interval_deg", "initial_inventory",
+                "final_inventory", "external_exchange_raw",
+                "analytical_burn_species_correction", "steps",
+                "solver_max_stage_residual", "solver_max_global_residual")),
+                "MISSING_CONSERVATION_TERM")
+        interval = segment["interval_deg"]
+        numeric_list(interval, 2, "CONSERVATION_SEGMENT_INTERVAL")
+        require(interval[0] == expected_start and interval[1] > interval[0],
+                "CONSERVATION_SEGMENT_INTERVAL_GAP")
+        expected_start = interval[1]
+        initial = segment["initial_inventory"]
+        final = segment["final_inventory"]
+        ext_raw = segment["external_exchange_raw"]
+        numeric_list(initial, 3, "CONSERVATION_INITIAL_INVENTORY")
+        numeric_list(final, 3, "CONSERVATION_FINAL_INVENTORY")
+        numeric_list(ext_raw, 3, "CONSERVATION_EXTERNAL_EXCHANGE")
+        correction = segment["analytical_burn_species_correction"]
+        numeric_list(correction, 3, "CONSERVATION_SOURCE_CORRECTION")
+        if cycle_initial is None:
+            cycle_initial = initial
+            same_vector(ledger["initial_inventory"], initial,
+                        "CYCLE_INITIAL_INVENTORY")
+            if previous_inputs is not None:
+                same_vector(initial,
+                            terminal_inventory(previous_inputs["state"],
+                                               previous_inputs["cells"]),
+                            "CYCLE_CONTINUATION_INVENTORY")
+        if prior_segment_final is not None:
+            same_vector(initial, prior_segment_final,
+                        "SEGMENT_CONTINUITY_INVENTORY")
+        steps = segment["steps"]
+        require(type(steps) is list and bool(steps), "MISSING_CONSERVATION_STEPS")
+        scales = (initial[0], initial[1], initial[0])
+        require(all(type(v) in (int, float) and math.isfinite(v) and v > 0
+                    for v in scales), "MALFORMED_CONSERVATION_SCALES")
+        cumulative_external = [0., 0., 0.]
+        prior_time = None
+        local_stage_max = 0.
+        local_global_max = 0.
+        for step in steps:
+            require(type(step) is dict, "MALFORMED_CONSERVATION_STEP")
+            require(all(k in step for k in ("dt", "time_start", "time_end",
+                    "inventory_start", "inventory_stage1", "inventory_stage2",
+                    "inventory_accepted", "external_rate_stage_a",
+                    "external_rate_stage_b", "cumulative_external",
+                    "stage_residuals", "global_residual")),
+                    "MISSING_CONSERVATION_TERM")
+            dt = number(step["dt"], "CONSERVATION_DT", positive=True)
+            t0 = number(step["time_start"], "CONSERVATION_TIME")
+            t1 = number(step["time_end"], "CONSERVATION_TIME")
+            require(math.isclose(t1-t0, dt, rel_tol=2e-12, abs_tol=2e-14),
+                    "CONSERVATION_TIME_STEP_MISMATCH")
+            require(prior_time is None or math.isclose(t0, prior_time,
+                    rel_tol=0., abs_tol=2e-14), "CONSERVATION_TIME_GAP")
+            prior_time = t1
+            inv0, inv1, inv2 = (step[k] for k in
+                                ("inventory_start", "inventory_stage1", "inventory_stage2"))
+            for inv in (inv0, inv1, inv2):
+                numeric_list(inv, 3, "CONSERVATION_STAGE_INVENTORY")
+            ext_a = step["external_rate_stage_a"]
+            ext_b = step["external_rate_stage_b"]
+            numeric_list(ext_a, 3, "CONSERVATION_STAGE_EXTERNAL")
+            numeric_list(ext_b, 3, "CONSERVATION_STAGE_EXTERNAL")
+            stage_a = max(abs(b-a-dt*e)/scale
+                          for a, b, e, scale in zip(inv0, inv1, ext_a, scales))
+            stage_b = max(abs(b-a-dt*e)/scale
+                          for a, b, e, scale in zip(inv1, inv2, ext_b, scales))
+            local_stage_max = max(local_stage_max, stage_a, stage_b)
+            for k in range(3):
+                cumulative_external[k] += dt*.5*(ext_a[k]+ext_b[k])
+            accepted = [0.5*a+0.5*b for a, b in zip(inv0, inv2)]
+            same_vector(step["inventory_accepted"], accepted,
+                        "CONSERVATION_ACCEPTED_INVENTORY")
+            global_residual = [(accepted[k]-initial[k]-cumulative_external[k])/scales[k]
+                               for k in range(3)]
+            local_global_max = max(local_global_max, *(abs(v) for v in global_residual))
+            same_vector(step["cumulative_external"], cumulative_external,
+                        "CONSERVATION_CUMULATIVE_EXTERNAL")
+            same_vector(step["stage_residuals"], [stage_a, stage_b],
+                        "CONSERVATION_STAGE_RESIDUAL")
+            same_vector(step["global_residual"], global_residual,
+                        "CONSERVATION_GLOBAL_RESIDUAL")
+        same_vector(steps[0]["inventory_start"], initial,
+                    "SEGMENT_INITIAL_INVENTORY")
+        same_vector(steps[-1]["inventory_accepted"], final,
+                    "SEGMENT_FINAL_INVENTORY")
+        same_vector(cumulative_external, ext_raw,
+                    "SEGMENT_EXTERNAL_EXCHANGE")
+        same_number(segment["solver_max_stage_residual"], local_stage_max,
+                    "SEGMENT_STAGE_RESIDUAL")
+        same_number(segment["solver_max_global_residual"], local_global_max,
+                    "SEGMENT_GLOBAL_RESIDUAL")
+        same_number(diagnostics[index]["max_stage_residual"], local_stage_max,
+                    "GATE_STAGE_RESIDUAL")
+        same_number(diagnostics[index]["max_global_residual"], local_global_max,
+                    "GATE_GLOBAL_RESIDUAL")
+        max_stage_residual = max(max_stage_residual, local_stage_max)
+        max_global_residual = max(max_global_residual, local_global_max)
+        physical = [((final[k]-correction[k])-initial[k]
+                     -(ext_raw[k]-correction[k]))/scales[k] for k in range(3)]
+        same_vector(diagnostics[index]["physical_balance"], physical,
+                    "CONSERVATION_PHYSICAL_BALANCE")
+        all_physical.append(physical)
+        for k in range(3):
+            external_total[k] += ext_raw[k]-correction[k]
+        prior_segment_final = [final[k]-correction[k] for k in range(3)]
+
+    require(expected_start == inputs["end"], "CONSERVATION_CYCLE_INTERVAL_INCOMPLETE")
+    terminal = terminal_inventory(inputs["state"], inputs["cells"])
+    same_vector(ledger["final_inventory"], terminal, "CYCLE_FINAL_INVENTORY")
+    same_vector(terminal, prior_segment_final, "CYCLE_TERMINAL_INVENTORY")
+    same_vector(ledger["external_exchange"], external_total,
+                "CYCLE_EXTERNAL_EXCHANGE")
+    correction_total = [0., 0., math.fsum(
+        s["analytical_burn_species_correction"][2] for s in segments)]
+    same_vector(ledger["analytical_burn_species_correction"], correction_total,
+                "CYCLE_SOURCE_CORRECTION")
+    scales = (cycle_initial[0], cycle_initial[1], cycle_initial[0])
+    global_balance = [(terminal[k]-cycle_initial[k]-external_total[k])/scales[k]
+                      for k in range(3)]
+    same_vector(ledger["global_balance"], global_balance,
+                "LEDGER_GLOBAL_BALANCE")
+    same_vector(inputs["gate_inputs"]["global_balance"], global_balance,
+                "CYCLE_GLOBAL_BALANCE")
+    return {"global_balance": global_balance, "physical_balances": all_physical,
+            "max_global_residual": max_global_residual,
+            "max_stage_residual": max_stage_residual}
+
+
+def gates(inputs: dict, previous_inputs: dict | None = None) -> dict:
     raw = inputs["gate_inputs"]
     require(type(raw) is dict and type(raw["complete"]) is bool,
             "MALFORMED_GATE_INPUTS")
@@ -193,18 +382,27 @@ def gates(inputs: dict) -> dict:
                 number(limit, "CFL_LIMIT", positive=True)
     complete = raw["complete"] is True
     balance = raw["global_balance"]
-    conservation = (isinstance(balance, list) and len(balance) == 3
-                    and max(abs(v) for v in balance) <= CONSERVATION_LIMIT
-                    and all(max(abs(v) for v in s["physical_balance"]) <= CONSERVATION_LIMIT
-                            and s["max_global_residual"] <= CONSERVATION_LIMIT
-                            and s["max_stage_residual"] <= CONSERVATION_LIMIT
-                            for s in segments))
+    if "conservation_ledger" in inputs:
+        conservation = recompute_conservation(inputs, previous_inputs)
+        conservation_pass = (max(abs(v) for v in conservation["global_balance"])
+                             <= CONSERVATION_LIMIT
+                             and all(max(abs(v) for v in values) <= CONSERVATION_LIMIT
+                                     for values in conservation["physical_balances"])
+                             and conservation["max_global_residual"] <= CONSERVATION_LIMIT
+                             and conservation["max_stage_residual"] <= CONSERVATION_LIMIT)
+    else:
+        require(inputs.get("cycle", 0) <= 30, "MISSING_CONSERVATION_LEDGER")
+        conservation_pass = (max(abs(v) for v in balance) <= CONSERVATION_LIMIT
+                             and all(max(abs(v) for v in s["physical_balance"]) <= CONSERVATION_LIMIT
+                                     and s["max_global_residual"] <= CONSERVATION_LIMIT
+                                     and s["max_stage_residual"] <= CONSERVATION_LIMIT
+                                     for s in segments))
     positive = all(min(s["extrema"][k] for k in ("rho", "p", "T")) > 0
                    and s["extrema"]["Y_min"] >= 0
                    and s["extrema"]["Y_max"] <= 1 for s in segments)
     cfl = all(stage["dt"] <= min(stage["limits"])
               for segment in segments for stage in segment["stages"])
-    return {"complete": complete, "conservation": conservation,
+    return {"complete": complete, "conservation": conservation_pass,
             "positive": positive, "CFL": cfl}
 
 
@@ -252,6 +450,8 @@ def read_checkpoint(root: Path, cycle: int, parent_sha: str | None, identity: di
     row = payload["inputs"]
     required = ("state", "cells", "history", "work_indicated_J", "port_integral",
                 "initial_cylinder_mass", "gate_inputs", "cycle", "begin", "end", "identity")
+    if cycle >= 31:
+        required += ("conservation_ledger",)
     require(all(key in row for key in required), "MISSING_CONTRACT_INPUT")
     validate_identity(row["identity"])
     validate_metric_inputs(row, identity["mesh"])
@@ -323,7 +523,7 @@ def audit(root: Path) -> dict:
             else:
                 require(payload["source_sha256"] is None, "NEW_CYCLE_HAS_HISTORICAL_SOURCE")
             row = payload["inputs"]
-            gate = gates(row)
+            gate = gates(row, prior if cycle >= 31 else None)
             claims = payload["claims"]
             require(type(claims) is dict and type(claims["checks"]) is dict,
                     "MALFORMED_CLAIMS")

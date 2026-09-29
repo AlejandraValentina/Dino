@@ -13,7 +13,7 @@ class CachedMesh:
         self.areas=mesh.areas;self.volumes=mesh.volumes;self.widths=mesh.widths
         self.as_dict=mesh.as_dict
 
-def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensors=(),wall_limit=600.,numeric_backend=None):
+def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensors=(),wall_limit=600.,numeric_backend=None,capture_conservation=False):
     kernel_class=Kernel;primitive_fn=batch_primitive;hllc_fn=batch_hllc
     if numeric_backend is not None:
         kernel_class=numeric_backend.Kernel;primitive_fn=numeric_backend.primitive;hllc_fn=numeric_backend.hllc
@@ -148,7 +148,7 @@ def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensor
                     pressure=ch.thermodynamics(eos)[1],pipe_face=left[0].tolist(),exchange=port['exchange'],
                     outlet=boundary_state,open_reaction=port['open_reaction'],closed_reaction=port['closed_reaction']))
     def advance(cells,state,op,dt):return cells+dt*op['dq'],[a+dt*b for a,b in zip(state,op['dz'])]
-    history=[];stages=[];snapshots=[];external=[0.]*3;port_integral=[0.]*3;rejections={};hit_events=[]
+    history=[];stages=[];snapshots=[];conservation_history=[];external=[0.]*3;port_integral=[0.]*3;rejections={};hit_events=[]
     def extremes(rows):
         return dict(rho=float(np.min(rows[:,0])),p=float(np.min(rows[:,2])),T=float(np.min(rows[:,2]/(rows[:,0]*eos.R))),
             Y_min=float(np.min(rows[:,3])),Y_max=float(np.max(rows[:,3])))
@@ -174,8 +174,11 @@ def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensor
                     counts['rejected']+=1;key=str(exc);rejections[key]=rejections.get(key,0)+1
                     if retry==12:raise InvalidState('joint_retries_exhausted: '+key)
                     dt*=.5
-            for qa,za,qb,zb,op in ((q,z,q1,z1,op0),(q1,z1,q2,z2,op1)):
-                residue=max(abs(b-a-dt*e)/s for a,b,e,s in zip(inventory(qa,za),inventory(qb,zb),op['external'],scale))
+            inv0=inventory(q,z);inv1=inventory(q1,z1);inv2=inventory(q2,z2)
+            stage_residues=[]
+            for a,b,op in ((inv0,inv1,op0),(inv1,inv2,op1)):
+                residue=max(abs(bv-av-dt*ev)/sv for av,bv,ev,sv in zip(a,b,op['external'],scale))
+                stage_residues.append(residue)
                 max_stage_residual=max(max_stage_residual,residue);max_CFL=max(max_CFL,dt/op['unit'])
             observe(q1,z1,t+dt);observe(q2,z2,t+2*dt);w=observe(qnew,znew,t+dt)
         except (ValueError,OverflowError,ZeroDivisionError) as exc:status='failed_numerical';reason=str(exc);break
@@ -186,6 +189,17 @@ def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensor
         if t>=target:
             t=target;hit_events.append(t);event_index+=1
         inv=inventory(q,z);res=[(a-b-e)/s for a,b,e,s in zip(inv,initial_inventory,external,scale)];max_global_residual=max(max_global_residual,max(map(abs,res)))
+        if capture_conservation:
+            # Durable primary terms for an independent finite-volume balance audit.
+            # These diagnostics do not participate in the numerical update.
+            conservation_history.append(dict(
+                time_start=t-dt, time_end=t, dt=dt,
+                inventory_start=inv0, inventory_stage1=inv1, inventory_stage2=inv2,
+                inventory_accepted=inv,
+                external_rate_stage_a=list(op0['external']),
+                external_rate_stage_b=list(op1['external']),
+                cumulative_external=external.copy(),
+                stage_residuals=stage_residues, global_residual=res))
         ch=system.chamber(z,t);rho,p,T,Y=ch.thermodynamics(eos)
         history.append(dict(time=t,angle=system.angle(t),dt=dt,chamber=z.copy(),cylinder=(p,T,ch.mass,Y),area=system.area(t),
             sensors=[(w[i][2],w[i][1],w[i][1]/eos.sound_speed(w[i]),w[i][3]) for i in sensor_indices],
@@ -195,9 +209,12 @@ def solve_exhaust(mesh,initial,system,end,*,eos=None,cfl=.4,exterior=None,sensor
         stages.append(dict(dt=dt,limits=[op0['limit'],op1['limit']],traces=[op0['trace'],op1['trace']]))
         if t>=next_snapshot:
             snapshots.append(dict(time=t,angle=system.angle(t),primitive=w.tolist()));next_snapshot+=end/8
-    return dict(status=status,reason=reason,time=t,wall_seconds=time.monotonic()-start,cells=q.tolist(),state=z,primitive=primitive(q).tolist(),
+    result=dict(status=status,reason=reason,time=t,wall_seconds=time.monotonic()-start,cells=q.tolist(),state=z,primitive=primitive(q).tolist(),
         initial_inventory=initial_inventory,final_inventory=inventory(q,z),external=external,port_integral=port_integral,
         max_global_residual=max_global_residual,max_stage_residual=max_stage_residual,max_CFL=max_CFL,extrema=extrema,
         counts=counts,rejections=rejections,events=events,hit_events=hit_events,history=history,stages=stages,snapshots=snapshots,
         sensor_positions=[mesh.centers[i] for i in sensor_indices],mesh=mesh.as_dict(),
         batch_observability=dict(HLLE_faces=fallback_faces,MUSCL_downgrade_cells=downgrade_cells))
+    if capture_conservation:
+        result["conservation_history"] = conservation_history
+    return result

@@ -18,12 +18,13 @@ from dev_orchestrator.p4_hybrid import checks, prepare
 from motorsim.hybrid_fast import run_cycle
 from motorsim.periodicity import PeriodicityDetector, compare_cycles
 
-ROOT = Path("results/p4-g2-v2-reaudit-20260929-r2")
+ROOT = Path("results/p4-g2-v2-ledger-recovery-20260929-retry")
 HIST = Path("results/p4-g2-periodic-completion-20260923")
 EARLY = Path("results/p4-r6-20260921/artifacts/g2_cycles")
 MAX_CYCLES = 400
 SCHEMA = "G2_V2_DURABLE_V1"
 DETECTOR_SCHEMA = "E13_R1_DETECTOR_V1"
+CONSERVATION_LEDGER_SCHEMA = "G2_CONSERVATION_LEDGER_V1"
 RUNTIME_SOURCES = (
     "motorsim/hybrid_fast.py", "motorsim/exhaust_numba_fused.py",
     "motorsim/periodicity.py", "dev_orchestrator/p4_hybrid.py",
@@ -96,9 +97,41 @@ def gate_inputs(row: dict) -> dict:
     })
 
 
-def audit_inputs(row: dict) -> dict:
-    """All raw inputs needed for E13 metrics and conservation/positive/CFL gates."""
+def conservation_ledger(row: dict) -> dict | None:
+    """Extract raw inventories and face/source exchanges captured by the solver."""
+    segments = row.get("segments", [])
+    if not segments or any("conservation_history" not in s["result"]
+                           or not s["result"]["conservation_history"]
+                           for s in segments):
+        return None
     return native({
+        "schema": CONSERVATION_LEDGER_SCHEMA,
+        "control_volume": EXPECTED["geometry"],
+        "topology_path": row["path"],
+        "identity": EXPECTED,
+        "cycle_interval_deg": [row["begin"], row["end"]],
+        "components": ["mass_kg", "energy_J", "fresh_species_mass_kg"],
+        "initial_inventory": row["initial_inventory"],
+        "final_inventory": row["final_inventory"],
+        "external_exchange": row["external"],
+        "global_balance": row["global_balance"],
+        "analytical_burn_species_correction": [0., 0., row["analytical_burn"]],
+        "segments": [{
+            "interval_deg": [s["start_angle"], s["end_angle"]],
+            "initial_inventory": s["result"]["initial_inventory"],
+            "final_inventory": s["result"]["final_inventory"],
+            "external_exchange_raw": s["result"]["external"],
+            "analytical_burn_species_correction": [0., 0., s["analytical_burn"]],
+            "solver_max_stage_residual": s["result"]["max_stage_residual"],
+            "solver_max_global_residual": s["result"]["max_global_residual"],
+            "steps": s["result"]["conservation_history"],
+        } for s in segments],
+    })
+
+
+def audit_inputs(row: dict) -> dict:
+    """Persist E13 inputs and, for captured acquisitions, the primary ledger."""
+    inputs = native({
         "cycle": row["cycle"], "begin": row["begin"], "end": row["end"],
         "identity": EXPECTED, "state": row["state"], "cells": row["cells"],
         "work_indicated_J": row["work_indicated_J"],
@@ -109,6 +142,10 @@ def audit_inputs(row: dict) -> dict:
                     for h in row["history"]],
         "gate_inputs": gate_inputs(row),
     })
+    ledger = conservation_ledger(row)
+    if ledger is not None:
+        inputs["conservation_ledger"] = ledger
+    return inputs
 
 
 def metric_row(inputs: dict) -> dict:
@@ -262,7 +299,7 @@ def run(root: Path = ROOT) -> dict:
         cycle += 1
         _, mesh, _, _ = prepare("chain")
         row = run_cycle(mesh, previous["cells"], previous["state"], previous["end"],
-                        backend="NUMBA_FUSED", cfl=.4)
+                        backend="NUMBA_FUSED", cfl=.4, capture_conservation=True)
         row.update(cycle=cycle, **EXPECTED,
                    initial_cylinder_mass=previous["state"][6])
         row["checks"] = native(checks(row))

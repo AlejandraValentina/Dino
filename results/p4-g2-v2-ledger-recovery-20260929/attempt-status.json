@@ -1,0 +1,9 @@
+{
+  "status": "INCOMPLETE_CAPTURE_ATTEMPT_NOT_VALID_EVIDENCE",
+  "contract": "G2-v2",
+  "cycles_created": "1-42",
+  "new_cycles_completed": "31-42",
+  "reason": "The first ledger serializer omitted the stored global_balance diagnostic required for the offline recomputation consistency gate.",
+  "used_for_decision": false,
+  "superseded_by": "results/p4-g2-v2-ledger-recovery-20260929-retry/"
+}

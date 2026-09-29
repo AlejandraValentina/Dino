@@ -17,6 +17,7 @@ from dev_orchestrator.p4_g2_v2_recovery import (
 )
 from dev_orchestrator.p4_g2_v2_offline_audit import (
     EvidenceError, audit, check_claim, compare, gates, read_checkpoint,
+    recompute_conservation, terminal_inventory,
     validate_detector_snapshot, validate_metric_inputs,
 )
 from motorsim.periodicity import PeriodicityDetector, compare_cycles
@@ -36,6 +37,35 @@ def _inputs(cycle: int, sensor_pressure: float = 1.) -> dict:
         ],
         "gate_inputs": {},
     }
+
+
+def _synthetic_ledger(inputs):
+    inventory = terminal_inventory(inputs["state"], inputs["cells"])
+    begin, end = inputs["begin"], inputs["end"]
+    segments = []
+    for i in range(3):
+        a = begin+(end-begin)*i/3
+        b = begin+(end-begin)*(i+1)/3
+        step = {"time_start": 0., "time_end": 1., "dt": 1.,
+                "inventory_start": inventory, "inventory_stage1": inventory,
+                "inventory_stage2": inventory, "inventory_accepted": inventory,
+                "external_rate_stage_a": [0., 0., 0.],
+                "external_rate_stage_b": [0., 0., 0.],
+                "cumulative_external": [0., 0., 0.],
+                "stage_residuals": [0., 0.], "global_residual": [0., 0., 0.]}
+        segments.append({"interval_deg": [a, b], "initial_inventory": inventory,
+                         "final_inventory": inventory,
+                         "external_exchange_raw": [0., 0., 0.],
+                         "analytical_burn_species_correction": [0., 0., 0.],
+                         "solver_max_stage_residual": 0.,
+                         "solver_max_global_residual": 0., "steps": [step]})
+    return {"schema": "G2_CONSERVATION_LEDGER_V1", "control_volume": "chain",
+            "identity": EXPECTED, "cycle_interval_deg": [begin, end],
+            "components": ["mass_kg", "energy_J", "fresh_species_mass_kg"],
+            "initial_inventory": inventory, "final_inventory": inventory,
+            "external_exchange": [0., 0., 0.], "global_balance": [0., 0., 0.],
+            "analytical_burn_species_correction": [0., 0., 0.],
+            "segments": segments}
 
 
 def _gates(cfl=True):
@@ -277,6 +307,7 @@ def _synthetic_durable_campaign(root: Path):
                    "stages": [{"dt": .1, "limits": [.2]}]}
         row["gate_inputs"] = {"complete": True, "global_balance": [0., 0., 0.],
                               "segments": [copy.deepcopy(segment) for _ in range(3)]}
+        row["conservation_ledger"] = _synthetic_ledger(row)
         lag1 = (compare_cycles(metric_row(before), metric_row(row)) if before else
                 {"status": "INVALID", "reason": "MISSING_PREVIOUS_CYCLE", "passed": False})
         lag2 = (compare_cycles(metric_row(before2), metric_row(row)) if before2 else
@@ -334,6 +365,56 @@ def test_offline_auditor_derives_known_synthetic_period2_without_claim_authority
     assert result["last_cycle"] == 38
     assert result["branch_A_streak"] >= 3 and result["branch_B_streak"] == 3
     assert result["trace"][-1]["lag2_passed"] is True
+
+
+def test_conservation_ledger_recomputes_synthetic_global_balance():
+    row = _inputs(31)
+    row["cells"] = [[1., 1., 1., 1.] for _ in range(251)]
+    row["conservation_ledger"] = _synthetic_ledger(row)
+    row["gate_inputs"] = {"complete": True, "global_balance": [0., 0., 0.],
+                          "segments": [{"physical_balance": [0., 0., 0.],
+                                        "max_global_residual": 0.,
+                                        "max_stage_residual": 0.,
+                                        "extrema": {"rho": 1., "p": 1., "T": 1.,
+                                                    "Y_min": 0., "Y_max": 1.},
+                                        "stages": [{"dt": .1, "limits": [.2]}]}
+                                       for _ in range(3)]}
+    recomputed = recompute_conservation(row)
+    assert recomputed["global_balance"] == [0., 0., 0.]
+    assert recomputed["max_global_residual"] == 0.
+    assert recomputed["max_stage_residual"] == 0.
+
+
+@pytest.mark.parametrize("damage,expected", [
+    ("initial", "CONSERVATION_DIAGNOSTIC_MISMATCH"),
+    ("final", "CONSERVATION_DIAGNOSTIC_MISMATCH"),
+    ("external", "CONSERVATION_DIAGNOSTIC_MISMATCH"),
+    ("missing", "MISSING_CONSERVATION_TERM"),
+    ("nonfinite", "INVALID_CHECKPOINT_SCHEMA_OR_NONFINITE"),
+    ("stored_residual", "CONSERVATION_DIAGNOSTIC_MISMATCH"),
+])
+def test_offline_conservation_auditor_rejects_mutated_primary_ledger(
+        tmp_path, damage, expected):
+    root = tmp_path/"durable"
+    _synthetic_durable_campaign(root)
+    def mutate(payload):
+        ledger = payload["inputs"]["conservation_ledger"]
+        if damage == "initial":
+            ledger["segments"][0]["initial_inventory"][0] += .1
+        elif damage == "final":
+            ledger["segments"][0]["final_inventory"][0] += .1
+        elif damage == "external":
+            ledger["segments"][0]["external_exchange_raw"][0] += .1
+        elif damage == "missing":
+            del ledger["segments"][0]["steps"]
+        elif damage == "nonfinite":
+            ledger["segments"][0]["steps"][0]["dt"] = math.inf
+        else:
+            payload["inputs"]["gate_inputs"]["global_balance"][0] = .1
+    _alter_closing_checkpoint(root, mutate)
+    result = audit(root)
+    assert result["classification"] == "E13_G2_V2_INCONCLUSIVE", result
+    assert expected in result["reason"], result
 
 
 @pytest.mark.parametrize("damage,expected", [
