@@ -815,3 +815,11 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [x] Confirmar P4 técnico `P4_PASS` sobre gates históricos intactos; runtime binding C3 siete hashes exactos y P5–P8 seis hashes de provenance exactos. Mantener P5–P8 revalidados; campaña P8 no repetida por ausencia de impacto productivo.
 - [x] 183 pruebas P4/E13, 109 P5–P8/acoplamiento y 53 regresiones adicionales PASS; OpenSpec estricto en cuatro cambios, `git diff --check` y `git lfs fsck` PASS. [Auditoría y receipt nuevos](../../../results/p4-g2-v2-r2-remediation-20260929/receipt.json).
 - [ ] Nueva revisión independiente: `READY_FOR_NEW_INDEPENDENT_REVIEW`. R2 histórico sigue BLOCKED; no hay validación experimental ni autorización P9.
+
+## Revisión adversarial R3 P4→P8 — 2026-09-29
+- [x] Reproducción R2 `dt=false` tras actualizar hash: `MALFORMED_CFL_DT`, clasificación `E13_G2_V2_INCONCLUSIVE`; 82 pruebas focales PASS.
+- [x] Recalcular independientemente métricas 44/48/50 y verificar tipado estricto del auditor G2.
+- [x] Revisar artefactos C3 y pruebas/provenance P5–P8 con agentes de solo lectura; validación LFS y OpenSpec PASS.
+- [ ] R3 no ratifica P4→P8: BLOCKER R3-001 por ledger bruto de conservación G2 31–50 ausente; MAJOR R3-002 por gate replay P8 que acepta salidas divergentes. La evidencia de conservación no prueba un fallo físico; se detuvo ratificación conforme al hard stop.
+- [ ] Confirmar runtime binding C3 completo y repetir revisión independiente tras corregir los hallazgos; P9 permanece detenido.
+- Reporte: `docs/gasdynamic/p4_p8_independent_review_r3_20260929.md`; receipt: `results/p4-p8-independent-review-r3-20260929/review.json`.
