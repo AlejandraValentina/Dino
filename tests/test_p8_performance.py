@@ -1,5 +1,6 @@
 import math
 import unittest
+from unittest.mock import patch
 
 from motorsim.p8_performance import (P8_ANCHORS, PREPARATION_CYCLES,
                                       PREPARATION_END_DEG, cycle_duration_s,
@@ -11,12 +12,55 @@ from motorsim.p8_performance import model_geometry_callback
 from motorsim.p8_performance import build_event_cuts
 from motorsim.simulation_case import SyntheticCase
 from motorsim.p8_performance import event_cuts, run_campaign
+from motorsim.p8_performance import run_anchor
 from motorsim.coupling import ChamberState
 from motorsim.exhaust_port import port_flux
 from motorsim.gas1d.eos import IdealGas
 
 
 class P8ContractTests(unittest.TestCase):
+    def _replay_anchor(self):
+        return {
+            "terminal_replay_digest": "a"*64,
+            "preparation_state_digest": "b"*64,
+            "p7_ledger": {"heat_added": 1.0},
+            "W_cycle_J": 1.0, "p_max_Pa": 2.0,
+            "global_mass_residual_kg": 0.0,
+            "global_energy_residual_J": 0.0,
+            "fresh_mass_delivered_kg": 3.0,
+            "fresh_short_circuit_mass_kg": 0.5,
+            "mass_balance_terms": {"residual": 0.0},
+            "energy_balance_terms": {"residual": 0.0},
+            "gates": {},
+        }
+
+    def test_replay_gate_requires_fresh_delivery_equality(self):
+        first = self._replay_anchor()
+        second = self._replay_anchor()
+        second["fresh_mass_delivered_kg"] += 1.0
+        with patch("motorsim.p8_performance._run_once", side_effect=[first, second]):
+            result = run_anchor(2500)
+        self.assertFalse(result["deterministic_replay"]["fresh_delivery_equal"])
+        self.assertFalse(result["gates"]["deterministic_replay"])
+
+    def test_replay_gate_requires_short_circuit_equality(self):
+        first = self._replay_anchor()
+        second = self._replay_anchor()
+        second["fresh_short_circuit_mass_kg"] += 1.0
+        with patch("motorsim.p8_performance._run_once", side_effect=[first, second]):
+            result = run_anchor(2500)
+        self.assertFalse(result["deterministic_replay"]["short_circuit_equal"])
+        self.assertFalse(result["gates"]["deterministic_replay"])
+
+    def test_replay_gate_requires_full_terminal_digest(self):
+        first = self._replay_anchor()
+        second = self._replay_anchor()
+        second["terminal_replay_digest"] = "c"*64
+        with patch("motorsim.p8_performance._run_once", side_effect=[first, second]):
+            result = run_anchor(2500)
+        self.assertFalse(result["deterministic_replay"]["state_equal"])
+        self.assertFalse(result["gates"]["deterministic_replay"])
+
     def test_campaign_is_nonvacuous_and_writes_consistent_anchor_evidence(self):
         import json, tempfile
         with tempfile.TemporaryDirectory() as directory:

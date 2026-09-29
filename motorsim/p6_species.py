@@ -696,6 +696,7 @@ class P6IntegratedSystem:
         return {'gas': self.gas.snapshot(),
                 'species_mass': {k: [tuple(x) for x in v] for k,v in self.species_mass.items()},
                 'external': list(self._external), 'fresh_delivered': self.fresh_delivered,
+                'species_initial': tuple(self._initial),
                 'fresh_delivered_tr1': self.fresh_delivered_tr1,
                 'fresh_delivered_tr2': self.fresh_delivered_tr2,
                 'fresh_short_circuit': self.fresh_short_circuit,
@@ -714,6 +715,7 @@ class P6IntegratedSystem:
             self.species_mass = self._mass_state_from_views()
         self._refresh_species_views()
         self._external = list(snapshot['external'])
+        self._initial = tuple(snapshot.get('species_initial', self._initial))
         self.fresh_delivered = snapshot['fresh_delivered']
         self.fresh_delivered_tr1 = snapshot.get('fresh_delivered_tr1', 0.0)
         self.fresh_delivered_tr2 = snapshot.get('fresh_delivered_tr2', 0.0)

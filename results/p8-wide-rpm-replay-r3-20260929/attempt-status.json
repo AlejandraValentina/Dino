@@ -1,0 +1,7 @@
+{
+  "status": "SUPERSEDED_FAILED_RESTART_GATE",
+  "used_for_decision": false,
+  "reason": "The newly expanded full-state restart comparison found that P6IntegratedSystem snapshots omitted species_initial. All five anchors failed the same ledger-state comparison while their independent physical state and external/species totals matched.",
+  "superseded_by": "results/p8-wide-rpm-replay-r3-20260929-r2",
+  "source_revision": "working tree before P6 snapshot baseline fix"
+}

@@ -1,0 +1,6 @@
+{
+  "status": "SUPERSEDED_FAILED_RESTART_GATE",
+  "used_for_decision": false,
+  "reason": "The snapshot contained species_initial but serialized the tuple baseline as a list, so exact restart-state equality failed at the container type. P6 now preserves the tuple representation used by the live ledger.",
+  "superseded_by": "results/p8-wide-rpm-replay-r3-20260929-r3"
+}

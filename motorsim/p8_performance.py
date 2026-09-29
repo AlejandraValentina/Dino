@@ -195,8 +195,61 @@ def _reset_measurement(system, *, case):
     }
 
 def _current(system):
-    return (system.gas.angle, system.gas._state(), system.species_mass,
-            system._external, system.p7_event and vars(system.p7_event.ledger).copy())
+    events = tuple((event.start, event.fresh_air, event.fuel,
+                    vars(event.ledger).copy()) for event in system.p7_events)
+    gas = system.gas
+    return {
+        "angle": gas.angle,
+        "conservative_state": gas._state(),
+        "species_mass": system.species_mass,
+        "species_external": system._external,
+        "species_initial": system._initial,
+        "gas_initial": gas._initial,
+        "gas_previous_totals": gas._previous_totals,
+        "gas_external_cumulative": gas._external_cumulative,
+        "gas_ledger": gas.ledger,
+        "p7_events": events,
+        "p7_source_delta": system.p7_source_delta,
+        "p7_enabled": system.p7_enabled,
+        "p7_angular_rate_deg_s": system.p7_angular_rate_deg_s,
+        "fresh_delivered": system.fresh_delivered,
+        "fresh_delivered_tr1": system.fresh_delivered_tr1,
+        "fresh_delivered_tr2": system.fresh_delivered_tr2,
+        "fresh_short_circuit": system.fresh_short_circuit,
+    }
+
+
+def _terminal_replay_digest(system):
+    """Hash all exact terminal state and accumulated ledgers used by P8 replay."""
+    gas = system.gas
+    events = [{"start": event.start, "fresh_air": event.fresh_air,
+               "fuel": event.fuel, "ledger": vars(event.ledger).copy()}
+              for event in system.p7_events]
+    payload = {
+        "angle": gas.angle,
+        "conservative_state": gas._state(),
+        "species_masses": system.species_mass,
+        "species_initial": system._initial,
+        "species_external": system._external,
+        "gas_external_cumulative": gas._external_cumulative,
+        "gas_last_external": gas._last_external,
+        "gas_ledger": gas.ledger,
+        "gas_initial": gas._initial,
+        "gas_previous_totals": gas._previous_totals,
+        "fresh_delivered": system.fresh_delivered,
+        "fresh_delivered_tr1": system.fresh_delivered_tr1,
+        "fresh_delivered_tr2": system.fresh_delivered_tr2,
+        "fresh_short_circuit": system.fresh_short_circuit,
+        "p7_events": events,
+        "p7_source_delta": system.p7_source_delta,
+        "p7_enabled": system.p7_enabled,
+        "p7_angular_rate_deg_s": system.p7_angular_rate_deg_s,
+        "external_flux_trace": system.external_flux_trace,
+        "verification_trace": system.verification_trace,
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                         allow_nan=False).encode("utf-8")
+    return sha256(encoded).hexdigest()
 
 def _physical_state_digest(system):
     value = repr((system.gas._state(), system.species_mass)).encode("utf-8")
@@ -277,7 +330,8 @@ def _run_once(rpm):
                                   "prescribed_heat": heat,
                                   "crankcase_p_dv_energy": -ccwork,
                                   "cylinder_p_dv_energy": -work,
-                                  "residual": eres}}
+                                   "residual": eres},
+         "terminal_replay_digest": _terminal_replay_digest(system)}
     r["gates"] = {
         "finite": all(isfinite(float(x)) for x in (work, pmax, *dts, *cfls)),
         "geometry_rebased": all(geometry_rebase.values()), "admissible": bool(system.gas.admissible()),
@@ -296,27 +350,44 @@ def _run_once(rpm):
     while restored.gas.angle < measured_end - 1e-12:
         step, _ = _step_dt(restored.gas, rpm, measured_end, cuts)
         restored.step(step, angle=restored.gas.angle + step*omega_deg_s(rpm))
+    restarted_state = _current(restored)
+    original_state = _current(system)
     r["restart"] = {"executed": True, "checkpoint_angle_deg": checkpoint["gas"]["angle"],
                      "checkpoint_inside_p7": P7_START_DEG < checkpoint["gas"]["angle"] < P7_END_DEG,
-                     "state_equal": _current(restored) == _current(system),
-                     "species_mass_equal": restored.species_mass == system.species_mass,
-                     "p7_ledger_equal": vars(restored.p7_event.ledger) == vars(system.p7_event.ledger),
-                     "external_equal": restored._external == system._external,
-                     "fresh_delivery_equal": restored.fresh_delivered == system.fresh_delivered,
-                     "short_circuit_equal": restored.fresh_short_circuit == system.fresh_short_circuit}
+                     "state_equal": restarted_state == original_state,
+                     "state_mismatch_fields": [key for key in original_state
+                                                if restarted_state[key] != original_state[key]],
+                      "species_mass_equal": restored.species_mass == system.species_mass,
+                      "p7_ledger_equal": vars(restored.p7_event.ledger) == vars(system.p7_event.ledger),
+                      "external_equal": restored._external == system._external,
+                      "fresh_delivery_equal": restored.fresh_delivered == system.fresh_delivered,
+                      "fresh_delivery_tr1_equal": restored.fresh_delivered_tr1 == system.fresh_delivered_tr1,
+                      "fresh_delivery_tr2_equal": restored.fresh_delivered_tr2 == system.fresh_delivered_tr2,
+                      "short_circuit_equal": restored.fresh_short_circuit == system.fresh_short_circuit}
     r["gates"]["restart"] = all(r["restart"][key] for key in (
         "executed", "checkpoint_inside_p7", "state_equal", "species_mass_equal",
         "p7_ledger_equal", "external_equal", "fresh_delivery_equal",
+        "fresh_delivery_tr1_equal", "fresh_delivery_tr2_equal",
         "short_circuit_equal"))
     return r
 
 def run_anchor(rpm, **kwargs):
     a = _run_once(rpm); b = _run_once(rpm)
+    digest_a = a.get("terminal_replay_digest")
+    digest_b = b.get("terminal_replay_digest")
     a["deterministic_replay"] = {
         "executed": True,
-        "state_equal": a["p7_ledger"] == b["p7_ledger"] and a["W_cycle_J"] == b["W_cycle_J"],
+        "state_equal": (type(digest_a) is str and len(digest_a) == 64
+                        and digest_a == digest_b),
         "preparation_state_equal": a["preparation_state_digest"] == b["preparation_state_digest"],
-        "metrics_equal": all(a[k] == b[k] for k in ("W_cycle_J", "p_max_Pa", "global_mass_residual_kg", "global_energy_residual_J"))}
+        "metrics_equal": all(a[k] == b[k] for k in ("W_cycle_J", "p_max_Pa", "global_mass_residual_kg", "global_energy_residual_J")),
+        "p7_ledger_equal": a["p7_ledger"] == b["p7_ledger"],
+        "fresh_delivery_equal": a["fresh_mass_delivered_kg"] == b["fresh_mass_delivered_kg"],
+        "short_circuit_equal": a["fresh_short_circuit_mass_kg"] == b["fresh_short_circuit_mass_kg"],
+        "external_accounting_equal": (a["mass_balance_terms"] == b["mass_balance_terms"]
+                                       and a["energy_balance_terms"] == b["energy_balance_terms"]),
+    }
+    a["replay_terminal_digests"] = {"first": digest_a, "second": digest_b}
     a["gates"]["deterministic_replay"] = all(a["deterministic_replay"].values())
     return a
 

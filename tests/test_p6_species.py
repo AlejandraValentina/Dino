@@ -69,11 +69,15 @@ def test_p6_integrates_on_p5c_and_derives_legacy_view():
 def test_p6_restart_and_deterministic_replay():
     a = P6IntegratedSystem(make_p5c_fixture(port_area=0.0))
     a.step(1e-7)
+    # The cumulative species-ledger baseline may differ from a fresh fixture
+    # after preparation/rebasing, so it must travel with a restart snapshot.
+    a._initial = tuple(value * .95 for value in a._species_totals())
     snap = a.snapshot()
     a.step(1e-7)
     expected = a._species_totals(), a.gas.totals()
     b = P6IntegratedSystem(make_p5c_fixture(port_area=0.0))
     b.restore(snap)
+    assert b._initial == a._initial
     b.step(1e-7)
     assert b._species_totals() == expected[0]
     assert b.gas.totals() == expected[1]
