@@ -805,3 +805,13 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [x] Auditor offline independiente del código productivo recalculó E13, conservación, admisibilidad, CFL, identidad, ancestry y detector: `E13_G2_V2_PASS`, período2 ciclo50, A=15, B=3, `sensor_max=0.000508629756519752`.
 - [x] 152 pruebas P4/E13 PASS, OpenSpec estricto PASS, `git diff --check` y Git LFS fsck PASS; matriz técnica nueva en `p4-recovery-matrix.json`.
 - [ ] Nueva revisión independiente en otro contexto: `READY_FOR_NEW_INDEPENDENT_REVIEW`; no se registra `INDEPENDENT_REVIEW_PASS` ni validación experimental.
+
+## Remediación del MAJOR R2 de auditoría — 2026-09-29
+
+- [x] Preservar intactos el reporte y receipt R2 bloqueados de `4214703`; no reinterpretar sus hallazgos históricos.
+- [x] Rechazar tipos no numéricos en `dt`, límites CFL y demás entradas numéricas científicas del auditor; `dt` debe ser finito y positivo. Evidencia malformada queda `INCONCLUSIVE`.
+- [x] Regresión exacta R2 sobre copia del checkpoint50 con `dt=false` y hash de cierre actualizado: `MALFORMED_CFL_DT`, nunca PASS; pruebas adversariales de booleanos, nulos, texto, arrays, cero, negativos y no finitos.
+- [x] Reauditar los checkpoints G2-v2 existentes sin simular de nuevo: `E13_G2_V2_PASS`, período2 ciclo50, seed 0/5/0, final A15/B3; 44 FAIL, 48/50 PASS; conservación, admisibilidad y CFL PASS.
+- [x] Confirmar P4 técnico `P4_PASS` sobre gates históricos intactos; runtime binding C3 siete hashes exactos y P5–P8 seis hashes de provenance exactos. Mantener P5–P8 revalidados; campaña P8 no repetida por ausencia de impacto productivo.
+- [x] 183 pruebas P4/E13, 109 P5–P8/acoplamiento y 53 regresiones adicionales PASS; OpenSpec estricto en cuatro cambios, `git diff --check` y `git lfs fsck` PASS. [Auditoría y receipt nuevos](../../../results/p4-g2-v2-r2-remediation-20260929/receipt.json).
+- [ ] Nueva revisión independiente: `READY_FOR_NEW_INDEPENDENT_REVIEW`. R2 histórico sigue BLOCKED; no hay validación experimental ni autorización P9.
