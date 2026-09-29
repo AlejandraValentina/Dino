@@ -788,3 +788,10 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [ ] Verificar continuation desde ciclo30 y ejecutar hasta PASS o ciclo400; no ejecutar ciclo401+.
 - [ ] Persistir evaluación, decisión, regresiones y matriz P4 final sólo después de la adquisición.
 - [x] Documento: `docs/gasdynamic/p4_g2_v2_preregistration_20260929.md`.
+
+## Cierre técnico P4 con G2-v2 — 2026-09-29
+- [x] Continuation validada desde ciclo30 y ciclos31–50 ejecutados; parada temprana contractual en ciclo50 por `CONVERGED_PERIOD2`.
+- [x] `E13_G2_V2_PASS`: rama A streak15, rama B streak3; conservación, admisibilidad y CFL PASS. Evidencia `results/p4-g2-v2-20260929/`.
+- [x] Matriz final P4 persistida en `results/p4-g2-v2-20260929/p4-final-gate-matrix.json`; clasificación técnica `P4_PASS`.
+- [ ] Revisión independiente conectada; permanece `INDEPENDENT_REVIEW_PENDING`. P5, P9 y validación experimental no iniciados.
+- [x] Cierre: `docs/gasdynamic/p4_final_closure_g2_v2_20260929.md`.
