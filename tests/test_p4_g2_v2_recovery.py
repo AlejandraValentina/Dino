@@ -246,6 +246,7 @@ def test_offline_auditor_derives_known_synthetic_period2_without_claim_authority
     ("metric", "LAG2_sensor_max_CLAIM_MISMATCH"),
     ("missing", "MISSING_CONTRACT_INPUT"),
     ("cfl", "PHYSICAL_GATE_FAILED"),
+    ("detector", "DETECTOR_STATE_MISMATCH"),
 ])
 def test_offline_auditor_rejects_tampered_closing_evidence(tmp_path, damage, expected):
     root = tmp_path/"durable"
@@ -255,9 +256,11 @@ def test_offline_auditor_rejects_tampered_closing_evidence(tmp_path, damage, exp
             payload["claims"]["lag2"]["sensor_max"] = .1
         elif damage == "missing":
             del payload["inputs"]["work_indicated_J"]
-        else:
+        elif damage == "cfl":
             payload["inputs"]["gate_inputs"]["segments"][0]["stages"][0]["dt"] = .3
             payload["claims"]["checks"]["CFL"] = False
+        else:
+            payload["detector"]["state"]["branch_B_streak"] = 2
     _alter_closing_checkpoint(root, mutate)
     result = audit(root)
     assert result["classification"] == "E13_G2_V2_INCONCLUSIVE"
@@ -271,3 +274,15 @@ def test_new_durable_acquisition_reaudits_without_producer_pass():
     assert result["detected_period"] == 2
     assert result["trace"][-1]["lag2_passed"] is True
     assert result["trace"][-1]["CFL"] is True
+
+
+def test_reacquired_terminal_states_match_historical_run_exactly():
+    historical = Path("results/p4-g2-v2-20260929")
+    assert ROOT.exists() and historical.exists()
+    for cycle in range(31, 51):
+        old = json.loads(gzip.decompress(
+            (historical/f"checkpoint_cycle{cycle:03}.json.gz").read_bytes()))
+        new = json.loads(gzip.decompress(
+            (ROOT/f"checkpoint_cycle{cycle:03}.json.gz").read_bytes()))["inputs"]
+        assert (old["begin"], old["end"], old["state"], old["cells"]) == (
+            new["begin"], new["end"], new["state"], new["cells"])

@@ -1,0 +1,126 @@
+{
+  "comparison": "historical compact run vs new durable acquisition",
+  "cycles": [
+    {
+      "cycle": 31,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 32,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 33,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 34,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 35,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 36,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 37,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 38,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 39,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 40,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 41,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 42,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 43,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 44,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 45,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 46,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 47,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 48,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 49,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    },
+    {
+      "cycle": 50,
+      "state_exact": true,
+      "cells_exact": true,
+      "angle_exact": true
+    }
+  ],
+  "all_exact": true
+}

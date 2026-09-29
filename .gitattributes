@@ -13,3 +13,5 @@ motorsim/exhaust_geometry.py -text
 motorsim/hybrid_exhaust.py -text
 docs/gasdynamic/p4c_hybrid.md -text
 results/p4-c3-r5-20260928/acquisition-evaluation.json filter=lfs diff=lfs merge=lfs -text
+# Durable angular histories for independent G2-v2 reauditing.
+results/p4-g2-v2-reaudit-20260929-r2/checkpoint_cycle*.json.gz filter=lfs diff=lfs merge=lfs -text
