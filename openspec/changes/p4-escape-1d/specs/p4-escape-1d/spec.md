@@ -63,3 +63,17 @@ regresiones históricas y revisión independiente; nunca iniciarP5 automáticame
 #### Scenario: Prueba costosa
 - **WHEN** una prueba supera600s
 - **THEN** detiene y perfila antes de nuevas campañas largas.
+
+
+### Requirement: G2-v2 preregistered horizon delta
+The G2-v2 evaluation SHALL preserve every existing E13 metric, threshold, branch,
+streak, solver, mesh and physical criterion, changing only the maximum horizon to
+400 cycles. The historical max-30 G2 result SHALL remain retained as evidence.
+
+#### Scenario: Frozen decision boundary
+- **WHEN** both period-2 branches reach their existing streak contract before cycle 400
+- **THEN** evaluation stops at the first qualifying cycle and records PASS
+- **WHEN** cycle 400 is reached without convergence
+- **THEN** evaluation records FAIL without extending the horizon or changing thresholds
+- **WHEN** continuation identity or evidence is invalid/incomplete
+- **THEN** evaluation records INCONCLUSIVE without treating the condition as scientific FAIL

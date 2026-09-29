@@ -782,3 +782,9 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [x] Rama A cerró (streak 5); rama B falló 14/14 comparaciones y terminó en `sensor_max=0.0290580`; resultado contractual `E13_G2_FAIL` bajo `max_cycles=30`.
 - [ ] Decisión humana si se desea cambiar el horizonte contractual; no se ejecutaron ciclos 31+, no se cambiaron thresholds ni física.
 - [x] Auditoría detallada: `docs/gasdynamic/p4_g2_root_cause_audit_20260929.md`.
+
+## G2-v2 — preregistración 2026-09-29
+- [x] Preregistrado antes de la adquisición: único delta `max_cycles=400`; thresholds, métricas, ramas, streaks, solver, malla, CFL y física congelados.
+- [ ] Verificar continuation desde ciclo30 y ejecutar hasta PASS o ciclo400; no ejecutar ciclo401+.
+- [ ] Persistir evaluación, decisión, regresiones y matriz P4 final sólo después de la adquisición.
+- [x] Documento: `docs/gasdynamic/p4_g2_v2_preregistration_20260929.md`.
