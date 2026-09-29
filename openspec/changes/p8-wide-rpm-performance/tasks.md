@@ -63,3 +63,8 @@ internal interfaces cancel. No residual is hidden or relaxed.
 
 No P4 acceptance, independent review, publication, archive, commit, push or P9
 work is claimed.
+
+## Revalidación sobre P4 cerrado — 2026-09-29
+- [x] P8 revalidado sobre `P4_PASS` mediante provenance y auditoría focal; cinco anchors y todos los gates vigentes PASS.
+- [x] Outputs conservan semántica `BOUNDED_TRANSIENT_INDICATED`; no se declara periodicidad ni validación experimental.
+- [ ] Revisión independiente permanece pendiente; P9 sigue detenido.

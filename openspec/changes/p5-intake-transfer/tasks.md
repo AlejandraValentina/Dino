@@ -30,3 +30,8 @@
 - [x] P6-C full topology species fixture bank and independent ledgers.
 - [x] P6-D restart/determinism and regressions.
 - [x] P6 conditional closure: F05-F09 PASS, four species ledgers and local/global species-mass gates PASS; evidence in `results/p6-species-20260925/final-campaign.json` and `evidence.json`; OpenSpec 1.3.1 strict PASS. Classification `P6_SPECIES_SCAVENGING_VERIFIED_CONDITIONAL`, dependency `CONDITIONAL_ON_P4`; P4 remains `BLOCKED / NOT_GRANTED`.
+
+## Revalidación sobre P4 cerrado — 2026-09-29
+- [x] Suite focal P5-A/P5-B/P5-C y backflow/ledgers/restart: PASS; receipt `results/p5-p8-revalidation-20260929/revalidation.json`.
+- [x] P5 revalidado sobre `P4_PASS`; clasificación condicional histórica conservada y evidencia P5-C parcial no borrada.
+- [x] P6 revalidado sobre `P4_PASS`; cuatro especies, scavenging, ledgers, restart y determinismo PASS.

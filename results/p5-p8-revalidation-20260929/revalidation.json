@@ -1,0 +1,285 @@
+{
+  "base_p4": "5642533f73ebcc79bbd38c7dcb2374702863d8a3",
+  "revalidation_date": "2026-09-29",
+  "new_simulations": false,
+  "p5": {
+    "status": "REVALIDATED_ON_P4_PASS",
+    "classification": "P5_IMPLEMENTATION_VERIFIED_CONDITIONAL",
+    "dependency": "P4 dependency now satisfied; conditional label retained",
+    "fixtures": "P5-A/P5-B/P5-C focal tests and causal-front evidence PASS",
+    "historical_partial_record_preserved": "results/p5c-conditional-20260924/evidence.json"
+  },
+  "p6": {
+    "status": "REVALIDATED_ON_P4_PASS",
+    "classification": "P6_SPECIES_SCAVENGING_VERIFIED_CONDITIONAL",
+    "evidence": "results/p6-species-20260925/final-campaign.json",
+    "species": "four-species ledgers and scavenging gates PASS"
+  },
+  "p7": {
+    "status": "REVALIDATED_ON_P4_PASS",
+    "classification": "P7_PRESCRIBED_COMBUSTION_VERIFIED_CONDITIONAL",
+    "evidence": "results/p7-prescribed-heat-burn-20260927/evidence.json",
+    "non_vacuous_event": true,
+    "source_admissibility": true,
+    "heat_consistency": true
+  },
+  "p8": {
+    "status": "REVALIDATED_ON_P4_PASS",
+    "classification": "P8_WIDE_RPM_PERFORMANCE_VERIFIED_CONDITIONAL",
+    "evidence": "results/p8-wide-rpm-20260927/p8-wide-rpm.json",
+    "failures": [],
+    "anchors": [
+      {
+        "rpm": 2500,
+        "P_indicated_W": 181.66935132323673,
+        "W_cycle_J": 4.3600644317576815,
+        "T_indicated_Nm": 0.6939258065133909,
+        "gates": {
+          "finite": true,
+          "geometry_rebased": true,
+          "admissible": true,
+          "species": true,
+          "p7_one_event": true,
+          "p7_nonvacuous": true,
+          "p7_source_admissible": true,
+          "p7_heat_consistent": true,
+          "cfl": true,
+          "source_heat_consistent": true,
+          "prescribed_heat_matches_ledger": true,
+          "global_mass_conservation": true,
+          "global_energy_conservation": true,
+          "prepared_initial_state": true,
+          "restart": true,
+          "deterministic_replay": true
+        },
+        "restart": {
+          "executed": true,
+          "checkpoint_angle_deg": 370.0,
+          "checkpoint_inside_p7": true,
+          "state_equal": true,
+          "species_mass_equal": true,
+          "p7_ledger_equal": true,
+          "external_equal": true,
+          "fresh_delivery_equal": true,
+          "short_circuit_equal": true
+        },
+        "deterministic_replay": {
+          "executed": true,
+          "state_equal": true,
+          "preparation_state_equal": true,
+          "metrics_equal": true
+        },
+        "fresh_mass_delivered_kg": 1.0712899252620959e-05,
+        "fresh_short_circuit_mass_kg": 3.6824649807329595e-06,
+        "global_mass_residual_kg": 2.168404344971009e-17,
+        "global_energy_residual_J": -6.0533800194662035e-12
+      },
+      {
+        "rpm": 5000,
+        "P_indicated_W": 171.3541030232319,
+        "W_cycle_J": 2.0562492362787825,
+        "T_indicated_Nm": 0.3272622301827029,
+        "gates": {
+          "finite": true,
+          "geometry_rebased": true,
+          "admissible": true,
+          "species": true,
+          "p7_one_event": true,
+          "p7_nonvacuous": true,
+          "p7_source_admissible": true,
+          "p7_heat_consistent": true,
+          "cfl": true,
+          "source_heat_consistent": true,
+          "prescribed_heat_matches_ledger": true,
+          "global_mass_conservation": true,
+          "global_energy_conservation": true,
+          "prepared_initial_state": true,
+          "restart": true,
+          "deterministic_replay": true
+        },
+        "restart": {
+          "executed": true,
+          "checkpoint_angle_deg": 370.0,
+          "checkpoint_inside_p7": true,
+          "state_equal": true,
+          "species_mass_equal": true,
+          "p7_ledger_equal": true,
+          "external_equal": true,
+          "fresh_delivery_equal": true,
+          "short_circuit_equal": true
+        },
+        "deterministic_replay": {
+          "executed": true,
+          "state_equal": true,
+          "preparation_state_equal": true,
+          "metrics_equal": true
+        },
+        "fresh_mass_delivered_kg": 5.337809888432449e-06,
+        "fresh_short_circuit_mass_kg": 6.555698444361781e-07,
+        "global_mass_residual_kg": 1.485356976305141e-17,
+        "global_energy_residual_J": -2.858828625218468e-13
+      },
+      {
+        "rpm": 8000,
+        "P_indicated_W": 89.2159329046306,
+        "W_cycle_J": 0.6691194967847296,
+        "T_indicated_Nm": 0.10649367543245129,
+        "gates": {
+          "finite": true,
+          "geometry_rebased": true,
+          "admissible": true,
+          "species": true,
+          "p7_one_event": true,
+          "p7_nonvacuous": true,
+          "p7_source_admissible": true,
+          "p7_heat_consistent": true,
+          "cfl": true,
+          "source_heat_consistent": true,
+          "prescribed_heat_matches_ledger": true,
+          "global_mass_conservation": true,
+          "global_energy_conservation": true,
+          "prepared_initial_state": true,
+          "restart": true,
+          "deterministic_replay": true
+        },
+        "restart": {
+          "executed": true,
+          "checkpoint_angle_deg": 370.0,
+          "checkpoint_inside_p7": true,
+          "state_equal": true,
+          "species_mass_equal": true,
+          "p7_ledger_equal": true,
+          "external_equal": true,
+          "fresh_delivery_equal": true,
+          "short_circuit_equal": true
+        },
+        "deterministic_replay": {
+          "executed": true,
+          "state_equal": true,
+          "preparation_state_equal": true,
+          "metrics_equal": true
+        },
+        "fresh_mass_delivered_kg": 2.7369281374379333e-06,
+        "fresh_short_circuit_mass_kg": 1.257943552924221e-07,
+        "global_mass_residual_kg": 1.0001765041178778e-17,
+        "global_energy_residual_J": -4.2216230511371577e-13
+      },
+      {
+        "rpm": 11000,
+        "P_indicated_W": 25.14477111178276,
+        "W_cycle_J": 0.1371532969733605,
+        "T_indicated_Nm": 0.021828625174661012,
+        "gates": {
+          "finite": true,
+          "geometry_rebased": true,
+          "admissible": true,
+          "species": true,
+          "p7_one_event": true,
+          "p7_nonvacuous": true,
+          "p7_source_admissible": true,
+          "p7_heat_consistent": true,
+          "cfl": true,
+          "source_heat_consistent": true,
+          "prescribed_heat_matches_ledger": true,
+          "global_mass_conservation": true,
+          "global_energy_conservation": true,
+          "prepared_initial_state": true,
+          "restart": true,
+          "deterministic_replay": true
+        },
+        "restart": {
+          "executed": true,
+          "checkpoint_angle_deg": 370.0,
+          "checkpoint_inside_p7": true,
+          "state_equal": true,
+          "species_mass_equal": true,
+          "p7_ledger_equal": true,
+          "external_equal": true,
+          "fresh_delivery_equal": true,
+          "short_circuit_equal": true
+        },
+        "deterministic_replay": {
+          "executed": true,
+          "state_equal": true,
+          "preparation_state_equal": true,
+          "metrics_equal": true
+        },
+        "fresh_mass_delivered_kg": 1.492520126867454e-06,
+        "fresh_short_circuit_mass_kg": 3.444858730087946e-08,
+        "global_mass_residual_kg": 5.637851296924623e-18,
+        "global_energy_residual_J": 3.241407142695607e-12
+      },
+      {
+        "rpm": 15000,
+        "P_indicated_W": -24.527961992246784,
+        "W_cycle_J": -0.09811184796898713,
+        "T_indicated_Nm": -0.015614985580144835,
+        "gates": {
+          "finite": true,
+          "geometry_rebased": true,
+          "admissible": true,
+          "species": true,
+          "p7_one_event": true,
+          "p7_nonvacuous": true,
+          "p7_source_admissible": true,
+          "p7_heat_consistent": true,
+          "cfl": true,
+          "source_heat_consistent": true,
+          "prescribed_heat_matches_ledger": true,
+          "global_mass_conservation": true,
+          "global_energy_conservation": true,
+          "prepared_initial_state": true,
+          "restart": true,
+          "deterministic_replay": true
+        },
+        "restart": {
+          "executed": true,
+          "checkpoint_angle_deg": 370.0,
+          "checkpoint_inside_p7": true,
+          "state_equal": true,
+          "species_mass_equal": true,
+          "p7_ledger_equal": true,
+          "external_equal": true,
+          "fresh_delivery_equal": true,
+          "short_circuit_equal": true
+        },
+        "deterministic_replay": {
+          "executed": true,
+          "state_equal": true,
+          "preparation_state_equal": true,
+          "metrics_equal": true
+        },
+        "fresh_mass_delivered_kg": 6.660292631712978e-07,
+        "fresh_short_circuit_mass_kg": 8.663303027031088e-09,
+        "global_mass_residual_kg": 1.3444106938820255e-17,
+        "global_energy_residual_J": -2.930988785010413e-14
+      }
+    ],
+    "semantics": {
+      "bounded_transient": true,
+      "periodic_output": false,
+      "experimental_validation": false
+    }
+  },
+  "tests": {
+    "passed": 141,
+    "deselected": 1,
+    "junit": "results/p5-p8-revalidation-20260929/focal-tests.xml"
+  },
+  "openspec": {
+    "p5-intake-transfer": "PASS",
+    "p7-prescribed-heat-burn": "PASS",
+    "p8-wide-rpm-performance": "PASS"
+  },
+  "provenance_sha256": {
+    "motorsim/p5c.py": "dabfac855da477b66f6dfe3478b2a1c05c1ead78c71168701552dba95757221e",
+    "motorsim/p6_species.py": "679d502fd2510cd63aa39fdf670cc48401a06abba241b404f6f9c2d932a4b349",
+    "motorsim/p7_prescribed.py": "529e0db5877b796464fa002c7fb10127097774d70e12d73e5a8391f2aa39758c",
+    "motorsim/p8_performance.py": "0f835605d94799b19cdab0bc6e17468af3d8101165f1f3de6f0b71ccf1215174",
+    "motorsim/hybrid_fast.py": "29ccd8423a100373b7be9f31f6e45163d8f0bc91622d3aa8b31b529a2ac4bf0b",
+    "motorsim/periodicity.py": "c661cbd062df5a6e606edf2ed9ea8a20307c0b76a7629cabbaf52344845e9294"
+  },
+  "independent_review": "INDEPENDENT_REVIEW_PENDING",
+  "p9": "STOPPED / NOT_AUTHORIZED",
+  "experimental_validation": "NOT_PERFORMED"
+}

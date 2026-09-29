@@ -17,3 +17,7 @@
 - Experimental validation: `NOT_PERFORMED`.
 - Independent review: `INDEPENDENT_REVIEW_PENDING`.
 - Measured residuals remain those recorded in `results/p7-prescribed-heat-burn-20260927/evidence.json`; no new values are introduced here.
+
+## Revalidación sobre P4 cerrado — 2026-09-29
+- [x] P7 revalidado: evento no vacuo, source admissibility, heat consistency, conservación, restart y determinismo PASS en la suite focal.
+- [ ] Revisión independiente permanece pendiente; no se inicia P9.
