@@ -1,0 +1,45 @@
+{
+  "baseline": "17b3652731b16c39cd49b8b6d169499f40a6704b",
+  "R3_historical_status": "BLOCKED_PRESERVED",
+  "R3_findings": {
+    "R3-001": "RESOLVED_WITH_PRIMARY_LEDGER_AND_INDEPENDENT_RECOMPUTATION",
+    "R3-002": "RESOLVED_WITH_FULL_RESTART_STATE_AND_TERMINAL_REPLAY_DIGEST"
+  },
+  "G2_v2": {
+    "status": "E13_G2_V2_PASS",
+    "last_cycle": 50,
+    "detected_period": 2,
+    "branch_A_streak": 15,
+    "branch_B_streak": 3,
+    "primary_ledger": "results/p4-g2-v2-ledger-recovery-20260929-retry/checkpoint_cycle*.json.gz",
+    "offline_audit": "results/p4-g2-v2-ledger-recovery-20260929-retry/offline-audit.json",
+    "terminal_state_parity": "EXACT_CYCLES_31_50"
+  },
+  "P4": "P4_PASS_TECHNICAL_ONLY",
+  "P4_acceptance": "NOT_GRANTED_PENDING_FINAL_INDEPENDENT_REVIEW",
+  "C3": {
+    "status": "P4_SCI_C3_PASS_HISTORICAL",
+    "runtime_binding_seven_sources": "ALL_HASHES_MATCH",
+    "rerun": false
+  },
+  "P5": "P5_IMPLEMENTATION_VERIFIED_CONDITIONAL_REVALIDATED",
+  "P6": "P6_SPECIES_SCAVENGING_VERIFIED_CONDITIONAL_REVALIDATED",
+  "P7": "P7_PRESCRIBED_COMBUSTION_VERIFIED_CONDITIONAL_REVALIDATED",
+  "P8": {
+    "status": "P8_WIDE_RPM_PERFORMANCE_VERIFIED_CONDITIONAL",
+    "campaign": "results/p8-wide-rpm-replay-r3-20260929-r3/",
+    "semantics": "BOUNDED_TRANSIENT_INDICATED",
+    "conditional_on_p4": true
+  },
+  "P9": "STOPPED_NOT_AUTHORIZED",
+  "experimental_validation": "NOT_PERFORMED",
+  "independent_review": "READY_FOR_FINAL_INDEPENDENT_REVIEW",
+  "scientific_changes": {
+    "physics": false,
+    "model": false,
+    "scientific_contract": false,
+    "thresholds": false,
+    "mesh": false,
+    "CFL": false
+  }
+}

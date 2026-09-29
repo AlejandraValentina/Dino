@@ -823,3 +823,17 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [ ] R3 no ratifica P4→P8: BLOCKER R3-001 por ledger bruto de conservación G2 31–50 ausente; MAJOR R3-002 por gate replay P8 que acepta salidas divergentes. La evidencia de conservación no prueba un fallo físico; se detuvo ratificación conforme al hard stop.
 - [ ] Confirmar runtime binding C3 completo y repetir revisión independiente tras corregir los hallazgos; P9 permanece detenido.
 - Reporte: `docs/gasdynamic/p4_p8_independent_review_r3_20260929.md`; receipt: `results/p4-p8-independent-review-r3-20260929/review.json`.
+
+## Remediación R3 y recuperación técnica P4→P8 — 2026-09-29
+- [x] Preservar sin cambios el reporte y receipt R3 BLOCKED de `17b3652`; R3 permanece como registro histórico, no como aceptación.
+- [x] R3-001: adquirir 31–50 con ledger primario de inventarios, flujos de etapa, fuentes, intervalos y balances; auditar de forma independiente desde entradas persistidas. Los estados conservativos/celdas 31–50 coinciden exactamente con la adquisición previa.
+- [x] Mutation tests del auditor: inventarios inicial/final y flujos alterados, términos faltantes, no finitos, malformados y residuo diagnóstico mutado; decisión basada en recálculo independiente.
+- [x] G2-v2 revalidado: `E13_G2_V2_PASS`, período 2 en ciclo 50, A=15/B=3; conservación, admisibilidad y CFL pasan. Evidencia primaria/auditoría: `results/p4-g2-v2-ledger-recovery-20260929-retry/`.
+- [x] R3-002: gate exacto ampliado a estado conservativo terminal, ledgers acumulados, especies, entrega fresca, short-circuit, eventos y estado P7; digest SHA-256 canónico de cada recorrido independiente.
+- [x] Mutation tests de fresh delivery, short-circuit y divergencia del digest impiden aprobar replay alterado; P6 snapshot/restore conserva el baseline de ledger de especies y su tipo canónico.
+- [x] Repetir únicamente los cinco anchors P8 porque la evidencia anterior no persistía ambos estados terminales requeridos por el gate corregido; los cinco anchors aprueban finite, geometría, admisibilidad, especies, P7, CFL, masa/energía, restart y replay determinista. Evidencia: `results/p8-wide-rpm-replay-r3-20260929-r3/`; semántica `BOUNDED_TRANSIENT_INDICATED`.
+- [x] Revalidar suites P4 (188 PASS, 2 campañas/adquisiciones excluidas), G2 focal (57 PASS, 1 adquisición excluida), P5–P7 (90 PASS), P8 replay (12 PASS, campaña probada por adquisición separada), P6 snapshot (16 PASS); OpenSpec estricto en P4/P5/P7/P8.
+- [x] Runtime binding C3-R5: siete hashes/componentes coinciden exactamente; no se repitió C3.
+- [x] Matriz de recuperación: `results/p4-p8-r3-remediation-20260929/recovery-matrix.json`. P4 recuperado técnicamente; aceptación sigue pendiente de revisor independiente final. P5–P8 continúan condicionales a P4.
+- [ ] Revisión independiente final en otro contexto; experimental validation permanece `NOT_PERFORMED`; P9 permanece `STOPPED_NOT_AUTHORIZED`.
+- Reporte de remediación: `docs/gasdynamic/p4_p8_r3_remediation_20260929.md`.
