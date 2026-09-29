@@ -21,3 +21,8 @@
 ## Revalidación sobre P4 cerrado — 2026-09-29
 - [x] P7 revalidado: evento no vacuo, source admissibility, heat consistency, conservación, restart y determinismo PASS en la suite focal.
 - [ ] Revisión independiente permanece pendiente; no se inicia P9.
+
+## Revalidación tras recuperación G2-v2 — 2026-09-29
+
+- [x] P7 mantiene evento no vacuo, fuente admisible, calor/ledger, restart y replay: suite P5–P8/acoplamiento 141 PASS y hash de producto intacto.
+- [ ] Nueva revisión independiente pendiente; P9 detenido.

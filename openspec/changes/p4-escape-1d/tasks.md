@@ -795,3 +795,13 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [x] Matriz final P4 persistida en `results/p4-g2-v2-20260929/p4-final-gate-matrix.json`; clasificación técnica `P4_PASS`.
 - [ ] Revisión independiente conectada; permanece `INDEPENDENT_REVIEW_PENDING`. P5, P9 y validación experimental no iniciados.
 - [x] Cierre: `docs/gasdynamic/p4_final_closure_g2_v2_20260929.md`.
+
+## Recuperación de evidencia G2-v2 tras revisión adversarial — 2026-09-29
+
+- [x] Preservar sin cambios los tres hallazgos BLOCKER/MAJOR en commit `544d2dc`; la revisión histórica continúa BLOCKED.
+- [x] Corregir persistencia de historias angulares e insumos E13, restauración versionada del detector y gate CFL explícito; regresiones negativas y continuous/restart PASS.
+- [x] Recalcular el estado del detector desde los ciclos originales 1–30, sin constantes manuales: al ciclo30 lag1=0, A=5, B=0.
+- [x] Nueva adquisición G2-v2 en `results/p4-g2-v2-reaudit-20260929-r2/`: ciclos31–50, sin 51+; 20 estados terminales coinciden exactamente con la corrida histórica.
+- [x] Auditor offline independiente del código productivo recalculó E13, conservación, admisibilidad, CFL, identidad, ancestry y detector: `E13_G2_V2_PASS`, período2 ciclo50, A=15, B=3, `sensor_max=0.000508629756519752`.
+- [x] 152 pruebas P4/E13 PASS, OpenSpec estricto PASS, `git diff --check` y Git LFS fsck PASS; matriz técnica nueva en `p4-recovery-matrix.json`.
+- [ ] Nueva revisión independiente en otro contexto: `READY_FOR_NEW_INDEPENDENT_REVIEW`; no se registra `INDEPENDENT_REVIEW_PASS` ni validación experimental.

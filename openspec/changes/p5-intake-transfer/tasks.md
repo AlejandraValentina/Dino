@@ -35,3 +35,9 @@
 - [x] Suite focal P5-A/P5-B/P5-C y backflow/ledgers/restart: PASS; receipt `results/p5-p8-revalidation-20260929/revalidation.json`.
 - [x] P5 revalidado sobre `P4_PASS`; clasificación condicional histórica conservada y evidencia P5-C parcial no borrada.
 - [x] P6 revalidado sobre `P4_PASS`; cuatro especies, scavenging, ledgers, restart y determinismo PASS.
+
+## Revalidación tras recuperación G2-v2 — 2026-09-29
+
+- [x] P5/P6: hashes de producto y runtime sin cambio; 141 pruebas P5–P8/acoplamiento PASS; recibo `results/p5-p8-revalidation-g2-v2-recovery-20260929/receipt.json`.
+- [x] Se conservan las clasificaciones condicionales y la evidencia histórica; no se repitió campaña física P8.
+- [ ] Nueva revisión independiente P4–P8 pendiente; estado `READY_FOR_NEW_INDEPENDENT_REVIEW`.

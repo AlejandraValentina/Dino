@@ -68,3 +68,9 @@ work is claimed.
 - [x] P8 revalidado sobre `P4_PASS` mediante provenance y auditoría focal; cinco anchors y todos los gates vigentes PASS.
 - [x] Outputs conservan semántica `BOUNDED_TRANSIENT_INDICATED`; no se declara periodicidad ni validación experimental.
 - [ ] Revisión independiente permanece pendiente; P9 sigue detenido.
+
+## Revalidación tras recuperación G2-v2 — 2026-09-29
+
+- [x] P8 conserva los cinco anchors y todos los gates históricos; `p8_performance.py` y runtime asociado sin cambios, 141 pruebas focales PASS y 1 campaña completa excluida por no haber cambiado P8.
+- [x] Recibo nuevo `results/p5-p8-revalidation-g2-v2-recovery-20260929/receipt.json`; semántica `BOUNDED_TRANSIENT_INDICATED`, sin validación experimental.
+- [ ] Nueva revisión independiente P4–P8 pendiente; P9 no autorizado.
