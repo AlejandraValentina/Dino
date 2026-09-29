@@ -4,6 +4,8 @@ from __future__ import annotations
 import copy
 import gzip
 import json
+import math
+import shutil
 from pathlib import Path
 
 import pytest
@@ -15,6 +17,7 @@ from dev_orchestrator.p4_g2_v2_recovery import (
 )
 from dev_orchestrator.p4_g2_v2_offline_audit import (
     EvidenceError, audit, check_claim, compare, gates, read_checkpoint,
+    validate_detector_snapshot, validate_metric_inputs,
 )
 from motorsim.periodicity import PeriodicityDetector, compare_cycles
 
@@ -24,7 +27,7 @@ def _inputs(cycle: int, sensor_pressure: float = 1.) -> dict:
     return {
         "cycle": cycle, "begin": begin, "end": begin+360., "identity": EXPECTED,
         "state": [1., 1., 0.] * 3, "cells": [[1., 1., 1., 1.]],
-        "work_indicated_J": 1., "port_integral": [1.],
+        "work_indicated_J": 1., "port_integral": [1., 0., 0.],
         "initial_cylinder_mass": 1.,
         "history": [
             {"angle": angle, "p_cyl": 1.,
@@ -82,6 +85,93 @@ def test_offline_cfl_is_recalculated_from_stage_data():
     del row["gate_inputs"]["segments"][2]["stages"]
     with pytest.raises(KeyError):
         gates(row)
+
+
+def _gate_row():
+    segment = {"physical_balance": [0., 0., 0.],
+               "max_global_residual": 0., "max_stage_residual": 0.,
+               "extrema": {"rho": 1., "p": 1., "T": 1.,
+                           "Y_min": 0., "Y_max": 1.},
+               "stages": [{"dt": .1, "limits": [.2, .25]}]}
+    return {"gate_inputs": {"complete": True, "global_balance": [0., 0., 0.],
+                            "segments": [copy.deepcopy(segment) for _ in range(3)]}}
+
+
+@pytest.mark.parametrize("dt", [False, True, None, "0.001", [0.001], 0, -.1,
+                                      math.nan, math.inf, -math.inf])
+def test_malformed_dt_is_invalid_evidence_not_a_physical_fail(dt):
+    row = _gate_row()
+    row["gate_inputs"]["segments"][0]["stages"][0]["dt"] = dt
+    with pytest.raises(EvidenceError, match="MALFORMED_CFL_DT"):
+        gates(row)
+
+
+def test_positive_finite_dt_passes_type_validation():
+    assert all(gates(_gate_row()).values())
+
+
+@pytest.mark.parametrize("limit", [False, True, None, "0.2", 0, -.2,
+                                         math.nan, math.inf, -math.inf])
+def test_malformed_cfl_limit_is_invalid_evidence(limit):
+    row = _gate_row()
+    row["gate_inputs"]["segments"][0]["stages"][0]["limits"][0] = limit
+    with pytest.raises(EvidenceError, match="MALFORMED_CFL_LIMIT"):
+        gates(row)
+
+
+@pytest.mark.parametrize("field,malformed,label", [
+    ("global_balance", False, "GLOBAL_BALANCE"),
+    ("physical_balance", False, "PHYSICAL_BALANCE"),
+    ("max_global_residual", False, "GLOBAL_RESIDUAL"),
+    ("rho", False, "EXTREMA_rho"),
+])
+def test_boolean_cannot_be_a_conservation_or_admissibility_number(field, malformed, label):
+    row = _gate_row()
+    segment = row["gate_inputs"]["segments"][0]
+    if field == "global_balance":
+        row["gate_inputs"][field][0] = malformed
+    elif field == "physical_balance":
+        segment[field][0] = malformed
+    elif field == "rho":
+        segment["extrema"][field] = malformed
+    else:
+        segment[field] = malformed
+    with pytest.raises(EvidenceError, match=f"MALFORMED_{label}"):
+        gates(row)
+
+
+def test_boolean_metric_claim_cannot_match_numeric_zero():
+    metric = compare(_inputs(1), _inputs(2))
+    assert metric["sensor_max"] == 0.
+    claim = copy.deepcopy(metric)
+    claim["sensor_max"] = False
+    with pytest.raises(EvidenceError, match="MALFORMED_CLAIM_METRIC"):
+        check_claim(claim, metric, "LAG2")
+
+
+@pytest.mark.parametrize("field", ["cycle", "begin", "sample_angle", "sample_pressure"])
+def test_boolean_cycle_or_angular_input_is_invalid(field):
+    row = _inputs(1)
+    if field == "cycle":
+        row["cycle"] = True
+    elif field == "begin":
+        row["begin"] = False
+    elif field == "sample_angle":
+        row["history"][0]["angle"] = False
+    else:
+        row["history"][0]["sensors_p_u_M_Y"][0][0] = False
+    with pytest.raises(EvidenceError, match="MALFORMED_"):
+        validate_metric_inputs(row, 1)
+
+
+def test_boolean_detector_streak_is_invalid_even_when_equal_to_one():
+    detector = PeriodicityDetector(1, EXPECTED["branch_map"])
+    detector.update(metric_row(_inputs(1)), lag1={"passed": False},
+                    lag2={"passed": False}, branch="A")
+    saved = snapshot(detector, 1, "A", {"passed": False}, {"passed": False})
+    saved["state"]["branch_A_streak"] = True
+    with pytest.raises(EvidenceError, match="MALFORMED_DETECTOR_BRANCH_A_STREAK"):
+        validate_detector_snapshot(saved, 1)
 
 
 def test_numpy_scalar_serialization_preserves_values_and_boolean_gate():
@@ -195,9 +285,12 @@ def _synthetic_durable_campaign(root: Path):
         detector.update(metric_row(row), lag1=lag1, lag2=lag2, branch=branch)
         saved = snapshot(detector, cycle, branch, lag1, lag2)
         source_sha = sha(f"synthetic source {cycle}".encode()) if cycle <= 30 else None
+        claims = {"lag1": lag1, "lag2": lag2, "checks": _gates()}
+        if cycle >= 31:
+            claims.update(cycle=cycle, branch=branch, elapsed_seconds=1.,
+                          detector=saved["state"])
         parent_sha = save_checkpoint(root, cycle, row, saved,
-                                     {"lag1": lag1, "lag2": lag2,
-                                      "checks": _gates()},
+                                     claims,
                                      parent_sha, source_sha)
         if cycle <= 30:
             ancestry.append({"cycle": cycle, "source_sha256": source_sha,
@@ -217,7 +310,8 @@ def _synthetic_durable_campaign(root: Path):
     (root/"manifest.json").write_text(json.dumps(manifest), encoding="utf8")
     (root/"decision.json").write_text(json.dumps({
         "status": "E13_G2_V2_PASS", "stop_reason": "CONVERGED_PERIOD2",
-        "last_cycle": 38, "closing_checkpoint_sha256": parent_sha,
+        "last_cycle": 38, "cycles_executed": 8, "max_cycles": 400,
+        "closing_checkpoint_sha256": parent_sha,
     }), encoding="utf8")
 
 
@@ -286,3 +380,25 @@ def test_reacquired_terminal_states_match_historical_run_exactly():
             (ROOT/f"checkpoint_cycle{cycle:03}.json.gz").read_bytes()))["inputs"]
         assert (old["begin"], old["end"], old["state"], old["cells"]) == (
             new["begin"], new["end"], new["state"], new["cells"])
+
+
+def test_r2_real_closing_checkpoint_false_dt_cannot_pass_after_hash_update(tmp_path):
+    """Replay the R2 finding without relying on the R2 report as an oracle."""
+    target = tmp_path/"mutated-real-evidence"
+    target.mkdir()
+    for checkpoint in ROOT.glob("checkpoint_cycle*.json.gz"):
+        shutil.copyfile(checkpoint, target/checkpoint.name)
+    for name in ("manifest.json", "seed-detector-cycle030.json", "decision.json"):
+        shutil.copyfile(ROOT/name, target/name)
+    path = target/"checkpoint_cycle050.json.gz"
+    payload = json.loads(gzip.decompress(path.read_bytes()))
+    payload["inputs"]["gate_inputs"]["segments"][0]["stages"][0]["dt"] = False
+    path.write_bytes(gzip.compress(json.dumps(payload, separators=(",", ":")).encode(),
+                                   mtime=0))
+    decision_path = target/"decision.json"
+    decision = json.loads(decision_path.read_text(encoding="utf-8"))
+    decision["closing_checkpoint_sha256"] = sha(path.read_bytes())
+    decision_path.write_text(json.dumps(decision), encoding="utf-8")
+    result = audit(target)
+    assert result["classification"] == "E13_G2_V2_INCONCLUSIVE", result
+    assert result["reason"] == "MALFORMED_CFL_DT"
