@@ -2,7 +2,7 @@
 from dataclasses import dataclass, replace
 from hashlib import sha256
 from math import pi, isfinite, floor
-import csv, json
+import csv, gzip, json
 from pathlib import Path
 
 from .project import ProjectError
@@ -216,11 +216,53 @@ def _current(system):
         "fresh_delivered_tr1": system.fresh_delivered_tr1,
         "fresh_delivered_tr2": system.fresh_delivered_tr2,
         "fresh_short_circuit": system.fresh_short_circuit,
+        "p8_boundary_species_trace": system.p8_boundary_species_trace,
     }
 
 
-def _terminal_replay_digest(system):
-    """Hash all exact terminal state and accumulated ledgers used by P8 replay."""
+def _capture_boundary_species(system, prefix=()):
+    """Record the exact species deltas accepted at both external boundaries.
+
+    This wraps only the P8 instance method and observes before/after inventories;
+    it does not alter fluxes, donor selection, or state updates.
+    """
+    system.p8_boundary_species_trace = list(prefix)
+    original = system._boundary_exchange
+
+    def capture(mass_flux, component, dt, *, incoming):
+        index = 0 if incoming else -1
+        before = tuple(system.species_mass[component][index])
+        original(mass_flux, component, dt, incoming=incoming)
+        after = tuple(system.species_mass[component][index])
+        # The coupled gas solver has appended this accepted step before P6
+        # applies its two-stage species boundary exchanges (one-based index).
+        step_index = len(system.gas.history)
+        calls = [row for row in system.p8_boundary_species_trace
+                 if row["step_index"] == step_index]
+        stage_index = len(calls) // 2
+        system.p8_boundary_species_trace.append({
+            "step_index": step_index,
+            "stage_index": stage_index,
+            "boundary_index": len(calls) % 2,
+            "component": component,
+            "incoming": bool(incoming),
+            "mass_flux": float(mass_flux),
+            "dt": float(dt),
+            "species_before": before,
+            "species_after": after,
+            "delta_species_mass": tuple(a - b for a, b in zip(after, before)),
+        })
+
+    system._boundary_exchange = capture
+
+
+def _terminal_digest_payload(system, accepted_steps):
+    """Return the exact contractual terminal replay preimage.
+
+    The durable auditor rebuilds this payload from the primary terminal state
+    and raw flux traces. Keep the field set explicit and version it alongside
+    the durable evidence schema.
+    """
     gas = system.gas
     events = [{"start": event.start, "fresh_air": event.fresh_air,
                "fuel": event.fuel, "ledger": vars(event.ledger).copy()}
@@ -244,18 +286,31 @@ def _terminal_replay_digest(system):
         "p7_source_delta": system.p7_source_delta,
         "p7_enabled": system.p7_enabled,
         "p7_angular_rate_deg_s": system.p7_angular_rate_deg_s,
+        "p8_boundary_species_trace": system.p8_boundary_species_trace,
         "external_flux_trace": system.external_flux_trace,
         "verification_trace": system.verification_trace,
+        "gas_history": _primary_gas_history(system.gas.history),
+        "accepted_steps": accepted_steps,
     }
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"),
-                         allow_nan=False).encode("utf-8")
+    return payload
+
+def _terminal_replay_digest(system, accepted_steps):
+    """Hash the canonical JSON representation of the terminal preimage."""
+    encoded = json.dumps(_terminal_digest_payload(system, accepted_steps), sort_keys=True,
+                         separators=(",", ":"), allow_nan=False).encode("utf-8")
     return sha256(encoded).hexdigest()
 
 def _physical_state_digest(system):
     value = repr((system.gas._state(), system.species_mass)).encode("utf-8")
     return sha256(value).hexdigest()
 
-def _run_once(rpm):
+def _primary_gas_history(history):
+    """Select durable numeric SSPRK2 records; omit runtime-only object graphs."""
+    fields = ("angle", "angle_start", "dt", "stage_states", "stage_work_rates",
+              "stage_external", "stage_exhaust_external", "prescribed_heat", "totals")
+    return [{key: record[key] for key in fields} for record in history]
+
+def _run_once(rpm, *, capture_primary=False):
     case, system = _new_system(rpm, enable_p7=False)
     prep_start, prep_end = PREPARATION_START_DEG, PREPARATION_END_DEG
     prep_cuts = build_event_cuts(case, prep_start, prep_end, p7_enabled=False)
@@ -265,6 +320,7 @@ def _run_once(rpm):
         raise RuntimeError("preparation must have P7 disabled and zero heat")
     prepared_fresh = sum(system.species_mass["cylinder"][0][:2])
     geometry_rebase = _reset_measurement(system, case=case)
+    _capture_boundary_species(system)
     prepared_state_digest = _physical_state_digest(system)
     prepared_snapshot = system.snapshot()
     _, prepared_restored = _new_system(rpm, enable_p7=True)
@@ -272,7 +328,8 @@ def _run_once(rpm):
     prepared_state_reproduced = (_physical_state_digest(prepared_restored) ==
                                  prepared_state_digest)
     measured_start, measured_end = MEASURED_START_DEG, MEASURED_END_DEG
-    checkpoint = None; dts = []; cfls = []
+    checkpoint = None; checkpoint_primary_state = None
+    checkpoint_boundary_species_trace = None; dts = []; cfls = []
     cuts = build_event_cuts(case, measured_start, measured_end,
                             p7_enabled=True, restart_probe=True)
     while system.gas.angle < measured_end - 1e-12:
@@ -280,6 +337,8 @@ def _run_once(rpm):
         if checkpoint is None and abs(system.gas.angle - RESTART_PROBE_DEG) <= 1e-12:
             # The probe is an exact shared scheduler cut inside P7.
             checkpoint = system.snapshot()
+            checkpoint_primary_state = _current(system)
+            checkpoint_boundary_species_trace = list(system.p8_boundary_species_trace)
         system.step(dt, angle=system.gas.angle + dt*omega_deg_s(rpm))
         dts.append(dt); cfls.append(dt/(cfl_dt/P8_CFL))
     if checkpoint is None:
@@ -294,6 +353,10 @@ def _run_once(rpm):
     heat = sum(h["prescribed_heat"] for h in system.gas.history)
     mres = final["mass"] - system.gas._initial["mass"] - ext["mass"]
     eres = final["energy"] - system.gas._initial["energy"] - ext["energy"] - heat + work + ccwork
+    accepted_steps = [{"dt": record["dt"], "achieved_cfl": cfl}
+                      for record, cfl in zip(system.gas.history, cfls)]
+    if len(accepted_steps) != len(system.gas.history):
+        raise RuntimeError("accepted CFL samples do not cover the gas history")
     r = {"rpm": rpm, "omega_deg_s": omega_deg_s(rpm), "prepared_cylinder_fresh_kg": prepared_fresh,
          "window_deg": [MEASURED_START_DEG, MEASURED_END_DEG], "window_s": cycle_duration_s(rpm), "step_count": len(dts),
          "actual_dt_min_s": min(dts), "actual_dt_max_s": max(dts), "achieved_CFL_min": min(cfls),
@@ -331,7 +394,7 @@ def _run_once(rpm):
                                   "crankcase_p_dv_energy": -ccwork,
                                   "cylinder_p_dv_energy": -work,
                                    "residual": eres},
-         "terminal_replay_digest": _terminal_replay_digest(system)}
+         "terminal_replay_digest": _terminal_replay_digest(system, accepted_steps)}
     r["gates"] = {
         "finite": all(isfinite(float(x)) for x in (work, pmax, *dts, *cfls)),
         "geometry_rebased": all(geometry_rebase.values()), "admissible": bool(system.gas.admissible()),
@@ -347,6 +410,7 @@ def _run_once(rpm):
     }
     _, restored = _new_system(rpm, enable_p7=True)
     restored.restore(checkpoint)
+    _capture_boundary_species(restored, checkpoint_boundary_species_trace)
     while restored.gas.angle < measured_end - 1e-12:
         step, _ = _step_dt(restored.gas, rpm, measured_end, cuts)
         restored.step(step, angle=restored.gas.angle + step*omega_deg_s(rpm))
@@ -369,10 +433,49 @@ def _run_once(rpm):
         "p7_ledger_equal", "external_equal", "fresh_delivery_equal",
         "fresh_delivery_tr1_equal", "fresh_delivery_tr2_equal",
         "short_circuit_equal"))
+    if capture_primary:
+        # These are execution outputs, not the flattened campaign summaries.
+        # The offline auditor independently integrates delivery metrics from
+        # the raw interface fluxes and rebuilds the terminal digest.
+        r["_primary_evidence"] = {
+            "schema": "P8_PRIMARY_ANCHOR_V1",
+            "rpm": rpm,
+            "configuration": {"mechanics": "S2T-0D-01", "cfl": P8_CFL,
+                              "eos_R_J_kgK": 287.0, "eos_gamma": 1.35,
+                              "preparation_deg": [PREPARATION_START_DEG, PREPARATION_END_DEG],
+                              "measured_deg": [MEASURED_START_DEG, MEASURED_END_DEG],
+                              "p7_deg": [P7_START_DEG, P7_END_DEG],
+                              "restart_probe_deg": RESTART_PROBE_DEG,
+                              "float_format": "binary64"},
+            "producer_terminal_digest": r["terminal_replay_digest"],
+            "terminal": _terminal_digest_payload(system, accepted_steps),
+            "restart": {
+                "checkpoint_state": checkpoint_primary_state,
+                "checkpoint_angle_deg": checkpoint_primary_state["angle"],
+                "terminal_state": {**restarted_state,
+                                    "gas_last_external": restored.gas._last_external},
+            },
+        }
     return r
 
-def run_anchor(rpm, **kwargs):
-    a = _run_once(rpm); b = _run_once(rpm)
+def _write_primary_evidence(output_dir, rpm, label, evidence):
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    encoded = json.dumps(evidence, ensure_ascii=False, allow_nan=False,
+                         separators=(",", ":")).encode("utf-8")
+    compressed = gzip.compress(encoded, compresslevel=6, mtime=0)
+    name = f"primary-{rpm}-{label}.json.gz"
+    path = output_dir / name
+    path.write_bytes(compressed)
+    return {"schema": evidence["schema"], "path": name,
+            "sha256": sha256(compressed).hexdigest(), "size_bytes": len(compressed)}
+
+def run_anchor(rpm, *, primary_output_dir=None, **kwargs):
+    capture_primary = primary_output_dir is not None
+    a = _run_once(rpm, capture_primary=capture_primary)
+    b = _run_once(rpm, capture_primary=capture_primary)
+    primary_a = a.pop("_primary_evidence", None)
+    primary_b = b.pop("_primary_evidence", None)
     digest_a = a.get("terminal_replay_digest")
     digest_b = b.get("terminal_replay_digest")
     a["deterministic_replay"] = {
@@ -389,12 +492,17 @@ def run_anchor(rpm, **kwargs):
     }
     a["replay_terminal_digests"] = {"first": digest_a, "second": digest_b}
     a["gates"]["deterministic_replay"] = all(a["deterministic_replay"].values())
+    if primary_output_dir is not None:
+        a["primary_evidence"] = {
+            "first": _write_primary_evidence(primary_output_dir, rpm, "first", primary_a),
+            "second": _write_primary_evidence(primary_output_dir, rpm, "second", primary_b),
+        }
     return a
 
 def run_campaign(output_dir):
     from .simulation_case import SyntheticCase
     output_dir = Path(output_dir); output_dir.mkdir(parents=True, exist_ok=True)
-    anchors = [run_anchor(r) for r in P8_ANCHORS]
+    anchors = [run_anchor(r, primary_output_dir=output_dir) for r in P8_ANCHORS]
     failures = [f"{a['rpm']}:{k}" for a in anchors for k, v in a["gates"].items() if not v]
     ok = not failures
     payload = {"status": "P8_WIDE_RPM_PERFORMANCE_VERIFIED_CONDITIONAL" if ok else "P8_NUMERICAL_GATE_BLOCKED",
@@ -408,6 +516,7 @@ def run_campaign(output_dir):
                                "periodic_convergence": "NOT_GRANTED_BY_P4"},
                "event_scheduler": "authoritative Model(case).events repeated by 360*k over every absolute interval; measured/restart also cut P7 at 350/390 and restart at 370",
                "residual_accounting": "external mass/energy is intake into stored topology minus exhaust outflow; internal interfaces cancel; energy also includes accepted P7 heat and both chamber -p*dV terms",
+               "durable_primary_evidence": "P8_PRIMARY_ANCHOR_V1 gzip JSON per anchor/replay; offline auditor recomputes deliveries, short-circuit, balances, work, power, species inventory and terminal digests before evaluating summaries",
                "initial_states_pty": SyntheticCase().initial_pty, "topology": "frozen P5-C/P6/P7 full-topology fixture",
                "synthetic_not_measured": True}, "p4": "BLOCKED / NOT_GRANTED", "p9": "STOPPED", "anchors": anchors}
     (output_dir / "p8-wide-rpm.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")

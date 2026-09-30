@@ -10,7 +10,7 @@ import csv
 import json
 from pathlib import Path
 
-P8_RESULT_DIR = Path("results/p8-wide-rpm-20260927")
+P8_RESULT_DIR = Path("results/p8-wide-rpm-auditable-r4-final-20260930")
 P8_RPMS = (2500, 5000, 8000, 11000, 15000)
 P8_EVIDENCE_COMMIT = "437a66fa4cbdf58c3393e7aaf81ca426c5419ebe"
 P8_CLOSED_AT = "2026-09-27T22:34:04-03:00"
@@ -69,6 +69,8 @@ def _audit_p8(repo: Path) -> tuple[dict, dict]:
         return {}, {"evidence_present": False, "closure_ok": False}
 
     payload = _read_json(consolidated_path)
+    from .p8_durable_audit import audit_campaign
+    primary_audit = audit_campaign(result_dir)
     anchors_list = payload.get("anchors", [])
     anchors = {int(a["rpm"]): a for a in anchors_list if "rpm" in a}
     anchors_complete = tuple(sorted(anchors)) == P8_RPMS and len(anchors_list) == len(P8_RPMS)
@@ -110,13 +112,16 @@ def _audit_p8(repo: Path) -> tuple[dict, dict]:
         "gates_ok": gates_ok,
         "restart_ok": restart_ok,
         "replay_ok": replay_ok,
+        "primary_audit_ok": primary_audit.get("passed") is True,
+        "primary_audit": primary_audit,
         "p7_nonvacuous": nonvacuous,
         "p4_blocked": payload.get("p4") == "BLOCKED / NOT_GRANTED",
         "p9_stopped": payload.get("p9") == "STOPPED",
         "status_ok": payload.get("status") == "P8_WIDE_RPM_PERFORMANCE_VERIFIED_CONDITIONAL",
         "no_failures": payload.get("failures") == [],
     }
-    flags["closure_ok"] = all(flags.values())
+    flags["closure_ok"] = all(value is True for key, value in flags.items()
+                               if key != "primary_audit")
     return payload, flags
 
 
@@ -143,11 +148,15 @@ def evaluate(repo: str | Path = ".") -> dict:
             "csv_consistency": "PASS" if audit.get("csv_equal") else "BLOCKED",
             "restart": "PASS" if audit.get("restart_ok") else "BLOCKED",
             "determinism": "PASS" if audit.get("replay_ok") else "BLOCKED",
+            "primary_recomputation": "PASS" if audit.get("primary_audit_ok") else "BLOCKED",
             "p7_nonvacuous": "PASS" if audit.get("p7_nonvacuous") else "BLOCKED",
             "measured_gates": "PASS" if audit.get("gates_ok") else "BLOCKED",
             "p4": "NOT_GRANTED" if audit.get("p4_blocked") else "INCONSISTENT",
             "p9": "STOPPED" if audit.get("p9_stopped") else "INCONSISTENT",
-            "independent_review": "PENDING",
+            "independent_review": (
+                "READY_FOR_FINAL_INDEPENDENT_RATIFICATION"
+                if closed else "BLOCKED_PENDING_P8_PRIMARY_EVIDENCE"
+            ),
         },
         "blockers": [
             "P4 remains BLOCKED / NOT_GRANTED",

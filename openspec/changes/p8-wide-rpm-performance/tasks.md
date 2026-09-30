@@ -74,3 +74,23 @@ work is claimed.
 - [x] P8 conserva los cinco anchors y todos los gates históricos; `p8_performance.py` y runtime asociado sin cambios, 141 pruebas focales PASS y 1 campaña completa excluida por no haber cambiado P8.
 - [x] Recibo nuevo `results/p5-p8-revalidation-g2-v2-recovery-20260929/receipt.json`; semántica `BOUNDED_TRANSIENT_INDICATED`, sin validación experimental.
 - [ ] Nueva revisión independiente P4–P8 pendiente; P9 no autorizado.
+
+## Remediación R4-001 — evidencia primaria durable y reauditoría
+
+- [x] Preservar sin modificaciones el reporte/receipt R4 `INDEPENDENT_REVIEW_BLOCKED` y la campaña R3 que reprodujo el MAJOR.
+- [x] Confirmar que la campaña R3 no persiste los flujos resueltos/preimage completos necesarios; por tanto, una campaña nueva de los mismos cinco anchors es necesaria y está autorizada.
+- [x] Añadir persistencia por replay de terminal state, historial gasdinámico, trazas de donantes/flujo, ledgers, configuración, checkpoint dentro de P7 y terminal de restart.
+- [x] Implementar auditor offline independiente de los resúmenes: integra fresh delivery/short-circuit desde flujos primarios; deriva trabajo/potencia/torque/presión y balances; reconstruye el preimage y el SHA-256; compara directamente replay y restart.
+- [x] Especificar canonicalización del digest y clases PRIMARY/DERIVED/SUMMARY/DIAGNOSTIC en `docs/gasdynamic/p8_primary_evidence_r4.md`.
+- [x] Agregar regresiones de mutación R4-001 para los dos valores frescos, copias consolidadas/individuales/concordantes, digest y evidencia primaria alterada.
+- [x] Ejecutar y auditar campaña nueva de 2500/5000/8000/11000/15000 rpm sin modificar configuración física; los cinco anchors aprobaron la reauditoría primaria y el replay.
+- [x] Ejecutar suites P8 y auditoría mutacional R4-001, regresiones P5–P7 y P4/E13, OpenSpec estricto, `git diff --check` y Git LFS fsck.
+- [x] Actualizar ruta del evaluador durable y registrar `READY_FOR_FINAL_INDEPENDENT_RATIFICATION` tras la reauditoría primaria de los cinco anchors. Mantener P9 no autorizado y la validación experimental `NOT_PERFORMED`.
+
+### Evidencia R4-001 — campaña final 2026-09-30
+
+- Resultado primario: `results/p8-wide-rpm-auditable-r4-final-20260930/primary-audit.json`, clasificación `P8_PRIMARY_EVIDENCE_REAUDIT_PASS`; cinco RPM aprobados, replay directo y copias de anchors coincidentes.
+- Pruebas automatizadas: P8 focal 20 PASS; P5–P7 113 PASS; P4/E13 19 PASS. OpenSpec estricto válido; `git diff --check` y `git lfs fsck` PASS.
+- Mutaciones del auditor durable sobre una copia temporal de la campaña final: fresh consolidado/individual/ambos, short-circuit consolidado/individual/ambos, digest consolidado/ambos, ataque combinado y estado primario con referencias SHA/tamaño actualizadas: todos `closure_ok=false`.
+- Impacto: solo `motorsim/p8_performance.py` recibió instrumentación de captura P8; no cambiaron solver/física, archivos productivos P4–P7, C3 ni G2. R4 original y su receipt permanecen intactos. Estado P4 `BLOCKED / NOT_GRANTED`; P9 `STOPPED`; revisión independiente pendiente.
+- El primer intento de campaña R4 queda preservado con `SUPERSEDED_NOT_USED_FOR_DECISION`; no aporta al resultado final. La campaña final es la única evidencia usada por el evaluador durable.

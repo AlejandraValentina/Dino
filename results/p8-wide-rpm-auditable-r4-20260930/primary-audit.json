@@ -1,0 +1,534 @@
+{
+  "schema": "P8_DURABLE_AUDIT_V1",
+  "passed": true,
+  "classification": "P8_PRIMARY_EVIDENCE_REAUDIT_PASS",
+  "campaign_path": "results\\p8-wide-rpm-auditable-r4-20260930",
+  "anchor_file_copies_equal": true,
+  "anchors": {
+    "2500": {
+      "passed": true,
+      "rpm": 2500,
+      "first": {
+        "terminal_digest": "3e7a84044d266d330008495a394c639da378181a8af85e98966d306879480e5c",
+        "counters": {
+          "fresh_delivered_tr1": 5.356449626310481e-06,
+          "fresh_delivered_tr2": 5.356449626310481e-06,
+          "fresh_delivered": 1.0712899252620962e-05,
+          "fresh_short_circuit": 3.682464980732959e-06
+        },
+        "work": 4.360064431757779,
+        "crankcase_work": 2.3948968477634742,
+        "power": 181.6693513232408,
+        "torque": 0.6939258065134064,
+        "p_max": 1754839.8989528634,
+        "heat": 11.356215098293987,
+        "mass_residual": 1.9949319973733282e-17,
+        "energy_residual": -7.361666831684488e-12,
+        "species_residual": 3.469446951953614e-18,
+        "external_totals": {
+          "mass": 0.004265558816386731,
+          "energy": 1775.4771406414995,
+          "species": -4.239494324107801e-07
+        },
+        "external_species": [
+          0.004308787788133708,
+          0.0,
+          -4.107051536834321e-05,
+          -2.1584563786310227e-06
+        ],
+        "species_balance": [
+          6.2784607514050975e-09,
+          0.0,
+          1.246211514957182e-09,
+          -7.524672256678999e-09
+        ],
+        "max_cfl": 0.4,
+        "min_cfl": 0.04670645222104556,
+        "p7_ledger": {
+          "fresh_air_converted": 1.4195268872867488e-05,
+          "fuel_converted": 0.0,
+          "burned_produced": 1.4195268872867485e-05,
+          "residual_unchanged": 0.0,
+          "source_mass_residual": -7.410633559680148e-22,
+          "heat_added": 11.356215098293987,
+          "heat_burn_residual": 0.0,
+          "heat_accumulation_roundoff": -1.792527037176514e-14
+        },
+        "captured_fresh": 1.4195367722837855e-05,
+        "burned_produced": 1.4195268872867485e-05,
+        "p7_heat": 11.356215098293987
+      },
+      "second": {
+        "terminal_digest": "3e7a84044d266d330008495a394c639da378181a8af85e98966d306879480e5c",
+        "counters": {
+          "fresh_delivered_tr1": 5.356449626310481e-06,
+          "fresh_delivered_tr2": 5.356449626310481e-06,
+          "fresh_delivered": 1.0712899252620962e-05,
+          "fresh_short_circuit": 3.682464980732959e-06
+        },
+        "work": 4.360064431757779,
+        "crankcase_work": 2.3948968477634742,
+        "power": 181.6693513232408,
+        "torque": 0.6939258065134064,
+        "p_max": 1754839.8989528634,
+        "heat": 11.356215098293987,
+        "mass_residual": 1.9949319973733282e-17,
+        "energy_residual": -7.361666831684488e-12,
+        "species_residual": 3.469446951953614e-18,
+        "external_totals": {
+          "mass": 0.004265558816386731,
+          "energy": 1775.4771406414995,
+          "species": -4.239494324107801e-07
+        },
+        "external_species": [
+          0.004308787788133708,
+          0.0,
+          -4.107051536834321e-05,
+          -2.1584563786310227e-06
+        ],
+        "species_balance": [
+          6.2784607514050975e-09,
+          0.0,
+          1.246211514957182e-09,
+          -7.524672256678999e-09
+        ],
+        "max_cfl": 0.4,
+        "min_cfl": 0.04670645222104556,
+        "p7_ledger": {
+          "fresh_air_converted": 1.4195268872867488e-05,
+          "fuel_converted": 0.0,
+          "burned_produced": 1.4195268872867485e-05,
+          "residual_unchanged": 0.0,
+          "source_mass_residual": -7.410633559680148e-22,
+          "heat_added": 11.356215098293987,
+          "heat_burn_residual": 0.0,
+          "heat_accumulation_roundoff": -1.792527037176514e-14
+        },
+        "captured_fresh": 1.4195367722837855e-05,
+        "burned_produced": 1.4195268872867485e-05,
+        "p7_heat": 11.356215098293987
+      },
+      "reason": null
+    },
+    "5000": {
+      "passed": true,
+      "rpm": 5000,
+      "first": {
+        "terminal_digest": "8057647202c77071a1bb2cd9532985cad0531c5790865f0f3c543f8baccb3dc2",
+        "counters": {
+          "fresh_delivered_tr1": 2.6689049442162243e-06,
+          "fresh_delivered_tr2": 2.6689049442162243e-06,
+          "fresh_delivered": 5.337809888432449e-06,
+          "fresh_short_circuit": 6.555698444361781e-07
+        },
+        "work": 2.0562492362787825,
+        "crankcase_work": 0.0029125409644265017,
+        "power": 171.3541030232319,
+        "torque": 0.3272622301827029,
+        "p_max": 1738504.6946132828,
+        "heat": 5.389498823617735,
+        "mass_residual": 1.485356976305141e-17,
+        "energy_residual": -2.858828625218468e-13,
+        "species_residual": 6.938893903907228e-18,
+        "external_totals": {
+          "mass": 0.0005470110734536762,
+          "energy": 190.67885173672207,
+          "species": -1.0571450812271511e-06
+        },
+        "external_species": [
+          0.0005627337253323527,
+          0.0,
+          -1.5327145292458373e-05,
+          -3.9550658621830467e-07
+        ],
+        "species_balance": [
+          2.5830431541415614e-09,
+          0.0,
+          1.1897422828687073e-09,
+          -3.772785431496084e-09
+        ],
+        "max_cfl": 0.4,
+        "min_cfl": 0.010462246081812045,
+        "p7_ledger": {
+          "fresh_air_converted": 6.736873529522168e-06,
+          "fuel_converted": 0.0,
+          "burned_produced": 6.7368735295221685e-06,
+          "residual_unchanged": 0.0,
+          "source_mass_residual": -2.6082038689562654e-23,
+          "heat_added": 5.389498823617735,
+          "heat_burn_residual": 0.0,
+          "heat_accumulation_roundoff": -1.2194780775465208e-14
+        },
+        "captured_fresh": 6.73703644289505e-06,
+        "burned_produced": 6.7368735295221685e-06,
+        "p7_heat": 5.389498823617735
+      },
+      "second": {
+        "terminal_digest": "8057647202c77071a1bb2cd9532985cad0531c5790865f0f3c543f8baccb3dc2",
+        "counters": {
+          "fresh_delivered_tr1": 2.6689049442162243e-06,
+          "fresh_delivered_tr2": 2.6689049442162243e-06,
+          "fresh_delivered": 5.337809888432449e-06,
+          "fresh_short_circuit": 6.555698444361781e-07
+        },
+        "work": 2.0562492362787825,
+        "crankcase_work": 0.0029125409644265017,
+        "power": 171.3541030232319,
+        "torque": 0.3272622301827029,
+        "p_max": 1738504.6946132828,
+        "heat": 5.389498823617735,
+        "mass_residual": 1.485356976305141e-17,
+        "energy_residual": -2.858828625218468e-13,
+        "species_residual": 6.938893903907228e-18,
+        "external_totals": {
+          "mass": 0.0005470110734536762,
+          "energy": 190.67885173672207,
+          "species": -1.0571450812271511e-06
+        },
+        "external_species": [
+          0.0005627337253323527,
+          0.0,
+          -1.5327145292458373e-05,
+          -3.9550658621830467e-07
+        ],
+        "species_balance": [
+          2.5830431541415614e-09,
+          0.0,
+          1.1897422828687073e-09,
+          -3.772785431496084e-09
+        ],
+        "max_cfl": 0.4,
+        "min_cfl": 0.010462246081812045,
+        "p7_ledger": {
+          "fresh_air_converted": 6.736873529522168e-06,
+          "fuel_converted": 0.0,
+          "burned_produced": 6.7368735295221685e-06,
+          "residual_unchanged": 0.0,
+          "source_mass_residual": -2.6082038689562654e-23,
+          "heat_added": 5.389498823617735,
+          "heat_burn_residual": 0.0,
+          "heat_accumulation_roundoff": -1.2194780775465208e-14
+        },
+        "captured_fresh": 6.73703644289505e-06,
+        "burned_produced": 6.7368735295221685e-06,
+        "p7_heat": 5.389498823617735
+      },
+      "reason": null
+    },
+    "8000": {
+      "passed": true,
+      "rpm": 8000,
+      "first": {
+        "terminal_digest": "ae14d7147b3e21c807a89a0241a9904634793893ab8f1e890b12c148036bbfd0",
+        "counters": {
+          "fresh_delivered_tr1": 1.3684640687189666e-06,
+          "fresh_delivered_tr2": 1.3684640687189666e-06,
+          "fresh_delivered": 2.7369281374379333e-06,
+          "fresh_short_circuit": 1.257943552924221e-07
+        },
+        "work": 0.6691194967847296,
+        "crankcase_work": -0.44068898868749634,
+        "power": 89.2159329046306,
+        "torque": 0.10649367543245129,
+        "p_max": 1687764.6907165232,
+        "heat": 2.0740493096814236,
+        "mass_residual": 1.0001765041178778e-17,
+        "energy_residual": -4.2216230511371577e-13,
+        "species_residual": 0.0,
+        "external_totals": {
+          "mass": 0.00019860189346346992,
+          "energy": 64.51855336847315,
+          "species": -1.812087734038001e-07
+        },
+        "external_species": [
+          0.00020582511808347838,
+          0.0,
+          -7.169386188759807e-06,
+          -5.383843124856286e-08
+        ],
+        "species_balance": [
+          9.850011652935916e-10,
+          0.0,
+          8.644876004708612e-11,
+          -1.0714499185038512e-09
+        ],
+        "max_cfl": 0.4,
+        "min_cfl": 0.012279603076107917,
+        "p7_ledger": {
+          "fresh_air_converted": 2.592561637101779e-06,
+          "fuel_converted": 0.0,
+          "burned_produced": 2.5925616371017795e-06,
+          "residual_unchanged": 0.0,
+          "source_mass_residual": -2.5694297777428422e-23,
+          "heat_added": 2.0740493096814236,
+          "heat_burn_residual": 0.0,
+          "heat_accumulation_roundoff": 5.1770653736182837e-17
+        },
+        "captured_fresh": 2.5927860030150544e-06,
+        "burned_produced": 2.5925616371017795e-06,
+        "p7_heat": 2.0740493096814236
+      },
+      "second": {
+        "terminal_digest": "ae14d7147b3e21c807a89a0241a9904634793893ab8f1e890b12c148036bbfd0",
+        "counters": {
+          "fresh_delivered_tr1": 1.3684640687189666e-06,
+          "fresh_delivered_tr2": 1.3684640687189666e-06,
+          "fresh_delivered": 2.7369281374379333e-06,
+          "fresh_short_circuit": 1.257943552924221e-07
+        },
+        "work": 0.6691194967847296,
+        "crankcase_work": -0.44068898868749634,
+        "power": 89.2159329046306,
+        "torque": 0.10649367543245129,
+        "p_max": 1687764.6907165232,
+        "heat": 2.0740493096814236,
+        "mass_residual": 1.0001765041178778e-17,
+        "energy_residual": -4.2216230511371577e-13,
+        "species_residual": 0.0,
+        "external_totals": {
+          "mass": 0.00019860189346346992,
+          "energy": 64.51855336847315,
+          "species": -1.812087734038001e-07
+        },
+        "external_species": [
+          0.00020582511808347838,
+          0.0,
+          -7.169386188759807e-06,
+          -5.383843124856286e-08
+        ],
+        "species_balance": [
+          9.850011652935916e-10,
+          0.0,
+          8.644876004708612e-11,
+          -1.0714499185038512e-09
+        ],
+        "max_cfl": 0.4,
+        "min_cfl": 0.012279603076107917,
+        "p7_ledger": {
+          "fresh_air_converted": 2.592561637101779e-06,
+          "fuel_converted": 0.0,
+          "burned_produced": 2.5925616371017795e-06,
+          "residual_unchanged": 0.0,
+          "source_mass_residual": -2.5694297777428422e-23,
+          "heat_added": 2.0740493096814236,
+          "heat_burn_residual": 0.0,
+          "heat_accumulation_roundoff": 5.1770653736182837e-17
+        },
+        "captured_fresh": 2.5927860030150544e-06,
+        "burned_produced": 2.5925616371017795e-06,
+        "p7_heat": 2.0740493096814236
+      },
+      "reason": null
+    },
+    "11000": {
+      "passed": true,
+      "rpm": 11000,
+      "first": {
+        "terminal_digest": "1d26bdaeebf102a78fa1bffb19a3b779effd254100e7e4b21f21b12d3d53c68b",
+        "counters": {
+          "fresh_delivered_tr1": 7.46260063433727e-07,
+          "fresh_delivered_tr2": 7.46260063433727e-07,
+          "fresh_delivered": 1.492520126867454e-06,
+          "fresh_short_circuit": 3.444858730087946e-08
+        },
+        "work": 0.1371532969733605,
+        "crankcase_work": -0.47798414139412637,
+        "power": 25.14477111178276,
+        "torque": 0.021828625174661012,
+        "p_max": 1685182.7187811628,
+        "heat": 0.8296681396010198,
+        "mass_residual": 5.637851296924623e-18,
+        "energy_residual": 3.241407142695607e-12,
+        "species_residual": 3.469446951953614e-18,
+        "external_totals": {
+          "mass": 0.00010128383246277252,
+          "energy": 31.91710753645292,
+          "species": -4.1282813754287104e-08
+        },
+        "external_species": [
+          0.00010614631639236817,
+          0.0,
+          -4.851881639068744e-06,
+          -1.0602290526836124e-08
+        ],
+        "species_balance": [
+          -4.4119720522070124e-11,
+          0.0,
+          3.6434787779843187e-10,
+          -3.2022816111320924e-10
+        ],
+        "max_cfl": 0.4,
+        "min_cfl": 0.049294250189847316,
+        "p7_ledger": {
+          "fresh_air_converted": 1.0370851745012747e-06,
+          "fuel_converted": 0.0,
+          "burned_produced": 1.0370851745012747e-06,
+          "residual_unchanged": 0.0,
+          "source_mass_residual": -6.565746112139657e-24,
+          "heat_added": 0.8296681396010198,
+          "heat_burn_residual": 0.0,
+          "heat_accumulation_roundoff": -7.146789670481324e-16
+        },
+        "captured_fresh": 1.0373367786182995e-06,
+        "burned_produced": 1.0370851745012747e-06,
+        "p7_heat": 0.8296681396010198
+      },
+      "second": {
+        "terminal_digest": "1d26bdaeebf102a78fa1bffb19a3b779effd254100e7e4b21f21b12d3d53c68b",
+        "counters": {
+          "fresh_delivered_tr1": 7.46260063433727e-07,
+          "fresh_delivered_tr2": 7.46260063433727e-07,
+          "fresh_delivered": 1.492520126867454e-06,
+          "fresh_short_circuit": 3.444858730087946e-08
+        },
+        "work": 0.1371532969733605,
+        "crankcase_work": -0.47798414139412637,
+        "power": 25.14477111178276,
+        "torque": 0.021828625174661012,
+        "p_max": 1685182.7187811628,
+        "heat": 0.8296681396010198,
+        "mass_residual": 5.637851296924623e-18,
+        "energy_residual": 3.241407142695607e-12,
+        "species_residual": 3.469446951953614e-18,
+        "external_totals": {
+          "mass": 0.00010128383246277252,
+          "energy": 31.91710753645292,
+          "species": -4.1282813754287104e-08
+        },
+        "external_species": [
+          0.00010614631639236817,
+          0.0,
+          -4.851881639068744e-06,
+          -1.0602290526836124e-08
+        ],
+        "species_balance": [
+          -4.4119720522070124e-11,
+          0.0,
+          3.6434787779843187e-10,
+          -3.2022816111320924e-10
+        ],
+        "max_cfl": 0.4,
+        "min_cfl": 0.049294250189847316,
+        "p7_ledger": {
+          "fresh_air_converted": 1.0370851745012747e-06,
+          "fuel_converted": 0.0,
+          "burned_produced": 1.0370851745012747e-06,
+          "residual_unchanged": 0.0,
+          "source_mass_residual": -6.565746112139657e-24,
+          "heat_added": 0.8296681396010198,
+          "heat_burn_residual": 0.0,
+          "heat_accumulation_roundoff": -7.146789670481324e-16
+        },
+        "captured_fresh": 1.0373367786182995e-06,
+        "burned_produced": 1.0370851745012747e-06,
+        "p7_heat": 0.8296681396010198
+      },
+      "reason": null
+    },
+    "15000": {
+      "passed": true,
+      "rpm": 15000,
+      "first": {
+        "terminal_digest": "9401a4e06d8cfde44d95b3d26d7b14cdde73676da0b64dd31f60fe5498bd353c",
+        "counters": {
+          "fresh_delivered_tr1": 3.330146315856489e-07,
+          "fresh_delivered_tr2": 3.330146315856489e-07,
+          "fresh_delivered": 6.660292631712978e-07,
+          "fresh_short_circuit": 8.663303027031088e-09
+        },
+        "work": -0.09811184796898713,
+        "crankcase_work": -0.43059890504934256,
+        "power": -24.527961992246784,
+        "torque": -0.015614985580144835,
+        "p_max": 1716040.4740701027,
+        "heat": 0.26576644913494724,
+        "mass_residual": 1.3444106938820255e-17,
+        "energy_residual": -2.930988785010413e-14,
+        "species_residual": -1.3877787807814457e-17,
+        "external_totals": {
+          "mass": 5.231164055151437e-05,
+          "energy": 15.81562990673734,
+          "species": -9.216410055997075e-09
+        },
+        "external_species": [
+          5.6160480787753235e-05,
+          0.0,
+          -3.8467008327406155e-06,
+          -2.1394034982635826e-09
+        ],
+        "species_balance": [
+          -4.598765294768731e-11,
+          0.0,
+          1.2808650817215634e-10,
+          -8.20988621531456e-11
+        ],
+        "max_cfl": 0.4,
+        "min_cfl": 0.0180790342733774,
+        "p7_ledger": {
+          "fresh_air_converted": 3.3220806141868403e-07,
+          "fuel_converted": 0.0,
+          "burned_produced": 3.3220806141868403e-07,
+          "residual_unchanged": 0.0,
+          "source_mass_residual": -9.098986738083304e-24,
+          "heat_added": 0.26576644913494724,
+          "heat_burn_residual": 0.0,
+          "heat_accumulation_roundoff": 2.0003530082357557e-17
+        },
+        "captured_fresh": 3.3246799024997374e-07,
+        "burned_produced": 3.3220806141868403e-07,
+        "p7_heat": 0.26576644913494724
+      },
+      "second": {
+        "terminal_digest": "9401a4e06d8cfde44d95b3d26d7b14cdde73676da0b64dd31f60fe5498bd353c",
+        "counters": {
+          "fresh_delivered_tr1": 3.330146315856489e-07,
+          "fresh_delivered_tr2": 3.330146315856489e-07,
+          "fresh_delivered": 6.660292631712978e-07,
+          "fresh_short_circuit": 8.663303027031088e-09
+        },
+        "work": -0.09811184796898713,
+        "crankcase_work": -0.43059890504934256,
+        "power": -24.527961992246784,
+        "torque": -0.015614985580144835,
+        "p_max": 1716040.4740701027,
+        "heat": 0.26576644913494724,
+        "mass_residual": 1.3444106938820255e-17,
+        "energy_residual": -2.930988785010413e-14,
+        "species_residual": -1.3877787807814457e-17,
+        "external_totals": {
+          "mass": 5.231164055151437e-05,
+          "energy": 15.81562990673734,
+          "species": -9.216410055997075e-09
+        },
+        "external_species": [
+          5.6160480787753235e-05,
+          0.0,
+          -3.8467008327406155e-06,
+          -2.1394034982635826e-09
+        ],
+        "species_balance": [
+          -4.598765294768731e-11,
+          0.0,
+          1.2808650817215634e-10,
+          -8.20988621531456e-11
+        ],
+        "max_cfl": 0.4,
+        "min_cfl": 0.0180790342733774,
+        "p7_ledger": {
+          "fresh_air_converted": 3.3220806141868403e-07,
+          "fuel_converted": 0.0,
+          "burned_produced": 3.3220806141868403e-07,
+          "residual_unchanged": 0.0,
+          "source_mass_residual": -9.098986738083304e-24,
+          "heat_added": 0.26576644913494724,
+          "heat_burn_residual": 0.0,
+          "heat_accumulation_roundoff": 2.0003530082357557e-17
+        },
+        "captured_fresh": 3.3246799024997374e-07,
+        "burned_produced": 3.3220806141868403e-07,
+        "p7_heat": 0.26576644913494724
+      },
+      "reason": null
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "status": "SUPERSEDED_NOT_USED_FOR_DECISION",
+  "used_for_decision": false,
+  "reason": "The first R4 implementation audit retained external species flux composition from a diagnostic trace. A focused check showed that the accepted donor deltas at the actual boundary routine must be persisted directly for independent species-ledger reconstruction. This artifact is preserved; the final campaign uses the corrected P8-only capture wrapper.",
+  "replacement": "results/p8-wide-rpm-auditable-r4-final-20260930/"
+}
