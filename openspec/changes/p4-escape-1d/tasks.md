@@ -835,5 +835,14 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [x] Revalidar suites P4 (188 PASS, 2 campañas/adquisiciones excluidas), G2 focal (57 PASS, 1 adquisición excluida), P5–P7 (90 PASS), P8 replay (12 PASS, campaña probada por adquisición separada), P6 snapshot (16 PASS); OpenSpec estricto en P4/P5/P7/P8.
 - [x] Runtime binding C3-R5: siete hashes/componentes coinciden exactamente; no se repitió C3.
 - [x] Matriz de recuperación: `results/p4-p8-r3-remediation-20260929/recovery-matrix.json`. P4 recuperado técnicamente; aceptación sigue pendiente de revisor independiente final. P5–P8 continúan condicionales a P4.
-- [ ] Revisión independiente final en otro contexto; experimental validation permanece `NOT_PERFORMED`; P9 permanece `STOPPED_NOT_AUTHORIZED`.
+- [x] Revisión independiente final R4 ejecutada el 2026-09-30 desde HEAD `3ae81d0`; resultado `INDEPENDENT_REVIEW_BLOCKED` por MAJOR R4-001 reproducible en la auditoría durable P8. No se concede aceptación P4→P8; validación experimental permanece `NOT_PERFORMED` y P9 `STOPPED_NOT_AUTHORIZED`.
 - Reporte de remediación: `docs/gasdynamic/p4_p8_r3_remediation_20260929.md`.
+
+## Revisión independiente final R4 P4→P8 — 2026-09-30
+- [x] Verificar baseline limpio `3ae81d0d6197a39198297bb579178c2eaaa04c1a`, igual a `origin/main`; preservar reportes y receipts R1/R2/R3.
+- [x] Reauditar R3-001 desde ledger primario; mutaciones de inventarios, flujos, fuentes, términos faltantes, no finitos, volumen de control e intervalos se rechazan. G2 sigue `E13_G2_V2_PASS`, ciclo 50, período 2, A=15/B=3; estados/celdas 31–50 tienen igualdad exacta tras parseo.
+- [x] Reproducir R2 `dt=false` con hash actualizado: `MALFORMED_CFL_DT`, nunca PASS. Revisar C3 receipt y sus siete hashes runtime-binding sin repetir adquisición.
+- [x] Ejecutar suites focales P4/E13, P5–P7, P8 replay y P6 snapshot; OpenSpec estricto P4/P5/P7/P8, `git diff --check` y Git LFS fsck aprobaron. Las exclusiones por filtro inicial y de campañas se identifican en el reporte R4.
+- [x] Reproducir en copia temporal la alteración concordante de `fresh_mass_delivered_kg`, `fresh_short_circuit_mass_kg` y `replay_terminal_digests.first` en JSON consolidado/individual: `_audit_p8` conserva `closure_ok=true`, `replay_ok=true` y `csv_equal=true` en los tres casos.
+- [ ] Corregir fuera de esta revisión la verificación durable P8 y repetir auditoría adversarial; hasta entonces `INDEPENDENT_REVIEW_BLOCKED`, P4–P8 no ratificados, P9 detenido y validación experimental `NOT_PERFORMED`.
+- Reporte R4: `docs/gasdynamic/p4_p8_independent_review_r4_20260930.md`; receipt: `results/p4-p8-independent-review-r4-20260930/review.json`.
