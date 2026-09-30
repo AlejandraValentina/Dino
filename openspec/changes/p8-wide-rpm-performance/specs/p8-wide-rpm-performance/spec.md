@@ -90,3 +90,22 @@ P9 stopped. If any anchor fails a measured gate, status MUST remain
 Given all five anchors pass all measured gates, closure is
 `P8_WIDE_RPM_PERFORMANCE_VERIFIED_CONDITIONAL` and
 `P8_READY_FOR_P9_DATA`; this scenario is not satisfied by a blocked anchor.
+
+### Requirement: primary trajectory is authoritative for terminal state
+
+Each durable primary execution MUST persist the fully accepted coupled state
+and cumulative accounting at every measured SSPRK2 endpoint, including gas
+state, four-species state, external state, P7 ledger/source, fresh delivery,
+short circuit, cycle identity, elapsed accepted time and angle. The last
+accepted endpoint MUST be compared exactly with the stored terminal before the
+terminal digest is rebuilt. The terminal MUST then be compared with the
+independent restart terminal and replay execution. A matching digest, restart
+pair or pair of summaries MUST NOT compensate for a trajectory mismatch.
+
+#### Scenario: coherently changed terminal is still rejected
+
+Given an intact primary trajectory, change the conservative terminal state,
+species state, cumulative ledger, fresh-delivery counter or time/cycle/angle;
+then update restart terminal, terminal digest, artifact hashes and summaries
+consistently. The audit MUST fail with a trajectory-to-terminal mismatch before
+accepting the digest or restart comparison.

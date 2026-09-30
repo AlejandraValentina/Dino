@@ -1,9 +1,9 @@
 """Independent offline audit for durable P8 replay evidence.
 
-This module deliberately does not import ``motorsim.p8_performance``. It
-reconstructs cumulative fresh delivery and short-circuit mass from persisted
-resolved stage fluxes, rebuilds the terminal digest preimage, and only then
-compares those results with campaign/anchor summaries.
+This module deliberately does not import ``motorsim.p8_performance``. It first
+binds the accepted coupled SSPRK2 trajectory endpoint to terminal state and
+ledgers, then reconstructs fresh delivery/short-circuit and the digest before
+comparing those results with campaign/anchor summaries.
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from math import fsum
 from pathlib import Path
 import zlib
 
-SCHEMA = "P8_PRIMARY_ANCHOR_V1"
+SCHEMA = "P8_PRIMARY_ANCHOR_V2"
 ANCHORS = (2500, 5000, 8000, 11000, 15000)
 FRESH_NAMES = ("fresh_air", "fuel")
 
@@ -139,6 +139,70 @@ def _fresh_metrics(primary):
             "fresh_short_circuit": short_circuit}
 
 
+def _validate_trajectory_terminal(terminal, rpm):
+    """Bind terminal state/ledgers to the final accepted coupled SSPRK2 path."""
+    history = terminal.get("gas_history")
+    steps = terminal.get("accepted_steps")
+    if (not isinstance(history, list) or not history
+            or not isinstance(steps, list) or len(history) != len(steps)):
+        raise EvidenceError("trajectory_terminal_mismatch: accepted history is incomplete")
+    elapsed = 0.0
+    previous_angle = 180.0
+    last = None
+    for index, (record, step) in enumerate(zip(history, steps), start=1):
+        accepted = record.get("p8_accepted_state")
+        if not isinstance(accepted, dict):
+            raise EvidenceError("trajectory_terminal_mismatch: accepted coupled state is missing")
+        if accepted.get("step_index") != index:
+            raise EvidenceError("trajectory_terminal_mismatch: step identity differs from history")
+        dt = _number(record.get("dt"), "gas_history.dt")
+        if dt != _number(step.get("dt"), "accepted_steps.dt") or dt != _number(
+                accepted.get("dt"), "accepted_state.dt"):
+            raise EvidenceError("trajectory_terminal_mismatch: accepted dt differs from history")
+        cfl = _number(step.get("achieved_cfl"), "accepted_steps.achieved_cfl")
+        if cfl != _number(accepted.get("achieved_cfl"), "accepted_state.achieved_cfl"):
+            raise EvidenceError("trajectory_terminal_mismatch: accepted CFL differs from history")
+        stage_states = record.get("stage_states")
+        if not isinstance(stage_states, list) or len(stage_states) != 3:
+            raise EvidenceError("trajectory_terminal_mismatch: SSPRK2 stages are incomplete")
+        # The accepted coupled endpoint is captured immediately after
+        # system.step returns. The SSPRK2 q_n candidate is installed into
+        # chamber primitives and reconstructed by _state(), which can differ
+        # by one binary64 ulp; record.totals and the accepted snapshot are the
+        # exact post-install state used by the next step.
+        angle = record.get("angle")
+        if (angle != accepted.get("angle") or record.get("angle_start") != previous_angle
+                or accepted.get("cycle_index") != 1):
+            raise EvidenceError("trajectory_terminal_mismatch: accepted cycle/angle identity differs")
+        if angle != previous_angle + dt * (6.0 * rpm):
+            raise EvidenceError("trajectory_terminal_mismatch: accepted angle does not follow dt/RPM")
+        elapsed += dt
+        if accepted.get("elapsed_time_s") != elapsed:
+            raise EvidenceError("trajectory_terminal_mismatch: accepted elapsed time differs")
+        previous_angle = angle
+        last = accepted
+    if (last is None or previous_angle != 540.0
+            or terminal.get("angle") != previous_angle
+            or terminal.get("elapsed_time_s") != last.get("elapsed_time_s")
+            or terminal.get("cycle_index") != last.get("cycle_index")):
+        raise EvidenceError("trajectory_terminal_mismatch: terminal cycle/time/angle differs")
+    if history[-1].get("totals") != terminal.get("gas_previous_totals"):
+        raise EvidenceError("trajectory_terminal_mismatch: terminal gas totals differ")
+
+    fields = (
+        "conservative_state", "species_masses", "species_initial", "species_external",
+        "gas_external_cumulative", "gas_last_external", "gas_ledger", "gas_initial",
+        "gas_previous_totals", "fresh_delivered", "fresh_delivered_tr1",
+        "fresh_delivered_tr2", "fresh_short_circuit", "p7_events", "p7_source_delta",
+        "p7_enabled", "p7_angular_rate_deg_s",
+    )
+    for field in fields:
+        if terminal.get(field) != last.get(field):
+            raise EvidenceError(f"trajectory_terminal_mismatch: {field}")
+    if terminal.get("p7_angular_rate_deg_s") != 6.0 * rpm:
+        raise EvidenceError("trajectory_terminal_mismatch: angular rate differs from anchor")
+
+
 def _derive_one(primary):
     if primary.get("schema") != SCHEMA:
         raise EvidenceError("unsupported primary evidence schema")
@@ -149,8 +213,9 @@ def _derive_one(primary):
     terminal = primary.get("terminal")
     if not isinstance(terminal, dict):
         raise EvidenceError("terminal primary state is missing")
-    if terminal.get("angle") != 540.0 or terminal.get("p7_enabled") is not True:
+    if terminal.get("p7_enabled") is not True:
         raise EvidenceError("terminal primary state is outside the measured contract")
+    _validate_trajectory_terminal(terminal, rpm)
     if terminal.get("p7_angular_rate_deg_s") != 6.0 * rpm:
         raise EvidenceError("terminal angular rate does not match the anchor RPM")
 
@@ -412,6 +477,8 @@ def audit_anchor_primary(anchor, first, second):
                                       "fuel": event[2], "ledger": event[3]})
         direct = {
             "angle": replay_terminal.get("angle"),
+            "elapsed_time_s": replay_terminal.get("elapsed_time_s"),
+            "cycle_index": replay_terminal.get("cycle_index"),
             "conservative_state": replay_terminal.get("conservative_state"),
             "species_masses": replay_terminal.get("species_mass"),
             "species_initial": replay_terminal.get("species_initial"),

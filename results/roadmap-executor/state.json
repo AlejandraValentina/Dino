@@ -17,12 +17,13 @@
     "measured_gates": "PASS",
     "p4": "NOT_GRANTED",
     "p9": "STOPPED",
-    "independent_review": "INDEPENDENT_REVIEW_BLOCKED"
+    "independent_review": "READY_FOR_FINAL_INDEPENDENT_RATIFICATION",
+    "trajectory_terminal_binding": "PASS"
   },
   "blockers": [
-    "P4 remains BLOCKED / NOT_GRANTED",
+    "P4 remains BLOCKED / NOT_GRANTED; P8 evidence remains CONDITIONAL_ON_P4",
     "P9 is not authorized",
-    "Final independent review blocked: P8 terminal PRIMARY/restart can be changed coherently without matching the final raw gas-history state."
+    "Final independent ratification has not yet been performed; preserve the historical blocked review receipt."
   ],
   "dependencies": {
     "P4": "UNRESOLVED",
@@ -30,7 +31,7 @@
   },
   "started_at": "2026-09-27T22:34:04-03:00",
   "completed_at": "2026-09-27T22:34:04-03:00",
-  "next_action": "Keep P9 stopped; require a new implementation remediation and subsequent independent review of terminal-to-history binding.",
+  "next_action": "Perform final independent ratification of P4-P8; keep P9 stopped and experimental validation NOT_PERFORMED.",
   "evidence": {
     "consolidated": "results\\p8-wide-rpm-auditable-r4-final-20260930\\p8-wide-rpm.json",
     "csv": "results\\p8-wide-rpm-auditable-r4-final-20260930\\p8-wide-rpm.csv",
@@ -584,10 +585,23 @@
       "no_failures": true,
       "closure_ok": true
     },
-    "reported_closure": "P8_READY_FOR_P9_DATA"
+    "reported_closure": "P8_READY_FOR_P9_DATA",
+    "trajectory_binding_campaign": "results\\p8-wide-rpm-trajectory-bound-20260930\\p8-wide-rpm.json",
+    "trajectory_binding_audit": "results\\p8-wide-rpm-trajectory-bound-20260930\\primary-audit.json",
+    "trajectory_binding_audit_status": "P8_PRIMARY_EVIDENCE_REAUDIT_PASS",
+    "trajectory_binding_anchors_rpm": [
+      2500,
+      5000,
+      8000,
+      11000,
+      15000
+    ]
   },
-  "independent_review_status": "INDEPENDENT_REVIEW_BLOCKED",
+  "independent_review_status": "READY_FOR_FINAL_INDEPENDENT_RATIFICATION",
   "independent_review_receipt": "results/p4-p8-independent-final-ratification-20260930/review.json",
   "independent_review_head": "722691dfee48a163198ce81b04e0b21a77bf2646",
-  "review_finding": "FINAL-001: terminal conservative PRIMARY state is not checked against the final raw gas-history stage"
+  "review_finding": "FINAL-001: terminal conservative PRIMARY state is not checked against the final raw gas-history stage",
+  "implementation_base": "d27d56880518f72486805be617b06deef92e65de",
+  "implementation_readiness": "READY_FOR_FINAL_INDEPENDENT_RATIFICATION",
+  "review_finding_status": "RESOLVED_BY_P8_PRIMARY_ANCHOR_V2_PENDING_FINAL_INDEPENDENT_RATIFICATION"
 }

@@ -1,5 +1,6 @@
 """P8 bounded transient driver with two fixed preparation cycles."""
 from dataclasses import dataclass, replace
+from copy import deepcopy
 from hashlib import sha256
 from math import pi, isfinite, floor
 import csv, gzip, json
@@ -200,6 +201,8 @@ def _current(system):
     gas = system.gas
     return {
         "angle": gas.angle,
+        "elapsed_time_s": system.p8_elapsed_time_s,
+        "cycle_index": 1,
         "conservative_state": gas._state(),
         "species_mass": system.species_mass,
         "species_external": system._external,
@@ -217,6 +220,44 @@ def _current(system):
         "fresh_delivered_tr2": system.fresh_delivered_tr2,
         "fresh_short_circuit": system.fresh_short_circuit,
         "p8_boundary_species_trace": system.p8_boundary_species_trace,
+    }
+
+
+def _accepted_trajectory_state(system, *, step_index, dt, achieved_cfl):
+    """Snapshot the fully accepted coupled state after one SSPRK2 step.
+
+    The gas history keeps the SSPRK2 ``q_n`` candidate, while ``system.step``
+    returns after installing it into chambers and completing P6/P7 updates.
+    This captures the exact post-install state used by the next step, including
+    its species state and cumulative ledgers.
+    """
+    state = _current(system)
+    return {
+        "step_index": step_index,
+        "dt": dt,
+        "achieved_cfl": achieved_cfl,
+        "angle": state["angle"],
+        "elapsed_time_s": state["elapsed_time_s"],
+        "cycle_index": state["cycle_index"],
+        "conservative_state": deepcopy(state["conservative_state"]),
+        "species_masses": deepcopy(system.species_mass),
+        "species_initial": deepcopy(state["species_initial"]),
+        "species_external": deepcopy(state["species_external"]),
+        "gas_external_cumulative": deepcopy(state["gas_external_cumulative"]),
+        "gas_last_external": deepcopy(system.gas._last_external),
+        "gas_ledger": deepcopy(state["gas_ledger"]),
+        "gas_initial": deepcopy(state["gas_initial"]),
+        "gas_previous_totals": deepcopy(state["gas_previous_totals"]),
+        "fresh_delivered": state["fresh_delivered"],
+        "fresh_delivered_tr1": state["fresh_delivered_tr1"],
+        "fresh_delivered_tr2": state["fresh_delivered_tr2"],
+        "fresh_short_circuit": state["fresh_short_circuit"],
+        "p7_events": deepcopy([{"start": event.start, "fresh_air": event.fresh_air,
+                                 "fuel": event.fuel, "ledger": vars(event.ledger).copy()}
+                                for event in system.p7_events]),
+        "p7_source_delta": deepcopy(state["p7_source_delta"]),
+        "p7_enabled": state["p7_enabled"],
+        "p7_angular_rate_deg_s": state["p7_angular_rate_deg_s"],
     }
 
 
@@ -269,6 +310,8 @@ def _terminal_digest_payload(system, accepted_steps):
               for event in system.p7_events]
     payload = {
         "angle": gas.angle,
+        "elapsed_time_s": system.p8_elapsed_time_s,
+        "cycle_index": 1,
         "conservative_state": gas._state(),
         "species_masses": system.species_mass,
         "species_initial": system._initial,
@@ -307,8 +350,9 @@ def _physical_state_digest(system):
 def _primary_gas_history(history):
     """Select durable numeric SSPRK2 records; omit runtime-only object graphs."""
     fields = ("angle", "angle_start", "dt", "stage_states", "stage_work_rates",
-              "stage_external", "stage_exhaust_external", "prescribed_heat", "totals")
-    return [{key: record[key] for key in fields} for record in history]
+              "stage_external", "stage_exhaust_external", "prescribed_heat", "totals",
+              "p8_accepted_state")
+    return [{key: record[key] for key in fields if key in record} for record in history]
 
 def _run_once(rpm, *, capture_primary=False):
     case, system = _new_system(rpm, enable_p7=False)
@@ -321,6 +365,7 @@ def _run_once(rpm, *, capture_primary=False):
     prepared_fresh = sum(system.species_mass["cylinder"][0][:2])
     geometry_rebase = _reset_measurement(system, case=case)
     _capture_boundary_species(system)
+    system.p8_elapsed_time_s = 0.0
     prepared_state_digest = _physical_state_digest(system)
     prepared_snapshot = system.snapshot()
     _, prepared_restored = _new_system(rpm, enable_p7=True)
@@ -340,7 +385,14 @@ def _run_once(rpm, *, capture_primary=False):
             checkpoint_primary_state = _current(system)
             checkpoint_boundary_species_trace = list(system.p8_boundary_species_trace)
         system.step(dt, angle=system.gas.angle + dt*omega_deg_s(rpm))
-        dts.append(dt); cfls.append(dt/(cfl_dt/P8_CFL))
+        accepted_dt = system.gas.history[-1]["dt"]
+        system.p8_elapsed_time_s += accepted_dt
+        achieved_cfl = dt/(cfl_dt/P8_CFL)
+        dts.append(dt); cfls.append(achieved_cfl)
+        if capture_primary:
+            system.gas.history[-1]["p8_accepted_state"] = _accepted_trajectory_state(
+                system, step_index=len(system.gas.history), dt=accepted_dt,
+                achieved_cfl=achieved_cfl)
     if checkpoint is None:
         raise RuntimeError("restart checkpoint was not reached inside measured P7 event")
     from .coupling import ChamberState
@@ -410,10 +462,12 @@ def _run_once(rpm, *, capture_primary=False):
     }
     _, restored = _new_system(rpm, enable_p7=True)
     restored.restore(checkpoint)
+    restored.p8_elapsed_time_s = checkpoint_primary_state["elapsed_time_s"]
     _capture_boundary_species(restored, checkpoint_boundary_species_trace)
     while restored.gas.angle < measured_end - 1e-12:
         step, _ = _step_dt(restored.gas, rpm, measured_end, cuts)
         restored.step(step, angle=restored.gas.angle + step*omega_deg_s(rpm))
+        restored.p8_elapsed_time_s += restored.gas.history[-1]["dt"]
     restarted_state = _current(restored)
     original_state = _current(system)
     r["restart"] = {"executed": True, "checkpoint_angle_deg": checkpoint["gas"]["angle"],
@@ -438,7 +492,7 @@ def _run_once(rpm, *, capture_primary=False):
         # The offline auditor independently integrates delivery metrics from
         # the raw interface fluxes and rebuilds the terminal digest.
         r["_primary_evidence"] = {
-            "schema": "P8_PRIMARY_ANCHOR_V1",
+            "schema": "P8_PRIMARY_ANCHOR_V2",
             "rpm": rpm,
             "configuration": {"mechanics": "S2T-0D-01", "cfl": P8_CFL,
                               "eos_R_J_kgK": 287.0, "eos_gamma": 1.35,
@@ -516,7 +570,7 @@ def run_campaign(output_dir):
                                "periodic_convergence": "NOT_GRANTED_BY_P4"},
                "event_scheduler": "authoritative Model(case).events repeated by 360*k over every absolute interval; measured/restart also cut P7 at 350/390 and restart at 370",
                "residual_accounting": "external mass/energy is intake into stored topology minus exhaust outflow; internal interfaces cancel; energy also includes accepted P7 heat and both chamber -p*dV terms",
-               "durable_primary_evidence": "P8_PRIMARY_ANCHOR_V1 gzip JSON per anchor/replay; offline auditor recomputes deliveries, short-circuit, balances, work, power, species inventory and terminal digests before evaluating summaries",
+               "durable_primary_evidence": "P8_PRIMARY_ANCHOR_V2 gzip JSON per run; every accepted endpoint binds coupled state and ledgers to the terminal before digest/restart/replay; offline auditor recomputes deliveries, short-circuit, balances, work, power and species inventory before evaluating summaries",
                "initial_states_pty": SyntheticCase().initial_pty, "topology": "frozen P5-C/P6/P7 full-topology fixture",
                "synthetic_not_measured": True}, "p4": "BLOCKED / NOT_GRANTED", "p9": "STOPPED", "anchors": anchors}
     (output_dir / "p8-wide-rpm.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")

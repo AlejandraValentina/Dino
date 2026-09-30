@@ -64,6 +64,24 @@ internal interfaces cancel. No residual is hidden or relaxed.
 No P4 acceptance, independent review, publication, archive, commit, push or P9
 work is claimed.
 
+## Remediación FINAL-001 — enlace trajectory → terminal
+
+- [x] Preservar sin cambios el dictamen y receipt independientes bloqueados del 2026-09-30; el bloqueo histórico sigue identificado como `INDEPENDENT_REVIEW_BLOCKED`.
+- [x] Confirmar insuficiencia de la campaña R4 para comparar estado de especies y ledgers acumulados con cada endpoint aceptado; conservarla intacta.
+- [x] Persistir en cada endpoint medido el estado acoplado aceptado después de SSPRK2/P6/P7: conservativo, cuatro especies, externos, ledgers, evento/fuente P7, contadores frescos, ciclo, tiempo y ángulo.
+- [x] Cambiar el esquema de evidencia primaria a V2 y hacer que la auditoría valide history → terminal antes de digest → restart/replay.
+- [x] Agregar mutaciones coherentes de masa, momento, energía, especies, ledgers, fresh delivery, short circuit, tiempo/ciclo/ángulo, restart y terminal/digest/hash/resúmenes; conservar control positivo.
+- [x] Reejecutar únicamente los cinco anchors P8 bajo la configuración congelada y reauditar la campaña V2: `results/p8-wide-rpm-trajectory-bound-20260930/`; los cinco anchors aprobaron, `failures=[]`.
+- [x] Ejecutar regresiones P8/R4-001 (23 passed; campaña excluida porque se ejecutó por separado), P5–P7 (113 passed), P4/E13 (76 passed, 1 deselected), OpenSpec strict y verificar que los siete hashes runtime-binding C3 siguen iguales.
+- [x] Confirmar exacto rechazo del ataque terminal/restart/digest/hash/summary sobre evidencia P8 real de 2500 rpm: `trajectory_terminal_mismatch: conservative_state`; control positivo y los cinco anchors pasan.
+- [x] Registrar `READY_FOR_FINAL_INDEPENDENT_RATIFICATION` sin otorgar `INDEPENDENT_REVIEW_PASS`, sin cambiar P4, y sin iniciar P9.
+
+### Resultado de FINAL-001 — 2026-09-30
+
+El registro PRIMARY que fija el endpoint es `gas_history[-1].p8_accepted_state`, capturado al regresar de `P6IntegratedSystem.step`: después de que SSPRK2 instala el candidato `q_n` y terminan transporte de especies y fuente P7, antes del siguiente paso. El `q_n` guardado dentro del diagnóstico de etapa puede diferir del estado reconstruido post-install por un ULP en cámaras; se conserva íntegro y no se agrega tolerancia. La comparación contractual se hace entre las copias exactas del endpoint post-install y el terminal. Se comprueban todos los endpoints para identidad/orden, `dt`, CFL, ángulo y tiempo aceptado; el último además se compara campo por campo con estado conservativo, cuatro especies, estado externo, ledgers gas/P7, fuente, fresh delivery, short circuit y ciclo/tiempo/ángulo. El digest sólo se recalcula después de ese gate; el restart directo y el segundo recorrido se comparan después.
+
+La campaña anterior `p8-wide-rpm-auditable-r4-final-20260930` y los receipts/reports `INDEPENDENT_REVIEW_BLOCKED` no se modificaron. La nueva auditoría V2 fue `P8_PRIMARY_EVIDENCE_REAUDIT_PASS` en 2500/5000/8000/11000/15000 rpm. El resultado conserva `BOUNDED_TRANSIENT_INDICATED`, `CONDITIONAL_ON_P4`, P4 `BLOCKED / NOT_GRANTED`, validación experimental `NOT_PERFORMED` y P9 `STOPPED`. La revisión independiente final sigue pendiente.
+
 ## Revalidación sobre P4 cerrado — 2026-09-29
 - [x] P8 revalidado sobre `P4_PASS` mediante provenance y auditoría focal; cinco anchors y todos los gates vigentes PASS.
 - [x] Outputs conservan semántica `BOUNDED_TRANSIENT_INDICATED`; no se declara periodicidad ni validación experimental.
