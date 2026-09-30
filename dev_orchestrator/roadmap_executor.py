@@ -12,7 +12,7 @@ from pathlib import Path
 
 P8_RESULT_DIR = Path("results/p8-wide-rpm-auditable-r4-final-20260930")
 P8_RPMS = (2500, 5000, 8000, 11000, 15000)
-P8_EVIDENCE_COMMIT = "437a66fa4cbdf58c3393e7aaf81ca426c5419ebe"
+P8_EVIDENCE_COMMIT = "602035de2c792475a2f102e64b0f3d00b4883b7f"
 P8_CLOSED_AT = "2026-09-27T22:34:04-03:00"
 P8_GATE_KEYS = (
     "finite", "geometry_rebased", "admissible", "species",

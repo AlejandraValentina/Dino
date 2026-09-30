@@ -2,7 +2,7 @@
   "current_phase": "P8",
   "current_subphase": null,
   "base_commit": "f782e6bb7fa9dfb7624f10179442da69f53075b5",
-  "latest_commit": "437a66fa4cbdf58c3393e7aaf81ca426c5419ebe",
+  "latest_commit": "602035de2c792475a2f102e64b0f3d00b4883b7f",
   "classification": "P8_WIDE_RPM_PERFORMANCE_VERIFIED_CONDITIONAL",
   "attempt": 0,
   "gates": {
