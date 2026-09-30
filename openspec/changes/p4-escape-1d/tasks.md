@@ -846,3 +846,14 @@ Evidencia: `results/p4-r7-20260921/closure.json`, `continuation.json`, `backend.
 - [x] Reproducir en copia temporal la alteración concordante de `fresh_mass_delivered_kg`, `fresh_short_circuit_mass_kg` y `replay_terminal_digests.first` en JSON consolidado/individual: `_audit_p8` conserva `closure_ok=true`, `replay_ok=true` y `csv_equal=true` en los tres casos.
 - [ ] Corregir fuera de esta revisión la verificación durable P8 y repetir auditoría adversarial; hasta entonces `INDEPENDENT_REVIEW_BLOCKED`, P4–P8 no ratificados, P9 detenido y validación experimental `NOT_PERFORMED`.
 - Reporte R4: `docs/gasdynamic/p4_p8_independent_review_r4_20260930.md`; receipt: `results/p4-p8-independent-review-r4-20260930/review.json`.
+
+## Ratificación independiente final P4→P8 — 2026-09-30
+- [x] Desde HEAD `78615563ad7f8e4f1dde9ee05226119ffc3433a4`, reproducir en copia temporal el ataque FINAL-001 coherente contra el anchor P8 de 2500 rpm; el auditor rechaza el terminal alterado con `trajectory_terminal_mismatch: conservative_state` y la evidencia comprometida queda intacta.
+- [x] Revisar la captura post-install aceptada, comparación exacta trajectory→terminal, orden digest/preimage y ataques de estado/ledger/restart/summary; revisar `q_n` vs estado instalado sin tolerancia añadida.
+- [x] Reauditar desde los diez artefactos primarios la campaña actual de cinco anchors P8: los cinco pasan todos los gates, con semántica `BOUNDED_TRANSIENT_INDICATED`.
+- [x] Recalcular offline G2 desde checkpoints y ledger durables hasta ciclo 50: `E13_G2_V2_PASS`, período 2, A=15/B=3; reproducir R2 `dt=false` como `INCONCLUSIVE / MALFORMED_CFL_DT`.
+- [x] Verificar igualdad de siete hashes runtime-binding C3 y recalcular offline sus 777 registros guardados: retorno causal, A, B0, B1 en ambas etapas, B2 y conservación PASS; sin nueva adquisición.
+- [x] Ejecutar P4/E13 (190), regresión R2 exacta (1), P5–P7/acoplamiento (100), P8/R4 (23; solo prueba de campaña excluida), OpenSpec estricto P4/P5/P7/P8, `git diff --check` y `git lfs fsck`; todos pasan.
+- [x] Resultado independiente: `INDEPENDENT_REVIEW_PASS`; P4 `P4_PASS`; P5–P8 `REVALIDATED_ON_P4_PASS`; P9 queda `READY_FOR_P9_HUMAN_AUTHORIZATION`, no iniciado; validación experimental `NOT_PERFORMED`.
+- [x] Preservar sin cambios los reportes y receipts históricos `INDEPENDENT_REVIEW_BLOCKED`.
+- Reporte: `docs/gasdynamic/p4_p8_independent_final_pass_20260930.md`; receipt: `results/p4-p8-independent-final-pass-20260930/review.json`.

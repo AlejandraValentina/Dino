@@ -225,3 +225,9 @@ La secuencia, las prioridades y los presupuestos anteriores son propuestas de pr
 - **Transición:** `CONDITIONALLY_BYPASSED_FOR_DEVELOPMENT`.
 
 P5 comprende intake + transfers 1D: geometría/malla, solver 1D reutilizable, fixtures aislados, topología de acoplamiento con cárter/cilindro, fronteras, conservación, admisibilidad y flujo inverso. `INDEPENDENT_OF_P4`: componentes aislados y sus pruebas. `CONDITIONAL_ON_P4`: cualquier resultado que dependa materialmente del comportamiento gasdinámico integrado. P5 podrá alcanzar `P5_IMPLEMENTATION_VERIFIED_CONDITIONAL`, nunca `P5_FULLY_ACCEPTED` mientras P4 siga bloqueado.
+
+### Ratificación independiente final P4→P8 (30/09/2026)
+
+La revisión independiente final ejecutada desde `78615563ad7f8e4f1dde9ee05226119ffc3433a4` resultó `INDEPENDENT_REVIEW_PASS`. P4 queda `P4_PASS` y su aceptación independiente está otorgada. P5, P6, P7 y P8 quedan `REVALIDATED_ON_P4_PASS`; el bloqueo previo fue una condición de governance ya resuelta, sin reinterpretar ni borrar sus recibos históricos.
+
+P8 conserva exclusivamente la semántica `BOUNDED_TRANSIENT_INDICATED`. La validación experimental permanece `NOT_PERFORMED`. P9 está `READY_FOR_P9_HUMAN_AUTHORIZATION`, pero requiere autorización humana explícita y no se inició en esta revisión. Informe: [ratificación independiente final](gasdynamic/p4_p8_independent_final_pass_20260930.md); receipt: [review.json](../results/p4-p8-independent-final-pass-20260930/review.json).

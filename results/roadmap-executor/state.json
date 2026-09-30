@@ -15,23 +15,22 @@
     "primary_recomputation": "PASS",
     "p7_nonvacuous": "PASS",
     "measured_gates": "PASS",
-    "p4": "NOT_GRANTED",
-    "p9": "STOPPED",
-    "independent_review": "READY_FOR_FINAL_INDEPENDENT_RATIFICATION",
+    "p4": "P4_PASS",
+    "p9": "READY_FOR_P9_HUMAN_AUTHORIZATION",
+    "independent_review": "INDEPENDENT_REVIEW_PASS",
     "trajectory_terminal_binding": "PASS"
   },
-  "blockers": [
-    "P4 remains BLOCKED / NOT_GRANTED; P8 evidence remains CONDITIONAL_ON_P4",
-    "P9 is not authorized",
-    "Final independent ratification has not yet been performed; preserve the historical blocked review receipt."
-  ],
+  "blockers": [],
   "dependencies": {
-    "P4": "UNRESOLVED",
-    "P7": "CONDITIONAL_VERIFIED"
+    "P4": "RESOLVED_P4_PASS",
+    "P7": "REVALIDATED_ON_P4_PASS",
+    "P5": "REVALIDATED_ON_P4_PASS",
+    "P6": "REVALIDATED_ON_P4_PASS",
+    "P8": "REVALIDATED_ON_P4_PASS"
   },
   "started_at": "2026-09-27T22:34:04-03:00",
   "completed_at": "2026-09-27T22:34:04-03:00",
-  "next_action": "Perform final independent ratification of P4-P8; keep P9 stopped and experimental validation NOT_PERFORMED.",
+  "next_action": "Await explicit human authorization before P9; experimental validation remains NOT_PERFORMED.",
   "evidence": {
     "consolidated": "results\\p8-wide-rpm-auditable-r4-final-20260930\\p8-wide-rpm.json",
     "csv": "results\\p8-wide-rpm-auditable-r4-final-20260930\\p8-wide-rpm.csv",
@@ -595,13 +594,38 @@
       8000,
       11000,
       15000
-    ]
+    ],
+    "final_independent_review": {
+      "decision": "INDEPENDENT_REVIEW_PASS",
+      "report": "docs/gasdynamic/p4_p8_independent_final_pass_20260930.md",
+      "receipt": "results/p4-p8-independent-final-pass-20260930/review.json",
+      "reviewed_head": "78615563ad7f8e4f1dde9ee05226119ffc3433a4",
+      "audited_campaign": "results/p8-wide-rpm-trajectory-bound-20260930",
+      "campaign_audit": "results/p8-wide-rpm-trajectory-bound-20260930/primary-audit.json"
+    }
   },
-  "independent_review_status": "READY_FOR_FINAL_INDEPENDENT_RATIFICATION",
-  "independent_review_receipt": "results/p4-p8-independent-final-ratification-20260930/review.json",
-  "independent_review_head": "722691dfee48a163198ce81b04e0b21a77bf2646",
-  "review_finding": "FINAL-001: terminal conservative PRIMARY state is not checked against the final raw gas-history stage",
+  "independent_review_status": "INDEPENDENT_REVIEW_PASS",
+  "independent_review_receipt": "results/p4-p8-independent-final-pass-20260930/review.json",
+  "independent_review_head": "78615563ad7f8e4f1dde9ee05226119ffc3433a4",
+  "review_finding": "FINAL-001: resolved by exact accepted-trajectory to terminal binding; see final independent review.",
   "implementation_base": "d27d56880518f72486805be617b06deef92e65de",
-  "implementation_readiness": "READY_FOR_FINAL_INDEPENDENT_RATIFICATION",
-  "review_finding_status": "RESOLVED_BY_P8_PRIMARY_ANCHOR_V2_PENDING_FINAL_INDEPENDENT_RATIFICATION"
+  "implementation_readiness": "READY_FOR_P9_HUMAN_AUTHORIZATION",
+  "review_finding_status": "CLOSED_NO_BLOCKER_OR_MAJOR",
+  "final_ratification": {
+    "decision": "INDEPENDENT_REVIEW_PASS",
+    "reviewed_head": "78615563ad7f8e4f1dde9ee05226119ffc3433a4",
+    "P4": "P4_PASS",
+    "P4_acceptance": "GRANTED_BY_INDEPENDENT_REVIEW",
+    "P5": "REVALIDATED_ON_P4_PASS",
+    "P6": "REVALIDATED_ON_P4_PASS",
+    "P7": "REVALIDATED_ON_P4_PASS",
+    "P8": "REVALIDATED_ON_P4_PASS",
+    "P8_semantics": "BOUNDED_TRANSIENT_INDICATED",
+    "experimental_validation": "NOT_PERFORMED",
+    "P9": "READY_FOR_P9_HUMAN_AUTHORIZATION",
+    "P9_started": false,
+    "historical_blocked_reviews_preserved": true,
+    "report": "docs/gasdynamic/p4_p8_independent_final_pass_20260930.md",
+    "receipt": "results/p4-p8-independent-final-pass-20260930/review.json"
+  }
 }
