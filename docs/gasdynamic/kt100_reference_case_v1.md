@@ -70,6 +70,10 @@ En el ledger global independiente, el máximo de los valores normalizados
 observados entre los cinco últimos ciclos completados fue `4,181e-8` para masa,
 `1,377e-7` para energía y `3,769e-8` para el marcador fresco. Son comprobaciones
 del modelo 0D con sus estados sintéticos, no balances de un motor medido.
+Una auditoría offline de todos los estados de fin de ciclo conservados confirmó
+masa y energía positivas, estado finito y marcador dentro de `[0,m]` en todos
+los ciclos completos. No hay estado final guardado para el ciclo incompleto de
+5000 rpm; el criterio no acredita etapas de 1D o cuatro especies.
 
 El preflight de topología híbrida completa terminó en `ValueError: invalid
 species state`. El artefacto pequeño se conserva en

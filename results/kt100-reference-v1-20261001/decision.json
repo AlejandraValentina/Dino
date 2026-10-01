@@ -1,4 +1,566 @@
 {
+  "admissibility_by_rpm": [
+    {
+      "all_completed_cycle_end_states_admissible": true,
+      "checked_completed_cycles": 17,
+      "cycles": [
+        {
+          "cycle": 1,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 2,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 3,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 4,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 5,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 6,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 7,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 8,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 9,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 10,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 11,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 12,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 13,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 14,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 15,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 16,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 17,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        }
+      ],
+      "rpm": 5000,
+      "scope": "cycle-end states in stored 0D trace; not a four-species/1D admissibility gate"
+    },
+    {
+      "all_completed_cycle_end_states_admissible": true,
+      "checked_completed_cycles": 19,
+      "cycles": [
+        {
+          "cycle": 1,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 2,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 3,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 4,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 5,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 6,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 7,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 8,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 9,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 10,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 11,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 12,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 13,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 14,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 15,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 16,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 17,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 18,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 19,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        }
+      ],
+      "rpm": 7000,
+      "scope": "cycle-end states in stored 0D trace; not a four-species/1D admissibility gate"
+    },
+    {
+      "all_completed_cycle_end_states_admissible": true,
+      "checked_completed_cycles": 21,
+      "cycles": [
+        {
+          "cycle": 1,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 2,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 3,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 4,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 5,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 6,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 7,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 8,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 9,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 10,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 11,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 12,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 13,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 14,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 15,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 16,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 17,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 18,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 19,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 20,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 21,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        }
+      ],
+      "rpm": 9000,
+      "scope": "cycle-end states in stored 0D trace; not a four-species/1D admissibility gate"
+    },
+    {
+      "all_completed_cycle_end_states_admissible": true,
+      "checked_completed_cycles": 22,
+      "cycles": [
+        {
+          "cycle": 1,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 2,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 3,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 4,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 5,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 6,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 7,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 8,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 9,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 10,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 11,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 12,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 13,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 14,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 15,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 16,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 17,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 18,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 19,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 20,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 21,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 22,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        }
+      ],
+      "rpm": 11000,
+      "scope": "cycle-end states in stored 0D trace; not a four-species/1D admissibility gate"
+    },
+    {
+      "all_completed_cycle_end_states_admissible": true,
+      "checked_completed_cycles": 25,
+      "cycles": [
+        {
+          "cycle": 1,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 2,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 3,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 4,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 5,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 6,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 7,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 8,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 9,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 10,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 11,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 12,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 13,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 14,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 15,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 16,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 17,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 18,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 19,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 20,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 21,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 22,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 23,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 24,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        },
+        {
+          "cycle": 25,
+          "finite": true,
+          "physical_four_cv_end_state": true
+        }
+      ],
+      "rpm": 13000,
+      "scope": "cycle-end states in stored 0D trace; not a four-species/1D admissibility gate"
+    }
+  ],
   "artifacts": {
     "campaign_fixture_config_sha256": "daf8bc60d61872a0352df811a588d4594f4b33ffba453e6106f838dd99f4643e",
     "campaign_sha256": "7e6d6730e9e8786956d4be9f5c4938d6fe39694a324ea00bd5d927f164442710",

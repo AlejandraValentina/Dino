@@ -1,6 +1,7 @@
 """Create a compact, reproducible KT100 campaign decision and source inventory."""
 import hashlib
 import json
+import math
 from pathlib import Path
 import platform
 import sys
@@ -15,6 +16,22 @@ def read(path):
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def admissibility_summary(point):
+    checked = []
+    for cycle in point.get("cycle_summaries", []):
+        state = cycle.get("state", [])
+        finite = len(state) == 12 and all(isinstance(v, (int, float)) and math.isfinite(v) for v in state)
+        physical = finite and all(state[3*i] > 0 and state[3*i+1] > 0 and
+            0 <= state[3*i+2] <= state[3*i] for i in range(4))
+        checked.append({"cycle": cycle.get("cycle"), "finite": finite,
+                        "physical_four_cv_end_state": physical})
+    return {"checked_completed_cycles": len(checked),
+        "all_completed_cycle_end_states_admissible": bool(checked) and all(
+            row["physical_four_cv_end_state"] for row in checked),
+        "cycles": checked,
+        "scope": "cycle-end states in stored 0D trace; not a four-species/1D admissibility gate"}
 
 
 def main():
@@ -58,6 +75,7 @@ def main():
         "campaign_environment": "campaign-environment.json",
         "converged_period1_points": [r["rpm"] for r in campaign["results"] if r.get("convergence_status") == "PERIOD_1_CONVERGED"],
         "not_converged_points": [{"rpm":r.get("rpm"), "cycles":r.get("cycles_completed"), "stop":r.get("stop_reason")} for r in campaign["results"] if r.get("convergence_status") == "NOT_CONVERGED"],
+        "admissibility_by_rpm": [{"rpm":r.get("rpm"), **admissibility_summary(r)} for r in campaign["results"]],
         "sensitivity": {"anchor_rpm": 9000, "preregistration": "sensitivity-preregistration.json", "variants": rows},
         "limits": [
             "This is the existing application four-control-volume 0D path, not the P5-C/P6 1D hybrid topology.",
