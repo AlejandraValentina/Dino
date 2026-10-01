@@ -2,9 +2,11 @@
 
 ## Estado
 
-`PROPOSED_FOR_PREREGISTRATION`. OpenSpec estricto aprobó el 2026-10-01. El
-commit de preregistro, fecha y hashes del contrato se registrarán antes de
-incorporar o inspeccionar cualquier resultado experimental que decidirá P9.
+`PREREGISTERED` como P9 v1.0 desde el commit de contrato
+`ba1dff027d66982aba0aeb7ae6f315fa92346a2c`, fechado 2026-10-01. El receipt
+`results/p9-readiness-20261001/preregistration.json` registra fecha, commit y
+hashes. El preregistro precede la incorporación o inspección de cualquier
+resultado experimental que decidirá P9.
 
 ## Why
 

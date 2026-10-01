@@ -9,7 +9,9 @@
 - [x] Transcribir los 32 apartados normativos a OpenSpec y pasar validación
       estricta antes de congelar el contrato; `openspec validate
       p9-experimental-validation --strict --no-interactive` aprobado.
-- [ ] Registrar la fecha y el commit de preregistro; fijar P9 v1.0 antes de
+- [x] Registrar preregistro P9 v1.0, 2026-10-01, en contrato congelado
+      `ba1dff027d66982aba0aeb7ae6f315fa92346a2c`; sus hashes están en
+      `results/p9-readiness-20261001/preregistration.json`. Ocurrió antes de
       recibir o inspeccionar el dataset confirmatorio.
 - [ ] Obtener dataset experimental autorizado y completo; conservar originales
       y congelar manifest, hashes y metadata antes de comparar.
@@ -21,7 +23,6 @@
 - [ ] Auditar evidencia primaria, ejecutar regresiones afectadas y revisión
       independiente; cerrar solo con clasificación sustentada.
 
-Estado al preparar el cambio: contrato v1.0 especificado y OpenSpec estricto
-aprobado. El commit de preregistro aún debe registrarse. No se encontraron
-datos experimentales autorizados; no hay implementación P9, comparación o
-campaña.
+Estado: `P9_PREREGISTERED_AWAITING_EXPERIMENTAL_DATA`. OpenSpec estricto
+aprobado. No se encontraron datos experimentales autorizados; no hay
+implementación P9, comparación o campaña.
