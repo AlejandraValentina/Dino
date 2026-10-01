@@ -1,0 +1,112 @@
+{
+  "schema": "motorsim-p9-readiness-reconstruction-v1",
+  "created_utc_date": "2026-10-01",
+  "repository": "E:/dino/Dino",
+  "branch": "main",
+  "starting_head": "7c107eb4e59c1ed31684539cc73c51b71752d6aa",
+  "starting_origin_main": "7c107eb4e59c1ed31684539cc73c51b71752d6aa",
+  "starting_worktree_clean": true,
+  "p9_authorization": "EXPLICITLY_GRANTED_BY_CURRENT_USER_ORDER",
+  "classification": "P9_CONTRACT_UNDEFINED",
+  "p9_evaluation": "NOT_PERFORMED",
+  "experimental_validation": "NOT_PERFORMED",
+  "p4": "P4_PASS",
+  "p5": "REVALIDATED_ON_P4_PASS",
+  "p6": "REVALIDATED_ON_P4_PASS",
+  "p7": "REVALIDATED_ON_P4_PASS",
+  "p8": "REVALIDATED_ON_P4_PASS",
+  "independent_review": "INDEPENDENT_REVIEW_PASS",
+  "p8_metric_semantics": "BOUNDED_TRANSIENT_INDICATED",
+  "p8_periodic_convergence": "NOT_GRANTED_BY_P4",
+  "p8_synthetic_not_measured": true,
+  "reusable_evidence": [
+    {
+      "path": "results/p4-p8-independent-final-pass-20260930/review.json",
+      "sha256": "82816e8ff06dc3b30be51bfbef31a2e2949b9e13f8ce096102baffc6ed2f98df",
+      "meaning": "historical independent review receipt; not rerun by this task"
+    },
+    {
+      "path": "results/p8-wide-rpm-auditable-r4-final-20260930/p8-wide-rpm.json",
+      "sha256": "812f161c39452a8bd7d2ec55a4823bfd65a1f9ab1745129240031113677e2a2b",
+      "meaning": "bounded-transient synthetic P8 summary; not experimental evidence"
+    },
+    {
+      "path": "results/p8-wide-rpm-auditable-r4-final-20260930/primary-15000-first.json.gz",
+      "sha256": "980ea760aa2638837a92275f5ed4cb4f463839a7b1c76219a768eeee3de70aef",
+      "meaning": "example P8 primary numerical artifact; not experimental evidence"
+    }
+  ],
+  "p9_contract_sources": {
+    "phase_descriptor": "dev_orchestrator/phases/P9.json",
+    "roadmap_descriptor": "dev_orchestrator/roadmap/gasdynamic.json",
+    "declarative_roadmap_notice": "dev_orchestrator/README.md",
+    "openspec_p9_change_exists": false,
+    "preregistration_exists": false,
+    "measurable_gates_defined": false,
+    "dataset_requirements_defined": false
+  },
+  "candidate_data": [
+    {
+      "path": "examples/EJEMPLO_SINTETICO_contraste.csv",
+      "classification": "SYNTHETIC_EXAMPLE_NOT_EXPERIMENTAL",
+      "sha256": "96b6e9c4bbd9a6edd86481404968b60bf115912a915e231d9147c68e3051d460"
+    },
+    {
+      "path": "examples/EJEMPLO_SINTETICO_presion_bar.csv",
+      "classification": "SYNTHETIC_EXAMPLE_NOT_EXPERIMENTAL",
+      "sha256": "24f40cd9278671294930f34709c3f88d2fa96b096b2cd435faafb45f3efe8fdf"
+    },
+    {
+      "path": "examples/EJEMPLO_SINTETICO_trabajo.csv",
+      "classification": "SYNTHETIC_EXAMPLE_NOT_EXPERIMENTAL",
+      "sha256": "5d446031ca1741486d9b40630a3ae8b8220887718baf8e46f41d26fd084ee260"
+    },
+    {
+      "path": "results/p0-baseline-0d-20260917/artifacts/table.csv",
+      "classification": "SIMULATION_OUTPUT_NOT_EXPERIMENTAL",
+      "sha256": "9c91361e7fba500011dc64d02281f27e877d63c1bcc1b781e5436dd643418d19"
+    },
+    {
+      "path": "results/simulacion-2t/barrido-20260915/gui-sweep/series.json",
+      "classification": "SYNTHETIC_PROJECT_SIMULATION_NOT_EXPERIMENTAL",
+      "sha256": "aa1ce958815fa9f927deafadb7d29bc5d2562b6392e7e9cc1229bac194ef2a48"
+    },
+    {
+      "path": "results/p8-wide-rpm-auditable-r4-final-20260930/p8-wide-rpm.json",
+      "classification": "BOUNDED_TRANSIENT_SYNTHETIC_NOT_MEASURED",
+      "sha256": "812f161c39452a8bd7d2ec55a4823bfd65a1f9ab1745129240031113677e2a2b"
+    },
+    {
+      "path": "results/p8-wide-rpm-auditable-r4-final-20260930/primary-15000-first.json.gz",
+      "classification": "P8_PRIMARY_SIMULATION_EVIDENCE_NOT_EXPERIMENTAL",
+      "sha256": "980ea760aa2638837a92275f5ed4cb4f463839a7b1c76219a768eeee3de70aef"
+    }
+  ],
+  "experimental_dataset_found": false,
+  "p8_reuse": "historical_dependency/numerical context only; not a measured baseline",
+  "unresolved_contract_dimensions": [
+    "target engine and configuration identity",
+    "authorized dataset and independent calibration/validation separation",
+    "required channels, units, operating conditions, and metadata",
+    "uncertainty, missing-data, exclusion, and outlier policy",
+    "preregistered RPM/time/crank-angle alignment",
+    "comparison metrics, thresholds, and P8 transient-versus-periodic applicability",
+    "primary evidence schema, offline audit, and PASS/FAIL/INCONCLUSIVE/DATA-REQUIRED gates"
+  ],
+  "permitted_claims": [
+    "P4-P8 statuses as recorded in the existing independent review",
+    "P8 results are bounded-transient indicated and synthetic, not measured",
+    "P9 experimental validation remains not performed"
+  ],
+  "prohibited_claims": [
+    "P9 PASS or scientific FAIL",
+    "experimental or predictive validation",
+    "periodic interpretation of P8 outputs",
+    "validation or calibration from synthetic examples or solver output"
+  ],
+  "implementation_performed": false,
+  "scientific_runs_performed": false,
+  "openspec_p9_validation": "NOT_APPLICABLE_NO_P9_SPEC_EXISTS",
+  "hard_stop": "P9 scientific contract is undefined; no authorized experimental dataset was found in the searched E:/dino workspace",
+  "report": "docs/gasdynamic/p9_readiness_contract_reconstruction_20261001.md"
+}
