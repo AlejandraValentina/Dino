@@ -15,6 +15,14 @@
       recibir o inspeccionar el dataset confirmatorio.
 - [ ] Obtener dataset experimental autorizado y completo; conservar originales
       y congelar manifest, hashes y metadata antes de comparar.
+- [x] Buscar y calificar fuentes públicas para dataset experimental P9; la
+      búsqueda concluye `DATA_REQUEST_REQUIRED` para el candidato preferido
+      Honda RS125/SAE 2004-01-3561. No se halló un archivo numérico descargable
+      que permita autorizar dataset P9. Ver matriz, límites y borrador de
+      solicitud en `docs/gasdynamic/p9_experimental_dataset_search_20261001.md`
+      y receipt `results/p9-dataset-search-20261001/search.json`.
+- [ ] Enviar manualmente la solicitud de datos a través del contacto institucional
+      verificado de Queen's University Belfast; no se envió ningún mensaje.
 - [ ] Calificar la configuración fija y todos los puntos con P9-A (E13,
       máximo 400 ciclos y todos los gates requeridos).
 - [ ] Implementar solo el adaptador requerido por el dataset congelado, el
@@ -23,6 +31,7 @@
 - [ ] Auditar evidencia primaria, ejecutar regresiones afectadas y revisión
       independiente; cerrar solo con clasificación sustentada.
 
-Estado: `P9_PREREGISTERED_AWAITING_EXPERIMENTAL_DATA`. OpenSpec estricto
-aprobado. No se encontraron datos experimentales autorizados; no hay
-implementación P9, comparación o campaña.
+Estado: `P9_PREREGISTERED_AWAITING_EXPERIMENTAL_DATA` (`DATA_REQUEST_REQUIRED`).
+OpenSpec estricto aprobado. La búsqueda pública encontró candidatos de interés,
+pero ningún archivo numérico completo y autorizado; no hay implementación P9,
+comparación ni campaña. El contrato y preregistro permanecen intactos.
