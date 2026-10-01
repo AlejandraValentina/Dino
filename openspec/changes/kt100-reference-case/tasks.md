@@ -30,3 +30,36 @@
 Estado: `KT100_REFERENCE_CASE_V1_READY`; fixture ejecutable y determinista en
 el camino 0D, pero no `KT100_MODEL_FIXTURE_V1_VERIFIED` por gates no soportados.
 P9 permanece congelado; validación experimental `NOT_PERFORMED`.
+
+## Continuación V2 autorizada
+
+- [x] Confirmar baseline `290502abbcaaa1f844f2fe40b7d8bb5b634c5496`, árbol
+      limpio, rama `main`, `origin/main`, y preservar los artifacts V1.
+- [x] Inspeccionar productor/auditor P8, P5-C/P6/P7, periodicidad E13 y
+      contrato P9 antes de preparar geometría o ejecutar campaña.
+- [x] Reproducir el armado de la geometría KT100 dentro del adaptador P5-C/P6;
+      validar las cuatro especies y registrar el resultado acotado.
+- [x] Determinar que el error histórico `invalid species state` no se reproduce
+      con la inicialización actual; conservar el artifact original sin alterarlo.
+- [x] Registrar el hard stop contractual P8/P7/E13 y validar OpenSpec estricto;
+      no cambiar código/contratos P4–P9, no crear fixture V2 parcial y no lanzar
+      la campaña.
+- [x] Ejecutar regresiones focales P5-C/P6/P7/P8: 56 pruebas aprobaron; el
+      diagnóstico reproducible de inicialización quedó en
+      `results/kt100-hybrid-model-fixture-v2-20261001/bounded-preflight.json`.
+- [x] Ejecutar regresiones KT100 V1 y guardas P9: 36 pruebas aprobaron; V1
+      mantiene su estado/documentación y P9 conserva su hash preregistrado.
+- [x] Ejecutar `git diff --check`, `git lfs fsck` y verificar que el hash
+      congelado del spec P9 no cambia.
+- [x] Revisión independiente puntual del diff y fundamento del blocker: sin
+      defectos concretos; se añadió la diferencia de anchors P8/V2 al registro.
+- [ ] Crear y validar un fixture V2 ejecutable cuando el productor/auditor
+      congelado pueda aceptar su identidad/topología y P7 periódico sin alterar
+      contratos P4–P8.
+- [ ] Ejecutar puntos, E13, evidencia primaria, restart/replay, sensibilidad y
+      comparación V1/V2 únicamente después de resolver el hard stop autorizado.
+
+Estado de continuación: `KT100_HYBRID_V2_STACK_CONTRACT_BLOCKER`.
+`KT100_HYBRID_MODEL_FIXTURE_V2_VERIFIED` NO otorgado. Los resultados V1 siguen
+siendo 0D y no convergen a 5000 rpm; no se sustituyen por resultados híbridos.
+P9 queda sin cambios y V1 permanece intacto.

@@ -1,0 +1,102 @@
+{
+  "schema": "KT100_HYBRID_V2_BOUNDED_PREFLIGHT_V1",
+  "classification": "INITIAL_SPECIES_ADMISSIBLE_ONLY",
+  "fixture_source": "KT100_MODEL_FIXTURE_V1",
+  "rpm": 5000,
+  "uses_p5c_full_topology_constructor": true,
+  "uses_default_verification_mesh_not_kt100_duct_mesh": true,
+  "gas_or_species_step_executed": false,
+  "p7_event_executed": false,
+  "species_names": [
+    "fresh_air",
+    "fuel",
+    "residual",
+    "burned"
+  ],
+  "component_cell_counts": {
+    "crankcase": 1,
+    "cylinder": 1,
+    "intake": 2,
+    "tr1": 2,
+    "tr2": 2,
+    "exhaust": 2
+  },
+  "species_mass_by_component": {
+    "crankcase": [
+      [
+        0.0003167564143173899,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "cylinder": [
+      [
+        0.0,
+        0.0,
+        7.658699358922075e-05,
+        0.0
+      ]
+    ],
+    "intake": [
+      [
+        0.0,
+        0.0,
+        0.0017652439024390242,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0017652439024390242,
+        0.0
+      ]
+    ],
+    "tr1": [
+      [
+        0.00030000000000000003,
+        0.0,
+        0.0012000000000000001,
+        0.0
+      ],
+      [
+        0.00030000000000000003,
+        0.0,
+        0.0012000000000000001,
+        0.0
+      ]
+    ],
+    "tr2": [
+      [
+        0.00030000000000000003,
+        0.0,
+        0.0012000000000000001,
+        0.0
+      ],
+      [
+        0.00030000000000000003,
+        0.0,
+        0.0012000000000000001,
+        0.0
+      ]
+    ],
+    "exhaust": [
+      [
+        3.0000000000000004e-07,
+        0.0,
+        1.2e-06,
+        0.0
+      ],
+      [
+        3.0000000000000004e-07,
+        0.0,
+        1.2e-06,
+        0.0
+      ]
+    ]
+  },
+  "species_sum_error_kg": 1.734723475976807e-18,
+  "species_admissible": true,
+  "geometry_model_events": 14,
+  "not_v2_verification": true
+}

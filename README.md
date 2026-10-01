@@ -1931,3 +1931,15 @@ Python 3.11.0 y OpenSpec CLI 1.3.1; el cambio documental valida con
 `openspec validate kt100-reference-case --strict --no-interactive`. La
 sensibilidad preregistrada se reproduce con
 `python -m scripts.run_kt100_sensitivity`.
+
+### Continuación híbrida V2 (diagnóstico bloqueado)
+
+La continuación `KT100_HYBRID_MODEL_FIXTURE_V2` se detuvo antes de crear una
+configuración o ejecutar una campaña: el P8 existente fija otra identidad de
+mecánica y ventana de medición, y el P7 actual registra un evento absoluto, no
+eventos periódicos para convergencia E13. El preflight puntual de geometría y
+cuatro especies fue admisible, pero no acredita topología dimensional completa,
+convergencia, P7 periódico, restart/replay ni V2. Detalle en
+[`tasks.md`](openspec/changes/kt100-reference-case/tasks.md) y en
+[`design.md`](openspec/changes/kt100-reference-case/design.md). No se cambiaron
+contratos P4–P9; V1 y su punto 5000 rpm no convergido permanecen sin cambios.

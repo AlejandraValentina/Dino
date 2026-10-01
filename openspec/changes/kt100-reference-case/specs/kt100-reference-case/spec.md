@@ -80,3 +80,24 @@ MUST NOT emit `P9_PASS`, `EXPERIMENTALLY_VALIDATED`, or
 - **THEN** P9 remains `P9_PREREGISTERED_AWAITING_EXPERIMENTAL_DATA`
 - **AND** experimental validation remains `NOT_PERFORMED`
 - **AND** predictive validation remains `NOT_CLAIMED`
+
+## Hybrid fixture V2 continuation
+
+### Requirement: V2 uses only contract-compatible existing capabilities
+
+`KT100_HYBRID_MODEL_FIXTURE_V2` MUST remain distinct from V1 and preserve all
+V1 documentation and artifacts. It MUST use the actual P5-C/P6/P7/P8/E13
+implementations, identify every undocumented completion as
+`SYNTHETIC_ASSUMPTION`, and MUST NOT change P4–P9 contracts or claim Yamaha
+validation. If the frozen stack cannot provide the required topology, repeated
+P7 event, E13 cycle convergence, restart/replay, and primary evidence together,
+the work MUST stop before a campaign and record the precise blocker. A partial
+configuration MUST NOT be called `KT100_HYBRID_MODEL_FIXTURE_V2_VERIFIED`.
+
+#### Scenario: incompatible fixed P8/P7 behavior
+
+- **WHEN** the existing P8 producer/auditor is fixed to another mechanical
+  identity or cannot produce repeated P7 cycle evidence for E13
+- **THEN** record the blocker and bounded preflight evidence
+- **AND** do not alter P4–P9 contracts, calibrate assumptions, or claim V2
+  verified, experimental, or predictive validity

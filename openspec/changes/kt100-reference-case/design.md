@@ -28,3 +28,29 @@ restart. Una sensibilidad descriptiva, congelada antes de ejecutarse, perturba
 malla. No hay calibración contra potencia externa.
 
 P9 v1.0 y sus claims permanecen congelados e intactos.
+
+## Continuación V2 — diagnóstico y límite contractual
+
+La orden V2 mantiene los cinco puntos exploratorios de V1 y requiere el stack
+completo, evidencia primaria, E13, restart y replay. El armado puntual con la
+geometría de `fixture_case(5000)` y `P6IntegratedSystem` produjo un estado P6
+admisible y `species_sum_error = 1.73e-18`; por tanto, el antiguo artefacto
+`kt100-reference-v1-20261001-smoke/anchor-5000.json` no identifica una falla
+reproducible en la inicialización P6 actual.
+
+No se generó una configuración V2 ejecutable ni se lanzó una campaña. P8
+construye siempre `SyntheticCase()`/`S2T-0D-01`, fija dos duct cells y su
+auditoría rechaza otra identidad de mecánica, otra ventana P7 y anchors distintos:
+P8 fija 2500/5000/8000/11000/15000 rpm, mientras V2 solicita
+5000/7000/9000/11000/13000 rpm. P6/P7 captura un único evento absoluto
+350–390° y no crea automáticamente el evento del ciclo siguiente. El
+productor/auditor P8 tampoco genera historiales de ciclos repetidos para el
+detector E13. Cumplir juntos P7 no vacuo, convergencia E13 por ciclos y auditoría
+primaria de P8 requeriría extender la semántica/contrato de esos componentes;
+esta entrega prohíbe cambios en contratos P4–P8. Este es el hard stop
+`KT100_HYBRID_V2_STACK_CONTRACT_BLOCKER`.
+
+La geometría documental y todos los límites/salidas de V1 permanecen intactos.
+No se escogieron nuevas dimensiones, mallas, estados ni valores de combustión,
+ni se creó un fixture parcial que pudiera confundirse con V2 verificado. El
+estado 5000 rpm V1 continúa siendo `NO_CONVERGENCE / 8 consecutive rejects`.
