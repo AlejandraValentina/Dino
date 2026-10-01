@@ -1,0 +1,303 @@
+{
+  "boundaries": {
+    "ambient_pressure_Pa": 101325.0,
+    "ambient_temperature_K": 300.0,
+    "atmosphere_species": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "exhaust_initial_pty": [
+      101325.0,
+      500.0,
+      0.0
+    ],
+    "initial_states_pty": [
+      [
+        101325.0,
+        300.0,
+        1.0
+      ],
+      [
+        120000.0,
+        330.0,
+        1.0
+      ],
+      [
+        140000.0,
+        700.0,
+        0.0
+      ],
+      [
+        101325.0,
+        500.0,
+        0.0
+      ]
+    ],
+    "inlet_and_initial_states_provenance": "SYNTHETIC_ASSUMPTION",
+    "transfer_initial_pty": [
+      101325.0,
+      300.0,
+      0.0
+    ]
+  },
+  "claims": {
+    "experimental_validation": "NOT_PERFORMED",
+    "p9_status_effect": "NONE",
+    "predictive_validation": "NOT_CLAIMED",
+    "prohibited": [
+      "P9_PASS",
+      "EXPERIMENTALLY_VALIDATED",
+      "PREDICTIVELY_VALIDATED"
+    ]
+  },
+  "combustion": {
+    "duration_deg": 40.0,
+    "event_start_deg": 350.0,
+    "fuel_chemistry": "NOT_MODELED",
+    "heat_per_bookkeeping_burned_kg_J": 800000.0,
+    "model": "P7 prescribed heat/bookkeeping source; no chemistry",
+    "provenance": "SYNTHETIC_ASSUMPTION"
+  },
+  "crank_slider": {
+    "crank_radius_mm": 23.0,
+    "offset_mm": 0.0,
+    "offset_provenance": "SYNTHETIC_ASSUMPTION",
+    "rod_length_mm": 100.0
+  },
+  "crankcase": {
+    "provenance": "SYNTHETIC_ASSUMPTION",
+    "volume_at_bdc_cm3": 180.0
+  },
+  "cylinder": {
+    "clearance_volume_cm3_conditional": 12.211370644503527,
+    "cylinders": 1,
+    "port_geometry_origin": "SYNTHETIC_ASSUMPTION",
+    "swept_volume_cm3": 97.69096515602821
+  },
+  "engine_geometry_and_project": {
+    "bore_mm": 52.0,
+    "compression_ratio": 9.0,
+    "crankcase_volume_bdc_cm3": 180.0,
+    "cycle": "2T",
+    "cylinder_count": 1,
+    "ducts": {
+      "exhaust": [
+        {
+          "end_diameter_mm": 35.0,
+          "length_mm": 120.0,
+          "name": "Header sintético",
+          "start_diameter_mm": 35.0
+        },
+        {
+          "end_diameter_mm": 35.0,
+          "length_mm": 180.0,
+          "name": "Salida sintética",
+          "start_diameter_mm": 35.0
+        }
+      ],
+      "intake": [
+        {
+          "end_diameter_mm": 22.0,
+          "length_mm": 65.0,
+          "name": "Admisión sintética",
+          "start_diameter_mm": 22.0
+        }
+      ],
+      "reference": "ordered-circular-inner-axial-linear-2t-v1"
+    },
+    "format_version": 6,
+    "four_stroke": {
+      "ducts": {
+        "exhaust": [],
+        "intake": [],
+        "reference": "ordered-circular-inner-axial-linear-4t-v1"
+      },
+      "exhaust": {
+        "duration_deg": null,
+        "lift_mm": null,
+        "opening_deg": null,
+        "seat_mm": null,
+        "stem_mm": null,
+        "throat_mm": null
+      },
+      "intake": {
+        "duration_deg": null,
+        "lift_mm": null,
+        "opening_deg": null,
+        "seat_mm": null,
+        "stem_mm": null,
+        "throat_mm": null
+      },
+      "reference": "sin-squared-cylindrical-curtain-annular-cap-720-v1"
+    },
+    "intake": {
+      "height_mm": 10.0,
+      "mode": "piston_port",
+      "reference": "straight-skirt-peripheral-tdc-developed-v1",
+      "skirt_mm": 42.0,
+      "top_mm": 62.0,
+      "width_mm": 20.0
+    },
+    "manufacturer": "Yamaha (referencia documental KT100SP)",
+    "model": "KT100_MODEL_FIXTURE_V1",
+    "name": "KT100_MODEL_FIXTURE_V1 — SINTÉTICO, NO MEDIDO",
+    "notes": "Fixture numérico sintético basado solo en geometría Yamaha KT100SP documentada; biela, cárter, puertos, conductos, condiciones y fuente P7 son supuestos. No medido, no calibrado, no validado.",
+    "ports": [
+      {
+        "function": "escape",
+        "height_mm": 17.0,
+        "name": "Escape sintético",
+        "top_mm": 27.0,
+        "width_mm": 32.0
+      },
+      {
+        "function": "transfer",
+        "height_mm": 12.0,
+        "name": "Transferencia 1 sintética",
+        "top_mm": 34.0,
+        "width_mm": 20.0
+      },
+      {
+        "function": "transfer",
+        "height_mm": 12.0,
+        "name": "Transferencia 2 sintética",
+        "top_mm": 34.0,
+        "width_mm": 20.0
+      }
+    ],
+    "rod_length_mm": 100.0,
+    "stroke_mm": 46.0,
+    "two_stroke_reference": "rectangular-peripheral-tdc-developed-bdc-v1"
+  },
+  "exhaust": {
+    "documented_description": "oval pipe; optional stepped chamber/muffler",
+    "finite_path_cells": 2,
+    "geometry_provenance": "SYNTHETIC_ASSUMPTION",
+    "mesh_area_m2": 0.0009621127501618742,
+    "modeled_path": "synthetic straight circular sections",
+    "total_mesh_length_mm": 300.0
+  },
+  "fixture_id": "KT100_MODEL_FIXTURE_V1",
+  "intake": {
+    "carburetor_reference": "Walbro WB40 (documented model identity only)",
+    "fuel_metering": "NOT_MODELED",
+    "mode": "piston_port",
+    "tract_geometry_provenance": "SYNTHETIC_ASSUMPTION"
+  },
+  "kind": "synthetic_model_fixture",
+  "provenance_parameter_map": {
+    "boundaries.ambient_pressure_Pa": "fixture_assumptions.initial_pressure_Pa",
+    "boundaries.ambient_temperature_K": "fixture_assumptions.initial_intake_temperature_K",
+    "boundaries.atmosphere_species": "P6 atmospheric_species() default",
+    "boundaries.exhaust_initial_pty": "fixture_assumptions.initial_exhaust_pressure_Pa|initial_exhaust_temperature_K",
+    "boundaries.initial_exhaust_pressure_Pa": "fixture_assumptions.initial_exhaust_pressure_Pa",
+    "boundaries.initial_states_pty": "fixture_assumptions.initial_pressure_Pa|initial_intake_temperature_K|initial_crankcase_temperature_K|initial_cylinder_temperature_K|initial_exhaust_temperature_K",
+    "boundaries.initial_transfer_pressure_Pa": "fixture_assumptions.initial_transfer_pressure_Pa",
+    "boundaries.initial_transfer_temperature_K": "fixture_assumptions.initial_transfer_temperature_K",
+    "boundaries.transfer_initial_pty": "fixture_assumptions.initial_transfer_pressure_Pa|initial_transfer_temperature_K",
+    "combustion.duration_deg": "fixture_assumptions.p7_duration_deg",
+    "combustion.event_start_deg": "fixture_assumptions.p7_start_angle_deg",
+    "combustion.heat_per_bookkeeping_burned_kg_J": "fixture_assumptions.p7_heat_value_J_kg",
+    "crank_slider.crank_radius_mm": "derived_parameters.crank_radius_mm",
+    "crank_slider.rod_length_mm": "fixture_assumptions.connecting_rod_length_mm",
+    "crankcase.volume_at_bdc_cm3": "fixture_assumptions.crankcase_volume_bdc_cm3",
+    "cylinder.clearance_volume_cm3_conditional": "derived_parameters.clearance_volume_cm3_if_geometric_ratio",
+    "cylinder.swept_volume_cm3": "derived_parameters.swept_volume_per_cylinder_cm3",
+    "engine_geometry_and_project.bore_mm": "parameters.bore_mm",
+    "engine_geometry_and_project.compression_ratio": "parameters.compression_ratio",
+    "engine_geometry_and_project.crankcase_volume_bdc_cm3": "fixture_assumptions.crankcase_volume_bdc_cm3",
+    "engine_geometry_and_project.cylinder_count": "parameters.cylinder_count",
+    "engine_geometry_and_project.ducts.exhaust[0]": "fixture_assumptions.exhaust_header_length_mm|exhaust_header_diameter_mm",
+    "engine_geometry_and_project.ducts.exhaust[1]": "fixture_assumptions.exhaust_tail_length_mm|exhaust_tail_diameter_mm",
+    "engine_geometry_and_project.ducts.intake[0]": "fixture_assumptions.intake_duct_length_mm|intake_duct_diameter_mm",
+    "engine_geometry_and_project.intake": "fixture_assumptions.intake_port_top_mm|intake_port_height_mm|intake_port_width_mm|intake_piston_skirt_mm",
+    "engine_geometry_and_project.ports[0]": "fixture_assumptions.exhaust_port_top_mm|exhaust_port_height_mm|exhaust_port_width_mm",
+    "engine_geometry_and_project.ports[1:3]": "fixture_assumptions.transfer_port_top_mm|transfer_port_height_mm|transfer_port_width_mm",
+    "engine_geometry_and_project.rod_length_mm": "fixture_assumptions.connecting_rod_length_mm",
+    "engine_geometry_and_project.stroke_mm": "parameters.stroke_mm",
+    "exhaust.documented_description": "parameters.exhaust_description",
+    "exhaust.mesh_area_m2": "fixture_assumptions.exhaust_header_diameter_mm|exhaust_tail_diameter_mm",
+    "exhaust.modeled_path": "fixture_assumptions.exhaust_header_length_mm|exhaust_header_diameter_mm|exhaust_tail_length_mm|exhaust_tail_diameter_mm",
+    "exhaust.total_mesh_length_mm": "fixture_assumptions.exhaust_header_length_mm|exhaust_tail_length_mm",
+    "intake.carburetor_reference": "parameters.carburetor",
+    "reference_geometry.bore_mm": "parameters.bore_mm",
+    "reference_geometry.compression_ratio": "parameters.compression_ratio",
+    "reference_geometry.cylinders": "parameters.cylinder_count",
+    "reference_geometry.displacement_cm3": "derived_parameters.displacement_from_bore_stroke_cm3",
+    "reference_geometry.rod_length_mm": "fixture_assumptions.connecting_rod_length_mm",
+    "reference_geometry.stroke_mm": "parameters.stroke_mm",
+    "sensitivity_plan.parameters": "fixture_assumptions.sensitivity_rod_scale|sensitivity_exhaust_length_scale",
+    "solver.CFL": "fixture_assumptions.solver_CFL",
+    "solver.backend": "existing P5-C SSPRK2 implementation",
+    "solver.cells_per_finite_path": "fixture_assumptions.solver_cells_per_path",
+    "solver.integrator": "existing P5-C SSPRK2 implementation",
+    "solver.mesh_areas_m2": "fixture_assumptions.intake_duct_diameter_mm|transfer_duct_diameter_mm|exhaust_header_diameter_mm",
+    "solver.mesh_lengths_mm": "fixture_assumptions.intake_duct_length_mm|transfer_duct_length_mm|exhaust_header_length_mm|exhaust_tail_length_mm",
+    "thermodynamics.R_J_kgK": "fixture_assumptions.thermo_R_J_kgK",
+    "thermodynamics.gamma": "fixture_assumptions.thermo_gamma",
+    "transfer.finite_duct_diameter_mm": "fixture_assumptions.transfer_duct_diameter_mm",
+    "transfer.finite_duct_length_mm": "fixture_assumptions.transfer_duct_length_mm",
+    "transfer.two_rectangular_paths": "fixture_assumptions.transfer_port_top_mm|transfer_port_height_mm|transfer_port_width_mm"
+  },
+  "provenance_sha256": "2090a311224f43f285fd1fbf76d964171f2e86990283d918e9d3847f7eedf209",
+  "reference_case_id": "KT100_REFERENCE_CASE_V1",
+  "reference_geometry": {
+    "bore_mm": 52.0,
+    "compression_ratio": 9.0,
+    "cylinders": 1,
+    "displacement_cm3": 97.69096515602821,
+    "rod_length_mm": 100.0,
+    "rod_length_provenance": "SYNTHETIC_ASSUMPTION",
+    "stroke_mm": 46.0
+  },
+  "schema": "motorsim-kt100-fixture-v1",
+  "sensitivity_plan": {
+    "calibration": false,
+    "parameters": [
+      "connecting_rod_length_mm",
+      "exhaust_header_length_mm"
+    ],
+    "pre_registered": true,
+    "relative_variants": [
+      0.95,
+      1.0,
+      1.05
+    ]
+  },
+  "solver": {
+    "CFL": 0.4,
+    "P8_bounded_transient_substitution": false,
+    "backend": "existing Python scalar implementation",
+    "cells_per_finite_path": 2,
+    "integrator": "SSPRK2",
+    "mesh_areas_m2": {
+      "exhaust": 0.0009621127501618742,
+      "intake": 0.00038013271108436493,
+      "transfer_1": 0.0002544690049407732,
+      "transfer_2": 0.0002544690049407732
+    },
+    "mesh_lengths_mm": {
+      "exhaust": 300.0,
+      "intake": 65.0,
+      "transfer_1": 45.0,
+      "transfer_2": 45.0
+    },
+    "periodicity_contract": "E13-R1; thresholds unchanged; max 400 cycles",
+    "topology": "P5-C full topology + authoritative P6 species + P7 prescribed source"
+  },
+  "thermodynamics": {
+    "R_J_kgK": 287.0,
+    "eos": "calorically perfect ideal gas",
+    "gamma": 1.35,
+    "provenance": "SYNTHETIC_ASSUMPTION"
+  },
+  "transfer": {
+    "duct_diameter_mm": 18.0,
+    "duct_length_mm": 45.0,
+    "finite_path_cells": 2,
+    "port_geometry_provenance": "SYNTHETIC_ASSUMPTION",
+    "two_rectangular_paths": true
+  }
+}

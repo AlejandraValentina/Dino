@@ -1,0 +1,20 @@
+{
+  "case_id": "KT100_REFERENCE_SIMULATION",
+  "dataset_kind": "SYNTHETIC_MODEL_EXECUTION",
+  "experimental_validation": "NOT_PERFORMED",
+  "fixture_id": "KT100_MODEL_FIXTURE_V1",
+  "predictive_validation": "NOT_CLAIMED",
+  "results": [
+    {
+      "case_id": "KT100_REFERENCE_SIMULATION",
+      "classification": "INCOMPLETE_OR_ERROR",
+      "error": "ValueError: invalid species state",
+      "fixture_id": "KT100_MODEL_FIXTURE_V1",
+      "rpm": 5000
+    }
+  ],
+  "rpms": [
+    5000
+  ],
+  "schema": "kt100-reference-campaign-v1"
+}

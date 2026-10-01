@@ -1,0 +1,7 @@
+{
+  "case_id": "KT100_REFERENCE_SIMULATION",
+  "classification": "INCOMPLETE_OR_ERROR",
+  "error": "ValueError: invalid species state",
+  "fixture_id": "KT100_MODEL_FIXTURE_V1",
+  "rpm": 5000
+}

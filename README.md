@@ -1914,3 +1914,20 @@ Usar una carpeta de prueba y archivos descartables, sin reemplazar proyectos rea
 
 La tarea 4.2 se marca con la declaración de comprobación manual de la usuaria,
 registrada separadamente en tasks.md. Las entregas permanecen sin archivar.
+
+## Caso documental Yamaha KT100SP
+
+`KT100_REFERENCE_CASE_V1` separa los datos publicados, derivados, unknowns y
+supuestos del fixture ejecutable `KT100_MODEL_FIXTURE_V1`. La campaña disponible
+es exploratoria del modelo 0D sintético: no es rendimiento del Yamaha ni
+validación experimental/predictiva. Sus límites, resultados, sensibilidad y
+fuentes se documentan en
+[KT100 Reference Case V1](docs/gasdynamic/kt100_reference_case_v1.md).
+Recrear configuración: `python -m scripts.build_kt100_fixture`; pruebas focales:
+`python -m pytest tests/test_kt100_reference.py -q`. El barrido fijo ya ejecutado
+queda en `results/kt100-reference-v1-20261001/`; su repetición usa el comando de
+la documentación y los límites temporales de la aplicación. Verificado con
+Python 3.11.0 y OpenSpec CLI 1.3.1; el cambio documental valida con
+`openspec validate kt100-reference-case --strict --no-interactive`. La
+sensibilidad preregistrada se reproduce con
+`python -m scripts.run_kt100_sensitivity`.

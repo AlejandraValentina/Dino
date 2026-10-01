@@ -1,0 +1,44 @@
+{
+  "aka_kt100s_series_2013": {
+    "authority": "competition technical document for S/SE/SD/SEC series",
+    "published": "2013-08-20 update",
+    "publisher": "Australian Karting Association",
+    "title": "Yamaha KT100S Series Engines Technical Specifications, Version 5",
+    "url": "https://www.karting.net.au/wp-content/uploads/2010/09/YAMAHA-KT100S-V-5.pdf",
+    "used_for": [
+      "variant-difference cross-check only; not mixed into KT100SP"
+    ]
+  },
+  "gore_2024_thesis": {
+    "authority": "academic secondary source; variant identity differs/unclear",
+    "published": "2024",
+    "publisher": "North Carolina State University repository",
+    "title": "Experimental Development of a High Power Density Generator Utilizing Renewable Fuel",
+    "url": "https://repository.lib.ncsu.edu/bitstreams/24433484-a6eb-4ad8-80f1-a18fa75c4ef6/download",
+    "used_for": [
+      "context only; not used to populate KT100SP parameters"
+    ]
+  },
+  "yamaha_1998_kt100sp": {
+    "authority": "manufacturer primary source",
+    "published": "1998-12-16",
+    "publisher": "Yamaha Motor Co., Ltd.",
+    "title": "Yamaha KT100SP product release",
+    "url": "https://global.yamaha-motor.com/jp/news/1998/1216/kart.html",
+    "used_for": [
+      "variant",
+      "context",
+      "architecture",
+      "2T",
+      "single cylinder",
+      "air cooling",
+      "97.6 cm3",
+      "52x46 mm",
+      "compression ratio 9.0:1",
+      "TCI",
+      "premix",
+      "Walbro WB40",
+      "oval/optional exhaust description"
+    ]
+  }
+}

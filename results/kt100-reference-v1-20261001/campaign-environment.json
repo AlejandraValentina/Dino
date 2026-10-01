@@ -1,0 +1,7 @@
+{
+  "logical_cpus": 12,
+  "machine": "AMD64",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "processor": "Intel64 Family 6 Model 165 Stepping 3, GenuineIntel",
+  "python": "3.11.0 (main, Oct 24 2022, 18:26:48) [MSC v.1933 64 bit (AMD64)]"
+}

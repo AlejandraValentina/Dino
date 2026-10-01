@@ -1,0 +1,17 @@
+{
+  "schema": "kt100-reference-sensitivity-preregistration-v1",
+  "status": "FROZEN_BEFORE_SENSITIVITY_RUNS",
+  "anchor_rpm": 9000,
+  "anchor_selection": "geometric midpoint of the fixed exploratory grid [5000, 7000, 9000, 11000, 13000]; selected by grid position only, not by output values",
+  "solver": "existing adaptive RK4 profile B; no tolerance, model, or stopping changes",
+  "variants": [
+    {"parameter": "connecting_rod_length_mm", "scale": 0.95},
+    {"parameter": "connecting_rod_length_mm", "scale": 1.05},
+    {"parameter": "exhaust_segment_lengths_mm", "scale": 0.95},
+    {"parameter": "exhaust_segment_lengths_mm", "scale": 1.05}
+  ],
+  "baseline": "primary 9000 rpm result from campaign.json",
+  "reported_metrics": ["convergence_status", "cycles_completed", "indicated_work_last_completed_cycle_J", "indicated_power_from_work_W", "torque_equivalent_from_work_Nm", "peak_pressure_last_completed_cycle_Pa", "mass_energy_and_passive_marker_balances"],
+  "interpretation": "descriptive local sensitivity only; no fitting, parameter selection, or Yamaha performance validation",
+  "run_limit": "exactly four variant runs; no retries or post-hoc parameter changes"
+}
