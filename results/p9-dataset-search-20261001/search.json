@@ -13,7 +13,12 @@
   "dataset_files_downloaded": [],
   "sha256_files_downloaded": [],
   "best_candidate_id": "C01",
-  "best_candidate_classification": "PROMISING_DATA_REQUEST_REQUIRED",
+  "best_candidate_classification": "DATA_REQUEST_REQUIRED",
+  "previous_best_candidate_label": "PROMISING_DATA_REQUEST_REQUIRED",
+  "normalized_matrix": "results/p9-dataset-search-20261001/matrix.json",
+  "expanded_search_matrix": "results/p9-dataset-search-20261001/search-expansion.json",
+  "expanded_candidate_count": 17,
+  "combined_candidate_count": 27,
   "contact": {
     "institution": "Queen's University Belfast, School of Mechanical and Aerospace Engineering",
     "verified_route": "schooloffice.mae@qub.ac.uk",

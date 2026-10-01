@@ -123,6 +123,30 @@ Thank you for your time.
 Regards,
 MotorSim project
 
+### Solicitudes focales adicionales (no enviadas)
+
+**Queen's University Belfast — SAE 2001-28-0059 y SAE 978510.** Consultar si
+conservan las 2000 trazas de presión del estudio monocilíndrico lean-burn y las
+capturas presión/ángulo del ensayo transitorio. Para cada paquete, pedir el
+modelo/configuración de motor, lista completa de RPM y cargas, indicar cuáles
+son puntos estabilizados, formato raw, número de ciclos por punto, geometría,
+procedimiento TDC, calibración/incertidumbre y permisos de reutilización. En
+SAE 978510, preguntar de forma explícita si hay cinco o más puntos estacionarios;
+las mediciones hechas durante aceleración no se asumirán equivalentes. En SAE
+2001-28-0059, confirmar si las 2000 trazas cubren cinco o más RPM en una misma
+configuración. Contacto de enrutamiento institucional verificado:
+`schooloffice.mae@qub.ac.uk`.
+
+**University of Wales Trinity Saint David — datos previos KTM citados en la
+tesis MRes 2025.** Pedir al autor, vía la biblioteca institucional, la cita
+primaria del dataset de aproximadamente 2000–10000 rpm, si sobreviven sus
+archivos de adquisición/setup, puntos exactos, motor/configuración, geometría,
+calibración/TDC, incertidumbre y permiso. No se asume que la mención de 300
+ciclos o el rango de RPM garantice cinco puntos compatibles. Ruta verificada:
+`library@uwtsd.ac.uk`.
+
+Las tres solicitudes anteriores siguen preparadas, pero no se enviaron.
+
 ## Búsquedas realizadas y límites
 
 Se buscaron títulos/DOI/autores y frases sobre `two-stroke`, presión de cilindro,
@@ -151,3 +175,53 @@ de un suplemento entregado bajo solicitud.
 - Comparación, simulación, campaña y calibración P9: no ejecutadas.
 - Estado P9: `P9_PREREGISTERED_AWAITING_EXPERIMENTAL_DATA`.
 - Contrato/preregistro: intactos.
+
+## Ampliación de búsqueda y calificación sintética (actualización del mismo día)
+
+La matriz histórica de diez filas anterior se conserva sin reescritura. Una
+segunda búsqueda incorporó 17 leads adicionales, para 27 filas/leads en total,
+con una matriz normalizada y límites por campo en
+[`search-expansion.json`](../../results/p9-dataset-search-20261001/search-expansion.json).
+La matriz completa en el esquema P9, con todas las columnas y `null` explícito
+para lo desconocido, está en [`matrix.json`](../../results/p9-dataset-search-20261001/matrix.json).
+La nueva consulta del SAE 2001-28-0059 halló una campaña de 2000 trazas
+continuas de presión en un 2T SI monocilíndrico, pero el resumen público no
+establece cinco RPM ni da archivos de adquisición, configuración completa o
+licencia. Queda como `DATA_REQUEST_REQUIRED`, no como dataset P9 listo.
+
+La búsqueda también detectó estudios de kart 2T que ofrecen potencia de banco,
+un motor pequeño de investigación con solo una velocidad pública, un HCCI 2T
+con presión experimental en un único punto y otros motores 2T de arquitectura
+pesada/opposed-piston. El trabajo de SAE 2001-28-0059 describe las 2000 trazas;
+el informe técnico Chalmers muestra presión angular experimental para un
+prototipo de range-extender a 11200 rpm; ambos son pistas, no archivos de
+medición descargables. La tesis UWTSD documenta adquisición/corrección de
+ángulo y ganancia, pero su análisis público cubre 1600 y 2500 rpm. [SAE
+2001-28-0059](https://saemobilus.sae.org/papers/experimental-investigation-cyclic-variation-combustion-phases-a-lean-burn-two-stroke-si-engine-2001-28-0059),
+[Chalmers report](https://research.chalmers.se/publication/534994/file/534994_Fulltext.pdf),
+[UWTSD thesis](https://repository.uwtsd.ac.uk/id/eprint/3981/1/Vacas_J_MRes_Thesis.pdf).
+La búsqueda de referencias también encontró SAE 978510, con presión de cilindro
+y escape capturada a intervalos durante una aceleración en un banco inercial;
+la naturaleza transitoria no demuestra por sí sola cinco puntos estacionarios.
+[SAE 978510](https://saemobilus.sae.org/papers/validation-two-stroke-engine-simulation-a-transient-test-method-978510).
+
+Una búsqueda de repositorios encontró además una ficha de datos de presión
+resuelta por ángulo para el motor AVL 5402 de investigación; ese motor es 4T y
+por tanto no se incorporó como candidato compatible. La página del artículo
+IAME X30/Screamer III es una comparación modelo-potencia de banco y tampoco
+aporta la presión experimental primaria necesaria. [Mendeley AVL
+5402](https://data.mendeley.com/datasets/rg4tyrxv2j/1), [IAME 1D model
+paper](https://www.mdpi.com/1996-1073/16/13/4947).
+
+La expansión buscó Zenodo, Figshare, Mendeley Data, OSF, Dryad, IEEE DataPort,
+suplementos y repositorios académicos/institucionales. El acceso de búsqueda a
+IEEE DataPort fue bloqueado por robots; no se infiere ausencia de datos
+privados. No se descargó ningún dataset, no se digitalizaron figuras ni se
+contactó a autores. Se verificaron rutas institucionales para pedir archivos
+de QUB/UWTSD y las solicitudes siguen sin enviar.
+
+La infraestructura sintética ahora disponible se documenta por separado en
+[`p9_pipeline_qualification_20261001.md`](p9_pipeline_qualification_20261001.md).
+Su calificación no altera esta conclusión de Track A: el estado experimental
+P9 sigue `P9_PREREGISTERED_AWAITING_EXPERIMENTAL_DATA`,
+`NOT_PERFORMED`; no hay comparación, calibración ni campaña confirmatoria.
