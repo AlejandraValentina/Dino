@@ -99,10 +99,14 @@ class GenericTwoStrokePortTests(unittest.TestCase):
 
     def test_zero_discharge_coefficient_is_a_valid_closed_flow_path(self):
         model = generic_fixture()
-        port = next(p for p in model.ports if p.id == "tr-primary")
-        closed = replace(port, discharge_coefficient=0.0)
-        closed.validate()
-        self.assertEqual(model.area_at(closed, 180.0), 0.0)
+        ports = tuple(replace(p, discharge_coefficient=0.0)
+                      if p.id == "tr-primary" else p for p in model.ports)
+        closed_model = replace(model, ports=ports)
+        closed_model.validate()
+        closed_port = next(p for p in closed_model.ports if p.id == "tr-primary")
+        self.assertEqual(closed_model.area_at(closed_port, 180.0), 0.0)
+        restored = TwoStrokePortSet.loads(closed_model.dumps())
+        self.assertEqual(restored, closed_model)
 
     def test_profile_interpolates_periodically_and_preserves_explicit_values(self):
         model = generic_fixture()
