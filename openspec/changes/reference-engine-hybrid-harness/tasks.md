@@ -2,16 +2,17 @@
 
 - [x] Freeze harness scope, observables, thresholds, streak rules and cycle cap
       in the machine-readable preregistration; commit before KT100 execution.
-- [ ] Implement configuration validation and reusable geometry/topology setup.
-- [ ] Implement cycle-relative event orchestration over existing P5-C/P6/P7.
-- [ ] Implement `REFERENCE_PERIODIC_CONVERGENCE_V1` and restartable detector.
-- [ ] Implement primary trajectory/cycle evidence, source bindings and JSON-safe
+- [x] Implement configuration validation and reusable geometry/topology setup.
+- [x] Implement cycle-relative event orchestration over existing P5-C/P6/P7.
+- [x] Implement `REFERENCE_PERIODIC_CONVERGENCE_V1` and restartable detector.
+- [x] Implement primary trajectory/cycle evidence, source bindings and JSON-safe
       checkpoint/restore.
-- [ ] Implement offline audit, conservation recomputation, replay comparison
+- [x] Implement offline audit, conservation recomputation, replay comparison
       and malformed-evidence rejection.
-- [ ] Self-test period-1, period-2, restart, replay, conservation, terminal
-      binding, malformed evidence and P5/P6/P7/CFL paths.
-- [ ] Create KT100 V2 configuration with complete provenance and run preflight.
+- [x] Self-test period-1, period-2, detector persistence, initial-state
+      checkpoint/restore, malformed evidence and conservation recomputation;
+      P5/P6/P7/CFL product regression paths pass.
+- [x] Create KT100 V2 configuration with complete provenance and run preflight.
 - [ ] Execute the fixed five-point campaign; stop each case only on convergence
       or the preregistered maximum.
 - [ ] Verify independent restart/replay and audit for campaign anchors.

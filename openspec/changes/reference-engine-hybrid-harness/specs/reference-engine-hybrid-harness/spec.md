@@ -6,11 +6,15 @@
 
 The system MUST provide `REFERENCE_ENGINE_HYBRID_HARNESS_V1` as orchestration,
 configuration, convergence, evidence and audit around existing product physics.
-It MUST accept arbitrary valid engine geometry, RPM, CFL, finite meshes, boundary
+It MUST accept arbitrary valid geometry within the existing single-cylinder 2T
+P5-C topology, RPM, CFL, finite meshes, compatible boundary
 states, four-species initial states, cycle-relative P7 timing, maximum cycles,
 checkpoint cadence and replay configuration. It MUST NOT depend on P8 campaign
 anchors, fixed P8 mechanics/windows or historical P7 absolute campaign gates.
 It MUST NOT modify P4–P9 scientific contracts or introduce physical equations.
+It MUST reject non-product atmospheric boundaries and configurable discharge
+coefficients because the existing P5-C/P4 interfaces do not expose them; it
+MUST NOT accept and silently ignore those inputs.
 The physical event phase MUST be in [30°,350°] for the fixed 40° product event
 inside the preregistered [30°,390°] cycle. The scheduler offset MUST also be
 applied to cycle boundaries and checkpoints, while its inverse is applied to

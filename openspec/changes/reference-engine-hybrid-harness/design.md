@@ -50,6 +50,16 @@ case.
 
 ### Physics/event orchestration
 
+The current product stack supports one 2T cylinder, one intake, two transfer
+paths/ports and one exhaust path. Configuration outside that topology is
+rejected. Its atmospheric P5-C boundary is fixed at 101325 Pa / 300 K; P6
+assigns fresh-air-only donor composition. The P4 ideal-port flux API accepts
+effective geometry but no configurable discharge coefficient. The harness
+does not silently consume legacy 0D coefficients: V2 records this product-model
+limitation as a `MODEL_FORM_DIFFERENCE` from V1. A future case requiring a
+different atmospheric boundary or active discharge coefficients cannot run
+under this harness without an independently authorized product capability.
+
 The harness constructs `Model` geometry and the existing `IntegratedP5C`,
 `P6IntegratedSystem`, EOS, Riemann fluxes, CFL step and P7 source. It supplies
 finite meshes/states from a validated JSON config. Cycles use one normalized

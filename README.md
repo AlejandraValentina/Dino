@@ -1932,7 +1932,7 @@ Python 3.11.0 y OpenSpec CLI 1.3.1; el cambio documental valida con
 sensibilidad preregistrada se reproduce con
 `python -m scripts.run_kt100_sensitivity`.
 
-### Continuación híbrida V2 (diagnóstico bloqueado)
+### Continuación híbrida V2 anterior al harness (diagnóstico histórico)
 
 La continuación `KT100_HYBRID_MODEL_FIXTURE_V2` se detuvo antes de crear una
 configuración o ejecutar una campaña: el P8 existente fija otra identidad de
@@ -1943,3 +1943,34 @@ convergencia, P7 periódico, restart/replay ni V2. Detalle en
 [`tasks.md`](openspec/changes/kt100-reference-case/tasks.md) y en
 [`design.md`](openspec/changes/kt100-reference-case/design.md). No se cambiaron
 contratos P4–P9; V1 y su punto 5000 rpm no convergido permanecen sin cambios.
+Ese bloqueo pertenece al intento previo que dependía de P8/E13. No describe la
+nueva infraestructura de referencia independiente registrada más abajo.
+
+### Harness híbrido de motores de referencia (infraestructura nueva)
+
+`REFERENCE_ENGINE_HYBRID_HARNESS_V1` es una infraestructura separada de P8:
+usa los componentes productivos P5-C/P6/P7 sin importar anchors/ventanas P8 ni
+presentar su convergencia como E13. El contrato de periodicidad, con 3
+comparaciones consecutivas, precedencia period-1, ramas period-2 independientes
+y máximo 400 ciclos, se congeló antes de la campaña fija de puntos RPM en el commit local
+`3c20048`. El ciclo relativo adapta la fase de P7 sin cambiar su mecanismo ni
+la geometría de puertos. P4 sigue siendo dependencia condicional del stack.
+
+El cliente `KT100_HYBRID_MODEL_FIXTURE_V2` se genera desde el fixture V1 y marca
+por separado las dimensiones de transferencias, estados iniciales y evento P7
+sintéticos. No es un KT100 medido ni calibrado; sus puntos RPM son exploratorios.
+La configuración está en `configs/fixtures/kt100_hybrid_model_fixture_v2.json`.
+
+Comandos reproducibles:
+
+```powershell
+python -m scripts.build_kt100_hybrid_fixture_v2
+python -m unittest tests.test_reference_harness -v
+python -m pytest tests/test_p5c_integrated.py tests/test_p6_species.py tests/test_p7_prescribed.py tests/test_p7_full_topology.py tests/test_gas1d.py -q
+python -m scripts.run_kt100_hybrid_v2
+```
+
+Las campañas escriben PRIMARY comprimido, checkpoints, replay y resúmenes en
+`results/kt100-hybrid-model-fixture-v2-harness-20261002/`. Los estados de cada
+punto y la suficiencia del stack se registran en el `tasks.md` del cambio; estos
+resultados son salidas del modelo y no validación experimental ni predictiva.
