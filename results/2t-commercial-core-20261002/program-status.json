@@ -107,11 +107,17 @@
       ]
     },
     "11_fuel": {
-      "status": "ACCOUNTING_COMPONENT_VERIFIED_P6_PER_SPECIES_DELIVERY_BINDING_PENDING",
+      "status": "INTEGRATED_P6_FUEL_OUTPUTS_WITH_EXACT_EXHAUST_CLOSE_SPECIES; STOICHIOMETRY_UNDEFINED",
       "verified_scope": [
         "explicit_fuel_properties",
         "afr_equivalence",
-        "fuel_masses_flow_isfc_bsfc"
+        "fuel_masses_flow_isfc_bsfc",
+        "cylinder_fuel_pseudo_species_at_exact_exhaust_close_or_explicit_undefined"
+      ],
+      "blocked_scope": [
+        "stoichiometric_AFR_not_configured",
+        "total_trapped_fuel_not_inferred_from_global_terminal_inventory",
+        "P7_QF_to_fuel_LHV_relationship_not_authorized_or_verified"
       ]
     },
     "12_powervalve": {
@@ -424,7 +430,7 @@
       "evidence": "results/2t-commercial-core-20261002/fixture-a-periodicity-extension-20261002-v1.json.gz"
     },
     "integrated_output_fuel_accounting": {
-      "result": "PASS_85_TEST_REGRESSION; current-cycle ledger/output checks pass",
+      "result": "PASS_33_FOCAL_TESTS; exact exhaust-close cylinder fuel pseudo-species and undefined fallback verified",
       "quantities": [
         "gross_fresh_air_intake",
         "fuel_delivery",
@@ -434,7 +440,8 @@
         "global_fuel_species_residual",
         "gross_intake_AFR",
         "ISFC_if_positive_indicated_power",
-        "BSFC_if_positive_brake_power"
+        "BSFC_if_positive_brake_power",
+        "cylinder_fuel_species_at_exhaust_close_kg"
       ],
       "equivalence_ratio": "UNDEFINED_WITHOUT_EXPLICIT_STOICHIOMETRIC_AFR",
       "tests": "tests/test_integrated_2t.py"
@@ -478,7 +485,8 @@
       "results/kt100-hybrid-model-fixture-v2-harness-20261002-r2/",
       "results/kt100-hybrid-model-fixture-v2-harness-20261002-r3/",
       "results/kt100-hybrid-model-fixture-v2-harness-20261002-r4/"
-    ]
+    ],
+    "latest_commit": "f03af37"
   },
   "queue": [
     {
@@ -560,7 +568,7 @@
         "17b-static-reed-intake-crankcase"
       ],
       "state": "IN_PROGRESS",
-      "blocker": "Equivalence ratio requires explicit stoichiometric AFR; terminal global fuel inventory is not trapped fuel; no approved P7 Q_F-to-LHV binding. Dynamic reed integration remains separate.",
+      "blocker": "Stoichiometric AFR and Q_F-to-LHV remain unspecified; this metric is only the exact remaining fuel pseudo-species in the cylinder at exhaust closure, not total trapped fuel.",
       "commits": [
         "8b04b83ccaa64a0221b380044c38e7c53d0f3cca"
       ],
@@ -570,7 +578,8 @@
         "independent read-only review PASS for source stages, ledgers, event transactionality and absolute event chronology; no full-engine review",
         "P9 spec SHA-256 rechecked unchanged: 79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d",
         "21 integrated tests and 73-test integrated/P5-C/P6/P7/reed/ports group pass; fixture A shows nonzero fuel delivery/short-circuit, P7 heat, wall heat and work",
-        "Cycle-primary collector derives fuel flow only from actual integrated P6 intake fuel-species ledger; LHV-based metrics remain undefined."
+        "Cycle-primary collector derives fuel flow only from actual integrated P6 intake fuel-species ledger; LHV-based metrics remain undefined.",
+        "Engineering V2 emits cylinder_fuel_species_at_exhaust_close_kg only from the validated exact cylinder closure snapshot; missing closure stays UNDEFINED; source explicitly disclaims total trapped fuel. 33 focal integrated/output tests PASS."
       ],
       "next_action": "Continue generic geometry and cycle integration independently; keep quantities UNDEFINED unless inputs have approved meanings."
     },
