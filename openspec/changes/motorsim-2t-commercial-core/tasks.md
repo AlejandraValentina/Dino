@@ -68,6 +68,12 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       `motorsim.mechanical`; cuatro pruebas analíticas/negativas. Parcial: no
       se inyectan pérdidas al solver ni hay mapas calibrados/documentados.
 - [ ] Fase 11: combustible, AFR y BSFC consistentes con P6.
+- [x] Fase 11a: propiedades de combustible explícitas con provenance y cálculo
+      de AFR/equivalence, inventario entregado/atrapado/quemado/no quemado,
+      short-circuit explícito desde ledger P6 (sin inferirlo de delivered menos
+      trapped), energía potencial, fuel flow e ISFC/BSFC de 2T;
+      nueve pruebas analíticas/negativas. Parcial: adaptador consume masas
+      suministradas, no se acopla a la campaña P6 ni al ledger energético.
 - [ ] Fase 12: geometría/actuación de powervalve.
 - [ ] Fase 13: plenum, airbox, boost bottle y uniones.
 - [ ] Fase 14: esquema unificado de outputs por ángulo y ciclo/RPM.

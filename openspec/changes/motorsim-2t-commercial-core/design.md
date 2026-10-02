@@ -142,3 +142,18 @@ RPM/load map and provenance. For a two-stroke cycle of 360 degrees,
 `P=W*RPM/60`, and `T=W/(2*pi)`. Negative brake output is preserved and flagged;
 the model never clips it or fits losses to a target. This arithmetic capability
 does not add losses to the gas solver or imply a measured performance map.
+
+## Fuel accounting `FUEL_ACCOUNTING_V1`
+
+Fuel properties explicitly provide stoichiometric AFR and LHV with provenance.
+The cycle adapter receives delivered/trapped P6 fresh-air and fuel masses,
+plus the prescribed profile's final burned fraction, and checks trapped mass
+does not exceed delivered mass. Short-circuited fuel is a separate supplied P6
+species-ledger value; delivered-minus-trapped is reported only as fuel not
+trapped, not mislabeled as exhaust short circuit. AFR and equivalence ratios are explicit; zero
+fuel yields `UNDEFINED/ZERO_DENOMINATOR`. Delivered fuel defines fuel flow and
+includes any delivered-but-untrapped short-circuit amount. Burned, trapped
+unburned, not-trapped and short-circuited fuel are reported separately. Heat potential is
+`burned_fuel*LHV`; it is bookkeeping only and is not coupled to the solver.
+SFC uses the 2T one-cycle-per-revolution rate; brake SFC is undefined when
+brake power is nonpositive.

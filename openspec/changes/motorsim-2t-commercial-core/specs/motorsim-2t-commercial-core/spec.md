@@ -267,3 +267,29 @@ loss terms to desired performance.
 - **WHEN** configured losses exceed indicated cycle work
 - **THEN** negative brake work/power/torque remain visible and are flagged, not
   clipped to zero.
+
+### Requirement: Explicit fuel, AFR and 2T SFC accounting
+
+Fuel accounting MUST use explicit stoichiometric AFR, LHV and provenance. The
+cycle input MUST distinguish delivered and trapped fresh-air/fuel masses,
+explicit P6 species-ledger short circuit, and a bounded prescribed burned
+fraction. Outputs MUST include delivered
+and trapped AFR, equivalence ratio, fuel trapped/burned/unburned/short-circuited,
+fuel flow, released-energy potential, indicated SFC and brake SFC when brake
+power is positive. Fuel flow MUST use the declared 2T 360-degree cycle rate.
+Zero denominators and nonpositive brake power MUST have explicit undefined
+statuses. The energy potential MUST NOT be passed to the gas solver without a
+separately verified energy coupling.
+
+#### Scenario: Complete fuel ledger
+
+- **WHEN** explicit fuel properties, P6 delivered/trapped and short-circuited
+  species masses, burned fraction, RPM and indicated/brake work are supplied
+- **THEN** AFR, equivalence, species-derived fuel masses, flow, energy potential
+  and SFC are returned with the 2T cycle convention.
+
+#### Scenario: Missing fuel or nonpositive brake power
+
+- **WHEN** no fuel is present or brake power is zero/negative
+- **THEN** AFR or brake SFC is explicitly undefined; masses and energy remain
+  zero or signed according to the supplied ledger, without invented values.
