@@ -42,12 +42,16 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       ángulos de cierre resueltos, cierre terminal, ledger P6 cumulativo y
       summary concordante; no interpola. Tests de evento ausente, resumen stale
       y bool-as-number cubiertos.
-- [ ] Fase 4c: verificar ledgers P6 durante operación periódica y exponer los
-      outputs en el esquema de resultados, sin cambiar transporte. La serie
-      contigua de primary cycles y el mapeo a outputs ya existen y se prueban
-      con fixtures; la verificación de un resultado periódico de campaña queda
-      pendiente hasta disponer de ciclos híbridos completos (KT100 no aporta
-      ciclos y sus recibos permanecen congelados).
+- [x] Fase 4c: verificados ledgers P6 y outputs V2 durante operación periódica
+      en dos fixtures internos completos, sin cambiar transporte. Fixture A
+      alcanzó P1 en ciclo 16; Fixture B, con cámara 20% más larga, alcanzó P1
+      en ciclo 19. Los ciclos tienen snapshots exactos de cierre, outputs
+      ligados a sus trazas/ledgers y balances de especie reconstruidos. Evidencia
+      comprimida preservada en `fixture-a-periodicity-extension-20261002-v1`
+      y `fixture-b-long-chamber-primary-20261002-v1`; auditoría adicional de
+      fuel para ciclos 13–16 en `fixture-a-fuel-output-audit-20261002.json`.
+      Son fixtures sintéticos `CONDITIONAL_ON_P4`, no validación experimental ni
+      cierre de Commercial Core.
 - [ ] Fase 5: reed estática y/o dinámica, según alcance físico derivable.
 - [x] Fase 5a: `STATIC_REED_V1` y `DYNAMIC_REED_V1` multi-petal, respuesta,
       contactos, flujo y serialization/replay individual. `motorsim.reed`
