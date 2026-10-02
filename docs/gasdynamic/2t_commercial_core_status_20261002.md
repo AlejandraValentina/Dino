@@ -219,3 +219,34 @@ pruebas; el grupo actual integrado/P5-C/P6/P7/reed/puertos pasó 68/68.
 OpenSpec estricto, compilación Python y diff check pasaron. La revisión
 independiente read-only de esta conexión sigue pendiente; no se presenta la
 autorrevisión como independiente.
+
+### Continuación: evidencia primaria, trabajo indicado y collector parcial
+
+La evidencia primaria por ciclo ahora se reconstruye desde los stages SSPRK2
+aceptados y comprueba continuidad de estado, CFL, flujos externos, fuentes P7 y
+térmicas, inventarios y deltas de los ledgers del checkpoint. Al integrar el
+observable de trabajo se detectó que el ledger energético guarda `-p·dV/dt`,
+mientras el trabajo indicado producido es `∮p·dV`; la salida de ciclo invierte
+ese signo sin alterar el balance energético del solver. También se corrigió el
+signo del acumulador de masa P7 que realmente se hubiera limitado; la masa
+limitada verificada para el fixture es cero. La presión inicial sintética de
+cárter/cilindro se igualó con los 101325 Pa de la atmósfera, derivada de la EOS
+existente.
+
+`make_integrated_engineering_output` genera la salida V1 para una trayectoria
+completa con señales de las cámaras/especies, calor P7 y de pared, trabajo e
+indicadores mecánicos, caudal de combustible ligado al ledger P6 y residuo de
+energía. Las pérdidas al freno requieren pasar un `MechanicalLossModel` real y
+explícito. AFR, BSFC/ISFC y las métricas de retención/scavenging permanecen
+indefinidas hasta disponer de las magnitudes de entrada necesarias; no se
+rellenan con estimaciones.
+
+Se extendió el diagnóstico del mismo fixture A a seis ciclos, sin cambiar
+solver, malla, CFL ni contrato. El ciclo 1 tiene trabajo indicado negativo; la
+comparación 1→2 queda `INVALID`, y las comparaciones 2→3, 3→4, 4→5 y 5→6 son
+`FAIL` bajo `REFERENCE_PERIODIC_CONVERGENCE_V1`. No se concede P1/P2. El primary
+record conserva trazas completas de estados de ductos y aperturas, pero el
+collector aún carece de salidas tipadas por ducto, Mach y cierres geométricos.
+Fixture A sigue bloqueado para periodicidad; Fixture B y las regresiones amplias
+actuales P4–P8 siguen pendientes. La revisión de este delta es autorrevisión,
+no una revisión independiente del motor integrado.

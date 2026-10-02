@@ -4,7 +4,7 @@
   "recorded_at": "2026-10-02",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
   "status_capture_head": "8b04b83",
-  "overall": "NOT_READY_INTEGRATION_GAPS_REMAIN",
+  "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
   "kt100_policy": "FROZEN_NO_RERUNS_OR_ADJUSTMENTS_IN_THIS_MISSION",
@@ -144,7 +144,7 @@
       "unknowns_left_null": true
     },
     "17_integrated_2t_foundation": {
-      "status": "PARTIAL_ONE_SYNTHETIC_FIXTURE_TWO_COMPLETE_CYCLES",
+      "status": "PARTIAL_ONE_SYNTHETIC_FIXTURE_SIX_CYCLES_P1_FAIL",
       "implementation": "motorsim.integrated_2t.IntegratedEngine2T",
       "verified_scope": [
         "single_global_ssprk2_stage_state",
@@ -181,7 +181,12 @@
         "wall_heat_and_indicated_work_nonzero_in_full_cycles",
         "checkpoint_at_360_degrees_replays_to_720_degree_snapshot_exactly",
         "json_checkpoint_state_and_trace_use_canonical_array_representation",
-        "mechanical_loss_model_calculates_positive_brake_work_from_synthetic_cycle_average"
+        "mechanical_loss_model_calculates_positive_brake_work_from_synthetic_cycle_average",
+        "complete_cycle_primary_rebuilt_from_accepted_ssprk2_stages",
+        "cycle_primary_crosschecks_checkpoint_ledger_deltas_and_global_residuals",
+        "indicated_work_sign_converted_from_gas_energy_rhs_with_preserved_energy_ledger",
+        "first_integrated_engineering_output_v1_from_cycle_primary_record",
+        "p7_availability_limited_mass_ledger_sign_corrected_and_zero_for_fixture_a"
       ],
       "focal_tests": 21,
       "blocked_scope": [
@@ -191,12 +196,16 @@
         "fuel_accounting_binding_to_trapped_species_and_defensible_p7_qf_to_lhv_relation",
         "dynamic_reed_state_and_restart",
         "independent_second_fixture_and_two_independent_full_trajectory_replays",
-        "broad_current_p4_p8_regressions_not_rerun"
+        "broad_current_p4_p8_regressions_not_rerun",
+        "fixture_a_cycle_1_indicated_work_negative_and_p1_comparison_invalid",
+        "fixture_a_periodic_comparisons_cycles_2_to_6_fail_reference_contract",
+        "typed_per_duct_mach_flow_and_port_closure_channels_missing_from_collector",
+        "fixture_b_not_started_until_fixture_a_closes_cycle_evidence"
       ],
       "boundary_v2": "NOT_IMPLEMENTED_NO_FALLBACK"
     },
     "17d_p7_fuel_combustion_thermal_mechanics": {
-      "status": "PARTIAL_P7_AND_THERMAL_STAGE_INTEGRATED_SYNTHETIC_CYCLE_EVIDENCE",
+      "status": "PARTIAL_CYCLE_PRIMARY_AND_CONDITIONAL_MECHANICAL_OUTPUT",
       "verified_scope": [
         "P7_CAPTURE_FROM_ACTUAL_FOUR_SPECIES_CYLINDER_INVENTORY",
         "P7_SOURCE_IN_BOTH_INTEGRATED_SSPRK2_STAGES",
@@ -209,13 +218,19 @@
         "two_cycle_synthetic_fixture_has_nonzero_p7_heat_wall_heat_and_indicated_work",
         "fuel_delivered_and_fuel_short_circuited_are_separate_global_species_ledgers",
         "checkpoint_schema_v3_persists_fuel_short_circuit_and_canonical_json_state",
-        "synthetic_friction_model_produces_positive_brake_work_from_cycle_average"
+        "synthetic_friction_model_produces_positive_brake_work_from_cycle_average",
+        "fuel_flow_output_bound_to_integrated_p6_intake_species_ledger",
+        "mechanical_outputs_bound_to_explicit_mechanical_loss_model_and_cycle_work",
+        "undefined_fuel_lhv_metrics_remain_explicitly_undefined"
       ],
       "blocked_scope": [
         "fuel_accounting_requires_cycle_trapping_and_exact_closure_observables",
         "p7_prescribed_qf_has_no_approved_relation_to_fuel_lhv",
         "mechanical_outputs_not_yet_part_of_cycle_collector_or_durable_output",
-        "cycle_primary_evidence_and_periodicity_pending"
+        "cycle_primary_evidence_and_periodicity_pending",
+        "fixture_a_cycle_1_has_negative_indicated_work_and_no_periodic_sequence",
+        "fuel_trapping_and_exact_port_closure_accounting_pending",
+        "collector_lacks_per_duct_mach_flow_and_port_closure_channels"
       ],
       "dependency_status": "CONDITIONAL_ON_P4"
     }
@@ -242,8 +257,8 @@
       "command": "python -m pytest tests/test_integrated_2t.py tests/test_p5c_integrated.py tests/test_p6_species.py tests/test_p7_full_topology.py tests/test_reed.py tests/test_two_stroke_ports_p5c.py -q"
     },
     "integrated_cycle_fixture_a": {
-      "result": "PASS_TWO_COMPLETE_SYNTHETIC_CYCLES_CHECKPOINT_REPLAY",
-      "cycles": 2,
+      "result": "SIX_COMPLETE_ADMISSIBLE_CYCLES_PERIODIC_GATE_FAILS",
+      "cycles": 6,
       "rpm": 3000,
       "max_cfl": 0.4,
       "atmosphere_species_mass_fractions": [
@@ -252,12 +267,32 @@
         0.0,
         0.0
       ],
+      "cycle_indicated_work_j": [
+        -111.7339533280776,
+        25.638633810282446,
+        51.72927582177082,
+        53.215760795438406,
+        47.840327850534095,
+        44.26869307907014
+      ],
+      "periodic_comparisons": {
+        "1_to_2": "INVALID",
+        "2_to_3": "FAIL",
+        "3_to_4": "FAIL",
+        "4_to_5": "FAIL",
+        "5_to_6": "FAIL"
+      },
       "evidence_limits": [
         "NO_P1_P2_CLASSIFICATION",
         "SYNTHETIC_ONLY",
-        "NO_CYCLE_COLLECTOR",
+        "NO_COMMERCIAL_CORE_READINESS",
         "NO_FUEL_LHV_CLAIM"
       ]
+    },
+    "integrated_output_and_foundation_tests": {
+      "result": "PASS",
+      "count": 32,
+      "command": "python -m pytest tests/test_integrated_2t.py tests/test_engineering_outputs.py -q"
     }
   },
   "review": {
@@ -302,7 +337,7 @@
         "17a-integrated-gas-species-foundation"
       ],
       "state": "IN_PROGRESS",
-      "blocker": "Dynamic reed mechanical state/restart remains open; existing CrankcaseGeometry V2 now drives both chamber volumes/rates in the shared stages.",
+      "blocker": "Dynamic reed mechanical state and SSPRK2 restart remain open; static reed and slider-crank are integrated.",
       "commits": [
         "a70917dde45ca15c62d5e0f460020599488a4d1f",
         "d3b82f3 Integrate generic ports into accepted 2T stages"
@@ -347,7 +382,7 @@
         "17b-static-reed-intake-crankcase"
       ],
       "state": "IN_PROGRESS",
-      "blocker": "Cycle-level trapped-fuel/combustion accounting and an approved relation between prescribed P7 Q_F and fuel LHV are unresolved; mechanical losses have only been exercised separately with a synthetic average-cycle input.",
+      "blocker": "Fixture A has negative indicated work on cycle 1 and P1 comparisons fail on cycles 2–6; trapped-fuel/closure accounting and approved P7 Q_F-to-LHV binding remain unresolved.",
       "commits": [
         "8b04b83ccaa64a0221b380044c38e7c53d0f3cca"
       ],
@@ -356,7 +391,8 @@
         "72-test integrated/P5-C/P6/P7/reed/ports regression PASS; OpenSpec strict PASS; py_compile, diff-check and Git LFS fsck PASS",
         "independent read-only review PASS for source stages, ledgers, event transactionality and absolute event chronology; no full-engine review",
         "P9 spec SHA-256 rechecked unchanged: 79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d",
-        "21 integrated tests and 73-test integrated/P5-C/P6/P7/reed/ports group pass; fixture A shows nonzero fuel delivery/short-circuit, P7 heat, wall heat and work"
+        "21 integrated tests and 73-test integrated/P5-C/P6/P7/reed/ports group pass; fixture A shows nonzero fuel delivery/short-circuit, P7 heat, wall heat and work",
+        "Cycle-primary collector derives fuel flow only from actual integrated P6 intake fuel-species ledger; LHV-based metrics remain undefined."
       ],
       "next_action": "Resolve non-LHV accounting and cycle ledger bindings without inventing fuel properties; feed the actual work and fuel evidence into the unified collector."
     },
@@ -369,12 +405,15 @@
         "17d-fuel-combustion-thermal-mechanics"
       ],
       "state": "IN_PROGRESS",
-      "blocker": null,
+      "blocker": "Fixture A P1 remains unresolved: cycle 1 indicated work is negative; 1→2 is INVALID and comparisons 2→6 fail the existing periodic contract. Typed per-duct/Mach/port-closure collector channels are incomplete.",
       "commits": [],
       "evidence": [
-        "fixture A completes two full cycles; checkpoint at 360 degrees reproduces the terminal 720-degree JSON snapshot exactly under an absolute-angle scheduler"
+        "fixture A completes two full cycles; checkpoint at 360 degrees reproduces the terminal 720-degree JSON snapshot exactly under an absolute-angle scheduler",
+        "Six admissible synthetic cycles completed; no P1/P2 convergence. Cycle work sign was checked against the energy RHS convention.",
+        "Integrated engineering output V1 derives chamber/species/P7/thermal/work/fuel-flow values from cycle-primary trace; undefined inputs remain UNDEFINED.",
+        "21 integrated tests, 32 combined output/foundation tests and 73 integrated/P5-C/P6/P7/reed/ports regressions PASS; OpenSpec strict PASS."
       ],
-      "next_action": "Implement a primary cycle record from accepted stage traces, exact closure snapshots, restartable P1/P2 detector state and one engineering output collector."
+      "next_action": "Complete typed duct/port channels from accepted stage traces and investigate the concrete nonperiodic/negative-work fixture behavior without changing solver thresholds; keep fixture B gated."
     },
     {
       "id": "18-fixture-b-regressions",
@@ -383,7 +422,7 @@
         "17e-cycle-evidence-collector"
       ],
       "state": "READY",
-      "blocker": null,
+      "blocker": "Execution remains gated on Fixture A cycle-primary, periodicity, fuel/mechanical/output requirements.",
       "commits": [],
       "evidence": [],
       "next_action": "Wait until fixture A meets its cycle evidence, periodicity, fuel/mechanical/output contract; then build an independent second configuration and rerun broad P4–P8 regressions."

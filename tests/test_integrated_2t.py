@@ -9,8 +9,11 @@ from motorsim.crankcase import CrankcaseGeometry
 from motorsim.expansion_chamber import ChamberSection, ExpansionChamber
 from motorsim.integrated_2t import (
     DuctPath2T, EngineGeometry2T, IntegratedEngine2T, IntegratedPortBinding2T,
-    SliderCrankChambers2T,
+    SliderCrankChambers2T, make_integrated_cycle_primary,
+    make_integrated_engineering_output,
 )
+from motorsim.engineering_outputs import validate_engineering_output
+from motorsim.reference_harness.convergence import PeriodicDetector, compare_cycles
 from motorsim.kinematics import piston_position
 from motorsim.p6_species import SPECIES
 from motorsim.powervalve import PowerValve
@@ -647,7 +650,9 @@ def _internal_cycle_fixture():
         "cylinder-wall", "cylinder_wall", 1e-4, 1000.0,
         "SYNTHETIC_ASSUMPTION", wall_temperature_K=290.0),))
     return IntegratedEngine2T(
-        (1.1768, 0.0, 101325.0, 1.0), (1.1768, 0.0, 1e6, 1.0),
+        # Start every gas component at the same atmospheric pressure.  With
+        # gamma=1.35 this energy density gives p=(gamma-1)*rhoE=101325 Pa.
+        (1.1768, 0.0, 289500.0, 1.0), (1.1768, 0.0, 289500.0, 1.0),
         paths, states, geometry, species=species,
         atmosphere_species=(.98, .02, 0.0, 0.0),
         inlet_boundary=Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0)),
@@ -684,9 +689,14 @@ def _advance_cycle_fixture(system, target_angle):
 
 def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays():
     system = _internal_cycle_fixture()
+    cycle_zero_checkpoint = deepcopy(system.snapshot())
     _advance_cycle_fixture(system, 360.0)
     cycle_one_checkpoint = deepcopy(system.snapshot())
+    first_cycle = make_integrated_cycle_primary(
+        system, cycle_zero_checkpoint, cycle_one_checkpoint, 1)
     _advance_cycle_fixture(system, 720.0)
+    second_cycle = make_integrated_cycle_primary(
+        system, cycle_one_checkpoint, system.snapshot(), 2)
 
     assert system.cycle == 2
     assert system.crank_angle_unwrapped_deg == pytest.approx(720.0)
@@ -709,15 +719,52 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     assert system.ledger["heat_to_wall_J"] > 0.0
     assert system.ledger["cylinder_work_J"] > 0.0
     assert max(value for trace in system.trace for value in trace["stage_cfl"]) <= .4
+    assert abs(first_cycle["conservation"]["mass_residual_kg"]) < 1e-12
+    assert abs(first_cycle["conservation"]["energy_residual_J"]) < 1e-9
+    assert all(abs(value) < 1e-12 for value in
+               first_cycle["conservation"]["species_residual_kg"])
+    assert second_cycle["CFL"]["max"] <= .4
+    assert system.ledger["p7_availability_limited_kg"] == pytest.approx(0.0, abs=1e-15)
+    comparison = compare_cycles(first_cycle, second_cycle)
+    assert first_cycle["observables"]["work_J"] < 0.0
+    assert second_cycle["observables"]["work_J"] > 0.0
+    assert comparison["status"] == "INVALID"
+    assert comparison["reason"] == "INVALID numeric observable"
+    detector = PeriodicDetector()
+    detector.update(first_cycle)
+    update = detector.update(second_cycle)
+    assert update["classification"] is None
+    assert update["outcomes"]["lag1"]["status"] == "INVALID"
+    assert update["lag1_streak"] == 0
+    assert detector.converged_cycle is None
+
+    output = make_integrated_engineering_output(
+        first_cycle, displacement_m3=system.slider_crank.crankcase.displacement_m3)
+    assert validate_engineering_output(output) == output
+    assert output["operating_point"]["rpm"] == pytest.approx(3000.0)
+    assert len(output["crank_angle_trace"]["angle_deg"]) == len(first_cycle["trajectory"]) + 1
+    assert output["cycle_metrics"]["indicated_work_j"]["value"] == pytest.approx(
+        first_cycle["observables"]["work_J"])
+    assert output["cycle_metrics"]["brake_power_w"]["status"] == "UNDEFINED"
+    assert output["cycle_metrics"]["bsfc_g_kwh"]["status"] == "UNDEFINED"
+    assert output["cycle_metrics"]["fuel_flow_kg_s"]["status"] == "DEFINED"
+    assert output["cycle_metrics"]["fuel_flow_kg_s"]["value"] > 0.0
 
     mechanical = MechanicalLossModel((LossTerm(
         "synthetic-friction", "piston_ring", "SYNTHETIC_ASSUMPTION", mep_pa=10_000.0),))
     brake = mechanical.evaluate_2t(
-        indicated_work_j=system.ledger["cylinder_work_J"] / 2.0,
+        indicated_work_j=second_cycle["observables"]["work_J"],
         displacement_m3=system.slider_crank.crankcase.displacement_m3,
         rpm=3000.0, load=0.0)
     assert brake["brake_work_j"] > 0.0
     assert brake["cycle_convention"] == "2T_360_DEG_ONE_CYCLE_PER_REV"
+    output_with_losses = make_integrated_engineering_output(
+        second_cycle, displacement_m3=system.slider_crank.crankcase.displacement_m3,
+        mechanical_loss_model=mechanical)
+    assert validate_engineering_output(output_with_losses) == output_with_losses
+    assert output_with_losses["cycle_metrics"]["brake_power_w"]["value"] == pytest.approx(
+        second_cycle["observables"]["work_J"] * 3000.0 / 60.0 -
+        brake["mechanical_loss_power_w"])
 
     replay = _internal_cycle_fixture()
     replay.restore(cycle_one_checkpoint)

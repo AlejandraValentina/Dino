@@ -12,7 +12,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 import hashlib
 import json
-from math import fsum, isclose, isfinite
+from math import fsum, isclose, isfinite, pi
 from types import MappingProxyType
 from collections.abc import Mapping
 from typing import Callable
@@ -232,7 +232,7 @@ class IntegratedEngine2T:
     configured, contribute species and heat sources to the same cylinder
     stage RHS and are checkpointed with the integrated ledger.
     """
-    schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V3"
+    schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V5"
     dependency_status = "CONDITIONAL_ON_P4"
 
     def __init__(self, crankcase_state: tuple, cylinder_state: tuple,
@@ -368,6 +368,7 @@ class IntegratedEngine2T:
                        "heat_to_wall_J": 0.0,
                        "cylinder_work_J": 0.0, "crankcase_work_J": 0.0,
                        "p7_heat_added_J": 0.0,
+                       "p7_availability_limited_kg": 0.0,
                        "p7_source_species_kg": [0.0] * 4}
         self.trace = []
         geometry0 = self._geometry(self.angle_deg, self.reference_rpm)
@@ -496,6 +497,49 @@ class IntegratedEngine2T:
         donor_left = self._fractions(left_species, left_mass)
         donor_right = self._fractions(right_species, right_mass)
         return donor_species(mass_flux, donor_left, donor_right)
+
+    def _limit_p7_stage_source(self, state, assembled, dt_s):
+        """Bound the prescribed P7 sink by reactant mass in this SSPRK stage.
+
+        This is an availability limiter for the new integrated coupling only;
+        it does not alter the historical P7 source law. Any limited mass is
+        explicit in the accepted-stage trace and global ledger.
+        """
+        requested = tuple(assembled["p7_species_rate"])
+        scale = 1.0
+        if any(requested[index] < 0.0 for index in (0, 1)):
+            species = state["species"]["chambers"]["cylinder"]
+            full_rhs = assembled["species"]["chambers"]["cylinder"]
+            for index in (0, 1):
+                if requested[index] >= 0.0:
+                    continue
+                non_p7_rate = full_rhs[index] - requested[index]
+                available_without_p7 = species[index] + dt_s * non_p7_rate
+                allowed = max(0.0, available_without_p7) / (-dt_s * requested[index])
+                scale = min(scale, max(0.0, min(1.0, allowed)))
+        applied = tuple(value * scale for value in requested)
+        # A sink is negative.  The unapplied portion is the requested sink
+        # magnitude minus the accepted sink magnitude: -requested + applied.
+        # Subtracting ``applied`` here double-counted every unscaled sink.
+        limited = max(0.0, -requested[0] + applied[0]) + max(
+            0.0, -requested[1] + applied[1])
+        heat_limited = 0.0
+        if scale < 1.0:
+            rhs_species = assembled["species"]["chambers"]["cylinder"]
+            assembled["species"]["chambers"]["cylinder"] = tuple(
+                rhs_species[index] + applied[index] - requested[index]
+                for index in range(4))
+            requested_heat = assembled["p7_heat_rate"]
+            applied_heat = requested_heat * scale
+            assembled["q"]["chambers"]["cylinder"][1] += (
+                applied_heat - requested_heat)
+            assembled["p7_species_rate"] = applied
+            assembled["p7_heat_rate"] = applied_heat
+            heat_limited = requested_heat - applied_heat
+        limitation = {"scale": scale, "limited_reactant_rate_kg_s": limited,
+                      "limited_heat_rate_W": heat_limited}
+        assembled["p7_limiter"] = limitation
+        return limitation
 
     def _external_face(self, state, path, side, boundary):
         cells = state["ducts"][path.id]
@@ -866,6 +910,7 @@ class IntegratedEngine2T:
         self._validate(q0)
         rpm = float(delta_angle_deg) / (6.0 * float(dt_s))
         r0 = self._assemble(q0, start_angle, rpm, step_p7_event)
+        limiter0 = self._limit_p7_stage_source(q0, r0, float(dt_s))
         cfl0 = self._cfl(q0, r0, float(dt_s))
         q1 = deepcopy(q0)
         for name in ("crankcase", "cylinder"):
@@ -894,6 +939,7 @@ class IntegratedEngine2T:
                 q1["ducts"][path.id][i] = (q[0], q[1], q[2], rho)
         self._validate(q1)
         r1 = self._assemble(q1, end_angle, rpm, step_p7_event)
+        limiter1 = self._limit_p7_stage_source(q1, r1, float(dt_s))
         cfl1 = self._cfl(q1, r1, float(dt_s))
         qn = self._combine(q0, r0, r1, float(dt_s), end_angle)
         self._validate(qn)
@@ -923,6 +969,9 @@ class IntegratedEngine2T:
         p7_species_increment = tuple(.5 * float(dt_s) * (
             r0["p7_species_rate"][j] + r1["p7_species_rate"][j]) for j in range(4))
         p7_heat_increment = .5 * float(dt_s) * (r0["p7_heat_rate"] + r1["p7_heat_rate"])
+        p7_limited_increment = .5 * float(dt_s) * (
+            limiter0["limited_reactant_rate_kg_s"] +
+            limiter1["limited_reactant_rate_kg_s"])
         if step_p7_event is not None:
             step_p7_event.record(p7_species_increment, p7_heat_increment)
         self.p7_event = step_p7_event
@@ -932,6 +981,7 @@ class IntegratedEngine2T:
                                      p7_species_increment[j] for j in range(4)]
         self.p7_heat_added_j += p7_heat_increment
         self.ledger["p7_heat_added_J"] += p7_heat_increment
+        self.ledger["p7_availability_limited_kg"] += p7_limited_increment
         self.ledger["p7_source_species_kg"] = list(self.p7_source_species_kg)
         trace = {"angle_start_deg": start_angle, "angle_end_deg": end_angle,
                  "time_start_s": self.time_s, "dt_s": float(dt_s),
@@ -939,6 +989,12 @@ class IntegratedEngine2T:
                  "stage_states": (q0, q1, qn),
                  "stage_face_fluxes": (r0["faces"], r1["faces"]),
                  "stage_external": (r0["external"], r1["external"]),
+                 "stage_cycle_rates": tuple({
+                     "fresh_delivery_kg_s": item["fresh_delivered_rate"],
+                     "fresh_short_circuit_kg_s": item["fresh_short_circuit_rate"],
+                     "fuel_delivery_kg_s": item["fuel_delivered_rate"],
+                     "fuel_short_circuit_kg_s": item["fuel_short_circuited_rate"]}
+                     for item in (r0, r1)),
                  "stage_geometry": (vars(r0["geometry"]), vars(r1["geometry"])),
                  "stage_work_rates": (r0["work_rates"], r1["work_rates"]),
                  "stage_thermal_rates": (wall_rates_0, wall_rates_1),
@@ -947,6 +1003,8 @@ class IntegratedEngine2T:
                       "heat_w": r0["p7_heat_rate"]},
                      {"species_kg_s": r1["p7_species_rate"],
                       "heat_w": r1["p7_heat_rate"]}),
+                 "stage_p7_limiter": (limiter0, limiter1),
+                 "p7_availability_limited_kg": p7_limited_increment,
                  "p7_source_species_increment_kg": p7_species_increment,
                  "p7_heat_increment_j": p7_heat_increment,
                  "heat_to_wall_J": heat_to_wall,
@@ -1045,7 +1103,8 @@ class IntegratedEngine2T:
                          "fresh_delivered_kg", "fresh_short_circuit_kg", "fuel_delivered_kg",
                          "fuel_short_circuited_kg",
                          "heat_to_wall_J", "cylinder_work_J", "crankcase_work_J",
-                         "p7_heat_added_J", "p7_source_species_kg"}
+                         "p7_heat_added_J", "p7_availability_limited_kg",
+                         "p7_source_species_kg"}
         if not isinstance(ledger, dict) or set(ledger) != ledger_fields:
             raise ValueError("integrated engine checkpoint ledger schema mismatch")
         if (not isinstance(ledger["external_species_kg"], (list, tuple)) or
@@ -1145,3 +1204,362 @@ class IntegratedEngine2T:
         self.p7_source_species_kg = list(ledger["p7_source_species_kg"])
         self.initial_inventory = deepcopy(snapshot["initial_inventory"])
         self.trace = deepcopy(trace)
+
+
+def make_integrated_cycle_primary(engine: IntegratedEngine2T,
+                                 start_checkpoint: dict,
+                                 end_checkpoint: dict,
+                                 cycle_index: int) -> dict:
+    """Rebuild one complete 360-degree primary record from accepted stages.
+
+    Checkpoint ledgers are cross-checks only. Cycle terms and periodic
+    observables are recomputed from the saved stage trajectory.
+    """
+    if not isinstance(engine, IntegratedEngine2T):
+        raise ValueError("integrated cycle evidence requires IntegratedEngine2T")
+    if type(cycle_index) is not int or cycle_index < 1:
+        raise ValueError("integrated cycle index must be a positive integer")
+    for checkpoint in (start_checkpoint, end_checkpoint):
+        if (not isinstance(checkpoint, dict) or checkpoint.get("schema") != engine.schema or
+                checkpoint.get("configuration_identity") != engine.configuration_identity):
+            raise ValueError("integrated cycle checkpoint identity mismatch")
+    start_angle = float(cycle_index - 1) * 360.0
+    end_angle = float(cycle_index) * 360.0
+    if (start_checkpoint.get("crank_angle_unwrapped_deg") != start_angle or
+            end_checkpoint.get("crank_angle_unwrapped_deg") != end_angle or
+            end_checkpoint.get("cycle") != cycle_index):
+        raise ValueError("integrated cycle checkpoints must bind exact 360-degree boundaries")
+    start_index = start_checkpoint.get("accepted_steps")
+    end_index = end_checkpoint.get("accepted_steps")
+    if (type(start_index) is not int or type(end_index) is not int or
+            start_index < 0 or end_index <= start_index):
+        raise ValueError("integrated cycle accepted-step interval is invalid")
+    trajectory = end_checkpoint.get("trace", [])[start_index:end_index]
+    if len(trajectory) != end_index - start_index:
+        raise ValueError("integrated cycle primary trajectory is incomplete")
+    if (trajectory[0].get("angle_start_deg") != start_angle or
+            trajectory[-1].get("angle_end_deg") != end_angle):
+        raise ValueError("integrated cycle trajectory does not cover the exact cycle")
+    prior_end = start_angle
+    prior_state = start_checkpoint["state"]
+    cfl_values = []
+    external_mass = external_energy = p7_heat = wall_heat = 0.0
+    p7_limited_mass = 0.0
+    external_species = [0.0] * 4
+    p7_species = [0.0] * 4
+    rates_integral = {"fresh_delivery_kg": 0.0,
+                      "fresh_short_circuit_kg": 0.0,
+                      "fuel_delivery_kg": 0.0,
+                      "fuel_short_circuit_kg": 0.0,
+                      "cylinder_work_J": 0.0,
+                      "crankcase_work_J": 0.0}
+    for row in trajectory:
+        if (not isinstance(row, dict) or row.get("angle_start_deg") != prior_end or
+                len(row.get("stage_states", ())) != 3 or
+                len(row.get("stage_external", ())) != 2 or
+                len(row.get("stage_cycle_rates", ())) != 2 or
+                len(row.get("stage_p7_source_rates", ())) != 2 or
+                len(row.get("stage_p7_limiter", ())) != 2 or
+                len(row.get("stage_work_rates", ())) != 2 or
+                len(row.get("stage_thermal_rates", ())) != 2 or
+                len(row.get("stage_cfl", ())) != 2):
+            raise ValueError("integrated cycle stage trajectory is incomplete or discontinuous")
+        if json.dumps(row["stage_states"][0], sort_keys=True) != json.dumps(
+                prior_state, sort_keys=True):
+            raise ValueError("integrated cycle stage state does not continue prior state")
+        dt = row.get("dt_s")
+        if type(dt) not in (int, float) or not isfinite(dt) or dt <= 0:
+            raise ValueError("integrated cycle timestep is invalid")
+        for stage_state in row["stage_states"]:
+            engine._validate(_tuplify(stage_state))
+        cfl_values.extend(row["stage_cfl"])
+        if any(type(value) not in (int, float) or not isfinite(value) or
+               value < 0 or value > engine.max_cfl for value in row["stage_cfl"]):
+            raise ValueError("integrated cycle contains an inadmissible CFL value")
+        external0, external1 = row["stage_external"]
+        external_mass += .5 * dt * (external0["mass"] + external1["mass"])
+        external_energy += .5 * dt * (external0["energy"] + external1["energy"])
+        for index in range(4):
+            external_species[index] += .5 * dt * (
+                external0["species"][index] + external1["species"][index])
+            p7_species[index] += .5 * dt * (
+                row["stage_p7_source_rates"][0]["species_kg_s"][index] +
+                row["stage_p7_source_rates"][1]["species_kg_s"][index])
+        p7_heat += .5 * dt * sum(
+            stage["heat_w"] for stage in row["stage_p7_source_rates"])
+        p7_limited_mass += .5 * dt * sum(
+            stage["limited_reactant_rate_kg_s"]
+            for stage in row["stage_p7_limiter"])
+        wall_heat += .5 * dt * sum(
+            sum(stage.values()) for stage in row["stage_thermal_rates"])
+        for rate_name, trace_name in (
+                ("fresh_delivery_kg", "fresh_delivery_kg_s"),
+                ("fresh_short_circuit_kg", "fresh_short_circuit_kg_s"),
+                ("fuel_delivery_kg", "fuel_delivery_kg_s"),
+                ("fuel_short_circuit_kg", "fuel_short_circuit_kg_s")):
+            rates_integral[rate_name] += .5 * dt * sum(
+                stage[trace_name] for stage in row["stage_cycle_rates"])
+        for name in ("cylinder", "crankcase"):
+            rates_integral[f"{name}_work_J"] += .5 * dt * sum(
+                stage[name] for stage in row["stage_work_rates"])
+        prior_end = row["angle_end_deg"]
+        prior_state = row["stage_states"][2]
+    if json.dumps(prior_state, sort_keys=True) != json.dumps(
+            end_checkpoint["state"], sort_keys=True):
+        raise ValueError("integrated cycle terminal stage state mismatch")
+
+    start_state = _tuplify(start_checkpoint["state"])
+    end_state = _tuplify(end_checkpoint["state"])
+    start_inventory = engine.inventory(start_state)
+    end_inventory = engine.inventory(end_state)
+    end_ledger = end_checkpoint["ledger"]
+    start_ledger = start_checkpoint["ledger"]
+    recomputed = {
+        "external_mass_kg": external_mass,
+        "external_energy_J": external_energy,
+        "external_species_kg": external_species,
+        "fresh_delivered_kg": rates_integral["fresh_delivery_kg"],
+        "fresh_short_circuit_kg": rates_integral["fresh_short_circuit_kg"],
+        "fuel_delivered_kg": rates_integral["fuel_delivery_kg"],
+        "fuel_short_circuited_kg": rates_integral["fuel_short_circuit_kg"],
+        "heat_to_wall_J": wall_heat,
+        "cylinder_work_J": rates_integral["cylinder_work_J"],
+        "crankcase_work_J": rates_integral["crankcase_work_J"],
+        "p7_heat_added_J": p7_heat,
+        "p7_availability_limited_kg": p7_limited_mass,
+        "p7_source_species_kg": p7_species,
+    }
+    for key, value in recomputed.items():
+        expected = [end_ledger[key][i] - start_ledger[key][i]
+                    for i in range(4)] if key in {
+                        "external_species_kg", "p7_source_species_kg"} else (
+                            value if key not in end_ledger else end_ledger[key] - start_ledger[key])
+        if isinstance(value, list):
+            if any(not isclose(value[i], expected[i], rel_tol=1e-10, abs_tol=1e-14)
+                   for i in range(4)):
+                raise ValueError(f"integrated cycle ledger differs from primary {key}")
+        elif not isclose(value, expected, rel_tol=1e-10, abs_tol=1e-14):
+            raise ValueError(f"integrated cycle ledger differs from primary {key}")
+
+    def chamber_observables(state, name):
+        mass, energy, volume = state["chambers"][name]
+        pressure = (engine.eos.gamma - 1.0) * energy / volume
+        return {"mass_kg": mass, "total_energy_J": energy,
+                "pressure_Pa": pressure, "temperature_K": energy / (mass * engine.eos.cv)}
+
+    ducts = {}
+    for path in engine.ducts:
+        cells = []
+        for q, composition, volume in zip(
+                end_state["ducts"][path.id],
+                end_state["species"]["ducts"][path.id], path.mesh.volumes):
+            rho, momentum, energy_density, _ = q
+            velocity = momentum / rho
+            pressure = (engine.eos.gamma - 1.0) * (
+                energy_density - .5 * momentum * momentum / rho)
+            total_mass = sum(composition)
+            sound = engine.eos.sound_speed((rho, velocity, pressure, 1.0))
+            cells.append({"mass_kg": rho * volume,
+                          "total_energy_J": energy_density * volume,
+                          "pressure_Pa": pressure,
+                          "temperature_K": pressure / (rho * engine.eos.R),
+                          "species_mass_fractions": [value / total_mass
+                                                     for value in composition],
+                          "velocity_over_sound_speed": velocity / sound})
+        ducts[path.id] = cells
+    observables = {"chambers": {name: chamber_observables(end_state, name)
+                                for name in ("cylinder", "crankcase")},
+                   "ducts": ducts,
+                   "global_species_kg": list(end_inventory["species_kg"]),
+                   "cylinder_species_kg": list(
+                       end_state["species"]["chambers"]["cylinder"]),
+                   "cycle_start_total_mass_kg": start_inventory["mass_kg"],
+                   "cycle_start_total_energy_J": start_inventory["energy_J"],
+                   # The stage RHS ledger is gas-energy transfer (-p dV/dt).
+                   # Indicated work produced by the cylinder is its negative.
+                   "work_J": -rates_integral["cylinder_work_J"],
+                   "cylinder_energy_work_J": rates_integral["cylinder_work_J"],
+                   "fresh_delivery_kg": rates_integral["fresh_delivery_kg"],
+                   "fresh_short_circuit_kg": rates_integral["fresh_short_circuit_kg"],
+                   "p7_burned_produced_kg": p7_species[3],
+                   "p7_heat_J": p7_heat}
+    mass_residual = end_inventory["mass_kg"] - start_inventory["mass_kg"] - external_mass
+    energy_residual = (end_inventory["energy_J"] - start_inventory["energy_J"] -
+                       external_energy - p7_heat - rates_integral["cylinder_work_J"] -
+                       rates_integral["crankcase_work_J"] + wall_heat)
+    species_residual = [end_inventory["species_kg"][i] -
+                        start_inventory["species_kg"][i] - external_species[i] -
+                        p7_species[i] for i in range(4)]
+    return {"schema": "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V1",
+            "contract": "REFERENCE_PERIODIC_CONVERGENCE_V1",
+            "cycle_index": cycle_index,
+            "configuration_hash": engine.configuration_identity["configuration_sha256"],
+            "eos_gamma": engine.eos.gamma, "eos_cv": engine.eos.cv,
+            "cycle_start_deg": start_angle, "cycle_end_deg": end_angle,
+            "start_state": _jsonify(start_state),
+            "terminal_state": _jsonify(end_state),
+            "trajectory": deepcopy(trajectory),
+            "observables": observables,
+            "cycle_ledgers": recomputed,
+            "conservation": {"mass_residual_kg": mass_residual,
+                             "energy_residual_J": energy_residual,
+                             "species_residual_kg": species_residual},
+            "CFL": {"min": min(cfl_values), "max": max(cfl_values)},
+            "P7_availability_limited_kg": p7_limited_mass,
+            "admissible": True,
+            "evidence_source": "accepted IntegratedEngine2T SSPRK2 stage trajectory"}
+
+
+def make_integrated_engineering_output(cycle_record: dict, *,
+                                       displacement_m3: float,
+                                       mechanical_loss_model=None,
+                                       load: float = 0.0) -> dict:
+    """Build the existing engineering-output schema from one primary cycle.
+
+    Only quantities present in the accepted trajectory or explicitly supplied
+    through the existing mechanical model are defined.  Fuel properties and
+    exact port-closure states are intentionally not inferred here.
+    """
+    from .engineering_outputs import build_engineering_output
+
+    if (not isinstance(cycle_record, dict) or
+            cycle_record.get("schema") != "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V1" or
+            cycle_record.get("contract") != "REFERENCE_PERIODIC_CONVERGENCE_V1" or
+            cycle_record.get("admissible") is not True):
+        raise ValueError("engineering output requires admissible integrated cycle evidence")
+    trajectory = cycle_record.get("trajectory")
+    if not isinstance(trajectory, list) or not trajectory:
+        raise ValueError("engineering output requires a complete accepted trajectory")
+    start = cycle_record.get("cycle_start_deg")
+    end = cycle_record.get("cycle_end_deg")
+    if (type(start) not in (int, float) or type(end) not in (int, float) or
+            not isclose(end - start, 360.0, rel_tol=0.0, abs_tol=1e-10)):
+        raise ValueError("engineering output requires one complete 360-degree cycle")
+    displacement = float(displacement_m3)
+    if not isfinite(displacement) or displacement <= 0.0:
+        raise ValueError("engineering output requires positive displacement")
+
+    def sample(state):
+        values = {}
+        for name in ("cylinder", "crankcase"):
+            mass, energy, volume = state["chambers"][name]
+            gamma = float(cycle_record["eos_gamma"])
+            values[f"{name}_mass_kg"] = mass
+            values[f"{name}_temperature_k"] = energy / (mass * float(cycle_record["eos_cv"]))
+            values[f"{name}_pressure_pa"] = (gamma - 1.0) * energy / volume
+            values[f"{name}_volume_m3"] = volume
+        for index, name in enumerate(SPECIES):
+            values[f"{name}_mass_kg"] = state["species"]["chambers"]["cylinder"][index]
+        return values
+
+    # Bind thermodynamic constants into the primary record rather than relying
+    # on whichever engine object happens to be present when a file is replayed.
+    if (type(cycle_record.get("eos_gamma")) not in (int, float) or
+            type(cycle_record.get("eos_cv")) not in (int, float)):
+        raise ValueError("cycle primary record lacks EOS identity for output reconstruction")
+    rows = []
+    first = trajectory[0]
+    rows.append((float(start), sample(_tuplify(first["stage_states"][0])),
+                 first["stage_p7_source_rates"][0]["heat_w"],
+                 sum(first["stage_thermal_rates"][0].values())))
+    duration = 0.0
+    for row in trajectory:
+        duration += float(row["dt_s"])
+        rows.append((float(row["angle_end_deg"]),
+                     sample(_tuplify(row["stage_states"][2])),
+                     row["stage_p7_source_rates"][1]["heat_w"],
+                     sum(row["stage_thermal_rates"][1].values())))
+    if (not isclose(rows[-1][0], float(end), rel_tol=0.0, abs_tol=1e-10) or
+            any(b[0] <= a[0] for a, b in zip(rows, rows[1:]))):
+        raise ValueError("cycle trajectory does not supply ordered full-cycle output samples")
+    rpm = 60.0 / duration
+    cycle_number = cycle_record.get("cycle_index")
+    channels = {}
+    channel_map = {
+        "cylinder_pressure_pa": "cylinder_pressure_pa",
+        "crankcase_pressure_pa": "crankcase_pressure_pa",
+        "cylinder_temperature_k": "cylinder_temperature_k",
+        "crankcase_temperature_k": "crankcase_temperature_k",
+        "cylinder_mass_kg": "cylinder_mass_kg",
+        "fresh_air_mass_kg": "fresh_air_mass_kg",
+        "fuel_mass_kg": "fuel_mass_kg",
+        "residual_mass_kg": "residual_mass_kg",
+        "burned_mass_kg": "burned_mass_kg",
+        "cylinder_volume_m3": "cylinder_volume_m3",
+        "crankcase_volume_m3": "crankcase_volume_m3",
+        "heat_release_w": None,
+        "wall_heat_transfer_w": None,
+    }
+    for channel, key in channel_map.items():
+        if key is None:
+            index = 2 if channel == "heat_release_w" else 3
+            values = [row[index] for row in rows]
+            source = ("accepted SSPRK2 stage P7 heat source" if index == 2 else
+                      "accepted SSPRK2 stage wall-heat source")
+        else:
+            values = [row[1][key] for row in rows]
+            source = f"accepted integrated cycle trajectory: {key}"
+        channels[channel] = {"values": values, "source": source}
+
+    metrics = {}
+    def defined(name, value, source):
+        metrics[name] = {"value": value, "status": "DEFINED", "reason": None,
+                         "source": source}
+    def undefined(name, reason):
+        metrics[name] = {"value": None, "status": "UNDEFINED", "reason": reason,
+                         "source": "integrated cycle evidence; required inputs unavailable"}
+
+    obs = cycle_record["observables"]
+    work = float(obs["work_J"])
+    defined("indicated_work_j", work, "accepted SSPRK2 cylinder -p dV work integral")
+    defined("indicated_power_w", work * rpm / 60.0,
+            "indicated work times one 2T cycle per revolution")
+    defined("indicated_torque_nm", work / (2.0 * pi),
+            "indicated work divided by 2 pi")
+    defined("imep_pa", work / displacement, "indicated work / explicit displacement")
+    pressure_samples = [row[1]["cylinder_pressure_pa"] for row in rows]
+    peak_index = max(range(len(pressure_samples)), key=pressure_samples.__getitem__)
+    defined("peak_pressure_pa", pressure_samples[peak_index],
+            "accepted integrated cylinder state samples")
+    defined("angle_of_peak_pressure_deg", rows[peak_index][0] - float(start),
+            "accepted integrated crank-angle samples relative to cycle start")
+    defined("fresh_delivery_kg", float(obs["fresh_delivery_kg"]),
+            "stage-integrated fresh_air donor flow into the cylinder")
+    defined("fresh_short_circuit_kg", float(obs["fresh_short_circuit_kg"]),
+            "stage-integrated fresh_air donor flow out the exhaust while transfer routes are open")
+    defined("fuel_flow_kg_s",
+            float(cycle_record["cycle_ledgers"]["fuel_delivered_kg"]) / duration,
+            "integrated P6 fuel-species inflow at the engine intake boundary / cycle duration")
+    defined("wall_heat_loss_j", float(cycle_record["cycle_ledgers"]["heat_to_wall_J"]),
+            "accepted SSPRK2 thermal source integral")
+    defined("energy_balance_residual_j", float(cycle_record["conservation"]["energy_residual_J"]),
+            "independent global energy balance from accepted trajectory and inventory")
+    if mechanical_loss_model is None:
+        for name in ("brake_power_w", "brake_torque_nm", "bmep_pa", "fmep_pa"):
+            undefined(name, "No mechanical-loss model was explicitly configured for this cycle.")
+    else:
+        result = mechanical_loss_model.evaluate_2t(
+            indicated_work_j=work, displacement_m3=displacement,
+            rpm=rpm, load=load)
+        for name, key in (("brake_power_w", "brake_power_w"),
+                          ("brake_torque_nm", "brake_torque_nm"),
+                          ("bmep_pa", "brake_mep_pa"),
+                          ("fmep_pa", "friction_mep_pa")):
+            defined(name, float(result[key]), f"MechanicalLossModel.evaluate_2t: {key}")
+    for name in ("gross_work_j", "net_work_j"):
+        undefined(name, "Gross/net work separation is not defined by this integrated model.")
+    for name in ("delivery_ratio", "trapping_efficiency", "scavenging_efficiency",
+                 "charging_efficiency", "trapping_ratio", "residual_fraction",
+                 "purity_at_transfer_close", "purity_at_exhaust_close",
+                 "short_circuit_fraction", "fresh_retained_kg", "fresh_lost_kg"):
+        undefined(name, "Exact geometric port-closure composition snapshots are not yet collected.")
+    for name in ("afr", "equivalence_ratio", "isfc_g_kwh", "bsfc_g_kwh"):
+        undefined(name, "No approved fuel-property/LHV binding exists for prescribed P7 heat release.")
+    for name in ("ca10_deg", "ca50_deg", "ca90_deg"):
+        undefined(name, "Combustion-fraction landmarks are not part of the current P7 source record.")
+
+    return build_engineering_output(
+        rpm=rpm, cycle_number=cycle_number,
+        angles_deg=tuple(row[0] - float(start) for row in rows),
+        channels=channels, cycle_metrics=metrics,
+        dependency_status="CONDITIONAL_ON_P4")

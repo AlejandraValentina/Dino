@@ -249,3 +249,42 @@ Para cada fase registrar contrato, código, pruebas unitarias/analíticas/negati
 integración, restart/replay, conservación, regresiones, auditoría, revisión puntual,
 OpenSpec estricto y commit. Las campañas con gates numéricos deben preregistrar
 thresholds y horizonte antes de ejecutarse.
+
+### Continuación de evidencia primaria y salida del ciclo — 2026-10-02
+
+Se construyó `MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V1` recalculando desde los
+stages SSPRK2 aceptados: estado inicial/terminal, composición, flujos externos,
+fuente P7, calor de pared, trabajo de energía del cilindro/cárter, inventarios,
+residuos independientes y CFL. Los deltas de ledgers checkpoint se usan como
+cross-check, no como autoridad de los términos de ciclo. El registro queda
+vinculado a identidad de configuración, EOS y límites angulares exactos.
+
+Se corrigieron dos errores de contabilidad detectados al enlazar esa evidencia:
+el acumulador P7 de masa supuestamente limitada restaba con signo incorrecto y
+contaba como pérdida incluso una fuente aplicada íntegramente; el observable de
+trabajo indicado confundía el término de energía del gas `-p·dV/dt` con el
+trabajo producido `∮p·dV`. El ledger energético del integrador no cambió; la
+conversión a trabajo indicado se hace únicamente al construir observables.
+También se equilibró la presión inicial sintética de cilindro y cárter con la
+atmósfera a 101325 Pa, usando `rhoE=101325/(gamma-1)` para `gamma=1.35`.
+
+El collector integrado produce `MOTORSIM_ENGINEERING_OUTPUTS_V1` a partir de
+una trayectoria completa: presión/temperatura/masa/volumen de cámaras, cuatro
+especies, calor P7, calor de pared, trabajo/potencia/torque/IMEP indicados,
+caudal de combustible del ledger P6 y balance de energía. Las métricas de freno
+solo se definen si se entrega un `MechanicalLossModel` explícito; los cálculos
+de scavenging, AFR/equivalence ratio, ISFC y BSFC siguen `UNDEFINED` por ausencia
+de cierres geométricos exactos o de una relación LHV aprobada.
+
+Diagnóstico sin cambios de solver, malla, CFL ni thresholds: ciclos 1–6 del
+fixture A completan y son admisibles, pero ciclo 1 tiene trabajo indicado
+negativo; los pares 1→2 son `INVALID` y 2→3 a 5→6 son `FAIL` en el contrato
+`REFERENCE_PERIODIC_CONVERGENCE_V1`. No hay P1/P2 ni periodicidad acreditada.
+La trayectoria de ciclo incluye estados de ductos/puertos para auditoría, pero
+la salida tipada aún no reúne todos los canales por ducto, Mach y cierres de
+puerto; Fixture A permanece bloqueado y Fixture B no se inicia aún.
+
+Pruebas actuales: 21 focales integradas y 11 de salida de ingeniería (32 en
+conjunto) aprobadas; OpenSpec estricto aprobado. Regresión P4–P8 amplia y revisión
+independiente del delta actual siguen pendientes. Esto es evidencia de trabajo
+integrado parcial, no cierre del Commercial Core.
