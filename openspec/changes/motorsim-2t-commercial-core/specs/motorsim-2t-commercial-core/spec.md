@@ -384,3 +384,26 @@ evidence adapter supplies a distinct schema.
 
 - **WHEN** channel units, sample counts or cycle span disagree with the schema
 - **THEN** construction or offline validation rejects the artifact.
+
+### Requirement: Exploratory experimental-data import remains separate from P9
+
+The reusable importer MUST support pressure trace, dyno torque and dyno power
+with strict headers, declared units, uncertainty, metadata and provenance. Raw
+bytes MUST be preserved and hash-bound. Overlay MUST join exact coordinates
+only and report descriptive errors without claiming equivalent conditions.
+Every result MUST be marked `EXPLORATORY_COMPARISON`, not eligible for validation
+or P9 decisions. The importer MUST NOT modify or invoke the frozen P9 contract
+or pipeline.
+
+#### Scenario: Import and compare a trace
+
+- **WHEN** a declared pressure/dyno dataset and simulation values with matching
+  canonical units are supplied
+- **THEN** raw data remains bound, exact matches and descriptive errors are
+  returned, and unmatched/interpolated points are not invented.
+
+#### Scenario: Keep P9 authority separate
+
+- **WHEN** an exploratory overlay is produced
+- **THEN** it cannot emit P9 PASS/validation status and remains explicitly
+  ineligible for preregistered decisions.

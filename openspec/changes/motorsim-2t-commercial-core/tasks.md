@@ -94,6 +94,16 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       de no-claim; diez tests incluyendo esquema inválido. Parcial: outputs aún
       no recolectados de un ciclo full-core arbitrario ni ligados a evidence.
 - [ ] Fase 15: importación exploratoria generalizada sin cambiar P9.
+- [x] Fase 15a: importador separado de presión/dyno con units, incertidumbre,
+      provenance, raw+SHA256 y overlay exacto con métricas descriptivas;
+      15 pruebas focales. Siempre EXPLORATORY_COMPARISON, nunca P9 elegible.
+      Importador + parser/persistence heredados + calificación P9: 56 PASS;
+      OpenSpec estricto PASS. Hash congelado P9 reconfirmado:
+      `79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d`.
+      En un intento de incluir la ventana GUI heredada de `external_data`, Qt
+      terminó con access violation en `ExternalWindowTests.test_import_confirm_`
+      `roundtrip_unknown_conditions_and_previous_preserved`; parser/persistencia
+      se validaron por separado. P9 no se editó ni ejecutó.
 - [ ] Fase 16: segundo reference case con fuentes públicas y provenance.
 - [ ] Gate final: integración arbitraria 2T, regresiones, auditoría y dos casos;
       declarar readiness solo con todos los requisitos del Commercial Core.

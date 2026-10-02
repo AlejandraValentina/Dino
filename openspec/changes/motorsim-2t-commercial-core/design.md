@@ -199,3 +199,14 @@ and reason. It rejects unknown channels, nonfinite/bool values, incomplete
 cycle spans and altered units. Periodicity defaults to `NOT_EVALUATED`;
 experimental validation remains `NOT_PERFORMED` and predictive validation
 `NOT_CLAIMED`. Channels remain optional until a producing solver path exists.
+
+## Exploratory measurement import `MOTORSIM_MEASUREMENT_DATA_V1`
+
+The additive importer handles pressure traces (cycle/angle/absolute pressure),
+dyno torque and dyno power as strict CSV schemas. Metadata declares source,
+configuration, conditions, value/uncertainty units, angle period and convention,
+and provenance; raw CSV bytes are retained and bound by SHA-256. Only exact
+coordinates overlay; no interpolation or condition equivalence is inferred.
+Bias, MAE, RMSE and uncertainty-normalized RMSE are descriptive. Every result
+is `EXPLORATORY_COMPARISON`, not validation-eligible, and the module does not
+call, edit or feed the frozen P9 pipeline.
