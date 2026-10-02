@@ -4,7 +4,6 @@ motorsim/coupled.py -text
 motorsim/coupling_adapter.py -text
 tests/test_coupled.py -text
 tests/test_coupling_adapter.py -text
-
 # Preserve reviewed P4 bank byte hashes.
 motorsim/exhaust_port.py -text
 motorsim/exhaust1d.py -text
@@ -15,3 +14,4 @@ docs/gasdynamic/p4c_hybrid.md -text
 results/p4-c3-r5-20260928/acquisition-evaluation.json filter=lfs diff=lfs merge=lfs -text
 # Durable angular histories for independent G2-v2 reauditing.
 results/p4-g2-v2-reaudit-20260929-r2/checkpoint_cycle*.json.gz filter=lfs diff=lfs merge=lfs -text
+results/2t-commercial-core-20261002/fixture-a-integrated-cycles-20261002-v2.json.gz filter=lfs diff=lfs merge=lfs -text

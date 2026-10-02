@@ -3,8 +3,10 @@ from __future__ import annotations
 
 import math
 from typing import Any
+from urllib.parse import quote, unquote
 
 SCHEMA = "MOTORSIM_ENGINEERING_OUTPUTS_V1"
+SCHEMA_V2 = "MOTORSIM_ENGINEERING_OUTPUTS_V2"
 DEPENDENCIES = {"INDEPENDENT_OF_P4", "CONDITIONAL_ON_P4", "REVALIDATED_ON_P4_PASS"}
 CHANNEL_UNITS = {
     "cylinder_pressure_pa": "Pa", "crankcase_pressure_pa": "Pa",
@@ -40,6 +42,38 @@ METRIC_UNITS = {
     "wall_heat_loss_j": "J", "energy_balance_residual_j": "J",
     "ca10_deg": "degCA", "ca50_deg": "degCA", "ca90_deg": "degCA",
 }
+METRIC_UNITS_V2 = {**METRIC_UNITS, "brake_work_j": "J"}
+
+
+def _metric_unit(name: str, schema: str) -> str | None:
+    return (METRIC_UNITS if schema == SCHEMA else METRIC_UNITS_V2).get(name)
+
+
+def _integrated_channel_unit(name: str) -> str | None:
+    """Resolve integrated V2 fixed channels and path-addressed duct channels."""
+    if name in CHANNEL_UNITS:
+        return CHANNEL_UNITS[name]
+    if name == "crankcase_mass_kg":
+        return "kg"
+    parts = name.split(":") if isinstance(name, str) else ()
+    if len(parts) != 5 or parts[0] != "duct" or not parts[1]:
+        return None
+    try:
+        duct_id = unquote(parts[1])
+        if quote(duct_id, safe="") != parts[1]:
+            return None
+        index = int(parts[3])
+        if index < 0 or str(index) != parts[3]:
+            return None
+    except (ValueError, TypeError):
+        return None
+    if parts[2] == "cell":
+        return {"pressure_pa": "Pa", "temperature_k": "K", "mach": "1",
+                "fresh_air_mass_kg": "kg", "fuel_mass_kg": "kg",
+                "residual_mass_kg": "kg", "burned_mass_kg": "kg"}.get(parts[4])
+    if parts[2] == "face" and parts[4] == "mass_flow_kg_s":
+        return "kg/s"
+    return None
 
 
 def _finite(value: Any, label: str) -> float:
@@ -48,12 +82,14 @@ def _finite(value: Any, label: str) -> float:
     return float(value)
 
 
-def build_engineering_output(*, rpm: float, cycle_number: int,
-                             angles_deg: tuple[float, ...],
-                             channels: dict[str, dict[str, Any]],
-                             cycle_metrics: dict[str, dict[str, Any]],
-                             dependency_status: str,
-                             cycle_period_deg: float = 360.0) -> dict[str, Any]:
+def _build_engineering_output(*, rpm: float, cycle_number: int,
+                              angles_deg: tuple[float, ...],
+                              channels: dict[str, dict[str, Any]],
+                              cycle_metrics: dict[str, dict[str, Any]],
+                              dependency_status: str,
+                              cycle_period_deg: float,
+                              schema: str,
+                              configuration_sha256: str | None = None) -> dict[str, Any]:
     speed = _finite(rpm, "rpm")
     period = _finite(cycle_period_deg, "cycle_period_deg")
     if speed <= 0 or period != 360.0:
@@ -74,7 +110,9 @@ def build_engineering_output(*, rpm: float, cycle_number: int,
 
     trace = {}
     for name, record in channels.items():
-        if name not in CHANNEL_UNITS or not isinstance(record, dict) or set(record) != {"values", "source"}:
+        unit = (CHANNEL_UNITS.get(name) if schema == SCHEMA else
+                _integrated_channel_unit(name))
+        if unit is None or not isinstance(record, dict) or set(record) != {"values", "source"}:
             raise ValueError(f"Unsupported or malformed crank-angle channel: {name}")
         values = record["values"]
         if not isinstance(values, (tuple, list)) or len(values) != len(angles):
@@ -82,12 +120,13 @@ def build_engineering_output(*, rpm: float, cycle_number: int,
         source = record["source"]
         if not isinstance(source, str) or not source.strip():
             raise ValueError(f"Channel {name} requires source provenance")
-        trace[name] = {"unit": CHANNEL_UNITS[name], "source": source,
+        trace[name] = {"unit": unit, "source": source,
                        "values": [_finite(value, name) for value in values]}
 
     metrics = {}
     for name, record in cycle_metrics.items():
-        if name not in METRIC_UNITS or not isinstance(record, dict) or set(record) != {
+        unit = _metric_unit(name, schema)
+        if unit is None or not isinstance(record, dict) or set(record) != {
                 "value", "status", "reason", "source"}:
             raise ValueError(f"Unsupported or malformed cycle metric: {name}")
         status, value, reason, source = (record[key] for key in ("status", "value", "reason", "source"))
@@ -102,10 +141,10 @@ def build_engineering_output(*, rpm: float, cycle_number: int,
                 raise ValueError(f"Undefined metric {name} requires null value and reason")
         else:
             raise ValueError(f"Metric {name} status must be DEFINED or UNDEFINED")
-        metrics[name] = {"value": value, "unit": METRIC_UNITS[name],
+        metrics[name] = {"value": value, "unit": unit,
                          "status": status, "reason": reason, "source": source}
 
-    output = {"schema": SCHEMA,
+    output = {"schema": schema,
               "operating_point": {"cycle_convention": "2T_360_DEG_ONE_CYCLE_PER_REV",
                                   "rpm": speed, "cycle_number": cycle_number,
                                   "dependency_status": dependency_status},
@@ -114,12 +153,52 @@ def build_engineering_output(*, rpm: float, cycle_number: int,
               "claims": {"periodicity": "NOT_EVALUATED",
                          "experimental_validation": "NOT_PERFORMED",
                          "predictive_validation": "NOT_CLAIMED"}}
+    if schema == SCHEMA_V2:
+        if (not isinstance(configuration_sha256, str) or
+                len(configuration_sha256) != 64 or
+                any(ch not in "0123456789abcdef" for ch in configuration_sha256)):
+            raise ValueError("V2 integrated output requires a lowercase configuration SHA-256")
+        output["configuration_sha256"] = configuration_sha256
     return output
 
 
-def validate_engineering_output(value: Any) -> dict[str, Any]:
-    if not isinstance(value, dict) or value.get("schema") != SCHEMA:
+def build_engineering_output(*, rpm: float, cycle_number: int,
+                             angles_deg: tuple[float, ...],
+                             channels: dict[str, dict[str, Any]],
+                             cycle_metrics: dict[str, dict[str, Any]],
+                             dependency_status: str,
+                             cycle_period_deg: float = 360.0) -> dict[str, Any]:
+    """Build the unchanged fixed-channel engineering-output V1 record."""
+    return _build_engineering_output(
+        rpm=rpm, cycle_number=cycle_number, angles_deg=angles_deg,
+        channels=channels, cycle_metrics=cycle_metrics,
+        dependency_status=dependency_status, cycle_period_deg=cycle_period_deg,
+        schema=SCHEMA)
+
+
+def build_integrated_engineering_output_v2(*, rpm: float, cycle_number: int,
+                                           angles_deg: tuple[float, ...],
+                                           channels: dict[str, dict[str, Any]],
+                                           cycle_metrics: dict[str, dict[str, Any]],
+                                           dependency_status: str,
+                                           configuration_sha256: str,
+                                           cycle_period_deg: float = 360.0) -> dict[str, Any]:
+    """Build path-addressed integrated output without changing the V1 contract."""
+    return _build_engineering_output(
+        rpm=rpm, cycle_number=cycle_number, angles_deg=angles_deg,
+        channels=channels, cycle_metrics=cycle_metrics,
+        dependency_status=dependency_status, cycle_period_deg=cycle_period_deg,
+        schema=SCHEMA_V2, configuration_sha256=configuration_sha256)
+
+
+def _validate_engineering_output(value: Any, schema: str) -> dict[str, Any]:
+    if not isinstance(value, dict) or value.get("schema") != schema:
         raise ValueError("Engineering output schema is invalid")
+    if schema == SCHEMA_V2:
+        config_hash = value.get("configuration_sha256")
+        if (not isinstance(config_hash, str) or len(config_hash) != 64 or
+                any(ch not in "0123456789abcdef" for ch in config_hash)):
+            raise ValueError("Integrated output configuration hash is invalid")
     op = value.get("operating_point")
     trace = value.get("crank_angle_trace")
     if (not isinstance(op, dict) or set(op) != {"cycle_convention", "rpm", "cycle_number",
@@ -137,12 +216,14 @@ def validate_engineering_output(value: Any) -> dict[str, Any]:
     if not isinstance(metrics, dict):
         raise ValueError("Engineering output metrics are malformed")
     for name, row in trace["channels"].items():
-        if not isinstance(row, dict) or row.get("unit") != CHANNEL_UNITS.get(name):
+        unit = (CHANNEL_UNITS.get(name) if schema == SCHEMA else
+                _integrated_channel_unit(name))
+        if not isinstance(row, dict) or row.get("unit") != unit:
             raise ValueError(f"Channel {name} unit does not match schema")
     for name, row in metrics.items():
-        if not isinstance(row, dict) or row.get("unit") != METRIC_UNITS.get(name):
+        if not isinstance(row, dict) or row.get("unit") != _metric_unit(name, schema):
             raise ValueError(f"Metric {name} unit does not match schema")
-    return build_engineering_output(
+    args = dict(
         rpm=op.get("rpm"), cycle_number=op.get("cycle_number"),
         angles_deg=tuple(trace.get("angle_deg", ())), channels={
             name: {"values": row.get("values"), "source": row.get("source")}
@@ -152,3 +233,17 @@ def validate_engineering_output(value: Any) -> dict[str, Any]:
                        for name, row in metrics.items()},
         dependency_status=op.get("dependency_status"),
         cycle_period_deg=360.0)
+    if schema == SCHEMA:
+        return build_engineering_output(**args)
+    return build_integrated_engineering_output_v2(
+        **args, configuration_sha256=value["configuration_sha256"])
+
+
+def validate_engineering_output(value: Any) -> dict[str, Any]:
+    """Validate only the frozen, fixed-channel V1 output contract."""
+    return _validate_engineering_output(value, SCHEMA)
+
+
+def validate_integrated_engineering_output_v2(value: Any) -> dict[str, Any]:
+    """Validate strict path-addressed V2 output and configuration identity."""
+    return _validate_engineering_output(value, SCHEMA_V2)

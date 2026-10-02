@@ -233,20 +233,79 @@ limitada verificada para el fixture es cero. La presión inicial sintética de
 cárter/cilindro se igualó con los 101325 Pa de la atmósfera, derivada de la EOS
 existente.
 
-`make_integrated_engineering_output` genera la salida V1 para una trayectoria
-completa con señales de las cámaras/especies, calor P7 y de pared, trabajo e
-indicadores mecánicos, caudal de combustible ligado al ledger P6 y residuo de
-energía. Las pérdidas al freno requieren pasar un `MechanicalLossModel` real y
-explícito. AFR, BSFC/ISFC y las métricas de retención/scavenging permanecen
-indefinidas hasta disponer de las magnitudes de entrada necesarias; no se
-rellenan con estimaciones.
+`make_integrated_engineering_output` genera `MOTORSIM_ENGINEERING_OUTPUTS_V2`
+para una trayectoria completa con hash de configuración, señales de ambas
+cámaras, especies por celda y cuatro masas por especie/celda de cada ducto,
+Mach/estado por celda, flujo firmado por cara, áreas/flujos de puerto, calor P7
+y de pared, trabajo indicado y caudal de combustible ligado al ledger P6. El
+collector reintegra los valores desde la trayectoria antes de emitir y rechaza
+resúmenes corruptos. V1 queda intacto. Las pérdidas al freno requieren pasar un
+`MechanicalLossModel` explícito. AFR, BSFC/ISFC y métricas de retención/scavenging
+permanecen indefinidas hasta disponer de las magnitudes de entrada necesarias.
 
 Se extendió el diagnóstico del mismo fixture A a seis ciclos, sin cambiar
 solver, malla, CFL ni contrato. El ciclo 1 tiene trabajo indicado negativo; la
 comparación 1→2 queda `INVALID`, y las comparaciones 2→3, 3→4, 4→5 y 5→6 son
 `FAIL` bajo `REFERENCE_PERIODIC_CONVERGENCE_V1`. No se concede P1/P2. El primary
-record conserva trazas completas de estados de ductos y aperturas, pero el
-collector aún carece de salidas tipadas por ducto, Mach y cierres geométricos.
+record conserva trazas completas de estados de ductos y aperturas, y V2 emite
+canales tipados por ducto/celda/cara; los cierres geométricos exactos y sus
+snapshots P6 siguen pendientes. V1 permanece sin cambios. La prueba focal de
+integrador/output pasó 33/33 y el grupo P5-C/P6/P7/reed/ports/output pasó 85/85;
+OpenSpec estricto, compilación y diff check pasaron. Las regresiones amplias
+P4–P8 y revisión independiente de este delta siguen pendientes.
 Fixture A sigue bloqueado para periodicidad; Fixture B y las regresiones amplias
 actuales P4–P8 siguen pendientes. La revisión de este delta es autorrevisión,
 no una revisión independiente del motor integrado.
+
+### Cierres exactos y collector alineado — continuación del 2026-10-02
+
+La evidencia primaria cambió a
+`MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2`. Para RPM constante, el builder usa
+la geometría genérica vinculada y la posición powervalve de ese RPM, y captura
+los estados terminales aceptados en los últimos cierres agregados exactos de
+transferencia y escape. El fixture A agenda ambos eventos exactamente. Si el
+cierre no existe o no hay una única fila SSPRK2 en el evento, el snapshot queda
+`UNAVAILABLE`; no se interpola. Los ratios de scavenging solo se calculan con el
+reference-charge mass explícito, sintético, de `1e-4 kg` usado en esta prueba.
+
+Se revisó también la alineación de los canales angulares: cada muestra al inicio
+de paso usa estado y RHS SSPRK2 de esa misma etapa. El último punto reevalúa
+solo lectura el estado terminal aceptado; su fuente P7 se rotula como request
+instantáneo anterior al limitador de un futuro paso y queda fuera de integrales
+y conservación. Los outputs mantienen null/UNDEFINED si se elimina la evidencia
+exacta de cierre.
+
+El perfil auxiliar sintético de escape se corrigió para incluir un intervalo
+cerrado. Su versión anterior solo alcanzaba área cero en puntos aislados, por lo
+que no existía cierre agregado según la propia geometría. Se repitieron seis
+ciclos completos a 3000 RPM/CFL 0.4: trabajo indicado
+`[-111.5764, 17.2841, 52.2598, 57.1227, 53.2165, 50.4537] J`; todos capturaron
+cierres exactos de transferencia y escape. Los ratios de scavenging calculados
+con la referencia sintética explícita fueron
+`[0.57136, 0.49767, 0.47893, 0.50271, 0.53278, 0.55344]`. El ciclo 1 conserva
+trabajo negativo; 1→2 es INVALID y los pares siguientes no alcanzan el gate
+periódico. El detector no clasifica P1/P2 ni hay convergencia. Los residuos
+globales finales fueron `1.10e-18 kg` de masa y `-1.07e-12 J` de energía; los
+residuos por especie permanecen dentro de `1e-18 kg`.
+
+La trayectoria primaria y los seis outputs se conservaron comprimidos en
+`results/2t-commercial-core-20261002/fixture-a-integrated-cycles-20261002-v2.json.gz`
+(SHA-256 `c037c83f81796b7fb9a93bdae6b6ffff070c44e030977ef69d6329dcf1279dc2`,
+60,694,798 bytes) y se asignaron a Git LFS para no guardar el blob en Git. Pasan
+33/33 pruebas focales y 85/85 del grupo integrado/P5-C/P6/P7/reed/puertos/output.
+La suite amplia actual seleccionada por prefijo P4–P8 pasó 300 pruebas en `.venv`
+Python 3.11, con cuatro warnings de deprecación NumPy preexistentes. Siguen
+pendientes revisión independiente, P1/P2, reed dinámica, boundary V2, Fixture B
+y las vinculaciones defendibles de combustible/mecánica. No declarar readiness.
+
+
+### Revisión independiente puntual del delta V2 — 2026-10-02
+
+Una revisión read-only independiente comprobó la resolución de powervalve a RPM
+constante, la selección de los últimos cierres agregados, el requisito de un
+único endpoint aceptado exacto, la captura de `stage_states[2]`, y la alineación
+de muestras de salida con el estado y RHS de su stage. Verificó además la
+evaluación read-only del endpoint terminal, el rebuild de integrales, la
+separación del contrato V1 y outputs V2, y la identidad del artefacto LFS. No
+encontró defectos materiales en este delta. La revisión fue puntual, no acredita
+convergencia P1/P2 ni un motor integrado completo.

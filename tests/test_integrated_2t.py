@@ -1,4 +1,5 @@
 from copy import deepcopy
+from dataclasses import replace
 import json
 
 import pytest
@@ -12,7 +13,7 @@ from motorsim.integrated_2t import (
     SliderCrankChambers2T, make_integrated_cycle_primary,
     make_integrated_engineering_output,
 )
-from motorsim.engineering_outputs import validate_engineering_output
+from motorsim.engineering_outputs import validate_integrated_engineering_output_v2
 from motorsim.reference_harness.convergence import PeriodicDetector, compare_cycles
 from motorsim.kinematics import piston_position
 from motorsim.p6_species import SPECIES
@@ -607,8 +608,9 @@ def _internal_cycle_fixture():
                         height_mm=10.0, width_mm=20.0, roof_travel_mm=4.0),
          PortDefinition("aux-exhaust", "Aux exhaust", "exhaust", "auxiliary", "exhaust",
                         "effective_profile", .5, "SYNTHETIC_ASSUMPTION",
-                        area_profile=(AreaKnot(0.0, 0.0), AreaKnot(90.0, 25.0),
-                                      AreaKnot(180.0, 50.0), AreaKnot(270.0, 25.0),
+                        area_profile=(AreaKnot(0.0, 0.0), AreaKnot(60.0, 0.0),
+                                      AreaKnot(90.0, 25.0), AreaKnot(180.0, 50.0),
+                                      AreaKnot(270.0, 25.0), AreaKnot(310.0, 0.0),
                                       AreaKnot(360.0, 0.0)))))
     valve = PowerValve("pv", "main-exhaust", (1000.0, 5000.0), (0.0, 1.0),
                        "SYNTHETIC_ASSUMPTION")
@@ -667,10 +669,26 @@ def _internal_cycle_fixture():
 
 def _advance_cycle_fixture(system, target_angle):
     rpm = 3000.0
+    binding = system.port_binding
+    ports = binding.port_set
+    if binding.powervalve is not None:
+        valve = binding.powervalve
+        ports = replace(ports, ports=tuple(
+            valve.apply(port, rpm) if port.id == valve.exhaust_port_id else port
+            for port in ports.ports))
+    closure_angles = sorted({angle for duct in ports.ducts
+                             for angle in ports.duct_closing_angles(duct.id)})
     while system.crank_angle_unwrapped_deg < target_angle - 1e-10:
         angle = system.crank_angle_unwrapped_deg
         target = min(target_angle, (int((angle + 1e-10) / .5) + 1) * .5)
-        for boundary in (40.0, 300.0, 340.0, 660.0, 700.0, 360.0, 720.0):
+        next_cycle = int(angle // 360.0)
+        scheduled = {float(value) for value in
+                     (40.0, 300.0, 340.0, 660.0, 700.0, 360.0, 720.0)}
+        scheduled.update(cycle * 360.0 + event
+                         for cycle in range(max(0, next_cycle - 1),
+                                            int(target_angle // 360.0) + 2)
+                         for event in closure_angles)
+        for boundary in scheduled:
             if angle < boundary < target:
                 target = boundary
         step = target - angle
@@ -694,9 +712,17 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     cycle_one_checkpoint = deepcopy(system.snapshot())
     first_cycle = make_integrated_cycle_primary(
         system, cycle_zero_checkpoint, cycle_one_checkpoint, 1)
+    assert first_cycle["port_closure_snapshots"]["status"] == "EXACT_EVENT_STATES_CAPTURED"
+    for role in ("transfer", "exhaust"):
+        snapshot = first_cycle["port_closure_snapshots"]["snapshots"][role]
+        assert sum(snapshot["cylinder_species_kg"]) == pytest.approx(
+            snapshot["cylinder_total_mass_kg"])
+        assert sum(row["angle_end_deg"] == pytest.approx(snapshot["angle_deg"])
+                   for row in first_cycle["trajectory"]) == 1
     _advance_cycle_fixture(system, 720.0)
     second_cycle = make_integrated_cycle_primary(
         system, cycle_one_checkpoint, system.snapshot(), 2)
+    assert second_cycle["port_closure_snapshots"]["status"] == "EXACT_EVENT_STATES_CAPTURED"
 
     assert system.cycle == 2
     assert system.crank_angle_unwrapped_deg == pytest.approx(720.0)
@@ -739,16 +765,46 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     assert detector.converged_cycle is None
 
     output = make_integrated_engineering_output(
-        first_cycle, displacement_m3=system.slider_crank.crankcase.displacement_m3)
-    assert validate_engineering_output(output) == output
+        first_cycle, displacement_m3=system.slider_crank.crankcase.displacement_m3,
+        scavenging_reference_mass_kg=1e-4)
+    assert validate_integrated_engineering_output_v2(output) == output
     assert output["operating_point"]["rpm"] == pytest.approx(3000.0)
     assert len(output["crank_angle_trace"]["angle_deg"]) == len(first_cycle["trajectory"]) + 1
+    trace_channels = output["crank_angle_trace"]["channels"]
+    assert "intake_port_area_m2" in trace_channels
+    assert "transfer_mass_flow_kg_s" in trace_channels
+    assert "duct:primary:cell:0:pressure_pa" in trace_channels
+    assert "duct:primary:cell:0:fresh_air_mass_kg" in trace_channels
+    assert "duct:primary:face:1:mass_flow_kg_s" in trace_channels
     assert output["cycle_metrics"]["indicated_work_j"]["value"] == pytest.approx(
         first_cycle["observables"]["work_J"])
     assert output["cycle_metrics"]["brake_power_w"]["status"] == "UNDEFINED"
+    assert output["cycle_metrics"]["brake_work_j"]["status"] == "UNDEFINED"
     assert output["cycle_metrics"]["bsfc_g_kwh"]["status"] == "UNDEFINED"
     assert output["cycle_metrics"]["fuel_flow_kg_s"]["status"] == "DEFINED"
     assert output["cycle_metrics"]["fuel_flow_kg_s"]["value"] > 0.0
+    assert output["cycle_metrics"]["purity_at_transfer_close"]["status"] == "DEFINED"
+    assert output["cycle_metrics"]["purity_at_exhaust_close"]["status"] == "DEFINED"
+    assert output["cycle_metrics"]["fresh_retained_kg"]["status"] == "DEFINED"
+    terminal_channels = output["crank_angle_trace"]["channels"]
+    assert terminal_channels["cylinder_pressure_pa"]["values"][-1] == pytest.approx(
+        first_cycle["observables"]["chambers"]["cylinder"]["pressure_Pa"])
+    assert terminal_channels["exhaust_port_area_m2"]["values"][-1] == pytest.approx(
+        first_cycle["terminal_diagnostic"]["geometry"]["exhaust_area_m2"])
+    unavailable = deepcopy(first_cycle)
+    unavailable["port_closure_snapshots"] = {
+        "status": "UNAVAILABLE", "reason": "synthetic missing exact event", "snapshots": {}}
+    unavailable_output = make_integrated_engineering_output(
+        unavailable, displacement_m3=system.slider_crank.crankcase.displacement_m3,
+        scavenging_reference_mass_kg=1e-4)
+    assert unavailable_output["cycle_metrics"]["purity_at_exhaust_close"]["status"] == "UNDEFINED"
+    assert unavailable_output["cycle_metrics"]["purity_at_exhaust_close"]["value"] is None
+    tampered_primary = deepcopy(first_cycle)
+    tampered_primary["observables"]["work_J"] += 1.0
+    with pytest.raises(ValueError, match="observable work_J differs"):
+        make_integrated_engineering_output(
+            tampered_primary,
+            displacement_m3=system.slider_crank.crankcase.displacement_m3)
 
     mechanical = MechanicalLossModel((LossTerm(
         "synthetic-friction", "piston_ring", "SYNTHETIC_ASSUMPTION", mep_pa=10_000.0),))
@@ -761,10 +817,12 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     output_with_losses = make_integrated_engineering_output(
         second_cycle, displacement_m3=system.slider_crank.crankcase.displacement_m3,
         mechanical_loss_model=mechanical)
-    assert validate_engineering_output(output_with_losses) == output_with_losses
+    assert validate_integrated_engineering_output_v2(output_with_losses) == output_with_losses
     assert output_with_losses["cycle_metrics"]["brake_power_w"]["value"] == pytest.approx(
         second_cycle["observables"]["work_J"] * 3000.0 / 60.0 -
         brake["mechanical_loss_power_w"])
+    assert output_with_losses["cycle_metrics"]["brake_work_j"]["value"] == pytest.approx(
+        brake["brake_work_j"])
 
     replay = _internal_cycle_fixture()
     replay.restore(cycle_one_checkpoint)

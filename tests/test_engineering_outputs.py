@@ -4,7 +4,9 @@ import pytest
 
 from motorsim.engineering_outputs import (
     build_engineering_output,
+    build_integrated_engineering_output_v2,
     validate_engineering_output,
+    validate_integrated_engineering_output_v2,
 )
 from motorsim.scavenging import (ScavengingInput, calculate_scavenging_metrics,
                                  scavenging_engineering_records)
@@ -81,3 +83,45 @@ def test_schema_accepts_geometry_bound_scavenging_diagnostics():
     validated = validate_engineering_output(record)
     assert validated["cycle_metrics"]["purity_at_transfer_close"]["value"] == pytest.approx(0.4)
     assert validated["cycle_metrics"]["fresh_retained_kg"]["value"] == pytest.approx(0.005)
+
+
+def test_integrated_v2_binds_configuration_and_path_addressed_duct_channels():
+    base = output()
+    channels = {
+        **{name: {"values": row["values"], "source": row["source"]}
+           for name, row in base["crank_angle_trace"]["channels"].items()},
+        "crankcase_mass_kg": {"values": [1, 1, 1, 1, 1], "source": "integrated state"},
+        "duct:primary:cell:0:pressure_pa": {
+            "values": [100_000, 110_000, 120_000, 110_000, 100_000],
+            "source": "integrated duct state"},
+        "duct:primary:face:1:mass_flow_kg_s": {
+            "values": [0, .01, .02, .01, 0], "source": "accepted HLLC face flux"},
+    }
+    values = dict(rpm=base["operating_point"]["rpm"], cycle_number=3,
+                  angles_deg=tuple(base["crank_angle_trace"]["angle_deg"]),
+                  channels=channels,
+                  cycle_metrics={name: {key: row[key] for key in
+                                        ("value", "status", "reason", "source")}
+                                 for name, row in base["cycle_metrics"].items()},
+                  dependency_status="CONDITIONAL_ON_P4",
+                  configuration_sha256="a" * 64)
+    record = build_integrated_engineering_output_v2(**values)
+    assert record["schema"] == "MOTORSIM_ENGINEERING_OUTPUTS_V2"
+    assert record["configuration_sha256"] == "a" * 64
+    assert record["crank_angle_trace"]["channels"][
+        "duct:primary:cell:0:pressure_pa"]["unit"] == "Pa"
+    assert validate_integrated_engineering_output_v2(record) == record
+    with pytest.raises(ValueError, match="Unsupported or malformed crank-angle channel"):
+        build_integrated_engineering_output_v2(
+            **{**values, "channels": {"duct:primary:cell:0:fake": {
+                "values": [1, 2, 3, 4, 5], "source": "bad"}}})
+    with pytest.raises(ValueError, match="configuration SHA-256"):
+        build_integrated_engineering_output_v2(**{**values, "configuration_sha256": "bad"})
+    v1_only = {**values, "cycle_metrics": {**values["cycle_metrics"],
+        "brake_work_j": {"value": 1.0, "status": "DEFINED", "reason": None,
+                         "source": "must require schema V2"}},
+        "channels": {name: {"values": row["values"], "source": row["source"]}
+                     for name, row in base["crank_angle_trace"]["channels"].items()}}
+    with pytest.raises(ValueError, match="Unsupported or malformed cycle metric"):
+        build_engineering_output(**{key: value for key, value in v1_only.items()
+                                    if key != "configuration_sha256"})

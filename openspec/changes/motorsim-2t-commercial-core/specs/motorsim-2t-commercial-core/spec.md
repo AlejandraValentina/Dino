@@ -490,15 +490,18 @@ share its SSPRK stages and global ledgers.
 
 ### Requirement: Versioned engineering output schema
 
-Engineering output MUST use `MOTORSIM_ENGINEERING_OUTPUTS_V1` with a strict
-360-degree 2T cycle convention, RPM/cycle identity, explicit P4 dependency
-status, crank-angle trace and cycle metrics. Supported channels and metrics
+The existing fixed-channel `MOTORSIM_ENGINEERING_OUTPUTS_V1` MUST retain its
+strict 360-degree 2T convention, RPM/cycle identity, explicit P4 dependency
+status, crank-angle trace and cycle metrics. Integrated cycle evidence MUST
+use the distinct `MOTORSIM_ENGINEERING_OUTPUTS_V2` schema, binding the engine
+configuration SHA-256 and supporting path-addressed duct-cell and duct-face
+channels alongside the supported fixed channels. Every channel and metric
 MUST declare units and source. Undefined values MUST carry null, status and
-reason. Nonfinite/bool values, unknown channels, mismatched sample counts,
-incomplete cycles or altered units MUST be rejected. The schema MUST keep
-periodicity `NOT_EVALUATED`, experimental validation `NOT_PERFORMED`, and
-predictive validation `NOT_CLAIMED` unless a later explicitly authorized
-evidence adapter supplies a distinct schema.
+reason. Nonfinite/bool values, unknown V2 channel forms, mismatched sample
+counts, incomplete cycles, invalid configuration identity or altered units
+MUST be rejected. Both schemas MUST keep periodicity `NOT_EVALUATED`,
+experimental validation `NOT_PERFORMED`, and predictive validation
+`NOT_CLAIMED`.
 
 #### Scenario: Build a trace with unavailable metric
 
@@ -510,6 +513,56 @@ evidence adapter supplies a distinct schema.
 
 - **WHEN** channel units, sample counts or cycle span disagree with the schema
 - **THEN** construction or offline validation rejects the artifact.
+
+#### Scenario: Build integrated output with duct topology identity
+
+- **WHEN** one complete integrated primary cycle supplies its configuration
+  identity, duct meshes, accepted cell states and face fluxes
+- **THEN** V2 emits path-addressed pressure, temperature, Mach, four species
+  masses, signed face mass flow, port areas and port flows with source/unit
+  provenance, while retaining all non-claim controls.
+
+#### Scenario: Reject forged integrated summaries
+
+- **WHEN** a cycle summary disagrees with the accepted SSPRK2 trajectory or
+  global conservation reconstructed from that trajectory
+- **THEN** V2 output construction rejects it and does not serialize the summary.
+
+### Requirement: Integrated cycle closure evidence and scavenging outputs
+
+Integrated full-cycle evidence MUST use a versioned primary-cycle schema that
+stores exact accepted-stage cylinder species snapshots at the last aggregate
+transfer and exhaust closure events derived from the bound generic port
+geometry. A powervalve MUST be resolved at the cycle RPM before its exhaust
+closure is derived. Closure states MUST be exact trajectory endpoints; nearest
+samples and interpolation MUST NOT be used. If a closure is absent, the exact
+endpoint is missing/ambiguous, or RPM varies in a way that prevents an exact
+powervalve event, the record MUST mark closure evidence unavailable and
+scavenging outputs MUST remain null/UNDEFINED. Scavenging ratios MUST only be
+defined when an explicit positive reference-charge mass is supplied, and MUST
+be computed from the same cycle's P6 fresh-delivery/outward-short-circuit
+integrals and closure species inventories. Missing evidence MUST NOT retain a
+previous cycle's values.
+
+#### Scenario: Emit exact closure-bound scavenging metrics
+
+- **WHEN** a constant-RPM integrated cycle reaches unique exact transfer and
+  exhaust closure endpoints and receives an explicit reference-charge mass
+- **THEN** the versioned primary evidence binds both four-species snapshots and
+  the V2 collector emits scavenging metrics from those snapshots and that
+  cycle's P6 ledgers.
+
+#### Scenario: Keep scavenging undefined without exact closure evidence
+
+- **WHEN** the port geometry has no aggregate closure or the accepted trajectory
+  lacks an exact closure endpoint
+- **THEN** no interpolation is performed and scavenging values remain null and
+  UNDEFINED even if another cycle previously had valid closure data.
+
+Engineering trace channels MUST pair each accepted state with an RHS evaluation
+made from that same state. The terminal point MUST be a read-only evaluation of
+the accepted terminal state; a requested prescribed P7 endpoint rate MUST be
+identified as pre-limiter and MUST NOT enter cycle ledgers or conservation.
 
 ### Requirement: Exploratory experimental-data import remains separate from P9
 

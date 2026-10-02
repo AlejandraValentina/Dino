@@ -200,6 +200,17 @@ cycle spans and altered units. Periodicity defaults to `NOT_EVALUATED`;
 experimental validation remains `NOT_PERFORMED` and predictive validation
 `NOT_CLAIMED`. Channels remain optional until a producing solver path exists.
 
+The fixed V1 contract remains unchanged. The integrated cycle collector uses
+`MOTORSIM_ENGINEERING_OUTPUTS_V2`, which binds the configuration SHA-256 and
+adds strict path-addressed duct-cell channels (pressure, temperature, Mach,
+four extensive species masses) and duct-face signed mass-flow channels. Channel
+keys encode the URL-quoted stable duct id plus cell/face index; unknown forms
+remain invalid. Port openings and integrated interface flows use the existing
+fixed area/flow channel names. V2 re-integrates work, species/external exchange,
+P7/thermal sources and energy conservation from the saved SSPRK2 stages before
+building the artifact; cycle summaries are cross-checks, never the output
+authority.
+
 ## Exploratory measurement import `MOTORSIM_MEASUREMENT_DATA_V1`
 
 The additive importer handles pressure traces (cycle/angle/absolute pressure),
@@ -259,3 +270,21 @@ and opposite volume rates at each stage's angle and RPM, while retaining the
 existing pressure-volume work term in the common gas RHS. The resolved model
 configuration is part of checkpoint identity; no independent kinematics or
 energy update is introduced.
+
+Integrated cycle evidence is versioned as
+`MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2` to add geometry-bound last-close
+snapshots for aggregate transfer and exhaust duct roles. The cycle builder
+derives event angles from the bound generic port set and resolves a configured
+powervalve at cycle RPM. It accepts a snapshot only when the accepted SSPRK2
+trajectory has one endpoint exactly at that angle. Variable-RPM cycles with a
+mapped powervalve, missing closures, or missing/ambiguous event rows leave the
+closure evidence unavailable. The collector uses snapshots only when the
+caller also supplies a positive reference-charge mass; otherwise scavenging
+metrics remain explicitly undefined. It never interpolates event states, and
+unavailable evidence cannot inherit metrics from another cycle.
+Engineering trace rows at step starts pair the stage-start state with its own
+stage-start face evaluation. The final row is rebuilt by a read-only RHS call
+from the accepted terminal state, rather than pairing that state with the
+provisional SSPRK2 second-stage flux. Its P7 value is the instantaneous
+prescribed request before a future-step availability limiter and is descriptive
+only; it is excluded from all accepted-cycle integrals and conservation terms.

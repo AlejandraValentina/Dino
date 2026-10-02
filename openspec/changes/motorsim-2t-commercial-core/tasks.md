@@ -268,10 +268,11 @@ conversión a trabajo indicado se hace únicamente al construir observables.
 También se equilibró la presión inicial sintética de cilindro y cárter con la
 atmósfera a 101325 Pa, usando `rhoE=101325/(gamma-1)` para `gamma=1.35`.
 
-El collector integrado produce `MOTORSIM_ENGINEERING_OUTPUTS_V1` a partir de
+El collector integrado produce `MOTORSIM_ENGINEERING_OUTPUTS_V2` a partir de
 una trayectoria completa: presión/temperatura/masa/volumen de cámaras, cuatro
 especies, calor P7, calor de pared, trabajo/potencia/torque/IMEP indicados,
-caudal de combustible del ledger P6 y balance de energía. Las métricas de freno
+caudal de combustible del ledger P6, cuatro especies por celda y flujo firmado
+por cara de ducto, áreas/flujos de puertos y balance de energía. Las métricas de freno
 solo se definen si se entrega un `MechanicalLossModel` explícito; los cálculos
 de scavenging, AFR/equivalence ratio, ISFC y BSFC siguen `UNDEFINED` por ausencia
 de cierres geométricos exactos o de una relación LHV aprobada.
@@ -280,11 +281,66 @@ Diagnóstico sin cambios de solver, malla, CFL ni thresholds: ciclos 1–6 del
 fixture A completan y son admisibles, pero ciclo 1 tiene trabajo indicado
 negativo; los pares 1→2 son `INVALID` y 2→3 a 5→6 son `FAIL` en el contrato
 `REFERENCE_PERIODIC_CONVERGENCE_V1`. No hay P1/P2 ni periodicidad acreditada.
-La trayectoria de ciclo incluye estados de ductos/puertos para auditoría, pero
-la salida tipada aún no reúne todos los canales por ducto, Mach y cierres de
-puerto; Fixture A permanece bloqueado y Fixture B no se inicia aún.
+La salida V2 reúne canales por celda/cara de ducto, Mach y áreas/flujos de
+puertos; los cierres geométricos exactos y sus snapshots P6 siguen pendientes.
+Fixture A permanece bloqueado y Fixture B no se inicia aún.
 
-Pruebas actuales: 21 focales integradas y 11 de salida de ingeniería (32 en
-conjunto) aprobadas; OpenSpec estricto aprobado. Regresión P4–P8 amplia y revisión
+Pruebas actuales: 21 focales integradas y 12 de salida de ingeniería (33 en
+conjunto) aprobadas; el grupo integrador/P5-C/P6/P7/reed/puertos/output pasó
+85/85; OpenSpec estricto aprobado. Regresión P4–P8 amplia y revisión
 independiente del delta actual siguen pendientes. Esto es evidencia de trabajo
 integrado parcial, no cierre del Commercial Core.
+
+### Integración de cierres geométricos y alineación de trazas — 2026-10-02
+
+La evidencia primaria integrada se versionó como
+`MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2`. Cuando hay un `TwoStrokePortSet`
+vinculado y RPM constante, el constructor deriva los cierres agregados exactos
+de transferencia y escape, resolviendo antes el techo powervalve a ese RPM.
+Solo registra el estado terminal SSPRK2 en un ángulo de cierre si existe una
+única fila aceptada en ese ángulo. Los ciclos de RPM variable con powervalve,
+geometría sin cierre o evidencia angular faltante conservan el estado
+`UNAVAILABLE`; no se interpola.
+
+El fixture A usa ahora para su escape auxiliar un perfil sintético con intervalos
+realmente cerrados. El perfil anterior solo tocaba área cero en puntos aislados
+y, de acuerdo con `duct_closing_angles`, no definía un cierre del conducto. La
+corrección cambia la geometría sintética y obliga a repetir el diagnóstico de
+seis ciclos; los resultados numéricos anteriores quedan como evidencia de la
+revisión previa, no como resultado del fixture actualizado.
+
+El collector de ingeniería toma cada muestra inicial de paso desde su estado y
+RHS de etapa 1 alineados; añade el endpoint del ciclo mediante una evaluación
+RHS de solo lectura sobre el estado terminal aceptado. La tasa P7 de ese punto
+es el request prescrito previo a cualquier limitador de un paso futuro y no
+participa de integrales ni balances. Con reference-charge mass positiva,
+scavenging se deriva de las dos instantáneas de cuatro especies y los ledgers
+P6 de ese mismo ciclo. Sin cierres exactos, el valor permanece null/UNDEFINED.
+
+Evidencia de esta continuación: prueba focal del ciclo integrado aprobada;
+`tests/test_integrated_2t.py` + `tests/test_engineering_outputs.py`: 33/33;
+OpenSpec estricto, `py_compile` y `git diff --check`: PASS. El grupo de regresión
+integrado de 85 pruebas pasó nuevamente tras este cambio. Se repitieron seis
+ciclos completos del fixture revisado, todos con cierres exactos. El trabajo
+indicado fue `[-111.5764, 17.2841, 52.2598, 57.1227, 53.2165, 50.4537] J`;
+primer ciclo negativo, 1→2 INVALID, pares restantes FAIL y sin P1/P2. Los ratios
+de scavenging con referencia sintética explícita fueron
+`[0.57136, 0.49767, 0.47893, 0.50271, 0.53278, 0.55344]`. Artefacto primario y
+outputs: `results/2t-commercial-core-20261002/fixture-a-integrated-cycles-20261002-v2.json.gz`,
+SHA-256 `c037c83f81796b7fb9a93bdae6b6ffff070c44e030977ef69d6329dcf1279dc2`.
+La suite amplia seleccionada actual P4–P8 pasó 300 pruebas en `.venv` Python
+3.11, con cuatro warnings NumPy preexistentes. Falta revisión independiente de
+este delta. No declarar periodicidad ni Commercial Core READY.
+
+
+### Revisión independiente read-only de cierres V2 — 2026-10-02
+
+La revisión independiente puntual del delta actual no encontró defectos materiales
+en la derivación de cierres, la alineación estado/flujo por stage, la reconstrucción
+de integrales, la compatibilidad de salida V1/V2 ni el artefacto LFS. Confirmó
+que el powervalve se resuelve a RPM constante y que el snapshot se captura solo
+en un endpoint SSPRK2 aceptado, único y exacto; el punto terminal del collector
+se evalúa en solo lectura. La revisión comprobó el puntero LFS y su tamaño/hash,
+y que P4–P8 y la infraestructura de orquestación no están en el delta. Esta es
+una revisión puntual de implementación/evidencia, no una aprobación del motor
+completo. Fixture A sigue sin convergencia P1/P2; no cambia su bloqueo.
