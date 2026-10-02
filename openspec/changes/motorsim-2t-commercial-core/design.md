@@ -168,6 +168,18 @@ existing 0D restriction, preserving its upstream donor and fresh fraction. This
 is not a P5-C stage extension: wall heat remains a separate prescribed model,
 and actual intake/transfer topologies still require global stage ledgers.
 
+## Intake volumes and junctions `MOTORSIM_NETWORK_COMPONENTS_V1`
+
+Network configuration describes explicit plenum, airbox and boost-bottle
+volumes plus neck/junction area, effective length and provenance. Atmosphere
+defaults to P6 species `(fresh_air=1,fuel=residual=burned=0)` while pressure and
+temperature remain explicit. A volume/duct exchange reuses the existing P3
+Riemann interface for gas flux and P6 `donor_species` for four-species flux;
+the adjacent finite volume receives exact opposite extensive increments. A
+lumped Helmholtz frequency is an estimate using the caller's declared effective
+neck length, with no hidden end correction. This network description does not
+yet add its nodes to the production P5-C SSPRK state or global campaign ledger.
+
 ## Exhaust powervalve geometry `POWERVALVE_GEOMETRY_V1`
 
 The powervalve maps RPM to a bounded roof position using piecewise-linear

@@ -336,3 +336,28 @@ integration or modify their stage ledger.
 - **WHEN** pressure ordering changes across a configured link
 - **THEN** the existing restriction resolves the direction, enthalpy and fresh
   fraction from the actual upstream donor; closed area gives exact zero flux.
+
+### Requirement: Reusable intake volumes and junction interfaces
+
+Network V1 MUST represent plenum, airbox and boost-bottle volumes and explicit
+connections with area, effective length and provenance. Atmosphere MUST default
+to four-species fresh air only, with pressure and temperature explicit. A
+0D-volume/1D-duct exchange MUST reuse the existing P3 Riemann flux and P6
+four-species donor semantics; adjacent volume and duct MUST receive equal and
+opposite mass, energy and each species increment. A lumped Helmholtz estimate
+MUST use explicit effective neck length and MUST be labeled as an estimate.
+Network components MUST NOT be claimed integrated into P5-C until their states
+share its SSPRK stages and global ledgers.
+
+#### Scenario: Reverse volume/duct flow
+
+- **WHEN** pressure order reverses across a network interface
+- **THEN** the resolved P6 flux uses the actual new donor composition and all
+  extensive increments remain equal and opposite.
+
+#### Scenario: Atmosphere and boost-bottle estimate
+
+- **WHEN** an atmosphere boundary and explicit bottle/neck geometry are given
+- **THEN** atmosphere contains only the default fresh-air species and the
+  Helmholtz estimate uses caller-provided effective length without hidden
+  corrections.

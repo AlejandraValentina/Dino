@@ -84,6 +84,10 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       de `GENERIC_2T_PORTS_V1`; siete pruebas analíticas/negativas aprobadas.
       Parcial: no hay servo, integración al ciclo del solver ni calibración.
 - [ ] Fase 13: plenum, airbox, boost bottle y uniones.
+- [x] Fase 13a: schema de volúmenes/conexiones, atmosphere P6, intercambio
+      conservativo 0D/1D con Riemann P3 + donor real P6 y estimación Helmholtz
+      con longitud efectiva explícita; ocho pruebas. Parcial: topology todavía
+      no entra al estado SSPRK2/productivo P5-C ni a ledger global de campaña.
 - [ ] Fase 14: esquema unificado de outputs por ángulo y ciclo/RPM.
 - [ ] Fase 15: importación exploratoria generalizada sin cambiar P9.
 - [ ] Fase 16: segundo reference case con fuentes públicas y provenance.
