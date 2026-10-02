@@ -29,7 +29,59 @@ and verified together.
 
 - **WHEN** a subsystem has only unit or isolated fixture coverage
 - **THEN** its phase may be recorded complete at its own scope but the overall
-  commercial-core readiness remains not ready.
+      commercial-core readiness remains not ready.
+
+### Requirement: Generic engine topology uses one stage-coherent conservative state
+
+The integrated 2T engine MUST keep cylinder, crankcase, intake, every named
+transfer route, exhaust and their four extensive species masses in one
+checkpointable state. A global SSPRK2 stage MUST resolve each face flux once
+from that stage state and apply equal-and-opposite mass and energy increments
+to its connected components. Species flux MUST use the actual donor selected
+by the sign of that same mass flux; no independent legacy scalar may be
+advanced as authoritative species state. Each accepted step MUST preserve
+admissibility and record both stage states, interface fluxes, external
+exchange, work and CFL. A checkpoint MUST bind mesh, topology, EOS, boundary,
+geometry and initial-state identities, and restore atomically only when those
+identities match. Internal ledgers MUST independently reconcile total mass,
+energy and each species against external exchange and volume work. Readiness
+remains unavailable until combustion, thermal, reed, scavenging, mechanics,
+fuel and evidence collection are also verified on integrated fixtures.
+
+When configured, an existing quasi-static reed model MUST resolve effective
+intake area from the same stage's duct and crankcase pressures. A checkpoint
+MUST reject wrapped/unwrapped angle disagreement and chamber volumes that do
+not match the configured geometry at the restored angle. The explicit geometry
+identity remains a caller-declared binding; the runtime volume check is an
+additional state-consistency gate.
+
+#### Scenario: Three or more transfer routes share stage fluxes
+
+- **WHEN** an engine topology has named primary, secondary and boost routes
+- **THEN** each route participates in the same two SSPRK2 stages, each interface
+  uses one shared Riemann flux, and every species follows the actual donor for
+  forward or reverse flow.
+
+#### Scenario: Reject inadmissible CFL or mismatched restart
+
+- **WHEN** a proposed step exceeds its configured CFL bound or a checkpoint has
+  a different mesh, topology, boundary, geometry or initial-state identity
+- **THEN** the state remains unchanged and the step/checkpoint is rejected.
+
+#### Scenario: Static reed and chamber limits are stage based
+
+- **WHEN** the inlet reed is configured or a connected chamber has gross outward
+  mass flux
+- **THEN** reed area is resolved from that stage's pressure state, chamber
+  depletion participates in the accepted CFL gate, and the same shared flux
+  updates chamber, duct, species and global ledgers.
+
+#### Scenario: JSON checkpoint restores all accepted physical history
+
+- **WHEN** the full engine checkpoint is serialized to JSON and restored under
+  the same configuration
+- **THEN** the conservative state, four species, angle/time/cycle, ledgers,
+  accepted-step trace and replay trajectory continue identically.
 
 ### Requirement: Evidence and conservation for stateful components
 

@@ -11,7 +11,12 @@
   "phases": {
     "1_reference_harness": {
       "status": "LOCAL_BLOCKER",
-      "verified_scope": ["period_1_and_period_2_fixtures", "offline_audit", "malformed_evidence", "accepted_step_checkpoint_restart_replay"],
+      "verified_scope": [
+        "period_1_and_period_2_fixtures",
+        "offline_audit",
+        "malformed_evidence",
+        "accepted_step_checkpoint_restart_replay"
+      ],
       "blocked_scope": "No complete engine cycle is available to establish multi-cycle campaign operation and campaign-anchor restart/replay."
     },
     "2_kt100_v2": {
@@ -21,76 +26,174 @@
     },
     "3_generic_2t_ports": {
       "status": "GEOMETRY_IMPLEMENTED_CORE_TOPOLOGY_PARTIAL",
-      "verified_scope": ["multiple_transfer_apertures", "primary_secondary_boost_roles", "piston_port_intake", "single_bridged_auxiliary_exhaust", "periodic_area_profiles", "discharge_coefficients", "powervalve_ready_roof"],
+      "verified_scope": [
+        "multiple_transfer_apertures",
+        "primary_secondary_boost_roles",
+        "piston_port_intake",
+        "single_bridged_auxiliary_exhaust",
+        "periodic_area_profiles",
+        "discharge_coefficients",
+        "powervalve_ready_roof"
+      ],
       "blocked_scope": "P5-C binding supports two existing transfer paths only; arbitrary path topology, project persistence and GUI remain open."
     },
     "4_scavenging": {
       "status": "METRICS_AND_EXACT_CLOSURE_ADAPTER_IMPLEMENTED_PERIODIC_CAMPAIGN_PENDING",
-      "verified_scope": ["four_species_metrics", "exact_geometry_closure_snapshots", "complete_360_cycle_binding", "stable_output_schema_adapter"]
+      "verified_scope": [
+        "four_species_metrics",
+        "exact_geometry_closure_snapshots",
+        "complete_360_cycle_binding",
+        "stable_output_schema_adapter"
+      ]
     },
     "5_reed": {
       "status": "COMPONENT_IMPLEMENTED_P5C_STAGE_INTEGRATION_BLOCKED",
-      "verified_scope": ["static_and_dynamic_multi_petal_model", "serialization", "unit_restart_replay"]
+      "verified_scope": [
+        "static_and_dynamic_multi_petal_model",
+        "serialization",
+        "unit_restart_replay"
+      ]
     },
     "6_expansion_chamber": {
       "status": "COMPONENT_VERIFIED",
-      "verified_scope": ["connected_sections", "existing_quasi_1d_mesh_and_solver_trace", "characteristics", "travel_and_reflection_timing_estimates"]
+      "verified_scope": [
+        "connected_sections",
+        "existing_quasi_1d_mesh_and_solver_trace",
+        "characteristics",
+        "travel_and_reflection_timing_estimates"
+      ]
     },
     "7_thermal": {
       "status": "PRESCRIBED_COMPONENT_VERIFIED_CORE_ENERGY_COUPLING_PENDING",
-      "verified_scope": ["prescribed_wall_temperatures", "constant_h_v1", "cycle_heat_ledger"]
+      "verified_scope": [
+        "prescribed_wall_temperatures",
+        "constant_h_v1",
+        "cycle_heat_ledger"
+      ]
     },
     "8_combustion": {
       "status": "PRESCRIBED_COMBUSTION_V2_VERIFIED",
-      "verified_scope": ["single_and_double_wiebe", "ignition", "efficiency_maps", "ca10_ca50_ca90"],
+      "verified_scope": [
+        "single_and_double_wiebe",
+        "ignition",
+        "efficiency_maps",
+        "ca10_ca50_ca90"
+      ],
       "chemistry_or_predictive_lite": "NOT_IMPLEMENTED_NO_SUPPORTED_PARAMETERS"
     },
     "9_crankcase": {
       "status": "GEOMETRY_AND_REVERSIBLE_LINK_COMPONENT_PARTIAL_CORE_COUPLING_BLOCKED",
-      "verified_scope": ["slider_crank_volume", "analytic_volume_rate", "bidirectional_existing_restriction_helper"]
+      "verified_scope": [
+        "slider_crank_volume",
+        "analytic_volume_rate",
+        "bidirectional_existing_restriction_helper"
+      ]
     },
     "10_mechanical_losses": {
       "status": "ACCOUNTING_COMPONENT_VERIFIED",
-      "verified_scope": ["fmep_terms_and_maps", "imep_bmep", "indicated_and_brake_power_torque"]
+      "verified_scope": [
+        "fmep_terms_and_maps",
+        "imep_bmep",
+        "indicated_and_brake_power_torque"
+      ]
     },
     "11_fuel": {
       "status": "ACCOUNTING_COMPONENT_VERIFIED_P6_PER_SPECIES_DELIVERY_BINDING_PENDING",
-      "verified_scope": ["explicit_fuel_properties", "afr_equivalence", "fuel_masses_flow_isfc_bsfc"]
+      "verified_scope": [
+        "explicit_fuel_properties",
+        "afr_equivalence",
+        "fuel_masses_flow_isfc_bsfc"
+      ]
     },
     "12_powervalve": {
       "status": "GEOMETRY_COMPONENT_VERIFIED",
-      "verified_scope": ["bounded_rpm_map", "linear_interpolation", "generic_exhaust_roof_geometry"]
+      "verified_scope": [
+        "bounded_rpm_map",
+        "linear_interpolation",
+        "generic_exhaust_roof_geometry"
+      ]
     },
     "13_intake_network": {
       "status": "COMPONENTS_VERIFIED_P5C_STAGE_AND_GLOBAL_LEDGER_INTEGRATION_PENDING",
-      "verified_scope": ["plenum_airbox_boost_bottle", "atmosphere_species", "conservative_0d_1d_interface_helper", "helmholtz_estimate"]
+      "verified_scope": [
+        "plenum_airbox_boost_bottle",
+        "atmosphere_species",
+        "conservative_0d_1d_interface_helper",
+        "helmholtz_estimate"
+      ]
     },
     "14_engineering_outputs": {
       "status": "SCHEMA_VERIFIED_FULL_CORE_PRIMARY_COLLECTOR_PENDING",
-      "verified_scope": ["versioned_schema", "units_provenance_nonclaims", "scavenging_metrics_binding"]
+      "verified_scope": [
+        "versioned_schema",
+        "units_provenance_nonclaims",
+        "scavenging_metrics_binding"
+      ]
     },
     "15_experimental_import": {
       "status": "EXPLORATORY_IMPORTER_VERIFIED_P9_UNCHANGED",
-      "verified_scope": ["pressure_trace", "dyno_torque_power", "units_uncertainty_provenance_hash_overlay"]
+      "verified_scope": [
+        "pressure_trace",
+        "dyno_torque_power",
+        "units_uncertainty_provenance_hash_overlay"
+      ]
     },
     "16_second_reference_case": {
       "status": "DOCUMENTED_PARTIAL_NOT_SIMULATION_READY",
       "case_id": "HONDA_CR250R_2007_REFERENCE_CASE_PARTIAL_V1",
       "unknowns_left_null": true
+    },
+    "17_integrated_2t_foundation": {
+      "status": "PARTIAL_NOT_AN_ENGINE_CYCLE",
+      "implementation": "motorsim.integrated_2t.IntegratedEngine2T",
+      "verified_scope": [
+        "single_global_ssprk2_stage_state",
+        "three_or_more_named_transfer_routes",
+        "existing_eos_hllc_p3_interface_and_p6_donor_semantics",
+        "four_extensive_species_and_independent_global_ledgers",
+        "mass_energy_species_conservation_on_static_volume_fixture",
+        "forward_and_reverse_donor_flow",
+        "duct_area_volume_and_zero_dimensional_chamber_cfl",
+        "prescribed_thermal_source_in_same_stages",
+        "static_reed_area_from_each_stage_pressure",
+        "atomic_json_checkpoint_restart_and_replay",
+        "restored_angle_and_chamber_geometry_consistency"
+      ],
+      "focal_tests": 13,
+      "blocked_scope": [
+        "dynamic_reed_state_and_restart",
+        "combustion_and_fuel_conversion",
+        "periodic_complete_engine_cycles",
+        "full_evidence_and_engineering_output_collector",
+        "two_independent_integrated_fixtures"
+      ],
+      "boundary_v2": "NOT_IMPLEMENTED_NO_FALLBACK"
     }
   },
   "automated_checks": {
-    "focused_program_tests": {"result": "PASS", "count": 204},
+    "focused_program_tests": {
+      "result": "PASS",
+      "count": 204
+    },
     "commercial_core_openspec_strict": "PASS",
+    "integrated_engine_foundation_tests": {
+      "result": "PASS",
+      "count": 13
+    },
     "reference_harness_openspec_strict": "PASS",
     "git_diff_check": "PASS",
     "git_lfs_fsck": "PASS",
     "p4_p8_regressions": "PASS_PREVIOUSLY_RECORDED_346_TESTS_NOT_RERUN_FOR_THIS_CLOSEOUT",
-    "p9_contract_sha256": "79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d"
+    "p9_contract_sha256": "79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d",
+    "integrated_regression_group_current": {
+      "result": "PASS",
+      "count": 65,
+      "command": "python -m pytest tests/test_integrated_2t.py tests/test_p5c_integrated.py tests/test_p6_species.py tests/test_p7_full_topology.py tests/test_reed.py tests/test_two_stroke_ports_p5c.py -q"
+    }
   },
   "review": {
-    "current_delta": "SELF_REVIEWED",
-    "independent_review_current_delta": "NOT_PERFORMED",
+    "current_delta": "INDEPENDENT_READ_ONLY_REVIEW_PASS_FOR_CFL_RESTART_AND_STATIC_REED_DELTA",
+    "independent_review_current_delta": "PASS_FOCAL_SCOPE; geometry callback identity still caller-declared",
     "prior_harness_punctual_review": "NO_MATERIAL_DEFECT_FOUND"
   },
   "git": {
@@ -102,5 +205,100 @@
       "results/kt100-hybrid-model-fixture-v2-harness-20261002-r3/",
       "results/kt100-hybrid-model-fixture-v2-harness-20261002-r4/"
     ]
-  }
+  },
+  "queue": [
+    {
+      "id": "17a-integrated-gas-species-foundation",
+      "description": "SSPRK2 gas/species N-route foundation, global ledgers, cell/chamber CFL, atomic restart checks",
+      "dependencies": [],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "tests/test_integrated_2t.py:13",
+        "65-test integrated regression group: PASS",
+        "independent read-only review confirmed area-volume and gross chamber-outflow CFL plus restart checks"
+      ],
+      "next_action": "Continue with coupled subsystems; foundation is not a complete engine."
+    },
+    {
+      "id": "17b-static-reed-intake-crankcase",
+      "description": "Bind existing static reed to shared intake/crankcase stage with donor/species/global ledgers",
+      "dependencies": [
+        "17a-integrated-gas-species-foundation"
+      ],
+      "state": "IN_PROGRESS",
+      "blocker": "Dynamic reed state/restart and full crankcase geometry coupling remain open.",
+      "commits": [],
+      "evidence": [
+        "tests/test_integrated_2t.py:13",
+        "tests/test_reed.py",
+        "independent read-only review found no concrete static-reed defect"
+      ],
+      "next_action": "Audit stage flux/orientation and extend durable reed state only with a consistent integration scheme."
+    },
+    {
+      "id": "17c-exhaust-chamber-boundary",
+      "description": "Integrate generic exhaust mesh, expansion chamber, powervalve-ready geometry and justified external boundary",
+      "dependencies": [
+        "17a-integrated-gas-species-foundation"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "evidence": [],
+      "next_action": "Bind existing ExpansionChamber mesh and assess boundary V2 scope without rerunning KT100."
+    },
+    {
+      "id": "17d-fuel-combustion-thermal-mechanics",
+      "description": "Integrate existing P7/P11 capabilities and ledgers without double counting",
+      "dependencies": [
+        "17a-integrated-gas-species-foundation",
+        "17b-static-reed-intake-crankcase"
+      ],
+      "state": "READY",
+      "blocker": "Species-to-burned-mass and released-energy stage contract not yet integrated.",
+      "commits": [],
+      "evidence": [],
+      "next_action": "Derive binding only from existing P6/P7/fuel contracts and preregister any new contract before campaigns."
+    },
+    {
+      "id": "17e-cycle-evidence-collector",
+      "description": "Integrated primary cycle evidence, P1/P2 periodicity, collector, checkpoint/replay and Fixture A",
+      "dependencies": [
+        "17b-static-reed-intake-crankcase",
+        "17c-exhaust-chamber-boundary",
+        "17d-fuel-combustion-thermal-mechanics"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "evidence": [],
+      "next_action": "Implement after integrated subsystems produce auditable accepted-cycle states."
+    },
+    {
+      "id": "18-fixture-b-regressions",
+      "description": "Independent Fixture B and current broad P4-P8 regression suite",
+      "dependencies": [
+        "17e-cycle-evidence-collector"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "evidence": [],
+      "next_action": "Run only after Fixture A passes its preregistered contract."
+    },
+    {
+      "id": "reservoir-boundary-v2",
+      "description": "Resolve reservoir inlet branch via a new versioned capability if formulation is unambiguous",
+      "dependencies": [],
+      "state": "BLOCKED_LOCAL",
+      "blocker": "Scientific formulation review required before selecting a generalized inflow construction.",
+      "commits": [],
+      "evidence": [
+        "docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md"
+      ],
+      "next_action": "Continue independent internal fixture work; do not retry KT100 before both fixtures pass."
+    }
+  ]
 }

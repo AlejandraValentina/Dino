@@ -210,3 +210,34 @@ coordinates overlay; no interpolation or condition equivalence is inferred.
 Bias, MAE, RMSE and uncertainty-normalized RMSE are descriptive. Every result
 is `EXPLORATORY_COMPARISON`, not validation-eligible, and the module does not
 call, edit or feed the frozen P9 pipeline.
+
+## Generic integrated 2T stage graph
+
+The new orchestration is separate from historical P5/P6 campaign products.
+It reuses the existing `IdealGas`, finite-volume meshes, HLLC face flux and
+P3 Riemann interface. Each path has a stable id and role; the core requires
+one intake, one exhaust and at least three transfer routes. One immutable
+stage state feeds all boundary and internal faces. The resolved Euler mass,
+momentum and energy flux is shared by connected cells/chambers, while four
+extensive species masses use the existing P6 donor-selection function and the
+same resolved mass-flux sign. The passive scalar slot is derived as total mass
+density for compatibility and is never advanced as species authority.
+
+The accepted state records two stage evaluations, exact stage geometry, CFL,
+external exchange, chamber volume work and primary face/species traces. A JSON
+checkpoint is tied to explicit caller-supplied geometry identity, meshes,
+topology, EOS, boundary conditions, CFL policy and initial state. Restore
+validates the candidate before installing it, including wrapped/unwrapped angle
+agreement and crankcase/cylinder volumes at the restored angle. The caller's
+geometry identity is a declared binding, not a proof of arbitrary callback
+equivalence. The duct CFL includes both local wave-speed/width and
+area-volume/face-wave-speed bounds; 0D chamber depletion also constrains the
+step. The optional existing quasi-static reed resolves effective intake area
+from each shared stage's duct and crankcase pressure. This first implementation
+is a conservative gas/species foundation with prescribed `ThermalSystem` sources
+evaluated from the same stage states; each surface requires an explicit
+chamber or `duct_id:cell_index` location. Reed mechanics, combustion, complete
+fuel conversion, periodic-cycle evidence and the complete engineering
+collector remain open integration work. Existing reservoir-boundary
+inconsistency is not hidden by an automatic fallback; boundary V2 remains an
+explicit local blocker until its mathematical scope is resolved.

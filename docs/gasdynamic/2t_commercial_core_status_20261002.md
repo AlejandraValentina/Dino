@@ -49,3 +49,53 @@ componentes aislados no prueba una configuración completa ni concede claims
 experimentales o predictivos. El delta recibió autorrevisión, no una revisión
 independiente nueva. No hubo push. Los directorios históricos r2/r3/r4/base
 siguen sin stage.
+
+## Continuación de integración end-to-end
+
+La orden vigente autoriza un integrador nuevo sin alterar P5/P6 históricos.
+El primer prototipo `motorsim.integrated_2t` usa un solo estado SSPRK2 para
+crankcase/cilindro, admisión, N transfers (mínimo 3) y escape, reutiliza EOS,
+malla, HLLC, interfaz P3 y selección de donor P6. Un fixture artificial
+estático acredita conservación de masa/energía/cuatro especies por etapa,
+flujo inverso con donor real, rechazo CFL, fuente térmica de pared desde el
+estado de cada etapa, trazas y checkpoint JSON/replay: 7 pruebas focales pasan.
+Esto NO es un ciclo de motor completo.
+
+Continúan pendientes reed dinámica, admisión geométrica/reed, malla/chamber
+de expansión en ciclos, fuentes de combustión, contabilidad de combustible
+y brake work, scavenging a cierres exactos, periodicidad P1/P2, collector
+primario completo, dos fixtures integrados y regresiones P4–P8 ejecutadas ahora.
+La frontera reservoir V1 aún puede producir `No consistent reservoir inflow
+branch`; no hay fallback implícito ni se reintentó KT100. El Commercial Core
+permanece `MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL`.
+
+### Continuación: restauración, CFL y reed estática en etapa común
+
+En la continuación desde `ab92aee`, se corrigió el gate de CFL para incluir el
+límite área-volumen de cada celda (además de `dx/(|u|+a)`) y la tasa de
+flujo saliente bruto de las cámaras 0D, sin ocultarlo con entradas simultáneas.
+La revisión read-only independiente
+confirmó el arreglo del CFL original y encontró una incoherencia reproducible
+en reloj/volúmenes de restart; se añadió rechazo atómico si el ángulo envuelto
+no corresponde al no envuelto o si el volumen guardado no coincide con la
+geometría declarada al restaurar.
+
+Se conectó el modelo existente `STATIC_REED_V1` al área de admisión en cada
+stage SSPRK2 usando la diferencia de presión ducto-cárter de ese mismo stage.
+El flujo de gas/especies sigue usando la interfaz compartida y el donor P6.
+Las pruebas cubren la reed cerrada y abierta, conservación, backward donor,
+CFL 0D/1D, reinicio y rechazo de geometría obsoleta. Suite agrupada actual:
+65 pruebas aprobadas, incluida `tests/test_reed.py`; OpenSpec estricto,
+`git diff --check`, `git lfs fsck` y hash P9 aprobados.
+
+La revisión independiente fue puntual sobre el fundamento CFL, el restart y
+la reed estática integrada; sus hallazgos se corrigieron y la pasada final no
+encontró defectos concretos en ese alcance. No es revisión independiente de un
+motor completo. El token de identidad geométrica sigue siendo un binding
+declarado por el caller; la validación de volumen al ángulo restaurado no prueba
+equivalencia de callbacks arbitrarios para ángulos futuros. La reed dinámica,
+cámara de expansión ejecutada dentro de ciclos,
+combustión, combustible integrado, desempeño al freno, evidencia periódica,
+fixtures completos y regresiones amplias P4–P8 actuales siguen pendientes.
+Commercial Core continúa `MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL`; no se reintentó
+KT100 ni se ejecutaron campañas físicas.

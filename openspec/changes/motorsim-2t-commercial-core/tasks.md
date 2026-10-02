@@ -131,6 +131,48 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
 - [ ] Gate final: integración arbitraria 2T, regresiones, auditoría y dos casos;
       declarar readiness solo con todos los requisitos del Commercial Core.
 
+- [ ] Integración end-to-end autorizada (continuación 2026-10-02):
+      conservar P4–P9 y convertir los módulos existentes en un único motor.
+      La etiqueta `CONDITIONAL_ON_P4` sigue obligatoria para la evidencia nueva.
+- [ ] 17a. Integrador gas/especies con stage SSPRK2 común y transferencias N:
+      iniciado en `motorsim.integrated_2t`. Reutiliza EOS/HLLC/P3 y donor P6;
+      fixture de malla estática con tres transfers prueba conservación local,
+      backflow/donor, geometría de celda en CFL, vaciado bruto de cámara 0D,
+      flujo con entrada y salida simultáneas, calor prescrito, restart atómico
+      y JSON replay. **Parcial**, 13 pruebas focales
+      pasan; no incluye combustión ni ciclos de motor. Revisión independiente
+      confirma la cota de CFL y originó el gate de coherencia geométrica del
+      restart.
+- [ ] 17b. Reed/intake/crankcase integrado por etapas, retroflujo, especie y
+      ledger global; checkpoint/replay de estado mecánico reed. Parcial: el
+      modelo estático existente limita el área de admisión por presión en cada
+      stage común y el flujo conserva donor/ledger P6. La dinámica multi-petal
+      y su estado de restart siguen pendientes.
+- [ ] 17c. Topología generic ports N con piston intake, transfers y exhaust
+      expansion-chamber en los mismos stages; scavenging ledger con cierres
+      geométricos y flujos con signo.
+- [ ] 17d. Combustión P7 autorizada, paredes térmicas, combustible/especies y
+      trabajo mecánico integrados con ledger único sin doble conteo.
+- [ ] 17e. Periodicidad P1/P2, evidencia primaria, collector engineering,
+      checkpoint/restart/replay continuo y fixtures integrados completos.
+- [ ] 18. Segundo fixture integrado independiente; validar y correr regresiones
+      amplias P4–P8 antes de evaluar el gate Commercial Core.
+
+## Cola autónoma
+
+- `DONE` — Fundación común acotada: estado conservativo gas/especies N-route,
+  SSPRK2, ledgers, CFL de ducto/cámara y restart geométricamente consistente;
+  revisión read-only puntual completada. Esto no es un ciclo.
+- `IN_PROGRESS` — Integración estática reed/intake/crankcase en el stage común;
+  faltan dinámica reed, configuración de cárter acoplada y verificación de
+  retroflujo con reed dinámica.
+- `READY` — Integración de exhaust + expansion chamber y frontera externa.
+- `READY` — Bind P7, fuel/P6 y work/brake en ledger por ciclo sin doble conteo.
+- `READY` — Evidencia primaria, periodicidad, collector y Fixture A completo.
+- `READY` — Fixture B y suite amplia actual P4–P8.
+- `BLOCKED_LOCAL` — KT100 V2: boundary reservoir sin resolver; no reintentar
+  hasta completar ambos fixtures internos y cumplir la condición de la orden.
+
 Comprobación agrupada del avance autónomo: el 2026-10-02 se ejecutaron 204
 pruebas focales de provenance, puertos/P5-C, scavenging, reed, cámara, thermal,
 combustion, cárter, mecánica, fuel, powervalve, network, engineering outputs,
