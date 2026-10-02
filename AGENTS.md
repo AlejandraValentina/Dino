@@ -1,5 +1,108 @@
 # MotorSim — Instrucciones de trabajo para Codex
 
+## ORDEN VIGENTE — MOTORSIM AUTONOMOUS ENGINEERING TEAM
+
+Esta sección es la instrucción operativa vigente del repositorio. Reemplaza,
+únicamente donde exista conflicto, las instrucciones históricas de este archivo
+relativas a:
+
+- un único agente/escritor como única modalidad permitida;
+- detenerse obligatoriamente después de cada cambio;
+- requerir nueva autorización humana después de cada entrega;
+- prohibición de mantener un roadmap o cola autónoma;
+- «La física requiere otra definición»: queda permitida la creación de
+  capabilities físicas nuevas y versionadas dentro del alcance del cambio
+  `openspec/changes/motorsim-2t-commercial-core`, preregistradas antes de la
+  campaña que las utilice, sin modificar las versiones históricas;
+- STOP históricos asociados a P4-R*, superados por evidencia posterior
+  (`results/p4-g2-v2-20260929/decision-final.json`, clasificación `P4_PASS`).
+
+Las secciones históricas se conservan como provenance y registro de decisiones,
+pero NO representan el estado operativo actual cuando contradicen esta sección.
+
+### Estado científico vigente
+
+- P4: `P4_PASS` (`results/p4-g2-v2-20260929/decision-final.json`).
+- P5–P8: `REVALIDATED_ON_P4_PASS`
+  (`results/p5-p8-revalidation-20260929/revalidation.json`).
+- Revisión independiente P4–P8: `INDEPENDENT_REVIEW_PASS`
+  (`results/p4-p8-independent-final-pass-20260930/review.json`). Cubre P4–P8,
+  no el Commercial Core.
+- Commercial Core, delta actual: `SELF_REVIEWED`; revisión independiente
+  `NOT_PERFORMED`.
+- P8 semantics: `BOUNDED_TRANSIENT_INDICATED`.
+- Regresiones P4–P8: `PASS_PREVIOUSLY_RECORDED_346_TESTS_NOT_RERUN_FOR_THIS_CLOSEOUT`;
+  deben reejecutarse antes de cualquier cierre global.
+- P9: `P9_PREREGISTERED_AWAITING_EXPERIMENTAL_DATA`; contrato congelado,
+  SHA-256 `79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d`
+  de `openspec/changes/p9-experimental-validation/specs/p9-experimental-validation/spec.md`.
+- Experimental validation: `NOT_PERFORMED`. Predictive validation: `NOT_CLAIMED`.
+- KT100: `KT100_REFERENCE_CASE_V1`, caso de referencia, no validación; híbrido
+  V2 bloqueado por la capability de reservoir boundary.
+
+Estado machine-readable del Commercial Core:
+`results/2t-commercial-core-20261002/program-status.json`; documentación:
+`docs/gasdynamic/2t_commercial_core_status_20261002.md`.
+
+### Modalidad operativa vigente
+
+MotorSim se desarrolla bajo `MOTORSIM_AUTONOMOUS_ENGINEERING_TEAM`. El Codex
+principal actúa como coordinador/tech lead y conserva la responsabilidad de
+integrar. Puede usar subagentes, agentes read-only, worktrees u otras
+capacidades de delegación cuando sean útiles y seguras. No se requiere
+autorización humana entre tareas dentro del alcance vigente.
+
+Si no hay subagentes, realizar pasadas secuenciales con roles separados. Una
+autorrevisión secuencial NO puede etiquetarse como revisión independiente.
+
+### Continuidad y presupuesto
+
+La cola durable machine-readable (`READY`, `IN_PROGRESS`, `BLOCKED_LOCAL`,
+`REVIEW`, `DONE`) vive en el campo `queue` de
+`results/2t-commercial-core-20261002/program-status.json` y se actualiza en el
+mismo commit que cambia el estado de una tarea. Para el modo autónomo, esta cola
+sustituye a `tasks.md` como registro detallado de avance; `tasks.md` del cambio
+`motorsim-2t-commercial-core` conserva sus tareas y remite a la cola. Al retomar
+una sesión, leer `AGENTS.md`, `docs/gasdynamic/autonomous_engineering_mode.md`
+y `program-status.json`, y continuar sin reconstruir planificación.
+
+Un `BLOCKED_LOCAL` no detiene el programa mientras exista otra tarea `READY`.
+Presupuesto de cómputo (estimar antes con una corrida corta): diagnóstico
+≤10 min; campaña de fixture/integración ≤30 min por configuración; campaña
+científica larga ≤60 min continuos, ampliable a 120 min sólo si es gate-critical,
+tiene checkpoint/restart usable, persiste progreso y no hay alternativa más
+barata. Una proyección mayor es `PERFORMANCE_BLOCKED_LOCAL`, no STOP global; no
+se reduce precisión, CFL ni umbrales para cumplir el presupuesto.
+
+Solo se escala al humano una decisión científica cuando existan alternativas
+físicamente legítimas con consecuencias materiales y teoría, evidencia,
+contratos y tests no permitan resolver entre ellas. Bugs, refactors, APIs,
+schemas, performance, serialización, tests, documentación y mantenimiento Git
+no requieren autorización humana.
+
+### Protección histórica
+
+No modificar retrospectivamente P4–P9 para facilitar trabajo nuevo. Las nuevas
+capacidades se crean como capabilities/versiones nuevas. No modificar
+tolerancias, umbrales, expected values o tests existentes solamente para
+conseguir PASS. Un criterio nuevo queda versionado y, cuando corresponda,
+preregistrado y commiteado antes de ejecutar la campaña que lo utiliza.
+
+### Git
+
+No force-push, no reset ni rebase destructivo, no publicar ni hacer push
+automático. No incorporar archivos históricos/untracked al staging sin
+inspeccionarlos primero; los directorios `results/kt100-hybrid-model-fixture-v2-harness-20261002*`
+no versionados se preservan. Commits pequeños y semánticos.
+
+Reglas detalladas del programa autónomo:
+`docs/gasdynamic/autonomous_engineering_mode.md`.
+
+Esta orden permanece vigente hasta que una nueva sección explícitamente marcada
+como ORDEN VIGENTE la reemplace.
+
+## Órdenes históricas
+
 P4-R4 autorizado por orden8f6dbacb: evaluación focal Numba serial, equivalencia
 y gates en docs/gasdynamic/p4_r4_numba.md. Sustituye STOP R3 sólo en ese alcance.
 Sin cambios científicos, packaging, publicación ni P5. Estados siguientes históricos.
