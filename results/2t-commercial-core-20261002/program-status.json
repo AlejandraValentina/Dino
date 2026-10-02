@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-02",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "8b04b83",
+  "status_capture_head": "e93fd624...",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -406,7 +406,9 @@
       ],
       "state": "IN_PROGRESS",
       "blocker": "Fixture A P1 remains unresolved: cycle 1 indicated work is negative; 1→2 is INVALID and comparisons 2→6 fail the existing periodic contract. Typed per-duct/Mach/port-closure collector channels are incomplete.",
-      "commits": [],
+      "commits": [
+        "e93fd624"
+      ],
       "evidence": [
         "fixture A completes two full cycles; checkpoint at 360 degrees reproduces the terminal 720-degree JSON snapshot exactly under an absolute-angle scheduler",
         "Six admissible synthetic cycles completed; no P1/P2 convergence. Cycle work sign was checked against the energy RHS convention.",
