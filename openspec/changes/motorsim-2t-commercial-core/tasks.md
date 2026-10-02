@@ -50,6 +50,11 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       pendiente el ciclo híbrido P5 integrado con admisión reed, especie P6 y
       auditoría de onda primaria; sin amplitudes reflejadas sintéticas.
 - [ ] Fase 7: transferencia térmica configurable y ledger energético.
+- [x] Fase 7a: superficies térmicas direccionables, pared prescrita o mapa
+      RPM/carga acotado, correlación explícita `CONSTANT_H_V1`, esquema durable
+      y ledger trapezoidal por ciclo en `motorsim.thermal`; nueve pruebas
+      analíticas/negativas aprobadas. Parcial: no hay capacidad térmica dinámica
+      de paredes ni acoplamiento a energía P5/P6 por etapa.
 - [ ] Fase 8: `COMBUSTION_MODEL_V2`, separado de P7 prescrito histórico.
 - [ ] Fase 9: modelo de cárter V2 y acoplamiento de admisión/transferencia.
 - [ ] Fase 10: pérdidas mecánicas y rendimiento al freno con provenance.

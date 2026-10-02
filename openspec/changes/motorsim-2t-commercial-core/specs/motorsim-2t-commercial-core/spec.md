@@ -196,3 +196,29 @@ estimate; amplitudes remain outputs of the gasdynamic solver.
   the base flow is supersonic in that direction
 - **THEN** its travel-time estimate is explicitly unavailable and no reflected
   wave amplitude is fabricated.
+
+### Requirement: Configurable prescribed-wall thermal ledger
+
+Thermal configuration MUST represent cylinder wall, head, piston crown,
+crankcase, transfer walls and exhaust walls as separately addressable surfaces.
+Each configured surface MUST carry explicit area, heat-transfer coefficient,
+provenance and either a fixed positive wall temperature or a bounded RPM/load
+temperature map. `CONSTANT_H_V1` MUST calculate signed gas-to-wall heat as
+`h*A*(Tgas-Twall)`. The cycle ledger MUST integrate complete, strictly ordered
+crank-angle samples with the declared RPM and return signed energy per surface
+and total. Map extrapolation, incomplete cycles, missing surfaces, and malformed
+or nonfinite values MUST be rejected. The model MUST not silently select/fill
+coefficients or alter the gas solver.
+
+#### Scenario: Analytical fixed-wall cycle
+
+- **WHEN** a fixed gas-wall temperature difference and explicit area, `h`, RPM,
+  and complete cycle samples are supplied
+- **THEN** the per-surface ledger equals the trapezoidal integral of
+  `h*A*(Tgas-Twall)` over crank-angle time.
+
+#### Scenario: Mapped prescribed wall temperature
+
+- **WHEN** an RPM/load point lies inside an explicit map
+- **THEN** bilinear interpolation supplies its temperature, while an out-of-map
+  point is rejected rather than extrapolated.

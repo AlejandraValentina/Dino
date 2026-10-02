@@ -108,3 +108,16 @@ an estimate obtained by integrating characteristic speeds to a named section
 station; reflected amplitudes remain the solver's responsibility. Neither
 trace adapter nor geometry changes P4/P5/P6 contracts or the product project
 schema.
+
+## Thermal prescribed-wall transfer `MOTORSIM_THERMAL_V1`
+
+Each configured surface has explicit area, provenance, `CONSTANT_H_V1`
+coefficient, and exactly one wall-temperature source: a fixed kelvin value or a
+bounded RPM/load map with bilinear interpolation. The model evaluates
+`Qdot_gas_to_wall = h*A*(Tgas-Twall)`. A cycle ledger integrates the supplied
+ordered crank-angle samples by trapezoids using `dt=dCA/(6*RPM)`, reports each
+surface and total signed energy, and requires a complete specified cycle. Map
+extrapolation is rejected. This is prescribed-wall transfer, not a wall-capacity
+model or a fitted heat-transfer correlation; upstream integration must supply
+gas temperatures from the same physical solver stages and close the energy
+ledger globally.
