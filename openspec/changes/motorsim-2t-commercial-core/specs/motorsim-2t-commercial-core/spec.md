@@ -69,6 +69,12 @@ caller mutation cannot change stage routing under a stale configuration hash.
 Internal duct species fluxes MUST receive adjacent cell states in geometric
 left/right order and select the donor exactly once from the signed shared gas
 mass flux; negative flux MUST use the right-cell composition.
+When configured with the existing `CrankcaseGeometry` V2 and a cylinder
+compression ratio, the integrated engine MUST derive crankcase and cylinder
+volumes plus their opposite slider-crank volume rates at each SSPRK2 stage's
+angle and RPM. The stage gas-energy RHS MUST include each chamber's `-p dV/dt`
+work exactly once, and the geometry configuration MUST participate in restart
+identity.
 
 #### Scenario: Three or more transfer routes share stage fluxes
 
@@ -114,6 +120,15 @@ mass flux; negative flux MUST use the right-cell composition.
 - **THEN** the four species flux MUST be the shared negative mass flux times
   the normalized right-cell species composition, without a second donor
   selection based on already reordered states.
+
+#### Scenario: Existing slider-crank volumes drive both chamber stages
+
+- **WHEN** an engine uses `CrankcaseGeometry` V2 and a finite cylinder
+  compression ratio
+- **THEN** both chamber volumes and volume rates are resolved from the same
+  stage angle/RPM, the cylinder and crankcase swept-volume rates are opposite,
+  and the resulting moving-volume step preserves the global mass/energy
+  ledger with `-p dV/dt` included once per stage.
 
 #### Scenario: JSON checkpoint restores all accepted physical history
 

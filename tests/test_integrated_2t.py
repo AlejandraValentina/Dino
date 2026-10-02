@@ -5,10 +5,13 @@ import pytest
 
 from motorsim.gas1d.mesh import uniform_mesh
 from motorsim.gas1d.boundary import Boundary
+from motorsim.crankcase import CrankcaseGeometry
 from motorsim.expansion_chamber import ChamberSection, ExpansionChamber
 from motorsim.integrated_2t import (
     DuctPath2T, EngineGeometry2T, IntegratedEngine2T, IntegratedPortBinding2T,
+    SliderCrankChambers2T,
 )
+from motorsim.kinematics import piston_position
 from motorsim.p6_species import SPECIES
 from motorsim.powervalve import PowerValve
 from motorsim.reed import ReedPetal
@@ -22,7 +25,7 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
           reed_petals=(), intake_area=0.0, transfer_pressure=101325.0,
           transfer_area=1e-5, duct_length=.02, exhaust_mesh=None,
           port_binding=None, reference_rpm=1000.0, geometry_identity=None,
-          duct_species=None):
+          duct_species=None, slider_crank=None):
     def duct_mesh(duct_id):
         if duct_id == "exhaust" and exhaust_mesh is not None:
             return exhaust_mesh
@@ -48,6 +51,13 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
         "crankcase": (0.0, 0.0, 0.00017652, 0.0),
         "cylinder": (0.000211824, 0.0, 0.0, 0.0),
     }
+    if slider_crank is not None:
+        crankcase_volume, cylinder_volume, _, _ = slider_crank.resolve(
+            0.0, reference_rpm)
+        component_species["crankcase"] = (
+            0.0, 0.0, 1.1768 * crankcase_volume, 0.0)
+        component_species["cylinder"] = (
+            1.1768 * cylinder_volume, 0.0, 0.0, 0.0)
     for path in paths:
         if path.role == "transfer":
             component_species[path.id] = tuple(
@@ -62,7 +72,8 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
         geometry_identity=(geometry_identity or
                            {"fixture": "three-transfer-static-volume-v1"}),
         reed_petals=reed_petals,
-        port_binding=port_binding, reference_rpm=reference_rpm,
+        port_binding=port_binding, slider_crank=slider_crank,
+        reference_rpm=reference_rpm,
         thermal_system=thermal_system, thermal_locations=thermal_locations,
         max_cfl=max_cfl)
 
@@ -186,6 +197,47 @@ def test_integrated_checkpoint_rejects_geometry_callback_mismatch():
     target = _case(geometry=different_geometry)
     with pytest.raises(ValueError, match="cylinder geometry mismatch"):
         target.restore(source.snapshot())
+
+
+def test_existing_crankcase_v2_drives_both_chamber_volumes_in_integrated_stages():
+    crankcase = CrankcaseGeometry(56.0, 50.0, 100.0, 20.0,
+                                  "SYNTHETIC_ASSUMPTION")
+    model = SliderCrankChambers2T(crankcase, 8.0)
+    geometry = model.resolve(90.0, 3000.0)
+    assert geometry[0] == pytest.approx(crankcase.volume_m3(90.0))
+    assert geometry[1] == pytest.approx(
+        crankcase.displacement_m3 / 7.0 +
+        crankcase.displacement_m3 * piston_position(50.0, 100.0, 90.0) / 50.0)
+    assert geometry[2] == pytest.approx(crankcase.volume_rate_m3_s(90.0, 3000.0))
+    assert geometry[3] == pytest.approx(-geometry[2])
+
+    system = _case(crankcase_pressure=101325.0, cylinder_pressure=101325.0,
+                   slider_crank=model, reference_rpm=3000.0,
+                   geometry_identity={"slider_crank": model.to_dict(),
+                                      "fixture": "shared-2t-slider-crank-v1"})
+    initial = system._geometry(0.0, 3000.0)
+    initial_volumes = (system.state["chambers"]["crankcase"][2],
+                       system.state["chambers"]["cylinder"][2])
+    assert initial_volumes == pytest.approx((initial.crankcase_volume_m3,
+                                             initial.cylinder_volume_m3))
+    record = system.step(1.25e-6, 0.0225)
+    expected_end = model.resolve(0.0225, 3000.0)
+    assert system.state["chambers"]["crankcase"][2] == pytest.approx(expected_end[0])
+    assert system.state["chambers"]["cylinder"][2] == pytest.approx(expected_end[1])
+    assert record["stage_geometry"][0]["crankcase_volume_rate_m3_s"] == pytest.approx(
+        model.resolve(0.0, 3000.0)[2], rel=1e-6, abs=1e-15)
+    assert record["stage_geometry"][1]["crankcase_volume_rate_m3_s"] == pytest.approx(
+        expected_end[2], rel=1e-6, abs=1e-15)
+    assert abs(system.conservation_report()["mass"]["residual"]) < 1e-14
+    assert abs(system.conservation_report()["energy"]["residual"]) < 1e-10
+
+    mismatched = _case(crankcase_pressure=101325.0, cylinder_pressure=101325.0,
+                       slider_crank=SliderCrankChambers2T(crankcase, 9.0),
+                       reference_rpm=3000.0,
+                       geometry_identity={"slider_crank": model.to_dict(),
+                                          "fixture": "shared-2t-slider-crank-v1"})
+    with pytest.raises(ValueError, match="configuration mismatch"):
+        mismatched.restore(system.snapshot())
 
 
 def test_integrated_backflow_uses_the_actual_duct_species_donor():

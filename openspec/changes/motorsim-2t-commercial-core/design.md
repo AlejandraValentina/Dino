@@ -252,3 +252,10 @@ complete angular cycle, exact scavenging closure, or reservoir-boundary V2.
 The duct-to-path mapping is copied into an immutable view at construction, so
 later mutation of the caller's dictionary cannot diverge stage routing from
 the checkpoint identity.
+
+The integrated geometry resolver can also consume the existing `CrankcaseGeometry`
+V2 plus a cylinder compression ratio. It derives both moving chamber volumes
+and opposite volume rates at each stage's angle and RPM, while retaining the
+existing pressure-volume work term in the common gas RHS. The resolved model
+configuration is part of checkpoint identity; no independent kinematics or
+energy update is introduced.

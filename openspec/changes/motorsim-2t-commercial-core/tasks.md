@@ -139,15 +139,16 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       fixture de malla estática con tres transfers prueba conservación local,
       backflow/donor, geometría de celda en CFL, vaciado bruto de cámara 0D,
       flujo con entrada y salida simultáneas, calor prescrito, restart atómico
-      y JSON replay. **Parcial**, 15 pruebas focales
+      y JSON replay. **Parcial**, 16 pruebas focales
       pasan; no incluye combustión ni ciclos de motor. Revisión independiente
       confirma la cota de CFL y originó el gate de coherencia geométrica del
       restart.
 - [ ] 17b. Reed/intake/crankcase integrado por etapas, retroflujo, especie y
       ledger global; checkpoint/replay de estado mecánico reed. Parcial: el
       modelo estático existente limita el área de admisión por presión en cada
-      stage común y el flujo conserva donor/ledger P6. La dinámica multi-petal
-      y su estado de restart siguen pendientes.
+      stage común y el flujo conserva donor/ledger P6. `CrankcaseGeometry` V2
+      resuelve volúmenes opuestos de cárter/cilindro y trabajo p·dV en ambos
+      stages; la dinámica multi-petal y su estado de restart siguen pendientes.
 - [ ] 17c. Topología generic ports N con piston intake, transfers y exhaust
       expansion-chamber en los mismos stages; scavenging ledger con cierres
       geométricos y flujos con signo. Parcial: el mesh real de

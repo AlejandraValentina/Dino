@@ -17,10 +17,12 @@ from types import MappingProxyType
 from collections.abc import Mapping
 from typing import Callable
 
+from .crankcase import CrankcaseGeometry
 from .coupling import ChamberState, interface_flux
 from .gas1d.boundary import Boundary
 from .gas1d.eos import IdealGas
 from .gas1d.riemann import hllc_flux
+from .kinematics import piston_position
 from .p6_species import (SPECIES, atmospheric_species, donor_species,
                          legacy_to_species, validate_species)
 from .powervalve import PowerValve
@@ -60,6 +62,42 @@ class EngineGeometry2T:
             raise ValueError("port areas cannot be negative")
         if len(self.transfer_areas_m2) != len(transfer_ids) or not transfer_ids:
             raise ValueError("geometry must resolve every configured transfer route")
+
+
+@dataclass(frozen=True)
+class SliderCrankChambers2T:
+    """Resolve the existing crankcase model and matching 2T cylinder volume."""
+    crankcase: CrankcaseGeometry
+    cylinder_compression_ratio: float
+
+    def validate(self) -> None:
+        if not isinstance(self.crankcase, CrankcaseGeometry):
+            raise ValueError("slider-crank chambers require existing CrankcaseGeometry")
+        self.crankcase.validate()
+        if (type(self.cylinder_compression_ratio) not in (int, float) or
+                not isfinite(self.cylinder_compression_ratio) or
+                self.cylinder_compression_ratio <= 1.0):
+            raise ValueError("cylinder compression ratio must be finite and greater than one")
+
+    def resolve(self, angle_deg: float, rpm: float) -> tuple[float, float, float, float]:
+        self.validate()
+        position = piston_position(self.crankcase.stroke_mm,
+                                   self.crankcase.rod_length_mm, angle_deg)
+        swept = self.crankcase.displacement_m3
+        cylinder_clearance = swept / (self.cylinder_compression_ratio - 1.0)
+        cylinder_volume = cylinder_clearance + swept * position / self.crankcase.stroke_mm
+        crankcase_volume = self.crankcase.volume_m3(angle_deg)
+        crankcase_rate = self.crankcase.volume_rate_m3_s(angle_deg, rpm)
+        result = (crankcase_volume, cylinder_volume, crankcase_rate, -crankcase_rate)
+        if any(not isfinite(value) for value in result) or min(result[:2]) <= 0.0:
+            raise ValueError("slider-crank chamber geometry is inadmissible")
+        return result
+
+    def to_dict(self) -> dict:
+        self.validate()
+        return {"schema": "INTEGRATED_SLIDER_CRANK_CHAMBERS_2T_V1",
+                "crankcase": self.crankcase.to_dict(),
+                "cylinder_compression_ratio": self.cylinder_compression_ratio}
 
 
 @dataclass(frozen=True)
@@ -162,6 +200,7 @@ class IntegratedEngine2T:
                  geometry_identity: dict | None = None,
                  reed_petals: tuple[ReedPetal, ...] = (),
                  port_binding: IntegratedPortBinding2T | None = None,
+                 slider_crank: SliderCrankChambers2T | None = None,
                  reference_rpm: float = 1000.0,
                  thermal_system: ThermalSystem | None = None,
                  thermal_locations: dict[str, str] | None = None,
@@ -208,6 +247,11 @@ class IntegratedEngine2T:
                 raise ValueError("port_binding must use IntegratedPortBinding2T")
             port_binding.validate(ducts)
         self.port_binding = port_binding
+        if slider_crank is not None:
+            if not isinstance(slider_crank, SliderCrankChambers2T):
+                raise ValueError("slider_crank must use SliderCrankChambers2T")
+            slider_crank.validate()
+        self.slider_crank = slider_crank
         if set(initial_duct_states) != {path.id for path in ducts}:
             raise ValueError("initial duct states must match topology ids exactly")
         p_atm, t_atm = atmosphere
@@ -320,6 +364,8 @@ class IntegratedEngine2T:
                     "reed": [petal.to_dict() for petal in self.reed_petals],
                     "port_binding": (None if self.port_binding is None else
                                      self.port_binding.to_dict()),
+                    "slider_crank": (None if self.slider_crank is None else
+                                     self.slider_crank.to_dict()),
                     "reference_rpm": self.reference_rpm,
                     "initial_state_sha256": hashlib.sha256(initial_bytes).hexdigest(),
                     "boundaries": {"inlet": vars(self.inlet_boundary),
@@ -339,6 +385,14 @@ class IntegratedEngine2T:
         result = self.geometry(float(angle) % 360.0)
         if not isinstance(result, EngineGeometry2T):
             raise ValueError("geometry callback must return EngineGeometry2T")
+        if self.slider_crank is not None:
+            crankcase_volume, cylinder_volume, crankcase_rate, cylinder_rate = (
+                self.slider_crank.resolve(float(angle) % 360.0,
+                                          self.reference_rpm if rpm is None else float(rpm)))
+            result = EngineGeometry2T(crankcase_volume, cylinder_volume,
+                                      crankcase_rate, cylinder_rate,
+                                      result.intake_area_m2, result.transfer_areas_m2,
+                                      result.exhaust_area_m2)
         if self.port_binding is not None:
             intake, transfers, exhaust = self.port_binding.resolve(
                 self.ducts, float(angle) % 360.0,

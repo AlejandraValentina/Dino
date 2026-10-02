@@ -138,3 +138,21 @@ read-only de este delta confirmó el donante izquierda/derecha para ambos signos
 la correspondencia de estado/flujo por stage y la resolución de áreas a ángulo
 y RPM; no encontró defectos concretos. Es una revisión puntual, no de un motor
 completo; se conserva separada de la autorrevisión.
+
+### Continuación: geometría móvil de cárter y cilindro
+
+El integrador ahora acepta el modelo existente `CrankcaseGeometry` V2 junto
+con la relación de compresión del cilindro. Resuelve ambos volúmenes y sus
+tasas opuestas usando el mismo ángulo y RPM de cada stage SSPRK2; el término
+`-p dV/dt` permanece en el RHS de energía que ya era dueño del trabajo de
+frontera móvil. La identidad del checkpoint incluye la configuración del
+modelo. Una prueba de integración comprueba TDC/BDC y posición intermedia,
+ambas tasas por stage, una transición móvil aceptada y los ledgers globales
+de masa/energía, además de rechazar restart con compresión distinta.
+
+Esta conexión reduce la brecha de geometría del workstream 17b, pero no cierra
+la reed dinámica ni prueba ciclos completos. La ejecución focal pasó 16/16
+pruebas; el grupo actual integrado/P5-C/P6/P7/reed/puertos pasó 68/68.
+OpenSpec estricto, compilación Python y diff check pasaron. La revisión
+independiente read-only de esta conexión sigue pendiente; no se presenta la
+autorrevisión como independiente.
