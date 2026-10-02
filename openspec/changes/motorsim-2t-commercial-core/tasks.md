@@ -161,7 +161,15 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       mantiene admisibilidad. Sigue pendiente completar ciclos/cierres exactos
       y clasificar la frontera V2.
 - [ ] 17d. Combustión P7 autorizada, paredes térmicas, combustible/especies y
-      trabajo mecánico integrados con ledger único sin doble conteo.
+      trabajo mecánico integrados con ledger único sin doble conteo. Parcial:
+      el P7 prescrito existente ya puede configurarse por ángulo de ciclo;
+      captura las cuatro especies reales del cilindro, aplica conversión y
+      calor en ambos stages SSPRK2, y agrega fuentes a ledgers globales de
+      especie/energía. El checkpoint V2 guarda evento activo/histórico y la
+      identidad del ángulo P7. Pasan 20 pruebas integradas focales y 72 pruebas
+      agrupadas con P5-C/P6/P7/reed/puertos. No se derivan AFR/LHV ni fuel
+      quemado conectado a FuelAccounting; pérdidas/brake tampoco están
+      acoplados. No hay trayectoria de ciclo completo; 17d sigue abierto.
 - [ ] 17e. Periodicidad P1/P2, evidencia primaria, collector engineering,
       checkpoint/restart/replay continuo y fixtures integrados completos.
 - [ ] 18. Segundo fixture integrado independiente; validar y correr regresiones
@@ -179,7 +187,9 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
   en el stage común y el binding existente generic ports/powervalve resuelve
   áreas por ángulo/RPM. Falta trayectoria angular aceptada, cierres exactos de
   puertos por ciclo y clasificación de boundary V2.
-- `READY` — Bind P7, fuel/P6 y work/brake en ledger por ciclo sin doble conteo.
+- `IN_PROGRESS` — P7 prescrito participa de los dos stages SSPRK2 y de los
+  ledgers conservativos; falta integrar FuelAccounting con el ledger P6,
+  mecánica/brake y evidencia por ciclo sin doble conteo.
 - `READY` — Evidencia primaria, periodicidad, collector y Fixture A completo.
 - `READY` — Fixture B y suite amplia actual P4–P8.
 - `BLOCKED_LOCAL` — KT100 V2: boundary reservoir sin resolver; no reintentar

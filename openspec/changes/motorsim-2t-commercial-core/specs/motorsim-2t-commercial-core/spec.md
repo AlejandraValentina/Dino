@@ -76,6 +76,18 @@ angle and RPM. The stage gas-energy RHS MUST include each chamber's `-p dV/dt`
 work exactly once, and the geometry configuration MUST participate in restart
 identity.
 
+When configured with the existing prescribed P7 event and an ignition angle,
+the integrated engine MUST capture the cylinder's actual four-species masses at
+that angle and add P7 species conversion and prescribed heat to the same
+cylinder RHS at both SSPRK2 stages. The source MUST use the existing fixed
+40-degree P7 event and `Q_F` contract without adding chemistry or inferring fuel
+properties. The global species ledger MUST distinguish this internal source
+from external species flow, and the energy ledger MUST count P7 heat exactly
+once. The checkpoint MUST preserve active/completed event ledgers and bind the
+configured ignition angle. With P7 unconfigured, no combustion source may be
+applied. A step that crosses an ignition or event-end boundary MUST be rejected
+so callers can align accepted integration steps to the prescribed event.
+
 #### Scenario: Three or more transfer routes share stage fluxes
 
 - **WHEN** an engine topology has named primary, secondary and boost routes
@@ -128,7 +140,15 @@ identity.
 - **THEN** both chamber volumes and volume rates are resolved from the same
   stage angle/RPM, the cylinder and crankcase swept-volume rates are opposite,
   and the resulting moving-volume step preserves the global mass/energy
-  ledger with `-p dV/dt` included once per stage.
+      ledger with `-p dV/dt` included once per stage.
+
+#### Scenario: Prescribed P7 conversion and heat share the integrated stages
+
+- **WHEN** an integrated engine has P7 configured and an accepted step lies
+  within one aligned prescribed event
+- **THEN** each stage applies the existing captured-species P7 source to the
+  cylinder species and energy RHS, and checkpoint/restart reproduces both
+  source histories and their global ledgers without changing total gas mass.
 
 #### Scenario: JSON checkpoint restores all accepted physical history
 

@@ -12,7 +12,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 import hashlib
 import json
-from math import fsum, isfinite
+from math import fsum, isclose, isfinite
 from types import MappingProxyType
 from collections.abc import Mapping
 from typing import Callable
@@ -25,10 +25,48 @@ from .gas1d.riemann import hllc_flux
 from .kinematics import piston_position
 from .p6_species import (SPECIES, atmospheric_species, donor_species,
                          legacy_to_species, validate_species)
+from .p7_prescribed import (P7BurnEvent, P7Ledger, Q_F, capture_event,
+                            restore_event, snapshot_event)
 from .powervalve import PowerValve
 from .reed import ReedPetal, static_area
 from .thermal import ThermalSystem
 from .two_stroke_ports import TwoStrokePortSet
+
+_USE_ACTIVE_P7_EVENT = object()
+
+
+def _restore_validated_p7_event(value):
+    event_fields = {"start", "fresh_air", "fuel", "ledger"}
+    ledger_fields = set(vars(P7Ledger()))
+    if (not isinstance(value, dict) or set(value) != event_fields or
+            any(type(value[name]) not in (int, float) or
+                not isfinite(value[name]) or value[name] < 0.0
+                for name in ("start", "fresh_air", "fuel")) or
+            not isinstance(value["ledger"], dict) or
+            set(value["ledger"]) != ledger_fields):
+        raise ValueError("integrated engine checkpoint P7 event is invalid")
+    if any(type(number) not in (int, float) or not isfinite(number)
+           for number in value["ledger"].values()):
+        raise ValueError("integrated engine checkpoint P7 ledger is invalid")
+    event = restore_event(value)
+    ledger = event.ledger
+    tolerance = 1e-12
+    if (ledger.fresh_air_converted < -tolerance or
+            ledger.fuel_converted < -tolerance or
+            ledger.burned_produced < -tolerance or
+            ledger.heat_added < -tolerance or
+            ledger.fresh_air_converted > event.fresh_air + tolerance or
+            ledger.fuel_converted > event.fuel + tolerance or
+            ledger.burned_produced > event.fresh + tolerance or
+            not abs(ledger.fresh_air_converted + ledger.fuel_converted -
+                    ledger.burned_produced) <= tolerance or
+            not abs(ledger.source_mass_residual) <= tolerance or
+            not abs(ledger.residual_unchanged) <= tolerance or
+            not abs(ledger.heat_burn_residual) <= tolerance or
+            not isclose(ledger.heat_added, Q_F * ledger.burned_produced,
+                        rel_tol=1e-12, abs_tol=1e-12)):
+        raise ValueError("integrated engine checkpoint P7 ledger is inconsistent")
+    return event
 
 
 def _tuplify(value):
@@ -179,12 +217,13 @@ class IntegratedEngine2T:
     """One SSPRK2 state for reed/intake-ready, N-transfer, exhaust topology.
 
     ``geometry(angle_deg)`` must return an :class:`EngineGeometry2T` with exact
-    stage volumes and effective areas.  Boundary conditions are explicit
-    existing ``Boundary`` objects.  The default atmosphere uses the existing
-    P6 composition (fresh air only).  Source/reed state can be added to this
-    same state by subsequent adapters; no out-of-band stage mutation is used.
+    stage volumes and effective areas. Boundary conditions are explicit
+    existing ``Boundary`` objects. The default atmosphere uses the existing
+    P6 composition (fresh air only). Existing prescribed P7 events, when
+    configured, contribute species and heat sources to the same cylinder
+    stage RHS and are checkpointed with the integrated ledger.
     """
-    schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V1"
+    schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V2"
     dependency_status = "CONDITIONAL_ON_P4"
 
     def __init__(self, crankcase_state: tuple, cylinder_state: tuple,
@@ -204,7 +243,8 @@ class IntegratedEngine2T:
                  reference_rpm: float = 1000.0,
                  thermal_system: ThermalSystem | None = None,
                  thermal_locations: dict[str, str] | None = None,
-                 thermal_load: float = 0.0):
+                 thermal_load: float = 0.0,
+                 combustion_start_angle_deg: float | None = None):
         self.eos = eos or IdealGas()
         self.geometry = geometry
         if not isinstance(geometry_identity, dict) or not geometry_identity:
@@ -271,6 +311,18 @@ class IntegratedEngine2T:
         if not isfinite(self.thermal_load) or self.thermal_load < 0:
             raise ValueError("thermal load must be finite and nonnegative")
         self.thermal_locations = dict(thermal_locations or {})
+        if (combustion_start_angle_deg is not None and
+                (type(combustion_start_angle_deg) not in (int, float) or
+                 not isfinite(combustion_start_angle_deg) or
+                 not 0.0 <= combustion_start_angle_deg < 360.0)):
+            raise ValueError("combustion_start_angle_deg must be in [0, 360)")
+        self.combustion_start_angle_deg = (
+            None if combustion_start_angle_deg is None else
+            float(combustion_start_angle_deg))
+        self.p7_event: P7BurnEvent | None = None
+        self.p7_events: list[dict] = []
+        self.p7_heat_added_j = 0.0
+        self.p7_source_species_kg = [0.0] * 4
         if self.thermal_system is None:
             if self.thermal_locations:
                 raise ValueError("thermal locations require a ThermalSystem")
@@ -304,7 +356,9 @@ class IntegratedEngine2T:
                        "fresh_short_circuit_kg": 0.0,
                        "fuel_delivered_kg": 0.0,
                        "heat_to_wall_J": 0.0,
-                       "cylinder_work_J": 0.0, "crankcase_work_J": 0.0}
+                       "cylinder_work_J": 0.0, "crankcase_work_J": 0.0,
+                       "p7_heat_added_J": 0.0,
+                       "p7_source_species_kg": [0.0] * 4}
         self.trace = []
         geometry0 = self._geometry(self.angle_deg, self.reference_rpm)
         self.state = {
@@ -342,6 +396,9 @@ class IntegratedEngine2T:
         self._validate(self.state)
         self.initial_inventory = self.inventory(self.state)
         self.configuration_identity = self._configuration_identity()
+        if self.combustion_start_angle_deg == 0.0:
+            self.p7_event = capture_event(
+                0.0, self.state["species"]["chambers"]["cylinder"])
 
     def _chamber_from_primitive(self, primitive, volume):
         rho, velocity, pressure, _ = primitive
@@ -373,7 +430,9 @@ class IntegratedEngine2T:
                     "thermal": (None if self.thermal_system is None else
                                 self.thermal_system.to_dict()),
                     "thermal_locations": self.thermal_locations,
-                    "thermal_load": self.thermal_load}
+                    "thermal_load": self.thermal_load,
+                    "p7": {"schema": "P7_PRESCRIBED_V1",
+                           "start_angle_deg": self.combustion_start_angle_deg}}
         encoded = json.dumps(identity, sort_keys=True, separators=(",", ":"),
                              allow_nan=False)
         normalized = json.loads(encoded)
@@ -451,7 +510,7 @@ class IntegratedEngine2T:
                                                right_comp, right_mass)
         return face, species_flux, max(abs(speeds[0]), abs(speeds[-1]))
 
-    def _assemble(self, state, angle, rpm):
+    def _assemble(self, state, angle, rpm, p7_event=_USE_ACTIVE_P7_EVENT):
         """Build every RHS from one immutable stage state."""
         g = self._geometry(angle, rpm)
         chambers = state["chambers"]
@@ -624,6 +683,17 @@ class IntegratedEngine2T:
             faces_trace[path.id]["face_speeds"] = face_speeds
         for name in ("crankcase", "cylinder"):
             rhs_q["chambers"][name][1] += work[name]
+        p7_species_rate = (0.0, 0.0, 0.0, 0.0)
+        p7_heat_rate = 0.0
+        stage_p7_event = (self.p7_event if p7_event is _USE_ACTIVE_P7_EVENT else
+                          p7_event)
+        if stage_p7_event is not None:
+            p7_source = stage_p7_event.source(float(angle), float(rpm) * 6.0)
+            p7_species_rate = tuple(p7_source[:4])
+            p7_heat_rate = p7_source[4]
+            for index, rate in enumerate(p7_species_rate):
+                rhs_s["chambers"]["cylinder"][index] += rate
+            rhs_q["chambers"]["cylinder"][1] += p7_heat_rate
         if self.thermal_system is not None:
             for surface in self.thermal_system.surfaces:
                 location = self.thermal_locations[surface.id]
@@ -654,6 +724,8 @@ class IntegratedEngine2T:
                 "fresh_delivered_rate": fresh_delivered_rate,
                 "fresh_short_circuit_rate": fresh_short_circuit_rate,
                 "fuel_delivered_rate": fuel_delivered_rate,
+                "p7_species_rate": p7_species_rate,
+                "p7_heat_rate": p7_heat_rate,
                 "thermal_rates": thermal_rates,
                 "faces": faces_trace}
 
@@ -749,10 +821,38 @@ class IntegratedEngine2T:
             raise ValueError("time and crank-angle increments must be positive finite values")
         start_angle = self.crank_angle_unwrapped_deg
         end_angle = start_angle + float(delta_angle_deg)
+        step_p7_event = self.p7_event
+        archived_p7_event = None
+        if self.combustion_start_angle_deg is not None:
+            cycle_ignition = (int(start_angle // 360.0) * 360.0 +
+                              self.combustion_start_angle_deg)
+            if cycle_ignition > start_angle + 1e-10:
+                ignition = cycle_ignition
+            else:
+                ignition = cycle_ignition + 360.0
+            boundaries = [ignition, ignition + 40.0]
+            if (self.p7_event is not None and
+                    self.p7_event.start + 40.0 > start_angle + 1e-10):
+                boundaries.append(self.p7_event.start + 40.0)
+            if any(start_angle + 1e-10 < boundary < end_angle - 1e-10
+                   for boundary in boundaries):
+                raise ValueError(
+                    "P7 integrated steps must end exactly at ignition and the fixed 40-degree event boundary")
+            if (self.p7_event is None and
+                    start_angle > cycle_ignition + 1e-10):
+                raise ValueError("P7 event start was skipped; align steps to its ignition angle")
+            if abs(start_angle - cycle_ignition) <= 1e-10:
+                if (step_p7_event is None or
+                        abs(step_p7_event.start - cycle_ignition) > 1e-10):
+                    if step_p7_event is not None:
+                        archived_p7_event = snapshot_event(step_p7_event)
+                    step_p7_event = capture_event(
+                        cycle_ignition,
+                        self.state["species"]["chambers"]["cylinder"])
         q0 = deepcopy(self.state)
         self._validate(q0)
         rpm = float(delta_angle_deg) / (6.0 * float(dt_s))
-        r0 = self._assemble(q0, start_angle, rpm)
+        r0 = self._assemble(q0, start_angle, rpm, step_p7_event)
         cfl0 = self._cfl(q0, r0, float(dt_s))
         q1 = deepcopy(q0)
         for name in ("crankcase", "cylinder"):
@@ -780,7 +880,7 @@ class IntegratedEngine2T:
                 rho = fsum(q1["species"]["ducts"][path.id][i])/path.mesh.volumes[i]
                 q1["ducts"][path.id][i] = (q[0], q[1], q[2], rho)
         self._validate(q1)
-        r1 = self._assemble(q1, end_angle, rpm)
+        r1 = self._assemble(q1, end_angle, rpm, step_p7_event)
         cfl1 = self._cfl(q1, r1, float(dt_s))
         qn = self._combine(q0, r0, r1, float(dt_s), end_angle)
         self._validate(qn)
@@ -805,6 +905,19 @@ class IntegratedEngine2T:
                                                      r1["work_rates"]["crankcase"])
         self.ledger["cylinder_work_J"] += .5*dt_s*(r0["work_rates"]["cylinder"]+
                                                    r1["work_rates"]["cylinder"])
+        p7_species_increment = tuple(.5 * float(dt_s) * (
+            r0["p7_species_rate"][j] + r1["p7_species_rate"][j]) for j in range(4))
+        p7_heat_increment = .5 * float(dt_s) * (r0["p7_heat_rate"] + r1["p7_heat_rate"])
+        if step_p7_event is not None:
+            step_p7_event.record(p7_species_increment, p7_heat_increment)
+        self.p7_event = step_p7_event
+        if archived_p7_event is not None:
+            self.p7_events.append(archived_p7_event)
+        self.p7_source_species_kg = [self.p7_source_species_kg[j] +
+                                     p7_species_increment[j] for j in range(4)]
+        self.p7_heat_added_j += p7_heat_increment
+        self.ledger["p7_heat_added_J"] += p7_heat_increment
+        self.ledger["p7_source_species_kg"] = list(self.p7_source_species_kg)
         trace = {"angle_start_deg": start_angle, "angle_end_deg": end_angle,
                  "time_start_s": self.time_s, "dt_s": float(dt_s),
                  "rpm": float(delta_angle_deg) / (6.0 * float(dt_s)),
@@ -814,6 +927,13 @@ class IntegratedEngine2T:
                  "stage_geometry": (vars(r0["geometry"]), vars(r1["geometry"])),
                  "stage_work_rates": (r0["work_rates"], r1["work_rates"]),
                  "stage_thermal_rates": (wall_rates_0, wall_rates_1),
+                 "stage_p7_source_rates": (
+                     {"species_kg_s": r0["p7_species_rate"],
+                      "heat_w": r0["p7_heat_rate"]},
+                     {"species_kg_s": r1["p7_species_rate"],
+                      "heat_w": r1["p7_heat_rate"]}),
+                 "p7_source_species_increment_kg": p7_species_increment,
+                 "p7_heat_increment_j": p7_heat_increment,
                  "heat_to_wall_J": heat_to_wall,
                  "stage_cfl": (cfl0, cfl1),
                  "inventory": self.inventory(qn), "dependency": self.dependency_status}
@@ -840,16 +960,19 @@ class IntegratedEngine2T:
                            "external": self.ledger["external_energy_J"],
                            "work": self.ledger["crankcase_work_J"]+
                                    self.ledger["cylinder_work_J"],
-                           "residual": final["energy_J"]-self.initial_inventory["energy_J"]-
-                                       self.ledger["external_energy_J"]-
-                                       self.ledger["crankcase_work_J"]-
+                          "residual": final["energy_J"]-self.initial_inventory["energy_J"]-
+                                      self.ledger["external_energy_J"]-
+                                      self.ledger["p7_heat_added_J"]-
+                                      self.ledger["crankcase_work_J"]-
                                        self.ledger["cylinder_work_J"]+
                                        self.ledger["heat_to_wall_J"]},
                 "species": {SPECIES[i]: {"initial": self.initial_inventory["species_kg"][i],
                                          "final": final["species_kg"][i],
                                          "external": self.ledger["external_species_kg"][i],
+                                         "source": self.ledger["p7_source_species_kg"][i],
                                          "residual": delta_species[i]-
-                                                    self.ledger["external_species_kg"][i]}
+                                                    self.ledger["external_species_kg"][i]-
+                                                    self.ledger["p7_source_species_kg"][i]}
                             for i in range(4)}}
 
     def snapshot(self):
@@ -861,6 +984,9 @@ class IntegratedEngine2T:
                 "rejected_steps": self.rejected_steps,
                 "max_cfl": self.max_cfl,
                 "ledger": deepcopy(self.ledger),
+                "p7": {"active_event": (None if self.p7_event is None else
+                                         snapshot_event(self.p7_event)),
+                       "completed_events": deepcopy(self.p7_events)},
                 "initial_inventory": deepcopy(self.initial_inventory),
                 "trace": deepcopy(self.trace)}
 
@@ -902,14 +1028,19 @@ class IntegratedEngine2T:
         ledger = deepcopy(snapshot.get("ledger"))
         ledger_fields = {"external_mass_kg", "external_energy_J", "external_species_kg",
                          "fresh_delivered_kg", "fresh_short_circuit_kg", "fuel_delivered_kg",
-                         "heat_to_wall_J", "cylinder_work_J", "crankcase_work_J"}
+                         "heat_to_wall_J", "cylinder_work_J", "crankcase_work_J",
+                         "p7_heat_added_J", "p7_source_species_kg"}
         if not isinstance(ledger, dict) or set(ledger) != ledger_fields:
             raise ValueError("integrated engine checkpoint ledger schema mismatch")
         if (not isinstance(ledger["external_species_kg"], (list, tuple)) or
                 len(ledger["external_species_kg"]) != 4 or
+                not isinstance(ledger["p7_source_species_kg"], (list, tuple)) or
+                len(ledger["p7_source_species_kg"]) != 4 or
                 any(type(value) not in (int, float) or not isfinite(value)
                     for key, value in ledger.items()
-                    for value in (ledger[key] if key == "external_species_kg" else (value,)))):
+                    for value in (ledger[key] if key in
+                                  {"external_species_kg", "p7_source_species_kg"} else
+                                  (value,)))):
             raise ValueError("integrated engine checkpoint ledger contains invalid values")
         baseline = json.loads(json.dumps(self.initial_inventory, sort_keys=True))
         initial = json.loads(json.dumps(snapshot.get("initial_inventory"), sort_keys=True))
@@ -918,6 +1049,73 @@ class IntegratedEngine2T:
         trace = snapshot.get("trace")
         if not isinstance(trace, list) or len(trace) != counters[1]:
             raise ValueError("integrated engine checkpoint primary trace is incomplete")
+        p7 = snapshot.get("p7")
+        if (not isinstance(p7, dict) or set(p7) != {"active_event", "completed_events"} or
+                not isinstance(p7["completed_events"], list)):
+            raise ValueError("integrated engine checkpoint P7 state is invalid")
+        active_event = (None if p7["active_event"] is None else
+                        _restore_validated_p7_event(p7["active_event"]))
+        completed_events = [_restore_validated_p7_event(item)
+                            for item in p7["completed_events"]]
+        if (self.combustion_start_angle_deg is None and
+                (active_event is not None or completed_events)):
+            raise ValueError("integrated engine checkpoint has unconfigured P7 state")
+        if active_event is not None and (
+                abs((active_event.start % 360.0) - self.combustion_start_angle_deg) > 1e-10):
+            raise ValueError("integrated engine checkpoint P7 event identity mismatch")
+        if any(abs((event.start % 360.0) - self.combustion_start_angle_deg) > 1e-10
+               for event in completed_events):
+            raise ValueError("integrated engine checkpoint P7 history identity mismatch")
+        if self.combustion_start_angle_deg is not None:
+            phase = self.combustion_start_angle_deg
+            latest_ignition = None
+            if float(unwrapped) >= phase - 1e-10:
+                latest_ignition = phase + 360.0 * max(
+                    0, int((float(unwrapped) - phase) // 360.0))
+            exact_ignition = (latest_ignition is not None and
+                              abs(float(unwrapped) - latest_ignition) <= 1e-10)
+            if latest_ignition is None:
+                if active_event is not None or completed_events:
+                    raise ValueError("integrated engine checkpoint has premature P7 history")
+            else:
+                allowed_active_starts = {latest_ignition}
+                if exact_ignition and latest_ignition - 360.0 >= phase:
+                    allowed_active_starts.add(latest_ignition - 360.0)
+                if active_event is None:
+                    first_ignition_pending = (exact_ignition and
+                                              latest_ignition == phase and phase > 0.0)
+                    if not first_ignition_pending:
+                        raise ValueError(
+                            "integrated engine checkpoint is missing the event for its crank-angle phase")
+                    expected_completed = []
+                else:
+                    if not any(abs(active_event.start - value) <= 1e-10
+                               for value in allowed_active_starts):
+                        raise ValueError(
+                            "integrated engine checkpoint P7 event cycle disagrees with unwrapped angle")
+                    expected_completed = [
+                        phase + 360.0 * cycle
+                        for cycle in range(int((active_event.start - phase) // 360.0))]
+                actual_completed = [event.start for event in completed_events]
+                if (len(actual_completed) != len(expected_completed) or
+                        any(abs(actual - expected) > 1e-10
+                            for actual, expected in zip(actual_completed,
+                                                       expected_completed))):
+                    raise ValueError(
+                        "integrated engine checkpoint P7 completed-event chronology is invalid")
+        p7_all_events = completed_events + ([] if active_event is None else [active_event])
+        p7_expected_species = (
+            -fsum(event.ledger.fresh_air_converted for event in p7_all_events),
+            -fsum(event.ledger.fuel_converted for event in p7_all_events),
+            0.0,
+            fsum(event.ledger.burned_produced for event in p7_all_events))
+        if (any(not isclose(float(ledger["p7_source_species_kg"][j]),
+                            p7_expected_species[j], rel_tol=1e-12, abs_tol=1e-12)
+                for j in range(4)) or
+                not isclose(float(ledger["p7_heat_added_J"]),
+                            fsum(event.ledger.heat_added for event in p7_all_events),
+                            rel_tol=1e-12, abs_tol=1e-12)):
+            raise ValueError("integrated engine checkpoint P7 aggregate ledger is inconsistent")
         # Commit restored values only after the entire checkpoint passes validation.
         self.state = state
         self.angle_deg = float(angle)
@@ -925,5 +1123,9 @@ class IntegratedEngine2T:
         self.time_s = float(time_s)
         self.cycle, self.accepted_steps, self.rejected_steps = counters
         self.ledger = ledger
+        self.p7_event = active_event
+        self.p7_events = [snapshot_event(item) for item in completed_events]
+        self.p7_heat_added_j = float(ledger["p7_heat_added_J"])
+        self.p7_source_species_kg = list(ledger["p7_source_species_kg"])
         self.initial_inventory = deepcopy(snapshot["initial_inventory"])
         self.trace = deepcopy(trace)

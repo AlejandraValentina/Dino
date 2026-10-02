@@ -25,7 +25,8 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
           reed_petals=(), intake_area=0.0, transfer_pressure=101325.0,
           transfer_area=1e-5, duct_length=.02, exhaust_mesh=None,
           port_binding=None, reference_rpm=1000.0, geometry_identity=None,
-          duct_species=None, slider_crank=None):
+          duct_species=None, slider_crank=None,
+          combustion_start_angle_deg=None, cylinder_species=None):
     def duct_mesh(duct_id):
         if duct_id == "exhaust" and exhaust_mesh is not None:
             return exhaust_mesh
@@ -51,6 +52,8 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
         "crankcase": (0.0, 0.0, 0.00017652, 0.0),
         "cylinder": (0.000211824, 0.0, 0.0, 0.0),
     }
+    if cylinder_species is not None:
+        component_species["cylinder"] = tuple(cylinder_species)
     if slider_crank is not None:
         crankcase_volume, cylinder_volume, _, _ = slider_crank.resolve(
             0.0, reference_rpm)
@@ -75,6 +78,7 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
         port_binding=port_binding, slider_crank=slider_crank,
         reference_rpm=reference_rpm,
         thermal_system=thermal_system, thermal_locations=thermal_locations,
+        combustion_start_angle_deg=combustion_start_angle_deg,
         max_cfl=max_cfl)
 
 
@@ -423,3 +427,142 @@ def test_prescribed_wall_heat_uses_stage_state_and_global_energy_ledger():
     assert record["heat_to_wall_J"] > 0.0
     assert system.ledger["heat_to_wall_J"] == record["heat_to_wall_J"]
     assert abs(system.conservation_report()["energy"]["residual"]) < 1e-10
+
+
+def test_p7_prescribed_combustion_shares_integrated_species_and_energy_stages():
+    mass = 1.1768 * .00018
+    initial_species = (.00018, .00001, mass - .00019, 0.0)
+    system = _case(combustion_start_angle_deg=0.0,
+                   cylinder_species=initial_species,
+                   transfer_area=0.0, exhaust_area=0.0)
+    initial_inventory = system.inventory()
+    for _ in range(100):
+        record = system.step(.05 / 18000.0, .05)
+    assert system.p7_events == []
+    final_species = system.state["species"]["chambers"]["cylinder"]
+    event = system.p7_event
+    assert event is not None
+    assert record["stage_p7_source_rates"][0]["heat_w"] > 0.0
+    assert record["stage_p7_source_rates"][1]["heat_w"] > 0.0
+    assert final_species[0] < initial_species[0]
+    assert final_species[1] < initial_species[1]
+    assert final_species[3] > 0.0
+    assert sum(final_species) == pytest.approx(
+        system.state["chambers"]["cylinder"][0], abs=1e-14)
+    assert event.ledger.fresh_air_converted == pytest.approx(
+        initial_species[0] - final_species[0], abs=1e-14)
+    assert event.ledger.fuel_converted == pytest.approx(
+        initial_species[1] - final_species[1], abs=1e-14)
+    assert system.ledger["p7_heat_added_J"] == pytest.approx(
+        800000.0 * event.ledger.burned_produced, rel=1e-12)
+    expected_energy_change = (
+        system.ledger["external_energy_J"] + system.ledger["p7_heat_added_J"] +
+        system.ledger["cylinder_work_J"] + system.ledger["crankcase_work_J"] -
+        system.ledger["heat_to_wall_J"])
+    assert system.inventory()["energy_J"] - initial_inventory["energy_J"] == pytest.approx(
+        expected_energy_change, rel=1e-12, abs=1e-12)
+    assert abs(system.conservation_report()["energy"]["residual"]) < 1e-10
+    assert abs(system.conservation_report()["mass"]["residual"]) < 1e-14
+    assert all(abs(item["residual"]) < 1e-14
+               for item in system.conservation_report()["species"].values())
+
+
+def test_p7_integrated_checkpoint_replays_event_and_rejects_skipped_phase():
+    mass = 1.1768 * .00018
+    initial_species = (.00018, .00001, mass - .00019, 0.0)
+    continuous = _case(combustion_start_angle_deg=0.0,
+                       cylinder_species=initial_species,
+                       transfer_area=0.0, exhaust_area=0.0)
+    for _ in range(60):
+        continuous.step(.05 / 18000.0, .05)
+    checkpoint = continuous.snapshot()
+    expected = continuous.step(.05 / 18000.0, .05)
+    replay = _case(combustion_start_angle_deg=0.0,
+                   cylinder_species=initial_species,
+                   transfer_area=0.0, exhaust_area=0.0)
+    replay.restore(checkpoint)
+    actual = replay.step(.05 / 18000.0, .05)
+    assert replay.state == continuous.state
+    assert replay.ledger == continuous.ledger
+    assert actual["stage_p7_source_rates"] == expected["stage_p7_source_rates"]
+    wrong_contract = _case(cylinder_species=initial_species,
+                           transfer_area=0.0, exhaust_area=0.0)
+    with pytest.raises(ValueError, match="configuration mismatch"):
+        wrong_contract.restore(checkpoint)
+    corrupted = deepcopy(checkpoint)
+    corrupted["p7"]["active_event"]["start"] = float("nan")
+    untouched = _case(combustion_start_angle_deg=0.0,
+                      cylinder_species=initial_species,
+                      transfer_area=0.0, exhaust_area=0.0)
+    before = untouched.snapshot()
+    with pytest.raises(ValueError, match="P7 event is invalid"):
+        untouched.restore(corrupted)
+    assert untouched.snapshot() == before
+    skipped = _case(combustion_start_angle_deg=10.0,
+                    cylinder_species=initial_species,
+                    transfer_area=0.0, exhaust_area=0.0)
+    with pytest.raises(ValueError, match="end exactly at ignition"):
+        skipped.step(20.0 / 18000.0, 20.0)
+
+
+def test_p7_ignition_capture_is_transactional_when_the_step_is_rejected():
+    mass = 1.1768 * .00018
+    initial_species = (.00018, .00001, mass - .00019, 0.0)
+    system = _case(combustion_start_angle_deg=10.0,
+                   cylinder_species=initial_species,
+                   transfer_area=0.0, exhaust_area=0.0)
+    system.angle_deg = system.crank_angle_unwrapped_deg = 10.0
+    before_state = deepcopy(system.state)
+    before_ledger = deepcopy(system.ledger)
+    with pytest.raises(ValueError, match="CFL limit exceeded"):
+        system.step(1.0, .05)
+    assert system.p7_event is None
+    assert system.p7_events == []
+    assert system.state == before_state
+    assert system.ledger == before_ledger
+    system.step(.05 / 18000.0, .05)
+    assert system.p7_event is not None
+    assert system.p7_event.start == pytest.approx(10.0)
+    assert system.p7_events == []
+    corrupted = system.snapshot()
+    corrupted["p7"]["active_event"] = None
+    corrupted["p7"]["completed_events"] = []
+    corrupted["ledger"]["p7_heat_added_J"] = 0.0
+    corrupted["ledger"]["p7_source_species_kg"] = [0.0] * 4
+    target = _case(combustion_start_angle_deg=10.0,
+                   cylinder_species=initial_species,
+                   transfer_area=0.0, exhaust_area=0.0)
+    with pytest.raises(ValueError, match="missing the event"):
+        target.restore(corrupted)
+
+
+def test_p7_event_boundary_requires_exact_alignment_and_stops_cleanly():
+    mass = 1.1768 * .00018
+    initial_species = (.00018, .00001, mass - .00019, 0.0)
+    system = _case(combustion_start_angle_deg=0.0,
+                   cylinder_species=initial_species,
+                   transfer_area=0.0, exhaust_area=0.0, duct_length=.2)
+    def advance_to(target):
+        while system.crank_angle_unwrapped_deg < target - 1e-12:
+            delta = min(.05, target - system.crank_angle_unwrapped_deg)
+            while True:
+                try:
+                    system.step(delta / 18000.0, delta)
+                    break
+                except ValueError as error:
+                    if "inadmissible species mass" not in str(error):
+                        raise
+                    delta /= 2.0
+                    assert delta > 1e-7
+    advance_to(39.95)
+    before_state = deepcopy(system.state)
+    before_angle = system.crank_angle_unwrapped_deg
+    before_heat = system.ledger["p7_heat_added_J"]
+    with pytest.raises(ValueError, match="event boundary"):
+        system.step(.1 / 18000.0, .1)
+    assert system.state == before_state
+    assert system.crank_angle_unwrapped_deg == before_angle
+    assert system.ledger["p7_heat_added_J"] == before_heat
+    advance_to(40.0)
+    assert system.crank_angle_unwrapped_deg == pytest.approx(40.0)
+    assert system.trace[-1]["stage_p7_source_rates"][1]["heat_w"] == pytest.approx(0.0)

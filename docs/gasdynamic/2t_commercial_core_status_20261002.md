@@ -99,6 +99,27 @@ combustión, combustible integrado, desempeño al freno, evidencia periódica,
 fixtures completos y regresiones amplias P4–P8 actuales siguen pendientes.
 Commercial Core continúa `MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL`; no se reintentó
 KT100 ni se ejecutaron campañas físicas.
+
+### Continuación: fuente prescrita P7 en el estado integrado
+
+`IntegratedEngine2T` ahora ofrece P7 opcional por ángulo de ignición. En cada
+stage SSPRK2 usa el evento P7 existente, capturado desde las cuatro especies
+reales presentes en el cilindro, para convertir fresh_air/fuel a burned y sumar
+el calor prescrito al RHS de energía del cilindro. No se añadieron química,
+AFR, LHV ni propiedades de combustible. El ledger global de especies distingue
+esa conversión interna del transporte externo; el de energía acredita el calor
+P7 una sola vez junto a flujo externo, trabajo móvil y pérdidas térmicas.
+El checkpoint V2 guarda evento activo e historial P7 y rechaza configuraciones
+con otro ángulo de ignición. Los pasos que cruzan los límites de ignición o los
+40° del evento se rechazan para que el integrador los alinee explícitamente.
+
+La prueba focal integrada pasó 20/20 y la regresión agrupada con P5-C/P6/P7,
+reed y puertos pasó 72/72. OpenSpec estricto pasó. Esto comprueba acoplamiento
+P7 en trayectorias breves y restart/replay del evento, no consumo completo,
+fuel-flow derivado, ciclos, rendimiento al freno ni Commercial Core completo.
+La revisión independiente read-only de este delta confirmó etapas, balances,
+captura transaccional y cronología de restart sin hallar defectos concretos;
+no revisó el motor completo. La revisión del motor completo sigue pendiente.
 Una prueba adicional vincula la malla multi-sección de `ExpansionChamber` a la
 ruta exhaust del mismo integrador y comprueba que sus celdas y caras se
 actualizan en los dos stages con transporte de especies y balance global.
