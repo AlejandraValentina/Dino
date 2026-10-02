@@ -344,3 +344,20 @@ se evalúa en solo lectura. La revisión comprobó el puntero LFS y su tamaño/h
 y que P4–P8 y la infraestructura de orquestación no están en el delta. Esta es
 una revisión puntual de implementación/evidencia, no una aprobación del motor
 completo. Fixture A sigue sin convergencia P1/P2; no cambia su bloqueo.
+
+
+### Replay integrado de seis ciclos — 2026-10-02
+
+Se ejecutaron dos recorridos independientes de Fixture A hasta 2160°/ciclo 6,
+a 3000 RPM y CFL máximo 0.4. Un recorrido fue continuo; el otro guardó
+checkpoint al cerrar el ciclo 3, creó una instancia nueva y restauró antes de
+continuar. Los snapshots completos finales fueron estructuralmente iguales,
+incluyendo estados, especies, ledgers, reloj y traza aceptada; los seis
+registros primarios y outputs de ingeniería V2 también fueron iguales. Los seis
+outputs validaron con el modelo de pérdidas sintético explícito. Se aceptaron
+11.176 pasos. Por ciclo, CFL máximo fue ≤0.4; residuos globales de masa y especies
+se mantuvieron alrededor de 1e-18 kg y los de energía alrededor de 1e-12 J.
+El ciclo 1 conserva trabajo indicado negativo y la secuencia no converge P1/P2;
+esto verifica replay/conservación, no Commercial Core readiness. Evidencia del
+recorrido actual en `results/2t-commercial-core-20261002/fixture-a-restart-replay-audit-20261002.json`;
+la trayectoria primaria completa existente sigue en el artefacto V2 LFS.

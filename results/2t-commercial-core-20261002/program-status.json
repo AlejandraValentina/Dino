@@ -332,6 +332,19 @@
       "result": "PASS",
       "count": 33,
       "command": "python -m pytest tests/test_integrated_2t.py tests/test_engineering_outputs.py -q"
+    },
+    "integrated_six_cycle_restart_replay": {
+      "result": "PASS_CONTINUOUS_EQUALS_CYCLE3_CHECKPOINT_RESTART_AND_INDEPENDENT_RUN",
+      "cycles": 6,
+      "accepted_steps": 11176,
+      "rpm": 3000,
+      "max_cfl": 0.4,
+      "full_snapshot_equality": true,
+      "six_primary_records_equal": true,
+      "six_engineering_outputs_equal_and_validated": true,
+      "p1_p2": "NOT_MET; fixture A remains blocked",
+      "evidence": "results/2t-commercial-core-20261002/fixture-a-restart-replay-audit-20261002.json",
+      "primary_trajectory": "results/2t-commercial-core-20261002/fixture-a-integrated-cycles-20261002-v2.json.gz"
     }
   },
   "review": {
@@ -463,7 +476,8 @@
         "Terminal angular output point is evaluated read-only from the accepted terminal state; P7 requested endpoint rate is pre-limiter and excluded from cycle integrals.",
         "Updated synthetic exhaust geometry has actual closed intervals; six full V2 primary cycles capture exact transfer/exhaust snapshots and same-cycle scavenging; 33/33 focal, 85/85 integrated regression, and 300 P4–P8 tests pass.",
         "Terminal angular output point is evaluated read-only from the accepted terminal state; P7 requested endpoint rate is pre-limiter and excluded from cycle integrals.",
-        "Independent read-only review of V2 closure/output delta PASS; no material findings; full-engine acceptance remains open."
+        "Independent read-only review of V2 closure/output delta PASS; no material findings; full-engine acceptance remains open.",
+        "Two independent six-cycle Fixture A runs (one continuous, one checkpoint/restart after cycle 3) had exact full snapshot, primary-cycle and validated V2-output equality; 11,176 accepted steps; P1/P2 still fail."
       ],
       "next_action": "Keep Fixture B gated; continue independent integration while preserving the observed Fixture A periodicity failure."
     },

@@ -309,3 +309,17 @@ evaluación read-only del endpoint terminal, el rebuild de integrales, la
 separación del contrato V1 y outputs V2, y la identidad del artefacto LFS. No
 encontró defectos materiales en este delta. La revisión fue puntual, no acredita
 convergencia P1/P2 ni un motor integrado completo.
+
+
+### Continuidad y replay de Fixture A — 2026-10-02
+
+Se compararon dos recorridos de seis ciclos completos (3000 RPM, CFL 0.4): uno
+continuo y otro reanudado desde checkpoint al ciclo 3. La igualdad estructural
+directa abarcó el snapshot final completo, los seis registros primarios y los
+seis outputs V2. Se aceptaron 11.176 pasos; en cada ciclo se mantuvieron los
+residuos globales de masa/especies en el orden de 1e-18 kg y energía en el orden
+de 1e-12 J. El brake output se calculó con un modelo de pérdidas sintético y
+explícito. No hay P1/P2: el trabajo del primer ciclo es negativo y los pares
+posteriores siguen fallando. Esta comprobación no cambia el estado parcial.
+Evidencia de comparación: `results/2t-commercial-core-20261002/fixture-a-restart-replay-audit-20261002.json`;
+la trayectoria primaria permanece en el artefacto V2 LFS.
