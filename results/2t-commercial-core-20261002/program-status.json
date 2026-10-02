@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-02",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "29544ad",
+  "status_capture_head": "a70917dde45ca15c62d5e0f460020599488a4d1f",
   "overall": "NOT_READY_INTEGRATION_GAPS_REMAIN",
   "ready_claim": false,
   "push_performed": false,
@@ -213,7 +213,9 @@
       "dependencies": [],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "a70917dde45ca15c62d5e0f460020599488a4d1f"
+      ],
       "evidence": [
         "tests/test_integrated_2t.py:13",
         "65-test integrated regression group: PASS",
@@ -229,7 +231,9 @@
       ],
       "state": "IN_PROGRESS",
       "blocker": "Dynamic reed state/restart and full crankcase geometry coupling remain open.",
-      "commits": [],
+      "commits": [
+        "a70917dde45ca15c62d5e0f460020599488a4d1f"
+      ],
       "evidence": [
         "tests/test_integrated_2t.py:13",
         "tests/test_reed.py",
