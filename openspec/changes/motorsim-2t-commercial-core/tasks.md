@@ -33,6 +33,14 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
 - [ ] Fase 4c: verificar ledgers P6 durante operación periódica y exponer los
       outputs en el esquema de resultados, sin cambiar transporte.
 - [ ] Fase 5: reed estática y/o dinámica, según alcance físico derivable.
+- [x] Fase 5a: `STATIC_REED_V1` y `DYNAMIC_REED_V1` multi-petal, respuesta,
+      contactos, flujo y serialization/replay individual. `motorsim.reed`
+      conserva mecánica desacoplada y reutiliza `simulation.restriction`; 16
+      pruebas reed más 48 regresiones P6/scavenging/ports, y 64 tests focales
+      de harness/evidencia, aprobados. Se corrigió contacto a tope al final de
+      un paso con redondeo de una ULP. Sin conexión productiva a P5/P6.
+- [ ] Fase 5b: integración del estado reed con el timestep/etapas de P5-C/P6,
+      especies, ledgers y casos de operación del engine.
 - [ ] Fase 6: sistema de cámara de expansión sobre ducts quasi-1D existentes.
 - [ ] Fase 7: transferencia térmica configurable y ledger energético.
 - [ ] Fase 8: `COMBUSTION_MODEL_V2`, separado de P7 prescrito histórico.

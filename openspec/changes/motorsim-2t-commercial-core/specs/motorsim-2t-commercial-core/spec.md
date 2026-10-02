@@ -129,3 +129,39 @@ These are model diagnostics, not experimental claims.
 - **WHEN** a ratio denominator is zero or an exhaust exchange is inward
 - **THEN** the ratio is explicitly undefined when appropriate, and inward
   exhaust species do not increment fresh-short-circuit mass.
+
+### Requirement: Configurable multi-petal reed intake
+
+The engine MUST expose separate `STATIC_REED_V1` and `DYNAMIC_REED_V1` modes.
+Every petal MUST identify its mass, effective pressure area, effective flow
+width, spring stiffness, damping, lift stop, discharge coefficient, restitution,
+and parameter provenance. Static mode MUST compute bounded equilibrium lift
+from signed pressure differential and MUST block reverse flow. Dynamic mode MUST
+advance petal position and velocity using the damped lumped-mass/spring equation
+under the supplied pressure differential, enforce closed/open lift stops with
+the configured restitution, and expose bidirectional transient flow through
+the current open area; reverse pressure MUST drive closure but MUST NOT erase
+area before the petal physically closes. Multiple petals MUST have independent
+state and contribute summed area. Flow MUST reuse the existing gas-flow function
+and MUST NOT alter global ledgers itself.
+
+#### Scenario: Static reed opening and reverse protection
+
+- **WHEN** forward differential is positive
+- **THEN** static lift is the spring equilibrium clipped to `[0,lift_stop]` and
+  effective area is coefficient × width × lift; reverse differential returns
+  zero area/flow.
+
+#### Scenario: Dynamic petal response
+
+- **WHEN** the differential changes while a petal has nonzero velocity
+- **THEN** the petal state advances deterministically from its previous
+  position/velocity, respects the stops, and permits transient reverse flow only
+  while its area remains open.
+
+#### Scenario: Multi-petal and invalid configuration
+
+- **WHEN** a reed bank contains multiple valid petals or any mass/stiffness/
+  damping/area/provenance value is invalid
+- **THEN** valid petal areas/states remain individually inspectable and malformed
+  or nonfinite inputs are rejected without silently clipping parameters.

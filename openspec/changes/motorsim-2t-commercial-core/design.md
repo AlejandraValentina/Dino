@@ -75,3 +75,21 @@ snapshot to the terminal gas/species state, and recomputes fresh delivery/loss
 from cumulative P6 ledgers. It rejects a missing event, nonmonotone trajectory,
 terminal mismatch, bool-as-number, or stale cycle summary; it never interpolates
 across a closure event.
+
+## Reed `STATIC_REED_V1` / `DYNAMIC_REED_V1`
+
+Each synthetic/configured petal supplies `m`, pressure area `Ap`, effective
+flow width `w`, spring `k`, damping `c`, lift limit `h`, flow coefficient `Cd`,
+restitution `e`, and provenance. Positive `dp = p_upstream - p_downstream`
+opens the valve. Static lift is `clamp(dp*Ap/k,0,h)`; static reverse flow is
+blocked. Dynamic state follows `m*x''+c*x'+k*x=dp*Ap` at constant dp during a
+solver step. Use the closed-form damped linear-oscillator solution between
+contacts; detect contact times from monotone intervals separated by exact
+velocity extrema and bounded bisection, apply configured restitution, then
+advance the remaining step. At a stop where acceleration points outward, hold
+the petal there until the force releases it. `Aeff=Cd*w*x`; bank area is the
+sum of petal areas. Existing `simulation.restriction` computes mass/energy/fresh
+flux. Static mode gates reverse flow; dynamic mode allows transient reverse
+flow while open and records no ledger itself. All coefficients are user/model
+inputs with provenance; no value is fitted. The standalone state model does not
+modify P5/P6 and requires a later stage-coherent integration phase.
