@@ -19,7 +19,14 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       admisión, cinemática, proyectos y simulación aprobadas.
 - [ ] Fase 3b: integración de esta configuración en un engine case ejecutable,
       topología variable con ledgers globales, schema de proyecto y GUI. El
-      módulo 3a aún no altera áreas/flujos de P5 ni declara completa la fase.
+      adaptador opt-in `motorsim.two_stroke_ports_p5c` ahora resuelve y suma
+      aperturas genéricas como áreas de entrada a las interfaces existentes de
+      P5-C, sin editar P5; admite varias ventanas por cada una de las dos rutas
+      transfer existentes. No descarta silenciosamente una tercera ruta: la
+      rechaza. Tres pruebas nuevas verifican RHS geométrico, rechazo de ruta
+      extra y datos inválidos; junto con 8 pruebas genéricas, 11 pasaron. Sigue
+      parcial: la física histórica P5-C admite solo dos rutas, no hay topología
+      variable/full-core, schema persistente ni GUI.
 - [ ] Fase 4: métricas de barrido con definiciones matemáticas y ledgers P6.
 - [x] Fase 4a: funciones puras `MOTORSIM_2T_SCAVENGING_METRICS_V1`, masas,
       reference charge y nueve ratios con valores undefined explícitos para
