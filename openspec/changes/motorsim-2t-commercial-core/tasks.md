@@ -42,6 +42,13 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
 - [ ] Fase 5b: integración del estado reed con el timestep/etapas de P5-C/P6,
       especies, ledgers y casos de operación del engine.
 - [ ] Fase 6: sistema de cámara de expansión sobre ducts quasi-1D existentes.
+- [x] Fase 6a: ensamblado geométrico conectado y trazas de solver en
+      `motorsim.expansion_chamber`, reutilizando `gas1d.mesh.segments_mesh` y
+      `gas1d.solver`. Once pruebas de geometría, esquema, estados inválidos,
+      flujo, presión/temperatura/Mach, características, tiempos de llegada y
+      mapeo de un estado producido por el solver aprobadas. Se marca parcial:
+      pendiente el ciclo híbrido P5 integrado con admisión reed, especie P6 y
+      auditoría de onda primaria; sin amplitudes reflejadas sintéticas.
 - [ ] Fase 7: transferencia térmica configurable y ledger energético.
 - [ ] Fase 8: `COMBUSTION_MODEL_V2`, separado de P7 prescrito histórico.
 - [ ] Fase 9: modelo de cárter V2 y acoplamiento de admisión/transferencia.

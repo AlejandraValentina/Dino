@@ -93,3 +93,18 @@ flux. Static mode gates reverse flow; dynamic mode allows transient reverse
 flow while open and records no ledger itself. All coefficients are user/model
 inputs with provenance; no value is fitted. The standalone state model does not
 modify P5/P6 and requires a later stage-coherent integration phase.
+
+## Expansion chamber geometry and trace adapter
+
+`ExpansionChamber` is a typed, provenance-bearing assembly of continuous
+conical sections (header, diffuser, belly, baffle cone, stinger, silencer,
+tailpipe or generic cone). It uses the accepted `gas1d.mesh.segments_mesh`
+builder for exact frustum volumes and shared face areas. It does not implement
+a second gas solver. `map_solver_state` consumes the existing quasi-1D
+primitive trajectory to expose pressure, temperature, Mach, mass flow and
+left/right characteristic speeds. Optional wave decomposition is explicitly
+linear, isentropic and relative to a supplied base state. Reflection timing is
+an estimate obtained by integrating characteristic speeds to a named section
+station; reflected amplitudes remain the solver's responsibility. Neither
+trace adapter nor geometry changes P4/P5/P6 contracts or the product project
+schema.

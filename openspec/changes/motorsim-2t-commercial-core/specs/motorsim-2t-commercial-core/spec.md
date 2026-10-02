@@ -165,3 +165,34 @@ and MUST NOT alter global ledgers itself.
   damping/area/provenance value is invalid
 - **THEN** valid petal areas/states remain individually inspectable and malformed
   or nonfinite inputs are rejected without silently clipping parameters.
+
+### Requirement: Expansion chamber reuses the quasi-1D solver
+
+The engine MUST represent an expansion system as connected, provenance-bearing
+conical sections for header, diffuser, belly, baffle cone, stinger, silencer,
+tailpipe, or generic cones. Geometry MUST reuse the existing quasi-1D mesh and
+MUST NOT add a parallel gas solver. The result adapter MUST derive pressure,
+temperature, Mach, mass flow and characteristic speeds from actual solver
+primitive states. A travelling-wave decomposition MUST identify its linear
+small-perturbation base state and MUST NOT be represented as a nonlinear wave
+solution. Reflection timing MUST be reported as a characteristic travel-time
+estimate; amplitudes remain outputs of the gasdynamic solver.
+
+#### Scenario: Build a continuous expansion assembly
+
+- **WHEN** adjacent sections have matching endpoint diameters
+- **THEN** they form a mesh using the existing frustum geometry; disconnected,
+  nonfinite, or nonpositive sections are rejected.
+
+#### Scenario: Map an actual 1D solution
+
+- **WHEN** admissible primitive cells from the quasi-1D solver are provided
+- **THEN** the adapter reports pressure, temperature, signed Mach, mass flow,
+  and left/right characteristic speeds for every cell.
+
+#### Scenario: Report travel-time limits
+
+- **WHEN** a characteristic cannot travel toward a requested station because
+  the base flow is supersonic in that direction
+- **THEN** its travel-time estimate is explicitly unavailable and no reflected
+  wave amplitude is fabricated.
