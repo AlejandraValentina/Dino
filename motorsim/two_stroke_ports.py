@@ -355,6 +355,37 @@ class TwoStrokePortSet:
                 events.update((opening, 360.0 - opening))
         return tuple(sorted(events))
 
+    def duct_closing_angles(self, duct_id: str) -> tuple[float, ...]:
+        """Return exact angular boundaries where a duct's aggregate area closes.
+
+        The area is classified on each open interval between analytic window
+        events/profile knots. A boundary is a closure only when the aggregate
+        area is positive immediately before it and zero immediately after it.
+        Isolated zero-area points do not count as closure when the path remains
+        open on both sides.
+        """
+        if duct_id not in {duct.id for duct in self.ducts}:
+            raise ProjectError(f"Conducto desconocido: {duct_id}.")
+        apertures = tuple(port for port in self.ports if port.duct_id == duct_id)
+        boundaries = sorted({0.0, 360.0, *(event for port in apertures
+                                           for event in self.event_angles(port))})
+        if len(boundaries) < 2:
+            return ()
+        intervals = []
+        for left, right in zip(boundaries, boundaries[1:]):
+            midpoint = left + (right - left) * 0.5
+            intervals.append(self.duct_area_at(duct_id, midpoint) > 0.0)
+        result = []
+        count = len(intervals)
+        # boundaries[:-1] represents each periodic boundary exactly once;
+        # the 360-degree endpoint and zero-degree origin are the same event.
+        for index, boundary in enumerate(boundaries[:-1]):
+            left_open = intervals[index - 1]
+            right_open = intervals[index]
+            if left_open and not right_open:
+                result.append(boundary)
+        return tuple(result)
+
     def compile_profiles(self) -> tuple[CompiledPortProfile, ...]:
         self.validate()
         angles = tuple(float(degree) for degree in range(361))

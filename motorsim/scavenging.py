@@ -201,6 +201,18 @@ def scavenging_input_from_cycle(cycle: dict[str, Any], *, reference_mass_kg: flo
     observables = cycle.get("observables")
     if not isinstance(start, dict) or not isinstance(observables, dict):
         raise ValueError("Faltan ledgers P6 acumulados u observables.")
+    cycle_start_angle = _number(start.get("angle_deg"),
+                                "cycle_start_cumulative.angle_deg",
+                                nonnegative=False)
+    cycle_end_angle = _number(cycle.get("scheduler_angle_deg"),
+                              "scheduler_angle_deg", nonnegative=False)
+    terminal_angle = _number(last.get("angle_deg"), "trajectory terminal angle",
+                             nonnegative=False)
+    if (abs(cycle_end_angle - cycle_start_angle - 360.0) > 1e-8 or
+            abs(terminal_angle - cycle_end_angle) > 1e-9 or
+            _number(trajectory[0].get("angle_deg"), "trajectory first angle",
+                    nonnegative=False) <= cycle_start_angle):
+        raise ValueError("La evidencia primaria no contiene un ciclo completo de 360°.")
     delivery_start = _number(start.get("fresh_delivery"), "start.fresh_delivery")
     short_start = _number(start.get("fresh_short_circuit"),
                           "start.fresh_short_circuit")
@@ -235,3 +247,111 @@ def scavenging_metrics_from_cycle(cycle: dict[str, Any], *, reference_mass_kg: f
         transfer_close_angle_deg=transfer_close_angle_deg,
         exhaust_close_angle_deg=exhaust_close_angle_deg)
     return calculate_scavenging_metrics(inputs)
+
+
+def scavenging_metrics_from_generic_ports(cycle: dict[str, Any], *, ports,
+                                          reference_mass_kg: float) -> dict[str, Any]:
+    """Bind exact P6 cycle snapshots to the generic geometry's last closures.
+
+    Transfer purity is sampled after the last transfer duct closes; exhaust
+    purity is sampled after the last exhaust duct closes. The accepted primary
+    trajectory must contain exact event-angle rows. No interpolation or nearest
+    sample selection is performed.
+    """
+    from .two_stroke_ports import TwoStrokePortSet
+    if not isinstance(ports, TwoStrokePortSet):
+        raise ValueError("Se requiere GENERIC_2T_PORTS_V1 validado.")
+    ports.validate()
+    if not isinstance(cycle, dict) or cycle.get("schema") != "REFERENCE_ENGINE_HYBRID_CYCLE_PRIMARY_V1":
+        raise ValueError("No es evidencia primaria de ciclo del harness.")
+    start = cycle.get("cycle_start_cumulative")
+    if not isinstance(start, dict):
+        raise ValueError("Falta identidad angular inicial del ciclo.")
+    cycle_start = _number(start.get("angle_deg"), "cycle_start_cumulative.angle_deg",
+                          nonnegative=False)
+    cycle_end = cycle_start + 360.0
+
+    def last_close(role: str) -> float:
+        duct_ids = [duct.id for duct in ports.ducts if duct.role == role]
+        closes = []
+        for duct_id in duct_ids:
+            for base_angle in ports.duct_closing_angles(duct_id):
+                target = cycle_start + ((base_angle - cycle_start) % 360.0)
+                if target <= cycle_start + 1e-9:
+                    target += 360.0
+                if target <= cycle_end + 1e-9:
+                    closes.append(target)
+        if not closes:
+            raise ValueError(f"La geometría no define cierre de {role} dentro del ciclo.")
+        return max(closes)
+
+    return scavenging_metrics_from_cycle(
+        cycle, reference_mass_kg=reference_mass_kg,
+        transfer_close_angle_deg=last_close("transfer"),
+        exhaust_close_angle_deg=last_close("exhaust"))
+
+
+def scavenging_series_from_primary_cycles(cycles: list[dict[str, Any]], *, ports,
+                                         reference_mass_kg: float) -> dict[str, Any]:
+    """Audit a contiguous run of complete primary cycles without claiming period.
+
+    Each cycle is independently bound to geometry-derived exact closure rows
+    and P6 cumulative delivery/short-circuit ledgers. Periodic convergence is a
+    separate campaign contract and is not inferred by this diagnostic series.
+    """
+    if not isinstance(cycles, list) or not cycles:
+        raise ValueError("Se requiere una secuencia de ciclos primarios completos.")
+    rows = []
+    configuration = None
+    for expected_index, cycle in enumerate(cycles, 1):
+        if cycle.get("cycle_index") != expected_index:
+            raise ValueError("Los ciclos deben ser contiguos desde el índice uno.")
+        if cycle.get("configuration_hash") is None:
+            raise ValueError("Cada ciclo debe estar ligado a una configuración.")
+        if configuration is None:
+            configuration = cycle["configuration_hash"]
+        elif cycle["configuration_hash"] != configuration:
+            raise ValueError("La configuración cambió dentro de la serie.")
+        rows.append({"cycle_index": expected_index,
+                     "metrics": scavenging_metrics_from_generic_ports(
+                         cycle, ports=ports, reference_mass_kg=reference_mass_kg)})
+    return {"schema": "MOTORSIM_2T_SCAVENGING_SERIES_V1",
+            "configuration_hash": configuration,
+            "periodicity": "NOT_EVALUATED",
+            "cycles": rows}
+
+
+def scavenging_engineering_records(metrics: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """Translate audited scavenging metrics to the stable output-schema shape."""
+    if not isinstance(metrics, dict) or metrics.get("schema") != "MOTORSIM_2T_SCAVENGING_METRICS_V1":
+        raise ValueError("Scavenging metric schema is invalid.")
+    ratios = metrics.get("ratios")
+    masses = metrics.get("masses_kg")
+    if not isinstance(ratios, dict) or not isinstance(masses, dict):
+        raise ValueError("Scavenging metrics lack ratios or masses.")
+    result = {}
+    for source, target in (("delivery_ratio", "delivery_ratio"),
+                           ("trapping_efficiency", "trapping_efficiency"),
+                           ("scavenging_efficiency", "scavenging_efficiency"),
+                           ("charging_efficiency", "charging_efficiency"),
+                           ("trapping_ratio", "trapping_ratio"),
+                           ("residual_fraction", "residual_fraction"),
+                           ("purity_at_transfer_close", "purity_at_transfer_close"),
+                           ("purity_at_exhaust_close", "purity_at_exhaust_close"),
+                           ("short_circuit_fraction", "short_circuit_fraction")):
+        row = ratios.get(source)
+        if not isinstance(row, dict) or row.get("status") not in {"AVAILABLE", "UNDEFINED"}:
+            raise ValueError(f"Scavenging ratio {source} is missing or invalid.")
+        available = row["status"] == "AVAILABLE"
+        result[target] = {"value": row.get("value") if available else None,
+                          "status": "DEFINED" if available else "UNDEFINED",
+                          "reason": None if available else row.get("reason"),
+                          "source": "MOTORSIM_2T_SCAVENGING_METRICS_V1 P6 ledger"}
+    for source, target in (("fresh_delivered", "fresh_delivery_kg"),
+                           ("fresh_retained", "fresh_retained_kg"),
+                           ("fresh_lost", "fresh_short_circuit_kg"),
+                           ("fresh_lost", "fresh_lost_kg")):
+        value = _number(masses.get(source), f"masses_kg.{source}")
+        result[target] = {"value": value, "status": "DEFINED", "reason": None,
+                          "source": "MOTORSIM_2T_SCAVENGING_METRICS_V1 P6 ledger"}
+    return result

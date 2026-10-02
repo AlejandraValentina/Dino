@@ -31,14 +31,18 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
 - [x] Fase 4a: funciones puras `MOTORSIM_2T_SCAVENGING_METRICS_V1`, masas,
       reference charge y nueve ratios con valores undefined explícitos para
       denominadores cero; cinco pruebas analíticas/negativas aprobadas.
-- [ ] Fase 4b: extraer snapshots de cierre de transfers/escape desde evidencia
+- [x] Fase 4b: extraer snapshots de cierre de transfers/escape desde evidencia
       primaria de ciclo, ligarlos a geometry events y agregar auditor offline.
 - [x] Fase 4b1: adaptador de primary trajectory que exige snapshots únicos en
       ángulos de cierre resueltos, cierre terminal, ledger P6 cumulativo y
       summary concordante; no interpola. Tests de evento ausente, resumen stale
       y bool-as-number cubiertos.
 - [ ] Fase 4c: verificar ledgers P6 durante operación periódica y exponer los
-      outputs en el esquema de resultados, sin cambiar transporte.
+      outputs en el esquema de resultados, sin cambiar transporte. La serie
+      contigua de primary cycles y el mapeo a outputs ya existen y se prueban
+      con fixtures; la verificación de un resultado periódico de campaña queda
+      pendiente hasta disponer de ciclos híbridos completos (KT100 no aporta
+      ciclos y sus recibos permanecen congelados).
 - [ ] Fase 5: reed estática y/o dinámica, según alcance físico derivable.
 - [x] Fase 5a: `STATIC_REED_V1` y `DYNAMIC_REED_V1` multi-petal, respuesta,
       contactos, flujo y serialization/replay individual. `motorsim.reed`

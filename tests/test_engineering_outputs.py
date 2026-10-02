@@ -6,6 +6,8 @@ from motorsim.engineering_outputs import (
     build_engineering_output,
     validate_engineering_output,
 )
+from motorsim.scavenging import (ScavengingInput, calculate_scavenging_metrics,
+                                 scavenging_engineering_records)
 
 
 def output(**changes):
@@ -69,3 +71,13 @@ def test_malformed_undefined_metric_and_modified_units_are_rejected():
 def test_schema_never_claims_four_stroke_or_nonperiodic_trace_as_2t():
     with pytest.raises(ValueError):
         output(cycle_period_deg=720.0)
+
+
+def test_schema_accepts_geometry_bound_scavenging_diagnostics():
+    metrics = calculate_scavenging_metrics(ScavengingInput(
+        0.01, 0.012, 0.002, (0.003, 0.001, 0.006, 0.0),
+        (0.004, 0.001, 0.004, 0.001)))
+    record = output(cycle_metrics=scavenging_engineering_records(metrics))
+    validated = validate_engineering_output(record)
+    assert validated["cycle_metrics"]["purity_at_transfer_close"]["value"] == pytest.approx(0.4)
+    assert validated["cycle_metrics"]["fresh_retained_kg"]["value"] == pytest.approx(0.005)
