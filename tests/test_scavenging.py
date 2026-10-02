@@ -2,7 +2,8 @@ import math
 import unittest
 
 from motorsim.scavenging import (ScavengingInput, calculate_scavenging_metrics,
-                                 reference_charge_mass)
+                                 reference_charge_mass,
+                                 scavenging_metrics_from_cycle)
 
 
 class ScavengingMetricTests(unittest.TestCase):
@@ -14,6 +15,38 @@ class ScavengingMetricTests(unittest.TestCase):
             species_at_transfer_close_kg=(0.003, 0.001, 0.006, 0.0),
             species_at_exhaust_close_kg=(0.004, 0.001, 0.004, 0.001),
         )
+
+    @staticmethod
+    def primary_cycle():
+        terminal_gas = [1.0, 2.0, 3.0]
+        terminal_species = {"cylinder": [[0.004, 0.001, 0.004, 0.001]]}
+        rows = [
+            {"angle_deg": 40.0, "state": [0.0],
+             "species_mass": {"cylinder": [[0.0, 0.0, 0.0, 0.0]]},
+             "fresh_delivery_cumulative_kg": 0.0,
+             "fresh_short_circuit_cumulative_kg": 0.0},
+            {"angle_deg": 100.0, "state": [1.0],
+             "species_mass": {"cylinder": [[0.003, 0.001, 0.006, 0.0]]},
+             "fresh_delivery_cumulative_kg": 0.004,
+             "fresh_short_circuit_cumulative_kg": 0.0002},
+            {"angle_deg": 250.0, "state": terminal_gas,
+             "species_mass": terminal_species,
+             "fresh_delivery_cumulative_kg": 0.012,
+             "fresh_short_circuit_cumulative_kg": 0.002},
+        ]
+        return {
+            "schema": "REFERENCE_ENGINE_HYBRID_CYCLE_PRIMARY_V1",
+            "terminal_state": {"gas_conservative": terminal_gas,
+                               "species_mass": terminal_species},
+            "trajectory_terminal_state": terminal_gas,
+            "trajectory_last_state": terminal_gas,
+            "trajectory_last_species_mass": terminal_species,
+            "trajectory": rows,
+            "cycle_start_cumulative": {"fresh_delivery": 0.0,
+                                       "fresh_short_circuit": 0.0},
+            "observables": {"fresh_delivery_kg": 0.012,
+                            "fresh_short_circuit_kg": 0.002},
+        }
 
     def test_all_metrics_match_independent_analytic_values(self):
         result = calculate_scavenging_metrics(self.inputs)
@@ -36,6 +69,33 @@ class ScavengingMetricTests(unittest.TestCase):
         volume_m3 = math.pi * (0.052 ** 2) * 0.046 / 4.0
         expected = (101325.0 / (287.0 * 300.0)) * volume_m3
         self.assertAlmostEqual(mass, expected, places=15)
+
+    def test_cycle_metrics_bind_to_exact_primary_event_snapshots_and_ledgers(self):
+        result = scavenging_metrics_from_cycle(
+            self.primary_cycle(), reference_mass_kg=0.01,
+            transfer_close_angle_deg=100.0, exhaust_close_angle_deg=250.0)
+        self.assertAlmostEqual(result["ratios"]["purity_at_transfer_close"]["value"], 0.4)
+        self.assertAlmostEqual(result["ratios"]["purity_at_exhaust_close"]["value"], 0.5)
+        self.assertAlmostEqual(result["masses_kg"]["fresh_lost"], 0.002)
+
+    def test_cycle_metrics_reject_missing_events_and_stale_summaries(self):
+        cycle = self.primary_cycle()
+        with self.assertRaisesRegex(ValueError, "Falta snapshot"):
+            scavenging_metrics_from_cycle(cycle, reference_mass_kg=0.01,
+                                          transfer_close_angle_deg=101.0,
+                                          exhaust_close_angle_deg=250.0)
+        cycle = self.primary_cycle()
+        cycle["observables"]["fresh_delivery_kg"] = 99.0
+        with self.assertRaisesRegex(ValueError, "no coinciden"):
+            scavenging_metrics_from_cycle(cycle, reference_mass_kg=0.01,
+                                          transfer_close_angle_deg=100.0,
+                                          exhaust_close_angle_deg=250.0)
+        cycle = self.primary_cycle()
+        cycle["observables"]["fresh_delivery_kg"] = True
+        with self.assertRaisesRegex(ValueError, "número"):
+            scavenging_metrics_from_cycle(cycle, reference_mass_kg=0.01,
+                                          transfer_close_angle_deg=100.0,
+                                          exhaust_close_angle_deg=250.0)
 
     def test_zero_denominators_are_explicitly_undefined(self):
         zero = ScavengingInput(0.0, 0.0, 0.0, (0.0,) * 4, (0.0,) * 4)

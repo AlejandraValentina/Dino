@@ -6,7 +6,7 @@ is represented explicitly as undefined rather than as a fabricated zero.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import fsum, isfinite, pi
+from math import fsum, inf, isfinite, pi
 from typing import Any
 
 SPECIES = ("fresh_air", "fuel", "residual", "burned")
@@ -144,3 +144,94 @@ def calculate_scavenging_metrics(inputs: ScavengingInput) -> dict[str, Any]:
             "short_circuit_fraction": "fresh_lost / fresh_delivered",
         },
     }
+
+
+def scavenging_input_from_cycle(cycle: dict[str, Any], *, reference_mass_kg: float,
+                                transfer_close_angle_deg: float,
+                                exhaust_close_angle_deg: float) -> ScavengingInput:
+    """Reconstruct inputs from a cycle's primary trajectory and P6 cumulative ledgers.
+
+    Close angles are scheduler angles already resolved from the engine geometry.
+    A cycle lacking an exact event snapshot or trajectory-terminal binding is
+    rejected; summary values are cross-checked against cumulative primary data.
+    """
+    if not isinstance(cycle, dict) or cycle.get("schema") != "REFERENCE_ENGINE_HYBRID_CYCLE_PRIMARY_V1":
+        raise ValueError("No es evidencia primaria de ciclo del harness.")
+    transfer_angle = _number(transfer_close_angle_deg, "transfer_close_angle_deg",
+                             nonnegative=False)
+    exhaust_angle = _number(exhaust_close_angle_deg, "exhaust_close_angle_deg",
+                            nonnegative=False)
+    trajectory = cycle.get("trajectory")
+    terminal = cycle.get("terminal_state")
+    if not isinstance(trajectory, list) or not trajectory or not isinstance(terminal, dict):
+        raise ValueError("Falta la trayectoria primaria o el estado terminal.")
+    if not isinstance(trajectory[-1], dict):
+        raise ValueError("El último paso de trayectoria no es objeto.")
+    if (cycle.get("trajectory_terminal_state") != terminal.get("gas_conservative") or
+            cycle.get("trajectory_last_species_mass") != terminal.get("species_mass") or
+            trajectory[-1].get("state") != cycle.get("trajectory_last_state") or
+            trajectory[-1].get("species_mass") != cycle.get("trajectory_last_species_mass")):
+        raise ValueError("La trayectoria no coincide con el estado terminal primario.")
+
+    def state_at(target: float, label: str) -> tuple[float, float, float, float]:
+        matches = []
+        previous = -inf
+        for index, row in enumerate(trajectory):
+            if not isinstance(row, dict):
+                raise ValueError(f"trajectory[{index}] no es objeto.")
+            angle = _number(row.get("angle_deg"), f"trajectory[{index}].angle_deg",
+                            nonnegative=False)
+            if angle <= previous:
+                raise ValueError("Los ángulos de la trayectoria deben crecer estrictamente.")
+            previous = angle
+            if abs(angle - target) <= 1e-9:
+                matches.append(row)
+        if len(matches) != 1:
+            raise ValueError(f"Falta snapshot único en {label}={target:.12g}°.")
+        by_component = matches[0].get("species_mass")
+        if not isinstance(by_component, dict):
+            raise ValueError(f"Falta estado P6 de species en {label}.")
+        cylinder = by_component.get("cylinder")
+        if not isinstance(cylinder, list) or len(cylinder) != 1:
+            raise ValueError(f"Estado del cilindro inválido en {label}.")
+        return _species_mass(cylinder[0], f"{label}.cylinder_species")
+
+    start = cycle.get("cycle_start_cumulative")
+    last = trajectory[-1]
+    observables = cycle.get("observables")
+    if not isinstance(start, dict) or not isinstance(observables, dict):
+        raise ValueError("Faltan ledgers P6 acumulados u observables.")
+    delivery_start = _number(start.get("fresh_delivery"), "start.fresh_delivery")
+    short_start = _number(start.get("fresh_short_circuit"),
+                          "start.fresh_short_circuit")
+    delivery_end = _number(last.get("fresh_delivery_cumulative_kg"),
+                            "last.fresh_delivery_cumulative_kg")
+    short_end = _number(last.get("fresh_short_circuit_cumulative_kg"),
+                        "last.fresh_short_circuit_cumulative_kg")
+    delivered, short = delivery_end - delivery_start, short_end - short_start
+    if delivered < 0.0 or short < 0.0:
+        raise ValueError("Los ledgers P6 acumulados retroceden dentro del ciclo.")
+    summary_delivery = _number(observables.get("fresh_delivery_kg"),
+                               "observables.fresh_delivery_kg")
+    summary_short = _number(observables.get("fresh_short_circuit_kg"),
+                             "observables.fresh_short_circuit_kg")
+    if summary_delivery != delivered or summary_short != short:
+        raise ValueError("Los observables frescos no coinciden con los ledgers P6.")
+    return ScavengingInput(
+        reference_mass_kg=reference_mass_kg,
+        fresh_delivered_kg=delivered,
+        fresh_short_circuit_kg=short,
+        species_at_transfer_close_kg=state_at(transfer_angle, "transfer_close"),
+        species_at_exhaust_close_kg=state_at(exhaust_angle, "exhaust_close"),
+    )
+
+
+def scavenging_metrics_from_cycle(cycle: dict[str, Any], *, reference_mass_kg: float,
+                                  transfer_close_angle_deg: float,
+                                  exhaust_close_angle_deg: float) -> dict[str, Any]:
+    """Auditable convenience path from trajectory-bound primary cycle evidence."""
+    inputs = scavenging_input_from_cycle(
+        cycle, reference_mass_kg=reference_mass_kg,
+        transfer_close_angle_deg=transfer_close_angle_deg,
+        exhaust_close_angle_deg=exhaust_close_angle_deg)
+    return calculate_scavenging_metrics(inputs)

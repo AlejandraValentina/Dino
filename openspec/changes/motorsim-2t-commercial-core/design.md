@@ -68,3 +68,10 @@ denominators return `UNDEFINED/ZERO_DENOMINATOR`; no clipping to [0,1] and no
 substitution of zero. A model output outside a familiar efficiency range remains
 visible to expose ledger/state mismatch. `Fret` and `Flost` remain separately
 reported masses.
+
+The trajectory adapter accepts resolved scheduler-angle identities from the
+geometry layer, requires exactly one snapshot at each closure, binds the last
+snapshot to the terminal gas/species state, and recomputes fresh delivery/loss
+from cumulative P6 ledgers. It rejects a missing event, nonmonotone trajectory,
+terminal mismatch, bool-as-number, or stale cycle summary; it never interpolates
+across a closure event.

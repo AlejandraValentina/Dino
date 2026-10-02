@@ -26,6 +26,10 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       denominadores cero; cinco pruebas analíticas/negativas aprobadas.
 - [ ] Fase 4b: extraer snapshots de cierre de transfers/escape desde evidencia
       primaria de ciclo, ligarlos a geometry events y agregar auditor offline.
+- [x] Fase 4b1: adaptador de primary trajectory que exige snapshots únicos en
+      ángulos de cierre resueltos, cierre terminal, ledger P6 cumulativo y
+      summary concordante; no interpola. Tests de evento ausente, resumen stale
+      y bool-as-number cubiertos.
 - [ ] Fase 4c: verificar ledgers P6 durante operación periódica y exponer los
       outputs en el esquema de resultados, sin cambiar transporte.
 - [ ] Fase 5: reed estática y/o dinámica, según alcance físico derivable.
