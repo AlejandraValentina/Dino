@@ -315,7 +315,7 @@
       "state": "IN_PROGRESS",
       "blocker": "P7 stage source is integrated and reviewed; FuelAccounting binding to P6 delivered/trapped species, mechanical/brake binding, and complete-cycle evidence remain open.",
       "commits": [
-        "8b04b8372e5aa3a56f83c93ac89a6d255db19789"
+        "8b04b83ccaa64a0221b380044c38e7c53d0f3cca"
       ],
       "evidence": [
         "20 integrated-engine tests PASS: stage source, source ledgers, exact event end, failed-step transactionality and checkpoint chronology/replay",
