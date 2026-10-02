@@ -81,12 +81,11 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       analíticas/negativas aprobadas. La correlación prescrita se evalúa en
       ambos stages del motor integrado y el balance térmico se registra en
       ciclos sintéticos completos. No modela capacidad térmica dinámica.
-- [ ] Fase 8: `COMBUSTION_MODEL_V2`, separado de P7 prescrito histórico.
+- [x] Fase 8: `COMBUSTION_MODEL_V2`, separado de P7 prescrito histórico.
 - [x] Fase 8a: single/double Wiebe, ignition, efficiency/map y CA10/50/90 en
-      `motorsim.combustion`, con serialization y 11 pruebas. Parcial e
-      intencionalmente sin química, conversión de especie ni energía liberada;
-      esos balances quedan condicionados a los contratos de combustible y
-      energía de fase 11 y a integración de solver.
+      `motorsim.combustion`, con serialization y 11 pruebas. Esta capability
+      prescribe fracción de quemado, landmarks CA10/50/90 e ignition; no incluye
+      química, conversión de especie ni energía liberada y no modifica P7.
 - [x] Fase 9: modelo de cárter V2 y acoplamiento de admisión/transferencia.
 - [x] Fase 9a: volumen de cárter V2 con cinemática/biela existente, dV/dt
       analítico y compresión geométrica, más link 0D bidireccional que reutiliza
@@ -94,11 +93,12 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       integrador resuelve volúmenes cárter/cilindro y flujos de admisión/
       transferencia con especies y ledgers en ambos stages SSPRK2. Evidencia
       sintética `CONDITIONAL_ON_P4`.
-- [ ] Fase 10: pérdidas mecánicas y rendimiento al freno con provenance.
+- [x] Fase 10: pérdidas mecánicas y rendimiento al freno con provenance.
 - [x] Fase 10a: términos FMEP explícitos por fuente, mapas RPM/carga,
       provenance y derivación analítica IMEP/BMEP, potencia y par 2T en
-      `motorsim.mechanical`; cuatro pruebas analíticas/negativas. Parcial: no
-      se inyectan pérdidas al solver ni hay mapas calibrados/documentados.
+      `motorsim.mechanical`; cuatro pruebas analíticas/negativas. El collector
+      usa el modelo cuando está explícitamente configurado; no altera la energía
+      del solver ni afirma calibración medida.
 - [ ] Fase 11: combustible, AFR y BSFC consistentes con P6.
 - [x] Fase 11a: propiedades de combustible explícitas con provenance y cálculo
       de AFR/equivalence, inventario entregado/atrapado/quemado/no quemado,
@@ -112,17 +112,19 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       de `GENERIC_2T_PORTS_V1`; siete pruebas analíticas/negativas aprobadas.
       El mapa RPM se resuelve en cada stage SSPRK2 del motor y cambia áreas y
       cierres exactos. No hay servo ni calibración medida.
-- [ ] Fase 13: plenum, airbox, boost bottle y uniones.
+- [x] Fase 13: plenum, airbox, boost bottle y uniones.
 - [x] Fase 13a: schema de volúmenes/conexiones, atmosphere P6, intercambio
       conservativo 0D/1D con Riemann P3 + donor real P6 y estimación Helmholtz
-      con longitud efectiva explícita; ocho pruebas. Parcial: topology todavía
-      no entra al estado SSPRK2/productivo P5-C ni a ledger global de campaña.
+      con longitud efectiva explícita; ocho pruebas. El helper de interfaz
+      aplica incrementos opuestos y conserva masa, energía y especies. La
+      topología reusable no está conectada como red completa al estado SSPRK2
+      del motor integrado.
 - [ ] Fase 14: esquema unificado de outputs por ángulo y ciclo/RPM.
 - [x] Fase 14a: `MOTORSIM_ENGINEERING_OUTPUTS_V1` con unidades, source,
       dependency status, trazas/metrics opcionales, estados undefined y controles
       de no-claim; diez tests incluyendo esquema inválido. Parcial: outputs aún
       no recolectados de un ciclo full-core arbitrario ni ligados a evidence.
-- [ ] Fase 15: importación exploratoria generalizada sin cambiar P9.
+- [x] Fase 15: importación exploratoria generalizada sin cambiar P9.
 - [x] Fase 15a: importador separado de presión/dyno con units, incertidumbre,
       provenance, raw+SHA256 y overlay exacto con métricas descriptivas;
       15 pruebas focales. Siempre EXPLORATORY_COMPARISON, nunca P9 elegible.
