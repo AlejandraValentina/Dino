@@ -155,6 +155,31 @@ class ReferenceHarnessTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "hash mismatch"):
             restore_checkpoint(restored, restored_detector, checkpoint, config)
 
+    def test_accepted_ssprk_step_checkpoint_restart_matches_continuous_run(self):
+        """Exercise restart continuity after a real P5-C/P6 accepted step."""
+        config = synthetic_configuration()
+        continuous, _, _ = build_system(config)
+        detector = PeriodicDetector()
+        omega = 6.0 * config["operating_point"]["rpm"]
+        dt = 1.0e-7
+        next_angle = continuous.gas.angle + omega * dt
+        continuous.step(dt, angle=next_angle)
+
+        checkpoint = checkpoint_payload(continuous, detector, config,
+                                        cycle_index=0, elapsed_time_s=dt)
+        restarted, _, _ = build_system(config)
+        restarted_detector = PeriodicDetector()
+        info = restore_checkpoint(restarted, restarted_detector, checkpoint, config)
+        self.assertEqual(info, {"cycle_index": 0, "elapsed_time_s": dt})
+        self.assertTrue(replay_comparison(continuous, restarted)["passed"])
+
+        next_dt = 1.0e-7
+        target_angle = continuous.gas.angle + omega * next_dt
+        continuous.step(next_dt, angle=target_angle)
+        restarted.step(next_dt, angle=target_angle)
+        self.assertTrue(replay_comparison(continuous, restarted)["passed"])
+        self.assertEqual(detector.snapshot(), restarted_detector.snapshot())
+
     def test_source_binding_detects_changed_component_set(self):
         binding = source_binding()
         self.assertTrue(verify_source_binding(binding))

@@ -9,9 +9,9 @@
       checkpoint/restore.
 - [x] Implement offline audit, conservation recomputation, replay comparison
       and malformed-evidence rejection.
-- [x] Self-test period-1, period-2, detector persistence, initial-state
-      checkpoint/restore, malformed evidence and conservation recomputation;
-      P5/P6/P7/CFL product regression paths pass.
+- [x] Self-test period-1, period-2, detector persistence, initial-state and
+      accepted-SSPRK2-step checkpoint/restore, malformed evidence and
+      conservation recomputation; P5/P6/P7/CFL product regression paths pass.
 - [x] Create KT100 V2 configuration with complete provenance and run preflight.
 - [x] Run the affected P5-B/P5-C/P6/harness tests (76 passed), then the
       P4-P8 regression set plus harness/P5-B tests (346 passed; 4 existing
@@ -74,3 +74,19 @@ Artifacts:
 `results/kt100-hybrid-model-fixture-v2-harness-20261002-r5/` is the current
 fixed-campaign evidence. Earlier partial/rejected attempts remain preserved in
 the sibling base, r2, r3, and r4 directories and are not used as current results.
+
+Closeout audit: all five r5 receipts were re-audited offline in this turn; each
+failure record agrees with its summary, configuration and product source
+bindings (`evidence_audit=PASS`), while retaining `NUMERICAL_FAILURE` and zero
+complete cycles. `tests/test_reference_harness.py` passes 11 tests after adding
+an accepted-step P5-C/P6 checkpoint/restore continuation comparison against an
+uninterrupted path. This verifies harness serialization and continuation at an
+accepted step; it does not substitute for a KT100 campaign anchor.
+
+KT100 campaign restart/replay, V1/V2 numerical comparison, and sensitivity are
+still pending because no complete V2 cycle exists. Do not infer V2 performance
+from V1 or run sensitivities against absent cycle outputs. The fixture remains
+`KT100_HYBRID_MODEL_FIXTURE_V2_BLOCKED_BEFORE_FIRST_CYCLE`, not VERIFIED. No
+solver, boundary, physical parameter, threshold, cycle horizon, P4–P9 contract,
+or P9 preregistration was changed. P9's frozen hash remains unchanged and P9
+still awaits experimental data.
