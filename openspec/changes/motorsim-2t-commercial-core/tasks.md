@@ -416,3 +416,15 @@ suite seleccionada P4–P8 de la orden: **300 passed**, cuatro warnings NumPy
 preexistentes. OpenSpec estricto aprobado. La clasificación P1 de A y B se
 obtuvo con el detector contractual sin cambiar thresholds. P4/P5-C histórico,
 P6, P7, P8 y P9 no fueron modificados.
+
+### Addendum 2026-10-02 — generic-port contract and periodic fixtures
+
+`GENERIC_2T_PORTS_V1` now accepts a finite nonnegative discharge coefficient:
+`Cd = 0` represents a valid closed-flow path and resolves to zero effective
+area. Focused validation: 40 tests across generic ports, the P5-C adapter,
+powervalve, and integrated engine; OpenSpec strict validation passed. Fixture A
+reached `PERIOD_1` at cycle 16 and Fixture B at cycle 19; their V2 outputs and
+P6-linked scavenging quantities were validated per cycle. These internal
+synthetic results remain `CONDITIONAL_ON_P4`; independent review of the latest
+fuel/output and Fixture B delta remains pending, and full-core readiness is not
+claimed.

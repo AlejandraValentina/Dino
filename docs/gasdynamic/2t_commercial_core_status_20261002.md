@@ -371,3 +371,14 @@ OpenSpec estricto pasó. El artifact de outputs de fuel de A se reconstruyó des
 primary V2 aceptada y validó cuatro outputs; `equivalence_ratio` quedó null/
 UNDEFINED sin estequiometría, y no se infirió LHV. El árbol mantiene solo los
 cuatro directorios históricos KT100 como untracked; no se incluyen en el stage.
+
+### Actualización acotada — puertos y campañas sintéticas periódicas — 2026-10-02
+
+Se corrigió el contrato de coeficiente de descarga: todo `Cd` finito no negativo
+es válido; `Cd=0` conserva la geometría pero cierra el flujo. La regresión
+focalizada de puertos, adaptador P5-C, powervalve e integración pasó 40 pruebas;
+OpenSpec estricto pasó. Las campañas internas sintéticas A y B alcanzaron
+`PERIOD_1` en los ciclos 16 y 19 respectivamente y sus outputs V2/P6 se
+validaron por ciclo. Esa evidencia sigue `CONDITIONAL_ON_P4`. No acredita un
+motor comercial completo; la revisión independiente del delta de fuel/output y
+Fixture B continúa pendiente.

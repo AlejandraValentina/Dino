@@ -2,6 +2,7 @@ import copy
 import json
 import math
 import unittest
+from dataclasses import replace
 
 from motorsim.project import ProjectError
 from motorsim.simulation import restriction
@@ -96,6 +97,13 @@ class GenericTwoStrokePortTests(unittest.TestCase):
             roof_travel_mm=4.0, roof_position=0.5)
         self.assertEqual(model.area_at(exhaust, 180.0), 200.0)
 
+    def test_zero_discharge_coefficient_is_a_valid_closed_flow_path(self):
+        model = generic_fixture()
+        port = next(p for p in model.ports if p.id == "tr-primary")
+        closed = replace(port, discharge_coefficient=0.0)
+        closed.validate()
+        self.assertEqual(model.area_at(closed, 180.0), 0.0)
+
     def test_profile_interpolates_periodically_and_preserves_explicit_values(self):
         model = generic_fixture()
         profile = next(p for p in model.ports if p.id == "ex-aux")
@@ -122,7 +130,7 @@ class GenericTwoStrokePortTests(unittest.TestCase):
     def test_negative_inputs_and_malformed_profiles_are_rejected(self):
         model = generic_fixture()
         payload = json.loads(model.dumps())
-        for coefficient in (0.0, -1.0, math.inf, math.nan, True):
+        for coefficient in (-1.0, math.inf, math.nan, True):
             bad = copy.deepcopy(payload)
             bad["ports"][1]["discharge_coefficient"] = coefficient
             with self.subTest(coefficient=coefficient), self.assertRaises(ProjectError):

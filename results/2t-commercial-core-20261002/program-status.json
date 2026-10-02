@@ -33,17 +33,26 @@
         "single_bridged_auxiliary_exhaust",
         "periodic_area_profiles",
         "discharge_coefficients",
-        "powervalve_ready_roof"
+        "powervalve_ready_roof",
+        "zero_discharge_coefficient_closed_route"
       ],
-      "blocked_scope": "P5-C binding supports two existing transfer paths only; arbitrary path topology, project persistence and GUI remain open."
+      "blocked_scope": "P5-C binding supports two existing transfer paths only; arbitrary path topology, project persistence and GUI remain open.",
+      "discharge_coefficient_contract": "finite and nonnegative; Cd=0 is valid and yields zero effective flow area"
     },
     "4_scavenging": {
-      "status": "METRICS_AND_EXACT_CLOSURE_ADAPTER_IMPLEMENTED_PERIODIC_CAMPAIGN_PENDING",
+      "status": "METRICS_EXACT_CLOSURE_AND_TWO_PERIODIC_SYNTHETIC_FIXTURES_VERIFIED_CONDITIONAL",
       "verified_scope": [
         "four_species_metrics",
         "exact_geometry_closure_snapshots",
         "complete_360_cycle_binding",
-        "stable_output_schema_adapter"
+        "stable_output_schema_adapter",
+        "fixture_A_period_1_at_cycle_16_with_same_cycle_P6_ledgers_and_V2_outputs",
+        "fixture_B_period_1_at_cycle_19_with_same_cycle_P6_ledgers_and_V2_outputs",
+        "synthetic_evidence_conditional_on_P4_not_experimental"
+      ],
+      "remaining": [
+        "independent_review_of_current_fuel_output_and_fixture_B_delta",
+        "no_claim_of_full_commercial_core_readiness"
       ]
     },
     "5_reed": {
@@ -384,7 +393,7 @@
       "full_snapshot_equality": true,
       "six_primary_records_equal": true,
       "six_engineering_outputs_equal_and_validated": true,
-      "p1_p2": "NOT_MET; fixture A remains blocked",
+      "p1_p2": "Not assessed in this six-cycle replay artifact; see integrated_fixture_a_periodicity_extension for later PERIOD_1 evidence.",
       "evidence": "results/2t-commercial-core-20261002/fixture-a-restart-replay-audit-20261002.json",
       "primary_trajectory": "results/2t-commercial-core-20261002/fixture-a-integrated-cycles-20261002-v2.json.gz"
     },
@@ -531,7 +540,7 @@
         "17b-static-reed-intake-crankcase"
       ],
       "state": "IN_PROGRESS",
-      "blocker": "Fixture A has negative indicated work on cycle 1 and P1 comparisons fail on cycles 2–6; trapped-fuel/closure accounting and approved P7 Q_F-to-LHV binding remain unresolved.",
+      "blocker": "Equivalence ratio requires explicit stoichiometric AFR; terminal global fuel inventory is not trapped fuel; no approved P7 Q_F-to-LHV binding. Dynamic reed integration remains separate.",
       "commits": [
         "8b04b83ccaa64a0221b380044c38e7c53d0f3cca"
       ],
@@ -543,7 +552,7 @@
         "21 integrated tests and 73-test integrated/P5-C/P6/P7/reed/ports group pass; fixture A shows nonzero fuel delivery/short-circuit, P7 heat, wall heat and work",
         "Cycle-primary collector derives fuel flow only from actual integrated P6 intake fuel-species ledger; LHV-based metrics remain undefined."
       ],
-      "next_action": "Resolve non-LHV accounting and cycle ledger bindings without inventing fuel properties; feed the actual work and fuel evidence into the unified collector."
+      "next_action": "Continue generic geometry and cycle integration independently; keep quantities UNDEFINED unless inputs have approved meanings."
     },
     {
       "id": "17e-cycle-evidence-collector",
@@ -554,7 +563,7 @@
         "17d-fuel-combustion-thermal-mechanics"
       ],
       "state": "IN_PROGRESS",
-      "blocker": "Fixture A reached P1 at cycle 16; equivalence-ratio fuel property and trapped-versus-terminal fuel semantics remain unresolved; Fixture B gate remains held.",
+      "blocker": "Full Commercial Core acceptance remains open: explicit stoichiometry/trapped-fuel semantics, dynamic reed integration, independent review, and boundary V2 decision. Synthetic fixtures A and B reached PERIOD_1 but remain CONDITIONAL_ON_P4.",
       "commits": [
         "e93fd624"
       ],
@@ -574,7 +583,7 @@
         "Two independent six-cycle Fixture A runs (one continuous, one checkpoint/restart after cycle 3) had exact full snapshot, primary-cycle and validated V2-output equality; 11,176 accepted steps; P1/P2 still fail.",
         "Fixture A primary campaign reached PERIOD_1 at cycle 16 after 3 consecutive PASS comparisons (13→14→15→16); full P1 artifact preserved; no solver/threshold changes."
       ],
-      "next_action": "Close fuel-mass outputs from accepted ledgers; keep equivalence ratio undefined without stoichiometry; release Fixture B only after its explicit gate is satisfied."
+      "next_action": "Continue remaining independent components and integration; do not promote readiness."
     },
     {
       "id": "18-fixture-b-regressions",

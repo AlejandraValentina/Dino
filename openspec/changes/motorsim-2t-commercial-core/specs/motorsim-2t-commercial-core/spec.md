@@ -216,6 +216,13 @@ unchanged.
   samples are recomputed, and stale or modified derived-profile evidence is
   rejected.
 
+#### Scenario: Zero discharge coefficient closes a geometric port
+
+- **WHEN** a geometrically valid port has a finite discharge coefficient of
+  zero
+- **THEN** the configuration remains valid and its effective area is zero at
+  every crank angle, without changing the geometric window or other ports.
+
 #### Scenario: Reverse flow through piston-port intake
 
 - **WHEN** the connected flow reverses through an open piston-port window
