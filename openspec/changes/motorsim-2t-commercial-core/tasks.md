@@ -89,6 +89,10 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       con longitud efectiva explícita; ocho pruebas. Parcial: topology todavía
       no entra al estado SSPRK2/productivo P5-C ni a ledger global de campaña.
 - [ ] Fase 14: esquema unificado de outputs por ángulo y ciclo/RPM.
+- [x] Fase 14a: `MOTORSIM_ENGINEERING_OUTPUTS_V1` con unidades, source,
+      dependency status, trazas/metrics opcionales, estados undefined y controles
+      de no-claim; diez tests incluyendo esquema inválido. Parcial: outputs aún
+      no recolectados de un ciclo full-core arbitrario ni ligados a evidence.
 - [ ] Fase 15: importación exploratoria generalizada sin cambiar P9.
 - [ ] Fase 16: segundo reference case con fuentes públicas y provenance.
 - [ ] Gate final: integración arbitraria 2T, regresiones, auditoría y dos casos;

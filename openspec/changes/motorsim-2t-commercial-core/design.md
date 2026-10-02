@@ -189,3 +189,13 @@ configured `roof_travel_mm`, reusing the generic port geometry's existing
 definition. It can target only the declared movable main rectangular exhaust.
 Port area and event angles are then computed by `TwoStrokePortSet`; no servos,
 control dynamics, or calibrated RPM values are added.
+
+## Unified engineering outputs `MOTORSIM_ENGINEERING_OUTPUTS_V1`
+
+The JSON-ready output binds a strict 360-degree 2T convention, RPM/cycle index,
+explicit P4 dependency status, crank-angle samples, supported signal names,
+units, source labels and cycle metrics. Undefined ratios carry `null`, status
+and reason. It rejects unknown channels, nonfinite/bool values, incomplete
+cycle spans and altered units. Periodicity defaults to `NOT_EVALUATED`;
+experimental validation remains `NOT_PERFORMED` and predictive validation
+`NOT_CLAIMED`. Channels remain optional until a producing solver path exists.

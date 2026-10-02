@@ -361,3 +361,26 @@ share its SSPRK stages and global ledgers.
 - **THEN** atmosphere contains only the default fresh-air species and the
   Helmholtz estimate uses caller-provided effective length without hidden
   corrections.
+
+### Requirement: Versioned engineering output schema
+
+Engineering output MUST use `MOTORSIM_ENGINEERING_OUTPUTS_V1` with a strict
+360-degree 2T cycle convention, RPM/cycle identity, explicit P4 dependency
+status, crank-angle trace and cycle metrics. Supported channels and metrics
+MUST declare units and source. Undefined values MUST carry null, status and
+reason. Nonfinite/bool values, unknown channels, mismatched sample counts,
+incomplete cycles or altered units MUST be rejected. The schema MUST keep
+periodicity `NOT_EVALUATED`, experimental validation `NOT_PERFORMED`, and
+predictive validation `NOT_CLAIMED` unless a later explicitly authorized
+evidence adapter supplies a distinct schema.
+
+#### Scenario: Build a trace with unavailable metric
+
+- **WHEN** a complete crank-angle trace and supported cycle metrics are supplied
+- **THEN** units, sources and undefined reasons are serialized, with no claim of
+  periodicity or validation.
+
+#### Scenario: Reject stale or unsupported channels
+
+- **WHEN** channel units, sample counts or cycle span disagree with the schema
+- **THEN** construction or offline validation rejects the artifact.
