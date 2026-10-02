@@ -60,6 +60,16 @@ its section areas, face fluxes, four-species transport, and external boundary
 exchange MUST then participate in both common SSPRK2 stages without modifying
 the historical expansion-chamber or P5/P6 solvers.
 
+The integrated geometry adapter MUST map each generic port duct to exactly one
+named integrated path with a matching role, sum apertures on that route, and
+resolve an existing powervalve roof at the current stage RPM before evaluating
+main-exhaust area. Its binding and RPM policy MUST participate in restart
+identity. The path map MUST be an immutable copy after construction so later
+caller mutation cannot change stage routing under a stale configuration hash.
+Internal duct species fluxes MUST receive adjacent cell states in geometric
+left/right order and select the donor exactly once from the signed shared gas
+mass flux; negative flux MUST use the right-cell composition.
+
 #### Scenario: Three or more transfer routes share stage fluxes
 
 - **WHEN** an engine topology has named primary, secondary and boost routes
@@ -88,6 +98,22 @@ the historical expansion-chamber or P5/P6 solvers.
 - **THEN** every section cell and face is advanced in both global SSPRK2
   stages, with species transport and external exchange in the integrated
   ledgers.
+
+#### Scenario: Generic port and powervalve geometry participates in a stage
+
+- **WHEN** every generic port duct is mapped to a matching integrated path and
+  an exhaust port has an existing powervalve map
+- **THEN** the stage resolves intake, each transfer route, and exhaust areas
+  from the configured angle and RPM, and a mismatched geometry/RPM binding
+  cannot restore a checkpoint.
+
+#### Scenario: Reverse internal flow transports the right-cell composition
+
+- **WHEN** the integrated finite-volume mass flux between adjacent duct cells
+  is negative in either SSPRK2 stage
+- **THEN** the four species flux MUST be the shared negative mass flux times
+  the normalized right-cell species composition, without a second donor
+  selection based on already reordered states.
 
 #### Scenario: JSON checkpoint restores all accepted physical history
 

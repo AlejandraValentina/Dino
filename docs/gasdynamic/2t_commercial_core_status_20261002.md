@@ -85,7 +85,7 @@ stage SSPRK2 usando la diferencia de presión ducto-cárter de ese mismo stage.
 El flujo de gas/especies sigue usando la interfaz compartida y el donor P6.
 Las pruebas cubren la reed cerrada y abierta, conservación, backward donor,
 CFL 0D/1D, reinicio y rechazo de geometría obsoleta. Suite agrupada actual:
-66 pruebas aprobadas, incluida `tests/test_reed.py`; OpenSpec estricto,
+67 pruebas aprobadas, incluida `tests/test_reed.py`; OpenSpec estricto,
 `git diff --check`, `git lfs fsck` y hash P9 aprobados.
 
 La revisión independiente fue puntual sobre el fundamento CFL, el restart y
@@ -104,3 +104,37 @@ ruta exhaust del mismo integrador y comprueba que sus celdas y caras se
 actualizan en los dos stages con transporte de especies y balance global.
 Esto verifica el enlace de malla, no ciclos completos ni reflexión/calibración
 de cámara.
+El adaptador stage geometry además mapea explícitamente cada ducto genérico a
+una ruta 1D y calcula aperturas existentes de puertos y powervalve según ángulo
+y RPM; una prueba comprueba la identidad de esa configuración en restart. Esta
+parte todavía se verifica en resolución de stage, no en un paso angular
+aceptado con variación de abertura.
+La revisión read-only del adapter detectó que el mapeo podía mutar después de
+congelar la identidad del checkpoint; ahora el constructor copia el mapa a una
+vista inmutable y la prueba rechaza mutación externa/interna. La revisión
+read-only final confirmó el cierre sin encontrar otro defecto en ese alcance.
+
+### Continuación: donante de especie en caras internas y trayectoria de puertos
+
+Al extender el fixture de `IntegratedPortBinding2T` desde la mera evaluación
+de etapas hasta pasos SSPRK2 aceptados, apareció una pérdida inadmisible de
+especie fresca durante flujo inverso interno. El diagnóstico localizó una doble
+selección de donante: el integrador preseleccionaba celda donante/receptora y
+después el helper P6 volvía a aplicar el signo del flujo sobre argumentos ya
+reordenados. Se corrigió pasando los estados siempre en orden geométrico
+izquierda/derecha para que el selector compartido elija una sola vez. La nueva
+aserción contrasta cada flujo interno negativo con la composición de la celda
+derecha en ambos stages usando fracciones iniciales distintas a cada lado. La
+misma trayectoria compara las áreas resueltas de cada stage con el binding a
+su ángulo y RPM, y confirma al menos un punto donde la powervalve cambia el
+área del puerto de escape principal.
+
+Resultado actual: el recorrido artificial a 3000 rpm completó pasos aceptados
+de 0° a 90° con áreas genéricas, tres transferencias, escape auxiliar y
+powervalve; `tests/test_integrated_2t.py` pasa 15/15 y la regresión agrupada
+de seis módulos pasa 67/67. Esto no acredita un ciclo, cierre
+geométrico, periodo ni viabilidad física de motor. La revisión independiente
+read-only de este delta confirmó el donante izquierda/derecha para ambos signos,
+la correspondencia de estado/flujo por stage y la resolución de áreas a ángulo
+y RPM; no encontró defectos concretos. Es una revisión puntual, no de un motor
+completo; se conserva separada de la autorrevisión.

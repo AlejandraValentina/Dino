@@ -139,7 +139,7 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       fixture de malla estática con tres transfers prueba conservación local,
       backflow/donor, geometría de celda en CFL, vaciado bruto de cámara 0D,
       flujo con entrada y salida simultáneas, calor prescrito, restart atómico
-      y JSON replay. **Parcial**, 13 pruebas focales
+      y JSON replay. **Parcial**, 15 pruebas focales
       pasan; no incluye combustión ni ciclos de motor. Revisión independiente
       confirma la cota de CFL y originó el gate de coherencia geométrica del
       restart.
@@ -152,8 +152,13 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       expansion-chamber en los mismos stages; scavenging ledger con cierres
       geométricos y flujos con signo. Parcial: el mesh real de
       `ExpansionChamber` se avanzó como la ruta exhaust en ambos SSPRK2 stages
-      con flujo y especies conservativos (prueba focal); falta enlazar áreas
-      genéricas/powervalve a esa ruta y verificar ciclos/cierres exactos.
+      con flujo y especies conservativos. El binding de áreas genéricas y el
+      mapa de powervalve participan ahora de una trayectoria angular aceptada
+      sintética 0–90° a 3000 rpm; el chequeo detectó y corrigió selección
+      invertida del donante P6 en caras internas con flujo inverso. La
+      regresión comprueba la composición del donante por stage y la ruta
+      mantiene admisibilidad. Sigue pendiente completar ciclos/cierres exactos
+      y clasificar la frontera V2.
 - [ ] 17d. Combustión P7 autorizada, paredes térmicas, combustible/especies y
       trabajo mecánico integrados con ledger único sin doble conteo.
 - [ ] 17e. Periodicidad P1/P2, evidencia primaria, collector engineering,
@@ -170,7 +175,8 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
   faltan dinámica reed, configuración de cárter acoplada y verificación de
   retroflujo con reed dinámica.
 - `IN_PROGRESS` — El mesh `ExpansionChamber` ya participa como ducto exhaust
-  en el stage común; faltan binding directo de áreas/powervalve, cierres de
+  en el stage común y el binding existente generic ports/powervalve resuelve
+  áreas por ángulo/RPM. Falta trayectoria angular aceptada, cierres exactos de
   puertos por ciclo y clasificación de boundary V2.
 - `READY` — Bind P7, fuel/P6 y work/brake en ledger por ciclo sin doble conteo.
 - `READY` — Evidencia primaria, periodicidad, collector y Fixture A completo.

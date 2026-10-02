@@ -241,3 +241,14 @@ fuel conversion, periodic-cycle evidence and the complete engineering
 collector remain open integration work. Existing reservoir-boundary
 inconsistency is not hidden by an automatic fallback; boundary V2 remains an
 explicit local blocker until its mathematical scope is resolved.
+
+The integrated geometry adapter also binds every existing generic port duct
+to one named integrated path. Port areas are accumulated by the mapped route;
+the existing `PowerValve` may replace the configured main-exhaust roof at the
+stage RPM before resolving its area. An existing multi-section
+`ExpansionChamber.mesh()` is accepted as the exhaust path mesh. These bindings
+are exercised together at stage resolution, but they do not yet establish a
+complete angular cycle, exact scavenging closure, or reservoir-boundary V2.
+The duct-to-path mapping is copied into an immutable view at construction, so
+later mutation of the caller's dictionary cannot diverge stage routing from
+the checkpoint identity.

@@ -13,6 +13,8 @@ from dataclasses import dataclass
 import hashlib
 import json
 from math import fsum, isfinite
+from types import MappingProxyType
+from collections.abc import Mapping
 from typing import Callable
 
 from .coupling import ChamberState, interface_flux
@@ -21,8 +23,10 @@ from .gas1d.eos import IdealGas
 from .gas1d.riemann import hllc_flux
 from .p6_species import (SPECIES, atmospheric_species, donor_species,
                          legacy_to_species, validate_species)
+from .powervalve import PowerValve
 from .reed import ReedPetal, static_area
 from .thermal import ThermalSystem
+from .two_stroke_ports import TwoStrokePortSet
 
 
 def _tuplify(value):
@@ -75,6 +79,64 @@ class DuctPath2T:
             raise ValueError("duct mesh face/cell shape mismatch")
 
 
+@dataclass(frozen=True)
+class IntegratedPortBinding2T:
+    """Bind existing generic port ducts to the integrated finite-volume paths."""
+    port_set: TwoStrokePortSet
+    path_by_duct: dict[str, str]
+    powervalve: PowerValve | None = None
+
+    def __post_init__(self):
+        if isinstance(self.path_by_duct, Mapping):
+            object.__setattr__(self, "path_by_duct",
+                               MappingProxyType(dict(self.path_by_duct)))
+
+    def validate(self, paths: tuple[DuctPath2T, ...]) -> None:
+        if not isinstance(self.port_set, TwoStrokePortSet):
+            raise ValueError("port binding requires the existing TwoStrokePortSet")
+        self.port_set.validate()
+        if not isinstance(self.path_by_duct, Mapping) or set(self.path_by_duct) != {
+                duct.id for duct in self.port_set.ducts}:
+            raise ValueError("every generic port duct must map to one integrated path")
+        path_roles = {path.id: path.role for path in paths}
+        if any(path_id not in path_roles for path_id in self.path_by_duct.values()):
+            raise ValueError("generic port binding names an unknown integrated path")
+        duct_roles = {duct.id: duct.role for duct in self.port_set.ducts}
+        for duct_id, path_id in self.path_by_duct.items():
+            if duct_roles[duct_id] != path_roles[path_id]:
+                raise ValueError(f"{duct_id}: generic and integrated path roles differ")
+        if set(self.path_by_duct.values()) != path_roles.keys():
+            raise ValueError("every integrated path requires an explicit generic port binding")
+        if self.powervalve is not None:
+            if not isinstance(self.powervalve, PowerValve):
+                raise ValueError("powervalve must use the existing PowerValve model")
+            self.powervalve.validate()
+            target = next((port for port in self.port_set.ports
+                           if port.id == self.powervalve.exhaust_port_id), None)
+            if target is None or target.role != "exhaust":
+                raise ValueError("powervalve target must be a bound exhaust port")
+
+    def resolve(self, paths: tuple[DuctPath2T, ...], angle_deg: float,
+                rpm: float) -> tuple[float, tuple[float, ...], float]:
+        areas = {path.id: 0.0 for path in paths}
+        for port in self.port_set.ports:
+            if self.powervalve is not None and port.id == self.powervalve.exhaust_port_id:
+                area_mm2 = self.powervalve.area_at(self.port_set, rpm, angle_deg)
+            else:
+                area_mm2 = self.port_set.area_at(port, angle_deg)
+            path_id = self.path_by_duct[port.duct_id]
+            areas[path_id] += area_mm2 * 1e-6
+        intake = next(path for path in paths if path.role == "intake")
+        exhaust = next(path for path in paths if path.role == "exhaust")
+        transfers = tuple(path.id for path in paths if path.role == "transfer")
+        return areas[intake.id], tuple(areas[path_id] for path_id in transfers), areas[exhaust.id]
+
+    def to_dict(self) -> dict:
+        return {"port_set": self.port_set.to_dict(),
+                "path_by_duct": dict(self.path_by_duct),
+                "powervalve": None if self.powervalve is None else self.powervalve.to_dict()}
+
+
 class IntegratedEngine2T:
     """One SSPRK2 state for reed/intake-ready, N-transfer, exhaust topology.
 
@@ -99,6 +161,8 @@ class IntegratedEngine2T:
                  max_cfl: float = 0.4,
                  geometry_identity: dict | None = None,
                  reed_petals: tuple[ReedPetal, ...] = (),
+                 port_binding: IntegratedPortBinding2T | None = None,
+                 reference_rpm: float = 1000.0,
                  thermal_system: ThermalSystem | None = None,
                  thermal_locations: dict[str, str] | None = None,
                  thermal_load: float = 0.0):
@@ -118,6 +182,9 @@ class IntegratedEngine2T:
         for petal in reed_petals:
             petal.validate()
         self.reed_petals = reed_petals
+        if type(reference_rpm) not in (int, float) or not isfinite(reference_rpm) or reference_rpm <= 0:
+            raise ValueError("reference_rpm must be positive and finite")
+        self.reference_rpm = float(reference_rpm)
         if type(max_cfl) not in (int, float) or not isfinite(max_cfl) or not 0 < max_cfl <= 1:
             raise ValueError("max_cfl must be finite and in (0, 1]")
         self.max_cfl = float(max_cfl)
@@ -136,6 +203,11 @@ class IntegratedEngine2T:
         self.intake = next(path for path in ducts if path.role == "intake")
         self.exhaust = next(path for path in ducts if path.role == "exhaust")
         self.transfers = tuple(path for path in ducts if path.role == "transfer")
+        if port_binding is not None:
+            if not isinstance(port_binding, IntegratedPortBinding2T):
+                raise ValueError("port_binding must use IntegratedPortBinding2T")
+            port_binding.validate(ducts)
+        self.port_binding = port_binding
         if set(initial_duct_states) != {path.id for path in ducts}:
             raise ValueError("initial duct states must match topology ids exactly")
         p_atm, t_atm = atmosphere
@@ -190,7 +262,7 @@ class IntegratedEngine2T:
                        "heat_to_wall_J": 0.0,
                        "cylinder_work_J": 0.0, "crankcase_work_J": 0.0}
         self.trace = []
-        geometry0 = self._geometry(self.angle_deg)
+        geometry0 = self._geometry(self.angle_deg, self.reference_rpm)
         self.state = {
             "chambers": {
                 "crankcase": self._chamber_from_primitive(crankcase_state,
@@ -246,6 +318,9 @@ class IntegratedEngine2T:
                     "species": list(SPECIES), "state_schema": self.schema,
                     "max_cfl": self.max_cfl, "geometry_sha256": self.geometry_sha256,
                     "reed": [petal.to_dict() for petal in self.reed_petals],
+                    "port_binding": (None if self.port_binding is None else
+                                     self.port_binding.to_dict()),
+                    "reference_rpm": self.reference_rpm,
                     "initial_state_sha256": hashlib.sha256(initial_bytes).hexdigest(),
                     "boundaries": {"inlet": vars(self.inlet_boundary),
                                    "outlet": vars(self.outlet_boundary)},
@@ -260,10 +335,19 @@ class IntegratedEngine2T:
             encoded.encode("utf-8")).hexdigest()
         return normalized
 
-    def _geometry(self, angle):
+    def _geometry(self, angle, rpm=None):
         result = self.geometry(float(angle) % 360.0)
         if not isinstance(result, EngineGeometry2T):
             raise ValueError("geometry callback must return EngineGeometry2T")
+        if self.port_binding is not None:
+            intake, transfers, exhaust = self.port_binding.resolve(
+                self.ducts, float(angle) % 360.0,
+                self.reference_rpm if rpm is None else float(rpm))
+            result = EngineGeometry2T(result.crankcase_volume_m3,
+                                      result.cylinder_volume_m3,
+                                      result.crankcase_volume_rate_m3_s,
+                                      result.cylinder_volume_rate_m3_s,
+                                      intake, transfers, exhaust)
         result.validate(tuple(path.id for path in self.transfers) if hasattr(self, "transfers")
                         else tuple(path.id for path in self.ducts if path.role == "transfer"))
         return result
@@ -315,7 +399,7 @@ class IntegratedEngine2T:
 
     def _assemble(self, state, angle, rpm):
         """Build every RHS from one immutable stage state."""
-        g = self._geometry(angle)
+        g = self._geometry(angle, rpm)
         chambers = state["chambers"]
         species_chambers = state["species"]["chambers"]
         cc = self._chamber_state(chambers["crankcase"], species_chambers["crankcase"])
@@ -459,11 +543,13 @@ class IntegratedEngine2T:
                 area = path.mesh.areas[i + 1]
                 gas_face = tuple(area * value for value in flux[:3])
                 mflux = gas_face[0]
-                donor = ss[i] if mflux >= 0 else ss[i + 1]
-                donor_mass = qs[i if mflux >= 0 else i + 1][0] * path.mesh.volumes[i if mflux >= 0 else i + 1]
-                receiver = ss[i + 1] if mflux >= 0 else ss[i]
-                receiver_mass = qs[i + 1 if mflux >= 0 else i][0] * path.mesh.volumes[i + 1 if mflux >= 0 else i]
-                sf = self._face_species_flux(mflux, donor, donor_mass, receiver, receiver_mass)
+                # Keep states in geometric left/right order.  The shared donor
+                # selector inside _face_species_flux chooses right for reverse
+                # flow; preselecting here would reverse that decision twice.
+                left_mass = qs[i][0] * path.mesh.volumes[i]
+                right_mass = qs[i + 1][0] * path.mesh.volumes[i + 1]
+                sf = self._face_species_flux(mflux, ss[i], left_mass,
+                                             ss[i + 1], right_mass)
                 faces.append(gas_face); species_faces.append(sf)
                 face_speeds.append(max(abs(waves[0]), abs(waves[-1])))
             faces.append(right_face); species_faces.append(right_face_species)

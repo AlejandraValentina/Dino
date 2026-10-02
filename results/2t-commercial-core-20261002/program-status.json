@@ -158,15 +158,22 @@
         "static_reed_area_from_each_stage_pressure",
         "atomic_json_checkpoint_restart_and_replay",
         "restored_angle_and_chamber_geometry_consistency",
-        "existing_expansion_chamber_mesh_in_integrated_exhaust_stages"
+        "existing_expansion_chamber_mesh_in_integrated_exhaust_stages",
+        "generic_port_path_binding_with_role_identity",
+        "powervalve_area_resolved_by_stage_rpm",
+        "expansion_chamber_mesh_integrated_exhaust_stage",
+        "generic_port_powervalve_accepted_angular_path_0_to_90_deg",
+        "reverse_internal_species_flux_uses_geometric_right_donor"
       ],
-      "focal_tests": 14,
+      "focal_tests": 15,
       "blocked_scope": [
         "dynamic_reed_state_and_restart",
         "combustion_and_fuel_conversion",
         "periodic_complete_engine_cycles",
         "full_evidence_and_engineering_output_collector",
-        "two_independent_integrated_fixtures"
+        "two_independent_integrated_fixtures",
+        "complete_360_degree_cycles_and_exact_port_closure",
+        "independent_review_of_reverse_internal_donor_fix"
       ],
       "boundary_v2": "NOT_IMPLEMENTED_NO_FALLBACK"
     }
@@ -179,7 +186,8 @@
     "commercial_core_openspec_strict": "PASS",
     "integrated_engine_foundation_tests": {
       "result": "PASS",
-      "count": 14
+      "count": 15,
+      "command": "python -m pytest tests/test_integrated_2t.py -q"
     },
     "reference_harness_openspec_strict": "PASS",
     "git_diff_check": "PASS",
@@ -188,14 +196,15 @@
     "p9_contract_sha256": "79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d",
     "integrated_regression_group_current": {
       "result": "PASS",
-      "count": 66,
+      "count": 67,
       "command": "python -m pytest tests/test_integrated_2t.py tests/test_p5c_integrated.py tests/test_p6_species.py tests/test_p7_full_topology.py tests/test_reed.py tests/test_two_stroke_ports_p5c.py -q"
     }
   },
   "review": {
-    "current_delta": "INDEPENDENT_READ_ONLY_REVIEW_PASS_FOR_CFL_RESTART_AND_STATIC_REED_DELTA",
-    "independent_review_current_delta": "PASS_FOCAL_SCOPE; geometry callback identity still caller-declared",
-    "prior_harness_punctual_review": "NO_MATERIAL_DEFECT_FOUND"
+    "current_delta": "INDEPENDENT_READ_ONLY_REVIEW_PASS_CFL_RESTART_STATIC_REED_PORT_BINDING_EXPANSION_MESH",
+    "independent_review_current_delta": "PASS_FOR_IMPLEMENTED_FOUNDATION_AND_GEOMETRY_BINDING; no complete-engine review performed",
+    "prior_harness_punctual_review": "NO_MATERIAL_DEFECT_FOUND",
+    "reverse_internal_donor_fix": "INDEPENDENT_READ_ONLY_REVIEW_PASS_BOTH_DONOR_DIRECTIONS_AND_STAGE_BINDING; no complete-engine review performed"
   },
   "git": {
     "branch": "main",
@@ -244,17 +253,21 @@
     },
     {
       "id": "17c-exhaust-chamber-boundary",
-      "description": "Integrate existing ExpansionChamber mesh into global exhaust path; continue with generic port/powervalve geometry and external boundary classification",
+      "description": "Bind generic TwoStrokePortSet/Powervalve stage geometry and ExpansionChamber mesh to the global exhaust path; finish with accepted trajectories and boundary classification",
       "dependencies": [
         "17a-integrated-gas-species-foundation"
       ],
       "state": "IN_PROGRESS",
-      "blocker": "Port/powervalve geometry and cycle-exact closure are not yet bound to this path.",
+      "blocker": "Cycles/exact port closures and boundary classification remain open; the integrated generic geometry now completes accepted synthetic steps 0–90 degrees.",
       "commits": [],
       "evidence": [
-        "tests/test_integrated_2t.py:14; existing expansion-chamber multi-section mesh participates in both global gas/species stages"
+        "tests/test_integrated_2t.py:15; multi-section ExpansionChamber mesh is accepted and advanced as exhaust",
+        "IntegratedPortBinding2T maps role-matched ducts, resolves powervalve roof by stage RPM, and binds identity; stage resolver test passes",
+        "read-only adversarial review found a mutable mapping/config identity mismatch; fixed using copied MappingProxyType and reviewer confirmed closure",
+        "tests/test_integrated_2t.py:15; accepted 0–90 degree synthetic path at 3000 rpm",
+        "negative internal species flux follows geometric right-cell composition in both SSPRK2 stages; regression corrected donor double-selection"
       ],
-      "next_action": "Bind existing TwoStrokePortSet/Powervalve areas to the same stage geometry callback; do not claim cycle verification."
+      "next_action": "Continue toward full-cycle admissible fixture and exact geometric closure; preserve reservoir blocker and do not retry KT100."
     },
     {
       "id": "17d-fuel-combustion-thermal-mechanics",

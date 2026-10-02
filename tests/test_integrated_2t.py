@@ -7,18 +7,22 @@ from motorsim.gas1d.mesh import uniform_mesh
 from motorsim.gas1d.boundary import Boundary
 from motorsim.expansion_chamber import ChamberSection, ExpansionChamber
 from motorsim.integrated_2t import (
-    DuctPath2T, EngineGeometry2T, IntegratedEngine2T,
+    DuctPath2T, EngineGeometry2T, IntegratedEngine2T, IntegratedPortBinding2T,
 )
 from motorsim.p6_species import SPECIES
+from motorsim.powervalve import PowerValve
 from motorsim.reed import ReedPetal
 from motorsim.thermal import ThermalSurface, ThermalSystem
+from motorsim.two_stroke_ports import AreaKnot, DuctBinding, PortDefinition, TwoStrokePortSet
 
 
 def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
           exhaust_area=0.0, thermal_system=None, thermal_locations=None,
           geometry=None, max_cfl=0.4, duct_pressure=101325.0,
           reed_petals=(), intake_area=0.0, transfer_pressure=101325.0,
-          transfer_area=1e-5, duct_length=.02, exhaust_mesh=None):
+          transfer_area=1e-5, duct_length=.02, exhaust_mesh=None,
+          port_binding=None, reference_rpm=1000.0, geometry_identity=None,
+          duct_species=None):
     def duct_mesh(duct_id):
         if duct_id == "exhaust" and exhaust_mesh is not None:
             return exhaust_mesh
@@ -48,14 +52,17 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
         if path.role == "transfer":
             component_species[path.id] = tuple(
                 (1.1768 * volume, 0.0, 0.0, 0.0) for volume in path.mesh.volumes)
+    component_species.update(duct_species or {})
     return IntegratedEngine2T(
         (1.1768, 0.0, crankcase_pressure, 1.0),
         (1.1768, 0.0, cylinder_pressure, 1.0),
         paths, states, geometry, species=component_species,
         inlet_boundary=Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0)),
         outlet_boundary=Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0)),
-        geometry_identity={"fixture": "three-transfer-static-volume-v1"},
+        geometry_identity=(geometry_identity or
+                           {"fixture": "three-transfer-static-volume-v1"}),
         reed_petals=reed_petals,
+        port_binding=port_binding, reference_rpm=reference_rpm,
         thermal_system=thermal_system, thermal_locations=thermal_locations,
         max_cfl=max_cfl)
 
@@ -226,6 +233,126 @@ def test_existing_expansion_chamber_mesh_participates_in_integrated_exhaust_stag
         exhaust_mesh.volumes) + 1
     assert abs(system.conservation_report()["mass"]["residual"]) < 1e-15
     assert abs(system.conservation_report()["energy"]["residual"]) < 1e-10
+
+
+def test_generic_ports_and_powervalve_resolve_into_integrated_stage_geometry():
+    ports = TwoStrokePortSet(
+        56.0, 100.0,
+        (DuctBinding("inlet", "intake"),
+         DuctBinding("primary", "transfer"),
+         DuctBinding("secondary", "transfer"),
+         DuctBinding("boost", "transfer"),
+         DuctBinding("exhaust", "exhaust")),
+        (PortDefinition("inlet-window", "Inlet", "intake", "piston_port", "inlet",
+                        "piston_port", .9, "SYNTHETIC_ASSUMPTION", top_mm=64.0,
+                        height_mm=10.0, width_mm=20.0, skirt_mm=42.0),
+         PortDefinition("primary-window", "Primary", "transfer", "primary", "primary",
+                        "rectangular_window", .8, "SYNTHETIC_ASSUMPTION", top_mm=32.0,
+                        height_mm=10.0, width_mm=20.0),
+         PortDefinition("secondary-window", "Secondary", "transfer", "secondary", "secondary",
+                        "rectangular_window", .8, "SYNTHETIC_ASSUMPTION", top_mm=34.0,
+                        height_mm=8.0, width_mm=12.0),
+         PortDefinition("boost-window", "Boost", "transfer", "boost", "boost",
+                        "rectangular_window", .7, "SYNTHETIC_ASSUMPTION", top_mm=36.0,
+                        height_mm=7.0, width_mm=8.0),
+         PortDefinition("main-exhaust", "Main exhaust", "exhaust", "main", "exhaust",
+                        "rectangular_window", .9, "SYNTHETIC_ASSUMPTION", top_mm=30.0,
+                        height_mm=10.0, width_mm=20.0, roof_travel_mm=4.0),
+         PortDefinition("aux-exhaust", "Aux exhaust", "exhaust", "auxiliary", "exhaust",
+                        "effective_profile", .5, "SYNTHETIC_ASSUMPTION",
+                        area_profile=(AreaKnot(0.0, 0.0), AreaKnot(90.0, 25.0),
+                                      AreaKnot(180.0, 50.0), AreaKnot(270.0, 25.0),
+                                      AreaKnot(360.0, 0.0)))))
+    valve = PowerValve("pv", "main-exhaust", (1000.0, 5000.0), (0.0, 1.0),
+                       "SYNTHETIC_ASSUMPTION")
+    path_mapping = {"inlet": "intake", "primary": "primary", "secondary": "secondary",
+                    "boost": "boost", "exhaust": "exhaust"}
+    binding = IntegratedPortBinding2T(ports, path_mapping, valve)
+    path_mapping["primary"] = "secondary"  # caller mutations cannot stale a live binding
+    assert binding.path_by_duct["primary"] == "primary"
+    with pytest.raises(TypeError):
+        binding.path_by_duct["primary"] = "secondary"
+    identity = {"ports": ports.to_dict(), "powervalve": valve.to_dict()}
+    duct_species = {
+        path_id: ((0.0, 0.0, 1.1768e-6, 0.0), (1.1768e-6, 0.0, 0.0, 0.0))
+        for path_id in path_mapping.values()
+    }
+    system = _case(port_binding=binding, reference_rpm=3000.0,
+                   cylinder_pressure=130000.0,
+                   geometry=lambda angle: EngineGeometry2T(.00015, .00018, 0.0, 0.0,
+                                                           0.0, (0.0, 0.0, 0.0), 0.0),
+                   geometry_identity=identity, duct_species=duct_species)
+    closed = system._geometry(0.0, 3000.0)
+    open_stage = system._assemble(system.state, 180.0, 3000.0)
+    resolved = open_stage["geometry"]
+    assert closed.exhaust_area_m2 < resolved.exhaust_area_m2
+    assert len(resolved.transfer_areas_m2) == 3
+    assert all(area > 0.0 for area in resolved.transfer_areas_m2)
+    assert open_stage["faces"]["exhaust"]["left"][0] != 0.0
+    checkpoint = system.snapshot()
+    mismatched = _case(port_binding=binding, reference_rpm=3001.0,
+                       cylinder_pressure=130000.0,
+                       geometry=lambda angle: EngineGeometry2T(
+                           .00015, .00018, 0.0, 0.0, 0.0, (0.0, 0.0, 0.0), 0.0),
+                       geometry_identity=identity)
+    with pytest.raises(ValueError, match="configuration mismatch"):
+        mismatched.restore(checkpoint)
+    for step_index in range(4000):
+        system.step(1.25e-6, 0.0225)
+    assert system.angle_deg == pytest.approx(90.0)
+    assert any(stage["exhaust_area_m2"] > 0.0
+               for trace in system.trace for stage in trace["stage_geometry"])
+    assert all(len(trace["stage_face_fluxes"]) == 2 for trace in system.trace)
+    reverse_donor_checked = False
+    forward_donor_checked = False
+    powervalve_effect_checked = False
+    for trace in system.trace:
+        stage_angles = (trace["angle_start_deg"], trace["angle_end_deg"])
+        for stage_state, stage_faces, stage_angle in zip(
+                trace["stage_states"][:2], trace["stage_face_fluxes"], stage_angles):
+            expected_areas = binding.resolve(system.ducts, stage_angle, 3000.0)
+            actual_geometry = trace["stage_geometry"][
+                0 if stage_angle == trace["angle_start_deg"] else 1]
+            assert actual_geometry["intake_area_m2"] == pytest.approx(expected_areas[0])
+            assert actual_geometry["transfer_areas_m2"] == pytest.approx(expected_areas[1])
+            assert actual_geometry["exhaust_area_m2"] == pytest.approx(expected_areas[2])
+            main_port = next(port for port in ports.ports if port.id == "main-exhaust")
+            raw_main_area = ports.area_at(main_port, stage_angle)
+            controlled_main_area = valve.area_at(ports, 3000.0, stage_angle)
+            if controlled_main_area != pytest.approx(raw_main_area, rel=1e-6, abs=1e-15):
+                powervalve_effect_checked = True
+            for duct in system.ducts:
+                gas_faces = stage_faces[duct.id]["all_faces"]
+                species_faces = stage_faces[duct.id]["all_species_faces"]
+                cell_species = stage_state["species"]["ducts"][duct.id]
+                for face_index in range(1, len(gas_faces) - 1):
+                    mass_flux = gas_faces[face_index][0]
+                    if mass_flux == 0.0:
+                        continue
+                    if mass_flux < 0.0:
+                        donor = cell_species[face_index]
+                        receiver = cell_species[face_index - 1]
+                    else:
+                        donor = cell_species[face_index - 1]
+                        receiver = cell_species[face_index]
+                    donor_total = sum(donor)
+                    receiver_total = sum(receiver)
+                    composition_gap = max(abs(donor[j] / donor_total -
+                                              receiver[j] / receiver_total)
+                                          for j in range(4))
+                    if composition_gap < 1e-4:
+                        continue
+                    expected_flux = tuple(mass_flux * value / donor_total
+                                          for value in donor)
+                    assert species_faces[face_index] == pytest.approx(
+                        expected_flux, rel=1e-12, abs=1e-15)
+                    if mass_flux < 0.0:
+                        reverse_donor_checked = True
+                    else:
+                        forward_donor_checked = True
+    assert reverse_donor_checked
+    assert forward_donor_checked
+    assert powervalve_effect_checked
 
 
 def test_fresh_exhaust_flow_is_counted_as_short_circuit_only_with_open_transfers():
