@@ -27,6 +27,6 @@ P4–P9 scientific contracts or claiming experimental validation.
   predictive claim is implied.
 - New capability schemas and contracts are versioned independently. No solver
   duplication, hidden calibration, or unsupported parameter provenance.
+
 - Blocked phases do not stop independent phases; the program stops only at the
   global hard stops authorized in the user order.
-
