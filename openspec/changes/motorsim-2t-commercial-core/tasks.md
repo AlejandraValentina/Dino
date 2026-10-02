@@ -61,33 +61,39 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       un paso con redondeo de una ULP. Sin conexión productiva a P5/P6.
 - [ ] Fase 5b: integración del estado reed con el timestep/etapas de P5-C/P6,
       especies, ledgers y casos de operación del engine. Bloqueada localmente:
-      P5-C histórico no expone estado de etapa al callback geométrico ni un
-      hook SSPRK2 para integrar mecánica reed. Requiere integrador separado.
+      la reed estática ya se resuelve desde presión en cada stage del integrador
+      nuevo y se ejercitó en ciclos completos A/B. Sigue bloqueada la reed
+      dinámica: el contrato no especifica el acoplamiento de impactos/restitución
+      con SSPRK2 ni el balance de trabajo diferencial y disipación mecánica.
+      Esto no cambia P5 histórico ni autoriza post-step operator splitting.
 - [ ] Fase 6: sistema de cámara de expansión sobre ducts quasi-1D existentes.
 - [x] Fase 6a: ensamblado geométrico conectado y trazas de solver en
       `motorsim.expansion_chamber`, reutilizando `gas1d.mesh.segments_mesh` y
       `gas1d.solver`. Once pruebas de geometría, esquema, estados inválidos,
       flujo, presión/temperatura/Mach, características, tiempos de llegada y
-      mapeo de un estado producido por el solver aprobadas. Se marca parcial:
-      pendiente el ciclo híbrido P5 integrado con admisión reed, especie P6 y
-      auditoría de onda primaria; sin amplitudes reflejadas sintéticas.
-- [ ] Fase 7: transferencia térmica configurable y ledger energético.
+      mapeo de un estado producido por el solver aprobadas. La cámara participa
+      ahora en los stages SSPRK2 y ciclos A/B con especies/ledgers; evidencia
+      sintética `CONDITIONAL_ON_P4`.
+- [x] Fase 7: transferencia térmica configurable y ledger energético.
 - [x] Fase 7a: superficies térmicas direccionables, pared prescrita o mapa
       RPM/carga acotado, correlación explícita `CONSTANT_H_V1`, esquema durable
       y ledger trapezoidal por ciclo en `motorsim.thermal`; nueve pruebas
-      analíticas/negativas aprobadas. Parcial: no hay capacidad térmica dinámica
-      de paredes ni acoplamiento a energía P5/P6 por etapa.
+      analíticas/negativas aprobadas. La correlación prescrita se evalúa en
+      ambos stages del motor integrado y el balance térmico se registra en
+      ciclos sintéticos completos. No modela capacidad térmica dinámica.
 - [ ] Fase 8: `COMBUSTION_MODEL_V2`, separado de P7 prescrito histórico.
 - [x] Fase 8a: single/double Wiebe, ignition, efficiency/map y CA10/50/90 en
       `motorsim.combustion`, con serialization y 11 pruebas. Parcial e
       intencionalmente sin química, conversión de especie ni energía liberada;
       esos balances quedan condicionados a los contratos de combustible y
       energía de fase 11 y a integración de solver.
-- [ ] Fase 9: modelo de cárter V2 y acoplamiento de admisión/transferencia.
+- [x] Fase 9: modelo de cárter V2 y acoplamiento de admisión/transferencia.
 - [x] Fase 9a: volumen de cárter V2 con cinemática/biela existente, dV/dt
       analítico y compresión geométrica, más link 0D bidireccional que reutiliza
-      `simulation.restriction`; ocho pruebas analíticas/negativas. Parcial:
-      no se integró admisión/transferencia al RHS ni a ledgers P5-C/P6.
+      `simulation.restriction`; ocho pruebas analíticas/negativas. El nuevo
+      integrador resuelve volúmenes cárter/cilindro y flujos de admisión/
+      transferencia con especies y ledgers en ambos stages SSPRK2. Evidencia
+      sintética `CONDITIONAL_ON_P4`.
 - [ ] Fase 10: pérdidas mecánicas y rendimiento al freno con provenance.
 - [x] Fase 10a: términos FMEP explícitos por fuente, mapas RPM/carga,
       provenance y derivación analítica IMEP/BMEP, potencia y par 2T en
@@ -100,11 +106,12 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       trapped), energía potencial, fuel flow e ISFC/BSFC de 2T;
       nueve pruebas analíticas/negativas. Parcial: adaptador consume masas
       suministradas, no se acopla a la campaña P6 ni al ledger energético.
-- [ ] Fase 12: geometría/actuación de powervalve.
+- [x] Fase 12: geometría/actuación de powervalve.
 - [x] Fase 12a: mapa RPM→posición lineal y aplicación geométrica al techo del
       escape principal móvil en `motorsim.powervalve`, reutilizando área/eventos
       de `GENERIC_2T_PORTS_V1`; siete pruebas analíticas/negativas aprobadas.
-      Parcial: no hay servo, integración al ciclo del solver ni calibración.
+      El mapa RPM se resuelve en cada stage SSPRK2 del motor y cambia áreas y
+      cierres exactos. No hay servo ni calibración medida.
 - [ ] Fase 13: plenum, airbox, boost bottle y uniones.
 - [x] Fase 13a: schema de volúmenes/conexiones, atmosphere P6, intercambio
       conservativo 0D/1D con Riemann P3 + donor real P6 y estimación Helmholtz

@@ -64,21 +64,27 @@
       ]
     },
     "6_expansion_chamber": {
-      "status": "COMPONENT_VERIFIED",
+      "status": "COMPONENT_AND_INTEGRATED_SYNTHETIC_EXHAUST_VERIFIED_CONDITIONAL",
       "verified_scope": [
         "connected_sections",
         "existing_quasi_1d_mesh_and_solver_trace",
         "characteristics",
-        "travel_and_reflection_timing_estimates"
-      ]
+        "travel_and_reflection_timing_estimates",
+        "full_expansion_chamber_mesh_in_both_global_SSPRK2_stages",
+        "A_B_periodic_full_cycles_with_four_species_and_primary_outputs"
+      ],
+      "dependency_status": "CONDITIONAL_ON_P4"
     },
     "7_thermal": {
-      "status": "PRESCRIBED_COMPONENT_VERIFIED_CORE_ENERGY_COUPLING_PENDING",
+      "status": "PRESCRIBED_THERMAL_SOURCE_STAGE_INTEGRATED_AND_LEDGERED_CONDITIONAL",
       "verified_scope": [
         "prescribed_wall_temperatures",
         "constant_h_v1",
-        "cycle_heat_ledger"
-      ]
+        "cycle_heat_ledger",
+        "prescribed_heat_rate_in_both_global_SSPRK2_stages",
+        "global_heat_loss_and_energy_residual_in_full_synthetic_cycles"
+      ],
+      "dependency_status": "CONDITIONAL_ON_P4"
     },
     "8_combustion": {
       "status": "PRESCRIBED_COMBUSTION_V2_VERIFIED",
@@ -91,12 +97,15 @@
       "chemistry_or_predictive_lite": "NOT_IMPLEMENTED_NO_SUPPORTED_PARAMETERS"
     },
     "9_crankcase": {
-      "status": "GEOMETRY_AND_REVERSIBLE_LINK_COMPONENT_PARTIAL_CORE_COUPLING_BLOCKED",
+      "status": "CRANKCASE_GEOMETRY_AND_INTAKE_TRANSFER_STAGE_INTEGRATED_CONDITIONAL",
       "verified_scope": [
         "slider_crank_volume",
         "analytic_volume_rate",
-        "bidirectional_existing_restriction_helper"
-      ]
+        "bidirectional_existing_restriction_helper",
+        "opposite_crankcase_cylinder_slider_crank_volumes_and_rates_in_both_stages",
+        "intake_transfer_species_flow_and_global_ledgers_in_full_synthetic_cycles"
+      ],
+      "dependency_status": "CONDITIONAL_ON_P4"
     },
     "10_mechanical_losses": {
       "status": "ACCOUNTING_COMPONENT_VERIFIED",
@@ -121,12 +130,15 @@
       ]
     },
     "12_powervalve": {
-      "status": "GEOMETRY_COMPONENT_VERIFIED",
+      "status": "RPM_MAP_STAGE_INTEGRATED_WITH_GENERIC_EXHAUST_GEOMETRY_CONDITIONAL",
       "verified_scope": [
         "bounded_rpm_map",
         "linear_interpolation",
-        "generic_exhaust_roof_geometry"
-      ]
+        "generic_exhaust_roof_geometry",
+        "powervalve_resolved_at_each_global_SSPRK2_stage_RPM",
+        "accepted_cycle_trace_and_exact_exhaust_closure_binding"
+      ],
+      "dependency_status": "CONDITIONAL_ON_P4"
     },
     "13_intake_network": {
       "status": "COMPONENTS_VERIFIED_P5C_STAGE_AND_GLOBAL_LEDGER_INTEGRATION_PENDING",
@@ -138,12 +150,15 @@
       ]
     },
     "14_engineering_outputs": {
-      "status": "SCHEMA_VERIFIED_FULL_CORE_PRIMARY_COLLECTOR_PENDING",
+      "status": "V1_V2_SCHEMA_AND_TWO_PERIODIC_FULL_CYCLE_COLLECTORS_VERIFIED_CONDITIONAL",
       "verified_scope": [
         "versioned_schema",
         "units_provenance_nonclaims",
-        "scavenging_metrics_binding"
-      ]
+        "scavenging_metrics_binding",
+        "fixture_A_and_B_full_primary_cycles_and_V2_outputs",
+        "fuel_output_from_accepted_P6_and_exact_exhaust_close_species_snapshot"
+      ],
+      "dependency_status": "CONDITIONAL_ON_P4"
     },
     "15_experimental_import": {
       "status": "EXPLORATORY_IMPORTER_VERIFIED_P9_UNCHANGED",
@@ -470,25 +485,14 @@
     }
   },
   "review": {
-    "current_delta": "SELF_REVIEW_ONLY; zero-Cd roundtrip and exact exhaust-close fuel output are not independently reviewed.",
-    "independent_review_current_delta": "PENDING. Earlier independent review covered the prior V2 closure/output delta only; it does not cover the later fuel-output, Fixture B or zero-Cd changes and is not a full-engine acceptance review.",
+    "current_delta": "SELF_REVIEW_ONLY; no independent review of exact exhaust-close fuel output, zero-Cd roundtrip, or Fixture B delta.",
+    "independent_review_current_delta": "PENDING; prior V2 closure review does not cover latest changes and was not a full-engine acceptance review.",
     "prior_harness_punctual_review": "NO_MATERIAL_DEFECT_FOUND",
     "reverse_internal_donor_fix": "INDEPENDENT_READ_ONLY_REVIEW_PASS_BOTH_DONOR_DIRECTIONS_AND_STAGE_BINDING; no complete-engine review performed",
     "slider_crank_stage_integration": "INDEPENDENT_READ_ONLY_REVIEW_PASS; geometry signs/units, stage RPM, single -pVdot ledger and checkpoint mismatch were checked; no cycle claim",
     "p7_integrated_source_review": "INDEPENDENT_READ_ONLY_REVIEW_PASS_TRANSACTIONAL_CAPTURE_EVENT_CHRONOLOGY_RESTART_AND_LEDGER; no concrete defect found, no complete-engine review",
     "prior_v2_closure_review": "PASS: closure derivation, endpoint evidence, stage/output alignment, V1/V2 separation, cycle integrals, LFS identity and scope boundaries; explicitly punctual and predates current fuel-output changes.",
     "latest_output_change_tests": "33 integrated/output tests PASS; self-review only"
-  },
-  "git": {
-    "branch": "main",
-    "publication": "NOT_PUSHED",
-    "preserved_untracked_historical_result_directories": [
-      "results/kt100-hybrid-model-fixture-v2-harness-20261002/",
-      "results/kt100-hybrid-model-fixture-v2-harness-20261002-r2/",
-      "results/kt100-hybrid-model-fixture-v2-harness-20261002-r3/",
-      "results/kt100-hybrid-model-fixture-v2-harness-20261002-r4/"
-    ],
-    "latest_commit": "242712d"
   },
   "queue": [
     {
@@ -519,7 +523,7 @@
         "17a-integrated-gas-species-foundation"
       ],
       "state": "BLOCKED_LOCAL_DYNAMIC_REED_COUPLING",
-      "blocker": "The standalone dynamic reed and integrated static reed are verified, but the stage-coupled mechanical/impact update has no accepted scheme for stop restitution, pressure work and damping-energy accounting. A separate post-step advance would be unverified operator splitting.",
+      "blocker": "Static reed and crankcase geometry are integrated; dynamic reed SSPRK2/impact integration needs a declared conservative method for stops/restitution and gas-pressure work/damping-energy ledgers. Independent advance after the gas step would be unverified splitting.",
       "commits": [
         "a70917dde45ca15c62d5e0f460020599488a4d1f",
         "d3b82f3 Integrate generic ports into accepted 2T stages"
@@ -533,7 +537,7 @@
         "fixture A completes two cycles with static reed and moving crankcase/cylinder geometry; 21 focused integrated tests pass",
         "Integrated static reed and moving crankcase are exercised on full synthetic cycles; standalone DYNAMIC_REED_V1 has its own multi-petal, stop, reverse-flow and replay tests."
       ],
-      "next_action": "Continue independent component work; resume dynamic integration only with a specified conservative stage/impact contract."
+      "next_action": "Proceed with independent capabilities; do not integrate dynamic reed until stage/impact/energy contract is specified."
     },
     {
       "id": "17c-exhaust-chamber-boundary",
@@ -582,7 +586,8 @@
         "P9 spec SHA-256 rechecked unchanged: 79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d",
         "21 integrated tests and 73-test integrated/P5-C/P6/P7/reed/ports group pass; fixture A shows nonzero fuel delivery/short-circuit, P7 heat, wall heat and work",
         "Cycle-primary collector derives fuel flow only from actual integrated P6 intake fuel-species ledger; LHV-based metrics remain undefined.",
-        "Engineering V2 emits cylinder_fuel_species_at_exhaust_close_kg only from the validated exact cylinder closure snapshot; missing closure stays UNDEFINED; source explicitly disclaims total trapped fuel. 33 focal integrated/output tests PASS."
+        "Engineering V2 emits cylinder_fuel_species_at_exhaust_close_kg only from the validated exact cylinder closure snapshot; missing closure stays UNDEFINED; source explicitly disclaims total trapped fuel. 33 focal integrated/output tests PASS.",
+        "Thermal stage source, slider-crank p*dV, P7 species/heat, mechanical output and fuel outputs are present in the two synthetic full-cycle fixtures; remain conditional. Exact exhaust-close fuel pseudo-species output is not called total trapped fuel."
       ],
       "next_action": "Continue generic geometry and cycle integration independently; keep quantities UNDEFINED unless inputs have approved meanings."
     },
