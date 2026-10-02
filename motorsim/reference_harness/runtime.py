@@ -5,10 +5,13 @@ from math import isfinite
 
 from ..gas1d.eos import IdealGas
 from ..gas1d.mesh import segments_mesh
-from ..gas1d.solver import cfl_step, event_step
+from ..gas1d.solver import event_step
 from ..p5b import Chamber
 from ..p5c import IntegratedP5C
 from ..p6_species import P6IntegratedSystem
+from ..coupling import ChamberState
+from ..duct_network import interface_exchange
+from ..gas1d.boundary import Boundary
 from ..simulation import Model
 from ..simulation_case import SyntheticCase
 
@@ -91,7 +94,8 @@ def build_system(config):
     gas = IntegratedP5C(chambers[0], chambers[1], (intake, tr1, tr2), exhaust,
                         eos=eos, meshes=meshes, exhaust_mesh=exhaust_mesh,
                         exhaust_area=pipe_area, external_boundary=True,
-                        geometry_callback=geometry_callback)
+                        geometry_callback=geometry_callback,
+                        external_boundary_flux_convention="global_x")
     start_scheduler = START_DEG + offset
     gas.angle = start_scheduler
     gas.core.angle = start_scheduler
@@ -125,12 +129,92 @@ def _faces_speeds(path, eos):
     return states, [cell_speeds[0], *[max(a, b) for a, b in zip(cell_speeds, cell_speeds[1:])], cell_speeds[-1]]
 
 
+def _duct_cfl_step(mesh, states, speeds, face_areas, eos, cfl):
+    """P2's cell CFL with the actual effective area at each coupled face."""
+    if len(face_areas) != mesh.n + 1:
+        raise ValueError("one effective face area is required per mesh face")
+    limits = []
+    for i, (state, volume, width) in enumerate(zip(states, mesh.volumes, mesh.widths)):
+        area_speed = (face_areas[i] * speeds[i] +
+                      face_areas[i + 1] * speeds[i + 1])
+        if area_speed <= 0.0:
+            raise ValueError("nonpositive finite-volume face wave capacity")
+        spectral = width / (abs(state[1]) + eos.sound_speed(state))
+        face_capacity = 2.0 * volume / area_speed
+        limits.append(cfl * min(spectral, face_capacity))
+    return min(limits)
+
+
 def cfl_limit(system, cfl):
     gas, eos = system.gas, system.gas.eos
     limits = []
-    for path in (gas.core.intake, *gas.core.transfers, gas.exhaust):
+    paths = (gas.core.intake, *gas.core.transfers, gas.exhaust)
+    path_states = []
+    for path in paths:
         states, speeds = _faces_speeds(path, eos)
-        dt, _, _ = cfl_step(path.mesh, states, speeds, eos, cfl)
+        path_states.append((states, speeds))
+
+    # The product's duct-only CFL controls internal faces.  P5-C also couples
+    # large, angle-dependent port areas directly to endpoint cells. Bound those
+    # same resolved Riemann interfaces in the harness timestep; otherwise a
+    # port area much larger than a duct cross-section can inject an unstable
+    # amount of mass into its first/last cell while every internal-face CFL
+    # remains below the requested value.
+    geometry = gas.geometry_callback(float(gas.angle))
+    areas = geometry["areas"] if isinstance(geometry, dict) else geometry[2]
+    cc = gas.core.crankcase.primitive
+    cy = gas.core.cylinder.primitive
+    cc_inventory = gas.core.crankcase.inventory(eos)
+    cc_state = ChamberState(cc_inventory[0], cc_inventory[2], cc_inventory[1],
+                            gas.core.crankcase.volume)
+    cy_inventory = gas.core.cylinder.inventory(eos)
+    cy_state = ChamberState(cy_inventory[0], cy_inventory[2], cy_inventory[1],
+                            gas.core.cylinder.volume)
+    # Normal follows P5-B's existing interface convention. Returned wave
+    # speeds are those from the actual product HLLC interface solve.
+    interface_speed = {}
+    intake_states = path_states[0][0]
+    if float(areas[0]) > 0.0:
+        interface_speed[(0, "right")] = max(abs(x) for x in interface_exchange(
+            cc_state, intake_states[-1], float(areas[0]), 1, eos=eos)["wave_speeds"])
+    for path_index, area_index in ((1, 1), (2, 2)):
+        states = path_states[path_index][0]
+        if float(areas[area_index]) > 0.0:
+            interface_speed[(path_index, "left")] = max(abs(x) for x in interface_exchange(
+                cc_state, states[0], float(areas[area_index]), -1, eos=eos)["wave_speeds"])
+            interface_speed[(path_index, "right")] = max(abs(x) for x in interface_exchange(
+                cy_state, states[-1], float(areas[area_index]), 1, eos=eos)["wave_speeds"])
+
+    # P5-C's exhaust port uses its existing effective-area flux rather than
+    # interface_exchange. Its local acoustic bound keeps that product flux
+    # represented at the duct endpoint without changing its flux law.
+    exhaust_states = path_states[3][0]
+    interface_speed[(3, "left")] = max(abs(w[1]) + eos.sound_speed(w)
+                                        for w in (cy, exhaust_states[0]))
+
+    face_areas = [list(path.mesh.areas) for path in paths]
+    # Replace mesh endpoint areas by the exact areas passed to the respective
+    # product interfaces. The atmospheric end remains the intake mesh area.
+    face_areas[0][-1] = float(areas[0])
+    face_areas[1][0] = face_areas[1][-1] = float(areas[1])
+    face_areas[2][0] = face_areas[2][-1] = float(areas[2])
+    face_areas[3][0] = min(float(areas[3]), gas.exhaust_area)
+
+    for path_index, (path, (states, speeds)) in enumerate(zip(paths, path_states)):
+        boundary_speeds = list(speeds)
+        for side in ("left", "right"):
+            value = interface_speed.get((path_index, side))
+            if value is not None:
+                boundary_speeds[0 if side == "left" else -1] = max(
+                    boundary_speeds[0 if side == "left" else -1], value)
+        if path_index == 0:
+            # The intake's left reservoir is an external P5-C boundary.
+            boundary = Boundary("reservoir", p0=101325.0, T0=300.0, Y0=0.0)
+            _, reservoir_speeds, _ = boundary.flux(states[0], -1, eos)
+            boundary_speeds[0] = max(boundary_speeds[0],
+                                     *(abs(x) for x in reservoir_speeds))
+        dt = _duct_cfl_step(path.mesh, states, boundary_speeds,
+                            face_areas[path_index], eos, cfl)
         limits.append(dt)
     return min(limits)
 
@@ -164,6 +248,7 @@ def advance_cycle(system, model, config, offset, cycle_index):
     before_burned = system.p7_source_delta[3]
     before_source = tuple(system.p7_source_delta)
     before_species_external = tuple(system._external)
+    start_species = system._species_totals()
     start_cumulative = {"gas_external": dict(before_external),
                         "species_external": tuple(before_species_external),
                         "p7_species_source": tuple(before_source),
@@ -172,7 +257,6 @@ def advance_cycle(system, model, config, offset, cycle_index):
                         "gas_totals": dict(before_totals),
                         "species_inventory": tuple(start_species),
                         "angle_deg": gas.angle}
-    start_species = system._species_totals()
     start_mass = before_totals["mass"]
     start_energy = before_totals["energy"]
     cuts = event_cuts(model, offset, phase)

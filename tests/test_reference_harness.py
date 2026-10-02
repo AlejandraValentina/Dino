@@ -11,7 +11,9 @@ from motorsim.reference_harness.config import CONTRACT_ID, validate_config
 from motorsim.reference_harness.convergence import PeriodicDetector, compare_cycles
 from motorsim.reference_harness.evidence import (audit_cycles, configuration_hash,
                                                   source_binding, verify_source_binding)
-from motorsim.reference_harness.runtime import build_system
+from motorsim.reference_harness.runtime import _duct_cfl_step, build_system
+from motorsim.gas1d.eos import IdealGas
+from motorsim.gas1d.mesh import uniform_mesh
 from scripts.build_kt100_hybrid_fixture_v2 import ROOT, V1_PATH, OUT_PATH, build as build_kt100_config
 
 
@@ -125,6 +127,18 @@ class ReferenceHarnessTests(unittest.TestCase):
         config["engine"]["project"]["ports"][0]["discharge_coefficient"] = 0.8
         with self.assertRaisesRegex(ValueError, "no configurable discharge"):
             validate_config(config)
+
+    def test_boundary_cfl_uses_the_resolved_geometric_face_area(self):
+        eos = IdealGas(287.0, 1.35)
+        mesh = uniform_mesh(1, length=0.03, area=1.0e-4)
+        state = eos.validate((1.0, 0.0, 101325.0, 1.0))
+        speed = abs(state[1]) + eos.sound_speed(state)
+        mesh_bound = _duct_cfl_step(mesh, [state], [speed, speed],
+                                    mesh.areas, eos, 0.4)
+        larger_port_bound = _duct_cfl_step(
+            mesh, [state], [speed, speed], (mesh.areas[0], 1.04e-4), eos, 0.4)
+        self.assertLess(larger_port_bound, mesh_bound)
+        self.assertAlmostEqual(larger_port_bound / mesh_bound, 2.0 / 2.04)
 
     def test_json_checkpoint_restore_and_full_state_replay_comparison(self):
         config = synthetic_configuration()

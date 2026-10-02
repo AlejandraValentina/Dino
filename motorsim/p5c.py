@@ -28,13 +28,16 @@ class IntegratedP5C:
     def __init__(self, crankcase, cylinder, duct_states, exhaust_states=None,
                  *, eos=None, meshes=None, exhaust_mesh=None,
                  exhaust_area=1.0e-4, port_area=0.0, volume_rates=(0.0, 0.0),
-                 external_boundary=False, geometry_callback=None):
+                 external_boundary=False, geometry_callback=None,
+                 external_boundary_flux_convention="legacy_contract"):
         self.eos = eos or IdealGas()
         self.core = IntegratedIntakeTransfer(crankcase, cylinder, duct_states,
                                              eos=self.eos, meshes=meshes,
                                              volume_rates=volume_rates,
                                              geometry_callback=geometry_callback,
-                                             external_boundary=external_boundary)
+                                             external_boundary=external_boundary,
+                                             external_boundary_flux_convention=(
+                                                 external_boundary_flux_convention))
         if exhaust_states is None:
             exhaust_states = ((1.0, 0.0, 100000.0, 0.0),) * 3
         self.exhaust_mesh = exhaust_mesh or uniform_mesh(len(exhaust_states),

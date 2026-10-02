@@ -1973,7 +1973,11 @@ python -m pytest tests/test_p5c_integrated.py tests/test_p6_species.py tests/tes
 python -m scripts.run_kt100_hybrid_v2
 ```
 
-Las campañas escriben PRIMARY comprimido, checkpoints, replay y resúmenes en
-`results/kt100-hybrid-model-fixture-v2-harness-20261002/`. Los estados de cada
-punto y la suficiencia del stack se registran en el `tasks.md` del cambio; estos
-resultados son salidas del modelo y no validación experimental ni predictiva.
+Las campañas escriben evidencia PRIMARY comprimida y auditorías en
+`results/kt100-hybrid-model-fixture-v2-harness-20261002-r5/`; checkpoints y replay
+solo existen para recorridos que alcanzan sus gates. La campaña preregistrada
+actual se detuvo antes de completar un ciclo en los cinco RPM porque la frontera
+atmosférica P5-C no pudo resolver una rama de entrada consistente. Por eso no hay
+convergencia, métricas por ciclo ni restart/replay de campaña. El `tasks.md` del
+cambio registra resultados y causa; esta salida del modelo no es validación
+experimental ni predictiva.

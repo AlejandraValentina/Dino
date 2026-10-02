@@ -9,7 +9,7 @@ from motorsim.reference_harness.evidence import write_json_gzip
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs/fixtures/kt100_hybrid_model_fixture_v2.json"
-OUTPUT = ROOT / "results/kt100-hybrid-model-fixture-v2-harness-20261002"
+OUTPUT = ROOT / "results/kt100-hybrid-model-fixture-v2-harness-20261002-r5"
 
 
 def main():

@@ -43,6 +43,19 @@ def test_interior_rhs_uses_gas1d_hllc():
     rhs=interior_rhs(mesh,states,E)
     assert len(rhs)==2 and rhs[0][0] != 0
 
+
+def test_atmospheric_intake_boundary_uses_consistent_left_face_orientation():
+    """A uniform stationary state must not acquire a pressure impulse."""
+    state = E.validate((101325.0 / (E.R * 300.0), 0.0, 101325.0, 0.0))
+    mesh = uniform_mesh(1, length=0.03, area=1.0e-4)
+    node = IntegratedIntakeTransfer(
+        Chamber(state, 1.0e-3), Chamber(state, 1.0e-2),
+        ((state,), (state,), (state,)), eos=E,
+        meshes=(mesh, mesh, mesh), external_boundary=True,
+        external_boundary_flux_convention="global_x")
+    rhs, _ = node._rhs(node._state(), 300.0)
+    assert rhs[2][0] == pytest.approx((0.0, 0.0, 0.0, 0.0), abs=1e-10)
+
 def test_global_ssprk2_two_stages():
     out=ssprk2_step((1.,), lambda z:(-z[0],), .1)
     assert 0 < out[0] < 1

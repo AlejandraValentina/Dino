@@ -837,7 +837,8 @@ class IntegratedIntakeTransfer:
     """
     def __init__(self, crankcase, cylinder, duct_states, *, eos=None,
                  volume_rates=(0.0, 0.0), meshes=None, external_boundary=True,
-                 geometry_callback=None):
+                 geometry_callback=None,
+                 external_boundary_flux_convention="legacy_contract"):
         if len(duct_states) != 3:
             raise ValueError("expected intake, transfer1 and transfer2 states")
         self.eos = eos or IdealGas()
@@ -845,6 +846,9 @@ class IntegratedIntakeTransfer:
         self.cylinder = cylinder
         self.external_boundary = bool(external_boundary)
         self.geometry_callback = geometry_callback
+        if external_boundary_flux_convention not in ("legacy_contract", "global_x"):
+            raise ValueError("unsupported external boundary flux convention")
+        self.external_boundary_flux_convention = external_boundary_flux_convention
         def normalize(states):
             if isinstance(states, tuple) and len(states) == 4 and isinstance(states[0], (int, float)):
                 return (states,)
@@ -1038,7 +1042,12 @@ class IntegratedIntakeTransfer:
             ext_face = (0.0, 0.0, 0.0, 0.0)
         # The finite-volume left face is outward from the stored subsystem;
         # ledgers use the atmospheric integral into the subsystem.
-        external_in = tuple(-value for value in ext_face)
+        # P5-B's historical fixtures use an outward-oriented boundary tuple.
+        # Reference-engine P5-C supplies Boundary.flux's global +x tuple and
+        # requests the explicitly named adapter convention below.
+        consistent_external = self.external_boundary_flux_convention == "global_x"
+        external_in = tuple(value if consistent_external else -value
+                            for value in ext_face)
         intake_cc = interface_exchange(cc, intake_p[-1], ai, 1, eos=self.eos)
         transfer = []
         for primitive, area in zip(tr_p, (at1, at2)):
@@ -1054,8 +1063,10 @@ class IntegratedIntakeTransfer:
             return tuple(tuple(-(faces[i + 1][k] - faces[i][k]) / volume
                                 for k in range(4))
                          for i, volume in enumerate(mesh.volumes)), tuple(faces)
+        left_external = (tuple(-value for value in ext_face)
+                         if consistent_external else ext_face)
         intake_rhs, intake_faces = duct_rhs(intake_p, self.intake.mesh,
-                                             ext_face, intake_cc['outward'])
+                                             left_external, intake_cc['outward'])
         transfer_rhs = []
         transfer_faces = []
         for (left, right), primitive, path in zip(transfer, tr_p, self.transfers):
