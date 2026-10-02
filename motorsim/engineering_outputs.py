@@ -43,6 +43,7 @@ METRIC_UNITS = {
     "fuel_short_circuited_per_cycle_kg": "kg",
     "fuel_consumed_by_p7_per_cycle_kg": "kg",
     "fuel_unburned_terminal_global_kg": "kg",
+    "cylinder_fuel_species_at_exhaust_close_kg": "kg",
     "fuel_species_balance_residual_kg": "kg",
     "isfc_g_kwh": "g/kWh", "bsfc_g_kwh": "g/kWh",
     "wall_heat_loss_j": "J", "energy_balance_residual_j": "J",

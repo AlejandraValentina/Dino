@@ -382,3 +382,13 @@ OpenSpec estricto pasó. Las campañas internas sintéticas A y B alcanzaron
 validaron por ciclo. Esa evidencia sigue `CONDITIONAL_ON_P4`. No acredita un
 motor comercial completo; la revisión independiente del delta de fuel/output y
 Fixture B continúa pendiente.
+
+### Inventario de fuel en cierre exacto — 2026-10-02
+
+Engineering output V2 expone la masa de pseudoespecie `fuel` del cilindro en el
+snapshot aceptado del cierre exacto de escape. Si no existe ese snapshot, el
+campo queda `UNDEFINED`. Se denomina
+`cylinder_fuel_species_at_exhaust_close_kg` y se documenta expresamente que no
+representa combustible total atrapado ni se infiere del inventario global
+terminal. Pasaron 33 pruebas focales integradas/de outputs y OpenSpec estricto.
+La AFR estequiométrica y la relación de `Q_F` con LHV siguen sin definirse.

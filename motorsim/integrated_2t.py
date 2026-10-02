@@ -1836,6 +1836,8 @@ def make_integrated_engineering_output(cycle_record: dict, *,
             "negative accepted P7 fuel-species source ledger; prescribed bookkeeping conversion")
     defined("fuel_unburned_terminal_global_kg", terminal_inventory[2][1],
             "terminal four-species inventory summed across cylinder, crankcase and ducts")
+    undefined("cylinder_fuel_species_at_exhaust_close_kg",
+              "An exact cylinder species snapshot at exhaust closure is unavailable.")
     defined("fuel_species_balance_residual_kg", species_residual[1],
             "independent global fuel-species balance from accepted trajectory")
     intake_fuel = integrals["fuel_delivery_kg"]
@@ -1885,6 +1887,18 @@ def make_integrated_engineering_output(cycle_record: dict, *,
                  "short_circuit_fraction", "fresh_retained_kg", "fresh_lost_kg"):
         undefined(name, "Exact geometric port-closure composition snapshots are not yet collected.")
     closures = cycle_record.get("port_closure_snapshots", {})
+    if (isinstance(closures, dict) and
+            closures.get("status") == "EXACT_EVENT_STATES_CAPTURED"):
+        exhaust_snapshot = closures.get("snapshots", {}).get("exhaust")
+        if not isinstance(exhaust_snapshot, dict):
+            raise ValueError("exact port-closure record lacks exhaust snapshot")
+        close_species = exhaust_snapshot.get("cylinder_species_kg")
+        if not isinstance(close_species, (list, tuple)) or len(close_species) != 4:
+            raise ValueError("exact exhaust-closure species snapshot is invalid")
+        close_species = validate_species(close_species, fsum(close_species))
+        defined("cylinder_fuel_species_at_exhaust_close_kg", close_species[1],
+                "accepted cylinder fuel pseudo-species at exact exhaust closure; "
+                "not total trapped fuel")
     if (scavenging_reference_mass_kg is not None and isinstance(closures, dict) and
             closures.get("status") == "EXACT_EVENT_STATES_CAPTURED"):
         from .scavenging import ScavengingInput, calculate_scavenging_metrics

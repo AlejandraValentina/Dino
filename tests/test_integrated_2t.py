@@ -803,6 +803,14 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
         first_cycle["observables"]["p7_fuel_consumed_kg"])
     assert output["cycle_metrics"]["fuel_unburned_terminal_global_kg"]["value"] == pytest.approx(
         first_cycle["observables"]["fuel_unburned_terminal_global_kg"])
+    assert output["cycle_metrics"][
+        "cylinder_fuel_species_at_exhaust_close_kg"]["status"] == "DEFINED"
+    assert output["cycle_metrics"][
+        "cylinder_fuel_species_at_exhaust_close_kg"]["value"] == pytest.approx(
+            first_cycle["port_closure_snapshots"]["snapshots"]["exhaust"]
+            ["cylinder_species_kg"][1])
+    assert "not total trapped fuel" in output["cycle_metrics"][
+        "cylinder_fuel_species_at_exhaust_close_kg"]["source"]
     assert abs(output["cycle_metrics"]["fuel_species_balance_residual_kg"]["value"]) < 1e-12
     assert output["cycle_metrics"]["equivalence_ratio"]["status"] == "UNDEFINED"
     prior_v2_record = deepcopy(first_cycle)
@@ -841,6 +849,10 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
         scavenging_reference_mass_kg=1e-4)
     assert unavailable_output["cycle_metrics"]["purity_at_exhaust_close"]["status"] == "UNDEFINED"
     assert unavailable_output["cycle_metrics"]["purity_at_exhaust_close"]["value"] is None
+    assert unavailable_output["cycle_metrics"][
+        "cylinder_fuel_species_at_exhaust_close_kg"]["status"] == "UNDEFINED"
+    assert unavailable_output["cycle_metrics"][
+        "cylinder_fuel_species_at_exhaust_close_kg"]["value"] is None
     tampered_primary = deepcopy(first_cycle)
     tampered_primary["observables"]["work_J"] += 1.0
     with pytest.raises(ValueError, match="observable work_J differs"):

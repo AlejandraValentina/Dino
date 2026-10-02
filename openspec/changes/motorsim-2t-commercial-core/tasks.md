@@ -437,3 +437,12 @@ P6-linked scavenging quantities were validated per cycle. These internal
 synthetic results remain `CONDITIONAL_ON_P4`; independent review of the latest
 fuel/output and Fixture B delta remains pending, and full-core readiness is not
 claimed.
+
+### Combustible species at exact exhaust closure — 2026-10-02
+
+Engineering output V2 now reports `cylinder_fuel_species_at_exhaust_close_kg`
+from the accepted exact cylinder snapshot, or keeps it `UNDEFINED` if that
+snapshot is unavailable. The field is explicitly not total trapped fuel and is
+not reconstructed from global terminal inventory. The 33-test integrated/output
+suite and OpenSpec strict validation passed. Stoichiometric AFR and a Q_F-to-LHV
+binding remain unresolved; no fuel chemistry or value was inferred.

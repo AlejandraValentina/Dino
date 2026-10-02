@@ -586,6 +586,15 @@ previous cycle's values.
 - **THEN** no interpolation is performed and scavenging values remain null and
   UNDEFINED even if another cycle previously had valid closure data.
 
+#### Scenario: Report unburned fuel species at exact exhaust closure
+
+- **WHEN** a primary cycle contains a validated exact exhaust-closure snapshot
+  of the cylinder's four species
+- **THEN** engineering output MUST report the `fuel` pseudo-species mass from
+  that snapshot as `cylinder_fuel_species_at_exhaust_close_kg`; without the
+  snapshot it MUST be UNDEFINED, and the value MUST NOT be labeled as total
+  trapped fuel or reconstructed from the terminal global inventory.
+
 #### Scenario: Verify a second integrated synthetic configuration
 
 - **WHEN** a second internally defined engine configuration changes the
