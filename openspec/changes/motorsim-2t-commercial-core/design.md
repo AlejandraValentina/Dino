@@ -53,3 +53,18 @@ derivados; al leer se regeneran y comparan los perfiles. Estos hashes prueban
 binding/integridad del artefacto, no son evidencia física. El coeficiente y el
 área no se conectan al P5-C histórico en este primer tramo; integración con
 topología variable requiere un adaptador nuevo y pruebas de ledgers por ducto.
+
+## Métricas de scavenging `MOTORSIM_2T_SCAVENGING_METRICS_V1`
+
+Se usan masas de especies P6: `F=fresh_air+fuel`, `R=residual`, `M=sum(especies)`.
+Fresh delivered y fresh short-circuit proceden de los ledgers P6 por dirección.
+`Fret` es la especie fresca presente en el cilindro al cierre de la última
+apertura de escape; `Mref=rho_amb*pi*bore²*stroke/4`. Delivery ratio=`Fdel/Mref`;
+trapping efficiency=`Fret/Fdel`; scavenging efficiency=`Fret/Mexhaust_close`;
+charging efficiency=`Fret/Mref`; trapping ratio=`Fdel/Fret`; residual fraction
+`=Rexhaust_close/Mexhaust_close`; purities at transfer/exhaust close are the
+respective fresh mass fractions; short-circuit fraction=`Flost/Fdel`. Zero
+denominators return `UNDEFINED/ZERO_DENOMINATOR`; no clipping to [0,1] and no
+substitution of zero. A model output outside a familiar efficiency range remains
+visible to expose ledger/state mismatch. `Fret` and `Flost` remain separately
+reported masses.

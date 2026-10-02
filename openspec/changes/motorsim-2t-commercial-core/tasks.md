@@ -21,6 +21,13 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       topología variable con ledgers globales, schema de proyecto y GUI. El
       módulo 3a aún no altera áreas/flujos de P5 ni declara completa la fase.
 - [ ] Fase 4: métricas de barrido con definiciones matemáticas y ledgers P6.
+- [x] Fase 4a: funciones puras `MOTORSIM_2T_SCAVENGING_METRICS_V1`, masas,
+      reference charge y nueve ratios con valores undefined explícitos para
+      denominadores cero; cinco pruebas analíticas/negativas aprobadas.
+- [ ] Fase 4b: extraer snapshots de cierre de transfers/escape desde evidencia
+      primaria de ciclo, ligarlos a geometry events y agregar auditor offline.
+- [ ] Fase 4c: verificar ledgers P6 durante operación periódica y exponer los
+      outputs en el esquema de resultados, sin cambiar transporte.
 - [ ] Fase 5: reed estática y/o dinámica, según alcance físico derivable.
 - [ ] Fase 6: sistema de cámara de expansión sobre ducts quasi-1D existentes.
 - [ ] Fase 7: transferencia térmica configurable y ledger energético.

@@ -96,3 +96,36 @@ unchanged.
 - **THEN** the geometry continues to expose its open area; donor selection stays
   with the existing conservative flow interface and is not suppressed by a
   one-way intake flag.
+
+### Requirement: Auditable two-stroke scavenging metrics
+
+The engine MUST derive cycle scavenging metrics from four-species inventories,
+fresh-delivery ledger, and direction-aware fresh short-circuit ledger without
+altering P6 transport. Let `F=fresh_air+fuel`, `R=residual`, `M=sum(four
+species)`, `Fdel=fresh delivered through transfers`, `Flost=fresh short circuit
+through outward exhaust`, and `Mref=rho_ambient*Vdisplacement`. The outputs MUST
+include: delivery ratio `Fdel/Mref`; trapping efficiency `Fret/Fdel`; scavenging
+efficiency `Fret/Mexhaust_close`; charging efficiency `Fret/Mref`; trapping
+ratio `Fdel/Fret`; fresh retained `Fret`; fresh lost `Flost`; residual fraction
+`Rexhaust_close/Mexhaust_close`; purity at transfer close `Ftransfer_close/
+Mtransfer_close`; purity at exhaust close `Fexhaust_close/Mexhaust_close`; and
+short-circuit fraction `Flost/Fdel`. `Fret` is `Fexhaust_close`. Reference
+displacement volume is `pi*bore^2*stroke/4` with SI conversion. Each zero
+denominator MUST produce an explicit undefined result and reason; invalid or
+nonfinite inputs MUST be rejected, never clipped to a plausible efficiency.
+These are model diagnostics, not experimental claims.
+
+#### Scenario: Analytical species ledger
+
+- **WHEN** reference mass is 0.01 kg, fresh delivery is 0.012 kg, short circuit
+  is 0.002 kg, transfer-close species are `[0.003,0.001,0.006,0]` kg, and
+  exhaust-close species are `[0.004,0.001,0.004,0.001]` kg
+- **THEN** delivery ratio is 1.2, trapping efficiency is 5/12, scavenging and
+  charging efficiency are 0.5, trapping ratio is 2.4, residual fraction 0.4,
+  transfer purity 0.4, exhaust purity 0.5, and short-circuit fraction 1/6.
+
+#### Scenario: Zero denominator and reverse exhaust
+
+- **WHEN** a ratio denominator is zero or an exhaust exchange is inward
+- **THEN** the ratio is explicitly undefined when appropriate, and inward
+  exhaust species do not increment fresh-short-circuit mass.
