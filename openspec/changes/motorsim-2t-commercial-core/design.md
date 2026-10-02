@@ -132,3 +132,13 @@ weighted normalized progress. This capability returns only dimensionless
 progress/rate and crank-angle points. It does not convert P6 species or release
 heat: fuel chemistry, oxygen availability, LHV and energy ledgers require their
 separate approved contracts before coupled integration.
+
+## Mechanical losses and indicated/brake conversion
+
+`MechanicalLossModel` sums explicit nonnegative FMEP terms classified as
+piston/ring, bearing/accessory, or pumping, each fixed or given by a bounded
+RPM/load map and provenance. For a two-stroke cycle of 360 degrees,
+`Wloss=FMEP*Vd`, `Wbrake=Windicated-Wloss`, `BMEP=IMEP-FMEP`,
+`P=W*RPM/60`, and `T=W/(2*pi)`. Negative brake output is preserved and flagged;
+the model never clips it or fits losses to a target. This arithmetic capability
+does not add losses to the gas solver or imply a measured performance map.

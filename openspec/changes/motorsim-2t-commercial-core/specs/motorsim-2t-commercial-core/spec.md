@@ -245,3 +245,25 @@ species conversion, stoichiometry, LHV or heat release.
 - **WHEN** efficiency is zero or RPM/load lies outside its configured map
 - **THEN** the burned fraction remains zero with undefined CA points, or the
   out-of-map request is rejected; no heat or chemistry output is fabricated.
+
+### Requirement: Explicit two-stroke mechanical losses and brake metrics
+
+Mechanical losses MUST be explicit nonnegative MEP terms with source class and
+provenance; each term MUST use either a fixed value or bounded RPM/load map.
+For the declared 2T 360-degree cycle, the model MUST derive indicated/brake
+MEP, work, power and torque from the stated displacement, RPM and indicated
+work. It MUST preserve negative brake output without clipping and MUST NOT fit
+loss terms to desired performance.
+
+#### Scenario: Convert indicated cycle work to brake output
+
+- **WHEN** indicated work, total 2T displacement, RPM and explicit mechanical
+  loss terms are supplied
+- **THEN** loss work is `FMEP*Vd`, brake work is indicated work minus loss work,
+  and power/torque follow the declared 360-degree cycle convention.
+
+#### Scenario: Loss exceeds indicated work
+
+- **WHEN** configured losses exceed indicated cycle work
+- **THEN** negative brake work/power/torque remain visible and are flagged, not
+  clipped to zero.

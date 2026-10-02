@@ -63,6 +63,10 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       energía de fase 11 y a integración de solver.
 - [ ] Fase 9: modelo de cárter V2 y acoplamiento de admisión/transferencia.
 - [ ] Fase 10: pérdidas mecánicas y rendimiento al freno con provenance.
+- [x] Fase 10a: términos FMEP explícitos por fuente, mapas RPM/carga,
+      provenance y derivación analítica IMEP/BMEP, potencia y par 2T en
+      `motorsim.mechanical`; cuatro pruebas analíticas/negativas. Parcial: no
+      se inyectan pérdidas al solver ni hay mapas calibrados/documentados.
 - [ ] Fase 11: combustible, AFR y BSFC consistentes con P6.
 - [ ] Fase 12: geometría/actuación de powervalve.
 - [ ] Fase 13: plenum, airbox, boost bottle y uniones.
