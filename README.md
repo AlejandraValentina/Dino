@@ -1959,6 +1959,9 @@ la geometría de puertos. P4 sigue siendo dependencia condicional del stack.
 El cliente `KT100_HYBRID_MODEL_FIXTURE_V2` se genera desde el fixture V1 y marca
 por separado las dimensiones de transferencias, estados iniciales y evento P7
 sintéticos. No es un KT100 medido ni calibrado; sus puntos RPM son exploratorios.
+El stack P4/P5-C usa su ley de área efectiva sin coeficientes de descarga
+configurables; los coeficientes sintéticos del V1 0D no se transfieren y esto
+queda registrado como diferencia de forma del modelo.
 La configuración está en `configs/fixtures/kt100_hybrid_model_fixture_v2.json`.
 
 Comandos reproducibles:
