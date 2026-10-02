@@ -5,8 +5,9 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
 
 - [ ] Fase 1: harness reusable y evidencia multi-ciclo. Parcial: harness y
       contrato de periodicidad implementados; KT100 r5 falla antes del ciclo 1
-      por rama de admisión reservoir sin solución. Ver cambio
-      `reference-engine-hybrid-harness`; no declarar VERIFIED.
+      por rama de admisión reservoir sin solución. Se validan self-fixtures,
+      period-1/2, auditoría y restart de paso aceptado; el multi-ciclo de un
+      motor no queda verificado. No declarar VERIFIED.
 - [ ] Fase 2: KT100 V2, cinco puntos exploratorios y provenance. Parcial:
       fixture/configuración generados; 0/5 ciclos completos, sin periodicidad,
       checkpoint de campaña ni performance. Preservar r2–r5. Estado congelado:
@@ -55,7 +56,9 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       de harness/evidencia, aprobados. Se corrigió contacto a tope al final de
       un paso con redondeo de una ULP. Sin conexión productiva a P5/P6.
 - [ ] Fase 5b: integración del estado reed con el timestep/etapas de P5-C/P6,
-      especies, ledgers y casos de operación del engine.
+      especies, ledgers y casos de operación del engine. Bloqueada localmente:
+      P5-C histórico no expone estado de etapa al callback geométrico ni un
+      hook SSPRK2 para integrar mecánica reed. Requiere integrador separado.
 - [ ] Fase 6: sistema de cámara de expansión sobre ducts quasi-1D existentes.
 - [x] Fase 6a: ensamblado geométrico conectado y trazas de solver en
       `motorsim.expansion_chamber`, reutilizando `gas1d.mesh.segments_mesh` y
@@ -119,9 +122,38 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       terminó con access violation en `ExternalWindowTests.test_import_confirm_`
       `roundtrip_unknown_conditions_and_previous_preserved`; parser/persistencia
       se validaron por separado. P9 no se editó ni ejecutó.
-- [ ] Fase 16: segundo reference case con fuentes públicas y provenance.
+- [x] Fase 16a: registrar `HONDA_CR250R_2007_REFERENCE_CASE_PARTIAL_V1` desde
+      la ficha oficial Honda, con parámetros publicados como DOCUMENTED y los
+      que faltan como null/UNKNOWN; prueba offline de provenance aprobada.
+      Queda marcado `NOT_SIMULATION_READY`: la fuente no define biela, cárter,
+      timing/geometría de lumbreras, conductos ni estados de frontera. No se
+      inventaron especificaciones ni se ejecutó otro motor.
 - [ ] Gate final: integración arbitraria 2T, regresiones, auditoría y dos casos;
       declarar readiness solo con todos los requisitos del Commercial Core.
+
+Comprobación agrupada del avance autónomo: el 2026-10-02 se ejecutaron 204
+pruebas focales de provenance, puertos/P5-C, scavenging, reed, cámara, thermal,
+combustion, cárter, mecánica, fuel, powervalve, network, engineering outputs,
+importador, harness, P5-B/P5-C y P6; todas pasaron. Esta suite no incluye KT100
+ni campañas físicas. Los regresos P4–P8 se acreditan separadamente; los
+fixtures unitarios no equivalen a verificación completa de engine.
+
+## Deuda de integración no global
+
+- El P5-C histórico tiene dos conductos transfer fijos y el callback geométrico
+  no expone un estado SSPRK2 de etapa a un componente externo. Se dejó intacto.
+  `two_stroke_ports_p5c` puede enlazar aperturas a esas dos rutas, pero tercera
+  ruta, reed dinámica y volúmenes externos en las mismas etapas requieren una
+  extensión integrada nueva y separada.
+- El P6 expone ledgers de fresh delivered y short-circuit agregados, pero el
+  primary evidence congelado no contiene un acumulador durable de delivered
+  fresh_air/fuel por especie. Fuel accounting acepta ledgers de cuatro
+  especies explícitos; no se derivan AFR/BSFC desde el contador escalar.
+- La fase 1/2 queda localmente bloqueada por la capability de frontera ya
+  registrada en `docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md`.
+  Las funciones independientes continúan; no repetir ni ajustar KT100.
+- El segundo caso Honda solo aporta procedencia documental parcial y no puede
+  alimentar una corrida sin reemplazar UNKNOWN por supuestos.
 
 Para cada fase registrar contrato, código, pruebas unitarias/analíticas/negativas,
 integración, restart/replay, conservación, regresiones, auditoría, revisión puntual,

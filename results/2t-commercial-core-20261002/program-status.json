@@ -1,0 +1,106 @@
+{
+  "schema": "MOTORSIM_2T_COMMERCIAL_CORE_STATUS_V1",
+  "program": "MOTORSIM_2T_COMMERCIAL_CORE",
+  "recorded_at": "2026-10-02",
+  "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
+  "status_capture_head": "29544ad",
+  "overall": "NOT_READY_INTEGRATION_GAPS_REMAIN",
+  "ready_claim": false,
+  "push_performed": false,
+  "kt100_policy": "FROZEN_NO_RERUNS_OR_ADJUSTMENTS_IN_THIS_MISSION",
+  "phases": {
+    "1_reference_harness": {
+      "status": "LOCAL_BLOCKER",
+      "verified_scope": ["period_1_and_period_2_fixtures", "offline_audit", "malformed_evidence", "accepted_step_checkpoint_restart_replay"],
+      "blocked_scope": "No complete engine cycle is available to establish multi-cycle campaign operation and campaign-anchor restart/replay."
+    },
+    "2_kt100_v2": {
+      "status": "LOCAL_BLOCKER",
+      "classification": "KT100_HYBRID_V2_BLOCKED_BY_RESERVOIR_BOUNDARY_CAPABILITY",
+      "campaign_rerun_authorized": false
+    },
+    "3_generic_2t_ports": {
+      "status": "GEOMETRY_IMPLEMENTED_CORE_TOPOLOGY_PARTIAL",
+      "verified_scope": ["multiple_transfer_apertures", "primary_secondary_boost_roles", "piston_port_intake", "single_bridged_auxiliary_exhaust", "periodic_area_profiles", "discharge_coefficients", "powervalve_ready_roof"],
+      "blocked_scope": "P5-C binding supports two existing transfer paths only; arbitrary path topology, project persistence and GUI remain open."
+    },
+    "4_scavenging": {
+      "status": "METRICS_AND_EXACT_CLOSURE_ADAPTER_IMPLEMENTED_PERIODIC_CAMPAIGN_PENDING",
+      "verified_scope": ["four_species_metrics", "exact_geometry_closure_snapshots", "complete_360_cycle_binding", "stable_output_schema_adapter"]
+    },
+    "5_reed": {
+      "status": "COMPONENT_IMPLEMENTED_P5C_STAGE_INTEGRATION_BLOCKED",
+      "verified_scope": ["static_and_dynamic_multi_petal_model", "serialization", "unit_restart_replay"]
+    },
+    "6_expansion_chamber": {
+      "status": "COMPONENT_VERIFIED",
+      "verified_scope": ["connected_sections", "existing_quasi_1d_mesh_and_solver_trace", "characteristics", "travel_and_reflection_timing_estimates"]
+    },
+    "7_thermal": {
+      "status": "PRESCRIBED_COMPONENT_VERIFIED_CORE_ENERGY_COUPLING_PENDING",
+      "verified_scope": ["prescribed_wall_temperatures", "constant_h_v1", "cycle_heat_ledger"]
+    },
+    "8_combustion": {
+      "status": "PRESCRIBED_COMBUSTION_V2_VERIFIED",
+      "verified_scope": ["single_and_double_wiebe", "ignition", "efficiency_maps", "ca10_ca50_ca90"],
+      "chemistry_or_predictive_lite": "NOT_IMPLEMENTED_NO_SUPPORTED_PARAMETERS"
+    },
+    "9_crankcase": {
+      "status": "GEOMETRY_AND_REVERSIBLE_LINK_COMPONENT_PARTIAL_CORE_COUPLING_BLOCKED",
+      "verified_scope": ["slider_crank_volume", "analytic_volume_rate", "bidirectional_existing_restriction_helper"]
+    },
+    "10_mechanical_losses": {
+      "status": "ACCOUNTING_COMPONENT_VERIFIED",
+      "verified_scope": ["fmep_terms_and_maps", "imep_bmep", "indicated_and_brake_power_torque"]
+    },
+    "11_fuel": {
+      "status": "ACCOUNTING_COMPONENT_VERIFIED_P6_PER_SPECIES_DELIVERY_BINDING_PENDING",
+      "verified_scope": ["explicit_fuel_properties", "afr_equivalence", "fuel_masses_flow_isfc_bsfc"]
+    },
+    "12_powervalve": {
+      "status": "GEOMETRY_COMPONENT_VERIFIED",
+      "verified_scope": ["bounded_rpm_map", "linear_interpolation", "generic_exhaust_roof_geometry"]
+    },
+    "13_intake_network": {
+      "status": "COMPONENTS_VERIFIED_P5C_STAGE_AND_GLOBAL_LEDGER_INTEGRATION_PENDING",
+      "verified_scope": ["plenum_airbox_boost_bottle", "atmosphere_species", "conservative_0d_1d_interface_helper", "helmholtz_estimate"]
+    },
+    "14_engineering_outputs": {
+      "status": "SCHEMA_VERIFIED_FULL_CORE_PRIMARY_COLLECTOR_PENDING",
+      "verified_scope": ["versioned_schema", "units_provenance_nonclaims", "scavenging_metrics_binding"]
+    },
+    "15_experimental_import": {
+      "status": "EXPLORATORY_IMPORTER_VERIFIED_P9_UNCHANGED",
+      "verified_scope": ["pressure_trace", "dyno_torque_power", "units_uncertainty_provenance_hash_overlay"]
+    },
+    "16_second_reference_case": {
+      "status": "DOCUMENTED_PARTIAL_NOT_SIMULATION_READY",
+      "case_id": "HONDA_CR250R_2007_REFERENCE_CASE_PARTIAL_V1",
+      "unknowns_left_null": true
+    }
+  },
+  "automated_checks": {
+    "focused_program_tests": {"result": "PASS", "count": 204},
+    "commercial_core_openspec_strict": "PASS",
+    "reference_harness_openspec_strict": "PASS",
+    "git_diff_check": "PASS",
+    "git_lfs_fsck": "PASS",
+    "p4_p8_regressions": "PASS_PREVIOUSLY_RECORDED_346_TESTS_NOT_RERUN_FOR_THIS_CLOSEOUT",
+    "p9_contract_sha256": "79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d"
+  },
+  "review": {
+    "current_delta": "SELF_REVIEWED",
+    "independent_review_current_delta": "NOT_PERFORMED",
+    "prior_harness_punctual_review": "NO_MATERIAL_DEFECT_FOUND"
+  },
+  "git": {
+    "branch": "main",
+    "publication": "NOT_PUSHED",
+    "preserved_untracked_historical_result_directories": [
+      "results/kt100-hybrid-model-fixture-v2-harness-20261002/",
+      "results/kt100-hybrid-model-fixture-v2-harness-20261002-r2/",
+      "results/kt100-hybrid-model-fixture-v2-harness-20261002-r3/",
+      "results/kt100-hybrid-model-fixture-v2-harness-20261002-r4/"
+    ]
+  }
+}
