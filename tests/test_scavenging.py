@@ -5,7 +5,8 @@ from motorsim.scavenging import (ScavengingInput, calculate_scavenging_metrics,
                                  reference_charge_mass,
                                  scavenging_metrics_from_cycle,
                                  scavenging_metrics_from_generic_ports,
-                                 scavenging_engineering_records)
+                                 scavenging_engineering_records,
+                                 scavenging_series_from_primary_cycles)
 from motorsim.two_stroke_ports import DuctBinding, PortDefinition, TwoStrokePortSet
 
 
@@ -148,6 +149,8 @@ class ScavengingMetricTests(unittest.TestCase):
                  "trajectory_last_state": terminal_gas,
                  "trajectory_last_species_mass": {"cylinder": exhaust_species},
                  "trajectory": rows,
+                 "cycle_index": 1,
+                 "configuration_hash": "generic-test-config",
                  "cycle_start_cumulative": {"angle_deg": 30.0,
                                              "fresh_delivery": 0.0,
                                              "fresh_short_circuit": 0.0},
@@ -158,6 +161,10 @@ class ScavengingMetricTests(unittest.TestCase):
             cycle, ports=ports, reference_mass_kg=0.01)
         self.assertAlmostEqual(result["ratios"]["purity_at_transfer_close"]["value"], 0.4)
         self.assertAlmostEqual(result["ratios"]["purity_at_exhaust_close"]["value"], 0.5)
+        series = scavenging_series_from_primary_cycles(
+            [cycle], ports=ports, reference_mass_kg=0.01)
+        self.assertEqual(series["periodicity"], "NOT_EVALUATED")
+        self.assertEqual(series["cycles"][0]["cycle_index"], 1)
 
     def test_generic_closure_rejects_missing_exact_snapshot(self):
         ports = TwoStrokePortSet(

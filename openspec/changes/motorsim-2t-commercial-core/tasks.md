@@ -1,6 +1,6 @@
 # Programa MOTORSIM_2T_COMMERCIAL_CORE
 
-Estado reconstruido en `9116eb0`. Las fases son una cola durable única; marcar
+Estado reconstruido desde `401d8d7`. Las fases son una cola durable única; marcar
 solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
 
 - [ ] Fase 1: harness reusable y evidencia multi-ciclo. Parcial: harness y
@@ -9,7 +9,9 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       `reference-engine-hybrid-harness`; no declarar VERIFIED.
 - [ ] Fase 2: KT100 V2, cinco puntos exploratorios y provenance. Parcial:
       fixture/configuración generados; 0/5 ciclos completos, sin periodicidad,
-      checkpoint de campaña ni performance. Preservar r2–r5.
+      checkpoint de campaña ni performance. Preservar r2–r5. Estado congelado:
+      `KT100_HYBRID_V2_BLOCKED_BY_RESERVOIR_BOUNDARY_CAPABILITY`; no más runs,
+      retries, ajustes ni sensitivities en esta misión.
 - [ ] Fase 3: geometría genérica 2T: transferencias múltiples, escape complejo,
       perfiles de área, piston-port y asociaciones con conductos.
 - [x] Fase 3a: API/configuración separada `GENERIC_2T_PORTS_V1`; conserva los
@@ -32,7 +34,9 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       reference charge y nueve ratios con valores undefined explícitos para
       denominadores cero; cinco pruebas analíticas/negativas aprobadas.
 - [x] Fase 4b: extraer snapshots de cierre de transfers/escape desde evidencia
-      primaria de ciclo, ligarlos a geometry events y agregar auditor offline.
+      primaria de ciclo, ligarlos a cierres exactos de geometría, exigir span
+      completo 360°, ledgers P6 concordantes y agregar auditor offline. Fixtures
+      geométricos/primarios y regresiones focales pasan.
 - [x] Fase 4b1: adaptador de primary trajectory que exige snapshots únicos en
       ángulos de cierre resueltos, cierre terminal, ledger P6 cumulativo y
       summary concordante; no interpola. Tests de evento ausente, resumen stale
