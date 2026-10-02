@@ -258,7 +258,19 @@
         "angle_deg": 107.65162630807096,
         "attempts": 25,
         "response": "Preserved as a failed candidate; not represented as a successful fixture."
-      }
+      },
+      "closed_conditional_workstreams": [
+        "17a integrated SSPRK2 gas/species foundation",
+        "17c generic ports/exhaust/scavenging exact closure path",
+        "17e periodic primary evidence and cycle collector",
+        "18 independent synthetic Fixture B and selected P4-P8 regressions"
+      ],
+      "remaining_blockers": [
+        "dynamic reed state integrated into common stages and restart",
+        "fuel trapped/stoichiometric semantics not established",
+        "independent review of current delta",
+        "P4 remains unresolved and all fixtures stay CONDITIONAL_ON_P4"
+      ]
     },
     "17d_p7_fuel_combustion_thermal_mechanics": {
       "status": "PARTIAL_CYCLE_PRIMARY_AND_CONDITIONAL_MECHANICAL_OUTPUT",
@@ -473,15 +485,20 @@
       "id": "17a-integrated-gas-species-foundation",
       "description": "SSPRK2 gas/species N-route foundation, global ledgers, cell/chamber CFL, atomic restart checks",
       "dependencies": [],
-      "state": "DONE",
+      "state": "DONE_CONDITIONAL",
       "blocker": null,
       "commits": [
-        "a70917dde45ca15c62d5e0f460020599488a4d1f"
+        "a70917dde45ca15c62d5e0f460020599488a4d1f",
+        "2c93e6c",
+        "f846aa3",
+        "b50507b",
+        "a489f07"
       ],
       "evidence": [
         "tests/test_integrated_2t.py:13",
         "65-test integrated regression group: PASS",
-        "independent read-only review confirmed area-volume and gross chamber-outflow CFL plus restart checks"
+        "independent read-only review confirmed area-volume and gross chamber-outflow CFL plus restart checks",
+        "Two internal full-cycle fixtures reached periodic closure; 85 integrated regression tests PASS; evidence remains CONDITIONAL_ON_P4."
       ],
       "next_action": "Continue with coupled subsystems; foundation is not a complete engine."
     },
@@ -513,10 +530,12 @@
       "dependencies": [
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "IN_PROGRESS",
-      "blocker": "Reservoir-boundary classification remains open; exact transfer/exhaust closure snapshots are captured for the constant-RPM internal fixture.",
+      "state": "DONE_CONDITIONAL",
+      "blocker": "Reservoir V2 remains a separate local KT100 blocker; no retry or historical P5 change. Integrated nonreflecting synthetic fixtures are complete.",
       "commits": [
-        "d3b82f3 Integrate generic ports into accepted 2T stages"
+        "d3b82f3 Integrate generic ports into accepted 2T stages",
+        "b50507b",
+        "a489f07"
       ],
       "evidence": [
         "tests/test_integrated_2t.py:15; multi-section ExpansionChamber mesh is accepted and advanced as exhaust",
@@ -528,7 +547,8 @@
         "fixture A completed 0–720 degrees through three transfers and multi-section expansion-chamber exhaust; synthetic ledgers close",
         "Integrated V2 output now includes port areas and signed interface flows from accepted stages; exact closure snapshots remain pending.",
         "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2 captures six unique exact closure states; six-cycle artifact includes same-cycle scavenging outputs and P6 ledgers.",
-        "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2 captures six unique exact closure states; the six-cycle artifact includes same-cycle scavenging outputs and P6 ledgers."
+        "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2 captures six unique exact closure states; the six-cycle artifact includes same-cycle scavenging outputs and P6 ledgers.",
+        "Fixture A/B full integrated paths include generic intake, three transfer routes, expansion chamber, exact port closures and V2 outputs; both reached PERIOD_1. CONDITIONAL_ON_P4."
       ],
       "next_action": "Continue boundary classification and other independent integration; preserve the no-fallback local blocker."
     },
@@ -562,10 +582,13 @@
         "17c-exhaust-chamber-boundary",
         "17d-fuel-combustion-thermal-mechanics"
       ],
-      "state": "IN_PROGRESS",
-      "blocker": "Full Commercial Core acceptance remains open: explicit stoichiometry/trapped-fuel semantics, dynamic reed integration, independent review, and boundary V2 decision. Synthetic fixtures A and B reached PERIOD_1 but remain CONDITIONAL_ON_P4.",
+      "state": "DONE_CONDITIONAL",
+      "blocker": "Global readiness still waits on dynamic reed coupling, approved trapped-fuel/stoichiometric semantics, independent review, and P4 acceptance.",
       "commits": [
-        "e93fd624"
+        "e93fd624",
+        "f846aa3",
+        "b50507b",
+        "a489f07"
       ],
       "evidence": [
         "fixture A completes two full cycles; checkpoint at 360 degrees reproduces the terminal 720-degree JSON snapshot exactly under an absolute-angle scheduler",
@@ -581,7 +604,8 @@
         "Terminal angular output point is evaluated read-only from the accepted terminal state; P7 requested endpoint rate is pre-limiter and excluded from cycle integrals.",
         "Independent read-only review of V2 closure/output delta PASS; no material findings; full-engine acceptance remains open.",
         "Two independent six-cycle Fixture A runs (one continuous, one checkpoint/restart after cycle 3) had exact full snapshot, primary-cycle and validated V2-output equality; 11,176 accepted steps; P1/P2 still fail.",
-        "Fixture A primary campaign reached PERIOD_1 at cycle 16 after 3 consecutive PASS comparisons (13→14→15→16); full P1 artifact preserved; no solver/threshold changes."
+        "Fixture A primary campaign reached PERIOD_1 at cycle 16 after 3 consecutive PASS comparisons (13→14→15→16); full P1 artifact preserved; no solver/threshold changes.",
+        "Fixture A P1 at cycle 16 and Fixture B P1 at cycle 19; full outputs validated per cycle; six-cycle checkpoint/replay is exact; synthetic and CONDITIONAL_ON_P4."
       ],
       "next_action": "Continue remaining independent components and integration; do not promote readiness."
     },
