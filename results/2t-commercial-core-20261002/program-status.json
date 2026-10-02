@@ -144,7 +144,7 @@
       "unknowns_left_null": true
     },
     "17_integrated_2t_foundation": {
-      "status": "PARTIAL_ONE_SYNTHETIC_FIXTURE_SIX_CYCLES_P1_FAIL",
+      "status": "PARTIAL_TWO_SYNTHETIC_FIXTURES_PERIOD_1_CONDITIONAL",
       "implementation": "motorsim.integrated_2t.IntegratedEngine2T",
       "verified_scope": [
         "single_global_ssprk2_stage_state",
@@ -198,16 +198,58 @@
       ],
       "focal_tests": 21,
       "blocked_scope": [
-        "fixture_a_cycle_1_indicated_work_negative_and_first_p1_pair_invalid",
-        "fixture_a_periodic_comparisons_cycles_2_to_6_fail_reference_contract",
         "dynamic_reed_state_and_restart_not_integrated",
-        "fixture_b_not_started_until_fixture_a_closes_cycle_evidence",
         "fixture_a_cycle_1_indicated_work_negative_and_cycle_1_to_2_invalid",
-        "periodicity_comparisons_cycles_2_to_6_fail_reference_contract",
         "dynamic_reed_stage_state_and_restart_not_integrated",
-        "fixture_b_not_started_until_fixture_a_meets_remaining_gates"
+        "equivalence_ratio_requires_explicit_stoichiometric_AFR",
+        "fuel_trapped_vs_terminal_global_inventory_semantics_not_equivalent",
+        "equivalence_ratio_requires_explicit_stoichiometric_AFR",
+        "dynamic_reed_stage_state_restart_and_SSPRK2_integration_not_implemented",
+        "GENERALIZED_RESERVOIR_BOUNDARY_V2_SCIENTIFIC_DECISION_REQUIRED",
+        "fuel_trapped_inventory_not_inferred_from_terminal_global_inventory"
       ],
-      "boundary_v2": "NOT_IMPLEMENTED_NO_FALLBACK"
+      "boundary_v2": "NOT_IMPLEMENTED_NO_FALLBACK",
+      "periodicity": {
+        "contract": "REFERENCE_PERIODIC_CONVERGENCE_V1",
+        "classification": "PERIOD_1",
+        "converged_cycle": 16,
+        "comparison_12_to_13": "FAIL",
+        "comparisons_13_to_14_14_to_15_15_to_16": [
+          "PASS",
+          "PASS",
+          "PASS"
+        ],
+        "conditional_on_p4": true
+      },
+      "periodicity_B": {
+        "contract": "REFERENCE_PERIODIC_CONVERGENCE_V1",
+        "classification": "PERIOD_1",
+        "converged_cycle": 19,
+        "comparison_16_to_17_17_to_18_18_to_19": [
+          "PASS",
+          "PASS",
+          "PASS"
+        ],
+        "conditional_on_p4": true
+      },
+      "fixture_B": {
+        "configuration": "INTERNAL_SYNTHETIC_B_EXPANSION_CHAMBER_120PCT",
+        "changed_component": "all expansion chamber axial section lengths scaled by 1.2",
+        "cycles": 19,
+        "accepted_steps": 33434,
+        "rpm": 3000,
+        "max_cfl": 0.4,
+        "artifact": "results/2t-commercial-core-20261002/fixture-b-long-chamber-primary-20261002-v1.json.gz",
+        "output_validation": "V2 validated each completed cycle with explicit synthetic loss model and scavenging reference",
+        "classification": "PERIOD_1"
+      },
+      "failed_fixture_B_candidate": {
+        "configuration": "PISTON_PORT_WITHOUT_REED",
+        "status": "FAILED_ADMISSIBILITY_BEFORE_CYCLE_1",
+        "angle_deg": 107.65162630807096,
+        "attempts": 25,
+        "response": "Preserved as a failed candidate; not represented as a successful fixture."
+      }
     },
     "17d_p7_fuel_combustion_thermal_mechanics": {
       "status": "PARTIAL_CYCLE_PRIMARY_AND_CONDITIONAL_MECHANICAL_OUTPUT",
@@ -249,7 +291,7 @@
     },
     "reference_harness_openspec_strict": "PASS",
     "git_diff_check": "PASS",
-    "git_lfs_fsck": "PASS",
+    "git_lfs_fsck": "PASS_AFTER_EXPLICIT_STAGE",
     "p4_p8_regressions": {
       "result": "PASS",
       "count": 300,
@@ -345,10 +387,62 @@
       "p1_p2": "NOT_MET; fixture A remains blocked",
       "evidence": "results/2t-commercial-core-20261002/fixture-a-restart-replay-audit-20261002.json",
       "primary_trajectory": "results/2t-commercial-core-20261002/fixture-a-integrated-cycles-20261002-v2.json.gz"
+    },
+    "integrated_fixture_a_periodicity_extension": {
+      "result": "PASS_PERIOD_1",
+      "converged_cycle": 16,
+      "contract": "REFERENCE_PERIODIC_CONVERGENCE_V1",
+      "pair_12_to_13": "FAIL",
+      "pairs_13_to_14_14_to_15_15_to_16": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "cycles_1_to_12_exactly_reproduced_from_prior_artifacts": true,
+      "solver_or_threshold_change": false,
+      "evidence": "results/2t-commercial-core-20261002/fixture-a-periodicity-extension-20261002-v1.json.gz"
+    },
+    "integrated_output_fuel_accounting": {
+      "result": "PASS_85_TEST_REGRESSION; current-cycle ledger/output checks pass",
+      "quantities": [
+        "gross_fresh_air_intake",
+        "fuel_delivery",
+        "fuel_short_circuit",
+        "P7_fuel_species_consumption",
+        "terminal_global_fuel_inventory",
+        "global_fuel_species_residual",
+        "gross_intake_AFR",
+        "ISFC_if_positive_indicated_power",
+        "BSFC_if_positive_brake_power"
+      ],
+      "equivalence_ratio": "UNDEFINED_WITHOUT_EXPLICIT_STOICHIOMETRIC_AFR",
+      "tests": "tests/test_integrated_2t.py"
+    },
+    "integrated_fixture_b": {
+      "result": "PASS_PERIOD_1",
+      "configuration": "20_percent_expansion_chamber_axial_length_change",
+      "cycles": 19,
+      "accepted_steps": 33434,
+      "converged_cycle": 19,
+      "contract": "REFERENCE_PERIODIC_CONVERGENCE_V1",
+      "final_three_comparisons": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "first_pair": "INVALID",
+      "artifact": "results/2t-commercial-core-20261002/fixture-b-long-chamber-primary-20261002-v1.json.gz"
+    },
+    "integrated_fixture_b_failed_alternative": {
+      "configuration": "PISTON_PORT_WITHOUT_REED",
+      "result": "FAILED_ADMISSIBILITY",
+      "angle_deg": 107.65162630807096,
+      "step_refinements": 25,
+      "solver_changed": false
     }
   },
   "review": {
-    "current_delta": "INDEPENDENT_READ_ONLY_REVIEW_PASS_INTEGRATED_PRIMARY_V2_CLOSURES_OUTPUT_ALIGNMENT_AND_FIXTURE_A; no material findings; complete-engine acceptance not reviewed",
+    "current_delta": "SELF_REVIEW_ONLY; no independent review capability used on current fuel-output/Fixture-B delta",
     "independent_review_current_delta": "PASS: closure derivation, accepted endpoint evidence, stage/output alignment, V1/V2 separation, cycle integrals, LFS artifact identity, and scope boundaries; no material findings; not a complete-engine acceptance review",
     "prior_harness_punctual_review": "NO_MATERIAL_DEFECT_FOUND",
     "reverse_internal_donor_fix": "INDEPENDENT_READ_ONLY_REVIEW_PASS_BOTH_DONOR_DIRECTIONS_AND_STAGE_BINDING; no complete-engine review performed",
@@ -460,7 +554,7 @@
         "17d-fuel-combustion-thermal-mechanics"
       ],
       "state": "IN_PROGRESS",
-      "blocker": "Fixture A remains nonperiodic: cycle 1 work is negative, 1→2 INVALID, 2→6 comparisons FAIL; P1/P2 not detected.",
+      "blocker": "Fixture A reached P1 at cycle 16; equivalence-ratio fuel property and trapped-versus-terminal fuel semantics remain unresolved; Fixture B gate remains held.",
       "commits": [
         "e93fd624"
       ],
@@ -477,9 +571,10 @@
         "Updated synthetic exhaust geometry has actual closed intervals; six full V2 primary cycles capture exact transfer/exhaust snapshots and same-cycle scavenging; 33/33 focal, 85/85 integrated regression, and 300 P4–P8 tests pass.",
         "Terminal angular output point is evaluated read-only from the accepted terminal state; P7 requested endpoint rate is pre-limiter and excluded from cycle integrals.",
         "Independent read-only review of V2 closure/output delta PASS; no material findings; full-engine acceptance remains open.",
-        "Two independent six-cycle Fixture A runs (one continuous, one checkpoint/restart after cycle 3) had exact full snapshot, primary-cycle and validated V2-output equality; 11,176 accepted steps; P1/P2 still fail."
+        "Two independent six-cycle Fixture A runs (one continuous, one checkpoint/restart after cycle 3) had exact full snapshot, primary-cycle and validated V2-output equality; 11,176 accepted steps; P1/P2 still fail.",
+        "Fixture A primary campaign reached PERIOD_1 at cycle 16 after 3 consecutive PASS comparisons (13→14→15→16); full P1 artifact preserved; no solver/threshold changes."
       ],
-      "next_action": "Keep Fixture B gated; continue independent integration while preserving the observed Fixture A periodicity failure."
+      "next_action": "Close fuel-mass outputs from accepted ledgers; keep equivalence ratio undefined without stoichiometry; release Fixture B only after its explicit gate is satisfied."
     },
     {
       "id": "18-fixture-b-regressions",
@@ -487,11 +582,16 @@
       "dependencies": [
         "17e-cycle-evidence-collector"
       ],
-      "state": "READY",
-      "blocker": "Execution remains gated on Fixture A cycle-primary, periodicity, fuel/mechanical/output requirements.",
+      "state": "DONE_CONDITIONAL",
+      "blocker": "Both completed internal fixtures reach P1, but overall Commercial Core remains partial due to unresolved explicit stoichiometric fuel property, dynamic reed integration and reservoir boundary V2 scientific decision.",
       "commits": [],
-      "evidence": [],
-      "next_action": "Hold Fixture B until Fixture A satisfies its cycle evidence/P1-P2 and fuel/mechanical/output requirements."
+      "evidence": [
+        "Fixture B 20% longer expansion chamber: 19 complete cycles, 33,434 accepted steps, P1 at cycle 19, V2 output validated per cycle; full primary+output artifact preserved.",
+        "P4-P8 selected regression suite current run: 300 passed, four pre-existing NumPy deprecation warnings.",
+        "No-reed piston-port alternative failed admissibility at 107.651626 degrees after 25 step reductions; retained only as failed candidate evidence.",
+        "Final current run: 85 integrated/P5-C/P6/P7/reed/port tests PASS; 300 P4-P8 tests PASS (4 pre-existing NumPy deprecation warnings); OpenSpec strict PASS."
+      ],
+      "next_action": "Keep readiness partial; continue only components independent of unresolved fuel/reed/reservoir decisions."
     },
     {
       "id": "reservoir-boundary-v2",

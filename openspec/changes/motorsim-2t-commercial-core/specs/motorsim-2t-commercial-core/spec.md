@@ -528,6 +528,26 @@ experimental validation `NOT_PERFORMED`, and predictive validation
   global conservation reconstructed from that trajectory
 - **THEN** V2 output construction rejects it and does not serialize the summary.
 
+#### Scenario: Rebuild fuel mass accounting from the integrated cycle
+
+- **WHEN** a complete primary cycle contains signed intake-face species flux,
+  P6 fuel delivery/short-circuit rates, accepted P7 species sources, and start
+  and terminal four-species inventories
+- **THEN** the V2 collector independently reports intake air/fuel per cycle,
+  P7 fuel-species consumption, short-circuited fuel, terminal system fuel
+  inventory and the global fuel-species residual from those accepted records;
+  gross intake AFR is defined only for positive fuel delivery, while
+  equivalence ratio remains UNDEFINED unless a stoichiometric AFR is explicitly
+  configured. ISFC/BSFC require positive corresponding power and use the
+  integrated fuel-species flow without inferring fuel LHV.
+
+#### Scenario: Read older V2 fuel traces without fabricating intake composition
+
+- **WHEN** a V2 primary trace lacks the newer gross-intake-air rate but retains
+  its signed species flux at the intake face
+- **THEN** the collector reconstructs gross inlet fresh_air from that accepted
+  signed face flux; if it is absent or malformed, output construction fails.
+
 ### Requirement: Integrated cycle closure evidence and scavenging outputs
 
 Integrated full-cycle evidence MUST use a versioned primary-cycle schema that
@@ -558,6 +578,17 @@ previous cycle's values.
   lacks an exact closure endpoint
 - **THEN** no interpolation is performed and scavenging values remain null and
   UNDEFINED even if another cycle previously had valid closure data.
+
+#### Scenario: Verify a second integrated synthetic configuration
+
+- **WHEN** a second internally defined engine configuration changes the
+  expansion-chamber section lengths while retaining the shared integrated
+  solver, transfer topology, four-species state, prescribed combustion,
+  thermal boundary and explicit synthetic loss model
+- **THEN** it MUST independently complete cycles, satisfy the same preregistered
+  periodicity contract, close its global ledgers, and build validated V2
+  engineering outputs. The result remains synthetic and CONDITIONAL_ON_P4 and
+  MUST NOT be presented as experimental or commercial readiness.
 
 Engineering trace channels MUST pair each accepted state with an RHS evaluation
 made from that same state. The terminal point MUST be a read-only evaluation of

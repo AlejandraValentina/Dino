@@ -323,3 +323,51 @@ explícito. No hay P1/P2: el trabajo del primer ciclo es negativo y los pares
 posteriores siguen fallando. Esta comprobación no cambia el estado parcial.
 Evidencia de comparación: `results/2t-commercial-core-20261002/fixture-a-restart-replay-audit-20261002.json`;
 la trayectoria primaria permanece en el artefacto V2 LFS.
+
+
+### Estado actualizado de integración — 2026-10-02
+
+Fixture A interno sintético alcanzó `PERIOD_1` en el ciclo 16: la comparación
+12→13 fue FAIL, seguida por tres PASS consecutivos 13→14, 14→15 y 15→16 bajo
+`REFERENCE_PERIODIC_CONVERGENCE_V1`. Los ciclos 1–12 regenerados coincidieron
+exactamente con las trayectorias primarias previas. El primer ciclo conserva
+trabajo indicado negativo. Este resultado acredita periodicidad posterior del
+fixture sintético; no cambia la dependencia `CONDITIONAL_ON_P4`.
+
+Se integró además la contabilidad por trayectoria de fuel entrante, conversión
+P7, short-circuit, inventario final y residual de balance; el recolector define
+AFR bruto y consumos específicos solo cuando las entradas/potencias existen.
+Equivalence ratio queda UNDEFINED sin estequiometría explícita; el inventario
+terminal no se confunde con fuel atrapado. No se infieren LHV ni combustible
+real. El estado global permanece `MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL`; Fixture B
+sigue gated mientras no se cierren las entradas y métricas de fuel necesarias.
+Evidencia P1: `results/2t-commercial-core-20261002/fixture-a-periodicity-extension-20261002-v1.json.gz`.
+
+
+### Fixture B y estado de readiness — 2026-10-02
+
+El segundo fixture sintético, con las longitudes de cámara de expansión
+aumentadas 20 %, completó 19 ciclos a 3000 RPM/CFL 0.4 y alcanzó `PERIOD_1` en
+el ciclo 19. Tres comparaciones PASS consecutivas ocurrieron en 16→17, 17→18 y
+18→19; ciclo 1→2 es INVALID. Los outputs V2 por ciclo se validaron con el mismo
+collector y una pérdida mecánica explícita sintética. La evidencia primaria y
+outputs completos están en
+`results/2t-commercial-core-20261002/fixture-b-long-chamber-primary-20261002-v1.json.gz`.
+
+Un intento alternativo de no-reed piston-port no completó el primer ciclo: el
+paso en 107.651626° siguió inadmisible tras 25 reducciones, y no se atribuye a
+una demostración exitosa. Ambos fixtures que sí completaron permanecen
+`CONDITIONAL_ON_P4`. No hay configuración estequiométrica aprobada, por lo que
+equivalence ratio no se inventa; la reed dinámica no está en el grafo SSPRK2 y
+GENERALIZED_RESERVOIR_BOUNDARY_V2 sigue bloqueada por decisión científica. El
+estado global permanece `MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL`.
+
+
+### Validación final de la tanda — 2026-10-02
+
+La regresión integrada de 85 pruebas y la suite P4–P8 de 300 pruebas pasaron;
+esta última emitió cuatro warnings de deprecación NumPy ya existentes.
+OpenSpec estricto pasó. El artifact de outputs de fuel de A se reconstruyó desde
+primary V2 aceptada y validó cuatro outputs; `equivalence_ratio` quedó null/
+UNDEFINED sin estequiometría, y no se infirió LHV. El árbol mantiene solo los
+cuatro directorios históricos KT100 como untracked; no se incluyen en el stage.

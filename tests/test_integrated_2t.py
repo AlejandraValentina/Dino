@@ -578,7 +578,8 @@ def test_p7_event_boundary_requires_exact_alignment_and_stops_cleanly():
     assert system.trace[-1]["stage_p7_source_rates"][1]["heat_w"] == pytest.approx(0.0)
 
 
-def _internal_cycle_fixture():
+def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
+                            fixture_name=None):
     rpm = 3000.0
     crankcase = CrankcaseGeometry(56.0, 50.0, 100.0, 80.0,
                                   "SYNTHETIC_ASSUMPTION")
@@ -617,12 +618,13 @@ def _internal_cycle_fixture():
     binding = IntegratedPortBinding2T(
         ports, {"inlet": "intake", "primary": "primary", "secondary": "secondary",
                 "boost": "boost", "exhaust": "exhaust"}, valve)
+    assert chamber_length_scale > 0.0
     chamber = ExpansionChamber((
-        ChamberSection("header", "header", 80.0, 20.0, 20.0),
-        ChamberSection("diffuser", "diffuser", 180.0, 20.0, 52.0),
-        ChamberSection("belly", "belly", 100.0, 52.0, 52.0),
-        ChamberSection("baffle", "baffle_cone", 170.0, 52.0, 16.0),
-        ChamberSection("stinger", "stinger", 120.0, 16.0, 16.0)))
+        ChamberSection("header", "header", 80.0 * chamber_length_scale, 20.0, 20.0),
+        ChamberSection("diffuser", "diffuser", 180.0 * chamber_length_scale, 20.0, 52.0),
+        ChamberSection("belly", "belly", 100.0 * chamber_length_scale, 52.0, 52.0),
+        ChamberSection("baffle", "baffle_cone", 170.0 * chamber_length_scale, 52.0, 16.0),
+        ChamberSection("stinger", "stinger", 120.0 * chamber_length_scale, 16.0, 16.0)))
     paths = (
         DuctPath2T("intake", uniform_mesh(2, .05, 1e-4), "intake"),
         DuctPath2T("primary", uniform_mesh(2, .05, 1e-4), "transfer"),
@@ -659,9 +661,16 @@ def _internal_cycle_fixture():
         atmosphere_species=(.98, .02, 0.0, 0.0),
         inlet_boundary=Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0)),
         outlet_boundary=Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0)),
-        geometry_identity={"fixture": "internal-cycle-a-synthetic-v1",
+        geometry_identity={"fixture": (fixture_name or
+                                        ("internal-cycle-b-piston-port-synthetic-v1"
+                                         if not with_reed else
+                                         "internal-cycle-a-synthetic-v1"
+                                         if chamber_length_scale == 1.0 else
+                                         "internal-cycle-b-long-chamber-synthetic-v1")),
+                           "chamber_length_scale": chamber_length_scale,
                            "ports": ports.to_dict(), "chamber": chamber.to_dict()},
-        reed_petals=(reed,), port_binding=binding, slider_crank=slider,
+        reed_petals=((reed,) if with_reed else ()),
+        port_binding=binding, slider_crank=slider,
         reference_rpm=rpm, thermal_system=thermal,
         thermal_locations={"cylinder-wall": "cylinder"},
         combustion_start_angle_deg=300.0, max_cfl=.4)
@@ -698,7 +707,8 @@ def _advance_cycle_fixture(system, target_angle):
                 break
             except ValueError as error:
                 if not any(reason in str(error) for reason in
-                           ("inadmissible species mass", "CFL limit exceeded")):
+                           ("inadmissible species mass", "CFL limit exceeded",
+                            "rho/p/Y inadmissible")):
                     raise
                 step *= .5
         else:
@@ -783,6 +793,38 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     assert output["cycle_metrics"]["bsfc_g_kwh"]["status"] == "UNDEFINED"
     assert output["cycle_metrics"]["fuel_flow_kg_s"]["status"] == "DEFINED"
     assert output["cycle_metrics"]["fuel_flow_kg_s"]["value"] > 0.0
+    assert output["cycle_metrics"]["afr"]["status"] == "DEFINED"
+    assert output["cycle_metrics"]["afr"]["value"] == pytest.approx(
+        first_cycle["observables"]["fresh_air_intake_delivery_kg"] /
+        first_cycle["observables"]["fuel_delivered_kg"])
+    assert output["cycle_metrics"]["fuel_delivered_per_cycle_kg"]["value"] == pytest.approx(
+        first_cycle["observables"]["fuel_delivered_kg"])
+    assert output["cycle_metrics"]["fuel_consumed_by_p7_per_cycle_kg"]["value"] == pytest.approx(
+        first_cycle["observables"]["p7_fuel_consumed_kg"])
+    assert output["cycle_metrics"]["fuel_unburned_terminal_global_kg"]["value"] == pytest.approx(
+        first_cycle["observables"]["fuel_unburned_terminal_global_kg"])
+    assert abs(output["cycle_metrics"]["fuel_species_balance_residual_kg"]["value"]) < 1e-12
+    assert output["cycle_metrics"]["equivalence_ratio"]["status"] == "UNDEFINED"
+    prior_v2_record = deepcopy(first_cycle)
+    for row in prior_v2_record["trajectory"]:
+        for stage in row["stage_cycle_rates"]:
+            stage.pop("fresh_air_intake_delivery_kg_s", None)
+    for key in ("fresh_air_intake_delivery_kg", "fuel_delivered_kg",
+                "fuel_short_circuited_kg", "p7_fuel_consumed_kg",
+                "fuel_unburned_terminal_global_kg", "fuel_inventory_start_global_kg",
+                "fuel_external_net_kg", "fuel_mass_balance_residual_kg"):
+        prior_v2_record["observables"].pop(key, None)
+    prior_output = make_integrated_engineering_output(
+        prior_v2_record, displacement_m3=system.slider_crank.crankcase.displacement_m3)
+    assert prior_output["cycle_metrics"]["afr"]["value"] == pytest.approx(
+        output["cycle_metrics"]["afr"]["value"])
+    tampered_intake_rate = deepcopy(first_cycle)
+    tampered_intake_rate["trajectory"][0]["stage_cycle_rates"][0][
+        "fresh_air_intake_delivery_kg_s"] += 1e-4
+    with pytest.raises(ValueError, match="differs from signed face flux"):
+        make_integrated_engineering_output(
+            tampered_intake_rate,
+            displacement_m3=system.slider_crank.crankcase.displacement_m3)
     assert output["cycle_metrics"]["purity_at_transfer_close"]["status"] == "DEFINED"
     assert output["cycle_metrics"]["purity_at_exhaust_close"]["status"] == "DEFINED"
     assert output["cycle_metrics"]["fresh_retained_kg"]["status"] == "DEFINED"
@@ -823,6 +865,12 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
         brake["mechanical_loss_power_w"])
     assert output_with_losses["cycle_metrics"]["brake_work_j"]["value"] == pytest.approx(
         brake["brake_work_j"])
+    assert output_with_losses["cycle_metrics"]["isfc_g_kwh"]["status"] == "DEFINED"
+    assert output_with_losses["cycle_metrics"]["bsfc_g_kwh"]["status"] == "DEFINED"
+    expected_fuel_flow = second_cycle["cycle_ledgers"]["fuel_delivered_kg"] * 50.0
+    assert output_with_losses["cycle_metrics"]["isfc_g_kwh"]["value"] == pytest.approx(
+        expected_fuel_flow * 3.6e9 /
+        output_with_losses["cycle_metrics"]["indicated_power_w"]["value"])
 
     replay = _internal_cycle_fixture()
     replay.restore(cycle_one_checkpoint)

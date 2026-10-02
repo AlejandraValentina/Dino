@@ -361,3 +361,58 @@ El ciclo 1 conserva trabajo indicado negativo y la secuencia no converge P1/P2;
 esto verifica replay/conservación, no Commercial Core readiness. Evidencia del
 recorrido actual en `results/2t-commercial-core-20261002/fixture-a-restart-replay-audit-20261002.json`;
 la trayectoria primaria completa existente sigue en el artefacto V2 LFS.
+
+
+### P1 integrado y contabilidad de combustible por ciclo — 2026-10-02
+
+Fixture A completó un horizonte de 16 ciclos al mismo punto sintético (3000 RPM,
+CFL 0.4), sin cambiar solver, geometría, valores iniciales ni thresholds. Los
+ciclos 1–12 reprodujeron exactamente sus artefactos previos; 12→13 falló y
+13→14, 14→15 y 15→16 pasaron `REFERENCE_PERIODIC_CONVERGENCE_V1`, por lo que el
+detector clasificó `PERIOD_1` en el ciclo 16. El trabajo del primer ciclo
+continúa negativo y la transición inicial sigue visible. Fixture B no se inicia
+en esta actualización. Trayectorias 7–12 y 13–16 conservadas bajo `results/`.
+
+El primary collector ahora integra por separado fresh_air bruto que entra por
+la frontera de admisión, fuel que entra, fuel cortocircuitado, conversión de fuel
+por el ledger P7, inventario global terminal y residuo global de fuel. El V2 de
+ingeniería deriva AFR bruto de los flujos aceptados, ISFC/BSFC solo con potencia
+positiva (no requieren LHV), y mantiene equivalence ratio `UNDEFINED` sin AFR
+estequiométrico explícito. El inventario terminal es el pseudo-especie fuel
+remanente en todo el sistema, no una estimación de fuel atrapado. Los registros
+V2 previos se leen usando su flujo firmado guardado de la cara de admisión; la
+ausencia de esa evidencia produce error, nunca una mezcla asumida.
+
+La corrida física no cambió para esta conexión de outputs. Suite focal integrada
+y de salida: 33 pruebas aprobadas; compatibility fallback de V2 probado. Sigue
+pendiente definir una propiedad estequiométrica defendible si se requiere
+equivalence ratio numérico. P1 del fixture A no implica validación P4 ni
+readiness comercial.
+
+
+### Segundo fixture integrado independiente — 2026-10-02
+
+Se probó el límite de admisión piston-port sin reed como candidato B. La corrida
+no aceptó el paso a 107.651626° después de 25 reducciones; se conserva como
+intento fallido, no como regresión del motor general. Sin cambiar solver, se
+continuó con una variación alternativa permitida: Fixture B mantiene el modelo
+reed estático y cambia todas las longitudes axiales de la cámara de expansión
+por un factor explícito 1.2 respecto de A.
+
+Fixture B completó ciclos hasta 6840° (ciclo 19), 33.434 pasos aceptados, CFL
+0.4, y alcanzó `PERIOD_1` tras tres PASS consecutivos 16→17, 17→18, 18→19 bajo
+`REFERENCE_PERIODIC_CONVERGENCE_V1`; el primer par sigue INVALID. Cada output V2
+se construyó y validó con el modelo de pérdidas sintético explícito y referencia
+de scavenging sintética. La trayectoria completa por stage y outputs están en
+`results/2t-commercial-core-20261002/fixture-b-long-chamber-primary-20261002-v1.json.gz`.
+La configuración difiere de A en identidad y longitudes del escape; no afirma
+validación real. Equivalence ratio continúa UNDEFINED sin estequiometría. El
+Commercial Core no está READY.
+
+
+Verificación final de esta tanda (2026-10-02): `tests/test_integrated_2t.py`,
+`test_engineering_outputs.py`, P5-C/P6/P7, reed y puertos: **85 passed**. La
+suite seleccionada P4–P8 de la orden: **300 passed**, cuatro warnings NumPy
+preexistentes. OpenSpec estricto aprobado. La clasificación P1 de A y B se
+obtuvo con el detector contractual sin cambiar thresholds. P4/P5-C histórico,
+P6, P7, P8 y P9 no fueron modificados.

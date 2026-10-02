@@ -579,6 +579,7 @@ class IntegratedEngine2T:
                                "cylinder": [0.0] * 4}, "ducts": {}}
         faces_trace = {}
         external = {"mass": 0.0, "energy": 0.0, "species": [0.0] * 4}
+        fresh_air_intake_delivered_rate = 0.0
         fresh_delivered_rate = 0.0
         fresh_short_circuit_rate = 0.0
         fuel_delivered_rate = 0.0
@@ -619,6 +620,7 @@ class IntegratedEngine2T:
                 external["mass"] += external_l[0]
                 external["energy"] += external_l[2]
                 for j, value in enumerate(species_l): external["species"][j] += value
+                fresh_air_intake_delivered_rate += max(0.0, species_l[0])
                 fuel_delivered_rate += max(0.0, species_l[1])
                 if right_exchange is not None:
                     chamber_outflow["crankcase"] += max(0.0, -right_exchange.outward[0])
@@ -778,6 +780,7 @@ class IntegratedEngine2T:
         return {"q": rhs_q, "species": rhs_s, "geometry": g,
                 "chamber_outflow_kg_s": chamber_outflow,
                 "external": external, "work_rates": work,
+                "fresh_air_intake_delivered_rate": fresh_air_intake_delivered_rate,
                 "fresh_delivered_rate": fresh_delivered_rate,
                 "fresh_short_circuit_rate": fresh_short_circuit_rate,
                 "fuel_delivered_rate": fuel_delivered_rate,
@@ -991,6 +994,8 @@ class IntegratedEngine2T:
                  "stage_face_fluxes": (r0["faces"], r1["faces"]),
                  "stage_external": (r0["external"], r1["external"]),
                  "stage_cycle_rates": tuple({
+                     "fresh_air_intake_delivery_kg_s": item[
+                         "fresh_air_intake_delivered_rate"],
                      "fresh_delivery_kg_s": item["fresh_delivered_rate"],
                      "fresh_short_circuit_kg_s": item["fresh_short_circuit_rate"],
                      "fuel_delivery_kg_s": item["fuel_delivered_rate"],
@@ -1207,6 +1212,33 @@ class IntegratedEngine2T:
         self.trace = deepcopy(trace)
 
 
+def _fresh_air_intake_rate(intake_duct_id: str, row: dict,
+                           stage_index: int) -> float:
+    """Read gross fresh-air intake from an explicit stage rate or its signed face flux.
+
+    The fallback keeps earlier V2 primary traces readable; it uses the saved
+    intake-boundary species flux, not a reconstructed or assumed mixture.
+    """
+    stage_rates = row.get("stage_cycle_rates", ())
+    if len(stage_rates) != 2 or stage_index not in (0, 1):
+        raise ValueError("integrated cycle intake stage-rate evidence is incomplete")
+    direct = stage_rates[stage_index].get("fresh_air_intake_delivery_kg_s")
+    faces = row.get("stage_face_fluxes", ())
+    if len(faces) != 2 or intake_duct_id not in faces[stage_index]:
+        raise ValueError("integrated cycle lacks signed intake donor flux")
+    species = faces[stage_index][intake_duct_id].get("left_species")
+    if (not isinstance(species, (list, tuple)) or len(species) != 4 or
+            type(species[0]) not in (int, float) or not isfinite(species[0])):
+        raise ValueError("integrated cycle signed intake species flux is invalid")
+    from_face = max(0.0, float(species[0]))
+    if direct is None:
+        return from_face
+    if (type(direct) not in (int, float) or not isfinite(direct) or direct < 0.0 or
+            not isclose(float(direct), from_face, rel_tol=1e-12, abs_tol=1e-15)):
+        raise ValueError("integrated cycle fresh-air intake rate differs from signed face flux")
+    return float(direct)
+
+
 def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                                  start_checkpoint: dict,
                                  end_checkpoint: dict,
@@ -1248,7 +1280,8 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
     p7_limited_mass = 0.0
     external_species = [0.0] * 4
     p7_species = [0.0] * 4
-    rates_integral = {"fresh_delivery_kg": 0.0,
+    rates_integral = {"fresh_air_intake_delivery_kg": 0.0,
+                      "fresh_delivery_kg": 0.0,
                       "fresh_short_circuit_kg": 0.0,
                       "fuel_delivery_kg": 0.0,
                       "fuel_short_circuit_kg": 0.0,
@@ -1300,6 +1333,9 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                 ("fuel_short_circuit_kg", "fuel_short_circuit_kg_s")):
             rates_integral[rate_name] += .5 * dt * sum(
                 stage[trace_name] for stage in row["stage_cycle_rates"])
+        rates_integral["fresh_air_intake_delivery_kg"] += .5 * dt * sum(
+            _fresh_air_intake_rate(engine.intake.id, row, stage_index)
+            for stage_index in range(2))
         for name in ("cylinder", "crankcase"):
             rates_integral[f"{name}_work_J"] += .5 * dt * sum(
                 stage[name] for stage in row["stage_work_rates"])
@@ -1441,6 +1477,19 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                    "cylinder_energy_work_J": rates_integral["cylinder_work_J"],
                    "fresh_delivery_kg": rates_integral["fresh_delivery_kg"],
                    "fresh_short_circuit_kg": rates_integral["fresh_short_circuit_kg"],
+                   "fresh_air_intake_delivery_kg": rates_integral[
+                       "fresh_air_intake_delivery_kg"],
+                   "fuel_delivered_kg": rates_integral["fuel_delivery_kg"],
+                   "fuel_short_circuited_kg": rates_integral[
+                       "fuel_short_circuit_kg"],
+                   "p7_fuel_consumed_kg": -p7_species[1],
+                   "fuel_unburned_terminal_global_kg": end_inventory["species_kg"][1],
+                   "fuel_inventory_start_global_kg": start_inventory["species_kg"][1],
+                   "fuel_external_net_kg": external_species[1],
+                   "fuel_mass_balance_residual_kg": (
+                       end_inventory["species_kg"][1] -
+                       start_inventory["species_kg"][1] - external_species[1] -
+                       p7_species[1]),
                    "p7_burned_produced_kg": p7_species[3],
                    "p7_heat_J": p7_heat}
     mass_residual = end_inventory["mass_kg"] - start_inventory["mass_kg"] - external_mass
@@ -1575,6 +1624,11 @@ def make_integrated_engineering_output(cycle_record: dict, *,
     if (not isinstance(cycle_record.get("duct_roles"), dict) or
             set(cycle_record["duct_roles"]) != set(cycle_record.get("duct_volumes_m3", {}))):
         raise ValueError("cycle primary record lacks stable duct role identity")
+    intake_ducts = [duct for duct, role in cycle_record["duct_roles"].items()
+                    if role == "intake"]
+    if len(intake_ducts) != 1:
+        raise ValueError("cycle primary record must identify one intake duct")
+    intake_duct_id = intake_ducts[0]
     rows = []
     for accepted_row in trajectory:
         rows.append((float(accepted_row["angle_start_deg"]),
@@ -1593,8 +1647,10 @@ def make_integrated_engineering_output(cycle_record: dict, *,
                  sum(terminal["thermal_rates_W"].values())))
     duration = 0.0
     integrals = {name: 0.0 for name in (
-        "cylinder_energy_work_J", "fuel_delivery_kg", "fresh_delivery_kg",
-        "fresh_short_circuit_kg", "wall_heat_loss_J", "p7_heat_J",
+        "cylinder_energy_work_J", "fresh_air_intake_delivery_kg",
+        "fuel_delivery_kg", "fresh_delivery_kg",
+        "fresh_short_circuit_kg", "fuel_short_circuit_kg",
+        "wall_heat_loss_J", "p7_heat_J",
         "crankcase_energy_work_J")}
     external_mass = external_energy = 0.0
     external_species = [0.0] * 4
@@ -1614,9 +1670,13 @@ def make_integrated_engineering_output(cycle_record: dict, *,
             stage["crankcase"] for stage in row["stage_work_rates"])
         for target, source in (("fuel_delivery_kg", "fuel_delivery_kg_s"),
                                ("fresh_delivery_kg", "fresh_delivery_kg_s"),
-                               ("fresh_short_circuit_kg", "fresh_short_circuit_kg_s")):
+                               ("fresh_short_circuit_kg", "fresh_short_circuit_kg_s"),
+                               ("fuel_short_circuit_kg", "fuel_short_circuit_kg_s")):
             integrals[target] += .5 * dt * sum(
                 stage[source] for stage in row["stage_cycle_rates"])
+        integrals["fresh_air_intake_delivery_kg"] += .5 * dt * sum(
+            _fresh_air_intake_rate(intake_duct_id, row, stage_index)
+            for stage_index in range(2))
         integrals["wall_heat_loss_J"] += .5 * dt * sum(
             sum(stage.values()) for stage in row["stage_thermal_rates"])
         integrals["p7_heat_J"] += .5 * dt * sum(
@@ -1639,15 +1699,11 @@ def make_integrated_engineering_output(cycle_record: dict, *,
     if not isinstance(obs, dict) or not isinstance(ledgers, dict):
         raise ValueError("engineering output requires cycle-primary derived observables and ledgers")
     work = -integrals["cylinder_energy_work_J"]
-    for key, actual in (("work_J", work),
-                         ("fresh_delivery_kg", integrals["fresh_delivery_kg"]),
-                         ("fresh_short_circuit_kg", integrals["fresh_short_circuit_kg"])):
-        if not isclose(float(obs[key]), actual, rel_tol=1e-10, abs_tol=1e-14):
-            raise ValueError(f"cycle primary observable {key} differs from accepted stages")
     ledger_checks = {
         "external_mass_kg": external_mass,
         "external_energy_J": external_energy,
         "fuel_delivered_kg": integrals["fuel_delivery_kg"],
+        "fuel_short_circuited_kg": integrals["fuel_short_circuit_kg"],
         "fresh_delivered_kg": integrals["fresh_delivery_kg"],
         "fresh_short_circuit_kg": integrals["fresh_short_circuit_kg"],
         "heat_to_wall_J": integrals["wall_heat_loss_J"],
@@ -1696,6 +1752,28 @@ def make_integrated_engineering_output(cycle_record: dict, *,
                        integrals["crankcase_energy_work_J"] + integrals["wall_heat_loss_J"])
     species_residual = [terminal_inventory[2][i] - initial_inventory[2][i] -
                         external_species[i] - p7_species[i] for i in range(4)]
+    trace_recomputable = {
+        "fresh_air_intake_delivery_kg", "fuel_delivered_kg",
+        "fuel_short_circuited_kg", "p7_fuel_consumed_kg",
+        "fuel_unburned_terminal_global_kg", "fuel_external_net_kg",
+        "fuel_mass_balance_residual_kg"}
+    for key, actual in (("work_J", work),
+                        ("fresh_delivery_kg", integrals["fresh_delivery_kg"]),
+                        ("fresh_short_circuit_kg", integrals["fresh_short_circuit_kg"]),
+                        ("fresh_air_intake_delivery_kg",
+                         integrals["fresh_air_intake_delivery_kg"]),
+                        ("fuel_delivered_kg", integrals["fuel_delivery_kg"]),
+                        ("fuel_short_circuited_kg", integrals["fuel_short_circuit_kg"]),
+                        ("p7_fuel_consumed_kg", -p7_species[1]),
+                        ("fuel_unburned_terminal_global_kg", terminal_inventory[2][1]),
+                        ("fuel_external_net_kg", external_species[1]),
+                        ("fuel_mass_balance_residual_kg", species_residual[1])):
+        if key not in obs and key in trace_recomputable:
+            continue
+        if key not in obs:
+            raise ValueError(f"cycle primary observable {key} is missing")
+        if not isclose(float(obs[key]), actual, rel_tol=1e-10, abs_tol=1e-14):
+            raise ValueError(f"cycle primary observable {key} differs from accepted stages")
     calculated_conservation = cycle_record.get("conservation", {})
     if (not isclose(float(calculated_conservation.get("mass_residual_kg")),
                     mass_residual, rel_tol=1e-10, abs_tol=1e-14) or
@@ -1747,10 +1825,38 @@ def make_integrated_engineering_output(cycle_record: dict, *,
     defined("fuel_flow_kg_s",
             integrals["fuel_delivery_kg"] / duration,
             "integrated P6 fuel-species inflow at the engine intake boundary / cycle duration")
+    defined("fuel_delivered_per_cycle_kg", integrals["fuel_delivery_kg"],
+            "accepted P6 fuel-species donor flow into the engine intake boundary")
+    defined("fresh_air_intake_delivered_per_cycle_kg",
+            integrals["fresh_air_intake_delivery_kg"],
+            "accepted P6 fresh_air donor flow into the engine intake boundary")
+    defined("fuel_short_circuited_per_cycle_kg", integrals["fuel_short_circuit_kg"],
+            "accepted fuel-species flow leaving exhaust while transfer and exhaust are open")
+    defined("fuel_consumed_by_p7_per_cycle_kg", -p7_species[1],
+            "negative accepted P7 fuel-species source ledger; prescribed bookkeeping conversion")
+    defined("fuel_unburned_terminal_global_kg", terminal_inventory[2][1],
+            "terminal four-species inventory summed across cylinder, crankcase and ducts")
+    defined("fuel_species_balance_residual_kg", species_residual[1],
+            "independent global fuel-species balance from accepted trajectory")
+    intake_fuel = integrals["fuel_delivery_kg"]
+    if intake_fuel > 0.0:
+        defined("afr", integrals["fresh_air_intake_delivery_kg"] / intake_fuel,
+                "gross fresh_air and fuel species delivered through the engine intake boundary")
+    else:
+        undefined("afr", "No positive fuel-species delivery at the intake boundary.")
+    undefined("equivalence_ratio", "Stoichiometric AFR is not configured for this fuel.")
+    indicated_power = work * rpm / 60.0
+    if indicated_power > 0.0:
+        defined("isfc_g_kwh", integrals["fuel_delivery_kg"] / duration *
+                3.6e9 / indicated_power,
+                "integrated fuel-species flow / positive indicated power; no LHV required")
+    else:
+        undefined("isfc_g_kwh", "Indicated power is nonpositive for this cycle.")
     defined("wall_heat_loss_j", integrals["wall_heat_loss_J"],
             "accepted SSPRK2 thermal source integral")
     defined("energy_balance_residual_j", energy_residual,
             "independent global energy balance from accepted trajectory and inventory")
+    brake_power = None
     if mechanical_loss_model is None:
         for name in ("brake_work_j", "brake_power_w", "brake_torque_nm", "bmep_pa", "fmep_pa"):
             undefined(name, "No mechanical-loss model was explicitly configured for this cycle.")
@@ -1764,6 +1870,13 @@ def make_integrated_engineering_output(cycle_record: dict, *,
                           ("bmep_pa", "brake_mep_pa"),
                           ("fmep_pa", "friction_mep_pa")):
             defined(name, float(result[key]), f"MechanicalLossModel.evaluate_2t: {key}")
+        brake_power = float(result["brake_power_w"])
+    if brake_power is not None and brake_power > 0.0:
+        defined("bsfc_g_kwh", integrals["fuel_delivery_kg"] / duration *
+                3.6e9 / brake_power,
+                "integrated fuel-species flow / positive brake power; no LHV required")
+    else:
+        undefined("bsfc_g_kwh", "Positive brake power requires an explicit loss model.")
     for name in ("gross_work_j", "net_work_j"):
         undefined(name, "Gross/net work separation is not defined by this integrated model.")
     for name in ("delivery_ratio", "trapping_efficiency", "scavenging_efficiency",
@@ -1785,8 +1898,6 @@ def make_integrated_engineering_output(cycle_record: dict, *,
                 closures["snapshots"]["exhaust"]["cylinder_species_kg"])))
         from .scavenging import scavenging_engineering_records
         metrics.update(scavenging_engineering_records(metrics_record))
-    for name in ("afr", "equivalence_ratio", "isfc_g_kwh", "bsfc_g_kwh"):
-        undefined(name, "No approved fuel-property/LHV binding exists for prescribed P7 heat release.")
     for name in ("ca10_deg", "ca50_deg", "ca90_deg"):
         undefined(name, "Combustion-fraction landmarks are not part of the current P7 source record.")
 

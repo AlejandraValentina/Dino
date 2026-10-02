@@ -15,3 +15,5 @@ results/p4-c3-r5-20260928/acquisition-evaluation.json filter=lfs diff=lfs merge=
 # Durable angular histories for independent G2-v2 reauditing.
 results/p4-g2-v2-reaudit-20260929-r2/checkpoint_cycle*.json.gz filter=lfs diff=lfs merge=lfs -text
 results/2t-commercial-core-20261002/fixture-a-integrated-cycles-20261002-v2.json.gz filter=lfs diff=lfs merge=lfs -text
+results/2t-commercial-core-20261002/fixture-a-*-20261002-v1.json.gz filter=lfs diff=lfs merge=lfs -text
+results/2t-commercial-core-20261002/fixture-b-*-20261002-v1.json.gz filter=lfs diff=lfs merge=lfs -text
