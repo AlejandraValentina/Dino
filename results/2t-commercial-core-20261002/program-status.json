@@ -144,7 +144,7 @@
       "unknowns_left_null": true
     },
     "17_integrated_2t_foundation": {
-      "status": "PARTIAL_NOT_AN_ENGINE_CYCLE",
+      "status": "PARTIAL_ONE_SYNTHETIC_FIXTURE_TWO_COMPLETE_CYCLES",
       "implementation": "motorsim.integrated_2t.IntegratedEngine2T",
       "verified_scope": [
         "single_global_ssprk2_stage_state",
@@ -172,22 +172,31 @@
         "internal_species_source_and_P7_energy_in_global_ledgers",
         "P7_active_and_completed_event_checkpoint_restart_replay",
         "aligned_step_rejection_at_ignition_and_event_end_boundaries",
-        "P7_event_restore_matches_unwrapped_crank_angle_and_absolute_cycle_history"
+        "P7_event_restore_matches_unwrapped_crank_angle_and_absolute_cycle_history",
+        "synthetic_internal_fixture_A_completes_0_to_720_degrees_at_3000_rpm",
+        "static_reed_slider_crank_three_transfers_and_expansion_chamber_in_full_cycles",
+        "explicit_synthetic_atmospheric_fuel_fraction_and_p7_source",
+        "global_mass_energy_four_species_ledgers_close_over_two_cycles",
+        "fuel_delivery_and_fuel_short_circuit_species_ledgers_nonzero",
+        "wall_heat_and_indicated_work_nonzero_in_full_cycles",
+        "checkpoint_at_360_degrees_replays_to_720_degree_snapshot_exactly",
+        "json_checkpoint_state_and_trace_use_canonical_array_representation",
+        "mechanical_loss_model_calculates_positive_brake_work_from_synthetic_cycle_average"
       ],
-      "focal_tests": 16,
+      "focal_tests": 21,
       "blocked_scope": [
+        "periodic_period_1_or_period_2_not_evaluated",
+        "exact_port_closure_scavenging_snapshots_and_cycle_scavenging_metrics",
+        "full_primary_cycle_evidence_and_unified_engineering_output_collector",
+        "fuel_accounting_binding_to_trapped_species_and_defensible_p7_qf_to_lhv_relation",
         "dynamic_reed_state_and_restart",
-        "combustion_and_fuel_conversion",
-        "periodic_complete_engine_cycles",
-        "full_evidence_and_engineering_output_collector",
-        "two_independent_integrated_fixtures",
-        "complete_360_degree_cycles_and_exact_port_closure",
-        "dynamic_reed_state_and_restart"
+        "independent_second_fixture_and_two_independent_full_trajectory_replays",
+        "broad_current_p4_p8_regressions_not_rerun"
       ],
       "boundary_v2": "NOT_IMPLEMENTED_NO_FALLBACK"
     },
     "17d_p7_fuel_combustion_thermal_mechanics": {
-      "status": "P7_STAGE_INTEGRATED_FUEL_AND_BRAKE_PENDING",
+      "status": "PARTIAL_P7_AND_THERMAL_STAGE_INTEGRATED_SYNTHETIC_CYCLE_EVIDENCE",
       "verified_scope": [
         "P7_CAPTURE_FROM_ACTUAL_FOUR_SPECIES_CYLINDER_INVENTORY",
         "P7_SOURCE_IN_BOTH_INTEGRATED_SSPRK2_STAGES",
@@ -196,12 +205,17 @@
         "IGNITION_AND_40_DEGREE_EVENT_BOUNDARY_GUARDS",
         "transactional_P7_capture_after_accepted_step_only",
         "P7_checkpoint_rejects_missing_or_cycle_shifted_events",
-        "accepted_exact_40_degree_event_end_after_admissible_step_refinement"
+        "accepted_exact_40_degree_event_end_after_admissible_step_refinement",
+        "two_cycle_synthetic_fixture_has_nonzero_p7_heat_wall_heat_and_indicated_work",
+        "fuel_delivered_and_fuel_short_circuited_are_separate_global_species_ledgers",
+        "checkpoint_schema_v3_persists_fuel_short_circuit_and_canonical_json_state",
+        "synthetic_friction_model_produces_positive_brake_work_from_cycle_average"
       ],
       "blocked_scope": [
-        "fuel_accounting_binding_to_P6_species_delivery_without_invented_fuel_properties",
-        "mechanical_loss_and_brake_performance_binding",
-        "cycle_level_evidence_and_integrated_fixture"
+        "fuel_accounting_requires_cycle_trapping_and_exact_closure_observables",
+        "p7_prescribed_qf_has_no_approved_relation_to_fuel_lhv",
+        "mechanical_outputs_not_yet_part_of_cycle_collector_or_durable_output",
+        "cycle_primary_evidence_and_periodicity_pending"
       ],
       "dependency_status": "CONDITIONAL_ON_P4"
     }
@@ -214,7 +228,7 @@
     "commercial_core_openspec_strict": "PASS",
     "integrated_engine_foundation_tests": {
       "result": "PASS",
-      "count": 20,
+      "count": 21,
       "command": "python -m pytest tests/test_integrated_2t.py -q"
     },
     "reference_harness_openspec_strict": "PASS",
@@ -224,13 +238,31 @@
     "p9_contract_sha256": "79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d",
     "integrated_regression_group_current": {
       "result": "PASS",
-      "count": 72,
+      "count": 73,
       "command": "python -m pytest tests/test_integrated_2t.py tests/test_p5c_integrated.py tests/test_p6_species.py tests/test_p7_full_topology.py tests/test_reed.py tests/test_two_stroke_ports_p5c.py -q"
+    },
+    "integrated_cycle_fixture_a": {
+      "result": "PASS_TWO_COMPLETE_SYNTHETIC_CYCLES_CHECKPOINT_REPLAY",
+      "cycles": 2,
+      "rpm": 3000,
+      "max_cfl": 0.4,
+      "atmosphere_species_mass_fractions": [
+        0.98,
+        0.02,
+        0.0,
+        0.0
+      ],
+      "evidence_limits": [
+        "NO_P1_P2_CLASSIFICATION",
+        "SYNTHETIC_ONLY",
+        "NO_CYCLE_COLLECTOR",
+        "NO_FUEL_LHV_CLAIM"
+      ]
     }
   },
   "review": {
-    "current_delta": "INDEPENDENT_READ_ONLY_REVIEW_PASS_CFL_RESTART_STATIC_REED_PORT_BINDING_EXPANSION_MESH",
-    "independent_review_current_delta": "PASS_FOR_IMPLEMENTED_FOUNDATION_AND_GEOMETRY_BINDING; no complete-engine review performed",
+    "current_delta": "SELF_REVIEW_ONLY_INTEGRATED_FIXTURE_A_AND_CHECKPOINT_JSON",
+    "independent_review_current_delta": "PENDING; prior independent reviews cover earlier foundation deltas only, not full-cycle fixture or latest delta",
     "prior_harness_punctual_review": "NO_MATERIAL_DEFECT_FOUND",
     "reverse_internal_donor_fix": "INDEPENDENT_READ_ONLY_REVIEW_PASS_BOTH_DONOR_DIRECTIONS_AND_STAGE_BINDING; no complete-engine review performed",
     "slider_crank_stage_integration": "INDEPENDENT_READ_ONLY_REVIEW_PASS; geometry signs/units, stage RPM, single -pVdot ledger and checkpoint mismatch were checked; no cycle claim",
@@ -280,7 +312,8 @@
         "tests/test_reed.py",
         "independent read-only review found no concrete static-reed defect",
         "tests/test_integrated_2t.py:16; CrankcaseGeometry V2 resolves cylinder/crankcase volume and opposite rates at stage angle/RPM; accepted moving-volume step closes mass/energy ledgers",
-        "16 integrated focal tests PASS; grouped 68 tests PASS; OpenSpec strict PASS; py_compile and diff-check PASS"
+        "16 integrated focal tests PASS; grouped 68 tests PASS; OpenSpec strict PASS; py_compile and diff-check PASS",
+        "fixture A completes two cycles with static reed and moving crankcase/cylinder geometry; 21 focused integrated tests pass"
       ],
       "next_action": "Integrate existing dynamic reed state across common stages and checkpoint/restart without advancing it twice."
     },
@@ -291,7 +324,7 @@
         "17a-integrated-gas-species-foundation"
       ],
       "state": "IN_PROGRESS",
-      "blocker": "Cycles/exact port closures and boundary classification remain open; the integrated generic geometry now completes accepted synthetic steps 0–90 degrees.",
+      "blocker": "Exact port-closure scavenging snapshots and reservoir-boundary classification remain open; fixture A completes two cycles through the existing nonreflecting boundary.",
       "commits": [
         "d3b82f3 Integrate generic ports into accepted 2T stages"
       ],
@@ -301,9 +334,10 @@
         "read-only adversarial review found a mutable mapping/config identity mismatch; fixed using copied MappingProxyType and reviewer confirmed closure",
         "tests/test_integrated_2t.py:15; accepted 0–90 degree synthetic path at 3000 rpm",
         "negative internal species flux follows geometric right-cell composition in both SSPRK2 stages; regression corrected donor double-selection",
-        "independent read-only review confirmed both signed internal donor directions, matching SSPRK2 stage pairing, and stage-angle/RPM binding; no focal defect found"
+        "independent read-only review confirmed both signed internal donor directions, matching SSPRK2 stage pairing, and stage-angle/RPM binding; no focal defect found",
+        "fixture A completed 0–720 degrees through three transfers and multi-section expansion-chamber exhaust; synthetic ledgers close"
       ],
-      "next_action": "Continue toward full-cycle admissible fixture and exact geometric closure; preserve reservoir blocker and do not retry KT100."
+      "next_action": "Add primary cycle extraction at exact port closure events and evaluate boundary behavior; preserve reservoir V2 blocker and do not retry KT100."
     },
     {
       "id": "17d-fuel-combustion-thermal-mechanics",
@@ -313,7 +347,7 @@
         "17b-static-reed-intake-crankcase"
       ],
       "state": "IN_PROGRESS",
-      "blocker": "P7 stage source is integrated and reviewed; FuelAccounting binding to P6 delivered/trapped species, mechanical/brake binding, and complete-cycle evidence remain open.",
+      "blocker": "Cycle-level trapped-fuel/combustion accounting and an approved relation between prescribed P7 Q_F and fuel LHV are unresolved; mechanical losses have only been exercised separately with a synthetic average-cycle input.",
       "commits": [
         "8b04b83ccaa64a0221b380044c38e7c53d0f3cca"
       ],
@@ -321,9 +355,10 @@
         "20 integrated-engine tests PASS: stage source, source ledgers, exact event end, failed-step transactionality and checkpoint chronology/replay",
         "72-test integrated/P5-C/P6/P7/reed/ports regression PASS; OpenSpec strict PASS; py_compile, diff-check and Git LFS fsck PASS",
         "independent read-only review PASS for source stages, ledgers, event transactionality and absolute event chronology; no full-engine review",
-        "P9 spec SHA-256 rechecked unchanged: 79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d"
+        "P9 spec SHA-256 rechecked unchanged: 79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d",
+        "21 integrated tests and 73-test integrated/P5-C/P6/P7/reed/ports group pass; fixture A shows nonzero fuel delivery/short-circuit, P7 heat, wall heat and work"
       ],
-      "next_action": "Bind existing FuelAccounting and MechanicalLossModel only after the integrated ledgers expose contract-compatible cycle values; do not infer fuel chemistry or alter P7 Q_F."
+      "next_action": "Resolve non-LHV accounting and cycle ledger bindings without inventing fuel properties; feed the actual work and fuel evidence into the unified collector."
     },
     {
       "id": "17e-cycle-evidence-collector",
@@ -333,11 +368,13 @@
         "17c-exhaust-chamber-boundary",
         "17d-fuel-combustion-thermal-mechanics"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
-      "evidence": [],
-      "next_action": "Implement after integrated subsystems produce auditable accepted-cycle states."
+      "evidence": [
+        "fixture A completes two full cycles; checkpoint at 360 degrees reproduces the terminal 720-degree JSON snapshot exactly under an absolute-angle scheduler"
+      ],
+      "next_action": "Implement a primary cycle record from accepted stage traces, exact closure snapshots, restartable P1/P2 detector state and one engineering output collector."
     },
     {
       "id": "18-fixture-b-regressions",
@@ -349,7 +386,7 @@
       "blocker": null,
       "commits": [],
       "evidence": [],
-      "next_action": "Run only after Fixture A passes its preregistered contract."
+      "next_action": "Wait until fixture A meets its cycle evidence, periodicity, fuel/mechanical/output contract; then build an independent second configuration and rerun broad P4–P8 regressions."
     },
     {
       "id": "reservoir-boundary-v2",

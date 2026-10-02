@@ -148,7 +148,8 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       modelo estático existente limita el área de admisión por presión en cada
       stage común y el flujo conserva donor/ledger P6. `CrankcaseGeometry` V2
       resuelve volúmenes opuestos de cárter/cilindro y trabajo p·dV en ambos
-      stages; la dinámica multi-petal y su estado de restart siguen pendientes.
+      stages; el fixture A completa dos ciclos con reed estática y cárter móvil.
+      La dinámica multi-petal y su estado de restart siguen pendientes.
 - [ ] 17c. Topología generic ports N con piston intake, transfers y exhaust
       expansion-chamber en los mismos stages; scavenging ledger con cierres
       geométricos y flujos con signo. Parcial: el mesh real de
@@ -158,20 +159,27 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       sintética 0–90° a 3000 rpm; el chequeo detectó y corrigió selección
       invertida del donante P6 en caras internas con flujo inverso. La
       regresión comprueba la composición del donante por stage y la ruta
-      mantiene admisibilidad. Sigue pendiente completar ciclos/cierres exactos
-      y clasificar la frontera V2.
+      mantiene admisibilidad. El fixture A completa dos ciclos por la cámara;
+      faltan cierres exactos para scavenging y clasificación de frontera V2.
 - [ ] 17d. Combustión P7 autorizada, paredes térmicas, combustible/especies y
       trabajo mecánico integrados con ledger único sin doble conteo. Parcial:
       el P7 prescrito existente ya puede configurarse por ángulo de ciclo;
       captura las cuatro especies reales del cilindro, aplica conversión y
       calor en ambos stages SSPRK2, y agrega fuentes a ledgers globales de
       especie/energía. El checkpoint V2 guarda evento activo/histórico y la
-      identidad del ángulo P7. Pasan 20 pruebas integradas focales y 72 pruebas
-      agrupadas con P5-C/P6/P7/reed/puertos. No se derivan AFR/LHV ni fuel
-      quemado conectado a FuelAccounting; pérdidas/brake tampoco están
-      acoplados. No hay trayectoria de ciclo completo; 17d sigue abierto.
+      identidad del ángulo P7. El fixture A completa dos ciclos y prueba
+      balances globales de masa/energía/cuatro especies y fuentes no vacuas de
+      P7, pared térmica, fresh/fuel delivery, short-circuit y trabajo indicado.
+      El brake work se calcula en la prueba con FMEP sintético explícito. Se
+      añadió al ledger V3 el fuel short-circuited usando el donor real de
+      escape. No se enlazó aún `FuelAccounting` a masas atrapadas/cierres exactos,
+      ni se justificó equivalencia de `Q_F` y LHV. Siguen sin output persistido;
+      17d abierto. Suite focal 21; regresión agrupada actual 73.
 - [ ] 17e. Periodicidad P1/P2, evidencia primaria, collector engineering,
       checkpoint/restart/replay continuo y fixtures integrados completos.
+      Progreso: el fixture A restaura en 360° y reproduce exactamente el
+      snapshot JSON a 720° con el mismo grid angular absoluto. P1/P2,
+      collector primario, segundo fixture y aceptación end-to-end pendientes.
 - [ ] 18. Segundo fixture integrado independiente; validar y correr regresiones
       amplias P4–P8 antes de evaluar el gate Commercial Core.
 
@@ -201,6 +209,24 @@ combustion, cárter, mecánica, fuel, powervalve, network, engineering outputs,
 importador, harness, P5-B/P5-C y P6; todas pasaron. Esta suite no incluye KT100
 ni campañas físicas. Los regresos P4–P8 se acreditan separadamente; los
 fixtures unitarios no equivalen a verificación completa de engine.
+
+Continuación de cierre integrada: el 2026-10-02 se ejecutó el fixture A con
+reed estática, cárter/cilindro slider-crank, tres transferencias, intake,
+expansion chamber multi-sección, mezcla atmosférica sintética etiquetada,
+P7 a 300° y pared prescrita. Completó los ciclos 0→360° y 360→720° respetando
+`max_cfl=0.4`; los ledgers globales de masa/energía/especies cierran, y hay
+fresh delivery, fuel delivery/short-circuit, short-circuit fresco, P7 heat,
+wall heat y cylinder work positivos. Un checkpoint en 360° reanudó el segundo
+ciclo con igualdad exacta del snapshot JSON a 720° usando el mismo grid
+angular absoluto. El brake work se calculó aparte sobre el trabajo indicado
+medio de ambos ciclos y un término FMEP sintético explícito; no es salida
+integrada persistida. `tests/test_integrated_2t.py`: 21/21; grupo
+integrado/P5-C/P6/P7/reed/puertos: 73/73; OpenSpec estricto, `py_compile` y
+`git diff --check`: PASS. Esto no prueba periodicidad P1/P2, cierres exactos de
+scavenging, dos ejecuciones independientes completas, output de ingeniería,
+segunda configuración, propiedades de combustible/LHV justificadas, reed
+dinámica ni Commercial Core READY. La frontera fue `nonreflecting` existente;
+no se implementó reservoir V2 ni se reintentó KT100.
 
 ## Deuda de integración no global
 

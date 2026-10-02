@@ -135,6 +135,48 @@ congelar la identidad del checkpoint; ahora el constructor copia el mapa a una
 vista inmutable y la prueba rechaza mutación externa/interna. La revisión
 read-only final confirmó el cierre sin encontrar otro defecto en ese alcance.
 
+### Continuación: Fixture A de dos ciclos y reanudación
+
+El 2026-10-02 un fixture controlado sintético completó los ciclos angulares
+0→360° y 360→720° con `IntegratedEngine2T`: piston-port intake, reed estática,
+cárter y cilindro slider-crank, tres transfer routes, escape por mesh
+multi-sección de expansión, cuatro especies, P7 prescrito a 300° y pérdida
+térmica de pared. La atmósfera usa explícitamente `(.98 fresh_air, .02 fuel,
+0 residual, 0 burned)` solo como supuesto sintético del fixture; no describe
+AFR, LHV ni combustible real. Los dos ciclos fueron admisibles bajo
+`max_cfl=0.4` y los balances integrados globales de masa, energía y especies
+cierran dentro de las tolerancias focales. El fixture registra delivery fresco
+y de combustible, combustible y carga fresca expulsados durante scavenging,
+fuente P7, calor de pared y trabajo indicado no vacuos.
+
+El checkpoint tomado en 360° se restauró y la segunda vuelta reprodujo el
+snapshot JSON terminal a 720° exactamente cuando el scheduler reutilizó el
+grid angular absoluto de 0.5° y los mismos límites P7/ciclo. Se canonicalizó
+la forma JSON del checkpoint porque listas y tuplas internas antes podían
+producir snapshots distintos aun con los mismos valores. También se versionó
+el estado integrado a V3 para persistir `fuel_short_circuited_kg`, calculado
+desde el flujo de especie fuel del donor de escape; el contador agregado de
+fresh short-circuit se conserva.
+
+La prueba aplicó `MechanicalLossModel` al trabajo indicado medio de esos dos
+ciclos y a un FMEP sintético explícito, y obtuvo brake work positivo. Eso aún
+no es un collector del motor ni un resultado persistido por ciclo. No se
+calcularon métricas de combustible porque faltan observables P6 exactos de
+trapping/retención por cierres y una relación científicamente defendible entre
+el calor prescrito P7 `Q_F` y un LHV. Tampoco se generó el record primary
+compatible con `REFERENCE_PERIODIC_CONVERGENCE_V1`, por lo que P1/P2 no se
+evaluó. Solo hay un fixture, dos ciclos y replay desde checkpoint; faltan dos
+recorridos completos independientes, cierres geométricos exactos y collector
+de ingeniería unificado. No se declara convergencia ni readiness.
+
+Comprobación actual: 21 pruebas focales de `tests/test_integrated_2t.py` y
+73 pruebas agrupadas de integrador/P5-C/P6/P7/reed/puertos aprobadas; OpenSpec
+estricto, compilación del integrador y `git diff --check` pasan. La revisión de
+este delta es autorrevisión puntual, no revisión independiente. El fixture usa
+la frontera `nonreflecting` ya existente; `GENERALIZED_RESERVOIR_BOUNDARY_V2`
+sigue sin implementación y KT100 permanece congelado. P4 sigue siendo una
+dependencia condicional y P9 no se modificó.
+
 ### Continuación: donante de especie en caras internas y trayectoria de puertos
 
 Al extender el fixture de `IntegratedPortBinding2T` desde la mera evaluación

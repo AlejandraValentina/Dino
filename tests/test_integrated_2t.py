@@ -17,6 +17,7 @@ from motorsim.powervalve import PowerValve
 from motorsim.reed import ReedPetal
 from motorsim.thermal import ThermalSurface, ThermalSystem
 from motorsim.two_stroke_ports import AreaKnot, DuctBinding, PortDefinition, TwoStrokePortSet
+from motorsim.mechanical import LossTerm, MechanicalLossModel
 
 
 def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
@@ -52,8 +53,6 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
         "crankcase": (0.0, 0.0, 0.00017652, 0.0),
         "cylinder": (0.000211824, 0.0, 0.0, 0.0),
     }
-    if cylinder_species is not None:
-        component_species["cylinder"] = tuple(cylinder_species)
     if slider_crank is not None:
         crankcase_volume, cylinder_volume, _, _ = slider_crank.resolve(
             0.0, reference_rpm)
@@ -61,6 +60,8 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
             0.0, 0.0, 1.1768 * crankcase_volume, 0.0)
         component_species["cylinder"] = (
             1.1768 * cylinder_volume, 0.0, 0.0, 0.0)
+    if cylinder_species is not None:
+        component_species["cylinder"] = tuple(cylinder_species)
     for path in paths:
         if path.role == "transfer":
             component_species[path.id] = tuple(
@@ -137,7 +138,8 @@ def test_integrated_engine_enforces_cfl_without_accepting_partial_state():
     original = deepcopy(system.snapshot())
     with pytest.raises(ValueError, match="CFL limit exceeded"):
         system.step(1e-4, .01)
-    assert system.state == original["state"]
+    assert json.dumps(system.state, sort_keys=True) == json.dumps(
+        original["state"], sort_keys=True)
     assert system.accepted_steps == 0
     assert system.rejected_steps == 1
 
@@ -147,7 +149,8 @@ def test_integrated_cfl_also_bounds_zero_dimensional_chamber_depletion():
     original = deepcopy(system.snapshot())
     with pytest.raises(ValueError, match="CFL limit exceeded"):
         system.step(6e-7, .01)
-    assert system.state == original["state"]
+    assert json.dumps(system.state, sort_keys=True) == json.dumps(
+        original["state"], sort_keys=True)
     assert system.accepted_steps == 0
 
 
@@ -412,9 +415,12 @@ def test_generic_ports_and_powervalve_resolve_into_integrated_stage_geometry():
 
 
 def test_fresh_exhaust_flow_is_counted_as_short_circuit_only_with_open_transfers():
-    system = _case(cylinder_pressure=130000.0, exhaust_area=1e-5)
+    system = _case(cylinder_pressure=130000.0, exhaust_area=1e-5,
+                   cylinder_species=(0.000105912, 0.000052956,
+                                     0.000052956, 0.0))
     system.step(1e-8, .01)
     assert system.ledger["fresh_short_circuit_kg"] > 0.0
+    assert system.ledger["fuel_short_circuited_kg"] > 0.0
 
 
 def test_prescribed_wall_heat_uses_stage_state_and_global_energy_ledger():
@@ -566,3 +572,156 @@ def test_p7_event_boundary_requires_exact_alignment_and_stops_cleanly():
     advance_to(40.0)
     assert system.crank_angle_unwrapped_deg == pytest.approx(40.0)
     assert system.trace[-1]["stage_p7_source_rates"][1]["heat_w"] == pytest.approx(0.0)
+
+
+def _internal_cycle_fixture():
+    rpm = 3000.0
+    crankcase = CrankcaseGeometry(56.0, 50.0, 100.0, 80.0,
+                                  "SYNTHETIC_ASSUMPTION")
+    slider = SliderCrankChambers2T(crankcase, 8.0)
+    ports = TwoStrokePortSet(
+        50.0, 100.0,
+        (DuctBinding("inlet", "intake"),
+         DuctBinding("primary", "transfer"),
+         DuctBinding("secondary", "transfer"),
+         DuctBinding("boost", "transfer"),
+         DuctBinding("exhaust", "exhaust")),
+        (PortDefinition("inlet-window", "Inlet", "intake", "piston_port", "inlet",
+                        "piston_port", .9, "SYNTHETIC_ASSUMPTION", top_mm=64.0,
+                        height_mm=10.0, width_mm=20.0, skirt_mm=42.0),
+         PortDefinition("primary-window", "Primary", "transfer", "primary", "primary",
+                        "rectangular_window", .8, "SYNTHETIC_ASSUMPTION", top_mm=32.0,
+                        height_mm=10.0, width_mm=20.0),
+         PortDefinition("secondary-window", "Secondary", "transfer", "secondary",
+                        "secondary", "rectangular_window", .8,
+                        "SYNTHETIC_ASSUMPTION", top_mm=34.0,
+                        height_mm=8.0, width_mm=12.0),
+         PortDefinition("boost-window", "Boost", "transfer", "boost", "boost",
+                        "rectangular_window", .7, "SYNTHETIC_ASSUMPTION", top_mm=36.0,
+                        height_mm=7.0, width_mm=8.0),
+         PortDefinition("main-exhaust", "Main exhaust", "exhaust", "main", "exhaust",
+                        "rectangular_window", .9, "SYNTHETIC_ASSUMPTION", top_mm=30.0,
+                        height_mm=10.0, width_mm=20.0, roof_travel_mm=4.0),
+         PortDefinition("aux-exhaust", "Aux exhaust", "exhaust", "auxiliary", "exhaust",
+                        "effective_profile", .5, "SYNTHETIC_ASSUMPTION",
+                        area_profile=(AreaKnot(0.0, 0.0), AreaKnot(90.0, 25.0),
+                                      AreaKnot(180.0, 50.0), AreaKnot(270.0, 25.0),
+                                      AreaKnot(360.0, 0.0)))))
+    valve = PowerValve("pv", "main-exhaust", (1000.0, 5000.0), (0.0, 1.0),
+                       "SYNTHETIC_ASSUMPTION")
+    binding = IntegratedPortBinding2T(
+        ports, {"inlet": "intake", "primary": "primary", "secondary": "secondary",
+                "boost": "boost", "exhaust": "exhaust"}, valve)
+    chamber = ExpansionChamber((
+        ChamberSection("header", "header", 80.0, 20.0, 20.0),
+        ChamberSection("diffuser", "diffuser", 180.0, 20.0, 52.0),
+        ChamberSection("belly", "belly", 100.0, 52.0, 52.0),
+        ChamberSection("baffle", "baffle_cone", 170.0, 52.0, 16.0),
+        ChamberSection("stinger", "stinger", 120.0, 16.0, 16.0)))
+    paths = (
+        DuctPath2T("intake", uniform_mesh(2, .05, 1e-4), "intake"),
+        DuctPath2T("primary", uniform_mesh(2, .05, 1e-4), "transfer"),
+        DuctPath2T("secondary", uniform_mesh(2, .05, 1e-4), "transfer"),
+        DuctPath2T("boost", uniform_mesh(2, .05, 1e-4), "transfer"),
+        DuctPath2T("exhaust", chamber.mesh(.2), "exhaust"))
+
+    def geometry(angle):
+        cc_vol, cy_vol, cc_rate, cy_rate = slider.resolve(angle, rpm)
+        intake, transfer_areas, exhaust = binding.resolve(paths, angle, rpm)
+        return EngineGeometry2T(cc_vol, cy_vol, cc_rate, cy_rate, intake,
+                                transfer_areas, exhaust)
+
+    states = {path.id: ((1.1768, 0.0, 101325.0, 1.0),) * len(path.mesh.volumes)
+              for path in paths}
+    cc_vol, cy_vol, _, _ = slider.resolve(0.0, rpm)
+    cc_mass, cy_mass = 1.1768 * cc_vol, 1.1768 * cy_vol
+    species = {"crankcase": (0.0, 0.0, cc_mass, 0.0),
+               "cylinder": (.78 * cy_mass, .05 * cy_mass, .17 * cy_mass, 0.0)}
+    for path in paths:
+        if path.role == "transfer":
+            species[path.id] = tuple((1.1768 * volume, 0.0, 0.0, 0.0)
+                                     for volume in path.mesh.volumes)
+    reed = ReedPetal("intake-petal", .001, 1e-4, .01, 10.0, .01,
+                     .002, .8, "SYNTHETIC_ASSUMPTION")
+    thermal = ThermalSystem((ThermalSurface(
+        "cylinder-wall", "cylinder_wall", 1e-4, 1000.0,
+        "SYNTHETIC_ASSUMPTION", wall_temperature_K=290.0),))
+    return IntegratedEngine2T(
+        (1.1768, 0.0, 101325.0, 1.0), (1.1768, 0.0, 1e6, 1.0),
+        paths, states, geometry, species=species,
+        atmosphere_species=(.98, .02, 0.0, 0.0),
+        inlet_boundary=Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0)),
+        outlet_boundary=Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0)),
+        geometry_identity={"fixture": "internal-cycle-a-synthetic-v1",
+                           "ports": ports.to_dict(), "chamber": chamber.to_dict()},
+        reed_petals=(reed,), port_binding=binding, slider_crank=slider,
+        reference_rpm=rpm, thermal_system=thermal,
+        thermal_locations={"cylinder-wall": "cylinder"},
+        combustion_start_angle_deg=300.0, max_cfl=.4)
+
+
+def _advance_cycle_fixture(system, target_angle):
+    rpm = 3000.0
+    while system.crank_angle_unwrapped_deg < target_angle - 1e-10:
+        angle = system.crank_angle_unwrapped_deg
+        target = min(target_angle, (int((angle + 1e-10) / .5) + 1) * .5)
+        for boundary in (40.0, 300.0, 340.0, 660.0, 700.0, 360.0, 720.0):
+            if angle < boundary < target:
+                target = boundary
+        step = target - angle
+        for attempt in range(25):
+            try:
+                system.step(step / (6.0 * rpm), step)
+                break
+            except ValueError as error:
+                if not any(reason in str(error) for reason in
+                           ("inadmissible species mass", "CFL limit exceeded")):
+                    raise
+                step *= .5
+        else:
+            raise AssertionError(f"fixture could not accept a step at {angle} degrees")
+
+
+def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays():
+    system = _internal_cycle_fixture()
+    _advance_cycle_fixture(system, 360.0)
+    cycle_one_checkpoint = deepcopy(system.snapshot())
+    _advance_cycle_fixture(system, 720.0)
+
+    assert system.cycle == 2
+    assert system.crank_angle_unwrapped_deg == pytest.approx(720.0)
+    assert cycle_one_checkpoint is not None
+    assert len(system.transfers) == 3
+    report = system.conservation_report()
+    assert abs(report["mass"]["residual"]) < 1e-12
+    assert abs(report["energy"]["residual"]) < 1e-9
+    assert all(abs(item["residual"]) < 1e-12
+               for item in report["species"].values())
+    assert all(sum(values) == pytest.approx(
+        system.state["ducts"][path.id][index][0] * path.mesh.volumes[index], abs=1e-14)
+        for path in system.ducts
+        for index, values in enumerate(system.state["species"]["ducts"][path.id]))
+    assert system.ledger["fresh_delivered_kg"] > 0.0
+    assert system.ledger["fresh_short_circuit_kg"] > 0.0
+    assert system.ledger["fuel_delivered_kg"] > 0.0
+    assert system.ledger["fuel_short_circuited_kg"] > 0.0
+    assert system.ledger["p7_heat_added_J"] > 0.0
+    assert system.ledger["heat_to_wall_J"] > 0.0
+    assert system.ledger["cylinder_work_J"] > 0.0
+    assert max(value for trace in system.trace for value in trace["stage_cfl"]) <= .4
+
+    mechanical = MechanicalLossModel((LossTerm(
+        "synthetic-friction", "piston_ring", "SYNTHETIC_ASSUMPTION", mep_pa=10_000.0),))
+    brake = mechanical.evaluate_2t(
+        indicated_work_j=system.ledger["cylinder_work_J"] / 2.0,
+        displacement_m3=system.slider_crank.crankcase.displacement_m3,
+        rpm=3000.0, load=0.0)
+    assert brake["brake_work_j"] > 0.0
+    assert brake["cycle_convention"] == "2T_360_DEG_ONE_CYCLE_PER_REV"
+
+    replay = _internal_cycle_fixture()
+    replay.restore(cycle_one_checkpoint)
+    assert json.dumps(replay.state, sort_keys=True) == json.dumps(
+        cycle_one_checkpoint["state"], sort_keys=True)
+    _advance_cycle_fixture(replay, 720.0)
+    assert replay.snapshot() == system.snapshot()

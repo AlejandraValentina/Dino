@@ -77,6 +77,15 @@ def _tuplify(value):
     return value
 
 
+def _jsonify(value):
+    """Return one stable JSON-shaped representation for replay evidence."""
+    if isinstance(value, (list, tuple)):
+        return [_jsonify(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _jsonify(item) for key, item in value.items()}
+    return value
+
+
 @dataclass(frozen=True)
 class EngineGeometry2T:
     """Resolved stage geometry in SI units, keyed by stable duct id."""
@@ -223,7 +232,7 @@ class IntegratedEngine2T:
     configured, contribute species and heat sources to the same cylinder
     stage RHS and are checkpointed with the integrated ledger.
     """
-    schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V2"
+    schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V3"
     dependency_status = "CONDITIONAL_ON_P4"
 
     def __init__(self, crankcase_state: tuple, cylinder_state: tuple,
@@ -355,6 +364,7 @@ class IntegratedEngine2T:
                        "fresh_delivered_kg": 0.0,
                        "fresh_short_circuit_kg": 0.0,
                        "fuel_delivered_kg": 0.0,
+                       "fuel_short_circuited_kg": 0.0,
                        "heat_to_wall_J": 0.0,
                        "cylinder_work_J": 0.0, "crankcase_work_J": 0.0,
                        "p7_heat_added_J": 0.0,
@@ -527,6 +537,7 @@ class IntegratedEngine2T:
         fresh_delivered_rate = 0.0
         fresh_short_circuit_rate = 0.0
         fuel_delivered_rate = 0.0
+        fuel_short_circuited_rate = 0.0
         thermal_rates = {}
         work = {"crankcase": -((self.eos.gamma - 1) * cc.internal_energy / cc.volume) *
                 g.crankcase_volume_rate_m3_s,
@@ -635,6 +646,7 @@ class IntegratedEngine2T:
                 if (left_exchange is not None and g.exhaust_area_m2 > 0 and
                         any(area > 0 for area in g.transfer_areas_m2)):
                     fresh_short_circuit_rate += max(0.0, left_species[0] + left_species[1])
+                    fuel_short_circuited_rate += max(0.0, left_species[1])
                 if left_exchange is not None:
                     chamber_outflow["cylinder"] += max(0.0, -left_exchange.outward[0])
                     rhs_q["chambers"]["cylinder"][0] += left_exchange.outward[0]
@@ -724,6 +736,7 @@ class IntegratedEngine2T:
                 "fresh_delivered_rate": fresh_delivered_rate,
                 "fresh_short_circuit_rate": fresh_short_circuit_rate,
                 "fuel_delivered_rate": fuel_delivered_rate,
+                "fuel_short_circuited_rate": fuel_short_circuited_rate,
                 "p7_species_rate": p7_species_rate,
                 "p7_heat_rate": p7_heat_rate,
                 "thermal_rates": thermal_rates,
@@ -896,6 +909,8 @@ class IntegratedEngine2T:
             r0["fresh_short_circuit_rate"]+r1["fresh_short_circuit_rate"])
         self.ledger["fuel_delivered_kg"] += .5*dt_s*(
             r0["fuel_delivered_rate"]+r1["fuel_delivered_rate"])
+        self.ledger["fuel_short_circuited_kg"] += .5*dt_s*(
+            r0["fuel_short_circuited_rate"]+r1["fuel_short_circuited_rate"])
         wall_rates_0, wall_rates_1 = r0["thermal_rates"], r1["thermal_rates"]
         if set(wall_rates_0) != set(wall_rates_1):
             raise ValueError("thermal surface set changed between SSPRK2 stages")
@@ -977,18 +992,18 @@ class IntegratedEngine2T:
 
     def snapshot(self):
         return {"schema": self.schema, "configuration_identity": deepcopy(self.configuration_identity),
-                "state": deepcopy(self.state), "angle_deg": self.angle_deg,
+                "state": _jsonify(self.state), "angle_deg": self.angle_deg,
                 "crank_angle_unwrapped_deg": self.crank_angle_unwrapped_deg,
                 "time_s": self.time_s, "cycle": self.cycle,
                 "accepted_steps": self.accepted_steps,
                 "rejected_steps": self.rejected_steps,
                 "max_cfl": self.max_cfl,
-                "ledger": deepcopy(self.ledger),
+                "ledger": _jsonify(self.ledger),
                 "p7": {"active_event": (None if self.p7_event is None else
                                          snapshot_event(self.p7_event)),
                        "completed_events": deepcopy(self.p7_events)},
-                "initial_inventory": deepcopy(self.initial_inventory),
-                "trace": deepcopy(self.trace)}
+                "initial_inventory": _jsonify(self.initial_inventory),
+                "trace": _jsonify(self.trace)}
 
     def restore(self, snapshot):
         if not isinstance(snapshot, dict) or snapshot.get("schema") != self.schema:
@@ -1028,6 +1043,7 @@ class IntegratedEngine2T:
         ledger = deepcopy(snapshot.get("ledger"))
         ledger_fields = {"external_mass_kg", "external_energy_J", "external_species_kg",
                          "fresh_delivered_kg", "fresh_short_circuit_kg", "fuel_delivered_kg",
+                         "fuel_short_circuited_kg",
                          "heat_to_wall_J", "cylinder_work_J", "crankcase_work_J",
                          "p7_heat_added_J", "p7_source_species_kg"}
         if not isinstance(ledger, dict) or set(ledger) != ledger_fields:
