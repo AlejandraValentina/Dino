@@ -152,7 +152,12 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       stage común y el flujo conserva donor/ledger P6. `CrankcaseGeometry` V2
       resuelve volúmenes opuestos de cárter/cilindro y trabajo p·dV en ambos
       stages; el fixture A completa dos ciclos con reed estática y cárter móvil.
-      La dinámica multi-petal y su estado de restart siguen pendientes.
+      La dinámica multi-petal y su estado de restart siguen pendientes. Estado
+      `BLOCKED_LOCAL` para ese subtramo: falta fijar un método de acoplamiento
+      al SSPRK2 común que resuelva impactos/restitución y contabilice el trabajo
+      de presión y el calor de amortiguamiento en la frontera/ledger de energía.
+      Avanzar la reed por separado y alimentar después el flujo sería splitting
+      no validado; `DYNAMIC_REED_V1` continúa disponible como componente autónomo.
 - [x] 17c. Topología generic ports N con piston intake, transfers y exhaust
       expansion-chamber en los mismos stages; scavenging ledger con cierres
       geométricos y flujos con signo. Parcial: el mesh real de
@@ -197,8 +202,9 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       SSPRK2, ledgers, CFL de ducto/cámara y restart geométricamente consistente;
       revisión read-only puntual completada; casos sintéticos siguen condicionados a P4.
 - `IN_PROGRESS` — La reed estática, intake y cárter geométrico ya participan en
-      los stages comunes. Falta integración SSPRK2 de dinámica multi-petal,
-      estado de restart y regresión de retroflujo con reed dinámica.
+      los stages comunes. `BLOCKED_LOCAL` para integrar dinámica multi-petal,
+      estado de restart y retroflujo hasta acordar el método de impactos y el
+      ledger de energía acoplado; no usar un split no verificado.
 - `DONE_CONDITIONAL` — `ExpansionChamber`, generic ports/powervalve, cierres
       exactos y ledgers por ciclo verificados en fixtures A/B. La frontera
       reservoir V2 es una deuda separada de KT100 y no se cambió.

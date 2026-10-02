@@ -272,10 +272,10 @@
         "18 independent synthetic Fixture B and selected P4-P8 regressions"
       ],
       "remaining_blockers": [
-        "dynamic reed state integrated into common stages and restart",
-        "fuel trapped/stoichiometric semantics not established",
-        "independent review of current delta",
-        "P4 remains unresolved and all fixtures stay CONDITIONAL_ON_P4"
+        "dynamic reed stage/impact/energy coupling contract and restart",
+        "stoichiometric AFR and Q_F-to-LHV semantics not configured",
+        "independent review of latest fuel-output/Fixture-B/zero-Cd delta",
+        "P4 unresolved; all integrated fixtures remain CONDITIONAL_ON_P4"
       ]
     },
     "17d_p7_fuel_combustion_thermal_mechanics": {
@@ -470,12 +470,14 @@
     }
   },
   "review": {
-    "current_delta": "SELF_REVIEW_ONLY; no independent review capability used on current fuel-output/Fixture-B delta",
-    "independent_review_current_delta": "PASS: closure derivation, accepted endpoint evidence, stage/output alignment, V1/V2 separation, cycle integrals, LFS artifact identity, and scope boundaries; no material findings; not a complete-engine acceptance review",
+    "current_delta": "SELF_REVIEW_ONLY; zero-Cd roundtrip and exact exhaust-close fuel output are not independently reviewed.",
+    "independent_review_current_delta": "PENDING. Earlier independent review covered the prior V2 closure/output delta only; it does not cover the later fuel-output, Fixture B or zero-Cd changes and is not a full-engine acceptance review.",
     "prior_harness_punctual_review": "NO_MATERIAL_DEFECT_FOUND",
     "reverse_internal_donor_fix": "INDEPENDENT_READ_ONLY_REVIEW_PASS_BOTH_DONOR_DIRECTIONS_AND_STAGE_BINDING; no complete-engine review performed",
     "slider_crank_stage_integration": "INDEPENDENT_READ_ONLY_REVIEW_PASS; geometry signs/units, stage RPM, single -pVdot ledger and checkpoint mismatch were checked; no cycle claim",
-    "p7_integrated_source_review": "INDEPENDENT_READ_ONLY_REVIEW_PASS_TRANSACTIONAL_CAPTURE_EVENT_CHRONOLOGY_RESTART_AND_LEDGER; no concrete defect found, no complete-engine review"
+    "p7_integrated_source_review": "INDEPENDENT_READ_ONLY_REVIEW_PASS_TRANSACTIONAL_CAPTURE_EVENT_CHRONOLOGY_RESTART_AND_LEDGER; no concrete defect found, no complete-engine review",
+    "prior_v2_closure_review": "PASS: closure derivation, endpoint evidence, stage/output alignment, V1/V2 separation, cycle integrals, LFS identity and scope boundaries; explicitly punctual and predates current fuel-output changes.",
+    "latest_output_change_tests": "33 integrated/output tests PASS; self-review only"
   },
   "git": {
     "branch": "main",
@@ -486,7 +488,7 @@
       "results/kt100-hybrid-model-fixture-v2-harness-20261002-r3/",
       "results/kt100-hybrid-model-fixture-v2-harness-20261002-r4/"
     ],
-    "latest_commit": "f03af37"
+    "latest_commit": "242712d"
   },
   "queue": [
     {
@@ -516,8 +518,8 @@
       "dependencies": [
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "IN_PROGRESS",
-      "blocker": "Dynamic reed mechanical state and SSPRK2 restart remain open; static reed and slider-crank are integrated.",
+      "state": "BLOCKED_LOCAL_DYNAMIC_REED_COUPLING",
+      "blocker": "The standalone dynamic reed and integrated static reed are verified, but the stage-coupled mechanical/impact update has no accepted scheme for stop restitution, pressure work and damping-energy accounting. A separate post-step advance would be unverified operator splitting.",
       "commits": [
         "a70917dde45ca15c62d5e0f460020599488a4d1f",
         "d3b82f3 Integrate generic ports into accepted 2T stages"
@@ -528,9 +530,10 @@
         "independent read-only review found no concrete static-reed defect",
         "tests/test_integrated_2t.py:16; CrankcaseGeometry V2 resolves cylinder/crankcase volume and opposite rates at stage angle/RPM; accepted moving-volume step closes mass/energy ledgers",
         "16 integrated focal tests PASS; grouped 68 tests PASS; OpenSpec strict PASS; py_compile and diff-check PASS",
-        "fixture A completes two cycles with static reed and moving crankcase/cylinder geometry; 21 focused integrated tests pass"
+        "fixture A completes two cycles with static reed and moving crankcase/cylinder geometry; 21 focused integrated tests pass",
+        "Integrated static reed and moving crankcase are exercised on full synthetic cycles; standalone DYNAMIC_REED_V1 has its own multi-petal, stop, reverse-flow and replay tests."
       ],
-      "next_action": "Integrate existing dynamic reed state across common stages and checkpoint/restart without advancing it twice."
+      "next_action": "Continue independent component work; resume dynamic integration only with a specified conservative stage/impact contract."
     },
     {
       "id": "17c-exhaust-chamber-boundary",
@@ -592,7 +595,7 @@
         "17d-fuel-combustion-thermal-mechanics"
       ],
       "state": "DONE_CONDITIONAL",
-      "blocker": "Global readiness still waits on dynamic reed coupling, approved trapped-fuel/stoichiometric semantics, independent review, and P4 acceptance.",
+      "blocker": "Global readiness still waits on the dynamic-reed coupling contract, fuel stoichiometric/trapped semantics, independent review of latest delta, and P4 acceptance.",
       "commits": [
         "e93fd624",
         "f846aa3",

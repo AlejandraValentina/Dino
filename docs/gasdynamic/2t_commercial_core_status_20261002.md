@@ -392,3 +392,16 @@ campo queda `UNDEFINED`. Se denomina
 representa combustible total atrapado ni se infiere del inventario global
 terminal. Pasaron 33 pruebas focales integradas/de outputs y OpenSpec estricto.
 La AFR estequiométrica y la relación de `Q_F` con LHV siguen sin definirse.
+
+### Límite local: integración de reed dinámica — 2026-10-02
+
+La reed estática forma parte de los stages integrados; `DYNAMIC_REED_V1` sigue
+verificada por separado con mecánica multi-pétalo, topes, flujo inverso y
+restart/replay. Su acoplamiento al motor integrado queda `BLOCKED_LOCAL`: el
+contrato actual no fija cómo combinar los eventos de impacto/restitución con
+SSPRK2 ni cómo registrar el trabajo diferencial de presión y la disipación en
+el balance energético. Avanzarla por separado del gas sería splitting no
+verificado. Esto no bloquea componentes independientes ni reabre P5 histórico.
+La última salida de fuel/cierre exacto, Fixture B y la corrección Cd=0 recibieron
+autorrevisión y tests, pero aún no revisión independiente; la revisión puntual
+V2 anterior no se presenta como cobertura de esos cambios.
