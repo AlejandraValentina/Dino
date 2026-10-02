@@ -314,3 +314,25 @@ actuator dynamics or unprovided RPM calibration may be inferred.
 - **WHEN** the target port is not the configured movable main exhaust or RPM
   lies outside the map
 - **THEN** the request is rejected without changing other ports.
+
+### Requirement: Slider-crank crankcase V2 geometry and donor-aware links
+
+Crankcase V2 MUST accept explicit bore, stroke, rod length, BDC volume and
+provenance. It MUST use the established slider-crank position to calculate
+volume throughout 360 degrees, analytic volume rate at RPM, and the ratio of
+maximum to minimum crankcase volume. A standalone 0D intake/leak link MUST reuse
+the existing bidirectional restriction relation and its actual donor state;
+it MUST NOT clamp reverse flow. The helper MUST NOT claim production P5-C/P6
+integration or modify their stage ledger.
+
+#### Scenario: Crankcase volume and compression
+
+- **WHEN** valid slider-crank dimensions and BDC volume are supplied
+- **THEN** TDC/BDC volumes, crankcase compression ratio and volume-rate sign
+  follow the existing kinematics and preserve its endpoint behavior.
+
+#### Scenario: Reversible intake/leak flow
+
+- **WHEN** pressure ordering changes across a configured link
+- **THEN** the existing restriction resolves the direction, enthalpy and fresh
+  fraction from the actual upstream donor; closed area gives exact zero flux.

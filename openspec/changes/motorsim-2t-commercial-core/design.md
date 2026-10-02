@@ -158,6 +158,16 @@ unburned, not-trapped and short-circuited fuel are reported separately. Heat pot
 SFC uses the 2T one-cycle-per-revolution rate; brake SFC is undefined when
 brake power is nonpositive.
 
+## Crankcase geometry `CRANKCASE_MODEL_V2`
+
+The V2 geometry reuses the established slider-crank position with explicit
+bore, stroke, rod length and BDC free volume. `V(theta)=V_BDC+Vd*(1-x(theta)/S)`;
+the derivative is analytic in time at supplied RPM, and compression ratio is
+`V_TDC/V_BDC`. A small-link helper delegates bidirectional pressure flow to the
+existing 0D restriction, preserving its upstream donor and fresh fraction. This
+is not a P5-C stage extension: wall heat remains a separate prescribed model,
+and actual intake/transfer topologies still require global stage ledgers.
+
 ## Exhaust powervalve geometry `POWERVALVE_GEOMETRY_V1`
 
 The powervalve maps RPM to a bounded roof position using piecewise-linear

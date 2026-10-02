@@ -62,6 +62,10 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       esos balances quedan condicionados a los contratos de combustible y
       energía de fase 11 y a integración de solver.
 - [ ] Fase 9: modelo de cárter V2 y acoplamiento de admisión/transferencia.
+- [x] Fase 9a: volumen de cárter V2 con cinemática/biela existente, dV/dt
+      analítico y compresión geométrica, más link 0D bidireccional que reutiliza
+      `simulation.restriction`; ocho pruebas analíticas/negativas. Parcial:
+      no se integró admisión/transferencia al RHS ni a ledgers P5-C/P6.
 - [ ] Fase 10: pérdidas mecánicas y rendimiento al freno con provenance.
 - [x] Fase 10a: términos FMEP explícitos por fuente, mapas RPM/carga,
       provenance y derivación analítica IMEP/BMEP, potencia y par 2T en
