@@ -157,3 +157,13 @@ unburned, not-trapped and short-circuited fuel are reported separately. Heat pot
 `burned_fuel*LHV`; it is bookkeeping only and is not coupled to the solver.
 SFC uses the 2T one-cycle-per-revolution rate; brake SFC is undefined when
 brake power is nonpositive.
+
+## Exhaust powervalve geometry `POWERVALVE_GEOMETRY_V1`
+
+The powervalve maps RPM to a bounded roof position using piecewise-linear
+interpolation within the configured RPM domain; extrapolation is rejected.
+Position `0` is the fully raised/open roof and `1` lowers the roof by the
+configured `roof_travel_mm`, reusing the generic port geometry's existing
+definition. It can target only the declared movable main rectangular exhaust.
+Port area and event angles are then computed by `TwoStrokePortSet`; no servos,
+control dynamics, or calibrated RPM values are added.

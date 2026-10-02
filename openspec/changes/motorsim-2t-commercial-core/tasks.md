@@ -75,6 +75,10 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       nueve pruebas analíticas/negativas. Parcial: adaptador consume masas
       suministradas, no se acopla a la campaña P6 ni al ledger energético.
 - [ ] Fase 12: geometría/actuación de powervalve.
+- [x] Fase 12a: mapa RPM→posición lineal y aplicación geométrica al techo del
+      escape principal móvil en `motorsim.powervalve`, reutilizando área/eventos
+      de `GENERIC_2T_PORTS_V1`; siete pruebas analíticas/negativas aprobadas.
+      Parcial: no hay servo, integración al ciclo del solver ni calibración.
 - [ ] Fase 13: plenum, airbox, boost bottle y uniones.
 - [ ] Fase 14: esquema unificado de outputs por ángulo y ciclo/RPM.
 - [ ] Fase 15: importación exploratoria generalizada sin cambiar P9.

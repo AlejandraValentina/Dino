@@ -293,3 +293,24 @@ separately verified energy coupling.
 - **WHEN** no fuel is present or brake power is zero/negative
 - **THEN** AFR or brake SFC is explicitly undefined; masses and energy remain
   zero or signed according to the supplied ledger, without invented values.
+
+### Requirement: RPM-mapped exhaust powervalve geometry
+
+Powervalve V1 MUST map RPM continuously to an explicit `[0,1]` exhaust roof
+position with provenance. Position zero MUST mean raised/open and position one
+MUST lower the roof by the configured travel distance. The model MUST target
+only its declared movable main exhaust window and MUST reuse generic port area
+and event calculations. RPM outside the configured map MUST be rejected. No
+actuator dynamics or unprovided RPM calibration may be inferred.
+
+#### Scenario: Interpolate roof position
+
+- **WHEN** an RPM lies between configured map points
+- **THEN** linear interpolation changes the main exhaust port's area profile and
+  event angles through the existing port geometry.
+
+#### Scenario: Invalid target or map range
+
+- **WHEN** the target port is not the configured movable main exhaust or RPM
+  lies outside the map
+- **THEN** the request is rejected without changing other ports.
