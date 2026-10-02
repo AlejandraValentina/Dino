@@ -222,3 +222,26 @@ coefficients or alter the gas solver.
 - **WHEN** an RPM/load point lies inside an explicit map
 - **THEN** bilinear interpolation supplies its temperature, while an out-of-map
   point is rejected rather than extrapolated.
+
+### Requirement: Prescribed combustion progress V2
+
+`COMBUSTION_MODEL_V2` MUST support one or two weighted Wiebe components with
+explicit ignition timing, duration, shape parameters, component delay and
+provenance. The model MUST expose normalized progress, derivative per crank
+degree, configured combustion efficiency and CA10/CA50/CA90. Efficiency MUST
+be an explicit scalar or bounded RPM/load map. The progress capability MUST
+remain separate from P7 historical code. It MUST NOT infer fuel chemistry,
+species conversion, stoichiometry, LHV or heat release.
+
+#### Scenario: Single or double prescribed burn
+
+- **WHEN** one or two valid Wiebe components and a supported operating point
+  are evaluated
+- **THEN** weighted progress is monotonic and bounded by configured efficiency,
+  the three CA points are ordered, and the final progress equals efficiency.
+
+#### Scenario: Zero efficiency and invalid operating point
+
+- **WHEN** efficiency is zero or RPM/load lies outside its configured map
+- **THEN** the burned fraction remains zero with undefined CA points, or the
+  out-of-map request is rejected; no heat or chemistry output is fabricated.

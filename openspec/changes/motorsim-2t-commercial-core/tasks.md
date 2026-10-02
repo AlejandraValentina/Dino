@@ -56,6 +56,11 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       analíticas/negativas aprobadas. Parcial: no hay capacidad térmica dinámica
       de paredes ni acoplamiento a energía P5/P6 por etapa.
 - [ ] Fase 8: `COMBUSTION_MODEL_V2`, separado de P7 prescrito histórico.
+- [x] Fase 8a: single/double Wiebe, ignition, efficiency/map y CA10/50/90 en
+      `motorsim.combustion`, con serialization y 11 pruebas. Parcial e
+      intencionalmente sin química, conversión de especie ni energía liberada;
+      esos balances quedan condicionados a los contratos de combustible y
+      energía de fase 11 y a integración de solver.
 - [ ] Fase 9: modelo de cárter V2 y acoplamiento de admisión/transferencia.
 - [ ] Fase 10: pérdidas mecánicas y rendimiento al freno con provenance.
 - [ ] Fase 11: combustible, AFR y BSFC consistentes con P6.

@@ -121,3 +121,14 @@ extrapolation is rejected. This is prescribed-wall transfer, not a wall-capacity
 model or a fitted heat-transfer correlation; upstream integration must supply
 gas temperatures from the same physical solver stages and close the energy
 ledger globally.
+
+## Prescribed combustion progress `COMBUSTION_MODEL_V2`
+
+One or two Wiebe components define weighted burn progress with explicit
+ignition angle, duration, shape `a,m`, and delay. The normalized law reaches
+unit progress at each component's end; optional scalar or bounded RPM/load
+efficiency scales the total burned fraction. CA10/50/90 are roots of the
+weighted normalized progress. This capability returns only dimensionless
+progress/rate and crank-angle points. It does not convert P6 species or release
+heat: fuel chemistry, oxygen availability, LHV and energy ledgers require their
+separate approved contracts before coupled integration.
