@@ -5,6 +5,7 @@ import pytest
 
 from motorsim.gas1d.mesh import uniform_mesh
 from motorsim.gas1d.boundary import Boundary
+from motorsim.expansion_chamber import ChamberSection, ExpansionChamber
 from motorsim.integrated_2t import (
     DuctPath2T, EngineGeometry2T, IntegratedEngine2T,
 )
@@ -17,13 +18,18 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
           exhaust_area=0.0, thermal_system=None, thermal_locations=None,
           geometry=None, max_cfl=0.4, duct_pressure=101325.0,
           reed_petals=(), intake_area=0.0, transfer_pressure=101325.0,
-          transfer_area=1e-5, duct_length=.02):
+          transfer_area=1e-5, duct_length=.02, exhaust_mesh=None):
+    def duct_mesh(duct_id):
+        if duct_id == "exhaust" and exhaust_mesh is not None:
+            return exhaust_mesh
+        return uniform_mesh(2, duct_length, 1e-4)
+
     paths = (
-        DuctPath2T("intake", uniform_mesh(2, duct_length, 1e-4), "intake"),
-        DuctPath2T("primary", uniform_mesh(2, duct_length, 1e-4), "transfer"),
-        DuctPath2T("secondary", uniform_mesh(2, duct_length, 1e-4), "transfer"),
-        DuctPath2T("boost", uniform_mesh(2, duct_length, 1e-4), "transfer"),
-        DuctPath2T("exhaust", uniform_mesh(2, duct_length, 1e-4), "exhaust"),
+        DuctPath2T("intake", duct_mesh("intake"), "intake"),
+        DuctPath2T("primary", duct_mesh("primary"), "transfer"),
+        DuctPath2T("secondary", duct_mesh("secondary"), "transfer"),
+        DuctPath2T("boost", duct_mesh("boost"), "transfer"),
+        DuctPath2T("exhaust", duct_mesh("exhaust"), "exhaust"),
     )
 
     if geometry is None:
@@ -33,7 +39,7 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
 
     states = {path.id: ((1.1768, 0.0,
                          transfer_pressure if path.role == "transfer" else duct_pressure,
-                         1.0),) * 2 for path in paths}
+                         1.0),) * len(path.mesh.volumes) for path in paths}
     component_species = {
         "crankcase": (0.0, 0.0, 0.00017652, 0.0),
         "cylinder": (0.000211824, 0.0, 0.0, 0.0),
@@ -199,6 +205,27 @@ def test_static_reed_is_evaluated_from_each_shared_stage_pressure():
         "effective_reed_area_m2"] > 0.0
     assert open_record["stage_face_fluxes"][0]["intake"][
         "right_species"][0] > 0.0
+
+
+def test_existing_expansion_chamber_mesh_participates_in_integrated_exhaust_stages():
+    chamber = ExpansionChamber((
+        ChamberSection("header", "header", 80.0, 20.0, 20.0),
+        ChamberSection("diffuser", "diffuser", 180.0, 20.0, 52.0),
+        ChamberSection("belly", "belly", 100.0, 52.0, 52.0),
+        ChamberSection("baffle", "baffle_cone", 170.0, 52.0, 16.0),
+        ChamberSection("stinger", "stinger", 120.0, 16.0, 16.0),
+    ))
+    exhaust_mesh = chamber.mesh(.01)
+    system = _case(cylinder_pressure=130000.0, exhaust_area=1e-5,
+                   exhaust_mesh=exhaust_mesh)
+    record = system.step(1e-8, .01)
+    assert system.exhaust.mesh.as_dict() == exhaust_mesh.as_dict()
+    assert len(record["stage_face_fluxes"][0]["exhaust"]["all_faces"]) == len(
+        exhaust_mesh.volumes) + 1
+    assert len(record["stage_face_fluxes"][1]["exhaust"]["all_species_faces"]) == len(
+        exhaust_mesh.volumes) + 1
+    assert abs(system.conservation_report()["mass"]["residual"]) < 1e-15
+    assert abs(system.conservation_report()["energy"]["residual"]) < 1e-10
 
 
 def test_fresh_exhaust_flow_is_counted_as_short_circuit_only_with_open_transfers():

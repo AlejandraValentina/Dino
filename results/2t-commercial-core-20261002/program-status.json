@@ -157,9 +157,10 @@
         "prescribed_thermal_source_in_same_stages",
         "static_reed_area_from_each_stage_pressure",
         "atomic_json_checkpoint_restart_and_replay",
-        "restored_angle_and_chamber_geometry_consistency"
+        "restored_angle_and_chamber_geometry_consistency",
+        "existing_expansion_chamber_mesh_in_integrated_exhaust_stages"
       ],
-      "focal_tests": 13,
+      "focal_tests": 14,
       "blocked_scope": [
         "dynamic_reed_state_and_restart",
         "combustion_and_fuel_conversion",
@@ -178,7 +179,7 @@
     "commercial_core_openspec_strict": "PASS",
     "integrated_engine_foundation_tests": {
       "result": "PASS",
-      "count": 13
+      "count": 14
     },
     "reference_harness_openspec_strict": "PASS",
     "git_diff_check": "PASS",
@@ -187,7 +188,7 @@
     "p9_contract_sha256": "79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d",
     "integrated_regression_group_current": {
       "result": "PASS",
-      "count": 65,
+      "count": 66,
       "command": "python -m pytest tests/test_integrated_2t.py tests/test_p5c_integrated.py tests/test_p6_species.py tests/test_p7_full_topology.py tests/test_reed.py tests/test_two_stroke_ports_p5c.py -q"
     }
   },
@@ -243,15 +244,17 @@
     },
     {
       "id": "17c-exhaust-chamber-boundary",
-      "description": "Integrate generic exhaust mesh, expansion chamber, powervalve-ready geometry and justified external boundary",
+      "description": "Integrate existing ExpansionChamber mesh into global exhaust path; continue with generic port/powervalve geometry and external boundary classification",
       "dependencies": [
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "READY",
-      "blocker": null,
+      "state": "IN_PROGRESS",
+      "blocker": "Port/powervalve geometry and cycle-exact closure are not yet bound to this path.",
       "commits": [],
-      "evidence": [],
-      "next_action": "Bind existing ExpansionChamber mesh and assess boundary V2 scope without rerunning KT100."
+      "evidence": [
+        "tests/test_integrated_2t.py:14; existing expansion-chamber multi-section mesh participates in both global gas/species stages"
+      ],
+      "next_action": "Bind existing TwoStrokePortSet/Powervalve areas to the same stage geometry callback; do not claim cycle verification."
     },
     {
       "id": "17d-fuel-combustion-thermal-mechanics",

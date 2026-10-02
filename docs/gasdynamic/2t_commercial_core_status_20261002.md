@@ -85,7 +85,7 @@ stage SSPRK2 usando la diferencia de presión ducto-cárter de ese mismo stage.
 El flujo de gas/especies sigue usando la interfaz compartida y el donor P6.
 Las pruebas cubren la reed cerrada y abierta, conservación, backward donor,
 CFL 0D/1D, reinicio y rechazo de geometría obsoleta. Suite agrupada actual:
-65 pruebas aprobadas, incluida `tests/test_reed.py`; OpenSpec estricto,
+66 pruebas aprobadas, incluida `tests/test_reed.py`; OpenSpec estricto,
 `git diff --check`, `git lfs fsck` y hash P9 aprobados.
 
 La revisión independiente fue puntual sobre el fundamento CFL, el restart y
@@ -99,3 +99,8 @@ combustión, combustible integrado, desempeño al freno, evidencia periódica,
 fixtures completos y regresiones amplias P4–P8 actuales siguen pendientes.
 Commercial Core continúa `MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL`; no se reintentó
 KT100 ni se ejecutaron campañas físicas.
+Una prueba adicional vincula la malla multi-sección de `ExpansionChamber` a la
+ruta exhaust del mismo integrador y comprueba que sus celdas y caras se
+actualizan en los dos stages con transporte de especies y balance global.
+Esto verifica el enlace de malla, no ciclos completos ni reflexión/calibración
+de cámara.

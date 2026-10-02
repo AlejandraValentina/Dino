@@ -55,6 +55,11 @@ not match the configured geometry at the restored angle. The explicit geometry
 identity remains a caller-declared binding; the runtime volume check is an
 additional state-consistency gate.
 
+An existing `ExpansionChamber.mesh()` MAY be bound as the exhaust path mesh;
+its section areas, face fluxes, four-species transport, and external boundary
+exchange MUST then participate in both common SSPRK2 stages without modifying
+the historical expansion-chamber or P5/P6 solvers.
+
 #### Scenario: Three or more transfer routes share stage fluxes
 
 - **WHEN** an engine topology has named primary, secondary and boost routes
@@ -75,6 +80,14 @@ additional state-consistency gate.
 - **THEN** reed area is resolved from that stage's pressure state, chamber
   depletion participates in the accepted CFL gate, and the same shared flux
   updates chamber, duct, species and global ledgers.
+
+#### Scenario: Expansion chamber mesh participates in integrated exhaust
+
+- **WHEN** an existing multi-section `ExpansionChamber` mesh is bound to the
+  exhaust route
+- **THEN** every section cell and face is advanced in both global SSPRK2
+  stages, with species transport and external exchange in the integrated
+  ledgers.
 
 #### Scenario: JSON checkpoint restores all accepted physical history
 

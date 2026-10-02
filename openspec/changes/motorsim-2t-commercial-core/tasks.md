@@ -150,7 +150,10 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       y su estado de restart siguen pendientes.
 - [ ] 17c. Topología generic ports N con piston intake, transfers y exhaust
       expansion-chamber en los mismos stages; scavenging ledger con cierres
-      geométricos y flujos con signo.
+      geométricos y flujos con signo. Parcial: el mesh real de
+      `ExpansionChamber` se avanzó como la ruta exhaust en ambos SSPRK2 stages
+      con flujo y especies conservativos (prueba focal); falta enlazar áreas
+      genéricas/powervalve a esa ruta y verificar ciclos/cierres exactos.
 - [ ] 17d. Combustión P7 autorizada, paredes térmicas, combustible/especies y
       trabajo mecánico integrados con ledger único sin doble conteo.
 - [ ] 17e. Periodicidad P1/P2, evidencia primaria, collector engineering,
@@ -166,7 +169,9 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
 - `IN_PROGRESS` — Integración estática reed/intake/crankcase en el stage común;
   faltan dinámica reed, configuración de cárter acoplada y verificación de
   retroflujo con reed dinámica.
-- `READY` — Integración de exhaust + expansion chamber y frontera externa.
+- `IN_PROGRESS` — El mesh `ExpansionChamber` ya participa como ducto exhaust
+  en el stage común; faltan binding directo de áreas/powervalve, cierres de
+  puertos por ciclo y clasificación de boundary V2.
 - `READY` — Bind P7, fuel/P6 y work/brake en ledger por ciclo sin doble conteo.
 - `READY` — Evidencia primaria, periodicidad, collector y Fixture A completo.
 - `READY` — Fixture B y suite amplia actual P4–P8.
