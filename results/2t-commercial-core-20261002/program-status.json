@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-02",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "a70917dde45ca15c62d5e0f460020599488a4d1f",
+  "status_capture_head": "8b04b83",
   "overall": "NOT_READY_INTEGRATION_GAPS_REMAIN",
   "ready_claim": false,
   "push_performed": false,
@@ -171,7 +171,8 @@
         "P7_species_conversion_and_prescribed_heat_in_both_global_SSPRK2_stages",
         "internal_species_source_and_P7_energy_in_global_ledgers",
         "P7_active_and_completed_event_checkpoint_restart_replay",
-        "aligned_step_rejection_at_ignition_and_event_end_boundaries"
+        "aligned_step_rejection_at_ignition_and_event_end_boundaries",
+        "P7_event_restore_matches_unwrapped_crank_angle_and_absolute_cycle_history"
       ],
       "focal_tests": 16,
       "blocked_scope": [
@@ -192,7 +193,10 @@
         "P7_SOURCE_IN_BOTH_INTEGRATED_SSPRK2_STAGES",
         "P7_INTERNAL_SPECIES_LEDGER_AND_PRESCRIBED_HEAT_ENERGY_LEDGER",
         "ACTIVE_EVENT_CHECKPOINT_RESTART_REPLAY",
-        "IGNITION_AND_40_DEGREE_EVENT_BOUNDARY_GUARDS"
+        "IGNITION_AND_40_DEGREE_EVENT_BOUNDARY_GUARDS",
+        "transactional_P7_capture_after_accepted_step_only",
+        "P7_checkpoint_rejects_missing_or_cycle_shifted_events",
+        "accepted_exact_40_degree_event_end_after_admissible_step_refinement"
       ],
       "blocked_scope": [
         "fuel_accounting_binding_to_P6_species_delivery_without_invented_fuel_properties",
@@ -310,11 +314,14 @@
       ],
       "state": "IN_PROGRESS",
       "blocker": "P7 stage source is integrated and reviewed; FuelAccounting binding to P6 delivered/trapped species, mechanical/brake binding, and complete-cycle evidence remain open.",
-      "commits": [],
+      "commits": [
+        "8b04b8372e5aa3a56f83c93ac89a6d255db19789"
+      ],
       "evidence": [
-        "20 integrated-engine tests PASS: source in both SSPRK2 stages, mass/energy/species ledgers, step-boundary alignment, transactional rejection, event checkpoint chronology and replay",
-        "72-test integrated/P5-C/P6/P7/reed/ports regression group PASS; OpenSpec strict PASS; py_compile, diff-check and Git LFS fsck PASS",
-        "independent read-only review PASS for source stages, aggregate ledgers, atomic capture/rejection, corrupted restart and absolute event chronology; no full-engine review"
+        "20 integrated-engine tests PASS: stage source, source ledgers, exact event end, failed-step transactionality and checkpoint chronology/replay",
+        "72-test integrated/P5-C/P6/P7/reed/ports regression PASS; OpenSpec strict PASS; py_compile, diff-check and Git LFS fsck PASS",
+        "independent read-only review PASS for source stages, ledgers, event transactionality and absolute event chronology; no full-engine review",
+        "P9 spec SHA-256 rechecked unchanged: 79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d"
       ],
       "next_action": "Bind existing FuelAccounting and MechanicalLossModel only after the integrated ledgers expose contract-compatible cycle values; do not infer fuel chemistry or alter P7 Q_F."
     },
