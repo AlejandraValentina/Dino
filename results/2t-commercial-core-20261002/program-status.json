@@ -702,13 +702,13 @@
         "integrated-intake-plenum",
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "evidence": [
         "Existing P3 volume/duct Riemann helper; bounded single-plenum integration and independent review."
       ],
-      "next_action": "Inspect current topology contracts and design a generic endpoint binding without changing reservoir, P3, or thermodynamic semantics; preregister only if the physical contract changes."
+      "next_action": "Implement a generic immutable binding for finite volumes on distinct external intake-left and exhaust-right endpoints; reuse P3 exchange and run end-to-end cycle evidence before review."
     }
   ]
 }
