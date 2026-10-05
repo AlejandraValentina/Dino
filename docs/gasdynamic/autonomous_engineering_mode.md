@@ -343,8 +343,10 @@ registra como decisión en la sección 17.
 con cambios trazables. `AUD-08` ejecutó Fixture A desde su preregistro aislado:
 20/20 ciclos admisibles, replay exacto ciclo 3→4 y ninguna convergencia de
 periodicidad dentro del horizonte. La evaluación está guardada con la evidencia;
-no acredita aceptación del Commercial Core. `AUD-09` ya no está bloqueada por
-AUD-08, pero requiere preregistro propio para el fixture realmente distinto.
+no acredita aceptación del Commercial Core. `AUD-09` completó Fixture C piston-port
+sin reed: 20/20 ciclos, replay exacto y `PERIOD_1` en el ciclo 20. La traza
+histórica cruda no existe, por lo que no se atribuye causa exacta; la ejecución
+actual no reprodujo el fallo.
 `AUD-11` reprodujo el límite de capacidad de reservoir V1; seleccionar política
 V2 sigue siendo una cuestión científica separada. No ejecutar KT100 ni reutilizar
 los ciclos A/B históricos. La fábrica de configuración V2 conserva lectura V1
@@ -390,10 +392,11 @@ contrato propios.
   restart exacto y sin periodicidad aceptada; no reutilizar A/B históricos.
 - AUD-10 y AUD-12 se resolvieron: colector por roles y límite CONFIG_V2
   explícito; Cd=0 rechazado otra vez por GENERIC_2T_PORTS_V1.
-- AUD-09 está activo: Fixture C piston-port sin reed está versionado, pero
-  requiere preregistro separado antes de integrar. AUD-11 sigue activo bajo
-  protocolo forense; AUD-13–18 esperan dependencias y prioridades anteriores.
-  La cola machine-readable es la fuente de estado.
+- AUD-09 completó Fixture C piston-port sin reed: 20/20 ciclos, replay exacto y
+  `PERIOD_1` al ciclo 20. No reprodujo el fallo histórico; como no hay traza
+  cruda, no se atribuye una causa exacta. La evidencia es sintética y condicional
+  a P4. AUD-11 sigue activo bajo protocolo forense; AUD-13–18 esperan
+  dependencias y prioridades anteriores. La cola machine-readable es la fuente.
 - Reservoir V1 rechaza correctamente el estado de entrada fuera de su rama
   característica admisible. Una política V2 de reservoir todavía no está
   seleccionada; no ejecutar KT100 ni adivinar una semántica de frontera.

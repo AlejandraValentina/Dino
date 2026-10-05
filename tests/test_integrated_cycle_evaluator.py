@@ -1,8 +1,13 @@
 import gzip
 import json
 
-from scripts.evaluate_integrated_cycle_evidence import evaluate
+from scripts.evaluate_integrated_cycle_evidence import _sha256_bytes, evaluate
 from motorsim.reference_harness.convergence import CONTRACT
+
+
+def test_source_digest_accepts_normalized_bytes():
+    assert _sha256_bytes(b"producer source\n") == _sha256_bytes(
+        b"producer source\r\n".replace(b"\r\n", b"\n"))
 
 
 def _record(index, phase=0):

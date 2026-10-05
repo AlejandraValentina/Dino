@@ -522,3 +522,8 @@ cualquier carpeta sin integrar. Una campaña requiere un archivo de preregistro 
 AUD-10: el colector integrado resuelve los canales de salida por rol y no por IDs literales. `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2` documenta y rechaza cualquier topología distinta de un ducto de admisión, al menos tres transferencias y un escape; extender esa cardinalidad requiere un schema nuevo.
 
 AUD-12: la afirmación histórica anterior de que Cd=0 era válido quedó supersedida. `GENERIC_2T_PORTS_V1` exige ahora un coeficiente de descarga estrictamente positivo; Cd=0 se rechaza, sin modificar resultados históricos.
+
+
+### Resultado AUD-09 — Fixture C piston-port sin reed — 2026-10-05
+
+El fixture sintético C completó el horizonte preregistrado de 20 ciclos admisibles y el replay exacto ciclo 3→4. `REFERENCE_PERIODIC_CONVERGENCE_V1` clasificó `PERIOD_1` en el ciclo 20. El manifest conserva 14.283 rechazos CFL; cerca del ángulo histórico 107.651626°, la propuesta de 0,5° excedió el CFL 0,4 y se aceptó tras reducir el paso. No hubo rechazos por admisibilidad de especies en esta ejecución. El fallo histórico no se reprodujo tras AUD-01/04; como no se conserva su traza cruda, no se atribuye una causa exacta. Esta evidencia permanece `SYNTHETIC_CONDITIONAL_ON_P4` y no acepta el Commercial Core. Evidencia: `results/2t-commercial-core-20261002/aud-09-fixture-c-20261005-v1/`.

@@ -714,6 +714,19 @@ Validación focal: `pytest tests/test_integrated_2t.py tests/test_two_stroke_por
 - [x] El productor permite C y conserva un `failure.json` con causa, ángulo,
   estado parcial, ledger y rechazos si no completa el horizonte. Cuatro pruebas
   del productor y `--validate-only` desde otra carpeta pasan.
-- [ ] Revisar el antecedente disponible (solo resume fallo a 107.651626°, sin
-  traza cruda), preregistrar Fixture C y el horizonte en un commit separado.
-- [ ] Ejecutar exclusivamente el horizonte registrado y clasificar el resultado.
+- [x] Revisar el antecedente disponible (solo resume fallo a 107.651626°, sin
+  traza cruda) y preregistrar Fixture C/horizonte en commit separado
+  `5a093bbf4df5f3d8d2fd53b807967f302037ee00`.
+- [x] Ejecutar 20 ciclos; replay exacto 3→4; `PERIOD_1` al ciclo 20 con tres
+  comparaciones lag-1 PASS finales.
+- [x] Conservar los 14.283 rechazos CFL en `manifest.json`. Cerca del ángulo
+  histórico, la propuesta de 0,5° excede CFL y avanza al reducirse a 0,25°;
+  no reaparece rechazo por masa de especies. La traza histórica cruda no existe,
+  así que no se atribuye causalidad exacta; el fallo no se reproduce tras AUD-01/04.
+
+Evidencia sintética `CONDITIONAL_ON_P4`, no aceptación del Commercial Core.
+Artefactos: `results/2t-commercial-core-20261002/aud-09-fixture-c-20261005-v1/`.
+
+
+Evaluador de evidencia: la campaña C se verificó offline con su preregistro y
+blob del productor; cinco pruebas focales de productor/evaluador pasan.

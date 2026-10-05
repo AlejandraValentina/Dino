@@ -3,14 +3,14 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "7213a39",
+  "status_capture_head": "5a093bbf4df5f3d8d2fd53b807967f302037ee00",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
   "kt100_policy": "FROZEN_NO_RERUNS_OR_ADJUSTMENTS_IN_THIS_MISSION",
   "phases": {
     "1_reference_harness": {
-      "status": "AUD-08_EVIDENCE_REGENERATED_NO_PERIODIC_CONVERGENCE",
+      "status": "AUD-08_A_NONCONVERGED_AUD-09_C_PERIOD1_AT_CYCLE20",
       "verified_scope": [
         "period_1_and_period_2_fixtures",
         "offline_audit",
@@ -20,9 +20,12 @@
         "preregistration_gated_cycle_evidence_producer_validate_only",
         "fixed_horizon_fixture_a_20_complete_admissible_cycles",
         "exact_restart_replay_cycle3_to4",
-        "offline_periodicity_evaluation_using_registered_v1_contract"
+        "offline_periodicity_evaluation_using_registered_v1_contract",
+        "fixed_horizon_fixture_c_no_reed_20_complete_admissible_cycles",
+        "exact_restart_replay_fixture_c_cycle3_to4",
+        "period1_converged_at_fixture_c_cycle20_under_registered_v1"
       ],
-      "blocked_scope": "Fixture A completed its preregistered 20-cycle horizon and exact cycle-3-to-4 restart, but the existing V1 detector found no period-1/period-2 convergence. Evidence is synthetic and CONDITIONAL_ON_P4; it is not Commercial Core acceptance."
+      "blocked_scope": "Fixture A did not converge within 20 cycles. Distinct piston-port/no-reed Fixture C completed 20 cycles and reached period-1 at cycle 20 after three consecutive PASS comparisons; evidence is synthetic CONDITIONAL_ON_P4 and does not accept the Commercial Core."
     },
     "2_kt100_v2": {
       "status": "LOCAL_BLOCKER",
@@ -1039,19 +1042,28 @@
         "AUD-04",
         "AUD-08"
       ],
-      "state": "IN_PROGRESS",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "audit-range:ab92aee..8cdf66e",
+        "4e9441c",
+        "495f654a5e8819b2ef4f45ac4daae7d530455016",
+        "5a093bbf4df5f3d8d2fd53b807967f302037ee00"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md",
         "results/2t-commercial-core-20261002/fixtures/fixture-c-engine-config-v2.json",
         "Fixture C removes the intake reed from Fixture A while retaining piston-port geometry; configuration hash 9095a5e65523f969fb0075c07956caaa45310cdb752ed87c6f39588863f65a27; validate-only round-trip PASS.",
-        "Producer supports fixture C and writes failure.json with reached angle, failure reason, partial state, ledger and all rejected trials if integration cannot complete; four producer tests PASS."
+        "Producer supports fixture C and writes failure.json with reached angle, failure reason, partial state, ledger and all rejected trials if integration cannot complete; four producer tests PASS.",
+        "results/2t-commercial-core-20261002/aud-09-fixture-c-20261005-v1/manifest.json",
+        "results/2t-commercial-core-20261002/aud-09-fixture-c-20261005-v1/restart-audit.json",
+        "results/2t-commercial-core-20261002/aud-09-fixture-c-20261005-v1/evaluation.json",
+        "Fixture C completed 20/20 admissible cycles; exact restart cycle 3→4; PERIOD_1 at cycle 20 after the registered three consecutive lag-1 PASS comparisons.",
+        "14,283 rejected CFL trials were recorded and visible; at the nearest matching point to historical 107.651626° (107.5°), the 0.5° proposal exceeded CFL 0.4 and was accepted after halving. No species-inadmissible trial occurred.",
+        "The historical raw trace is unavailable, so the original failure is not causally attributed to one change; the corrected no-reed candidate no longer reproduces it."
       ],
-      "next_action": "Inspect the available 107.651626-degree failure evidence (only the historical summary exists), create and separately commit an exact fixed-horizon preregistration for C, then run only that registered fixture."
+      "next_action": "Continue independent priority-2/3 audit queue. Do not reinterpret this synthetic result as product acceptance or rerun KT100."
     },
     {
       "id": "AUD-10",

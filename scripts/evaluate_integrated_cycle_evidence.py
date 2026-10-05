@@ -27,6 +27,10 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _sha256_bytes(payload: bytes) -> str:
+    return hashlib.sha256(payload).hexdigest()
+
+
 def _canonical_sha256(value: object) -> str:
     payload = json.dumps(value, sort_keys=True, separators=(",", ":"),
                          allow_nan=False).encode("utf-8")
@@ -94,7 +98,7 @@ def evaluate(output_dir: Path, preregistration_path: Path | None = None) -> dict
                            cwd=ROOT, check=True, capture_output=True)
             if (producer_blob != producer_source or
                     manifest.get("producer_commit") != producer_commit or
-                    manifest.get("producer_source_sha256") != _sha256(producer_source)):
+                    manifest.get("producer_source_sha256") != _sha256_bytes(producer_source)):
                 raise ValueError("producer source binding does not match cycle evidence")
     elif manifest.get("fixture_status") == "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT":
         raise ValueError("historical fixture evaluation requires its preregistration")
