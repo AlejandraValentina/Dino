@@ -43,9 +43,11 @@ def _sha256(data: bytes) -> str:
 def load_engine(fixture_id: str) -> tuple[IntegratedEngine2T, dict, str]:
     path = FIXTURES / f"fixture-{fixture_id.lower()}-engine-config-v2.json"
     wrapper = json.loads(path.read_text(encoding="utf-8"))
+    expected_status = ("AUDIT_REMEDIATION_FIXTURE" if fixture_id == "C" else
+                       "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT")
     if (wrapper.get("schema") != "MOTORSIM_COMMERCIAL_SYNTHETIC_FIXTURE_CONFIG_V1" or
             wrapper.get("fixture_id") != fixture_id or
-            wrapper.get("selection_status") != "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT"):
+            wrapper.get("selection_status") != expected_status):
         raise ValueError("fixture wrapper schema/identity is invalid")
     config = wrapper.get("engine_configuration")
     engine = IntegratedEngine2T.from_configuration_dict(config)
@@ -145,6 +147,32 @@ def _write_gzip_json(path: Path, value: object) -> None:
             stream.write(payload)
 
 
+def _write_failure_receipt(output: Path, fixture_id: str, cycle_index: int,
+                           target_angle: float, engine: IntegratedEngine2T,
+                           config_hash: str, prereg_hash: str,
+                           rejected_trials: list[dict], error: Exception) -> None:
+    receipt = {
+        "schema": "MOTORSIM_COMMERCIAL_CYCLE_FAILURE_V1",
+        "fixture_id": fixture_id,
+        "engine_configuration_sha256": config_hash,
+        "preregistration_sha256": prereg_hash,
+        "cycle_index": cycle_index,
+        "target_angle_deg": target_angle,
+        "reached_angle_deg": engine.crank_angle_unwrapped_deg,
+        "accepted_step_count": engine.accepted_steps,
+        "failure_type": type(error).__name__,
+        "failure_reason": str(error),
+        "completed_cycle_files": sorted(path.name for path in output.glob("cycle-*.json.gz")),
+        "current_state": engine.state,
+        "current_inventory": engine.inventory(),
+        "ledger": engine.ledger,
+        "rejected_trials": rejected_trials,
+    }
+    (output / "failure.json").write_text(
+        json.dumps(receipt, sort_keys=True, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8")
+
+
 def produce(fixture_id: str, horizon: int, restart_cycle: int,
             preregistration_path: Path, preregistration_commit: str,
             output: Path) -> None:
@@ -158,7 +186,12 @@ def produce(fixture_id: str, horizon: int, restart_cycle: int,
     restart_snapshot = None
     restart_engine = None
     for cycle in range(1, horizon + 1):
-        advance_to(engine, float(cycle * 360), rejected)
+        try:
+            advance_to(engine, float(cycle * 360), rejected)
+        except Exception as exc:
+            _write_failure_receipt(output, fixture_id, cycle, float(cycle * 360),
+                                   engine, config_hash, prereg_hash, rejected, exc)
+            raise
         end = engine.snapshot()
         record = make_integrated_cycle_primary(engine, start, end, cycle)
         _write_gzip_json(output / f"cycle-{cycle:03d}.json.gz", record)
@@ -169,9 +202,17 @@ def produce(fixture_id: str, horizon: int, restart_cycle: int,
             restart_engine.restore(restart_snapshot)
         if restart_cycle < cycle <= restart_cycle + 1 and restart_engine is not None:
             replay_rejections: list[dict] = []
-            advance_to(restart_engine, float(cycle * 360), replay_rejections)
+            try:
+                advance_to(restart_engine, float(cycle * 360), replay_rejections)
+            except Exception as exc:
+                _write_failure_receipt(output, fixture_id, cycle, float(cycle * 360),
+                                       engine, config_hash, prereg_hash, rejected, exc)
+                raise
             if restart_engine.snapshot() != end:
-                raise ValueError("restart replay differs from continuous trajectory")
+                error = ValueError("restart replay differs from continuous trajectory")
+                _write_failure_receipt(output, fixture_id, cycle, float(cycle * 360),
+                                       engine, config_hash, prereg_hash, rejected, error)
+                raise error
             if cycle == restart_cycle + 1:
                 (output / "restart-audit.json").write_text(json.dumps({
                     "status": "EXACT_REPLAY_PASS",
@@ -200,7 +241,7 @@ def produce(fixture_id: str, horizon: int, restart_cycle: int,
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--fixture", choices=("A", "B"), required=True)
+    parser.add_argument("--fixture", choices=("A", "B", "C"), required=True)
     parser.add_argument("--validate-only", action="store_true",
                         help="load and round-trip the committed fixture; do not integrate")
     parser.add_argument("--horizon", type=int)

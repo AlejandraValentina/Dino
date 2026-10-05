@@ -705,3 +705,15 @@ aceptación del Commercial Core. Artefactos en
   Cd=0 vuelve a ser rechazado y el test negativo quedó restablecido.
 
 Validación focal: `pytest tests/test_integrated_2t.py tests/test_two_stroke_ports.py` — **50 PASS**; OpenSpec estricto y `git diff --check` PASS.
+
+
+### AUD-09 — fixture piston-port sin reed — 2026-10-05
+
+- [x] Crear Fixture C sintético desde la configuración V2 versionada; conserva
+  la admisión piston-port y elimina la reed. Hash canónico: `9095a5e6…f65a27`.
+- [x] El productor permite C y conserva un `failure.json` con causa, ángulo,
+  estado parcial, ledger y rechazos si no completa el horizonte. Cuatro pruebas
+  del productor y `--validate-only` desde otra carpeta pasan.
+- [ ] Revisar el antecedente disponible (solo resume fallo a 107.651626°, sin
+  traza cruda), preregistrar Fixture C y el horizonte en un commit separado.
+- [ ] Ejecutar exclusivamente el horizonte registrado y clasificar el resultado.

@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "33cf353084728a3a25fef0dc23234fba81a4ff30",
+  "status_capture_head": "7213a39",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -1039,16 +1039,19 @@
         "AUD-04",
         "AUD-08"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "classification": "OPEN",
       "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "docs/gasdynamic/audit_8cdf66e.md",
+        "results/2t-commercial-core-20261002/fixtures/fixture-c-engine-config-v2.json",
+        "Fixture C removes the intake reed from Fixture A while retaining piston-port geometry; configuration hash 9095a5e65523f969fb0075c07956caaa45310cdb752ed87c6f39588863f65a27; validate-only round-trip PASS.",
+        "Producer supports fixture C and writes failure.json with reached angle, failure reason, partial state, ledger and all rejected trials if integration cannot complete; four producer tests PASS."
       ],
-      "next_action": "Create and commit a distinct-fixture preregistration, then diagnose and retry the piston-port/no-reed case only after reviewing the existing failed trace; do not reuse Fixture B or rerun KT100."
+      "next_action": "Inspect the available 107.651626-degree failure evidence (only the historical summary exists), create and separately commit an exact fixed-horizon preregistration for C, then run only that registered fixture."
     },
     {
       "id": "AUD-10",

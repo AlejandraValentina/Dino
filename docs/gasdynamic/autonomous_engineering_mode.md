@@ -390,10 +390,10 @@ contrato propios.
   restart exacto y sin periodicidad aceptada; no reutilizar A/B históricos.
 - AUD-10 y AUD-12 se resolvieron: colector por roles y límite CONFIG_V2
   explícito; Cd=0 rechazado otra vez por GENERIC_2T_PORTS_V1.
-- AUD-09 sigue READY y requiere preregistro independiente antes del fixture
-  piston-port sin reed. AUD-11 sigue activo bajo protocolo forense; AUD-13–18
-  esperan sus dependencias y prioridades anteriores. La cola machine-readable
-  es la fuente de estado.
+- AUD-09 está activo: Fixture C piston-port sin reed está versionado, pero
+  requiere preregistro separado antes de integrar. AUD-11 sigue activo bajo
+  protocolo forense; AUD-13–18 esperan dependencias y prioridades anteriores.
+  La cola machine-readable es la fuente de estado.
 - Reservoir V1 rechaza correctamente el estado de entrada fuera de su rama
   característica admisible. Una política V2 de reservoir todavía no está
   seleccionada; no ejecutar KT100 ni adivinar una semántica de frontera.
