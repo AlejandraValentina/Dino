@@ -660,3 +660,29 @@ modificaron ni se atribuyó su alcance al Commercial Core.
 
 Captura de estado reconciliada contra `a10d2dca698369f0eb95c310b78d48226ac63037`;
 los próximos commits de este modo deben actualizar esa referencia.
+
+
+### Preregistro AUD-08 — 2026-10-05
+
+- [x] Fijar Fixture A y su hash de configuración V2. Fixture B queda excluida
+  por no ser una topología suficientemente distinta.
+- [x] Fijar 20 ciclos completos, sin terminación temprana, y detector V1/hash
+  existentes sin cambios.
+- [x] Fijar replay exacto desde el snapshot de ciclo 3 a ciclo 4.
+- [x] Commitear el preregistro aislado antes de integrar:
+  `cdafa6e1b37978bb825bb04b0260a17544802e06`.
+- [ ] Verificar el blob y hashes del preregistro y ejecutar exclusivamente la
+  campaña registrada mediante el productor versionado.
+
+No se inició la integración al crear este preregistro.
+
+
+### Verificación del preregistro AUD-08 en Windows — 2026-10-05
+
+- [x] El gate comparó el JSON parseado del árbol y del blob del commit
+  preregistrado `cdafa6e1b37978bb825bb04b0260a17544802e06`.
+- [x] El primer intento detectó solo CRLF vs LF; el productor ahora verifica
+  igualdad estructural y calcula SHA canónico independiente de BOM/finales.
+- [x] Los tests cubren LF frente a CRLF+BOM.
+- [ ] No ejecutar los 20 ciclos hasta commitear este refuerzo del productor y
+  actualizar el estado durable.

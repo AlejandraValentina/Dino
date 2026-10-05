@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "a10d2dca698369f0eb95c310b78d48226ac63037",
+  "status_capture_head": "cdafa6e1b37978bb825bb04b0260a17544802e06",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -938,7 +938,8 @@
         "results/2t-commercial-core-20261002/fixtures/fixture-a-engine-config-v2.json",
         "results/2t-commercial-core-20261002/fixtures/fixture-b-engine-config-v2.json",
         "scripts/produce_integrated_cycle_evidence.py",
-        "tests/test_integrated_cycle_evidence_producer.py: 2 PASS; validate-only from outside repo; campaign refuses without committed preregistration"
+        "tests/test_integrated_cycle_evidence_producer.py: 2 PASS; validate-only from outside repo; campaign refuses without committed preregistration",
+        "Preregistration comparison is JSON-structural and canonical-hash based; LF/CRLF/BOM normalization test PASS."
       ],
       "next_action": "AUD-08 must preregister horizon and fixture selection in a separate commit before any integration."
     },
@@ -954,7 +955,7 @@
       "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "current audit-reconciliation commit"
+        "c071fda99bc7efed3ba58a8d51bd3554cef44d72"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md: independently reviewed exact range only",
@@ -976,7 +977,7 @@
       "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "working-tree: normalized status, refs, scope and evidence provenance"
+        "c071fda99bc7efed3ba58a8d51bd3554cef44d72"
       ],
       "evidence": [
         "program-status.json has 29 queue entries and only allowed state enums",
@@ -1007,12 +1008,15 @@
       "classification": "OPEN",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "cdafa6e1b37978bb825bb04b0260a17544802e06"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "results/2t-commercial-core-20261002/preregistration/AUD-08-fixture-a.json",
+        "Preregistration is isolated in commit cdafa6e1b37978bb825bb04b0260a17544802e06 before any new cycle integration.",
+        "20-cycle fixed horizon, no early stopping, restart after cycle 3, fixture A only, V1 periodic detector SHA fixed.",
+        "Commit blob gate PASS; work-tree CRLF vs commit LF is normalized structurally, not rejected as content drift."
       ],
-      "next_action": "Create the separate preregistration commit for Fixture A, a fixed 20-cycle horizon and restart cycle 3; do not run the producer until that commit exists."
+      "next_action": "Commit the verified line-ending-independent producer change and its tests, then run exactly the preregistered Fixture A campaign."
     },
     {
       "id": "AUD-09",
@@ -1232,7 +1236,7 @@
     "editorial_erratum": "A1, A2 and A3 are all DEFECT and all block current cycle evidence.",
     "historical_cycle_evidence": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
     "current_head_reconciled": "3d10f79",
-    "next_action": "Finish AUD-08 preregistration before any cycle generation; continue independent READY Priority 2 tasks.",
+    "next_action": "Run the exact committed Fixture A preregistration; no additional fixture or horizon changes.",
     "reconciled_head": "a10d2dca698369f0eb95c310b78d48226ac63037",
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
     "current_remediation": [
@@ -1243,10 +1247,19 @@
       "AUD-05 RESOLVED_BY_LATER_COMMIT",
       "AUD-06 RESOLVED_BY_LATER_COMMIT",
       "AUD-07 RESOLVED_BY_LATER_COMMIT"
-    ]
+    ],
+    "preregistration": {
+      "path": "results/2t-commercial-core-20261002/preregistration/AUD-08-fixture-a.json",
+      "commit": "cdafa6e1b37978bb825bb04b0260a17544802e06",
+      "fixture_id": "A",
+      "horizon_cycles": 20,
+      "restart_cycle": 3,
+      "campaign_run": "NOT_YET_RUN",
+      "blob_gate": "PASS (semantic JSON and line-ending-independent canonical hash)"
+    }
   },
   "audit_reconciliation": {
-    "head": "a10d2dca698369f0eb95c310b78d48226ac63037",
+    "head": "cdafa6e1b37978bb825bb04b0260a17544802e06",
     "findings": {
       "AUD-01": "OPEN",
       "AUD-02": "RESOLVED_BY_LATER_COMMIT",
@@ -1275,7 +1288,7 @@
       "AUD-05": "OPEN: commercial cycle producer and versioned engine fixture config are still test-only/private.",
       "AUD-06": "RESOLVED: only audit_8cdf66e is independent for its exact range; the current triage receipt is bounded and all other unreceipted Commercial Core review claims are labeled SELF_REVIEW.",
       "AUD-07": "RESOLVED: queue state enums/dependency blockers and full commit refs normalized; phase scope and historical cycle statuses corrected; P4 remains PASS and 300 is attributed only to the external audit run.",
-      "AUD-08": "IN_PROGRESS: preregistration draft selects Fixture A only, fixed 20-cycle horizon, restart audit after cycle 3; no integration will run before the separate commit is present.",
+      "AUD-08": "IN_PROGRESS: fixed prospective horizon 20 and restart at cycle 3 are isolated in commit cdafa6e1b37978bb825bb04b0260a17544802e06; producer has not yet run.",
       "AUD-09": "OPEN: piston-port candidate failed, successful B changes chamber length only.",
       "AUD-10": "READY: no dependency on AUD-08; proceed with collector/topology review after Priority 1.",
       "AUD-11": "PARTIAL: independent current-head reproduction confirms V1 capability limit; V2 scientific policy unresolved. Receipt records test and direct reproduction.",
@@ -1297,9 +1310,10 @@
       "openspec": "STRICT PASS before AUD-04 changes; rerun after documentation update",
       "compileall": "PASS before AUD-04 test updates; rerun after documentation update",
       "cycle_evidence": "No campaign artifacts regenerated; existing A/B results remain HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
-      "producer_tests": "2 passed; validate-only from off-CWD; missing committed preregistration rejected; no campaign run",
-      "queue": "29 entries; valid states; commit refs normalized; P4 remains PASS; cycle evidence superseded"
+      "producer_tests": "3 passed; validate-only off-CWD; missing preregistration rejected; canonical hash independent of LF/CRLF+BOM",
+      "queue": "29 entries; valid states; commit refs normalized; P4 remains PASS; cycle evidence superseded",
+      "preregistration_blob_gate": "PASS: commit cdafa6e1b37978bb825bb04b0260a17544802e06 matches structured JSON and canonical hashes"
     }
   },
-  "last_status_reviewed_head": "a10d2dca698369f0eb95c310b78d48226ac63037"
+  "last_status_reviewed_head": "cdafa6e1b37978bb825bb04b0260a17544802e06"
 }

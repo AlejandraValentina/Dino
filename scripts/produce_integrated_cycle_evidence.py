@@ -32,6 +32,10 @@ def _canonical_bytes(value: object) -> bytes:
                       allow_nan=False).encode("utf-8")
 
 
+def _decode_json_document(payload: bytes) -> object:
+    return json.loads(payload.decode("utf-8-sig"))
+
+
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -54,7 +58,7 @@ def _require_preregistration(path: Path, fixture_id: str,
                              config_sha256: str, horizon: int,
                              restart_cycle: int,
                              recorded_commit: str) -> tuple[dict, str]:
-    prereg = json.loads(path.read_text(encoding="utf-8"))
+    prereg = _decode_json_document(path.read_bytes())
     required = {
         "schema": "MOTORSIM_COMMERCIAL_CYCLE_PREREGISTRATION_V1",
         "fixture_id": fixture_id,
@@ -71,11 +75,15 @@ def _require_preregistration(path: Path, fixture_id: str,
     commit = str(recorded_commit)
     blob = subprocess.run(["git", "show", f"{commit}:{relative}"], cwd=ROOT,
                           check=True, capture_output=True).stdout
-    if blob != path.read_bytes():
-        raise ValueError("preregistration file differs from its recorded commit")
+    try:
+        committed_document = _decode_json_document(blob)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError("committed preregistration is not valid UTF-8 JSON") from exc
+    if committed_document != prereg:
+        raise ValueError("preregistration content differs from its recorded commit")
     subprocess.run(["git", "merge-base", "--is-ancestor", commit, "HEAD"],
                    cwd=ROOT, check=True, capture_output=True)
-    return prereg, _sha256(blob)
+    return prereg, _sha256(_canonical_bytes(committed_document))
 
 
 def _scheduled_angles(engine: IntegratedEngine2T, target_angle: float) -> set[float]:
