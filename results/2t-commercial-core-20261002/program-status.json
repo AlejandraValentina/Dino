@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "9efa092e26edb4a596a2b2acc425ae3def059f7b",
+  "status_capture_head": "917248b2a3d955ca6c5a43a695e4a6ed89231d00",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -1155,7 +1155,8 @@
       "classification": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "audit-range:ab92aee..8cdf66e",
+        "917248b2a3d955ca6c5a43a695e4a6ed89231d00"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md",
@@ -1180,7 +1181,8 @@
       "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "audit-range:ab92aee..8cdf66e",
+        "917248b2a3d955ca6c5a43a695e4a6ed89231d00"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md",
@@ -1303,7 +1305,7 @@
     }
   },
   "audit_reconciliation": {
-    "head": "9efa092e26edb4a596a2b2acc425ae3def059f7b",
+    "head": "917248b2a3d955ca6c5a43a695e4a6ed89231d00",
     "findings": {
       "AUD-01": "RESOLVED_BY_LATER_COMMIT",
       "AUD-02": "RESOLVED_BY_LATER_COMMIT",
@@ -1351,7 +1353,7 @@
     "audit_remediation_current": {
       "focused_tests": "9 passed after AUD-01..03; 7 passed after AUD-04",
       "integrated_test_module": "40 passed in 51.90 s after AUD-01..04",
-      "openspec": "STRICT PASS before AUD-04 changes; rerun after documentation update",
+      "openspec": "OpenSpec all strict: 32/32 PASS after AUD-11..14 docs and V3 contract.",
       "compileall": "PASS before AUD-04 test updates; rerun after documentation update",
       "cycle_evidence": "No campaign artifacts regenerated; existing A/B results remain HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
       "producer_tests": "3 passed; validate-only off-CWD; missing preregistration rejected; canonical hash independent of LF/CRLF+BOM",
@@ -1362,5 +1364,5 @@
       "AUD-14": "58 tests passed across test_engineering_outputs.py and test_integrated_2t.py; strict V3 validation and unchanged V2 validation exercised."
     }
   },
-  "last_status_reviewed_head": "cdafa6e1b37978bb825bb04b0260a17544802e06"
+  "last_status_reviewed_head": "917248b2a3d955ca6c5a43a695e4a6ed89231d00"
 }
