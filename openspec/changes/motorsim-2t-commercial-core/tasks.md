@@ -621,7 +621,9 @@ existentes; los nuevos resultados integrados usan V3.
 - [x] Crear `fixture-d-engine-config-v2.json`, idéntico a A salvo identidad
   sintética y P7 de 350° a 390°. Una evaluación geométrica sin integración
   confirma área de escape cero en todo el intervalo, muestreado cada 0.5°.
-- [ ] Commitear configuración y preregistro antes de toda integración.
+- [x] Commitear configuración/productor en `01172a2d7b2f7f97db9a7a46e12cf328962aef52`
+  y el preregistro separado en `57dfa97032037a96ab3869cf46b7180f35bb77a0`;
+  ambos preceden a toda integración.
 - [ ] Ejecutar únicamente el horizonte preregistrado y comprobar el área de
   escape cero durante el evento P7; no usar el resultado como calibración ni
   cambiar los fixtures científicos A/B existentes.
