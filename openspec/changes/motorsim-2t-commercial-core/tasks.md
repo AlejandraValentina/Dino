@@ -611,3 +611,21 @@ lectura compatible V1 y backflow de escape sin introducir combustible.
 
 El módulo afectado terminó con **40 PASS** en 51,90 s. No se generaron ni
 persistieron artefactos A/B nuevos.
+
+
+### Productor reproducible AUD-05 — 2026-10-05
+
+- [x] Versionar configuraciones JSON V2 de Fixture A y la variante histórica B
+  bajo `results/2t-commercial-core-20261002/fixtures/`. Ambas declaran
+  `HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT`; no son evidencia actual.
+- [x] Añadir `scripts/produce_integrated_cycle_evidence.py`: reconstruye el
+  motor solo desde configuración versionada, guarda ciclos gzip deterministas,
+  registra rechazos y ejecuta auditoría de restart exacto.
+- [x] Exigir preregistro cuyo archivo esté contenido en el commit declarado y
+  cuyo SHA de configuración, horizonte, ciclo de restart y contrato de
+  periodicidad coincidan antes de integrar.
+- [x] Verificar `--validate-only` fuera del repositorio para ambos fixtures y
+  comprobar que el modo de integración se rehúsa sin preregistro.
+
+Comprobaciones: `pytest tests/test_integrated_cycle_evidence_producer.py`
+(**2 PASS**); no se ejecutó ninguna integración ni se generaron ciclos.

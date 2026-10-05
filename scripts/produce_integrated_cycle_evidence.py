@@ -1,0 +1,222 @@
+"""Reproducible, preregistration-gated producer for synthetic integrated cycles.
+
+The fixture input is a committed JSON engine configuration. This script does
+not select thresholds or fixtures and refuses to integrate without a committed
+preregistration matching the exact config and requested horizon.
+"""
+from __future__ import annotations
+
+import argparse
+import gzip
+import hashlib
+import json
+import math
+from pathlib import Path
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from motorsim.integrated_2t import (  # noqa: E402
+    IntegratedEngine2T, make_integrated_cycle_primary,
+)
+from motorsim.powervalve import PowerValve  # noqa: E402
+
+FIXTURES = ROOT / "results/2t-commercial-core-20261002/fixtures"
+PERIODICITY_CONTRACT = ROOT / "motorsim/reference_harness/convergence.py"
+
+
+def _canonical_bytes(value: object) -> bytes:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"),
+                      allow_nan=False).encode("utf-8")
+
+
+def _sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def load_engine(fixture_id: str) -> tuple[IntegratedEngine2T, dict, str]:
+    path = FIXTURES / f"fixture-{fixture_id.lower()}-engine-config-v2.json"
+    wrapper = json.loads(path.read_text(encoding="utf-8"))
+    if (wrapper.get("schema") != "MOTORSIM_COMMERCIAL_SYNTHETIC_FIXTURE_CONFIG_V1" or
+            wrapper.get("fixture_id") != fixture_id or
+            wrapper.get("selection_status") != "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT"):
+        raise ValueError("fixture wrapper schema/identity is invalid")
+    config = wrapper.get("engine_configuration")
+    engine = IntegratedEngine2T.from_configuration_dict(config)
+    if engine.configuration_dict() != config:
+        raise ValueError("fixture configuration did not round-trip canonically")
+    return engine, wrapper, _sha256(_canonical_bytes(config))
+
+
+def _require_preregistration(path: Path, fixture_id: str,
+                             config_sha256: str, horizon: int,
+                             restart_cycle: int) -> tuple[dict, str]:
+    prereg = json.loads(path.read_text(encoding="utf-8"))
+    required = {
+        "schema": "MOTORSIM_COMMERCIAL_CYCLE_PREREGISTRATION_V1",
+        "fixture_id": fixture_id,
+        "engine_configuration_sha256": config_sha256,
+        "horizon_cycles": horizon,
+        "restart_cycle": restart_cycle,
+        "cycle_convergence_contract_sha256": _sha256(PERIODICITY_CONTRACT.read_bytes()),
+    }
+    if any(prereg.get(key) != value for key, value in required.items()):
+        raise ValueError("preregistration does not match fixture, horizon or contract")
+    if not prereg.get("selection_rationale") or not prereg.get("recorded_commit"):
+        raise ValueError("preregistration requires rationale and recorded_commit")
+    relative = path.resolve().relative_to(ROOT).as_posix()
+    commit = str(prereg["recorded_commit"])
+    blob = subprocess.run(["git", "show", f"{commit}:{relative}"], cwd=ROOT,
+                          check=True, capture_output=True).stdout
+    if blob != path.read_bytes():
+        raise ValueError("preregistration file differs from its recorded commit")
+    subprocess.run(["git", "merge-base", "--is-ancestor", commit, "HEAD"],
+                   cwd=ROOT, check=True, capture_output=True)
+    return prereg, _sha256(blob)
+
+
+def _scheduled_angles(engine: IntegratedEngine2T, target_angle: float) -> set[float]:
+    scheduled = {0.0, target_angle}
+    for cycle in range(math.floor(target_angle / 360.0) + 1):
+        scheduled.add(float(cycle * 360.0))
+        start = engine.combustion_start_angle_deg
+        if start is not None:
+            scheduled.add(cycle * 360.0 + float(start))
+            scheduled.add(cycle * 360.0 + float(start) + 40.0)
+    binding = engine.port_binding
+    if binding is not None:
+        ports = binding.port_set
+        if binding.powervalve is not None:
+            valve = binding.powervalve
+            ports = type(ports)(ports.stroke_mm, ports.rod_length_mm,
+                ports.ducts, tuple(valve.apply(port, engine.reference_rpm)
+                                    if port.id == valve.exhaust_port_id else port
+                                    for port in ports.ports))
+        closing = [angle for duct in ports.ducts
+                   for angle in ports.duct_closing_angles(duct.id)]
+        for cycle in range(math.floor(target_angle / 360.0) + 1):
+            scheduled.update(cycle * 360.0 + value for value in closing)
+    return {angle for angle in scheduled if 0.0 <= angle <= target_angle}
+
+
+def advance_to(engine: IntegratedEngine2T, target_angle: float,
+               rejected_trials: list[dict]) -> None:
+    scheduled = _scheduled_angles(engine, target_angle)
+    while engine.crank_angle_unwrapped_deg < target_angle - 1e-10:
+        angle = engine.crank_angle_unwrapped_deg
+        target = min(target_angle, (int((angle + 1e-10) / .5) + 1) * .5)
+        for boundary in scheduled:
+            if angle < boundary < target:
+                target = boundary
+        step = target - angle
+        for attempt in range(25):
+            try:
+                engine.step(step / (6.0 * engine.reference_rpm), step)
+                break
+            except ValueError as exc:
+                allowed = ("inadmissible species mass", "CFL limit exceeded",
+                           "rho/p/Y inadmissible")
+                if not any(reason in str(exc) for reason in allowed):
+                    raise
+                rejected_trials.append({"angle_deg": angle,
+                                        "attempted_step_deg": step,
+                                        "reason": str(exc)})
+                step *= .5
+        else:
+            raise RuntimeError(f"no accepted step at {angle:.12g} degrees")
+
+
+def _write_gzip_json(path: Path, value: object) -> None:
+    payload = json.dumps(value, sort_keys=True, separators=(",", ":"),
+                         allow_nan=False).encode("utf-8")
+    with path.open("wb") as raw:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as stream:
+            stream.write(payload)
+
+
+def produce(fixture_id: str, horizon: int, restart_cycle: int,
+            preregistration_path: Path, output: Path) -> None:
+    engine, wrapper, config_hash = load_engine(fixture_id)
+    prereg, prereg_hash = _require_preregistration(
+        preregistration_path, fixture_id, config_hash, horizon, restart_cycle)
+    output.mkdir(parents=True, exist_ok=False)
+    start = engine.snapshot()
+    rejected: list[dict] = []
+    restart_snapshot = None
+    restart_engine = None
+    for cycle in range(1, horizon + 1):
+        advance_to(engine, float(cycle * 360), rejected)
+        end = engine.snapshot()
+        record = make_integrated_cycle_primary(engine, start, end, cycle)
+        _write_gzip_json(output / f"cycle-{cycle:03d}.json.gz", record)
+        if cycle == restart_cycle:
+            restart_snapshot = end
+            restart_engine = IntegratedEngine2T.from_configuration_dict(
+                wrapper["engine_configuration"])
+            restart_engine.restore(restart_snapshot)
+        if restart_cycle < cycle <= restart_cycle + 1 and restart_engine is not None:
+            replay_rejections: list[dict] = []
+            advance_to(restart_engine, float(cycle * 360), replay_rejections)
+            if restart_engine.snapshot() != end:
+                raise ValueError("restart replay differs from continuous trajectory")
+            if cycle == restart_cycle + 1:
+                (output / "restart-audit.json").write_text(json.dumps({
+                    "status": "EXACT_REPLAY_PASS",
+                    "restart_cycle": restart_cycle,
+                    "compared_terminal_cycle": cycle,
+                    "snapshot_equal": True,
+                    "continuous_rejected_trials": rejected,
+                    "replay_rejected_trials": replay_rejections,
+                }, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+        start = end
+    manifest = {
+        "schema": "MOTORSIM_COMMERCIAL_CYCLE_PRODUCER_MANIFEST_V1",
+        "fixture_id": fixture_id,
+        "fixture_status": wrapper["selection_status"],
+        "engine_configuration_sha256": config_hash,
+        "preregistration_sha256": prereg_hash,
+        "preregistration_commit": prereg["recorded_commit"],
+        "horizon_cycles": horizon,
+        "restart_cycle": restart_cycle,
+        "continuous_rejected_trials": rejected,
+        "output_cycle_count": horizon,
+    }
+    (output / "manifest.json").write_text(json.dumps(
+        manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--fixture", choices=("A", "B"), required=True)
+    parser.add_argument("--validate-only", action="store_true",
+                        help="load and round-trip the committed fixture; do not integrate")
+    parser.add_argument("--horizon", type=int)
+    parser.add_argument("--restart-cycle", type=int)
+    parser.add_argument("--preregistration", type=Path)
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    try:
+        engine, wrapper, config_hash = load_engine(args.fixture)
+        if args.validate_only:
+            print(json.dumps({"fixture_id": args.fixture,
+                              "fixture_status": wrapper["selection_status"],
+                              "configuration_schema": engine.configuration_schema,
+                              "engine_configuration_sha256": config_hash},
+                             sort_keys=True))
+            return 0
+        if (args.horizon is None or args.horizon < 2 or
+                args.restart_cycle is None or
+                not 1 <= args.restart_cycle < args.horizon or
+                args.preregistration is None or args.output is None):
+            parser.error("integration requires horizon >= 2, restart cycle, preregistration and output")
+        produce(args.fixture, args.horizon, args.restart_cycle,
+                args.preregistration.resolve(), args.output.resolve())
+        return 0
+    except (OSError, ValueError, subprocess.CalledProcessError) as exc:
+        parser.exit(2, f"producer blocked: {exc}\n")
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

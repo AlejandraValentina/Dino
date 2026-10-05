@@ -345,8 +345,9 @@ posterior a `8cdf66e`. Cerrar las prioridades 1 `AUD-01`…`AUD-07` antes de tod
 capability nueva. El primer trabajo activo es la fuerza de pared de puertos
 cerrados/parciales; `AUD-11` aplica en paralelo el protocolo forense reservoir.
 La fábrica `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2` (con lectura compatible
-V1 para preservar replay histórico) y su ajuste de callback
-siguen incorporados; solo cubren slider-crank y puertos explícitos. KT100 sigue
+V1 para preservar replay histórico) y su ajuste de callback siguen incorporados;
+solo cubren slider-crank y puertos explícitos. AUD-05 añade fixtures V2 y un
+productor de evidencia bloqueado hasta un preregistro en commit separado. KT100 sigue
 congelado.
 
 ## 16. Arquitectura vigente
