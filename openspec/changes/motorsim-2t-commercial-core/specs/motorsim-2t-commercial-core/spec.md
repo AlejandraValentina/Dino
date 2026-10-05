@@ -220,6 +220,44 @@ authorization.
 - **THEN** the receipt remains unchanged while independent analytic fixtures and
   component work may proceed without changing that boundary or its contract.
 
+### Requirement: Versioned open-end plenum boundary
+The system SHALL preserve `LEGACY_CHARACTERISTIC_V1` exactly for historical
+reproduction and SHALL expose `OPEN_END_PLENUM_V2` as a separately selected,
+synthetic, stationary large-plenum capability. The new capability SHALL keep
+interior and reservoir entropy distinct across the contact, preserve reversal
+continuity, use ambient pressure for subsonic outflow, limit both flow
+directions at their ideal isentropic choking conditions, use reservoir
+stagnation enthalpy for incoming energy, and use the actual mass donor for
+species. It SHALL make the pressure force at the external face explicit. It
+SHALL NOT infer a calibrated carburetor/Walbro WB40, `Cd`, restriction area, or
+loss. Existing fixtures SHALL retain their recorded boundary selections.
+
+#### Scenario: Contact-aware reversal with unequal entropy
+- **WHEN** an interior state approaches zero boundary flow at ambient pressure
+  with a temperature different from the stationary reservoir temperature
+- **THEN** face pressure and normal velocity approach the same reversal state
+- **AND** each side retains its own entropy and the zero-flow species flux is
+  zero
+
+#### Scenario: Choked external flow
+- **WHEN** the prescribed pressure difference requests subsonic flow beyond
+  the isentropic critical ratio
+- **THEN** `OPEN_END_PLENUM_V2` returns the corresponding sonic limiting state
+- **AND** does not silently exceed the ideal choked mass flux
+
+#### Scenario: Historical and future boundary identities remain separate
+- **WHEN** a caller requests `LEGACY_CHARACTERISTIC_V1` or `nonreflecting`
+- **THEN** historical equations and receipts remain unchanged
+- **AND** `RESTRICTED_NOZZLE_V1` is only a documented future interface requiring
+  explicit `Cd`, area, and provenance, with no invented defaults
+- **AND** no mass-flow inlet capability is introduced
+
+#### Scenario: Synthetic provenance is visible
+- **WHEN** `OPEN_END_PLENUM_V2` is selected
+- **THEN** its ideal, lossless stationary-plenum assumptions are labeled
+  `SYNTHETIC_ASSUMPTION`
+- **AND** the result is not described as calibrated Walbro WB40 data
+
 ### Requirement: Generic two-stroke port geometry
 
 The engine configuration MUST represent any positive number of individually

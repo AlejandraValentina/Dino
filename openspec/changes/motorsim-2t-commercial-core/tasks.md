@@ -3,6 +3,13 @@
 Estado reconstruido desde `401d8d7`. Las fases son una cola durable única; marcar
 solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
 
+- [ ] AUD-11 / `OPEN_END_PLENUM_V2`: preregistro científico versionado y
+      comprometido antes del código/campaña; implementación aislada sin editar
+      V1; tests mínimos; instrumentar caras KT100 históricas; una campaña KT100
+      V2; clasificación aceptada y actualización de cola. Ver contrato y
+      evidencia en la sección de frontera externa de `design.md` y en
+      `docs/gasdynamic/open_end_plenum_v2_preregistration.md`.
+
 - [ ] Fase 1: harness reusable y evidencia multi-ciclo. Parcial: harness y
       contrato de periodicidad implementados; KT100 r5 falla antes del ciclo 1
       por rama de admisión reservoir sin solución. Se validan self-fixtures,

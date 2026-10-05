@@ -13,6 +13,76 @@ reservorio existente; ninguna fase posterior puede cambiarla de forma implícita
 ni reclasificar los recibos r5. Las fases independientes pueden avanzar con
 fixtures analíticos y evidencias propias.
 
+## Fronteras externas versionadas
+
+`LEGACY_CHARACTERISTIC_V1` conserva literalmente las fronteras históricas
+`open`, `nonreflecting` y `reservoir`. El nombre histórico `nonreflecting` se
+describe semánticamente como `EXTERNAL_STATE_RIEMANN / FARFIELD`; esta etiqueta
+no cambia sus ecuaciones ni reinterpreta evidencia previa.
+
+`OPEN_END_PLENUM_V2` es una capability opt-in nueva para una abertura a una
+atmósfera o plenum grande en reposo. Es un `SYNTHETIC_ASSUMPTION`: su admisión
+isentrópica y sin pérdidas no representa un carburador real calibrado ni datos
+del Walbro WB40. No modifica V1 ni cambia silenciosamente las terminaciones de
+Fixtures A/B. La presión del reservorio es la presión ambiente estática y sus
+presión/temperatura de estancamiento y composición son entradas explícitas.
+
+Sea `n` la normal unitaria hacia afuera del dominio, `w_i=n*u_i` la velocidad
+normal interior y `J_i=w_i+2*a_i/(gamma-1)` el invariante acústico saliente.
+Con `K_i=p_i/rho_i^gamma`, la cara del lado interior para una presión candidata
+`p` es
+
+`rho_i*(p)=(p/K_i)^(1/gamma)`,
+`a_i*(p)=sqrt(gamma*p/rho_i*(p))`,
+`w*(p)=J_i-2*a_i*(p)/(gamma-1)`.
+
+Para flujo saliente subsónico se impone `p*=p_amb`, se conserva `K_i` y se usa
+`w*=w*(p_amb)`. Si el estado de presión ambiente pide `w* >= a_i*`, la salida
+queda estrangulada: se fija `a*=J_i*(gamma-1)/(gamma+1)`, `w*=a*` y se obtiene
+`p*` de `K_i`; por tanto la presión de cara puede superar a `p_amb`, como
+corresponde al límite crítico. En la cara el estado transportado usa la
+densidad/entropía interior.
+
+Para flujo entrante subsónico, el lado interior conserva `J_i` y `K_i`, mientras
+el lado del reservorio conserva su entropía independiente
+`K_0=p_amb/rho_0^gamma`, `rho_0=p_amb/(R*T_0)`. Se resuelve la raíz única en el
+intervalo donde `w*(p)<0` de
+
+`cp*T_0*(p/p_amb)^((gamma-1)/gamma) + w*(p)^2/2 - cp*T_0 = 0`,
+
+con `0 < p <= p_amb`. La cara de contacto comparte `p*` y `w*`, pero no fuerza
+igualdad de densidad/entropía: el estado que dona masa usa
+`rho_0*(p)=(p/K_0)^(1/gamma)`. La raíz es única porque la función es
+estrictamente creciente donde `w<0`; el extremo inferior es el punto `w=0` y
+el superior es `p_amb`. Si el flujo requerido excede el límite, se usa el
+estado sónico isentrópico del reservorio (`M=-1`,
+`p*=p_amb*(2/(gamma+1))^(gamma/(gamma-1))`) sin forzar el invariante saliente,
+que deja de entrar desde el interior al alcanzar el choke. No existe área,
+coeficiente de descarga ni pérdida implícitos.
+
+En inflow, `h* + w*^2/2 = cp*T_0`; en outflow se conserva la entropía del
+interior y la energía total proviene de ese estado. La orientación se transforma
+solo con `w=n*u`; el flujo axial usa la velocidad `n*w`. El donante de especies
+es la composición del plenum para inflow y la interior para outflow; el flujo de
+especie usa exactamente el flujo másico común. El flujo de momento incluye `p*`
+explícitamente, y la reacción de presión sobre el dominio por unidad de área es
+`-n*p*`; los ledgers integrados aplican el área una vez.
+
+Con entropías iguales `K_i=K_0`, la rama subsónica reduce a la frontera de
+reservorio V1. La presión fija en el outflow tiene reflexión acústica de presión
+de magnitud unitaria en el límite lineal; esta respuesta forma parte del modelo
+de abertura a plenum y no se etiqueta como frontera no reflectiva.
+
+La interfaz futura `RESTRICTED_NOZZLE_V1` queda definida solo como un contrato
+de entradas requerido (`Cd`, área efectiva y provenance) y un nombre de
+capability; no tiene implementación ni valores predeterminados. No se añade
+`MASS_FLOW_INLET`.
+
+La preregistración completa, su decisión de provenance, los gates y el conjunto
+de tests inmutable están en
+`docs/gasdynamic/open_end_plenum_v2_preregistration.md` y su receipt JSON en
+`results/2t-commercial-core-20261002/preregistration/open-end-plenum-v2.json`.
+
 Toda métrica nueva documenta ecuación, dominio, unidades, especies/ledgers de
 origen y comportamiento ante denominadores cero antes de usarla en campañas.
 Todo estado persistente importante prueba round-trip, restart y replay. La

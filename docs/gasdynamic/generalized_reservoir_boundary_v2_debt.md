@@ -1,7 +1,8 @@
 # Deferred scientific work: `GENERALIZED_RESERVOIR_BOUNDARY_V2`
 
-Status: deferred capability work; this note does not amend P5 or authorize a
-boundary change.
+Status: the user's 2026-10-05 scientific decision resolves the blocker; the
+separately preregistered `OPEN_END_PLENUM_V2` capability is now in progress.
+This note does not amend historical P5 or its evidence.
 
 The KT100 hybrid fixture r5 stopped before its first complete cycle at each
 fixed RPM with `No consistent reservoir inflow branch`. The existing
@@ -28,6 +29,20 @@ Each option changes boundary semantics and may change mass, energy, species,
 and reflection behavior. It therefore requires a declared scientific model,
 independent analytical fixtures for subsonic/supersonic inflow/outflow and
 reversal, conservation and admissibility tests, and explicit authorization
-before implementation. No option is selected here. Do not retry KT100 V2,
-change its initial state, pressure, geometry, CFL, mesh, or horizon as a way to
-avoid this decision. Do not alter historical P5 or reinterpret its receipts.
+before implementation. At the time this note was written, no option was
+selected. Do not alter historical P5 or reinterpret its receipts.
+
+## Subsequent decision and separate P3-R1 debt
+
+On 2026-10-05 the user resolved AUD-11 as **CASE B — CAPABILITY LIMITATION**
+and selected the ideal stationary-plenum model as a new capability. Its exact
+equations and pre-campaign gates are preregistered in
+`open_end_plenum_v2_preregistration.md`; this decision does not rewrite the
+forensic conclusion or modify V1, P3-R1, or historical receipts.
+
+Separately, the external review noted that P3-R1's large-volume behavior has a
+finite-volume/infinite-plenum limit that may not be uniform for long-time
+responses. This is future scientific debt only: P3-R1 remains historical and
+closed, no P3 rerun or reinterpretation is authorized by the AUD-11 decision,
+and this observation is not used to select the KT100 boundary based on
+convergence.

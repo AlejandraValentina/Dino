@@ -749,14 +749,16 @@
     {
       "id": "reservoir-boundary-v2",
       "description": "Resolve reservoir inlet branch via a new versioned capability if formulation is unambiguous",
-      "dependencies": [],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "Scientific formulation review required before selecting a generalized inflow construction.",
+      "dependencies": ["AUD-11"],
+      "state": "IN_PROGRESS",
+      "blocker": null,
       "commits": [],
       "evidence": [
-        "docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md"
+        "docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md",
+        "docs/gasdynamic/open_end_plenum_v2_preregistration.md",
+        "results/2t-commercial-core-20261002/preregistration/open-end-plenum-v2.json"
       ],
-      "next_action": "AUD-11 current-head forensics is active; do not run KT100 or choose V2 semantics before a defensible conclusion."
+      "next_action": "Implement the preregistered OPEN_END_PLENUM_V2 additively; pass the frozen boundary suite; instrument the exact preserved KT100 r5 failure faces; then run the one preregistered r6 campaign."
     },
     {
       "id": "integrated-intake-plenum",
@@ -1100,9 +1102,9 @@
         "B4"
       ],
       "dependencies": [],
-      "state": "BLOCKED_LOCAL",
-      "classification": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
-      "blocker": "Forensic protocol concludes C: V1 is bounded and internally consistent for its contract, but multiple standard boundary models produce materially different fluxes; the configured physical apparatus/control mode is unspecified. No V2 policy may be selected by numerical convenience.",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_HUMAN_SCIENTIFIC_DECISION",
+      "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e",
         "9efa092"
@@ -1113,9 +1115,11 @@
         "tests/test_coupling_preflight.py::InterfaceTests::test_frozen_boundary_gap_is_not_hidden",
         "docs/gasdynamic/aud11_reservoir_forensic.md: sequential forensics/domain/skeptic/discriminating-test/synthesis; explicit self-review, not independent review",
         "tests/test_reservoir_forensic_diagnostic.py: bounded monotone branch, orientation mirror, V1 reject versus finite full-state Riemann flux",
-        "NASA Cart3D and NASA Glenn references recorded in the forensic decision package"
+        "NASA Cart3D and NASA Glenn references recorded in the forensic decision package",
+        "Human/scientific decision 2026-10-05: CASE B — CAPABILITY LIMITATION; OPEN_END_PLENUM_V2 authorized as ideal stationary-plenum SYNTHETIC_ASSUMPTION, not calibrated WB40",
+        "docs/gasdynamic/open_end_plenum_v2_preregistration.md and results/2t-commercial-core-20261002/preregistration/open-end-plenum-v2.json"
       ],
-      "next_action": "Await a scientific choice of external boundary apparatus/model before any reservoir V2. Continue independent AUD-13..18 workstreams; do not run KT100."
+      "next_action": "AUD-11 closed: the forensic evidence and human decision resolve the audit finding as CASE B. Continue the separately queued OPEN_END_PLENUM_V2 capability and one preregistered KT100 campaign."
     },
     {
       "id": "AUD-12",
@@ -1293,7 +1297,7 @@
       "next_action": "AUD-18 resolved; retain temp-root generation in tests and use LF-normalized hashes for text-source comparison."
     }
   ],
-  "audit_remediation_mode": true,
+  "audit_remediation_mode": false,
   "external_audit": {
     "artifact": "docs/gasdynamic/audit_8cdf66e.md",
     "sha256": "df682a07074c56d92bec4a33d17335e759f1bd4765aaf5c7d5d99fa97e2cd5d3",
@@ -1302,7 +1306,7 @@
     "editorial_erratum": "A1, A2 and A3 are all DEFECT and all block current cycle evidence.",
     "historical_cycle_evidence": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
     "current_head_reconciled": "3d10f79",
-    "next_action": "AUD-01..10 and AUD-12..18 are reconciled; AUD-11 remains BLOCKED_LOCAL after the forensic protocol concluded C. Await a scientific selection of external reservoir apparatus/control model; no KT100 run.",
+    "next_action": "AUD-01..AUD-18 are resolved or completed at the audit-finding level. AUD-11 is CASE B, resolved by the user's decision; continue MOTORSIM_AUTONOMOUS_ENGINEERING_TEAM with OPEN_END_PLENUM_V2 implementation, tests, instrumentation, and its preregistered KT100 campaign.",
     "reconciled_head": "a10d2dca698369f0eb95c310b78d48226ac63037",
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
     "current_remediation": [

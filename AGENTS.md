@@ -46,17 +46,23 @@ Estado machine-readable del Commercial Core:
 `results/2t-commercial-core-20261002/program-status.json`; documentación:
 `docs/gasdynamic/2t_commercial_core_status_20261002.md`.
 
-### Modo operativo actual — `AUDIT_REMEDIATION_MODE`
+### Reconciliación de auditoría y continuidad del equipo
 
 La auditoría independiente `docs/gasdynamic/audit_8cdf66e.md` cubre exactamente
-`ab92aee..8cdf66e`; reconciliar cada hallazgo con el HEAD actual, sin revertir
-commits posteriores. Prioridades 1 `AUD-01`…`AUD-07` preceden cualquier
-capability nueva. `AUD-01`…`AUD-18` y sus estados/clasificaciones viven en
-`program-status.json`. Los ciclos A/B existentes se preservan como
+`ab92aee..8cdf66e`; sus hallazgos se reconciliaron con el HEAD actual sin
+revertir commits posteriores. `AUD-01`…`AUD-18` y sus estados/clasificaciones
+viven en `results/2t-commercial-core-20261002/program-status.json`. La remediación
+de auditoría ya no es el modo operativo: los items de auditoría están cerrados a
+nivel de finding o explícitamente resueltos por decisión humana. Las tareas
+ingenieriles que surgen de un finding pueden seguir en la cola de trabajo sin
+reabrir retrospectivamente la auditoría.
+
+La errata de la auditoría que cuenta dos defectos se interpreta como tres: A1,
+A2 y A3 bloqueaban la evidencia de ciclos. Los ciclos A/B históricos permanecen
 `HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT` y no sirven como evidencia vigente.
-No regenerarlos antes de cerrar A1–A3 y preregistrar el horizonte mediante
-AUD-08 en un commit previo. La errata de la auditoría que cuenta dos defectos
-se interpreta como tres: A1, A2 y A3 bloquean la evidencia de ciclos.
+AUD-11 quedó resuelto como `CASE B — CAPABILITY LIMITATION` por decisión humana;
+`OPEN_END_PLENUM_V2` sigue como tarea de implementación preregistrada separada.
+Ver `docs/gasdynamic/open_end_plenum_v2_preregistration.md`.
 
 ### Modalidad operativa vigente
 
