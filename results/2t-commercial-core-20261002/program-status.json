@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "8cdf66e1ff5bfec971491199324dcb9e9ff9bdea",
+  "status_capture_head": "16cfebf0c0b83bb4a02fa3bbf4ea4b5def17084e",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -682,7 +682,8 @@
       "state": "DONE",
       "blocker": null,
       "commits": [
-        "8cdf66e1ff5bfec971491199324dcb9e9ff9bdea"
+        "8cdf66e1ff5bfec971491199324dcb9e9ff9bdea",
+        "16cfebf0c0b83bb4a02fa3bbf4ea4b5def17084e"
       ],
       "evidence": [
         "Four directional donor/global-ledger tests and an exact two-stage trapezoidal update test cover mass, energy and all four species.",
