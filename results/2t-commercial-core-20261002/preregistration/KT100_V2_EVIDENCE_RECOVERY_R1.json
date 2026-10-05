@@ -310,7 +310,7 @@
     "p4_dependency": "CONDITIONAL_ON_P4"
   },
   "runner": "scripts/run_kt100_open_end_plenum_v2_recovery_r1.py",
-  "runner_sha256": "5ace8e159c6905a687ae030ecca1ddb638ffe8fed6bf5f1143a7cfcf63a10234",
+  "runner_sha256": "4898b3a634dc163179495e7e1ef103577d1728c0041c33d5e73eed442aeb67e3",
   "campaign": {
     "runs": 1,
     "command": "python scripts/run_kt100_open_end_plenum_v2_recovery_r1.py",

@@ -116,6 +116,7 @@ def validate_inputs():
             "parallel": False,
             "convergence_contract": config["convergence_contract"],
             "boundary": "OPEN_END_PLENUM_V2",
+            "provenance": "SYNTHETIC_ASSUMPTION",
             "p4_dependency": "CONDITIONAL_ON_P4",
     }:
         raise RuntimeError("frozen campaign controls differ")
