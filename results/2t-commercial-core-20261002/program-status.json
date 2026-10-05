@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "57dfa97032037a96ab3869cf46b7180f35bb77a0",
+  "status_capture_head": "e099fe5b74183e743b945c967af27c3c8b83fee1",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -1207,7 +1207,8 @@
       "commits": [
         "audit-range:ab92aee..8cdf66e",
         "01172a2d7b2f7f97db9a7a46e12cf328962aef52",
-        "57dfa97032037a96ab3869cf46b7180f35bb77a0"
+        "57dfa97032037a96ab3869cf46b7180f35bb77a0",
+        "e099fe5b74183e743b945c967af27c3c8b83fee1"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md",
@@ -1313,7 +1314,7 @@
     }
   },
   "audit_reconciliation": {
-    "head": "57dfa97032037a96ab3869cf46b7180f35bb77a0",
+    "head": "e099fe5b74183e743b945c967af27c3c8b83fee1",
     "findings": {
       "AUD-01": "RESOLVED_BY_LATER_COMMIT",
       "AUD-02": "RESOLVED_BY_LATER_COMMIT",
@@ -1373,5 +1374,5 @@
       "AUD-15": "PASS: two complete admissible cycles, exact cycle-1 restart replay, 160 contiguous event steps/320 SSPRK2 stage evaluations with exhaust area exactly zero; 6 offline evidence/producer tests pass. No convergence or calibration claim."
     }
   },
-  "last_status_reviewed_head": "57dfa97032037a96ab3869cf46b7180f35bb77a0"
+  "last_status_reviewed_head": "e099fe5b74183e743b945c967af27c3c8b83fee1"
 }
