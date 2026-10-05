@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "6cff0a6ca83213c162da51012a7580c030a33d87",
+  "status_capture_head": "5b8f67dd7080967faa108263ce88789ecd379944",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -1302,7 +1302,7 @@
     "editorial_erratum": "A1, A2 and A3 are all DEFECT and all block current cycle evidence.",
     "historical_cycle_evidence": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
     "current_head_reconciled": "3d10f79",
-    "next_action": "Run the exact committed Fixture A preregistration; no additional fixture or horizon changes.",
+    "next_action": "AUD-01..10 and AUD-12..18 are reconciled; AUD-11 remains BLOCKED_LOCAL after the forensic protocol concluded C. Await a scientific selection of external reservoir apparatus/control model; no KT100 run.",
     "reconciled_head": "a10d2dca698369f0eb95c310b78d48226ac63037",
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
     "current_remediation": [
@@ -1325,7 +1325,7 @@
     }
   },
   "audit_reconciliation": {
-    "head": "6cff0a6ca83213c162da51012a7580c030a33d87",
+    "head": "5b8f67dd7080967faa108263ce88789ecd379944",
     "findings": {
       "AUD-01": "RESOLVED_BY_LATER_COMMIT",
       "AUD-02": "RESOLVED_BY_LATER_COMMIT",
@@ -1357,7 +1357,7 @@
       "AUD-08": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-09": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-10": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
-      "AUD-11": "C outcome: V1 branch characterized; scientific model selection unresolved; decision package is docs/gasdynamic/aud11_reservoir_forensic.md. Independent priority-3 queue proceeds.",
+      "AUD-11": "BLOCKED_LOCAL / outcome C: V1 bounded branch and full-state Riemann discriminator both characterized. Multiple physically legitimate models produce material flux differences; no configured apparatus/control criterion selects one. Await scientific decision. No reservoir V2 or KT100 run.",
       "AUD-12": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-13": "Bounded chamber/transfer mesh sensitivity and conservation recorded; lack of an acceptance threshold prevents a mesh-adequacy claim.",
       "AUD-14": "V3 now explicitly names gross crossing metrics and intake species ratio, leaves trapped/burned AFR undefined, and derives specific consumption only from positive prescribed P7 fuel sink and power. V1/V2 remain unchanged.",
@@ -1385,8 +1385,16 @@
       "AUD-15": "PASS: two complete admissible cycles, exact cycle-1 restart replay, 160 contiguous event steps/320 SSPRK2 stage evaluations with exhaust area exactly zero; 6 offline evidence/producer tests pass. No convergence or calibration claim.",
       "AUD-16": "PASS: integrated_2t test module 48 passed; stage assembly replay, trace restore validation, non-tautological ledger requirements and callback derivative cross-check.",
       "AUD-17": "PASS: reference harness tests 13 passed; additive V2 signed work detector contract validated; V1 remains intact.",
-      "AUD-18": "PASS: example-project and low-RPM diagnostics tests 11 passed; generator output is isolated to temporary root; source hash check is line-ending independent."
+      "AUD-18": "PASS: example-project and low-RPM diagnostics tests 11 passed; generator output is isolated to temporary root; source hash check is line-ending independent.",
+      "final_validation": {
+        "focused_command": "python -m pytest tests/test_integrated_2t.py tests/test_reference_harness.py tests/test_aud15_fixture_d_campaign.py tests/test_integrated_cycle_evidence_producer.py tests/test_example_projects.py tests/test_low_rpm_diagnostics.py -q",
+        "focused_result": "78 passed in 71.75 s",
+        "openspec_strict_command": "openspec validate --all --strict --no-interactive",
+        "openspec_strict_result": "32 passed, 0 failed",
+        "git_diff_check": "PASS",
+        "review_kind": "sequential self-review of AUD-15..18; no new independent review claimed"
+      }
     }
   },
-  "last_status_reviewed_head": "6cff0a6ca83213c162da51012a7580c030a33d87"
+  "last_status_reviewed_head": "5b8f67dd7080967faa108263ce88789ecd379944"
 }
