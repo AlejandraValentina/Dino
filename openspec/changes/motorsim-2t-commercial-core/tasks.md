@@ -499,3 +499,23 @@ La revisión independiente no encontró defectos concretos. No se agregó una
 nueva ley de interfaz, frontera atmosférica o propagación acústica;
 `effective_length_m` sigue siendo metadata en el enlace ideal P3. La
 clasificación global continúa parcial y condicional.
+
+### Configuración serializable del motor integrado — 2026-10-05
+
+- [x] Incorporar `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1` para reconstruir sin
+  callback externo las configuraciones resueltas por slider-crank y puertos
+  genéricos existentes.
+- [x] Preservar estados primitivos y especies iniciales, mallas, EOS, fronteras,
+  reed, puertos/powervalve, volúmenes de red, térmica, RPM y evento P7.
+- [x] Rechazar callbacks geométricos arbitrarios, configuración malformada,
+  deriva de parámetros vivos y arreglos geométricos de malla mutables.
+- [x] Confirmar JSON canónico, identidad y snapshot inicial exactos, además de
+  restore/checkpoint y replay exacto del siguiente paso.
+
+Cinco pruebas focales y 105 regresiones integradas/red/P5-C/P6/P7/reed/puertos
+aprobaron. OpenSpec estricto, `compileall` y `git diff --check` aprobaron. La
+revisión independiente puntual encontró inicialmente una vía de mutación in
+place de mallas; el contrato `DuctPath2T` se endureció para aceptar solamente
+`Mesh` con arreglos tupla y la revisión confirmó el cierre. La fábrica V1 no
+serializa callbacks arbitrarios ni acredita el motor completo; clasificación
+global permanece `MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL`.

@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from motorsim.gas1d.mesh import uniform_mesh
+from motorsim.gas1d.mesh import Mesh, uniform_mesh
 from motorsim.gas1d.boundary import Boundary
 from motorsim.gas1d.eos import IdealGas
 from motorsim.crankcase import CrankcaseGeometry
@@ -1146,3 +1146,74 @@ def test_multiple_finite_network_volumes_rebuild_cycle_and_engineering_output():
     with pytest.raises(ValueError, match="definition is malformed"):
         make_integrated_engineering_output(
             malformed, displacement_m3=system.slider_crank.crankcase.displacement_m3)
+
+
+def test_integrated_engine_config_roundtrip_rebuilds_without_external_callback():
+    system = _internal_cycle_fixture(network_volumes=())
+    encoded = system.configuration_json()
+    rebuilt = IntegratedEngine2T.from_configuration_dict(json.loads(encoded))
+
+    assert rebuilt.configuration_json() == encoded
+    assert rebuilt.configuration_identity == system.configuration_identity
+    assert rebuilt.snapshot() == system.snapshot()
+
+    system.step(1e-6, .01)
+    rebuilt.restore(system.snapshot())
+    assert rebuilt.snapshot() == system.snapshot()
+    rebuilt.step(1e-6, .01)
+    system.step(1e-6, .01)
+    assert rebuilt.snapshot() == system.snapshot()
+
+
+def test_integrated_engine_config_roundtrip_preserves_network_bindings():
+    eos = IdealGas()
+    volume = .001
+    mass = 101325.0 * volume / (eos.R * 300.0)
+    node = VolumeNode("intake-config", "plenum", volume,
+                      "SYNTHETIC_ASSUMPTION")
+    exhaust_node = VolumeNode("exhaust-config", "airbox", .003,
+                              "SYNTHETIC_ASSUMPTION")
+    bindings = (
+      IntegratedNetworkVolume2T(
+        node, NetworkConnection("neck-config", node.id, "intake", 1e-4,
+                                .05, "SYNTHETIC_ASSUMPTION"),
+        "intake", "left", VolumeGasState(
+            mass, 101325.0 * volume / (eos.gamma - 1.0),
+            (mass, 0.0, 0.0, 0.0))),
+      IntegratedNetworkVolume2T(
+        exhaust_node, NetworkConnection("exhaust-neck-config", "exhaust",
+                                        exhaust_node.id, 1e-4, .08,
+                                        "SYNTHETIC_ASSUMPTION"),
+        "exhaust", "right", VolumeGasState(
+            mass * 3.0, 101325.0 * .003 / (eos.gamma - 1.0),
+            (0.0, 0.0, 0.0, mass * 3.0))))
+    system = _internal_cycle_fixture(network_volumes=bindings)
+    rebuilt = IntegratedEngine2T.from_configuration_dict(
+        json.loads(system.configuration_json()))
+    assert rebuilt.configuration_json() == system.configuration_json()
+    assert rebuilt.snapshot() == system.snapshot()
+
+
+def test_integrated_engine_config_rejects_unserializable_geometry_contract():
+    with pytest.raises(ValueError, match="slider-crank and generic-port"):
+        _case().configuration_dict()
+
+    malformed = json.loads(_internal_cycle_fixture().configuration_json())
+    malformed["geometry_contract"] = "CALLBACK_V1"
+    with pytest.raises(ValueError, match="configuration schema is invalid"):
+        IntegratedEngine2T.from_configuration_dict(malformed)
+
+
+def test_integrated_engine_rejects_live_configuration_drift():
+    system = _internal_cycle_fixture()
+    system.thermal_locations["cylinder-wall"] = "crankcase"
+    with pytest.raises(ValueError, match="configuration changed after construction"):
+        system.configuration_json()
+    with pytest.raises(ValueError, match="configuration changed after construction"):
+        system.step(1e-6, .01)
+
+
+def test_integrated_duct_rejects_mutable_mesh_arrays():
+    mutable_mesh = Mesh([0.0, 1.0], [1.0, 1.0], [1.0], [0.5])
+    with pytest.raises(ValueError, match="immutable tuples"):
+        DuctPath2T("mutable", mutable_mesh, "intake").validate()

@@ -280,6 +280,17 @@ V6 checkpoints whose configuration identity did not contain network endpoint
 bindings. The current integrated topology does not support intermediate
 volume-to-volume connections or multiple volumes on one duct face.
 
+Integrated constructor configurations use
+`MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1` only when existing
+`SliderCrankChambers2T` and `IntegratedPortBinding2T` jointly resolve every
+moving volume and port area. The JSON captures exact constructor states,
+meshes, four-species inventories, EOS, boundaries, network endpoint volumes,
+and existing component parameters. Reconstruction uses an internal placeholder
+callback fully shadowed by those two explicit models. Arbitrary callbacks are
+rejected as non-serializable. A live-configuration fingerprint rejects steps,
+checkpoints, restores, and exports after configuration drift so checkpoint
+identity cannot silently describe different future behavior.
+
 The integrated geometry resolver can also consume the existing `CrankcaseGeometry`
 V2 plus a cylinder compression ratio. It derives both moving chamber volumes
 and opposite volume rates at each stage's angle and RPM, while retaining the

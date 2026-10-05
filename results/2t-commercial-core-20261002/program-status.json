@@ -359,12 +359,21 @@
       "command": "pytest all tests/test_p4_*.py, tests/test_p5*.py, tests/test_p6*.py, tests/test_p7*.py, tests/test_p8*.py -q"
     },
     "p9_contract_sha256": "79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d",
-    "integrated_regression_group_current": {
-      "result": "PASS",
-      "count": 100,
-      "command": ".venv\\Scripts\\python.exe -m pytest -q tests/test_integrated_2t.py tests/test_engineering_outputs.py tests/test_network_components.py tests/test_p5c_integrated.py tests/test_p6_species.py tests/test_p7_full_topology.py tests/test_reed.py tests/test_two_stroke_ports_p5c.py",
-      "run_date": "2026-10-05"
-    },
+  "integrated_regression_group_current": {
+    "result": "PASS",
+    "count": 105,
+    "command": ".venv\\Scripts\\python.exe -m pytest -q tests/test_integrated_2t.py tests/test_engineering_outputs.py tests/test_network_components.py tests/test_p5c_integrated.py tests/test_p6_species.py tests/test_p7_full_topology.py tests/test_reed.py tests/test_two_stroke_ports_p5c.py",
+    "run_date": "2026-10-05"
+  },
+  "integrated_engine_configuration_roundtrip": {
+    "result": "PASS",
+    "focused_tests": 5,
+    "regression_tests": 105,
+    "configuration_schema": "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1",
+    "supported_geometry": "SLIDER_CRANK_AND_GENERIC_PORTS_V1",
+    "details": "Canonical JSON rebuild has exact identity and initial snapshot; checkpoint restore and next-step replay are exact; intake-left and exhaust-right volume bindings survive reconstruction; arbitrary callbacks and live-configuration drift are rejected.",
+    "review": "Independent punctual review confirmed the guard and immutable Mesh contract; no concrete defect remains in this bounded factory scope."
+  },
     "integrated_cycle_fixture_a": {
       "result": "SIX_COMPLETE_CYCLES_EXACT_CLOSURES_CAPTURED_PERIODICITY_FAILS",
       "cycles": 6,
@@ -516,8 +525,8 @@
     }
   },
   "review": {
-    "current_delta": "Independent read-only review of multi-endpoint V7 network-volume integration: no concrete defect in sign/orientation, ledgers, CFL, restart, or primary/output; full engine remains unaccepted.",
-    "independent_review_current_delta": "PASS_PUNCTUAL_2026-10-05: intake-left/exhaust-right finite nodes, two-node checkpoint replay and aligned initial/mid/terminal output samples reviewed; no complete-engine acceptance.",
+    "current_delta": "Independent read-only review of deterministic integrated-engine config V1 reconstruction and live-configuration guard. A mutable Mesh edge was found and closed by requiring concrete tuple-backed Mesh geometry; no remaining concrete defect in the bounded factory scope.",
+    "independent_review_current_delta": "PASS_PUNCTUAL_2026-10-05: config V1 exact identity/initial snapshot/replay, two-node reconstruction, drift guard and immutable Mesh requirement reviewed; no complete-engine acceptance.",
     "prior_harness_punctual_review": "NO_MATERIAL_DEFECT_FOUND",
     "reverse_internal_donor_fix": "INDEPENDENT_READ_ONLY_REVIEW_PASS_BOTH_DONOR_DIRECTIONS_AND_STAGE_BINDING; no complete-engine review performed",
     "slider_crank_stage_integration": "INDEPENDENT_READ_ONLY_REVIEW_PASS; geometry signs/units, stage RPM, single -pVdot ledger and checkpoint mismatch were checked; no cycle claim",
@@ -739,13 +748,17 @@
         "17a-integrated-gas-species-foundation",
         "integrated-network-multi-endpoint"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
       "commits": [],
       "evidence": [
-        "Engine configuration identity is already canonical JSON and checkpoints bind it; engine construction still requires caller-supplied geometry callback."
+        "Added MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1, a strict JSON-safe factory for setups fully resolved by existing slider-crank chambers and generic ports; arbitrary geometry callbacks remain unsupported.",
+        "Configuration round-trip preserves initial gas/species state, meshes, EOS, atmosphere, boundaries, reed, ports/powervalve, finite endpoint volumes, slider-crank, thermal inputs, RPM, and P7 start; canonical configuration and engine identity match exactly.",
+        "Checkpoint restore and next accepted step replay exactly; two external network volumes reconstruct together; live configuration drift and mutable mesh arrays are rejected.",
+        "Five focused tests PASS; 105 integrated/network/P5-C/P6/P7/reed/port regressions PASS; OpenSpec strict, Python compileall and git diff check PASS.",
+        "Independent read-only review confirmed the bounded geometry resolution, identity guard and immutable Mesh requirement; no full-engine acceptance."
       ],
-      "next_action": "Inspect the stage geometry resolver and component serializers; build a bounded versioned factory for existing supported static/moving-geometry configurations and verify canonical round-trip plus replay."
+      "next_action": "Continue remaining independent integrated-engine work; this V1 factory does not change the partial Commercial Core classification or support arbitrary callback geometry."
     },
     {
       "id": "dynamic-reed-stage-coupling",

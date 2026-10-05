@@ -22,6 +22,7 @@ from .crankcase import CrankcaseGeometry
 from .coupling import ChamberState, interface_flux
 from .gas1d.boundary import Boundary
 from .gas1d.eos import IdealGas
+from .gas1d.mesh import Mesh
 from .gas1d.riemann import hllc_flux
 from .kinematics import piston_position
 from .network_components import (NetworkConnection, VolumeGasState, VolumeNode,
@@ -161,8 +162,13 @@ class DuctPath2T:
             raise ValueError("duct path requires a stable id")
         if self.role not in {"intake", "transfer", "exhaust"}:
             raise ValueError("unsupported duct role")
-        if not getattr(self.mesh, "volumes", None) or not getattr(self.mesh, "areas", None):
-            raise ValueError("duct path requires an existing finite-volume mesh")
+        if not isinstance(self.mesh, Mesh):
+            raise ValueError("duct path requires the existing immutable Mesh model")
+        if any(not isinstance(getattr(self.mesh, name), tuple) for name in
+               ("faces", "areas", "volumes", "centers")):
+            raise ValueError("duct Mesh geometry must be immutable tuples")
+        if not self.mesh.volumes or not self.mesh.areas:
+            raise ValueError("duct path requires a populated finite-volume mesh")
         if len(self.mesh.areas) != len(self.mesh.volumes) + 1:
             raise ValueError("duct mesh face/cell shape mismatch")
 
@@ -311,6 +317,7 @@ class IntegratedEngine2T:
     stage RHS and are checkpointed with the integrated ledger.
     """
     schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V7"
+    configuration_schema = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1"
     dependency_status = "CONDITIONAL_ON_P4"
 
     def __init__(self, crankcase_state: tuple, cylinder_state: tuple,
@@ -334,10 +341,14 @@ class IntegratedEngine2T:
                  thermal_locations: dict[str, str] | None = None,
                  thermal_load: float = 0.0,
                  combustion_start_angle_deg: float | None = None):
+        initial_crankcase_primitive = tuple(crankcase_state)
+        initial_cylinder_primitive = tuple(cylinder_state)
+        initial_duct_primitives = deepcopy(initial_duct_states)
         self.eos = eos or IdealGas()
         self.geometry = geometry
         if not isinstance(geometry_identity, dict) or not geometry_identity:
             raise ValueError("stable geometry_identity is required for restart/replay")
+        self._source_geometry_identity = deepcopy(geometry_identity)
         try:
             encoded_geometry = json.dumps(geometry_identity, sort_keys=True,
                                           separators=(",", ":"), allow_nan=False)
@@ -522,9 +533,269 @@ class IntegratedEngine2T:
         self._validate(self.state)
         self.initial_inventory = self.inventory(self.state)
         self.configuration_identity = self._configuration_identity()
+        self._configuration_spec = self._make_configuration_spec(
+            initial_crankcase_primitive, initial_cylinder_primitive,
+            initial_duct_primitives, atmosphere)
+        self._configuration_identity_digest = self._identity_fingerprint()
+        self._configuration_guard = self._live_configuration_signature()
         if self.combustion_start_angle_deg == 0.0:
             self.p7_event = capture_event(
                 0.0, self.state["species"]["chambers"]["cylinder"])
+
+    def _make_configuration_spec(self, crankcase_primitive, cylinder_primitive,
+                                 duct_primitives, atmosphere):
+        """Capture a JSON-safe constructor contract for reconstructible geometry.
+
+        V1 intentionally supports only explicit slider-crank volumes and a
+        generic port binding. Those two models resolve every geometry field;
+        arbitrary callbacks cannot be serialized or represented as reproducible.
+        """
+        if self.slider_crank is None or self.port_binding is None:
+            return None
+        return {
+            "schema": self.configuration_schema,
+            "geometry_contract": "SLIDER_CRANK_AND_GENERIC_PORTS_V1",
+            "initial_chambers": {
+                "crankcase": list(crankcase_primitive),
+                "cylinder": list(cylinder_primitive),
+                "species": {name: list(values) for name, values in
+                            self.state["species"]["chambers"].items()}},
+            "ducts": [{"id": path.id, "role": path.role,
+                       "mesh": path.mesh.as_dict()} for path in self.ducts],
+            "resolved_topology": {
+                "intake": self.intake.id,
+                "exhaust": self.exhaust.id,
+                "transfers": [path.id for path in self.transfers],
+                "network_endpoints": [
+                    {"duct_id": duct_id, "side": side,
+                     "node_id": binding.node.id,
+                     "connection_id": binding.connection.id}
+                    for (duct_id, side), binding in sorted(
+                        self.network_volume_by_endpoint.items())]},
+            "initial_duct_states": {
+                path.id: [list(row) for row in duct_primitives[path.id]]
+                for path in self.ducts},
+            "duct_species": {path.id: [list(row) for row in
+                                      self.state["species"]["ducts"][path.id]]
+                             for path in self.ducts},
+            "eos": {"R": self.eos.R, "gamma": self.eos.gamma},
+            "atmosphere": list(atmosphere),
+            "atmosphere_species": list(self.atmosphere_species),
+            "boundaries": {"inlet": _jsonify(vars(self.inlet_boundary)),
+                           "outlet": _jsonify(vars(self.outlet_boundary))},
+            "max_cfl": self.max_cfl,
+            "geometry_identity": deepcopy(self._source_geometry_identity),
+            "reed_petals": [petal.to_dict() for petal in self.reed_petals],
+            "port_binding": self.port_binding.to_dict(),
+            "network_volumes": [binding.to_dict()
+                                for binding in self.network_volumes],
+            "slider_crank": self.slider_crank.to_dict(),
+            "reference_rpm": self.reference_rpm,
+            "thermal_system": (None if self.thermal_system is None else
+                               self.thermal_system.to_dict()),
+            "thermal_locations": dict(self.thermal_locations),
+            "thermal_load": self.thermal_load,
+            "combustion_start_angle_deg": self.combustion_start_angle_deg,
+        }
+
+    def configuration_dict(self) -> dict:
+        """Return a detached constructor configuration, if V1 can represent it."""
+        self._assert_configuration_unchanged(check_identity=True)
+        if self._configuration_spec is None:
+            raise ValueError(
+                "configuration V1 requires explicit slider-crank and generic-port geometry")
+        result = deepcopy(self._configuration_spec)
+        try:
+            json.dumps(result, sort_keys=True, separators=(",", ":"),
+                       allow_nan=False)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("integrated engine configuration is not finite JSON data") from exc
+        return result
+
+    def _live_configuration_signature(self) -> str:
+        """Cheaply fingerprint live references/scalars checked before each step."""
+        try:
+            signature = (
+                id(self.eos), self.eos.R, self.eos.gamma,
+                tuple((id(path), path.id, path.role, id(path.mesh))
+                      for path in self.ducts),
+                id(self.intake), id(self.exhaust),
+                tuple(id(path) for path in self.transfers),
+                tuple(self.atmosphere_state), tuple(self.atmosphere_species),
+                id(self.inlet_boundary), id(self.outlet_boundary), self.max_cfl,
+                self.geometry_sha256, id(self.configuration_identity),
+                tuple(id(petal) for petal in self.reed_petals),
+                id(self.port_binding),
+                None if self.port_binding is None else (
+                    id(self.port_binding.port_set), id(self.port_binding.powervalve),
+                    tuple(sorted(self.port_binding.path_by_duct.items()))),
+                id(self.network_volumes),
+                tuple((id(item), id(item.node), id(item.connection),
+                       id(item.initial_state), item.duct_id, item.side)
+                      for item in self.network_volumes),
+                id(self.network_volume_by_endpoint),
+                tuple((key, id(item)) for key, item in
+                      sorted(self.network_volume_by_endpoint.items())),
+                id(self.slider_crank), self.reference_rpm,
+                id(self.thermal_system),
+                tuple(sorted(self.thermal_locations.items())), self.thermal_load,
+                self.combustion_start_angle_deg)
+            return hashlib.sha256(repr(signature).encode("utf-8")).hexdigest()
+        except (TypeError, ValueError, AttributeError) as exc:
+            raise ValueError("live integrated engine configuration is invalid") from exc
+
+    def _identity_fingerprint(self) -> str:
+        encoded = json.dumps(self.configuration_identity, sort_keys=True,
+                             separators=(",", ":"), allow_nan=False)
+        return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+    def _assert_configuration_unchanged(self, *, check_identity=False) -> None:
+        expected = getattr(self, "_configuration_guard", None)
+        if expected is not None and self._live_configuration_signature() != expected:
+            raise ValueError(
+                "integrated engine configuration changed after construction; rebuild the engine")
+        if (check_identity and
+                self._identity_fingerprint() != self._configuration_identity_digest):
+            raise ValueError(
+                "integrated engine configuration identity changed after construction")
+
+    def configuration_json(self) -> str:
+        """Return canonical compact JSON for the supported constructor contract."""
+        return json.dumps(self.configuration_dict(), sort_keys=True,
+                          separators=(",", ":"), allow_nan=False)
+
+    @classmethod
+    def from_configuration_dict(cls, value: dict) -> "IntegratedEngine2T":
+        """Rebuild a supported engine without caller code or geometry callbacks."""
+        fields = {"schema", "geometry_contract", "initial_chambers", "ducts",
+                  "resolved_topology", "initial_duct_states", "duct_species",
+                  "eos", "atmosphere",
+                  "atmosphere_species", "boundaries", "max_cfl",
+                  "geometry_identity", "reed_petals", "port_binding",
+                  "network_volumes", "slider_crank", "reference_rpm",
+                  "thermal_system", "thermal_locations", "thermal_load",
+                  "combustion_start_angle_deg"}
+        if (not isinstance(value, dict) or set(value) != fields or
+                value.get("schema") != cls.configuration_schema or
+                value.get("geometry_contract") !=
+                "SLIDER_CRANK_AND_GENERIC_PORTS_V1"):
+            raise ValueError("integrated engine configuration schema is invalid")
+        chambers = value["initial_chambers"]
+        if (not isinstance(chambers, dict) or
+                set(chambers) != {"crankcase", "cylinder", "species"} or
+                not isinstance(chambers["species"], dict) or
+                set(chambers["species"]) != {"crankcase", "cylinder"}):
+            raise ValueError("integrated engine initial chamber configuration is invalid")
+        if (not isinstance(value["ducts"], list) or
+                not isinstance(value["initial_duct_states"], dict) or
+                not isinstance(value["duct_species"], dict) or
+                not isinstance(value["boundaries"], dict) or
+                set(value["boundaries"]) != {"inlet", "outlet"}):
+            raise ValueError("integrated engine path configuration is invalid")
+        from .network_components import NetworkConnection, VolumeGasState, VolumeNode
+        from .thermal import ThermalSystem
+        from .two_stroke_ports import TwoStrokePortSet
+
+        paths = []
+        for row in value["ducts"]:
+            if not isinstance(row, dict) or set(row) != {"id", "role", "mesh"}:
+                raise ValueError("integrated engine duct configuration is invalid")
+            mesh_data = row["mesh"]
+            if (not isinstance(mesh_data, dict) or set(mesh_data) !=
+                    {"faces", "areas", "volumes", "centers"}):
+                raise ValueError("integrated engine mesh configuration is invalid")
+            mesh = Mesh(*(tuple(mesh_data[name]) for name in
+                          ("faces", "areas", "volumes", "centers")))
+            paths.append(DuctPath2T(row["id"], mesh, row["role"]))
+        paths = tuple(paths)
+        duct_ids = {path.id for path in paths}
+        if (set(value["initial_duct_states"]) != duct_ids or
+                set(value["duct_species"]) != duct_ids):
+            raise ValueError("integrated engine initial duct ids do not match topology")
+        binding_data = value["port_binding"]
+        if (not isinstance(binding_data, dict) or
+                set(binding_data) != {"port_set", "path_by_duct", "powervalve"}):
+            raise ValueError("integrated engine port binding configuration is invalid")
+        port_set = TwoStrokePortSet.from_dict(binding_data["port_set"])
+        valve = (None if binding_data["powervalve"] is None else
+                 PowerValve.from_dict(binding_data["powervalve"]))
+        binding = IntegratedPortBinding2T(port_set,
+                                          binding_data["path_by_duct"], valve)
+        slider_data = value["slider_crank"]
+        if (not isinstance(slider_data, dict) or
+                set(slider_data) != {"schema", "crankcase",
+                                     "cylinder_compression_ratio"} or
+                slider_data["schema"] != "INTEGRATED_SLIDER_CRANK_CHAMBERS_2T_V1"):
+            raise ValueError("integrated engine slider-crank configuration is invalid")
+        slider = SliderCrankChambers2T(
+            CrankcaseGeometry.from_dict(slider_data["crankcase"]),
+            slider_data["cylinder_compression_ratio"])
+        network = []
+        for row in value["network_volumes"]:
+            if (not isinstance(row, dict) or set(row) !=
+                    {"schema", "node", "connection", "duct_id", "side",
+                     "initial_state"} or
+                    row["schema"] != "INTEGRATED_NETWORK_VOLUME_2T_V1"):
+                raise ValueError("integrated engine network-volume configuration is invalid")
+            initial = row["initial_state"]
+            if not isinstance(initial, dict) or set(initial) != {
+                    "mass_kg", "internal_energy_j", "species_mass_kg"}:
+                raise ValueError("integrated engine network initial state is invalid")
+            network.append(IntegratedNetworkVolume2T(
+                VolumeNode.from_dict(row["node"]),
+                NetworkConnection.from_dict(row["connection"]),
+                row["duct_id"], row["side"],
+                VolumeGasState(initial["mass_kg"], initial["internal_energy_j"],
+                               tuple(initial["species_mass_kg"]))))
+        eos_data = value["eos"]
+        if not isinstance(eos_data, dict) or set(eos_data) != {"R", "gamma"}:
+            raise ValueError("integrated engine EOS configuration is invalid")
+        boundary_data = {}
+        for name in ("inlet", "outlet"):
+            fields_data = value["boundaries"][name]
+            if not isinstance(fields_data, dict) or set(fields_data) != {
+                    "kind", "state", "p0", "T0", "Y0"}:
+                raise ValueError("integrated engine boundary configuration is invalid")
+            boundary_data[name] = Boundary(
+                fields_data["kind"],
+                None if fields_data["state"] is None else
+                tuple(fields_data["state"]), fields_data["p0"],
+                fields_data["T0"], fields_data["Y0"])
+        species = {name: tuple(values) for name, values in
+                   chambers["species"].items()}
+        species.update({path_id: tuple(tuple(row) for row in rows)
+                        for path_id, rows in value["duct_species"].items()})
+        thermal = (None if value["thermal_system"] is None else
+                   ThermalSystem.from_dict(value["thermal_system"]))
+
+        def resolved_geometry(_angle):
+            # Both explicit models replace every returned geometry field.
+            return EngineGeometry2T(1.0, 1.0, 0.0, 0.0, 0.0,
+                                    tuple(0.0 for _ in
+                                          (path for path in paths
+                                           if path.role == "transfer")), 0.0)
+
+        engine = cls(
+            tuple(chambers["crankcase"]), tuple(chambers["cylinder"]), paths,
+            {key: tuple(tuple(row) for row in rows) for key, rows in
+             value["initial_duct_states"].items()}, resolved_geometry,
+            eos=IdealGas(**eos_data), species=species,
+            atmosphere=tuple(value["atmosphere"]),
+            atmosphere_species=tuple(value["atmosphere_species"]),
+            inlet_boundary=boundary_data["inlet"],
+            outlet_boundary=boundary_data["outlet"], max_cfl=value["max_cfl"],
+            geometry_identity=deepcopy(value["geometry_identity"]),
+            reed_petals=tuple(ReedPetal.from_dict(row)
+                              for row in value["reed_petals"]),
+            port_binding=binding, network_volumes=tuple(network),
+            slider_crank=slider, reference_rpm=value["reference_rpm"],
+            thermal_system=thermal,
+            thermal_locations=deepcopy(value["thermal_locations"]),
+            thermal_load=value["thermal_load"],
+            combustion_start_angle_deg=value["combustion_start_angle_deg"])
+        if engine.configuration_dict() != value:
+            raise ValueError("integrated engine resolved topology/configuration mismatch")
+        return engine
 
     def _chamber_from_primitive(self, primitive, volume):
         rho, velocity, pressure, _ = primitive
@@ -1108,6 +1379,7 @@ class IntegratedEngine2T:
         return {"mass_kg": mass, "energy_J": energy, "species_kg": tuple(species)}
 
     def step(self, dt_s: float, delta_angle_deg: float):
+        self._assert_configuration_unchanged()
         if (type(dt_s) not in (int, float) or not isfinite(dt_s) or dt_s <= 0 or
                 type(delta_angle_deg) not in (int, float) or not isfinite(delta_angle_deg)
                 or delta_angle_deg <= 0):
@@ -1297,6 +1569,7 @@ class IntegratedEngine2T:
                             for i in range(4)}}
 
     def snapshot(self):
+        self._assert_configuration_unchanged(check_identity=True)
         return {"schema": self.schema, "configuration_identity": deepcopy(self.configuration_identity),
                 "state": _jsonify(self.state), "angle_deg": self.angle_deg,
                 "crank_angle_unwrapped_deg": self.crank_angle_unwrapped_deg,
@@ -1312,6 +1585,7 @@ class IntegratedEngine2T:
                 "trace": _jsonify(self.trace)}
 
     def restore(self, snapshot):
+        self._assert_configuration_unchanged(check_identity=True)
         if not isinstance(snapshot, dict) or snapshot.get("schema") != self.schema:
             raise ValueError("integrated engine checkpoint schema mismatch")
         if snapshot.get("configuration_identity") != self.configuration_identity:

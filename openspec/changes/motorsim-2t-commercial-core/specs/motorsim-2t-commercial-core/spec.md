@@ -31,6 +31,37 @@ and verified together.
 - **THEN** its phase may be recorded complete at its own scope but the overall
       commercial-core readiness remains not ready.
 
+### Requirement: Deterministic integrated-engine configuration reconstruction
+
+The integrated 2T engine MUST expose a versioned JSON-safe constructor
+configuration and a factory that reconstructs supported existing engines
+without caller geometry code. Configuration V1 is limited to setups whose
+stage geometry is fully resolved by the existing slider-crank chamber model
+and generic 2T port binding. It MUST preserve exact initial primitive states,
+four-species inventories, meshes, boundary/EOS parameters, finite network
+endpoint volumes, and configured existing reed, thermal, powervalve, and
+prescribed-combustion inputs. Unsupported callback-dependent geometry MUST be
+rejected rather than silently replaced or labeled reproducible. The factory
+MUST produce the same canonical configuration identity and preserve existing
+checkpoint restore/replay behavior.
+Mutable live configuration that drifts after construction MUST be rejected
+before a step, checkpoint operation, or configuration export can rely on its
+stale identity.
+
+#### Scenario: Supported configuration rebuilds deterministic engine state
+
+- **WHEN** a supported engine configuration is encoded as canonical JSON and
+  rebuilt without an external geometry callback
+- **THEN** its configuration identity and initial physical/species snapshot
+  MUST match exactly, and a restored checkpoint MUST replay the next accepted
+  step exactly.
+
+#### Scenario: Unsupported arbitrary geometry is not serialized as reproducible
+
+- **WHEN** explicit slider-crank geometry or generic port binding is absent, or
+  the configuration schema/geometry contract is malformed
+- **THEN** configuration export or reconstruction MUST fail explicitly.
+
 ### Requirement: Generic engine topology uses one stage-coherent conservative state
 
 The integrated 2T engine MUST keep cylinder, crankcase, intake, every named
