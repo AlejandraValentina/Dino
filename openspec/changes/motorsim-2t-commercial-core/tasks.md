@@ -551,14 +551,20 @@ no se atribuye aceptación al motor completo.
   revisión puntual actual está registrada en
   `results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json`; no es
   aceptación end-to-end ni revisión de ciclos.
-- [ ] Cerrar AUD-01…AUD-07 antes de nuevas capabilities o campañas.
-- [ ] AUD-08 requiere preregistro en commit separado antes de regenerar ciclos.
+- [x] Cerrar AUD-01…AUD-07 antes de nuevas capabilities o campañas; evidencias
+  de implementación, productores y estados están registradas en la cola durable.
+- [x] AUD-08: preregistro aislado en commit previo y regeneración fija de Fixture
+  A; el resultado no converge dentro de los 20 ciclos registrados.
 
-AUD-11: la prueba de frontera V1 reproduce `InvalidState` porque el invariante
-característico excede el intervalo físico de la rama entrante; esto es límite
-de capacidad local. Elegir semántica V2 sigue siendo una decisión científica
-distinta y no se hizo. AUD-16 permanece parcial: el commit `9eada5d` cubre solo
-la ruta donde los modelos explícitos sombrean por completo el callback.
+AUD-11 forensic protocol (2026-10-05): see
+`docs/gasdynamic/aud11_reservoir_forensic.md`. The bounded monotone V1 branch,
+orientation mirror, and full-state Riemann discriminator were checked; 7
+focused tests pass. Outcome C: multiple standard boundary formulations have
+materially different fluxes, with no configured apparatus criterion to select
+one. No V2 policy or KT100 run was performed. AUD-11 is a local scientific
+blocker; independent AUD-13…18 tasks continue. This was sequential self-review,
+not independent review. AUD-16 remains partial: commit `9eada5d` covers only
+the path where explicit models fully shadow the callback.
 
 No se ejecutaron campañas ni se tocaron resultados KT100.
 

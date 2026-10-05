@@ -1100,18 +1100,21 @@
         "B4"
       ],
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "BLOCKED_LOCAL",
       "classification": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
-      "blocker": "V1 rejection reproduced as a local capability limit: characteristic invariant 1951.42924471796 exceeds the rest-state branch endpoint 1948.1859694157974; V2 boundary semantics remain unresolved and are not selected.",
+      "blocker": "Forensic protocol concludes C: V1 is bounded and internally consistent for its contract, but multiple standard boundary models produce materially different fluxes; the configured physical apparatus/control mode is unspecified. No V2 policy may be selected by numerical convenience.",
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md",
         "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
-        "tests/test_coupling_preflight.py::InterfaceTests::test_frozen_boundary_gap_is_not_hidden"
+        "tests/test_coupling_preflight.py::InterfaceTests::test_frozen_boundary_gap_is_not_hidden",
+        "docs/gasdynamic/aud11_reservoir_forensic.md: sequential forensics/domain/skeptic/discriminating-test/synthesis; explicit self-review, not independent review",
+        "tests/test_reservoir_forensic_diagnostic.py: bounded monotone branch, orientation mirror, V1 reject versus finite full-state Riemann flux",
+        "NASA Cart3D and NASA Glenn references recorded in the forensic decision package"
       ],
-      "next_action": "Retain the V1 limitation; defer V2 policy pending separately authorized scientific formulation. No KT100 run was performed."
+      "next_action": "Await a scientific choice of external boundary apparatus/model before any reservoir V2. Continue independent AUD-13..18 workstreams; do not run KT100."
     },
     {
       "id": "AUD-12",
@@ -1147,16 +1150,16 @@
       "dependencies": [
         "AUD-01"
       ],
-      "state": "BLOCKED_LOCAL",
+      "state": "READY",
       "classification": "OPEN",
-      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
+      "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "Proceed as an independent priority-3 audit workstream; no reservoir V2 or KT100 activity."
     },
     {
       "id": "AUD-14",
@@ -1169,16 +1172,16 @@
       "dependencies": [
         "AUD-03"
       ],
-      "state": "BLOCKED_LOCAL",
+      "state": "READY",
       "classification": "OPEN",
-      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
+      "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "Proceed as an independent priority-3 audit workstream; no reservoir V2 or KT100 activity."
     },
     {
       "id": "AUD-15",
@@ -1190,16 +1193,16 @@
       "dependencies": [
         "AUD-08"
       ],
-      "state": "BLOCKED_LOCAL",
+      "state": "READY",
       "classification": "OPEN",
-      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
+      "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "Proceed as an independent priority-3 audit workstream; no reservoir V2 or KT100 activity."
     },
     {
       "id": "AUD-16",
@@ -1210,9 +1213,9 @@
         "A7"
       ],
       "dependencies": [],
-      "state": "BLOCKED_LOCAL",
+      "state": "READY",
       "classification": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
-      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
+      "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
@@ -1221,7 +1224,7 @@
         "commit 9eada5d",
         "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "Proceed as an independent priority-3 audit workstream; no reservoir V2 or KT100 activity."
     },
     {
       "id": "AUD-17",
@@ -1231,16 +1234,16 @@
         "A10"
       ],
       "dependencies": [],
-      "state": "BLOCKED_LOCAL",
+      "state": "READY",
       "classification": "OPEN",
-      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
+      "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "Proceed as an independent priority-3 audit workstream; no reservoir V2 or KT100 activity."
     },
     {
       "id": "AUD-18",
@@ -1250,16 +1253,16 @@
         "C10"
       ],
       "dependencies": [],
-      "state": "BLOCKED_LOCAL",
+      "state": "READY",
       "classification": "OPEN",
-      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
+      "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "Proceed as an independent priority-3 audit workstream; no reservoir V2 or KT100 activity."
     }
   ],
   "audit_remediation_mode": true,
@@ -1294,20 +1297,20 @@
     }
   },
   "audit_reconciliation": {
-    "head": "cdafa6e1b37978bb825bb04b0260a17544802e06",
+    "head": "346823a795abc931b3f52e6227ca79d6c05a2080",
     "findings": {
-      "AUD-01": "OPEN",
+      "AUD-01": "RESOLVED_BY_LATER_COMMIT",
       "AUD-02": "RESOLVED_BY_LATER_COMMIT",
       "AUD-03": "RESOLVED_BY_LATER_COMMIT",
       "AUD-04": "RESOLVED_BY_LATER_COMMIT",
-      "AUD-05": "OPEN",
+      "AUD-05": "RESOLVED_BY_LATER_COMMIT",
       "AUD-06": "RESOLVED_BY_LATER_COMMIT",
       "AUD-07": "RESOLVED_BY_LATER_COMMIT",
-      "AUD-08": "OPEN",
-      "AUD-09": "OPEN",
-      "AUD-10": "OPEN",
+      "AUD-08": "RESOLVED_BY_LATER_COMMIT",
+      "AUD-09": "RESOLVED_BY_LATER_COMMIT",
+      "AUD-10": "RESOLVED_BY_LATER_COMMIT",
       "AUD-11": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
-      "AUD-12": "OPEN",
+      "AUD-12": "RESOLVED_BY_LATER_COMMIT",
       "AUD-13": "OPEN",
       "AUD-14": "OPEN",
       "AUD-15": "OPEN",
@@ -1316,24 +1319,24 @@
       "AUD-18": "OPEN"
     },
     "notes": {
-      "AUD-01": "OPEN: later commits do not add blocked-area traction.",
-      "AUD-02": "RESOLVED: initial chambers start at 101325 Pa/300 K. Replaced the obsolete exact-zero P7 limiter fixture assertion with ledger accounting and bounded scale checks; the 40-test affected module passes.",
-      "AUD-03": "RESOLVED: new V2 defaults exhaust backflow to fresh-air; V1 reader preserves its prior shared-composition semantics.",
-      "AUD-04": "RESOLVED: derive composition by normalizing the validated species sum without modifying extensive masses; fixture retries now record each rejection before halving.",
-      "AUD-05": "OPEN: commercial cycle producer and versioned engine fixture config are still test-only/private.",
-      "AUD-06": "RESOLVED: only audit_8cdf66e is independent for its exact range; the current triage receipt is bounded and all other unreceipted Commercial Core review claims are labeled SELF_REVIEW.",
-      "AUD-07": "RESOLVED: queue state enums/dependency blockers and full commit refs normalized; phase scope and historical cycle statuses corrected; P4 remains PASS and 300 is attributed only to the external audit run.",
-      "AUD-08": "IN_PROGRESS: fixed prospective horizon 20 and restart at cycle 3 are isolated in commit cdafa6e1b37978bb825bb04b0260a17544802e06; producer has not yet run.",
-      "AUD-09": "OPEN: piston-port candidate failed, successful B changes chamber length only.",
-      "AUD-10": "READY: no dependency on AUD-08; proceed with collector/topology review after Priority 1.",
-      "AUD-11": "PARTIAL: independent current-head reproduction confirms V1 capability limit; V2 scientific policy unresolved. Receipt records test and direct reproduction.",
-      "AUD-12": "READY: no dependency on AUD-08; version or revert the existing Cd=0 behavior without changing other criteria.",
-      "AUD-13": "OPEN: mesh-resolution study absent.",
-      "AUD-14": "OPEN: gross delivery/short-circuit and fuel metric semantics remain as audited.",
-      "AUD-15": "OPEN: current synthetic timing is unchanged.",
-      "AUD-16": "PARTIAL: only full explicit callback shadowing was fixed by 9eada5d; independent stage recomputation/trace and remaining cross-check criteria remain open.",
-      "AUD-17": "OPEN: periodicity V1 still rejects negative work.",
-      "AUD-18": "OPEN: limited source inspection found writes use temporary paths, but the original suite-wide side-effect/line-ending allegation has not been fully discriminated."
+      "AUD-01": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
+      "AUD-02": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
+      "AUD-03": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
+      "AUD-04": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
+      "AUD-05": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
+      "AUD-06": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
+      "AUD-07": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
+      "AUD-08": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
+      "AUD-09": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
+      "AUD-10": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
+      "AUD-11": "C outcome: V1 branch characterized; scientific model selection unresolved; decision package is docs/gasdynamic/aud11_reservoir_forensic.md. Independent priority-3 queue proceeds.",
+      "AUD-12": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
+      "AUD-13": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
+      "AUD-14": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
+      "AUD-15": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
+      "AUD-16": "READY/PARTIAL: callback shadowing resolved by 9eada5d; stage-rate recomputation, restored-trace validation, tautological comparison, and volume/rate cross-check remain open.",
+      "AUD-17": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
+      "AUD-18": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded."
     },
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json"
   },
@@ -1347,7 +1350,8 @@
       "cycle_evidence": "No campaign artifacts regenerated; existing A/B results remain HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
       "producer_tests": "3 passed; validate-only off-CWD; missing preregistration rejected; canonical hash independent of LF/CRLF+BOM",
       "queue": "29 entries; valid states; commit refs normalized; P4 remains PASS; cycle evidence superseded",
-      "preregistration_blob_gate": "PASS: commit cdafa6e1b37978bb825bb04b0260a17544802e06 matches structured JSON and canonical hashes"
+      "preregistration_blob_gate": "PASS: commit cdafa6e1b37978bb825bb04b0260a17544802e06 matches structured JSON and canonical hashes",
+      "AUD-11": "3 focused forensic diagnostics + 4 existing preflight tests PASS; OpenSpec strict PASS; no simulation or KT100 run."
     }
   },
   "last_status_reviewed_head": "cdafa6e1b37978bb825bb04b0260a17544802e06"

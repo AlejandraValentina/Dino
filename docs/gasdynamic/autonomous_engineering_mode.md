@@ -197,16 +197,20 @@ Resoluciones permitidas:
   `RESERVOIR_BOUNDARY_V2_SCIENTIFIC_DECISION_REQUIRED`. Escalar y continuar
   los workstreams independientes.
 
-Forensics ejecutado el 2026-10-05: V1 usa el invariante saliente de Euler y
-resuelve la entrada sub-sónica isentrópica desde el reservoir en reposo. Para
-la rama evaluada, `f(w)=w+2a(w)/(gamma-1)` es creciente en
+El protocolo forense AUD-11 quedó documentado en
+`docs/gasdynamic/aud11_reservoir_forensic.md`. V1 usa el invariante saliente de
+Euler y resuelve la entrada subsónica isentrópica desde el reservoir en reposo.
+Para la rama evaluada, `f(w)=w+2a(w)/(gamma-1)` es estrictamente creciente en
 `[-a_sonic,0]`, con extremos `J_choke` y `J_rest`; por eso `J+ > J_rest` no
-posee raíz en el dominio contractual. El fixture de 100 kPa, 301 K y
-`u=-0.001 m/s` no prueba un bug del solver. Las formulaciones alternativas
-(Riemann con estado exterior prescrito o característica con una política de
-choking/transición explícita) pueden cambiar caudal, energía y reflexión; V2
-queda clasificada como ambigüedad material a la espera de que se agoten las
-tareas independientes. KT100 y los recibos originales siguen congelados.
+posee raíz en el dominio contractual. La reproducción a 100 kPa, 301 K y
+`u=-0.001 m/s` no demuestra un bug del solver. Las pasadas forensics/domain/
+skeptic/discriminator se hicieron secuencialmente por el mismo autor y son
+autorrevisión, no revisión independiente. La clasificación es C: frontera V1
+válida y limitada, pero existen alternativas físicas estándar con consecuencias
+materiales y no hay datos del aparato o modo de control que permitan escoger.
+No se seleccionó ni implementó V2. AUD-11 queda como bloqueo científico local;
+los workstreams Priority 3 independientes continúan. KT100 y sus recibos siguen
+congelados.
 
 Como trabajo independiente prioritario, la integración ahora admite un único
 plenum finito en la entrada del ducto de admisión: el mismo helper P3 se evalúa
