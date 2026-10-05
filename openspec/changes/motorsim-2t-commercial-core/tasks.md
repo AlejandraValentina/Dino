@@ -614,6 +614,17 @@ tests/test_engineering_outputs.py tests/test_integrated_2t.py -q` — 58 passed.
 La salida V2 queda disponible con la semántica anterior para los consumidores
 existentes; los nuevos resultados integrados usan V3.
 
+### AUD-15 — fixture sintético de timing (en progreso)
+
+- [x] Extender la validación del productor para admitir Fixture D marcado como
+  `AUDIT_REMEDIATION_FIXTURE`; no se ha iniciado una campaña.
+- [ ] Crear y revisar la configuración D, idéntica a la base salvo identidad
+  sintética y timing P7 alineado cerca del PMS con el escape cerrado.
+- [ ] Commitear configuración y preregistro antes de toda integración.
+- [ ] Ejecutar únicamente el horizonte preregistrado y comprobar el área de
+  escape cero durante el evento P7; no usar el resultado como calibración ni
+  cambiar los fixtures científicos A/B existentes.
+
 
 ### Correcciones prioritarias AUD-01 / AUD-02 — 2026-10-05
 

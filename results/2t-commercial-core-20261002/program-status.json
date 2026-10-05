@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "917248b2a3d955ca6c5a43a695e4a6ed89231d00",
+  "status_capture_head": "350d36a4dc3f94bf374b5340b3222d0b00470968",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -1201,16 +1201,17 @@
       "dependencies": [
         "AUD-08"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "classification": "OPEN",
       "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "docs/gasdynamic/audit_8cdf66e.md",
+        "scripts/produce_integrated_cycle_evidence.py now recognizes D as a separately identified AUDIT_REMEDIATION_FIXTURE; configuration and preregistration are not yet committed and no campaign has run."
       ],
-      "next_action": "Proceed as an independent priority-3 audit workstream; no reservoir V2 or KT100 activity."
+      "next_action": "Create the distinct closed-exhaust near-PMS configuration, preregister it in a separate pre-campaign commit with producer source binding, then run the bounded horizon only after the commit gate."
     },
     {
       "id": "AUD-16",
@@ -1305,7 +1306,7 @@
     }
   },
   "audit_reconciliation": {
-    "head": "917248b2a3d955ca6c5a43a695e4a6ed89231d00",
+    "head": "350d36a4dc3f94bf374b5340b3222d0b00470968",
     "findings": {
       "AUD-01": "RESOLVED_BY_LATER_COMMIT",
       "AUD-02": "RESOLVED_BY_LATER_COMMIT",
@@ -1341,7 +1342,7 @@
       "AUD-12": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-13": "Bounded chamber/transfer mesh sensitivity and conservation recorded; lack of an acceptance threshold prevents a mesh-adequacy claim.",
       "AUD-14": "V3 now explicitly names gross crossing metrics and intake species ratio, leaves trapped/burned AFR undefined, and derives specific consumption only from positive prescribed P7 fuel sink and power. V1/V2 remain unchanged.",
-      "AUD-15": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
+      "AUD-15": "IN_PROGRESS: producer now recognizes the separate D audit fixture; configuration and preregistration must be committed before any campaign.",
       "AUD-16": "READY/PARTIAL: callback shadowing resolved by 9eada5d; stage-rate recomputation, restored-trace validation, tautological comparison, and volume/rate cross-check remain open.",
       "AUD-17": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
       "AUD-18": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded."
@@ -1364,5 +1365,5 @@
       "AUD-14": "58 tests passed across test_engineering_outputs.py and test_integrated_2t.py; strict V3 validation and unchanged V2 validation exercised."
     }
   },
-  "last_status_reviewed_head": "917248b2a3d955ca6c5a43a695e4a6ed89231d00"
+  "last_status_reviewed_head": "350d36a4dc3f94bf374b5340b3222d0b00470968"
 }

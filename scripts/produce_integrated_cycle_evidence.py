@@ -43,7 +43,7 @@ def _sha256(data: bytes) -> str:
 def load_engine(fixture_id: str) -> tuple[IntegratedEngine2T, dict, str]:
     path = FIXTURES / f"fixture-{fixture_id.lower()}-engine-config-v2.json"
     wrapper = json.loads(path.read_text(encoding="utf-8"))
-    expected_status = ("AUDIT_REMEDIATION_FIXTURE" if fixture_id == "C" else
+    expected_status = ("AUDIT_REMEDIATION_FIXTURE" if fixture_id in {"C", "D"} else
                        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT")
     if (wrapper.get("schema") != "MOTORSIM_COMMERCIAL_SYNTHETIC_FIXTURE_CONFIG_V1" or
             wrapper.get("fixture_id") != fixture_id or
