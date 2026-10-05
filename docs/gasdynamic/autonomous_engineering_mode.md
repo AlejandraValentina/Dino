@@ -388,10 +388,12 @@ contrato propios.
 
 - AUD-08 está completada con evidencia sintética fija de Fixture A: 20 ciclos,
   restart exacto y sin periodicidad aceptada; no reutilizar A/B históricos.
-- AUD-09, AUD-10 y AUD-12 están READY en prioridad 2. AUD-09 requiere un
-  preregistro independiente antes de integrar un fixture realmente distinto;
-  AUD-10/12 son independientes. Las tareas 13–18 esperan sus dependencias y
-  prioridades anteriores. La cola machine-readable es la fuente de estado.
+- AUD-10 y AUD-12 se resolvieron: colector por roles y límite CONFIG_V2
+  explícito; Cd=0 rechazado otra vez por GENERIC_2T_PORTS_V1.
+- AUD-09 sigue READY y requiere preregistro independiente antes del fixture
+  piston-port sin reed. AUD-11 sigue activo bajo protocolo forense; AUD-13–18
+  esperan sus dependencias y prioridades anteriores. La cola machine-readable
+  es la fuente de estado.
 - Reservoir V1 rechaza correctamente el estado de entrada fuera de su rama
   característica admisible. Una política V2 de reservoir todavía no está
   seleccionada; no ejecutar KT100 ni adivinar una semántica de frontera.

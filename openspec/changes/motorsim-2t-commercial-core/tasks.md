@@ -692,3 +692,16 @@ aceptación del Commercial Core. Artefactos en
 - [x] Los tests cubren LF frente a CRLF+BOM.
 - [x] Commitear el refuerzo del productor antes de los ciclos y comprobarlo
   contra el blob del preregistro.
+
+
+### Reconciliación de prioridad 2 — AUD-10 y AUD-12 — 2026-10-05
+
+- [x] AUD-10: el colector de outputs obtiene los ductos de admisión,
+  transferencias y escape por rol; IDs como `inlet` y `pipe` no causan `KeyError`.
+- [x] AUD-10: documentar el límite del schema integrado V2: un camino de
+  admisión, al menos tres transferencias y un escape. Otra cardinalidad exige
+  una versión de configuración distinta; la geometría genérica sigue separada.
+- [x] AUD-12: restaurar en `GENERIC_2T_PORTS_V1` el requisito de Cd positivo;
+  Cd=0 vuelve a ser rechazado y el test negativo quedó restablecido.
+
+Validación focal: `pytest tests/test_integrated_2t.py tests/test_two_stroke_ports.py` — **50 PASS**; OpenSpec estricto y `git diff --check` PASS.

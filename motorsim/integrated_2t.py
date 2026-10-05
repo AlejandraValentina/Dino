@@ -105,6 +105,36 @@ def _port_face_flux(exchange, duct_primitive, geometric_area, effective_area):
     return tuple(face)
 
 
+def _duct_ids_by_role(duct_roles: dict) -> dict[str, tuple[str, ...]]:
+    """Resolve CONFIG_V2 output channels from role metadata, never literal ids."""
+    if not isinstance(duct_roles, dict) or not duct_roles:
+        raise ValueError("cycle primary record lacks stable duct role identity")
+    grouped = {role: [] for role in ("intake", "transfer", "exhaust")}
+    for duct_id, role in duct_roles.items():
+        if (not isinstance(duct_id, str) or not duct_id or
+                not isinstance(role, str) or role not in grouped):
+            raise ValueError("cycle primary record contains an invalid duct role")
+        grouped[role].append(duct_id)
+    if (len(grouped["intake"]) != 1 or len(grouped["exhaust"]) != 1 or
+            len(grouped["transfer"]) < 3):
+        raise ValueError(
+            "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2 supports one intake, "
+            "at least three transfer paths and one exhaust")
+    return {role: tuple(ids) for role, ids in grouped.items()}
+
+
+def _role_face_outputs(face_fluxes: dict, role_ids: dict) -> dict[str, float]:
+    intake = face_fluxes[role_ids["intake"][0]]
+    exhaust = face_fluxes[role_ids["exhaust"][0]]
+    return {
+        "intake_port_area_m2": intake["effective_reed_area_m2"],
+        "intake_mass_flow_kg_s": intake["right"][0],
+        "transfer_mass_flow_kg_s": sum(
+            face_fluxes[path]["right"][0] for path in role_ids["transfer"]),
+        "exhaust_mass_flow_kg_s": exhaust["left"][0],
+    }
+
+
 @dataclass(frozen=True)
 class EngineGeometry2T:
     """Resolved stage geometry in SI units, keyed by stable duct id."""
@@ -325,7 +355,9 @@ class IntegratedEngine2T:
     """One SSPRK2 state for reed/intake-ready, N-transfer, exhaust topology.
 
     ``geometry(angle_deg)`` must return an :class:`EngineGeometry2T` with exact
-    stage volumes and effective areas. Boundary conditions are explicit
+    stage volumes and effective areas. CONFIG_V2 supports exactly one intake,
+    at least three transfer paths and exactly one exhaust; other role
+    cardinalities require a new configuration schema. Boundary conditions are explicit
     existing ``Boundary`` objects. The default atmosphere uses the existing
     P6 composition (fresh air only). Existing prescribed P7 events, when
     configured, contribute species and heat sources to the same cylinder
@@ -389,7 +421,9 @@ class IntegratedEngine2T:
                 sum(path.role == "intake" for path in ducts) != 1 or
                 sum(path.role == "exhaust" for path in ducts) != 1 or
                 sum(path.role == "transfer" for path in ducts) < 3):
-            raise ValueError("topology requires intake, exhaust and at least three transfers")
+            raise ValueError(
+                "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2 supports one intake, "
+                "at least three transfer paths and one exhaust")
         for path in ducts:
             path.validate()
         if len({path.id for path in ducts}) != len(ducts):
@@ -2159,6 +2193,12 @@ def make_integrated_engineering_output(cycle_record: dict, *,
     displacement = float(displacement_m3)
     if not isfinite(displacement) or displacement <= 0.0:
         raise ValueError("engineering output requires positive displacement")
+    duct_roles = cycle_record.get("duct_roles")
+    if (not isinstance(duct_roles, dict) or
+            set(duct_roles) != set(cycle_record.get("duct_volumes_m3", {}))):
+        raise ValueError("cycle primary record lacks stable duct role identity")
+    role_ids = _duct_ids_by_role(duct_roles)
+    intake_duct_id = role_ids["intake"][0]
 
     def sample(state, geometry, face_fluxes):
         values = {}
@@ -2171,15 +2211,9 @@ def make_integrated_engineering_output(cycle_record: dict, *,
             values[f"{name}_volume_m3"] = volume
         for index, name in enumerate(SPECIES):
             values[f"{name}_mass_kg"] = state["species"]["chambers"]["cylinder"][index]
-        values["intake_port_area_m2"] = face_fluxes["intake"]["effective_reed_area_m2"]
         values["transfer_port_area_m2"] = sum(geometry["transfer_areas_m2"])
         values["exhaust_port_area_m2"] = geometry["exhaust_area_m2"]
-        values["intake_mass_flow_kg_s"] = face_fluxes["intake"]["right"][0]
-        transfer_paths = [path for path, role in cycle_record["duct_roles"].items()
-                          if role == "transfer"]
-        values["transfer_mass_flow_kg_s"] = sum(
-            face_fluxes[path]["right"][0] for path in transfer_paths)
-        values["exhaust_mass_flow_kg_s"] = face_fluxes["exhaust"]["left"][0]
+        values.update(_role_face_outputs(face_fluxes, role_ids))
 
         gamma = float(cycle_record["eos_gamma"])
         gas_constant = float(cycle_record["eos_R"])
@@ -2223,14 +2257,6 @@ def make_integrated_engineering_output(cycle_record: dict, *,
             type(cycle_record.get("eos_R")) not in (int, float) or
             type(cycle_record.get("eos_cv")) not in (int, float)):
         raise ValueError("cycle primary record lacks EOS identity for output reconstruction")
-    if (not isinstance(cycle_record.get("duct_roles"), dict) or
-            set(cycle_record["duct_roles"]) != set(cycle_record.get("duct_volumes_m3", {}))):
-        raise ValueError("cycle primary record lacks stable duct role identity")
-    intake_ducts = [duct for duct, role in cycle_record["duct_roles"].items()
-                    if role == "intake"]
-    if len(intake_ducts) != 1:
-        raise ValueError("cycle primary record must identify one intake duct")
-    intake_duct_id = intake_ducts[0]
     rows = []
     for accepted_row in trajectory:
         rows.append((float(accepted_row["angle_start_deg"]),

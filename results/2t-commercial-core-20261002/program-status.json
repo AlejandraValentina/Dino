@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "4f405b67e0453d69a09cc8cf425613a32f48f30e",
+  "status_capture_head": "d311a24",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -1059,16 +1059,21 @@
         "B3"
       ],
       "dependencies": [],
-      "state": "READY",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "audit-range:ab92aee..8cdf66e",
+        "d311a24"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "docs/gasdynamic/audit_8cdf66e.md",
+        "motorsim/integrated_2t.py::_duct_ids_by_role and _role_face_outputs",
+        "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2 topology contract: one intake, at least three transfer paths, one exhaust; alternate cardinality requires a new schema",
+        "tests/test_integrated_2t.py::test_integrated_v2_output_roles_do_not_depend_on_duct_identifiers",
+        "tests/test_integrated_2t.py::test_integrated_v2_output_roles_do_not_depend_on_duct_identifiers (PASS); tests/test_integrated_2t.py and tests/test_two_stroke_ports.py: 50 PASS; OpenSpec strict PASS"
       ],
-      "next_action": "Implement role-based cycle collection and resolve or version the supported port-role cardinality with focused tests."
+      "next_action": "Continue remaining priority-2 work; topology limits are explicit and role collection is id-independent."
     },
     {
       "id": "AUD-11",
@@ -1099,16 +1104,20 @@
         "C6"
       ],
       "dependencies": [],
-      "state": "READY",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "audit-range:ab92aee..8cdf66e",
+        "d311a24"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "docs/gasdynamic/audit_8cdf66e.md",
+        "GENERIC_2T_PORTS_V1 again requires strictly positive finite discharge coefficients; zero is rejected",
+        "tests/test_two_stroke_ports.py restores zero to invalid numeric input coverage and explicitly tests rejection",
+        "OpenSpec specifies positive Cd for GENERIC_2T_PORTS_V1 and requires a new geometry schema for zero; focused port test PASS"
       ],
-      "next_action": "Review the existing Cd=0 acceptance; version its contract semantics or restore the prior rejection behavior and its test."
+      "next_action": "Continue remaining priority-2 work; no Cd=0 version or flow path was introduced."
     },
     {
       "id": "AUD-13",

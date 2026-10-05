@@ -97,6 +97,11 @@ resolve an existing powervalve roof at the current stage RPM before evaluating
 main-exhaust area. Its binding and RPM policy MUST participate in restart
 identity. The path map MUST be an immutable copy after construction so later
 caller mutation cannot change stage routing under a stale configuration hash.
+The current `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2` product topology supports
+exactly one intake path, at least three transfer paths, and exactly one exhaust
+path. Other role cardinalities MUST be rejected explicitly; changing these
+limits requires a new configuration schema. Output collection MUST resolve
+paths by their declared roles, not by literal path identifiers.
 Internal duct species fluxes MUST receive adjacent cell states in geometric
 left/right order and select the donor exactly once from the signed shared gas
 mass flux; negative flux MUST use the right-cell composition.
@@ -220,7 +225,7 @@ authorization.
 The engine configuration MUST represent any positive number of individually
 identified transfer windows (including primary, secondary, and boost roles),
 multiple exhaust apertures (including auxiliary or bridged segments), a piston
-port intake, explicit duct association, and nonnegative finite discharge
+port intake, explicit duct association, and positive finite discharge
 coefficients. Rectangular piston-controlled area MUST reuse the existing
 kinematics and use `Cd*w*max(0,min(h,x(theta)-top))`; piston-port intake MUST
 reuse its documented skirt-window geometry and MUST remain bidirectional at the
@@ -247,12 +252,12 @@ unchanged.
   samples are recomputed, and stale or modified derived-profile evidence is
   rejected.
 
-#### Scenario: Zero discharge coefficient closes a geometric port
+#### Scenario: Generic port geometry V1 rejects zero discharge coefficient
 
 - **WHEN** a geometrically valid port has a finite discharge coefficient of
   zero
-- **THEN** the configuration remains valid and its effective area is zero at
-  every crank angle, without changing the geometric window or other ports.
+- **THEN** V1 rejects the configuration; accepting a zero-flow coefficient
+  requires a new geometry schema.
 
 #### Scenario: Reverse flow through piston-port intake
 

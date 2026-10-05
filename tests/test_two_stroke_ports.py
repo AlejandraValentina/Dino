@@ -97,16 +97,13 @@ class GenericTwoStrokePortTests(unittest.TestCase):
             roof_travel_mm=4.0, roof_position=0.5)
         self.assertEqual(model.area_at(exhaust, 180.0), 200.0)
 
-    def test_zero_discharge_coefficient_is_a_valid_closed_flow_path(self):
+    def test_generic_ports_v1_rejects_zero_discharge_coefficient(self):
         model = generic_fixture()
         ports = tuple(replace(p, discharge_coefficient=0.0)
                       if p.id == "tr-primary" else p for p in model.ports)
         closed_model = replace(model, ports=ports)
-        closed_model.validate()
-        closed_port = next(p for p in closed_model.ports if p.id == "tr-primary")
-        self.assertEqual(closed_model.area_at(closed_port, 180.0), 0.0)
-        restored = TwoStrokePortSet.loads(closed_model.dumps())
-        self.assertEqual(restored, closed_model)
+        with self.assertRaisesRegex(ProjectError, "debe ser positivo"):
+            closed_model.validate()
 
     def test_profile_interpolates_periodically_and_preserves_explicit_values(self):
         model = generic_fixture()
@@ -134,7 +131,7 @@ class GenericTwoStrokePortTests(unittest.TestCase):
     def test_negative_inputs_and_malformed_profiles_are_rejected(self):
         model = generic_fixture()
         payload = json.loads(model.dumps())
-        for coefficient in (-1.0, math.inf, math.nan, True):
+        for coefficient in (-1.0, 0.0, math.inf, math.nan, True):
             bad = copy.deepcopy(payload)
             bad["ports"][1]["discharge_coefficient"] = coefficient
             with self.subTest(coefficient=coefficient), self.assertRaises(ProjectError):

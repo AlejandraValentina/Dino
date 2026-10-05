@@ -515,3 +515,10 @@ se atribuyen al Commercial Core.
 
 La validación `--validate-only` del productor AUD-05 puede ejecutarse desde
 cualquier carpeta sin integrar. Una campaña requiere un archivo de preregistro tracked y el hash del commit que lo contiene como argumento separado; el archivo se comprueba contra el blob declarado antes de crear resultados. AUD-08 completó el horizonte fijo de Fixture A: 20 ciclos válidos y replay exacto 3→4, pero el detector contractual no encontró periodicidad. Ver `evaluation.json`; resultado sintético condicionado a P4, sin aceptación del Commercial Core. AUD-09 requiere preregistro independiente para el fixture piston-port sin reed.
+
+
+### Reconciliación de hallazgos AUD-10 y AUD-12 — 2026-10-05
+
+AUD-10: el colector integrado resuelve los canales de salida por rol y no por IDs literales. `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2` documenta y rechaza cualquier topología distinta de un ducto de admisión, al menos tres transferencias y un escape; extender esa cardinalidad requiere un schema nuevo.
+
+AUD-12: la afirmación histórica anterior de que Cd=0 era válido quedó supersedida. `GENERIC_2T_PORTS_V1` exige ahora un coeficiente de descarga estrictamente positivo; Cd=0 se rechaza, sin modificar resultados históricos.

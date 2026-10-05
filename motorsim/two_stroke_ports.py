@@ -126,8 +126,8 @@ class PortDefinition:
                 "rectangular_window", "piston_port", "effective_profile"}:
             raise ProjectError(f"{self.id}: familia geométrica inválida.")
         cd = _finite(self.discharge_coefficient, f"{self.id}.discharge_coefficient")
-        if cd < 0.0:
-            raise ProjectError(f"{self.id}: el coeficiente de descarga debe ser no negativo.")
+        if cd <= 0.0:
+            raise ProjectError(f"{self.id}: el coeficiente de descarga debe ser positivo.")
         if not isinstance(self.provenance, str) or self.provenance not in PROVENANCE:
             raise ProjectError(f"{self.id}: provenance inválida.")
 

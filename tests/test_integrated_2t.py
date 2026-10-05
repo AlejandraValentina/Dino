@@ -14,7 +14,7 @@ from motorsim.integrated_2t import (
     IntegratedNetworkVolume2T,
     IntegratedPortBinding2T,
     SliderCrankChambers2T, make_integrated_cycle_primary,
-    make_integrated_engineering_output,
+    make_integrated_engineering_output, _duct_ids_by_role, _role_face_outputs,
 )
 from motorsim.engineering_outputs import validate_integrated_engineering_output_v2
 from motorsim.reference_harness.convergence import PeriodicDetector, compare_cycles
@@ -358,12 +358,38 @@ def test_integrated_network_volume_rejects_bad_face_orientation_and_duplicates()
 
 def test_integrated_engine_rejects_incomplete_or_non_generic_topology():
     system = _case()
-    with pytest.raises(ValueError, match="at least three transfers"):
+    with pytest.raises(ValueError, match="CONFIG_V2 supports"):
         IntegratedEngine2T(
             (1.1768, 0.0, 101325.0, 1.0), (1.1768, 0.0, 101325.0, 1.0),
             system.ducts[:4], {path.id: ((1.1768, 0.0, 101325.0, 1.0),) * 2
                                for path in system.ducts[:4]},
             system.geometry, geometry_identity={"fixture": "invalid-topology"})
+
+
+def test_integrated_v2_output_roles_do_not_depend_on_duct_identifiers():
+    roles = {"inlet": "intake", "tr-a": "transfer", "tr-b": "transfer",
+             "tr-c": "transfer", "pipe": "exhaust"}
+    assert _duct_ids_by_role(roles) == {
+        "intake": ("inlet",), "transfer": ("tr-a", "tr-b", "tr-c"),
+        "exhaust": ("pipe",)}
+    with pytest.raises(ValueError, match="CONFIG_V2 supports"):
+        _duct_ids_by_role({"inlet": "intake", "tr-a": "transfer",
+                           "tr-b": "transfer", "pipe": "exhaust"})
+    with pytest.raises(ValueError, match="CONFIG_V2 supports"):
+        _duct_ids_by_role({"inlet-a": "intake", "inlet-b": "intake",
+                           "tr-a": "transfer", "tr-b": "transfer",
+                           "tr-c": "transfer", "pipe": "exhaust"})
+    faces = {
+        "inlet": {"effective_reed_area_m2": 2.0, "right": (1.0,)},
+        "tr-a": {"right": (2.0,)}, "tr-b": {"right": (3.0,)},
+        "tr-c": {"right": (4.0,)}, "pipe": {"left": (5.0,)},
+    }
+    assert _role_face_outputs(faces, _duct_ids_by_role(roles)) == {
+        "intake_port_area_m2": 2.0,
+        "intake_mass_flow_kg_s": 1.0,
+        "transfer_mass_flow_kg_s": 9.0,
+        "exhaust_mass_flow_kg_s": 5.0,
+    }
 
 
 def test_integrated_engine_enforces_cfl_without_accepting_partial_state():
