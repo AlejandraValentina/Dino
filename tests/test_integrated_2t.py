@@ -14,10 +14,12 @@ from motorsim.integrated_2t import (
     IntegratedNetworkVolume2T,
     IntegratedPortBinding2T,
     SliderCrankChambers2T, make_integrated_cycle_primary,
-    make_integrated_engineering_output, _duct_ids_by_role, _role_face_outputs,
+    make_integrated_engineering_output, make_integrated_engineering_output_v4,
+    _fresh_air_fuel_species_ratio, _duct_ids_by_role, _role_face_outputs,
     _specific_consumption_value, _gross_fresh_short_circuit_rate,
 )
-from motorsim.engineering_outputs import validate_integrated_engineering_output_v3
+from motorsim.engineering_outputs import (validate_integrated_engineering_output_v3,
+                                          validate_integrated_engineering_output_v4)
 from motorsim.reference_harness.convergence import PeriodicDetector, compare_cycles
 from motorsim.kinematics import piston_position
 from motorsim.p6_species import SPECIES
@@ -1174,6 +1176,39 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     assert abs(output["cycle_metrics"]["fuel_species_balance_residual_kg"]["value"]) < 1e-12
     assert output["cycle_metrics"]["equivalence_ratio"]["status"] == "UNDEFINED"
 
+    output_v4 = make_integrated_engineering_output_v4(
+        first_cycle, displacement_m3=system.slider_crank.crankcase.displacement_m3,
+        scavenging_reference_mass_kg=1e-4)
+    assert validate_integrated_engineering_output_v4(output_v4) == output_v4
+    assert output_v4["schema"] == "MOTORSIM_ENGINEERING_OUTPUTS_V4"
+    snapshots = first_cycle["port_closure_snapshots"]["snapshots"]
+    last_close = max(snapshots.values(), key=lambda item: item["angle_deg"])
+    assert output_v4["cycle_metrics"][
+        "cylinder_fuel_species_at_last_port_close_kg"]["value"] == pytest.approx(
+            last_close["cylinder_species_kg"][1])
+    assert output_v4["cycle_metrics"][
+        "cylinder_fresh_air_species_at_last_port_close_kg"]["value"] == pytest.approx(
+            last_close["cylinder_species_kg"][0])
+    assert output_v4["cycle_metrics"][
+        "fresh_air_fuel_species_ratio_at_last_port_close"]["value"] == pytest.approx(
+            last_close["cylinder_species_kg"][0] / last_close["cylinder_species_kg"][1])
+    assert "not AFR" in output_v4["cycle_metrics"][
+        "fresh_air_fuel_species_ratio_at_last_port_close"]["source"]
+    assert output_v4["cycle_metrics"]["afr"]["status"] == "UNDEFINED"
+    assert make_integrated_engineering_output(
+        first_cycle, displacement_m3=system.slider_crank.crankcase.displacement_m3,
+        scavenging_reference_mass_kg=1e-4) == output
+    tampered_closure = deepcopy(first_cycle)
+    tampered_species = tampered_closure["port_closure_snapshots"]["snapshots"][
+        "exhaust"]["cylinder_species_kg"]
+    tampered_species[1] += 1e-12
+    tampered_species[2] -= 1e-12
+    with pytest.raises(ValueError, match="stored exhaust closure species differ"):
+        make_integrated_engineering_output_v4(
+            tampered_closure,
+            displacement_m3=system.slider_crank.crankcase.displacement_m3)
+    assert _fresh_air_fuel_species_ratio((0.01, 0.0, 0.02, 0.0)) is None
+
 
     prior_v2_record = deepcopy(first_cycle)
     for row in prior_v2_record["trajectory"]:
@@ -1215,6 +1250,14 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
         "cylinder_fuel_species_at_exhaust_close_kg"]["status"] == "UNDEFINED"
     assert unavailable_output["cycle_metrics"][
         "cylinder_fuel_species_at_exhaust_close_kg"]["value"] is None
+    unavailable_v4 = make_integrated_engineering_output_v4(
+        unavailable, displacement_m3=system.slider_crank.crankcase.displacement_m3)
+    assert validate_integrated_engineering_output_v4(unavailable_v4) == unavailable_v4
+    for name in ("cylinder_fuel_species_at_last_port_close_kg",
+                 "cylinder_fresh_air_species_at_last_port_close_kg",
+                 "fresh_air_fuel_species_ratio_at_last_port_close"):
+        assert unavailable_v4["cycle_metrics"][name]["status"] == "UNDEFINED"
+        assert unavailable_v4["cycle_metrics"][name]["value"] is None
     tampered_primary = deepcopy(first_cycle)
     tampered_primary["observables"]["work_J"] += 1.0
     with pytest.raises(ValueError, match="observable work_J differs"):

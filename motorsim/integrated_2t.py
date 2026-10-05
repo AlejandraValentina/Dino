@@ -2778,3 +2778,159 @@ def make_integrated_engineering_output(cycle_record: dict, *,
         channels=channels, cycle_metrics=metrics,
         dependency_status="CONDITIONAL_ON_P4",
         configuration_sha256=cycle_record["configuration_hash"])
+
+
+def _validated_last_port_close_species(cycle_record: dict, snapshots: dict):
+    """Rebuild closure identities and bind their species to accepted endpoints."""
+    binding = cycle_record.get("port_closure_geometry")
+    roles = cycle_record.get("duct_roles")
+    start, end = cycle_record.get("cycle_start_deg"), cycle_record.get("cycle_end_deg")
+    rpm_values = [float(row["rpm"]) for row in cycle_record.get("trajectory", [])]
+    if (not isinstance(binding, dict) or not isinstance(roles, dict) or
+            type(start) not in (int, float) or type(end) not in (int, float) or
+            not rpm_values or
+            any(not isclose(value, rpm_values[0], rel_tol=1e-12, abs_tol=1e-9)
+                for value in rpm_values)):
+        raise ValueError("exact port closures lack bound geometry or constant-RPM identity")
+    port_data = binding.get("port_set")
+    path_by_duct = binding.get("path_by_duct")
+    if not isinstance(port_data, dict) or not isinstance(path_by_duct, dict):
+        raise ValueError("exact port-closure geometry binding is malformed")
+    ports = TwoStrokePortSet.from_dict(port_data)
+    valve_data = binding.get("powervalve")
+    if valve_data is not None:
+        valve = PowerValve.from_dict(valve_data)
+        ports = replace(ports, ports=tuple(
+            valve.apply(port, rpm_values[0]) if port.id == valve.exhaust_port_id else port
+            for port in ports.ports))
+    by_role: dict[str, list[tuple[float, str]]] = {"transfer": [], "exhaust": []}
+    for duct in ports.ducts:
+        path_id = path_by_duct.get(duct.id)
+        role = roles.get(path_id)
+        if role not in by_role:
+            continue
+        for base_angle in ports.duct_closing_angles(duct.id):
+            target = float(start) + ((base_angle - float(start)) % 360.0)
+            if target <= float(start) + 1e-9:
+                target += 360.0
+            if target <= float(end) + 1e-9:
+                by_role[role].append((target, duct.id))
+
+    parsed = []
+    trajectory = cycle_record["trajectory"]
+    for role in ("transfer", "exhaust"):
+        candidates = by_role[role]
+        if not candidates:
+            raise ValueError(f"exact {role} closure is absent from bound geometry")
+        target = max(angle for angle, _ in candidates)
+        duct_ids = sorted(duct_id for angle, duct_id in candidates
+                          if isclose(angle, target, rel_tol=0.0, abs_tol=1e-9))
+        snapshot = snapshots.get(role)
+        if (not isinstance(snapshot, dict) or
+                type(snapshot.get("angle_deg")) not in (int, float) or
+                not isclose(float(snapshot["angle_deg"]), target,
+                            rel_tol=0.0, abs_tol=1e-9) or
+                snapshot.get("duct_ids") != duct_ids or
+                snapshot.get("state_source") !=
+                "accepted SSPRK2 terminal stage at exact geometry event"):
+            raise ValueError(f"stored {role} closure does not match bound port geometry")
+        matches = [row for row in trajectory
+                   if isclose(float(row["angle_end_deg"]), target,
+                              rel_tol=0.0, abs_tol=1e-9)]
+        if len(matches) != 1:
+            raise ValueError(f"accepted trajectory lacks one exact {role} closure endpoint")
+        terminal_stage = matches[0]["stage_states"][2]
+        accepted_species = terminal_stage["species"]["chambers"]["cylinder"]
+        stored_species = snapshot.get("cylinder_species_kg")
+        if (not isinstance(stored_species, (list, tuple)) or
+                len(stored_species) != 4 or list(stored_species) != list(accepted_species)):
+            raise ValueError(f"stored {role} closure species differ from accepted SSPRK2 endpoint")
+        total = snapshot.get("cylinder_total_mass_kg")
+        if (type(total) not in (int, float) or not isfinite(total) or total <= 0.0 or
+                float(total) != sum(accepted_species)):
+            raise ValueError(f"stored {role} closure total mass differs from accepted endpoint")
+        parsed.append((target, validate_species(accepted_species, float(total)), role))
+    if (isclose(parsed[0][0], parsed[1][0], rel_tol=0.0, abs_tol=1e-9) and
+            parsed[0][1] != parsed[1][1]):
+        raise ValueError("coincident exact closure endpoints have different species states")
+    return max(parsed, key=lambda item: item[0])
+
+
+def _fresh_air_fuel_species_ratio(species: tuple | list) -> float | None:
+    """Return only the pseudo-species ratio; zero fuel has no ratio."""
+    return None if species[1] == 0.0 else float(species[0]) / float(species[1])
+
+
+def make_integrated_engineering_output_v4(cycle_record: dict, *,
+                                          displacement_m3: float,
+                                          mechanical_loss_model=None,
+                                          load: float = 0.0,
+                                          scavenging_reference_mass_kg: float | None = None) -> dict:
+    """V4 adds species masses at the exact last cylinder gas-exchange closure.
+
+    The resulting fresh-air/fuel pseudo-species ratio is not an AFR and carries
+    no stoichiometric, residual-oxygen, combustion-chemistry, or LHV claim.
+    """
+    from .engineering_outputs import build_integrated_engineering_output_v4
+
+    v3 = make_integrated_engineering_output(
+        cycle_record, displacement_m3=displacement_m3,
+        mechanical_loss_model=mechanical_loss_model, load=load,
+        scavenging_reference_mass_kg=scavenging_reference_mass_kg)
+    channels = {name: {"values": row["values"], "source": row["source"]}
+                for name, row in v3["crank_angle_trace"]["channels"].items()}
+    metrics = {name: {key: row[key] for key in ("value", "status", "reason", "source")}
+               for name, row in v3["cycle_metrics"].items()}
+
+    def undefined(name: str, reason: str, source: str) -> None:
+        metrics[name] = {"value": None, "status": "UNDEFINED",
+                         "reason": reason, "source": source}
+
+    def defined(name: str, value: float, source: str) -> None:
+        number = float(value)
+        if not isfinite(number):
+            raise ValueError(f"{name} is outside supported numeric range")
+        metrics[name] = {"value": number, "status": "DEFINED",
+                         "reason": None, "source": source}
+
+    event_source = (
+        "Accepted SSPRK2 terminal stage at the later exact aggregate transfer/exhaust "
+        "closure; fuel/fresh_air are P6 pseudo-species, not chemical AFR or total fuel burn")
+    for name in ("cylinder_fuel_species_at_last_port_close_kg",
+                 "cylinder_fresh_air_species_at_last_port_close_kg",
+                 "fresh_air_fuel_species_ratio_at_last_port_close"):
+        undefined(name, "Exact last cylinder gas-exchange port-closure state is unavailable.",
+                  event_source)
+
+    closures = cycle_record.get("port_closure_snapshots", {})
+    if (isinstance(closures, dict) and
+            closures.get("status") == "EXACT_EVENT_STATES_CAPTURED"):
+        snapshots = closures.get("snapshots")
+        if not isinstance(snapshots, dict):
+            raise ValueError("exact port-closure snapshots are malformed")
+        role_snapshots = [snapshots.get("transfer"), snapshots.get("exhaust")]
+        if any(not isinstance(snapshot, dict) for snapshot in role_snapshots):
+            raise ValueError("exact port-closure record lacks transfer/exhaust snapshots")
+        if any(snapshot.get("species_order") != list(SPECIES)
+               for snapshot in role_snapshots):
+            raise ValueError("exact port-closure species order is invalid")
+        angle, species, role = _validated_last_port_close_species(cycle_record, snapshots)
+        source = event_source + f"; final closed-port event role={role}, angle={angle:.12g} degCA"
+        defined("cylinder_fuel_species_at_last_port_close_kg", species[1], source)
+        defined("cylinder_fresh_air_species_at_last_port_close_kg", species[0], source)
+        ratio = _fresh_air_fuel_species_ratio(species)
+        if ratio is not None:
+            defined("fresh_air_fuel_species_ratio_at_last_port_close",
+                    ratio,
+                    source + "; fresh_air pseudo-species mass / fuel pseudo-species mass, not AFR")
+        else:
+            undefined("fresh_air_fuel_species_ratio_at_last_port_close",
+                      "Fuel pseudo-species mass is zero at the last port-closure event.", source)
+
+    return build_integrated_engineering_output_v4(
+        rpm=v3["operating_point"]["rpm"],
+        cycle_number=v3["operating_point"]["cycle_number"],
+        angles_deg=tuple(v3["crank_angle_trace"]["angle_deg"]),
+        channels=channels, cycle_metrics=metrics,
+        dependency_status=v3["operating_point"]["dependency_status"],
+        configuration_sha256=v3["configuration_sha256"])

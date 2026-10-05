@@ -8,6 +8,7 @@ from urllib.parse import quote, unquote
 SCHEMA = "MOTORSIM_ENGINEERING_OUTPUTS_V1"
 SCHEMA_V2 = "MOTORSIM_ENGINEERING_OUTPUTS_V2"
 SCHEMA_V3 = "MOTORSIM_ENGINEERING_OUTPUTS_V3"
+SCHEMA_V4 = "MOTORSIM_ENGINEERING_OUTPUTS_V4"
 DEPENDENCIES = {"INDEPENDENT_OF_P4", "CONDITIONAL_ON_P4", "REVALIDATED_ON_P4_PASS"}
 CHANNEL_UNITS = {
     "cylinder_pressure_pa": "Pa", "crankcase_pressure_pa": "Pa",
@@ -58,11 +59,17 @@ METRIC_UNITS_V3 = {
     "gross_intake_air_fuel_ratio": "1",
     "p7_fuel_consumption_flow_kg_s": "kg/s",
 }
+METRIC_UNITS_V4 = {
+    **METRIC_UNITS_V3,
+    "cylinder_fuel_species_at_last_port_close_kg": "kg",
+    "cylinder_fresh_air_species_at_last_port_close_kg": "kg",
+    "fresh_air_fuel_species_ratio_at_last_port_close": "1",
+}
 
 
 def _metric_unit(name: str, schema: str) -> str | None:
     return {SCHEMA: METRIC_UNITS, SCHEMA_V2: METRIC_UNITS_V2,
-            SCHEMA_V3: METRIC_UNITS_V3}[schema].get(name)
+            SCHEMA_V3: METRIC_UNITS_V3, SCHEMA_V4: METRIC_UNITS_V4}[schema].get(name)
 
 
 def _integrated_channel_unit(name: str) -> str | None:
@@ -179,7 +186,7 @@ def _build_engineering_output(*, rpm: float, cycle_number: int,
               "claims": {"periodicity": "NOT_EVALUATED",
                          "experimental_validation": "NOT_PERFORMED",
                          "predictive_validation": "NOT_CLAIMED"}}
-    if schema in (SCHEMA_V2, SCHEMA_V3):
+    if schema in (SCHEMA_V2, SCHEMA_V3, SCHEMA_V4):
         if (not isinstance(configuration_sha256, str) or
                 len(configuration_sha256) != 64 or
                 any(ch not in "0123456789abcdef" for ch in configuration_sha256)):
@@ -232,10 +239,25 @@ def build_integrated_engineering_output_v3(*, rpm: float, cycle_number: int,
         schema=SCHEMA_V3, configuration_sha256=configuration_sha256)
 
 
+def build_integrated_engineering_output_v4(*, rpm: float, cycle_number: int,
+                                           angles_deg: tuple[float, ...],
+                                           channels: dict[str, dict[str, Any]],
+                                           cycle_metrics: dict[str, dict[str, Any]],
+                                           dependency_status: str,
+                                           configuration_sha256: str,
+                                           cycle_period_deg: float = 360.0) -> dict[str, Any]:
+    """V4 adds event-specific cylinder species at the last port closure."""
+    return _build_engineering_output(
+        rpm=rpm, cycle_number=cycle_number, angles_deg=angles_deg,
+        channels=channels, cycle_metrics=cycle_metrics,
+        dependency_status=dependency_status, cycle_period_deg=cycle_period_deg,
+        schema=SCHEMA_V4, configuration_sha256=configuration_sha256)
+
+
 def _validate_engineering_output(value: Any, schema: str) -> dict[str, Any]:
     if not isinstance(value, dict) or value.get("schema") != schema:
         raise ValueError("Engineering output schema is invalid")
-    if schema in (SCHEMA_V2, SCHEMA_V3):
+    if schema in (SCHEMA_V2, SCHEMA_V3, SCHEMA_V4):
         config_hash = value.get("configuration_sha256")
         if (not isinstance(config_hash, str) or len(config_hash) != 64 or
                 any(ch not in "0123456789abcdef" for ch in config_hash)):
@@ -279,7 +301,10 @@ def _validate_engineering_output(value: Any, schema: str) -> dict[str, Any]:
     if schema == SCHEMA_V2:
         return build_integrated_engineering_output_v2(
             **args, configuration_sha256=value["configuration_sha256"])
-    return build_integrated_engineering_output_v3(
+    if schema == SCHEMA_V3:
+        return build_integrated_engineering_output_v3(
+            **args, configuration_sha256=value["configuration_sha256"])
+    return build_integrated_engineering_output_v4(
         **args, configuration_sha256=value["configuration_sha256"])
 
 
@@ -296,3 +321,8 @@ def validate_integrated_engineering_output_v2(value: Any) -> dict[str, Any]:
 def validate_integrated_engineering_output_v3(value: Any) -> dict[str, Any]:
     """Validate explicit V3 fuel and gross-flow semantics."""
     return _validate_engineering_output(value, SCHEMA_V3)
+
+
+def validate_integrated_engineering_output_v4(value: Any) -> dict[str, Any]:
+    """Validate event-specific cylinder species output and V3 semantics."""
+    return _validate_engineering_output(value, SCHEMA_V4)

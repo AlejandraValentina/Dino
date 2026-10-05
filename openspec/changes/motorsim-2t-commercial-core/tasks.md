@@ -185,18 +185,18 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       y JSON replay. Cerrado como fundación integrada; la suite pertinente pasó
       y dos fixtures internos completan ciclos. Esto no declara readiness ni
       elimina la condición P4.
-- [ ] 17b. Reed/intake/crankcase integrado por etapas, retroflujo, especie y
+- [x] 17b. Reed estática/intake/crankcase integrado por etapas, retroflujo, especie y
       ledger global; checkpoint/replay de estado mecánico reed. Parcial: el
       modelo estático existente limita el área de admisión por presión en cada
       stage común y el flujo conserva donor/ledger P6. `CrankcaseGeometry` V2
       resuelve volúmenes opuestos de cárter/cilindro y trabajo p·dV en ambos
       stages; el fixture A completa dos ciclos con reed estática y cárter móvil.
-      La dinámica multi-petal y su estado de restart siguen pendientes. Estado
-      `BLOCKED_LOCAL` para ese subtramo: falta fijar un método de acoplamiento
-      al SSPRK2 común que resuelva impactos/restitución y contabilice el trabajo
-      de presión y el calor de amortiguamiento en la frontera/ledger de energía.
-      Avanzar la reed por separado y alimentar después el flujo sería splitting
-      no validado; `DYNAMIC_REED_V1` continúa disponible como componente autónomo.
+      El subtramo estático está cerrado condicionalmente. La reed dinámica y su
+      estado de restart siguen en `BLOCKED_LOCAL` separado: faltan una relación
+      de volumen desplazado y la identidad de los volúmenes de control a cada
+      lado para cerrar presión-trabajo y ledger de energía. Avanzar la reed por
+      separado y alimentar después el flujo sería splitting no validado;
+      `DYNAMIC_REED_V1` continúa disponible como componente autónomo.
 - [x] 17c. Topología generic ports N con piston intake, transfers y exhaust
       expansion-chamber en los mismos stages; scavenging ledger con cierres
       geométricos y flujos con signo. Parcial: el mesh real de
@@ -210,7 +210,7 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       con snapshots exactos de cierre y outputs V2 ligados a P6 por ciclo.
       Cerrado para las topologías internas ensayadas; evidencia sintética y
       `CONDITIONAL_ON_P4`. La deuda de reservoir V2 continúa local a KT100.
-- [ ] 17d. Combustión P7 autorizada, paredes térmicas, combustible/especies y
+- [x] 17d. Integración de P7 prescrito, paredes térmicas, combustible/especies y
       trabajo mecánico integrados con ledger único sin doble conteo. Parcial:
       el P7 prescrito existente ya puede configurarse por ángulo de ciclo;
       captura las cuatro especies reales del cilindro, aplica conversión y
@@ -224,38 +224,60 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       escape. Ahora los outputs V2 reconstruyen flujos y residual de fuel desde
       etapas aceptadas y se validan en ambos fixtures. Aún no se define fuel
       atrapado desde inventario terminal ni se justifica equivalencia de `Q_F`
-      y LHV; equivalence ratio sigue UNDEFINED sin AFR estequiométrico. 17d
-      permanece parcial.
+      y LHV; equivalence ratio sigue UNDEFINED sin AFR estequiométrico. Estos
+      valores dependientes de propiedades/evento quedan como subtramo
+      `BLOCKED_LOCAL` independiente; no se rellenan por inferencia. V4 añade
+      masas de pseudo-especies en el cierre exacto del último puerto del
+      cilindro y su cociente fresh-air/fuel claramente distinto de AFR; sin
+      instante exacto permanece UNDEFINED. AFR estequiométrica y relación entre
+      `Q_F` y LHV siguen bloqueadas por falta de propiedades explícitas.
 - [x] 17e. Periodicidad P1/P2, evidencia primaria, collector engineering,
-      checkpoint/restart/replay continuo y fixtures integrados completos.
+      checkpoint/restart/replay continuo y fixtures integrados completos para
+      las capacidades soportadas. El collector V4 incorpora las masas en el
+      último cierre exacto de puertos y no altera V1–V3.
       Progreso: el fixture A restaura en 360° y reproduce exactamente el
       snapshot JSON a 720° con el mismo grid angular absoluto. Fixture A alcanza
       P1 en ciclo 16 y Fixture B en ciclo 19; periodicidad, collector y replay
       verificados en dos fixtures sintéticos, sin aceptación global.
-- [x] 18. Segundo fixture integrado independiente; validar y correr regresiones
-      amplias P4–P8 antes de evaluar el gate Commercial Core.
+- [x] 18. Segundo fixture integrado independiente: el resultado actual es el
+      Fixture C piston-port sin reed de AUD-09, que difiere materialmente de A;
+      no se reutiliza ni renombra el antiguo Fixture B de cámara 20% más larga,
+      supersedido por auditoría. La regresión amplia P4–P8 se ejecuta como tarea
+      independiente de continuación y no equivale al gate Commercial Core.
 
 ## Cola autónoma
 
 - `DONE_CONDITIONAL` — Fundación común acotada: estado conservativo gas/especies N-route,
       SSPRK2, ledgers, CFL de ducto/cámara y restart geométricamente consistente;
       revisión read-only puntual completada; casos sintéticos siguen condicionados a P4.
-- `IN_PROGRESS` — La reed estática, intake y cárter geométrico ya participan en
-      los stages comunes. `BLOCKED_LOCAL` para integrar dinámica multi-petal,
-      estado de restart y retroflujo hasta acordar el método de impactos y el
-      ledger de energía acoplado; no usar un split no verificado.
+- `DONE` — La reed estática, intake y cárter geométrico participan en los stages
+      comunes. `BLOCKED_LOCAL` separado para dinámica multi-petal: la geometría
+      actual no identifica el volumen barrido ni los volúmenes de control que
+      reciben su presión-trabajo; no usar un split no verificado.
 - `DONE_CONDITIONAL` — `ExpansionChamber`, generic ports/powervalve, cierres
       exactos y ledgers por ciclo verificados en fixtures A/B. La frontera
       reservoir V2 es una deuda separada de KT100 y no se cambió.
-- `IN_PROGRESS` — P7, paredes, fuel-species y mecánica participan de etapas o
-      outputs; quedan la semántica de fuel atrapado, estequiometría/LHV y
-      revisión independiente del delta actual.
+- `DONE` — P7, paredes, fuel-species y mecánica participan de etapas o outputs
+      para las entradas explícitas actuales. Quedan `BLOCKED_LOCAL` los outputs
+      que requieren un evento total de fuel atrapado, AFR estequiométrica y LHV
+      documentados; los datos ausentes permanecen `UNDEFINED`.
 - `DONE_CONDITIONAL` — Evidencia primaria, periodicidad P1, collector,
       checkpoint/replay y Fixture A completo; sintético, no aceptación global.
-- `DONE_CONDITIONAL` — Fixture B y regresiones amplias P4–P8 actuales; no
-      representan validación experimental ni readiness.
-- `BLOCKED_LOCAL` — KT100 V2: boundary reservoir sin resolver; no reintentar
-  hasta completar ambos fixtures internos y cumplir la condición de la orden.
+- `DONE_CONDITIONAL` — Fixture C piston-port sin reed constituye el segundo caso
+      integrado materialmente distinto; preserva su identidad AUD-09 y no
+      convierte los antiguos resultados Fixture B supersedidos en evidencia.
+- `DONE` — Regresión del 2026-10-05: 25 módulos de pruebas P4–P8,
+      300 pasaron, cuatro warnings NumPy 1.25 preexistentes, 177,49 s; sin
+      campañas ni resultados físicos nuevos.
+- `DONE` — V4 reporta fresh_air/fuel pseudo-especies en el último cierre exacto
+      transfer/exhaust y su cociente de especies no-AFR; V3 permanece intacto.
+      El collector reconstruye el evento desde geometría y lo enlaza al stage
+      aceptado; rechaza snapshots adulterados. La prueba integrada focal pasó.
+      AFR estequiométrica y LHV sin propiedad explícita siguen `UNDEFINED`.
+- `BLOCKED_LOCAL` — KT100 V2: la única recuperación R1 ya se consumió. Su punto
+      de 5000 RPM se reconstruyó offline con 23 ciclos y auditoría PASS, pero
+      terminó en `NUMERICAL_FAILURE` antes de periodicidad; los otros cuatro
+      RPM no empezaron. No declarar verificación ni reintentar bajo R1.
 
 Comprobación agrupada del avance autónomo: el 2026-10-02 se ejecutaron 204
 pruebas focales de provenance, puertos/P5-C, scavenging, reed, cámara, thermal,

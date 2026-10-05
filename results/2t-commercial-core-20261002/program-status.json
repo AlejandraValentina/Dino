@@ -622,12 +622,12 @@
     },
     {
       "id": "17b-static-reed-intake-crankcase",
-      "description": "Bind existing static reed to shared intake/crankcase stage with donor/species/global ledgers",
+      "description": "Static reed/intake/crankcase shared-stage integration with donor/species/global ledgers; dynamic reed is tracked separately.",
       "dependencies": [
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "Dynamic reed SSPRK2/impact integration needs a declared conservative method for stops/restitution and gas-pressure work/damping-energy ledgers; independent advance after the gas step would be unverified splitting.",
+      "state": "DONE",
+      "blocker": null,
       "commits": [
         "a70917dde45ca15c62d5e0f460020599488a4d1f",
         "d3b82f3b49c3f3ac78b1280490e6af24b49e890c Integrate generic ports into accepted 2T stages"
@@ -639,9 +639,11 @@
         "tests/test_integrated_2t.py:16; CrankcaseGeometry V2 resolves cylinder/crankcase volume and opposite rates at stage angle/RPM; accepted moving-volume step closes mass/energy ledgers",
         "16 integrated focal tests PASS; grouped 68 tests PASS; OpenSpec strict PASS; py_compile and diff-check PASS",
         "fixture A completes two cycles with static reed and moving crankcase/cylinder geometry; 21 focused integrated tests pass",
-        "Integrated static reed and moving crankcase are exercised on full synthetic cycles; standalone DYNAMIC_REED_V1 has its own multi-petal, stop, reverse-flow and replay tests."
+        "Integrated static reed and moving crankcase are exercised on full synthetic cycles; standalone DYNAMIC_REED_V1 has its own multi-petal, stop, reverse-flow and replay tests.",
+        "BLOCKER_TRIAGE_2026-10-05: FORENSICS confirms the original static-reed integration and full synthetic fixture already exist; the blocker text incorrectly attached dynamic-reed work to this completed static task.",
+        "DECISION: close only the static subtask; no claim that dynamic reed is integrated."
       ],
-      "next_action": "Proceed with independent capabilities; do not integrate dynamic reed until stage/impact/energy contract is specified."
+      "next_action": "Static path is complete under existing fixture. Dynamic multi-petal SSPRK2 coupling remains tracked by dynamic-reed-stage-coupling."
     },
     {
       "id": "17c-exhaust-chamber-boundary",
@@ -673,13 +675,13 @@
     },
     {
       "id": "17d-fuel-combustion-thermal-mechanics",
-      "description": "Integrate existing P7/P11 capabilities and ledgers without double counting",
+      "description": "Integrated P7 prescribed source, thermal, mechanical and available pseudo-fuel ledgers; fuel-property-dependent metrics are tracked separately.",
       "dependencies": [
         "17a-integrated-gas-species-foundation",
         "17b-static-reed-intake-crankcase"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "The cycle contract does not define integrated trapped fresh-air/fuel observables, stoichiometric AFR or a Q_F-to-LHV relation. The P7 ignition reactant pool and exact exhaust-close pseudo-species are not interchangeable with total trapped fuel; no inferred values are permitted.",
+      "state": "DONE",
+      "blocker": null,
       "commits": [
         "8b04b83ccaa64a0221b380044c38e7c53d0f3cca"
       ],
@@ -691,20 +693,21 @@
         "21 integrated tests and 73-test integrated/P5-C/P6/P7/reed/ports group pass; fixture A shows nonzero fuel delivery/short-circuit, P7 heat, wall heat and work",
         "Cycle-primary collector derives fuel flow only from actual integrated P6 intake fuel-species ledger; LHV-based metrics remain undefined.",
         "Engineering V2 emits cylinder_fuel_species_at_exhaust_close_kg only from the validated exact cylinder closure snapshot; missing closure stays UNDEFINED; source explicitly disclaims total trapped fuel. 33 focal integrated/output tests PASS.",
-        "Thermal stage source, slider-crank p*dV, P7 species/heat, mechanical output and fuel outputs are present in the two synthetic full-cycle fixtures; remain conditional. Exact exhaust-close fuel pseudo-species output is not called total trapped fuel."
+        "Thermal stage source, slider-crank p*dV, P7 species/heat, mechanical output and fuel outputs are present in the two synthetic full-cycle fixtures; remain conditional. Exact exhaust-close fuel pseudo-species output is not called total trapped fuel.",
+        "BLOCKER_TRIAGE_2026-10-05: FORENSICS confirms the current task behavior is implemented for explicit P7/P6 data; no source identifies an approved stoichiometric AFR, LHV or total-trapped-fuel event.",
+        "DECISION: close the implemented P7/thermal/mechanical ledger scope only; no fuel chemistry or missing values inferred."
       ],
-      "next_action": "No independent fuel-accounting integration remains without approved trapped-charge observables and explicit fuel properties; keep dependent metrics UNDEFINED."
+      "next_action": "Available integrated ledgers/outputs are implemented. Keep missing total trapped-charge semantics and explicit fuel properties UNDEFINED in the separate blocked task."
     },
     {
       "id": "17e-cycle-evidence-collector",
-      "description": "Integrated primary cycle evidence, P1/P2 periodicity, collector, checkpoint/replay and Fixture A",
+      "description": "Integrated primary cycle evidence, P1/P2 periodicity, collector V3, checkpoint/replay and supported synthetic fixtures.",
       "dependencies": [
-        "17b-static-reed-intake-crankcase",
-        "17c-exhaust-chamber-boundary",
-        "17d-fuel-combustion-thermal-mechanics"
+        "17a-integrated-gas-species-foundation",
+        "17c-exhaust-chamber-boundary"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "AUD-01..AUD-08 are closed and current synthetic Fixture A/C evidence exists. This integration workstream remains blocked by dependencies 17b-static-reed-intake-crankcase and 17d-fuel-combustion-thermal-mechanics; their dynamic-impact and trapped-fuel/AFR contracts are unresolved.",
+      "state": "DONE",
+      "blocker": null,
       "commits": [
         "e93fd62c10478487d13a49c7181d1ef15aa601f5",
         "f846aa3c5816021fd08b38caf6614ed108f0ebf5",
@@ -727,20 +730,23 @@
         "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Fixture A primary campaign reached PERIOD_1 at cycle 16 after 3 consecutive PASS comparisons (13→14→15→16); full P1 artifact preserved; no solver/threshold changes.",
         "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Fixture A P1 at cycle 16 and Fixture B P1 at cycle 19; full outputs validated per cycle; six-cycle checkpoint/replay is exact; synthetic and CONDITIONAL_ON_P4.",
         "results/2t-commercial-core-20261002/aud-08-fixture-a-20261005-v1/decision.json: 20 fixed-horizon admissible cycles, exact restart replay, no convergence",
-        "results/2t-commercial-core-20261002/aud-09-fixture-c-20261005-v1/decision.json: 20 fixed-horizon admissible cycles, exact restart replay, period-1 at cycle 20"
+        "results/2t-commercial-core-20261002/aud-09-fixture-c-20261005-v1/decision.json: 20 fixed-horizon admissible cycles, exact restart replay, period-1 at cycle 20",
+        "BLOCKER_TRIAGE_2026-10-05: SKEPTIC checked that current V3 outputs retain UNDEFINED statuses when an exact closure snapshot/property is absent and reject tampered primary inputs; 65 relevant integrated-cycle/output/fuel tests PASS.",
+        "DECISION: remove stale dependencies on dynamic reed and unspecified fuel chemistry; collector remains synthetic and CONDITIONAL_ON_P4.",
+        "2026-10-05: additive V4 event-specific last-cylinder-port-close pseudo-species output; targeted two-cycle integrated test passed, V1-V3 unchanged."
       ],
-      "next_action": "Keep current AUD-08/AUD-09 artifacts as synthetic evidence; do not reopen old A/B results. Resume only if 17b/17d contracts are resolved or a genuinely independent collector task is split out.",
+      "next_action": "Collector is complete for represented supported inputs; V4 reports only exact last-port-close pseudo-species observables. Missing explicit fuel properties remain separate.",
       "cycle_evidence_status": "CURRENT_AUD08_FIXTURE_A_AND_AUD09_FIXTURE_C_SYNTHETIC_ONLY; NO_COMMERCIAL_CORE_ACCEPTANCE",
       "cycle_evidence_current_acceptance_use": false
     },
     {
       "id": "18-fixture-b-regressions",
-      "description": "Independent Fixture B and current broad P4-P8 regression suite",
+      "description": "Second materially distinct piston-port synthetic fixture and broad P4-P8 regression suite; the superseded long-chamber Fixture B is not used.",
       "dependencies": [
         "17e-cycle-evidence-collector"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "The P4-P8 test run is historical (300 PASS), but Fixture B is only a 20% chamber-length variant and its cycle PASS is superseded by A1-A3. No significantly distinct acceptance fixture is established.",
+      "state": "DONE",
+      "blocker": null,
       "commits": [
         "b50507bcdd2e69e4571d8d59b876a0f5308fb54c",
         "8cdf66e1ff5bfec971491199324dcb9e9ff9bdea"
@@ -749,9 +755,12 @@
         "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Fixture B 20% longer expansion chamber: 19 complete cycles, 33,434 accepted steps, P1 at cycle 19, V2 output validated per cycle; full primary+output artifact preserved.",
         "External audit historical P4-P8 regression run: 300 passed, four pre-existing NumPy deprecation warnings.",
         "No-reed piston-port alternative failed admissibility at 107.651626 degrees after 25 step reductions; retained only as failed candidate evidence.",
-        "Final current run: 85 integrated/P5-C/P6/P7/reed/port tests PASS; 300 P4-P8 tests PASS (4 pre-existing NumPy deprecation warnings); OpenSpec strict PASS."
+        "Final current run: 85 integrated/P5-C/P6/P7/reed/port tests PASS; 300 P4-P8 tests PASS (4 pre-existing NumPy deprecation warnings); OpenSpec strict PASS.",
+        "BLOCKER_TRIAGE_2026-10-05: DOMAIN review found AUD-09 Fixture C removes the intake reed from Fixture A while retaining piston-port geometry; its own preregistration/config hash, 20-cycle horizon, exact replay and PERIOD_1 at cycle 20 establish the genuinely distinct second case.",
+        "SKEPTIC: this does not revive the old 20%-longer chamber Fixture B result and does not establish experimental validity or Commercial Core acceptance.",
+        "DECISION: use Fixture C as the current second-fixture evidence without renaming its artifact; run the existing P4-P8 regression suite separately as an independent READY task."
       ],
-      "next_action": "After AUD-01..AUD-08, build a materially distinct Fixture B; rerun P4-P8 separately only for global closeout.",
+      "next_action": "AUD-09 Fixture C is the current independent second fixture (piston-port, no reed); retain its name and provenance rather than relabeling historical Fixture B.",
       "cycle_evidence_status": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
       "cycle_evidence_current_acceptance_use": false
     },
@@ -761,14 +770,16 @@
       "dependencies": [
         "AUD-11"
       ],
-      "state": "IN_PROGRESS",
-      "blocker": null,
+      "state": "BLOCKED_LOCAL",
+      "blocker": "KT100_V2_EVIDENCE_RECOVERY_R1 was invoked once and stopped at the first point because in-memory cycle records aliased mutable state and the post-run audit raised trajectory terminal species mismatch. Offline reconstruction from persisted point data is valid only for 5000 RPM: 23 cycles, no detected period, cycle-24 NUMERICAL_FAILURE at 142.19487248520613 degrees. The other four points were never started; the preregistered one-run allowance is consumed.",
       "commits": [
         "80fcf626e160ad582cacfafae2102a72b2df7bed",
         "8529a89ac4566caa85d95d9eae4a3786d44e1594",
         "df5cbd7",
+        "1c3d897",
         "ee58b8b",
-        "bd87651"
+        "bd87651",
+        "04045ff"
       ],
       "evidence": [
         "docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md",
@@ -787,9 +798,13 @@
         "scripts/run_kt100_open_end_plenum_v2_recovery_r1.py: frozen-input and no-overwrite gates",
         "Pre-run --validate-only exposed a preregistration JSON-path defect; fixed before campaign and included in the frozen runner hash. No solver run occurred.",
         "Two --validate-only gate defects were fixed before campaign; neither preflight started the solver.",
-        "Three preregistration preflights found only gate implementation/schema mismatches; all were corrected before simulation."
+        "Three preregistration preflights found only gate implementation/schema mismatches; all were corrected before simulation.",
+        "R1 campaign attempted exactly once after preregistration; only rpm-5000 primary cycles exist.",
+        "Offline receipt results/2t-commercial-core-20261002/kt100_v2_recovery_r1_5000_offline_audit.json: evidence audit PASS from 23 persisted cycles; source binding, initial replay and restart replay PASS; classification NUMERICAL_FAILURE; no periodicity.",
+        "The previously raised trajectory terminal species mismatch was caused by in-memory aliasing: audit_cycles over freshly deserialized persisted primary records and audit_campaign_directory both PASS after summary reconstruction; no solver was run for this audit.",
+        "R1 campaign execution halted before rpm 7000/9000/11000/13000 due to the audit exception. No result exists for those points."
       ],
-      "next_action": "Commit the preregistered R1 contract and runner separately; then pass --validate-only and execute the one authorized recovery campaign exactly once into its new output directory."
+      "next_action": "Do not rerun under consumed R1. Preserve the partial valid 5000-RPM result. Any future full five-point recovery requires a new explicit authorization and a preregistered immutable harness/evidence fix; no KT100 verification claim."
     },
     {
       "id": "integrated-intake-plenum",
@@ -867,12 +882,16 @@
         "17a-integrated-gas-species-foundation"
       ],
       "state": "BLOCKED_LOCAL",
-      "blocker": "Pressure forcing, impact treatment, pressure-work location and damping/impact dissipation destination lack one scientifically selected coupled contract.",
+      "blocker": "DYNAMIC_REED_V1 specifies force area, flow curtain width/lift, constant-pressure oscillator and stop restitution, but the integrated topology provides no reed swept-volume/control-volume placement binding. Without that binding, pressure work from reed motion cannot be assigned conservatively to adjacent gas volumes; independent post-step advance would be operator splitting.",
       "commits": [],
       "evidence": [
-        "SELF_REVIEW (historical claim retained; no durable review receipt identified in AUD-06): Independent technical review is documented in docs/gasdynamic/autonomous_engineering_mode.md."
+        "SELF_REVIEW (historical claim retained; no durable review receipt identified in AUD-06): Independent technical review is documented in docs/gasdynamic/autonomous_engineering_mode.md.",
+        "BLOCKER_TRIAGE_2026-10-05 FORENSICS: motorsim/reed.py advances DYNAMIC_REED_V1 under constant dp and computes flow curtain area from width*lift; integrated_2t binds only static reed area into the common stages and checkpoints no dynamic petal state.",
+        "DOMAIN/RESEARCH: a stage-coherent moving interface can pair pressure force work with equal/opposite gas volume work, but only after its swept-volume coefficient and neighboring control volumes are declared.",
+        "SKEPTIC: pressure_area_m2 and effective_width_m*lift_m are distinct configured quantities; treating the latter as swept volume or assigning all displacement to crankcase would silently invent geometry.",
+        "CONTRACT/DECISION: concrete missing topology/geometry binding; keep BLOCKED_LOCAL. No independent review is claimed."
       ],
-      "next_action": "Remain BLOCKED_LOCAL pending a conservative impact/work contract; no implementation until that decision is resolved and P1 remediation closes."
+      "next_action": "Remain BLOCKED_LOCAL pending an explicit supported interface geometry (swept-volume coefficient and adjacent control volumes) that is consistent with configured reed provenance; preserve the standalone reed capability and static integrated path."
     },
     {
       "id": "AUD-01",
@@ -1327,6 +1346,72 @@
         "python -m pytest tests/test_example_projects.py tests/test_low_rpm_diagnostics.py -q: 11 passed; examples/projects has no diff."
       ],
       "next_action": "AUD-18 resolved; retain temp-root generation in tests and use LF-normalized hashes for text-source comparison."
+    },
+    {
+      "id": "18-current-p4-p8-regression",
+      "description": "Re-run existing P4-P8 regression tests after the autonomous blocker triage; no scientific campaigns.",
+      "dependencies": [],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "No solver, physics, configuration, thresholds or historical artifacts are changed by this regression task.",
+        "2026-10-05 after additive V4 implementation: .venv Python 3.11, 25 P4-P8 test modules, 300 passed, 4 pre-existing NumPy 1.25 scalar-conversion DeprecationWarnings in test_p4_r10a.py, 177.49s; no campaign or result output. The later V4-only closure validation refinement is covered by the final focused integrated test above."
+      ],
+      "next_action": "Regression task complete for current source. This does not accept P4-P8 anew or declare Commercial Core readiness."
+    },
+    {
+      "id": "17d-fuel-accounting-semantics",
+      "description": "Define exact event-specific cylinder pseudo-species observables at the last gas-exchange port closure and keep them distinct from AFR/LHV.",
+      "dependencies": [
+        "17a-integrated-gas-species-foundation",
+        "17e-cycle-evidence-collector"
+      ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "motorsim/fuel.py requires explicit positive FuelProperties and caller-supplied trapped masses; it has no defaults.",
+        "motorsim/combustion.py documents prescribed progress with no species conversion or heat release.",
+        "motorsim/integrated_2t.py labels exhaust-close species as not total trapped fuel and leaves absent closure UNDEFINED.",
+        "tests/test_fuel.py plus focused integrated/output tests passed; no value is inferred.",
+        "OpenSpec adds MOTORSIM_ENGINEERING_OUTPUTS_V4 while preserving V1-V3.",
+        "The last exact cylinder port-closure state is max(aggregate transfer close, aggregate exhaust close), sourced from accepted SSPRK2 endpoints already stored in the primary cycle.",
+        "V4 reports event-specific P6 fresh_air/fuel pseudo-species masses and a clearly named species-mass ratio; this is not AFR and does not infer total chemical trapped fuel.",
+        "No fuel chemistry, stoichiometry, composition-dependent EOS, combustion change, or LHV inference.",
+        "Final focused validation test: tests/test_integrated_2t.py::test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays passed in 48.98s; V4 recomputes transfer/exhaust close identity from port geometry, binds exact accepted SSPRK2 endpoint states, rejects tampered closure species, keeps V3 identical, checks missing closure UNDEFINED and zero-fuel ratio helper undefined."
+      ],
+      "triage": {
+        "forensics": "P6 transports four pseudo-species. P7 applies a prescribed species sink/heat source. The integrated output exposes exact exhaust-close fuel species only when an exact snapshot exists; no total trapped-charge event is implemented.",
+        "domain_research": "AFR and equivalence ratio require paired air/fuel masses at the same declared event plus an explicit stoichiometric reference; an LHV-based energy requires an approved LHV and a justified mapping from P7 Q_F to fuel release.",
+        "skeptic": "Terminal global fuel inventory, exhaust-close cylinder fuel, delivered fuel and P7 heat are different observables; substituting any for trapped/burned fuel would be invalid.",
+        "contract": "Existing standalone FUEL_ACCOUNTING_V1 accepts explicit masses and FuelProperties. Keep integrated absent data UNDEFINED; do not add synthetic defaults or infer Q_F/LHV.",
+        "decision": "Remain BLOCKED_LOCAL only for these property-dependent/full trapped-fuel outputs. Existing explicit ledgers and event-specific outputs stay usable; no human decision is required to preserve the missing values as undefined."
+      },
+      "next_action": "Use V4 event metrics when closure evidence is exact; never infer total chemical trapped fuel, stoichiometric AFR or LHV."
+    },
+    {
+      "id": "17d-fuel-properties",
+      "description": "Enable stoichiometric AFR, equivalence ratio and LHV-based accounting only from explicit fuel properties and provenance.",
+      "dependencies": [
+        "17d-fuel-accounting-semantics"
+      ],
+      "state": "BLOCKED_LOCAL",
+      "blocker": "No approved fuel record supplies stoichiometric AFR, LHV and provenance, and P7 prescribed Q_F is not specified as a fuel chemical energy. These values cannot be inferred from P6 pseudo-species or the V4 event ratio.",
+      "commits": [],
+      "evidence": [
+        "motorsim/fuel.py::FuelProperties requires explicit positive stoichiometric_afr, lower_heating_value_j_kg and provenance; no default exists.",
+        "motorsim/p7_prescribed.py defines Q_F as prescribed bookkeeping and existing integrated outputs disclaim LHV equivalence.",
+        "V4 event ratio is explicitly pseudo-species fresh_air/fuel and not AFR."
+      ],
+      "triage": {
+        "forensics": "V4 now derives fresh_air/fuel pseudo-species masses at the exact last transfer/exhaust closure. FuelProperties remains an explicit separate input.",
+        "domain_research": "Stoichiometric AFR requires fuel chemistry; LHV is fuel-specific. P7 Q_F only expresses the prescribed source law and does not define chemical energy equivalence.",
+        "skeptic": "Using pseudo-species ratio as physical AFR, or Q_F as LHV, would overstate the evidence and is explicitly prohibited by current output names/contracts.",
+        "contract": "Keep AFR/equivalence ratio and LHV outputs UNDEFINED until an explicit fuel-properties record with provenance is supplied; do not set defaults.",
+        "decision": "Remain BLOCKED_LOCAL on the concrete missing external property record. This is a capability-input limit, not a reason to stop independent engineering."
+      },
+      "next_action": "Resume automatically when an approved explicit fuel-properties input is part of scope; no new chemistry is added."
     }
   ],
   "audit_remediation_mode": false,
@@ -1407,7 +1492,7 @@
       "AUD-08": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-09": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-10": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
-      "AUD-11": "The audit finding was resolved as CASE B by explicit human/scientific decision. The additive OPEN_END_PLENUM_V2 contract is preregistered, implemented, and analytically tested. Its single KT100 campaign emitted no cycle primary because the evidence writer failed with KeyError(transfer1); the bug is fixed but the consumed campaign is not retried.",
+      "AUD-11": "The original R6 campaign remains unrecoverable offline (manifests/summaries/failures only). The single preregistered R1 recovery was attempted once. Its persisted 5000-RPM point reconstructs and audits offline: 23 complete cycles, no periodicity, then NUMERICAL_FAILURE at cycle 24/142.194872 degrees. The R1 audit exception was due to mutable in-memory aliasing; other RPM points were not started. No KT100 verification claim; R1 allowance consumed.",
       "AUD-12": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-13": "Bounded chamber/transfer mesh sensitivity and conservation recorded; lack of an acceptance threshold prevents a mesh-adequacy claim.",
       "AUD-14": "V3 now explicitly names gross crossing metrics and intake species ratio, leaves trapped/burned AFR undefined, and derives specific consumption only from positive prescribed P7 fuel sink and power. V1/V2 remain unchanged.",
@@ -1418,10 +1503,10 @@
     },
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
     "current_delta": {
-      "range": "351e1b22ee49fe9d7c4cde53755d1d4e8caaa355..WORKING_TREE",
+      "range": "04045ffcca05b7f2ecfcb250ef39bbda0c0341fc..WORKING_TREE",
       "review_kind": "SELF_REVIEW",
-      "result": "R6 was checked for offline recovery. It has no primary trajectory/state/checkpoint, so recovery cannot be reconstructed. KT100_V2_EVIDENCE_RECOVERY_R1 freezes the already-approved sole evidence mapping delta and the unchanged R6 configuration before one recovery run.",
-      "evidence": "results/2t-commercial-core-20261002/preregistration/KT100_V2_EVIDENCE_RECOVERY_R1.json"
+      "result": "R1 single recovery was attempted once. R1 point 5000 was reconstructed offline from its persisted primary files and passes evidence audit, but its solver numerical-failed before periodicity; remaining RPM points were never run. Static reed, available P7/output collector, and AUD-09 distinct fixture blockers were decomposed; no readiness promoted. Added versioned ENGINEERING_OUTPUTS_V4 with exact last-port-close pseudo-species outputs, explicit non-AFR ratio semantics and no LHV inference; V1-V3 unchanged. Final focused test rejects closure evidence not matching bound geometry/accepted endpoint.",
+      "evidence": "results/2t-commercial-core-20261002/kt100_v2_recovery_r1_5000_offline_audit.json; receipt SHA-256 c12fb62077d7e43b3d68e9c393404ced6b3aed8e3200debd4604287469606a7a"
     }
   },
   "configuration_schema": "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2",
@@ -1461,24 +1546,48 @@
     "kt100_recovery_r1_preflight": {
       "first_validate_only": "Failed before campaign because configuration hash was read from the wrong JSON level; fixed in preregistered runner follow-up.",
       "second_validate_only": "Failed before campaign because manifest JSON was parsed from an open stream object; fixed in preregistered runner follow-up.",
-      "campaign_started": false,
+      "campaign_started": true,
       "recovery_runner_hash": "4898b3a634dc163179495e7e1ef103577d1728c0041c33d5e73eed442aeb67e3",
-      "third_validate_only": "Failed before campaign because the gate omitted the frozen provenance field in its exact comparison; corrected to require SYNTHETIC_ASSUMPTION, no solver started."
+      "third_validate_only": "Failed before campaign because the gate omitted the frozen provenance field in its exact comparison; corrected to require SYNTHETIC_ASSUMPTION, no solver started.",
+      "campaign_outcome": "Attempted once; first point 5000 RPM offline-reconstructed and audit PASS; 23 cycles; no periodicity; cycle-24 NUMERICAL_FAILURE; other four RPM points not started.",
+      "campaign_runner_exception": "ValueError: trajectory terminal species state mismatch after in-memory record mutation; persisted primary files pass offline directory audit.",
+      "retry_allowed": false
+    },
+    "kt100_recovery_r1_offline_audit": {
+      "point": "5000 RPM only; 23 persisted complete cycles",
+      "evidence_audit": "PASS after offline summary reconstruction from primary files",
+      "initial_restart_replay": "PASS / PASS",
+      "periodicity": "NONE detected",
+      "terminal": "NUMERICAL_FAILURE cycle 24 at 142.19487248520613 degrees; InvalidState: Conserved rho/species inadmissible",
+      "remaining_points": "7000, 9000, 11000, 13000 RPM were never started",
+      "rerun": "Not authorized under consumed one-run R1 preregistration",
+      "receipt": "results/2t-commercial-core-20261002/kt100_v2_recovery_r1_5000_offline_audit.json",
+      "receipt_sha256": "c12fb62077d7e43b3d68e9c393404ced6b3aed8e3200debd4604287469606a7a"
+    },
+    "current_blocker_triage": {
+      "review_kind": "SELF_REVIEW; no independent review claimed",
+      "collector": "65 focused integrated cycle/output/fuel tests PASS; collector separated from dynamic reed/fuel-properties",
+      "fixture_second_case": "Existing AUD-09 Fixture C is a materially distinct piston-port/no-reed case; no historical Fixture B relabeling",
+      "dynamic_reed": "BLOCKED_LOCAL on missing explicit swept-volume/adjacent control-volume binding",
+      "fuel_semantics": "DONE for exact event-specific pseudo-species outputs: V4 reports values at the last exact cylinder-port closure and the pseudo-species ratio; no total chemical trapped fuel/AFR claim.",
+      "next": "Run task 18-current-p4-p8-regression; no campaign.",
+      "p4_p8_regression": "25 modules, 300 passed, 4 pre-existing NumPy 1.25 DeprecationWarnings, 177.49s after additive V4 implementation; final V4-only closure-validation refinement passed targeted test.",
+      "fuel_properties": "BLOCKED_LOCAL: no explicit AFR_stoich/LHV/provenance; Q_F remains prescribed bookkeeping.",
+      "fuel_v4_test": "Final focused two-cycle test PASS (48.98s): geometry-derived later closure, exact accepted SSPRK2 endpoint species, tampered snapshot rejection, missing-event UNDEFINED, zero-fuel ratio helper undefined, V3 output unchanged."
     }
   },
-  "last_status_reviewed_head": "351e1b22ee49fe9d7c4cde53755d1d4e8caaa355",
+  "last_status_reviewed_head": "04045ffcca05b7f2ecfcb250ef39bbda0c0341fc",
   "continuation_status": {
     "mode": "MOTORSIM_AUTONOMOUS_ENGINEERING_TEAM",
     "audit_remediation_mode": false,
     "ready_tasks": 0,
     "local_blockers": [
-      "17b-static-reed-intake-crankcase: conservative dynamic-reed SSPRK2 impact/pressure-work/dissipation contract unresolved",
-      "17d-fuel-combustion-thermal-mechanics: trapped fresh/fuel observables and explicit fuel-property contract unresolved",
-      "17e-cycle-evidence-collector: depends on 17b and 17d for the integrated collector scope",
-      "18-fixture-b-regressions: depends on completed integrated evidence and a materially distinct Fixture B",
-      "dynamic-reed-stage-coupling: same unresolved conservative impact/work/dissipation contract"
+      "dynamic-reed-stage-coupling: missing swept-volume/control-volume topology binding for conservative pressure work",
+      "17d-fuel-properties: no explicit stoichiometric AFR/LHV record with provenance; P7 Q_F is not declared as fuel chemical energy",
+      "reservoir-boundary-v2: R1 allowance consumed; only 5000 RPM reconstructed and numerical-failed; four points absent"
     ],
-    "next_action": "Finish the frozen R1 preregistration commit, then execute its single recovery run. Continue the other five BLOCKED_LOCAL investigations autonomously in parallel sequence; do not reinterpret KT100 390-degree arrival as verification.",
-    "in_progress_tasks": 1
+    "next_action": "All resolvable local work from this order is complete. Continue the autonomous team without treating zero READY as program completion; the remaining blockers require their concrete interface geometry, explicit fuel-properties record, or a new KT100 recovery authorization.",
+    "in_progress_tasks": 0,
+    "blocker_triage_date": "2026-10-05"
   }
 }

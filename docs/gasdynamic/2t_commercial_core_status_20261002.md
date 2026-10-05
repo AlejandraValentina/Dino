@@ -531,3 +531,72 @@ AUD-12: la afirmación histórica anterior de que Cd=0 era válido quedó supers
 ### Resultado AUD-09 — Fixture C piston-port sin reed — 2026-10-05
 
 El fixture sintético C completó el horizonte preregistrado de 20 ciclos admisibles y el replay exacto ciclo 3→4. `REFERENCE_PERIODIC_CONVERGENCE_V1` clasificó `PERIOD_1` en el ciclo 20. El manifest conserva 14.283 rechazos CFL; cerca del ángulo histórico 107.651626°, la propuesta de 0,5° excedió el CFL 0,4 y se aceptó tras reducir el paso. No hubo rechazos por admisibilidad de especies en esta ejecución. El fallo histórico no se reprodujo tras AUD-01/04; como no se conserva su traza cruda, no se atribuye una causa exacta. Esta evidencia permanece `SYNTHETIC_CONDITIONAL_ON_P4` y no acepta el Commercial Core. Evidencia: `results/2t-commercial-core-20261002/aud-09-fixture-c-20261005-v1/`.
+
+
+### Continuación autónoma de bloqueos y recuperación R1 — 2026-10-05
+
+La inspección offline confirmó que la campaña original R6 no contiene ciclos
+primarios, trayectorias ni checkpoints; no puede reconstruirse. La enmienda
+`KT100_V2_EVIDENCE_RECOVERY_R1` y su runner quedaron congelados antes de una
+única ejecución. Esa invocación ejecutó únicamente 5000 RPM. El solver produjo
+23 ciclos completos; al intentar el ciclo 24 falló con `InvalidState: Conserved
+rho/species inadmissible` a 142.19487248520613°, tras 21.925 pasos aceptados.
+No se detectó periodicidad. Los puntos 7000, 9000, 11000 y 13000 RPM no
+comenzaron.
+
+El agregador en memoria abortó al comparar la especie terminal de una lista de
+records con referencias mutables que cambiaron durante ciclos posteriores. Los
+archivos primarios escritos en disco conservaron igualdad interna. Se
+reconstruyó el resumen faltante exclusivamente con esos archivos: source
+binding, replay inicial, replay de restart, 23 records primarios, ledger y
+auditoría de periodicidad pasaron. El recibo compacto es
+`results/2t-commercial-core-20261002/kt100_v2_recovery_r1_5000_offline_audit.json`;
+los datos originales de la ejecución permanecen en el directorio R1 no
+versionado. El allowance de una ejecución R1 está consumido; no se reintentó.
+Esto no acredita periodicidad, calificación física ni verificación de KT100.
+
+El triage siguió `forensics → domain/research → skeptic → contract → decision`
+para cada blocker y es una autorrevisión secuencial, no revisión independiente:
+
+- La integración estática de reed/intake/cárter ya está implementada. La reed
+  dinámica autónoma calcula fuerza con `pressure_area_m2` y área de flujo con
+  `effective_width_m × lift`, pero la topología integrada no liga el movimiento
+  con un volumen desplazado ni identifica los volúmenes de control vecinos. La
+  identidad de trabajo podría expresarse como fuerza por desplazamiento y
+  cancelarse con trabajo de presión de gas, pero asignar un área barrida o una
+  cámara sin esa ligadura inventaría geometría. La cola separa el trabajo
+  estático completado del acoplamiento dinámico, que queda `BLOCKED_LOCAL` por
+  esa dependencia concreta; no se implementó splitting.
+- La integración de P7 prescrito, paredes, trabajo mecánico, pseudo-especies y
+  sus ledgers está completa para entradas explícitas. V4 conserva V1–V3 y agrega
+  fresh_air/fuel pseudo-especies en el último cierre exacto de puertos del
+  cilindro y su cociente, nombrado como ratio de especies y no AFR. El valor en
+  ese evento no se generaliza como combustible total químico atrapado. `FuelProperties`
+  exige AFR estequiométrica y LHV explícitos. El combustible P6 es un pseudo-
+  species; el calor P7 prescrito no tiene una relación aprobada con LHV.
+  `fuel.py` no usa valores por defecto; AFR estequiométrica/equivalencia y
+  energía por LHV quedan `UNDEFINED` hasta existir esas propiedades.
+- La colección V3 de evidencia de ciclo reconstruye outputs disponibles,
+  valida los primarios y preserva estados `UNDEFINED`; V4 agrega el evento
+  explícito anterior sin alterar los esquemas antiguos. Sus dependencias
+  anteriores en reed dinámica y propiedades ausentes eran demasiado amplias;
+  65 pruebas focales de integrado, outputs y fuel pasaron. El collector queda
+  cerrado para las capacidades presentes y `CONDITIONAL_ON_P4`.
+- AUD-09 Fixture C es el segundo caso sintético materialmente distinto: conserva
+  piston-port y quita la reed de A; completó 20 ciclos admisibles, replay 3→4
+  exacto y `PERIOD_1` al ciclo 20. No renombra ni revive el antiguo Fixture B
+  de cámara 20% más larga, que permanece supersedido. El grupo automatizado
+  P4–P8 se separó como tarea `READY`; no es campaña científica.
+
+No se modificaron solver, ecuaciones, geometría, RPM, CFL, tolerancias, P4–P9 ni
+resultados históricos. P4/P9 y su provenance no se reinterpretan aquí. El
+Commercial Core permanece incompleto y no está declarado `READY`; la evidencia
+del motor sigue sintética y condicionada. La cola durable en
+`results/2t-commercial-core-20261002/program-status.json` contiene los tres
+bloqueos concretos: reed dinámica sin geometría de interfaz, AFR
+estequiométrica/LHV sin propiedades explícitas, y recuperación KT100 R1
+consumida con cuatro puntos ausentes. La suite P4–P8 queda ejecutada: 300
+pruebas pasaron en 177,49 s con cuatro warnings NumPy preexistentes. La prueba
+focal V4 final (48,98 s) valida cierres contra geometría y endpoints aceptados,
+rechaza species snapshots adulterados y conserva V1–V3. OpenSpec estricto pasó
+32/32; no se declara readiness.

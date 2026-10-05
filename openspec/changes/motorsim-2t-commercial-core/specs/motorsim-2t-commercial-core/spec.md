@@ -597,6 +597,16 @@ undefined when that sink or the corresponding power is nonpositive. The output
 MUST state that P7 consumption is prescribed bookkeeping, not measured or
 experimentally validated fuel burn.
 
+The additive `MOTORSIM_ENGINEERING_OUTPUTS_V4` MUST preserve V3 unchanged and
+may report cylinder `fresh_air` and `fuel` pseudo-species masses at the later
+of the exact aggregate transfer-closure and exhaust-closure events. This is the
+last exact cylinder gas-exchange-port closure state; it MUST be sourced from
+the accepted SSPRK2 endpoint and MUST remain UNDEFINED without both exact
+snapshots. The associated fresh-air/fuel pseudo-species mass ratio MUST be
+named as a species ratio, MUST be UNDEFINED for zero fuel, and MUST NOT be
+called AFR or equivalence ratio. V4 MUST keep AFR/equivalence ratio UNDEFINED
+without explicit stoichiometric properties and MUST NOT infer LHV from P7 heat.
+
 #### Scenario: Build a trace with unavailable metric
 
 - **WHEN** a complete crank-angle trace and supported cycle metrics are supplied
@@ -695,6 +705,15 @@ previous cycle's values.
   that snapshot as `cylinder_fuel_species_at_exhaust_close_kg`; without the
   snapshot it MUST be UNDEFINED, and the value MUST NOT be labeled as total
   trapped fuel or reconstructed from the terminal global inventory.
+
+#### Scenario: Report pseudo-species at the last exact cylinder port closure
+
+- **WHEN** a V4 primary cycle contains validated exact transfer and exhaust
+  closure snapshots from accepted SSPRK2 terminal stages
+- **THEN** V4 reports the cylinder `fresh_air` and `fuel` pseudo-species masses
+  from whichever aggregate closure occurs later and their species-mass ratio
+  when fuel mass is positive; the ratio is not AFR, missing/zero-denominator
+  values are UNDEFINED, and V3 remains byte-semantically unchanged.
 
 #### Scenario: Verify a second integrated synthetic configuration
 
