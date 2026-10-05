@@ -762,7 +762,8 @@
       "blocker": "The single preregistered campaign ran once; each of five RPM points reached 390 degrees, then cycle-primary construction failed with KeyError(transfer1) because the evidence writer used product labels instead of P6 keys tr1/tr2. The mapping defect is fixed and tested, but R6 has zero primary cycles and the one-run authorization is consumed; no retry.",
       "commits": [
         "80fcf626e160ad582cacfafae2102a72b2df7bed",
-        "8529a89ac4566caa85d95d9eae4a3786d44e1594"
+        "8529a89ac4566caa85d95d9eae4a3786d44e1594",
+        "df5cbd7"
       ],
       "evidence": [
         "docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md",
@@ -773,7 +774,8 @@
         "tests/test_kt100_open_end_plenum_v2.py::test_cycle_evidence_maps_transfer_output_names_to_p6_species_names (PASS)",
         "24 relevant reference-harness and producer tests PASS after correction",
         "tests/test_kt100_open_end_plenum_v2.py::test_cycle_evidence_maps_transfer_output_names_to_p6_species_names",
-        "24 campaign-producer/reference-harness tests PASS after evidence-writer correction; OpenSpec all-strict 32/32 PASS"
+        "24 campaign-producer/reference-harness tests PASS after evidence-writer correction; OpenSpec all-strict 32/32 PASS",
+        "df5cbd7: evidence-writer mapping correction, regression test, and immutable R6 outcome receipt"
       ],
       "next_action": "Do not rerun the consumed campaign or infer boundary physics from the writer failure. No other READY task exists; retain this local blocker until a future separate preregistration is authorized."
     },
@@ -1325,7 +1327,7 @@
     "historical_cycle_evidence": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
     "current_head_reconciled": "3d10f79",
     "next_action": "AUD-01..AUD-18 are present in the durable queue and reconciled; priority-1 findings are closed and audit_remediation_mode is false. AUD-11 is CASE B, not SCIENTIFIC_DECISION_REQUIRED. OPEN_END_PLENUM_V2 analytical implementation is tested; the sole preregistered KT100 campaign failed before cycle-primary emission due to the fixed transfer-label mapping defect and cannot be retried under that preregistration. The autonomous queue currently has zero READY tasks and six BLOCKED_LOCAL items; see continuation_status. Do not create a new campaign or invent unresolved physics.",
-    "reconciled_head": "8529a89ac4566caa85d95d9eae4a3786d44e1594",
+    "reconciled_head": "df5cbd7",
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
     "current_remediation": [
       "AUD-01 RESOLVED_BY_LATER_COMMIT",
@@ -1404,9 +1406,9 @@
     },
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
     "current_delta": {
-      "range": "8529a89ac4566caa85d95d9eae4a3786d44e1594..WORKING_TREE",
+      "range": "8529a89ac4566caa85d95d9eae4a3786d44e1594..df5cbd7",
       "review_kind": "SELF_REVIEW",
-      "result": "The current delta does not reopen any AUD finding. It corrects the evidence writer and reconciles campaign/governance state; current campaign receipt records five post-advance evidence failures and no cycle-primary acceptance.",
+      "result": "Commit df5cbd7 corrects the evidence writer and reconciles campaign/governance state; its campaign receipt records five post-advance evidence failures and no cycle-primary acceptance.",
       "evidence": "results/2t-commercial-core-20261002/aud-11-kt100-v2-campaign-audit.json"
     }
   },
