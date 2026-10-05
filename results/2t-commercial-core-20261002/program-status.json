@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "d311a24",
+  "status_capture_head": "33cf353084728a3a25fef0dc23234fba81a4ff30",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -1064,7 +1064,8 @@
       "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e",
-        "d311a24"
+        "d311a24",
+        "33cf353084728a3a25fef0dc23234fba81a4ff30"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md",
@@ -1109,7 +1110,8 @@
       "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e",
-        "d311a24"
+        "d311a24",
+        "33cf353084728a3a25fef0dc23234fba81a4ff30"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md",
