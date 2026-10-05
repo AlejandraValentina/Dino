@@ -29,15 +29,18 @@ class IntegratedP5C:
                  *, eos=None, meshes=None, exhaust_mesh=None,
                  exhaust_area=1.0e-4, port_area=0.0, volume_rates=(0.0, 0.0),
                  external_boundary=False, geometry_callback=None,
-                 external_boundary_flux_convention="legacy_contract"):
+                 external_boundary_flux_convention="legacy_contract",
+                 external_boundary_model=None):
         self.eos = eos or IdealGas()
+        self.external_boundary_model = external_boundary_model
         self.core = IntegratedIntakeTransfer(crankcase, cylinder, duct_states,
                                              eos=self.eos, meshes=meshes,
                                              volume_rates=volume_rates,
                                              geometry_callback=geometry_callback,
                                              external_boundary=external_boundary,
                                              external_boundary_flux_convention=(
-                                                 external_boundary_flux_convention))
+                                                 external_boundary_flux_convention),
+                                             external_boundary_model=external_boundary_model)
         if exhaust_states is None:
             exhaust_states = ((1.0, 0.0, 100000.0, 0.0),) * 3
         self.exhaust_mesh = exhaust_mesh or uniform_mesh(len(exhaust_states),
@@ -96,7 +99,8 @@ class IntegratedP5C:
             self.exhaust.cells[i].apply_flux(extensive, dt, self.eos, sign=-1.0)
             self.exhaust.cells[i + 1].apply_flux(extensive, dt, self.eos, sign=1.0)
         outlet = self.eos.primitive(self.exhaust.cells[-1].conservative)
-        out = Boundary("outflow").flux(outlet, 1, self.eos)[0]
+        outlet_boundary = self.external_boundary_model or Boundary("outflow")
+        out = outlet_boundary.flux(outlet, 1, self.eos)[0]
         ext = tuple(self.exhaust_mesh.areas[-1] * x for x in out)
         self.exhaust.cells[-1].apply_flux(ext, dt, self.eos, sign=-1.0)
         for key, idx in (("external_mass", 0), ("external_energy", 2),
@@ -132,7 +136,8 @@ class IntegratedP5C:
         for a, b, area in zip(prim, prim[1:], self.exhaust_mesh.areas[1:]):
             f, _, _ = hllc_flux(a, b, self.eos)
             faces.append(tuple(area * x for x in f))
-        out = Boundary('outflow').flux(prim[-1], 1, self.eos)[0]
+        outlet_boundary = self.external_boundary_model or Boundary('outflow')
+        out = outlet_boundary.flux(prim[-1], 1, self.eos)[0]
         faces.append(tuple(self.exhaust_mesh.areas[-1] * x for x in out))
         rhs = tuple(tuple(-(faces[i + 1][k] - faces[i][k]) /
                           self.exhaust_mesh.volumes[i] for k in range(4))

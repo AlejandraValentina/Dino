@@ -1,0 +1,200 @@
+{
+  "status": "KT100_R5_FAILURE_FACE_INSTRUMENTATION_V1",
+  "classification": "PRE_CAMPAIGN_DIAGNOSTIC_ONLY",
+  "boundary_used": "LEGACY_CHARACTERISTIC_V1",
+  "source_config": "configs/fixtures/kt100_hybrid_model_fixture_v2.json",
+  "source_config_sha256": "daf8bc60d61872a0352df811a588d4594f4b33ffba453e6106f838dd99f4643e",
+  "preserved_receipts": "results/kt100-hybrid-model-fixture-v2-harness-20261002-r5/",
+  "points": [
+    {
+      "rpm": 5000,
+      "status": "REPRODUCED_V1_FAILURE",
+      "angle_deg": 88.02583724627846,
+      "accepted_steps": 129,
+      "matches_preserved_r5_failure_exactly": true,
+      "error": "No consistent reservoir inflow branch",
+      "failing_face": {
+        "exception": "No consistent reservoir inflow branch",
+        "kind": "reservoir",
+        "selected_branch": "V1_RESERVOIR_SUBSONIC_INFLOW_REJECTED",
+        "normal": -1,
+        "interior_primitive": [
+          1.099634149444232,
+          -8.04279298474223,
+          97480.28216714619,
+          1.0
+        ],
+        "temperature_K": 308.8777765556875,
+        "sound_speed_m_s": 345.9403048598141,
+        "normal_velocity_m_s": 8.04279298474223,
+        "entropy_parameter_p_over_rho_gamma": 85749.51702984526,
+        "outgoing_invariant_Jplus_m_s": 1984.8445350408222,
+        "reservoir_rest_invariant_m_s": 1948.1859694157974,
+        "invariant_excess_m_s": 36.65856562502472,
+        "ambient_pressure_Pa": 101325.0,
+        "reservoir_stagnation_temperature_K": 300.0,
+        "reservoir_entropy_parameter_p_over_rho_gamma": 81330.49960170145,
+        "reservoir_species_mass_fractions": {
+          "fresh_air": 1.0,
+          "fuel": 0.0,
+          "residual": 0.0,
+          "burned": 0.0
+        },
+        "characteristic_residual_m_s": 36.65856562502472
+      },
+      "boundary_failures_observed": 1
+    },
+    {
+      "rpm": 7000,
+      "status": "REPRODUCED_V1_FAILURE",
+      "angle_deg": 90.30931958065604,
+      "accepted_steps": 95,
+      "matches_preserved_r5_failure_exactly": true,
+      "error": "No consistent reservoir inflow branch",
+      "failing_face": {
+        "exception": "No consistent reservoir inflow branch",
+        "kind": "reservoir",
+        "selected_branch": "V1_RESERVOIR_SUBSONIC_INFLOW_REJECTED",
+        "normal": -1,
+        "interior_primitive": [
+          1.0994749087224132,
+          -9.083523527021422,
+          96403.48724918402,
+          1.0
+        ],
+        "temperature_K": 305.51006646117725,
+        "sound_speed_m_s": 344.0492337593315,
+        "normal_velocity_m_s": 9.083523527021422,
+        "entropy_parameter_p_over_rho_gamma": 84818.88488120647,
+        "outgoing_invariant_Jplus_m_s": 1975.0791450089155,
+        "reservoir_rest_invariant_m_s": 1948.1859694157974,
+        "invariant_excess_m_s": 26.89317559311803,
+        "ambient_pressure_Pa": 101325.0,
+        "reservoir_stagnation_temperature_K": 300.0,
+        "reservoir_entropy_parameter_p_over_rho_gamma": 81330.49960170145,
+        "reservoir_species_mass_fractions": {
+          "fresh_air": 1.0,
+          "fuel": 0.0,
+          "residual": 0.0,
+          "burned": 0.0
+        },
+        "characteristic_residual_m_s": 26.89317559311803
+      },
+      "boundary_failures_observed": 1
+    },
+    {
+      "rpm": 9000,
+      "status": "REPRODUCED_V1_FAILURE",
+      "angle_deg": 91.9617253154556,
+      "accepted_steps": 75,
+      "matches_preserved_r5_failure_exactly": true,
+      "error": "No consistent reservoir inflow branch",
+      "failing_face": {
+        "exception": "No consistent reservoir inflow branch",
+        "kind": "reservoir",
+        "selected_branch": "V1_RESERVOIR_SUBSONIC_INFLOW_REJECTED",
+        "normal": -1,
+        "interior_primitive": [
+          1.10131354635011,
+          -13.967088799640186,
+          95698.63059537359,
+          1.0
+        ],
+        "temperature_K": 302.77000315877547,
+        "sound_speed_m_s": 342.5029017743756,
+        "normal_velocity_m_s": 13.967088799640186,
+        "entropy_parameter_p_over_rho_gamma": 84009.01616779286,
+        "outgoing_invariant_Jplus_m_s": 1971.1265275103572,
+        "reservoir_rest_invariant_m_s": 1948.1859694157974,
+        "invariant_excess_m_s": 22.94055809455972,
+        "ambient_pressure_Pa": 101325.0,
+        "reservoir_stagnation_temperature_K": 300.0,
+        "reservoir_entropy_parameter_p_over_rho_gamma": 81330.49960170145,
+        "reservoir_species_mass_fractions": {
+          "fresh_air": 1.0,
+          "fuel": 0.0,
+          "residual": 0.0,
+          "burned": 0.0
+        },
+        "characteristic_residual_m_s": 22.94055809455972
+      },
+      "boundary_failures_observed": 1
+    },
+    {
+      "rpm": 11000,
+      "status": "REPRODUCED_V1_FAILURE",
+      "angle_deg": 94.48698844740409,
+      "accepted_steps": 63,
+      "matches_preserved_r5_failure_exactly": true,
+      "error": "No consistent reservoir inflow branch",
+      "failing_face": {
+        "exception": "No consistent reservoir inflow branch",
+        "kind": "reservoir",
+        "selected_branch": "V1_RESERVOIR_SUBSONIC_INFLOW_REJECTED",
+        "normal": -1,
+        "interior_primitive": [
+          1.0996595509158553,
+          -8.949566084229142,
+          94876.03892709974,
+          1.0
+        ],
+        "temperature_K": 300.6189802759535,
+        "sound_speed_m_s": 341.2840809471168,
+        "normal_velocity_m_s": 8.949566084229142,
+        "entropy_parameter_p_over_rho_gamma": 83456.06552020815,
+        "outgoing_invariant_Jplus_m_s": 1959.1443143534677,
+        "reservoir_rest_invariant_m_s": 1948.1859694157974,
+        "invariant_excess_m_s": 10.95834493767029,
+        "ambient_pressure_Pa": 101325.0,
+        "reservoir_stagnation_temperature_K": 300.0,
+        "reservoir_entropy_parameter_p_over_rho_gamma": 81330.49960170145,
+        "reservoir_species_mass_fractions": {
+          "fresh_air": 1.0,
+          "fuel": 0.0,
+          "residual": 0.0,
+          "burned": 0.0
+        },
+        "characteristic_residual_m_s": 10.95834493767029
+      },
+      "boundary_failures_observed": 1
+    },
+    {
+      "rpm": 13000,
+      "status": "REPRODUCED_V1_FAILURE",
+      "angle_deg": 95.51281876637265,
+      "accepted_steps": 54,
+      "matches_preserved_r5_failure_exactly": true,
+      "error": "No consistent reservoir inflow branch",
+      "failing_face": {
+        "exception": "No consistent reservoir inflow branch",
+        "kind": "reservoir",
+        "selected_branch": "V1_RESERVOIR_SUBSONIC_INFLOW_REJECTED",
+        "normal": -1,
+        "interior_primitive": [
+          1.1024611949017515,
+          -16.46302581859051,
+          94678.36369675398,
+          1.0
+        ],
+        "temperature_K": 299.2302772231686,
+        "sound_speed_m_s": 340.4948911659567,
+        "normal_velocity_m_s": 16.46302581859051,
+        "entropy_parameter_p_over_rho_gamma": 82996.59443596003,
+        "outgoing_invariant_Jplus_m_s": 1962.1481181954853,
+        "reservoir_rest_invariant_m_s": 1948.1859694157974,
+        "invariant_excess_m_s": 13.962148779687823,
+        "ambient_pressure_Pa": 101325.0,
+        "reservoir_stagnation_temperature_K": 300.0,
+        "reservoir_entropy_parameter_p_over_rho_gamma": 81330.49960170145,
+        "reservoir_species_mass_fractions": {
+          "fresh_air": 1.0,
+          "fuel": 0.0,
+          "residual": 0.0,
+          "burned": 0.0
+        },
+        "characteristic_residual_m_s": 13.962148779687823
+      },
+      "boundary_failures_observed": 1
+    }
+  ]
+}

@@ -106,6 +106,19 @@ def validate_config(config):
             boundaries.get("atmosphere_species_mass_fractions") != {
                 "fresh_air": 1.0, "fuel": 0.0, "residual": 0.0, "burned": 0.0}):
         raise ValueError("the current P5-C/P6 atmospheric boundary is fixed at 101325 Pa, 300 K, fresh_air=1")
+    boundary_capability = boundaries.get(
+        "external_boundary_capability", "LEGACY_CHARACTERISTIC_V1")
+    if boundary_capability not in ("LEGACY_CHARACTERISTIC_V1", "OPEN_END_PLENUM_V2"):
+        raise ValueError("unsupported external boundary capability")
+    if (boundary_capability == "OPEN_END_PLENUM_V2" and
+            boundaries.get("external_boundary_provenance") != "SYNTHETIC_ASSUMPTION"):
+        raise ValueError("OPEN_END_PLENUM_V2 requires SYNTHETIC_ASSUMPTION provenance")
+    if boundary_capability == "OPEN_END_PLENUM_V2":
+        model = config.get("boundary_model")
+        if (not isinstance(model, dict) or model.get("id") != boundary_capability or
+                model.get("provenance") != "SYNTHETIC_ASSUMPTION" or
+                "not calibrated WB40" not in str(model.get("description", ""))):
+            raise ValueError("OPEN_END_PLENUM_V2 requires its explicit synthetic boundary-model identity")
     initial = config.get("initial_states")
     if not isinstance(initial, dict):
         raise ValueError("initial_states is required")
@@ -127,4 +140,5 @@ def validate_config(config):
         raise ValueError("evidence.checkpoint_cadence_cycles must be a positive integer")
     return {"project": project, "cfl": cfl, "dx_target_m": dx,
             "max_cycles": cycles, "gamma": gamma, "gas_R_J_kgK": gas_r,
-            "physical_event_phase_deg": phase, "transfer_meshes": meshes}
+            "physical_event_phase_deg": phase, "transfer_meshes": meshes,
+            "external_boundary_capability": boundary_capability}

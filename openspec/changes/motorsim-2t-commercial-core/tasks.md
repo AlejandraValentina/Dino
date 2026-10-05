@@ -3,12 +3,20 @@
 Estado reconstruido desde `401d8d7`. Las fases son una cola durable única; marcar
 solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
 
-- [ ] AUD-11 / `OPEN_END_PLENUM_V2`: preregistro científico versionado y
-      comprometido antes del código/campaña; implementación aislada sin editar
-      V1; tests mínimos; instrumentar caras KT100 históricas; una campaña KT100
-      V2; clasificación aceptada y actualización de cola. Ver contrato y
-      evidencia en la sección de frontera externa de `design.md` y en
-      `docs/gasdynamic/open_end_plenum_v2_preregistration.md`.
+- [x] AUD-11 scientific decision recorded as CASE B; `OPEN_END_PLENUM_V2`
+      equations, provenance and tests preregistered in commit `80fcf62` before
+      implementation/campaign; audit remediation mode exited because no other
+      AUD items remain open.
+- [x] Additive boundary module and P5-C opt-in wiring implemented; V1 defaults,
+      equations, Fixtures A/B and P3-R1 are unchanged. Twenty-one focused tests
+      pass; see `tests/test_open_end_plenum_v2.py` and
+      `tests/test_kt100_open_end_plenum_v2.py`.
+- [x] Replayed and instrumented all five preserved r5 failure faces; every RPM
+      matches its original accepted-step count, failure angle and error exactly.
+      Receipt: `results/2t-commercial-core-20261002/aud-11-kt100-r5-failure-face-instrumentation-v2.json`.
+- [ ] Execute exactly one preregistered five-point KT100 V2 campaign using the
+      committed `OPEN_END_PLENUM_V2` config; accept and audit its result without
+      tuning. Command: `python scripts/run_kt100_open_end_plenum_v2.py`.
 
 - [ ] Fase 1: harness reusable y evidencia multi-ciclo. Parcial: harness y
       contrato de periodicidad implementados; KT100 r5 falla antes del ciclo 1

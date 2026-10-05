@@ -838,13 +838,15 @@ class IntegratedIntakeTransfer:
     def __init__(self, crankcase, cylinder, duct_states, *, eos=None,
                  volume_rates=(0.0, 0.0), meshes=None, external_boundary=True,
                  geometry_callback=None,
-                 external_boundary_flux_convention="legacy_contract"):
+                 external_boundary_flux_convention="legacy_contract",
+                 external_boundary_model=None):
         if len(duct_states) != 3:
             raise ValueError("expected intake, transfer1 and transfer2 states")
         self.eos = eos or IdealGas()
         self.crankcase = crankcase
         self.cylinder = cylinder
         self.external_boundary = bool(external_boundary)
+        self.external_boundary_model = external_boundary_model
         self.geometry_callback = geometry_callback
         if external_boundary_flux_convention not in ("legacy_contract", "global_x"):
             raise ValueError("unsupported external boundary flux convention")
@@ -1035,7 +1037,8 @@ class IntegratedIntakeTransfer:
             ai, at1, at2 = (float(x) for x in areas[:3])
         # The only external boundary. Its face flux is in the duct +x sign.
         if self.external_boundary:
-            atmosphere = Boundary('reservoir', p0=101325.0, T0=300.0, Y0=0.0)
+            atmosphere = (self.external_boundary_model or
+                          Boundary('reservoir', p0=101325.0, T0=300.0, Y0=0.0))
             ext = atmosphere.flux(intake_p[0], -1, self.eos)
             ext_face = tuple(self.intake.mesh.areas[0] * value for value in ext[0])
         else:

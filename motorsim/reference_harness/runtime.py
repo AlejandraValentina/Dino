@@ -12,6 +12,7 @@ from ..p6_species import P6IntegratedSystem
 from ..coupling import ChamberState
 from ..duct_network import interface_exchange
 from ..gas1d.boundary import Boundary
+from ..gas1d.open_end_plenum_v2 import OpenEndPlenumV2Boundary
 from ..simulation import Model
 from ..simulation_case import SyntheticCase
 
@@ -91,11 +92,19 @@ def build_system(config):
     # and transfer sections are separate physical boundaries and must not
     # cap the exhaust pipe area.
     pipe_area = min(exhaust_mesh.areas)
+    boundary = None
+    if parsed["external_boundary_capability"] == "OPEN_END_PLENUM_V2":
+        boundary = OpenEndPlenumV2Boundary(
+            p0=config["boundaries"]["atmosphere_pressure_Pa"],
+            T0=config["boundaries"]["atmosphere_temperature_K"],
+            Y0=config["boundaries"]["atmosphere_species_mass_fractions"]["fresh_air"] +
+               config["boundaries"]["atmosphere_species_mass_fractions"]["fuel"])
     gas = IntegratedP5C(chambers[0], chambers[1], (intake, tr1, tr2), exhaust,
                         eos=eos, meshes=meshes, exhaust_mesh=exhaust_mesh,
                         exhaust_area=pipe_area, external_boundary=True,
                         geometry_callback=geometry_callback,
-                        external_boundary_flux_convention="global_x")
+                        external_boundary_flux_convention="global_x",
+                        external_boundary_model=boundary)
     start_scheduler = START_DEG + offset
     gas.angle = start_scheduler
     gas.core.angle = start_scheduler
@@ -209,10 +218,15 @@ def cfl_limit(system, cfl):
                     boundary_speeds[0 if side == "left" else -1], value)
         if path_index == 0:
             # The intake's left reservoir is an external P5-C boundary.
-            boundary = Boundary("reservoir", p0=101325.0, T0=300.0, Y0=0.0)
+            boundary = (gas.external_boundary_model or
+                        Boundary("reservoir", p0=101325.0, T0=300.0, Y0=0.0))
             _, reservoir_speeds, _ = boundary.flux(states[0], -1, eos)
             boundary_speeds[0] = max(boundary_speeds[0],
                                      *(abs(x) for x in reservoir_speeds))
+        elif path_index == 3 and gas.external_boundary_model is not None:
+            _, external_speeds, _ = gas.external_boundary_model.flux(states[-1], 1, eos)
+            boundary_speeds[-1] = max(boundary_speeds[-1],
+                                      *(abs(x) for x in external_speeds))
         dt = _duct_cfl_step(path.mesh, states, boundary_speeds,
                             face_areas[path_index], eos, cfl)
         limits.append(dt)

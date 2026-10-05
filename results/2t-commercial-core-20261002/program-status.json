@@ -752,13 +752,13 @@
       "dependencies": ["AUD-11"],
       "state": "IN_PROGRESS",
       "blocker": null,
-      "commits": [],
+      "commits": ["80fcf626e160ad582cacfafae2102a72b2df7bed"],
       "evidence": [
         "docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md",
         "docs/gasdynamic/open_end_plenum_v2_preregistration.md",
         "results/2t-commercial-core-20261002/preregistration/open-end-plenum-v2.json"
       ],
-      "next_action": "Implement the preregistered OPEN_END_PLENUM_V2 additively; pass the frozen boundary suite; instrument the exact preserved KT100 r5 failure faces; then run the one preregistered r6 campaign."
+      "next_action": "Run the one preregistered five-point campaign once after the implementation commit; accept the observed outcome and audit its receipts without tuning or rerunning."
     },
     {
       "id": "integrated-intake-plenum",
