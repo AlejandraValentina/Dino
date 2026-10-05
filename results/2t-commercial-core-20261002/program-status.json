@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "e099fe5b74183e743b945c967af27c3c8b83fee1",
+  "status_capture_head": "6cff0a6ca83213c162da51012a7580c030a33d87",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -1208,7 +1208,9 @@
         "audit-range:ab92aee..8cdf66e",
         "01172a2d7b2f7f97db9a7a46e12cf328962aef52",
         "57dfa97032037a96ab3869cf46b7180f35bb77a0",
-        "e099fe5b74183e743b945c967af27c3c8b83fee1"
+        "e099fe5b74183e743b945c967af27c3c8b83fee1",
+        "e099fe5b74183e743b945c967af27c3c8b83fee1",
+        "706538f3a742924000bdd5d038da432269774eb2"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md",
@@ -1235,7 +1237,8 @@
       "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e",
-        "9eada5d"
+        "9eada5d",
+        "01dd58c0e8ff865d73a7b6247564d92d7c4e39a2"
       ],
       "evidence": [
         "motorsim/integrated_2t.py::make_integrated_cycle_primary recalculates both saved SSPRK2 stages using _assemble and compares the recorded rates, resolved geometry, fluxes, work, thermal/P7 terms and limiter.",
@@ -1257,7 +1260,8 @@
       "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "audit-range:ab92aee..8cdf66e",
+        "39d4750442c966b7007a1755d2ce9e909ef78523"
       ],
       "evidence": [
         "motorsim/reference_harness/convergence.py adds compare_cycles_v2 and PeriodicDetectorV2; V1 definitions unchanged. Signed work is abs(a-b)/max(1,abs(a),abs(b)) with existing 0.005 threshold; other metrics reuse V1.",
@@ -1278,7 +1282,8 @@
       "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "audit-range:ab92aee..8cdf66e",
+        "6cff0a6ca83213c162da51012a7580c030a33d87"
       ],
       "evidence": [
         "tests/test_example_projects.py::test_generator_is_deterministic_from_another_directory redirects generation to a temporary repository root and verifies repeatable output; the checked-in examples/projects files are only read.",
@@ -1320,7 +1325,7 @@
     }
   },
   "audit_reconciliation": {
-    "head": "e099fe5b74183e743b945c967af27c3c8b83fee1",
+    "head": "6cff0a6ca83213c162da51012a7580c030a33d87",
     "findings": {
       "AUD-01": "RESOLVED_BY_LATER_COMMIT",
       "AUD-02": "RESOLVED_BY_LATER_COMMIT",
@@ -1383,5 +1388,5 @@
       "AUD-18": "PASS: example-project and low-RPM diagnostics tests 11 passed; generator output is isolated to temporary root; source hash check is line-ending independent."
     }
   },
-  "last_status_reviewed_head": "e099fe5b74183e743b945c967af27c3c8b83fee1"
+  "last_status_reviewed_head": "6cff0a6ca83213c162da51012a7580c030a33d87"
 }
