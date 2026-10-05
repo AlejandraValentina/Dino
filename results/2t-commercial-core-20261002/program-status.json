@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "16cfebf0c0b83bb4a02fa3bbf4ea4b5def17084e",
+  "status_capture_head": "5b473866bb8459e874f0e7826f202e3838fe7a85",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -718,7 +718,8 @@
       "state": "DONE",
       "blocker": null,
       "commits": [
-        "c92a924"
+        "c92a924",
+        "5b473866bb8459e874f0e7826f202e3838fe7a85"
       ],
       "evidence": [
         "IntegratedNetworkVolume2T binds distinct intake-left and exhaust-right endpoints with validated direction, node/connection identity and positive face area; legacy intake-plenum input normalizes to the same binding.",
@@ -738,13 +739,13 @@
         "17a-integrated-gas-species-foundation",
         "integrated-network-multi-endpoint"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "evidence": [
         "Engine configuration identity is already canonical JSON and checkpoints bind it; engine construction still requires caller-supplied geometry callback."
       ],
-      "next_action": "Inspect existing component serializers and geometry resolver, then design a bounded versioned config/factory with round-trip and exact replay tests; do not invent defaults."
+      "next_action": "Inspect the stage geometry resolver and component serializers; build a bounded versioned factory for existing supported static/moving-geometry configurations and verify canonical round-trip plus replay."
     },
     {
       "id": "dynamic-reed-stage-coupling",
