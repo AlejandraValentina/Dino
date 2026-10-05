@@ -658,6 +658,21 @@ antes de la campaña. La campaña se ejecutó solo después del preregistro.
 
 Validación: `python -m pytest tests/test_integrated_2t.py -q` — **48 passed**.
 
+### AUD-17 — periodicity detector V2 para trabajo con signo (2026-10-05)
+
+- [x] Conservar intactos `compare_cycles`/`PeriodicDetector` V1 y añadir
+  `compare_cycles_v2`/`PeriodicDetectorV2` bajo un contrato de detector propio.
+- [x] V2 admite trabajo indicado negativo con
+  `abs(a-b)/max(1 J, abs(a), abs(b)) <= 0.005`; el resto de observables y gates
+  reutiliza las métricas V1. El registro de ciclo sigue en su schema V1.
+- [x] V2 serializa/restaura su identidad, reproduce toda la historia y conserva
+  precedencia period-1 y streaks A/B independientes; rechaza snapshots V1.
+- [x] Cubrir comparación negativa, cruce de signo, bool inválido, convergencia
+  period-1/period-2, restore y separación V1/V2.
+
+Validación focal: `python -m pytest tests/test_reference_harness.py -q` —
+**13 passed**. OpenSpec estricto queda por ejecutar tras los cambios AUD-16/17.
+
 
 ### Correcciones prioritarias AUD-01 / AUD-02 — 2026-10-05
 

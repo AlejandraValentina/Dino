@@ -674,6 +674,32 @@ made from that same state. The terminal point MUST be a read-only evaluation of
 the accepted terminal state; a requested prescribed P7 endpoint rate MUST be
 identified as pre-limiter and MUST NOT enter cycle ledgers or conservation.
 
+### Requirement: Preserve V1 periodicity and add a signed-work V2 detector
+
+`REFERENCE_PERIODIC_CONVERGENCE_V1` MUST remain unchanged. The separately
+versioned `REFERENCE_PERIODIC_CONVERGENCE_V2` MUST accept finite signed
+indicated work while retaining the existing 1 J denominator floor and 0.005
+relative threshold:
+`abs(work_a-work_b) / max(1 J, abs(work_a), abs(work_b))`.
+All other V1 observables, thresholds, period-1 precedence, period-2 A/B branch
+identity, three-comparison streaks, and restart replay rules MUST remain the
+same. V2 detector snapshots MUST identify V2 and MUST NOT restore as V1 or
+rewrite historical V1 results. This detector version does not change the cycle
+primary record schema or constitute convergence evidence by itself.
+
+#### Scenario: Compare negative work without changing V1
+
+- **WHEN** two compatible cycle-primary records contain finite negative
+  indicated work
+- **THEN** V1 retains its prior INVALID behavior while V2 compares signed work
+  with the specified magnitude denominator and unchanged threshold.
+
+#### Scenario: Restore signed-work period detection
+
+- **WHEN** a V2 detector snapshot contains complete history and streak state
+- **THEN** restore replays that history under V2, preserves independent A/B
+  streaks and period-1 precedence, and rejects a V1 snapshot.
+
 ### Requirement: Exploratory experimental-data import remains separate from P9
 
 The reusable importer MUST support pressure trace, dyno torque and dyno power

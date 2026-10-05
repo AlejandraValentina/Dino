@@ -5,6 +5,7 @@ from copy import deepcopy
 from math import isfinite
 
 CONTRACT = "REFERENCE_PERIODIC_CONVERGENCE_V1"
+CONTRACT_V2 = "REFERENCE_PERIODIC_CONVERGENCE_V2"
 STREAK = 3
 THRESHOLDS = {
     "chamber_mass_relative": 0.002,
@@ -213,3 +214,129 @@ class PeriodicDetector:
             replayed.update(record)
         if replayed.snapshot() != self.snapshot():
             raise ValueError("persisted detector state does not match its complete history")
+
+
+def compare_cycles_v2(older, later):
+    """V2 comparison: preserve V1 metrics but allow signed indicated work.
+
+    Cycle primary records retain their V1 data contract. Only detector
+    semantics are versioned: work uses the same 1 J floor and 0.005 relative
+    threshold, with absolute magnitude in the denominator and a signed
+    difference in the numerator.
+    """
+    try:
+        if not isinstance(older, dict) or not isinstance(later, dict):
+            raise ValueError("cycle record must be an object")
+        work_a = older["observables"]["work_J"]
+        work_b = later["observables"]["work_J"]
+        if not _number(work_a) or not _number(work_b):
+            raise ValueError("INVALID signed work observable")
+        safe_older, safe_later = deepcopy(older), deepcopy(later)
+        safe_older["observables"]["work_J"] = 1.0
+        safe_later["observables"]["work_J"] = 1.0
+        result = compare_cycles(safe_older, safe_later)
+        if result["status"] == "INVALID":
+            result["contract"] = CONTRACT_V2
+            return result
+        denominator = max(1.0, abs(work_a), abs(work_b))
+        work_metric = abs(work_a - work_b) / denominator
+        threshold = THRESHOLDS["work_relative_floor_1J"]
+        result["metrics"]["work_J"] = {
+            "value": work_metric, "threshold": threshold,
+            "passed": work_metric <= threshold}
+        result["status"] = ("PASS" if all(metric["passed"]
+                            for metric in result["metrics"].values()) else "FAIL")
+        result["contract"] = CONTRACT_V2
+        return result
+    except (AttributeError, KeyError, TypeError, ValueError, IndexError) as exc:
+        return {"status": "INVALID", "reason": str(exc), "contract": CONTRACT_V2}
+
+
+class PeriodicDetectorV2:
+    """Restartable period-1/2 detector for signed-work cycle records."""
+    def __init__(self, state=None):
+        self.history = []
+        self.lag1_streak = 0
+        self.branch_streaks = {"A": 0, "B": 0}
+        self.detected_period = None
+        self.converged_cycle = None
+        if state is not None:
+            self.restore(state)
+
+    def update(self, record):
+        if self.detected_period is not None:
+            raise ValueError("detector already converged")
+        index = len(self.history) + 1
+        if record.get("cycle_index") != index:
+            raise ValueError("complete-cycle indexes must be contiguous from one")
+        self.history.append(deepcopy(record))
+        outcomes = {}
+        if index >= 2:
+            lag1 = compare_cycles_v2(self.history[-2], self.history[-1])
+            outcomes["lag1"] = lag1
+            self.lag1_streak = self.lag1_streak + 1 if lag1["status"] == "PASS" else 0
+            if self.lag1_streak >= STREAK:
+                self.detected_period = 1
+                self.converged_cycle = index
+        if index >= 3:
+            lag2 = compare_cycles_v2(self.history[-3], self.history[-1])
+            branch = "A" if (index - 1) % 2 == 0 else "B"
+            outcomes["lag2_branch"] = branch
+            outcomes["lag2"] = lag2
+            self.branch_streaks[branch] = (self.branch_streaks[branch] + 1
+                                           if lag2["status"] == "PASS" else 0)
+            if (self.detected_period is None and
+                    self.branch_streaks["A"] >= STREAK and
+                    self.branch_streaks["B"] >= STREAK):
+                self.detected_period = 2
+                self.converged_cycle = index
+        return {"outcomes": outcomes, "classification": self.classification,
+                "lag1_streak": self.lag1_streak,
+                "branch_streaks": dict(self.branch_streaks)}
+
+    @property
+    def classification(self):
+        return f"PERIOD_{self.detected_period}" if self.detected_period else None
+
+    def snapshot(self):
+        return {"contract": CONTRACT_V2, "history": deepcopy(self.history),
+                "lag1_streak": self.lag1_streak,
+                "branch_streaks": dict(self.branch_streaks),
+                "detected_period": self.detected_period,
+                "converged_cycle": self.converged_cycle}
+
+    def restore(self, state):
+        if not isinstance(state, dict) or state.get("contract") != CONTRACT_V2:
+            raise ValueError("detector contract mismatch")
+        history = state.get("history")
+        if (not isinstance(history, list) or
+                any(not isinstance(item, dict) or item.get("cycle_index") != i + 1
+                    for i, item in enumerate(history))):
+            raise ValueError("detector history identity mismatch")
+        branch_streaks = state.get("branch_streaks")
+        if not isinstance(branch_streaks, dict) or set(branch_streaks) != {"A", "B"}:
+            raise ValueError("detector branch state malformed")
+        lag1_streak = state.get("lag1_streak")
+        detected_period = state.get("detected_period")
+        converged_cycle = state.get("converged_cycle")
+        if (type(lag1_streak) is not int or lag1_streak < 0 or
+                any(type(value) is not int or value < 0
+                    for value in branch_streaks.values()) or
+                detected_period not in (None, 1, 2) or
+                (converged_cycle is not None and type(converged_cycle) is not int)):
+            raise ValueError("detector state contains invalid numeric/period fields")
+        replayed = PeriodicDetectorV2()
+        for record in history:
+            replayed.update(record)
+        candidate = {"contract": CONTRACT_V2, "history": deepcopy(history),
+                     "lag1_streak": lag1_streak,
+                     "branch_streaks": dict(branch_streaks),
+                     "detected_period": detected_period,
+                     "converged_cycle": converged_cycle}
+        if replayed.snapshot() != candidate:
+            raise ValueError("persisted detector state does not match its complete history")
+        self.history = deepcopy(history)
+        self.lag1_streak = lag1_streak
+        self.branch_streaks = dict(branch_streaks)
+        self.detected_period = detected_period
+        self.converged_cycle = converged_cycle

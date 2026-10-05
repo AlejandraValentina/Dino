@@ -1253,16 +1253,18 @@
         "A10"
       ],
       "dependencies": [],
-      "state": "READY",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "motorsim/reference_harness/convergence.py adds compare_cycles_v2 and PeriodicDetectorV2; V1 definitions unchanged. Signed work is abs(a-b)/max(1,abs(a),abs(b)) with existing 0.005 threshold; other metrics reuse V1.",
+        "OpenSpec spec adds V2 detector and restart separation contract without changing cycle-primary schema.",
+        "tests/test_reference_harness.py: 13 passed; negative work, sign change, invalid bool, period-1/2, A/B and restore covered."
       ],
-      "next_action": "Proceed as an independent priority-3 audit workstream; no reservoir V2 or KT100 activity."
+      "next_action": "AUD-17 resolved; V2 has no cycle acceptance evidence unless explicitly run by its own registered campaign."
     },
     {
       "id": "AUD-18",
@@ -1334,7 +1336,7 @@
       "AUD-14": "RESOLVED_BY_LATER_COMMIT",
       "AUD-15": "RESOLVED_BY_LATER_COMMIT",
       "AUD-16": "RESOLVED_BY_LATER_COMMIT",
-      "AUD-17": "OPEN",
+      "AUD-17": "RESOLVED_BY_LATER_COMMIT",
       "AUD-18": "OPEN"
     },
     "notes": {
@@ -1354,7 +1356,7 @@
       "AUD-14": "V3 now explicitly names gross crossing metrics and intake species ratio, leaves trapped/burned AFR undefined, and derives specific consumption only from positive prescribed P7 fuel sink and power. V1/V2 remain unchanged.",
       "AUD-15": "Two fixed preregistered cycles are admissible; exact restart replay passes; all accepted SSPRK2 evaluations during P7 event 350–390 degrees have exhaust area exactly zero. Synthetic diagnostic only.",
       "AUD-16": "Cycle rebuild independently recomputes both stage RHS from the stored states through _assemble; restore validates the full trace shape/clock/state/geometry and terminal binding. Callback volume-rate derivative relation has a synthetic independent check.",
-      "AUD-17": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
+      "AUD-17": "Additive signed-work detector V2 preserves the V1 implementation and thresholds; V2 snapshots are distinct and history-replay validated. No campaign was run.",
       "AUD-18": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded."
     },
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json"
@@ -1374,7 +1376,8 @@
       "AUD-13": "1 bounded diagnostic test PASS; nine isolated solver meshes completed; OpenSpec strict not rerun since AUD-11 (previous strict PASS remains).",
       "AUD-14": "58 tests passed across test_engineering_outputs.py and test_integrated_2t.py; strict V3 validation and unchanged V2 validation exercised.",
       "AUD-15": "PASS: two complete admissible cycles, exact cycle-1 restart replay, 160 contiguous event steps/320 SSPRK2 stage evaluations with exhaust area exactly zero; 6 offline evidence/producer tests pass. No convergence or calibration claim.",
-      "AUD-16": "PASS: integrated_2t test module 48 passed; stage assembly replay, trace restore validation, non-tautological ledger requirements and callback derivative cross-check."
+      "AUD-16": "PASS: integrated_2t test module 48 passed; stage assembly replay, trace restore validation, non-tautological ledger requirements and callback derivative cross-check.",
+      "AUD-17": "PASS: reference harness tests 13 passed; additive V2 signed work detector contract validated; V1 remains intact."
     }
   },
   "last_status_reviewed_head": "e099fe5b74183e743b945c967af27c3c8b83fee1"

@@ -8,7 +8,8 @@ from motorsim.reference_harness.checkpoint import (checkpoint_payload,
                                                    restore_checkpoint,
                                                    replay_comparison)
 from motorsim.reference_harness.config import CONTRACT_ID, validate_config
-from motorsim.reference_harness.convergence import PeriodicDetector, compare_cycles
+from motorsim.reference_harness.convergence import (PeriodicDetector, PeriodicDetectorV2,
+                                                     compare_cycles, compare_cycles_v2)
 from motorsim.reference_harness.evidence import (audit_cycles, configuration_hash,
                                                   source_binding, verify_source_binding)
 from motorsim.reference_harness.runtime import _duct_cfl_step, build_system
@@ -106,8 +107,47 @@ class ReferenceHarnessTests(unittest.TestCase):
         b["observables"]["work_J"] = float("nan")
         self.assertEqual(compare_cycles(a, b)["status"], "INVALID")
         b = cycle(2)
-        b["observables"]["ducts"]["exhaust"].append(copy.deepcopy(b["observables"]["ducts"]["exhaust"][0]))
+        b["observables"]["ducts"]["exhaust"].append(
+            copy.deepcopy(b["observables"]["ducts"]["exhaust"][0]))
         self.assertEqual(compare_cycles(a, b)["status"], "INVALID")
+
+    def test_signed_work_is_supported_by_v2_while_v1_remains_frozen(self):
+        a, b = cycle(1), cycle(2)
+        a["observables"]["work_J"] = -2.0
+        b["observables"]["work_J"] = -2.01
+        self.assertEqual(compare_cycles(a, b)["status"], "INVALID")
+        result = compare_cycles_v2(a, b)
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["contract"], "REFERENCE_PERIODIC_CONVERGENCE_V2")
+        self.assertAlmostEqual(result["metrics"]["work_J"]["value"], .01 / 2.01)
+
+        b["observables"]["work_J"] = 2.0
+        self.assertEqual(compare_cycles_v2(a, b)["status"], "FAIL")
+        b["observables"]["work_J"] = True
+        self.assertEqual(compare_cycles_v2(a, b)["status"], "INVALID")
+
+    def test_signed_work_v2_detector_period1_period2_and_restart(self):
+        period1 = PeriodicDetectorV2()
+        for i in range(1, 5):
+            record = cycle(i)
+            record["observables"]["work_J"] = -2.0
+            result = period1.update(record)
+        self.assertEqual(result["classification"], "PERIOD_1")
+        self.assertEqual(period1.snapshot()["contract"], "REFERENCE_PERIODIC_CONVERGENCE_V2")
+        restored = PeriodicDetectorV2(period1.snapshot())
+        self.assertEqual(restored.snapshot(), period1.snapshot())
+
+        period2 = PeriodicDetectorV2()
+        for i in range(1, 9):
+            phase = 0 if i % 2 else 1
+            record = cycle(i, phase)
+            record["observables"]["work_J"] = -2.0 - phase * .01
+            result = period2.update(record)
+        self.assertEqual(result["classification"], "PERIOD_2")
+        self.assertEqual(period2.branch_streaks, {"A": 3, "B": 3})
+        self.assertEqual(period2.converged_cycle, 8)
+        with self.assertRaisesRegex(ValueError, "contract mismatch"):
+            PeriodicDetectorV2(PeriodicDetector().snapshot())
 
     def test_config_schema_and_cycle_relative_geometry_adapter(self):
         config = synthetic_configuration()
