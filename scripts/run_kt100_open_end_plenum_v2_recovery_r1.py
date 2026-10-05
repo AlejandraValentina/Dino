@@ -64,20 +64,26 @@ def validate_inputs():
         raise RuntimeError("recovery retry policy must remain disabled")
     if receipt.get("runner_sha256") != _sha256_text(Path(__file__)):
         raise RuntimeError("recovery runner differs from its preregistered hash")
-    if receipt.get("configuration_sha256") != _sha256(
+    if receipt.get("recovery_change", {}).get("configuration_sha256") != _sha256(
             ROOT / "configs/fixtures/kt100_open_end_plenum_v2.json"):
         raise RuntimeError("frozen V2 configuration bytes changed")
 
-    expected_sources = receipt.get("source_binding_after_evidence_fix")
+    recovery = receipt.get("recovery_change", {})
+    expected_sources = recovery.get("source_binding_after_evidence_fix")
     if expected_sources != source_binding():
         raise RuntimeError("product source binding differs from the preregistered recovery")
-    before_sources = receipt.get("source_binding_original_r6")
+    before_sources = recovery.get("source_binding_original_r6")
     changed_sources = sorted(key for key in expected_sources
                              if before_sources.get(key) != expected_sources[key])
     if changed_sources != ["motorsim/reference_harness/evidence.py"]:
         raise RuntimeError(f"unexpected product-source delta since R6: {changed_sources}")
 
     old_root = ROOT / "results/kt100-hybrid-model-fixture-v2-harness-20261002-r6-open-end-plenum-v2"
+    original = receipt["original_campaign"]
+    if original.get("authorized_runs") != 1 or original.get("actual_runs") != 1:
+        raise RuntimeError("original campaign authorization/count differs")
+    if set(original.get("points", {})) != {str(rpm) for rpm in RPMS}:
+        raise RuntimeError("original campaign point set differs")
     expected_campaign_hash = receipt["original_campaign"]["campaign_summary_sha256"]
     if _sha256(old_root / "campaign-summary.json.gz") != expected_campaign_hash:
         raise RuntimeError("original R6 campaign summary changed")
@@ -115,7 +121,7 @@ def validate_inputs():
     for rpm in RPMS:
         point = deepcopy(config)
         point["operating_point"]["rpm"] = rpm
-        if configuration_hash(point) != receipt["configuration_sha256_by_rpm"][str(rpm)]:
+        if configuration_hash(point) != recovery["configuration_sha256_by_rpm"][str(rpm)]:
             raise RuntimeError(f"campaign configuration hash changed at {rpm} RPM")
     if OUTPUT.exists():
         raise FileExistsError(f"refusing to overwrite or rerun recovery output: {OUTPUT}")

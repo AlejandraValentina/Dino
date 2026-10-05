@@ -782,7 +782,8 @@
         "Offline R6 inspection: no cycle primary, trajectory, accepted-step trace, or checkpoint; reconstruction impossible.",
         "docs/gasdynamic/kt100_v2_evidence_recovery_r1.md",
         "results/2t-commercial-core-20261002/preregistration/KT100_V2_EVIDENCE_RECOVERY_R1.json",
-        "scripts/run_kt100_open_end_plenum_v2_recovery_r1.py: frozen-input and no-overwrite gates"
+        "scripts/run_kt100_open_end_plenum_v2_recovery_r1.py: frozen-input and no-overwrite gates",
+        "Pre-run --validate-only exposed a preregistration JSON-path defect; fixed before campaign and included in the frozen runner hash. No solver run occurred."
       ],
       "next_action": "Commit the preregistered R1 contract and runner separately; then pass --validate-only and execute the one authorized recovery campaign exactly once into its new output directory."
     },
@@ -1452,6 +1453,11 @@
       "relevant_tests": "24 campaign-producer/reference-harness tests and 22 open-end capability tests passed.",
       "openspec": "32/32 all strict passed.",
       "review_kind": "Sequential self-review; no independent review of the post-8cdf66e delta claimed."
+    },
+    "kt100_recovery_r1_preflight": {
+      "initial_validate_only": "Failed before simulation because runner read the correct configuration hash from the wrong JSON nesting level; no campaign process or solver was started.",
+      "correction": "Runner now reads recovery_change-bound hashes; the preregistration will bind this corrected runner before execution.",
+      "campaign_started": false
     }
   },
   "last_status_reviewed_head": "351e1b22ee49fe9d7c4cde53755d1d4e8caaa355",

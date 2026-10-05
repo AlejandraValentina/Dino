@@ -3,7 +3,7 @@
   "id": "KT100_V2_EVIDENCE_RECOVERY_R1",
   "status": "PREREGISTERED_BEFORE_RECOVERY_CAMPAIGN",
   "authorized_by": "User order 2026-10-05",
-  "preregistration_commit": "PENDING_THIS_COMMIT",
+  "preregistration_commit": "SELF_LOCATED_FROM_GIT_HISTORY_BY_FROZEN_RUNNER",
   "original_campaign": {
     "campaign_id": "KT100_HYBRID_MODEL_FIXTURE_V2_OPEN_END_PLENUM_V2",
     "directory": "results/kt100-hybrid-model-fixture-v2-harness-20261002-r6-open-end-plenum-v2",
@@ -310,7 +310,7 @@
     "p4_dependency": "CONDITIONAL_ON_P4"
   },
   "runner": "scripts/run_kt100_open_end_plenum_v2_recovery_r1.py",
-  "runner_sha256": "d3ac92479fe70df012d51e3c72db07e8ae09e0221e29bf78ea8c302b1e941a23",
+  "runner_sha256": "dce3808333da819d5c6f217eacbb7b3388597eb4bf548056fd90b72e25c79aba",
   "campaign": {
     "runs": 1,
     "command": "python scripts/run_kt100_open_end_plenum_v2_recovery_r1.py",
