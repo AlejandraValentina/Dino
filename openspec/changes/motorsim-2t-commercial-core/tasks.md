@@ -638,6 +638,26 @@ Validación previa de configuración: `tests/test_integrated_cycle_evidence_prod
 — 5 passed; `--validate-only` funciona fuera del repositorio. No se ha ejecutado
 antes de la campaña. La campaña se ejecutó solo después del preregistro.
 
+### AUD-16 — cross-check de etapas, restart y geometría (2026-10-05)
+
+- [x] En `make_integrated_cycle_primary`, recalcular ambos RHS SSPRK2 por paso
+  desde estados, ángulos y RPM guardados mediante `_assemble`; contrastar rates,
+  flujos externos, caras, interfaces, geometría, trabajo, thermal y fuente P7
+  contra el trace. El evento P7 se reconstruye desde su checkpoint y los estados
+  de captura, incluyendo el limitador de disponibilidad.
+- [x] Rechazar campos faltantes del ledger en vez de compararlos consigo
+  mismos; todo valor integrado debe contrastar contra la diferencia de ledger
+  entre checkpoints.
+- [x] Endurecer `restore` para validar el esquema y finitud del trace, continuidad
+  temporal/angular y de estados, RPM/dt, geometría/volúmenes por etapa y estado
+  terminal; fallos no mutan el engine.
+- [x] Contrastar las tasas de volumen de un callback sintético con una derivada
+  central angular independiente multiplicada por la velocidad angular.
+- [x] Pruebas adversariales: rate alterado, ledger incompleto y geometría de
+  trace corrupta son rechazados; recorrido de ciclo positivo se conserva.
+
+Validación: `python -m pytest tests/test_integrated_2t.py -q` — **48 passed**.
+
 
 ### Correcciones prioritarias AUD-01 / AUD-02 — 2026-10-05
 

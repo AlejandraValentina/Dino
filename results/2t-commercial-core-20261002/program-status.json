@@ -1230,18 +1230,20 @@
         "A7"
       ],
       "dependencies": [],
-      "state": "READY",
-      "classification": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "audit-range:ab92aee..8cdf66e",
+        "9eada5d"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md",
-        "commit 9eada5d",
-        "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json"
+        "motorsim/integrated_2t.py::make_integrated_cycle_primary recalculates both saved SSPRK2 stages using _assemble and compares the recorded rates, resolved geometry, fluxes, work, thermal/P7 terms and limiter.",
+        "motorsim/integrated_2t.py::restore validates trace fields, finite JSON content, angle/time/state continuity, stage geometry/volumes, initial configuration hash and terminal state before commit.",
+        "Missing checkpoint ledger fields now reject; no self-comparison fallback.",
+        "tests/test_integrated_2t.py: 48 passed, including tampered stage rates, missing ledger key, corrupt restore geometry atomicity, callback volume-rate derivative cross-check and full cycle rebuild/replay."
       ],
-      "next_action": "Proceed as an independent priority-3 audit workstream; no reservoir V2 or KT100 activity."
+      "next_action": "AUD-16 resolved; retain rebuild/restart trace cross-checks and continue independent queue items."
     },
     {
       "id": "AUD-17",
@@ -1331,7 +1333,7 @@
       "AUD-13": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
       "AUD-14": "RESOLVED_BY_LATER_COMMIT",
       "AUD-15": "RESOLVED_BY_LATER_COMMIT",
-      "AUD-16": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
+      "AUD-16": "RESOLVED_BY_LATER_COMMIT",
       "AUD-17": "OPEN",
       "AUD-18": "OPEN"
     },
@@ -1351,7 +1353,7 @@
       "AUD-13": "Bounded chamber/transfer mesh sensitivity and conservation recorded; lack of an acceptance threshold prevents a mesh-adequacy claim.",
       "AUD-14": "V3 now explicitly names gross crossing metrics and intake species ratio, leaves trapped/burned AFR undefined, and derives specific consumption only from positive prescribed P7 fuel sink and power. V1/V2 remain unchanged.",
       "AUD-15": "Two fixed preregistered cycles are admissible; exact restart replay passes; all accepted SSPRK2 evaluations during P7 event 350–390 degrees have exhaust area exactly zero. Synthetic diagnostic only.",
-      "AUD-16": "READY/PARTIAL: callback shadowing resolved by 9eada5d; stage-rate recomputation, restored-trace validation, tautological comparison, and volume/rate cross-check remain open.",
+      "AUD-16": "Cycle rebuild independently recomputes both stage RHS from the stored states through _assemble; restore validates the full trace shape/clock/state/geometry and terminal binding. Callback volume-rate derivative relation has a synthetic independent check.",
       "AUD-17": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
       "AUD-18": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded."
     },
@@ -1371,7 +1373,8 @@
       "AUD-11": "3 focused forensic diagnostics + 4 existing preflight tests PASS; OpenSpec strict PASS; no simulation or KT100 run.",
       "AUD-13": "1 bounded diagnostic test PASS; nine isolated solver meshes completed; OpenSpec strict not rerun since AUD-11 (previous strict PASS remains).",
       "AUD-14": "58 tests passed across test_engineering_outputs.py and test_integrated_2t.py; strict V3 validation and unchanged V2 validation exercised.",
-      "AUD-15": "PASS: two complete admissible cycles, exact cycle-1 restart replay, 160 contiguous event steps/320 SSPRK2 stage evaluations with exhaust area exactly zero; 6 offline evidence/producer tests pass. No convergence or calibration claim."
+      "AUD-15": "PASS: two complete admissible cycles, exact cycle-1 restart replay, 160 contiguous event steps/320 SSPRK2 stage evaluations with exhaust area exactly zero; 6 offline evidence/producer tests pass. No convergence or calibration claim.",
+      "AUD-16": "PASS: integrated_2t test module 48 passed; stage assembly replay, trace restore validation, non-tautological ledger requirements and callback derivative cross-check."
     }
   },
   "last_status_reviewed_head": "e099fe5b74183e743b945c967af27c3c8b83fee1"

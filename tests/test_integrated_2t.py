@@ -487,6 +487,47 @@ def test_integrated_checkpoint_rejects_geometry_callback_mismatch():
         target.restore(source.snapshot())
 
 
+def test_integrated_checkpoint_restore_rejects_corrupt_trace_geometry_atomically():
+    source = _case()
+    source.step(1e-8, .01)
+    corrupted = deepcopy(source.snapshot())
+    corrupted["trace"][0]["stage_geometry"][0]["exhaust_area_m2"] = 1e-5
+    target = _case()
+    before = deepcopy(target.snapshot())
+    with pytest.raises(ValueError, match="trace geometry mismatch"):
+        target.restore(corrupted)
+    assert target.snapshot() == before
+
+
+def test_callback_volume_rates_match_independent_angular_derivative():
+    from math import cos, pi, sin
+
+    amplitude = 2e-5
+
+    def geometry(angle):
+        radians = angle * pi / 180.0
+        cc_rate = amplitude * sin(radians) * pi / 180.0 * 6.0 * 3000.0
+        return EngineGeometry2T(
+            .00015 + amplitude * (1.0 - cos(radians)),
+            .00018 - amplitude * (1.0 - cos(radians)),
+            cc_rate, -cc_rate,
+            1e-5, (1e-5, 1e-5, 1e-5), 1e-5)
+
+    system = _case(geometry=geometry)
+    angle, rpm, h = 71.0, 3000.0, 1e-4
+    current = system._geometry(angle, rpm)
+    before, after = system._geometry(angle - h, rpm), system._geometry(angle + h, rpm)
+    radians_per_second = 6.0 * rpm
+    for volume_name, rate_name in (
+            ("crankcase_volume_m3", "crankcase_volume_rate_m3_s"),
+            ("cylinder_volume_m3", "cylinder_volume_rate_m3_s")):
+        finite_difference = (
+            getattr(after, volume_name) - getattr(before, volume_name)
+        ) / (2.0 * h) * radians_per_second
+        assert getattr(current, rate_name) == pytest.approx(
+            finite_difference, rel=1e-8, abs=1e-12)
+
+
 def test_existing_crankcase_v2_drives_both_chamber_volumes_in_integrated_stages():
     crankcase = CrankcaseGeometry(56.0, 50.0, 100.0, 20.0,
                                   "SYNTHETIC_ASSUMPTION")
@@ -1016,6 +1057,17 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     cycle_one_checkpoint = deepcopy(system.snapshot())
     first_cycle = make_integrated_cycle_primary(
         system, cycle_zero_checkpoint, cycle_one_checkpoint, 1)
+    corrupted_trace = deepcopy(cycle_one_checkpoint)
+    corrupted_trace["trace"][-1]["stage_cycle_rates"][0][
+        "fresh_delivery_kg_s"] += 1e-6
+    with pytest.raises(ValueError, match="recomputed stage 0 cycle rates"):
+        make_integrated_cycle_primary(
+            system, cycle_zero_checkpoint, corrupted_trace, 1)
+    missing_ledger_key = deepcopy(cycle_one_checkpoint)
+    del missing_ledger_key["ledger"]["external_mass_kg"]
+    with pytest.raises(ValueError, match="ledger schema is incomplete"):
+        make_integrated_cycle_primary(
+            system, cycle_zero_checkpoint, missing_ledger_key, 1)
     assert first_cycle["port_closure_snapshots"]["status"] == "EXACT_EVENT_STATES_CAPTURED"
     for role in ("transfer", "exhaust"):
         snapshot = first_cycle["port_closure_snapshots"]["snapshots"][role]

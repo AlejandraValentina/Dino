@@ -1746,6 +1746,79 @@ class IntegratedEngine2T:
         trace = snapshot.get("trace")
         if not isinstance(trace, list) or len(trace) != counters[1]:
             raise ValueError("integrated engine checkpoint primary trace is incomplete")
+        prior_angle = None
+        prior_time = None
+        prior_terminal_state = None
+        for row in trace:
+            if not isinstance(row, dict):
+                raise ValueError("integrated engine checkpoint trace row is invalid")
+            required = {"angle_start_deg", "angle_end_deg", "time_start_s", "dt_s",
+                        "rpm", "stage_states", "stage_geometry", "stage_cfl",
+                        "stage_cycle_rates", "stage_external", "stage_face_fluxes",
+                        "stage_network_exchanges", "stage_work_rates",
+                        "stage_thermal_rates", "stage_p7_source_rates",
+                        "stage_p7_limiter", "p7_availability_limited_kg",
+                        "p7_source_species_increment_kg", "p7_heat_increment_j",
+                        "heat_to_wall_J", "inventory", "dependency"}
+            if not required.issubset(row):
+                raise ValueError("integrated engine checkpoint trace row is incomplete")
+            angle0, angle1 = row["angle_start_deg"], row["angle_end_deg"]
+            time0, dt, rpm = row["time_start_s"], row["dt_s"], row["rpm"]
+            if (any(type(value) not in (int, float) or not isfinite(value)
+                    for value in (angle0, angle1, time0, dt, rpm)) or
+                    angle1 <= angle0 or time0 < 0 or dt <= 0 or rpm <= 0 or
+                    not isclose((angle1 - angle0), 6.0 * rpm * dt,
+                                rel_tol=1e-12, abs_tol=1e-12)):
+                raise ValueError("integrated engine checkpoint trace clock is invalid")
+            if ((prior_angle is not None and angle0 != prior_angle) or
+                    (prior_time is not None and not isclose(
+                        time0, prior_time, rel_tol=0.0, abs_tol=1e-12))):
+                raise ValueError("integrated engine checkpoint trace is discontinuous")
+            _validate_trace_tree(row)
+            stages = row["stage_states"]
+            if not isinstance(stages, (list, tuple)) or len(stages) != 3:
+                raise ValueError("integrated engine checkpoint trace states are invalid")
+            stage_states = [_tuplify(deepcopy(value)) for value in stages]
+            for stage_state in stage_states:
+                self._validate(stage_state)
+            if (prior_terminal_state is not None and
+                    _jsonify(stage_states[0]) != prior_terminal_state):
+                raise ValueError("integrated engine checkpoint trace state is discontinuous")
+            geometries = row["stage_geometry"]
+            if not isinstance(geometries, (list, tuple)) or len(geometries) != 2:
+                raise ValueError("integrated engine checkpoint trace geometry is invalid")
+            for stage_index, angle in enumerate((angle0, angle1)):
+                expected_geometry = vars(self._geometry(angle, rpm))
+                if geometries[stage_index] != _jsonify(expected_geometry):
+                    raise ValueError("integrated engine checkpoint trace geometry mismatch")
+                expected_volumes = (expected_geometry["crankcase_volume_m3"],
+                                    expected_geometry["cylinder_volume_m3"])
+                state_index = 0 if stage_index == 0 else 1
+                actual_volumes = tuple(stage_states[state_index]["chambers"][name][2]
+                                       for name in ("crankcase", "cylinder"))
+                if actual_volumes != expected_volumes:
+                    raise ValueError("integrated engine checkpoint trace state volume mismatch")
+            final_volumes = tuple(stage_states[2]["chambers"][name][2]
+                                  for name in ("crankcase", "cylinder"))
+            if final_volumes != tuple(geometries[1][name] for name in
+                                      ("crankcase_volume_m3", "cylinder_volume_m3")):
+                raise ValueError("integrated engine checkpoint trace terminal volume mismatch")
+            prior_angle = angle1
+            prior_time = time0 + dt
+            prior_terminal_state = _jsonify(stage_states[2])
+        if trace:
+            initial_payload = {"state": _tuplify(trace[0]["stage_states"][0]),
+                               "atmosphere": self.atmosphere_state,
+                               "atmosphere_species": self.atmosphere_species,
+                               "outlet_species": self.outlet_species}
+            initial_bytes = json.dumps(initial_payload, sort_keys=True, separators=(",", ":"),
+                                       allow_nan=False).encode("utf-8")
+            if hashlib.sha256(initial_bytes).hexdigest() != (
+                    self.configuration_identity["initial_state_sha256"]):
+                raise ValueError("integrated engine checkpoint trace initial state mismatch")
+        if trace and (prior_angle != unwrapped or
+                      prior_terminal_state != _jsonify(state)):
+            raise ValueError("integrated engine checkpoint trace terminal state mismatch")
         p7 = snapshot.get("p7")
         if (not isinstance(p7, dict) or set(p7) != {"active_event", "completed_events"} or
                 not isinstance(p7["completed_events"], list)):
@@ -1855,6 +1928,38 @@ def _fresh_air_intake_rate(intake_duct_id: str, row: dict,
     return float(direct)
 
 
+def _validate_trace_tree(value, path="trace"):
+    """Reject non-finite or non-JSON values anywhere in a restored trace."""
+    if value is None or type(value) in (str, bool, int):
+        return
+    if type(value) is float:
+        if not isfinite(value):
+            raise ValueError(f"integrated engine checkpoint {path} is non-finite")
+        return
+    if isinstance(value, (list, tuple)):
+        for index, item in enumerate(value):
+            _validate_trace_tree(item, f"{path}[{index}]")
+        return
+    if isinstance(value, dict) and all(isinstance(key, str) for key in value):
+        for key, item in value.items():
+            _validate_trace_tree(item, f"{path}.{key}")
+        return
+    raise ValueError(f"integrated engine checkpoint {path} has an invalid value")
+
+
+def _recompute_trace_stage(engine, row, stage_index, p7_event):
+    state = _tuplify(row["stage_states"][stage_index])
+    angle = row["angle_start_deg"] if stage_index == 0 else row["angle_end_deg"]
+    assembled = engine._assemble(state, angle, row["rpm"], p7_event)
+    limiter = engine._limit_p7_stage_source(state, assembled, row["dt_s"])
+    return assembled, limiter
+
+
+def _assert_trace_value_equal(actual, expected, description):
+    if _jsonify(actual) != _jsonify(expected):
+        raise ValueError(f"integrated cycle trace differs from recomputed {description}")
+
+
 def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                                  start_checkpoint: dict,
                                  end_checkpoint: dict,
@@ -1903,6 +2008,12 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                       "fuel_short_circuit_kg": 0.0,
                       "cylinder_work_J": 0.0,
                       "crankcase_work_J": 0.0}
+    start_p7 = start_checkpoint.get("p7")
+    if (not isinstance(start_p7, dict) or
+            not isinstance(start_p7.get("completed_events"), list)):
+        raise ValueError("integrated cycle start checkpoint P7 state is invalid")
+    current_p7_event = (None if start_p7.get("active_event") is None else
+                        _restore_validated_p7_event(start_p7["active_event"]))
     for row in trajectory:
         if (not isinstance(row, dict) or row.get("angle_start_deg") != prior_end or
                 len(row.get("stage_states", ())) != 3 or
@@ -1922,6 +2033,62 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
             raise ValueError("integrated cycle timestep is invalid")
         for stage_state in row["stage_states"]:
             engine._validate(_tuplify(stage_state))
+        if engine.combustion_start_angle_deg is not None:
+            phase = engine.combustion_start_angle_deg
+            angle_cycle = int(float(row["angle_start_deg"]) // 360.0)
+            ignition = angle_cycle * 360.0 + phase
+            if abs(float(row["angle_start_deg"]) - ignition) <= 1e-10:
+                current_p7_event = capture_event(
+                    ignition, _tuplify(row["stage_states"][0])[
+                        "species"]["chambers"]["cylinder"])
+        recomputed_stages = [
+            _recompute_trace_stage(engine, row, stage_index, current_p7_event)
+            for stage_index in range(2)
+        ]
+        for stage_index, (assembled, limiter) in enumerate(recomputed_stages):
+            expected_rates = {
+                "fresh_air_intake_delivery_kg_s": assembled[
+                    "fresh_air_intake_delivered_rate"],
+                "fresh_delivery_kg_s": assembled["fresh_delivered_rate"],
+                "fresh_short_circuit_kg_s": assembled["fresh_short_circuit_rate"],
+                "fuel_delivery_kg_s": assembled["fuel_delivered_rate"],
+                "fuel_short_circuit_kg_s": assembled["fuel_short_circuited_rate"],
+            }
+            expected_p7 = {"species_kg_s": assembled["p7_species_rate"],
+                           "heat_w": assembled["p7_heat_rate"]}
+            _assert_trace_value_equal(
+                row["stage_cycle_rates"][stage_index], expected_rates,
+                f"stage {stage_index} cycle rates")
+            _assert_trace_value_equal(row["stage_external"][stage_index],
+                                      assembled["external"],
+                                      f"stage {stage_index} external flux")
+            _assert_trace_value_equal(row["stage_face_fluxes"][stage_index],
+                                      assembled["faces"],
+                                      f"stage {stage_index} face fluxes")
+            _assert_trace_value_equal(row["stage_network_exchanges"][stage_index],
+                                      assembled["network_exchanges"],
+                                      f"stage {stage_index} network exchanges")
+            _assert_trace_value_equal(row["stage_geometry"][stage_index],
+                                      vars(assembled["geometry"]),
+                                      f"stage {stage_index} geometry")
+            _assert_trace_value_equal(row["stage_work_rates"][stage_index],
+                                      assembled["work_rates"],
+                                      f"stage {stage_index} work rates")
+            _assert_trace_value_equal(row["stage_thermal_rates"][stage_index],
+                                      assembled["thermal_rates"],
+                                      f"stage {stage_index} thermal rates")
+            _assert_trace_value_equal(row["stage_p7_source_rates"][stage_index],
+                                      expected_p7, f"stage {stage_index} P7 source")
+            _assert_trace_value_equal(row["stage_p7_limiter"][stage_index], limiter,
+                                      f"stage {stage_index} P7 limiter")
+        if current_p7_event is not None:
+            r0, r1 = (assembled for assembled, _ in recomputed_stages)
+            accepted_species = tuple(.5 * float(row["dt_s"]) *
+                                     (r0["p7_species_rate"][j] +
+                                      r1["p7_species_rate"][j]) for j in range(4))
+            accepted_heat = .5 * float(row["dt_s"]) * (
+                r0["p7_heat_rate"] + r1["p7_heat_rate"])
+            current_p7_event.record(accepted_species, accepted_heat)
         cfl_values.extend(row["stage_cfl"])
         if any(type(value) not in (int, float) or not isfinite(value) or
                value < 0 or value > engine.max_cfl for value in row["stage_cfl"]):
@@ -1982,11 +2149,15 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
         "p7_availability_limited_kg": p7_limited_mass,
         "p7_source_species_kg": p7_species,
     }
+    if (not isinstance(end_ledger, dict) or not isinstance(start_ledger, dict) or
+            set(end_ledger) != set(start_ledger) or
+            not set(recomputed).issubset(end_ledger)):
+        raise ValueError("integrated cycle checkpoint ledger schema is incomplete")
     for key, value in recomputed.items():
         expected = [end_ledger[key][i] - start_ledger[key][i]
                     for i in range(4)] if key in {
                         "external_species_kg", "p7_source_species_kg"} else (
-                            value if key not in end_ledger else end_ledger[key] - start_ledger[key])
+                            end_ledger[key] - start_ledger[key])
         if isinstance(value, list):
             if any(not isclose(value[i], expected[i], rel_tol=1e-10, abs_tol=1e-14)
                    for i in range(4)):
