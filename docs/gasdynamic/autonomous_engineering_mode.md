@@ -340,9 +340,11 @@ registra como decisión en la sección 17.
 ## 15. Objetivo actual
 
 `AUDIT_REMEDIATION_MODE`: prioridades 1 `AUD-01`…`AUD-07` quedaron cerradas
-con cambios trazables. El trabajo activo es `AUD-08`: registrar en un commit
-separado la selección de Fixture A, el horizonte fijo y el restart audit antes
-de cualquier integración. El productor rechaza campañas sin ese preregistro.
+con cambios trazables. `AUD-08` ejecutó Fixture A desde su preregistro aislado:
+20/20 ciclos admisibles, replay exacto ciclo 3→4 y ninguna convergencia de
+periodicidad dentro del horizonte. La evaluación está guardada con la evidencia;
+no acredita aceptación del Commercial Core. `AUD-09` ya no está bloqueada por
+AUD-08, pero requiere preregistro propio para el fixture realmente distinto.
 `AUD-11` reprodujo el límite de capacidad de reservoir V1; seleccionar política
 V2 sigue siendo una cuestión científica separada. No ejecutar KT100 ni reutilizar
 los ciclos A/B históricos. La fábrica de configuración V2 conserva lectura V1
@@ -384,12 +386,12 @@ contrato propios.
 
 ## 19. Blockers abiertos
 
-- AUD-08 está activo: preregistrar el horizonte y selección de Fixture A en un
-  commit independiente antes de cualquier ciclo. AUD-09 depende de este paso;
-  no usar los artefactos A/B supersedidos.
-- AUD-10 y AUD-12 están READY en prioridad 2 porque no dependen de AUD-08;
-  AUD-09 espera la preregistración; las tareas 13–18 esperan sus dependencias
-  y prioridades anteriores. La cola machine-readable es la fuente de estado.
+- AUD-08 está completada con evidencia sintética fija de Fixture A: 20 ciclos,
+  restart exacto y sin periodicidad aceptada; no reutilizar A/B históricos.
+- AUD-09, AUD-10 y AUD-12 están READY en prioridad 2. AUD-09 requiere un
+  preregistro independiente antes de integrar un fixture realmente distinto;
+  AUD-10/12 son independientes. Las tareas 13–18 esperan sus dependencias y
+  prioridades anteriores. La cola machine-readable es la fuente de estado.
 - Reservoir V1 rechaza correctamente el estado de entrada fuera de su rama
   característica admisible. Una política V2 de reservoir todavía no está
   seleccionada; no ejecutar KT100 ni adivinar una semántica de frontera.

@@ -671,10 +671,16 @@ los próximos commits de este modo deben actualizar esa referencia.
 - [x] Fijar replay exacto desde el snapshot de ciclo 3 a ciclo 4.
 - [x] Commitear el preregistro aislado antes de integrar:
   `cdafa6e1b37978bb825bb04b0260a17544802e06`.
-- [ ] Verificar el blob y hashes del preregistro y ejecutar exclusivamente la
-  campaña registrada mediante el productor versionado.
+- [x] Verificar el blob y hash canónico del preregistro y ejecutar exclusivamente
+  la campaña registrada mediante el productor versionado.
+- [x] Completar 20/20 ciclos admisibles; replay exacto desde ciclo 3 a 4.
+- [x] Evaluar offline con `REFERENCE_PERIODIC_CONVERGENCE_V1`, sin cambiar el
+  contrato ni sus thresholds. Resultado: ninguna comparación pasa y no hay
+  convergencia dentro del horizonte fijo.
 
-No se inició la integración al crear este preregistro.
+La campaña se conserva como evidencia sintética `CONDITIONAL_ON_P4`; no es
+aceptación del Commercial Core. Artefactos en
+`results/2t-commercial-core-20261002/aud-08-fixture-a-20261005-v1/`.
 
 
 ### Verificación del preregistro AUD-08 en Windows — 2026-10-05
@@ -684,5 +690,5 @@ No se inició la integración al crear este preregistro.
 - [x] El primer intento detectó solo CRLF vs LF; el productor ahora verifica
   igualdad estructural y calcula SHA canónico independiente de BOM/finales.
 - [x] Los tests cubren LF frente a CRLF+BOM.
-- [ ] No ejecutar los 20 ciclos hasta commitear este refuerzo del productor y
-  actualizar el estado durable.
+- [x] Commitear el refuerzo del productor antes de los ciclos y comprobarlo
+  contra el blob del preregistro.

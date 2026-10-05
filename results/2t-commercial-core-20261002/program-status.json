@@ -3,23 +3,26 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "cdafa6e1b37978bb825bb04b0260a17544802e06",
+  "status_capture_head": "4f405b67e0453d69a09cc8cf425613a32f48f30e",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
   "kt100_policy": "FROZEN_NO_RERUNS_OR_ADJUSTMENTS_IN_THIS_MISSION",
   "phases": {
     "1_reference_harness": {
-      "status": "AUD-05_PRODUCER_READY_AWAITING_AUD-08_PREREGISTRATION",
+      "status": "AUD-08_EVIDENCE_REGENERATED_NO_PERIODIC_CONVERGENCE",
       "verified_scope": [
         "period_1_and_period_2_fixtures",
         "offline_audit",
         "malformed_evidence",
         "accepted_step_checkpoint_restart_replay",
         "committed_versioned_integrated_engine_fixture_configs",
-        "preregistration_gated_cycle_evidence_producer_validate_only"
+        "preregistration_gated_cycle_evidence_producer_validate_only",
+        "fixed_horizon_fixture_a_20_complete_admissible_cycles",
+        "exact_restart_replay_cycle3_to4",
+        "offline_periodicity_evaluation_using_registered_v1_contract"
       ],
-      "blocked_scope": "Cycle campaigns remain blocked until AUD-08 preregistration; A/B evidence remains superseded and may not be reused."
+      "blocked_scope": "Fixture A completed its preregistered 20-cycle horizon and exact cycle-3-to-4 restart, but the existing V1 detector found no period-1/period-2 convergence. Evidence is synthetic and CONDITIONAL_ON_P4; it is not Commercial Core acceptance."
     },
     "2_kt100_v2": {
       "status": "LOCAL_BLOCKER",
@@ -1004,19 +1007,24 @@
         "AUD-04",
         "AUD-05"
       ],
-      "state": "IN_PROGRESS",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "cdafa6e1b37978bb825bb04b0260a17544802e06"
+        "cdafa6e1b37978bb825bb04b0260a17544802e06",
+        "4f405b67e0453d69a09cc8cf425613a32f48f30e"
       ],
       "evidence": [
         "results/2t-commercial-core-20261002/preregistration/AUD-08-fixture-a.json",
         "Preregistration is isolated in commit cdafa6e1b37978bb825bb04b0260a17544802e06 before any new cycle integration.",
         "20-cycle fixed horizon, no early stopping, restart after cycle 3, fixture A only, V1 periodic detector SHA fixed.",
-        "Commit blob gate PASS; work-tree CRLF vs commit LF is normalized structurally, not rejected as content drift."
+        "Commit blob gate PASS; work-tree CRLF vs commit LF is normalized structurally, not rejected as content drift.",
+        "results/2t-commercial-core-20261002/aud-08-fixture-a-20261005-v1/manifest.json",
+        "results/2t-commercial-core-20261002/aud-08-fixture-a-20261005-v1/restart-audit.json",
+        "results/2t-commercial-core-20261002/aud-08-fixture-a-20261005-v1/evaluation.json",
+        "20/20 cycles complete and admissible; exact restart cycle 3→4; period-1 comparisons 0 PASS, 18 FAIL, 1 INVALID; period-2 comparisons 0 PASS, 17 FAIL, 1 INVALID; no convergence within fixed horizon."
       ],
-      "next_action": "Commit the verified line-ending-independent producer change and its tests, then run exactly the preregistered Fixture A campaign."
+      "next_action": "Proceed with remaining priority-2 audit tasks. Preserve this campaign unchanged; do not claim periodic convergence or acceptance."
     },
     {
       "id": "AUD-09",
@@ -1031,16 +1039,16 @@
         "AUD-04",
         "AUD-08"
       ],
-      "state": "BLOCKED_LOCAL",
+      "state": "READY",
       "classification": "OPEN",
-      "blocker": "Depends on AUD-01, AUD-04 and AUD-08.",
+      "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "Create and commit a distinct-fixture preregistration, then diagnose and retry the piston-port/no-reed case only after reviewing the existing failed trace; do not reuse Fixture B or rerun KT100."
     },
     {
       "id": "AUD-10",

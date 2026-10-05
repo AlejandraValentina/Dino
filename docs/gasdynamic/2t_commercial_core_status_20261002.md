@@ -514,7 +514,4 @@ se atribuyen al Commercial Core.
 
 
 La validación `--validate-only` del productor AUD-05 puede ejecutarse desde
-cualquier carpeta sin integrar. Una campaña requiere un archivo de preregistro
-tracked y el hash del commit que lo contiene como argumento separado; el archivo
-se comprueba contra el blob exacto antes de crear resultados. AUD-08 sigue siendo
-el gate previo de evidencia.
+cualquier carpeta sin integrar. Una campaña requiere un archivo de preregistro tracked y el hash del commit que lo contiene como argumento separado; el archivo se comprueba contra el blob declarado antes de crear resultados. AUD-08 completó el horizonte fijo de Fixture A: 20 ciclos válidos y replay exacto 3→4, pero el detector contractual no encontró periodicidad. Ver `evaluation.json`; resultado sintético condicionado a P4, sin aceptación del Commercial Core. AUD-09 requiere preregistro independiente para el fixture piston-port sin reed.
