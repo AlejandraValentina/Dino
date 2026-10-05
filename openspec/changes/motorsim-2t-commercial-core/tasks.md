@@ -624,13 +624,19 @@ existentes; los nuevos resultados integrados usan V3.
 - [x] Commitear configuración/productor en `01172a2d7b2f7f97db9a7a46e12cf328962aef52`
   y el preregistro separado en `57dfa97032037a96ab3869cf46b7180f35bb77a0`;
   ambos preceden a toda integración.
-- [ ] Ejecutar únicamente el horizonte preregistrado y comprobar el área de
-  escape cero durante el evento P7; no usar el resultado como calibración ni
-  cambiar los fixtures científicos A/B existentes.
+- [x] Ejecutar únicamente los dos ciclos preregistrados, con restart tras el
+  ciclo 1; ambos ciclos completos y admisibles, replay exacto.
+- [x] Confirmar que los 160 pasos contiguos del evento P7 350–390° tienen
+  320 evaluaciones SSPRK2 con área de escape exactamente cero.
+- [x] Preservar métricas y hashes en
+  `results/2t-commercial-core-20261002/aud-15-fixture-d-20261005-v1/decision.json`;
+  la prueba offline de evidencia y las cinco pruebas del productor pasan (6).
+- [x] Mantener la conclusión limitada al diagnóstico sintético de timing: sin
+  criterio de convergencia, calibración ni validación experimental.
 
 Validación previa de configuración: `tests/test_integrated_cycle_evidence_producer.py`
 — 5 passed; `--validate-only` funciona fuera del repositorio. No se ha ejecutado
-ninguna integración con Fixture D.
+antes de la campaña. La campaña se ejecutó solo después del preregistro.
 
 
 ### Correcciones prioritarias AUD-01 / AUD-02 — 2026-10-05

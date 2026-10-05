@@ -1201,8 +1201,8 @@
       "dependencies": [
         "AUD-08"
       ],
-      "state": "IN_PROGRESS",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e",
@@ -1214,9 +1214,11 @@
         "results/2t-commercial-core-20261002/fixtures/fixture-d-engine-config-v2.json: config differs from A only in fixture identity and combustion_start_angle_deg=350; V2 validate-only PASS",
         "Geometry-only preflight samples the complete P7 350–390 degree interval every 0.5 degrees and reports exhaust area exactly zero; no integration run.",
         "results/2t-commercial-core-20261002/preregistration/AUD-15-fixture-d.json: committed in 57dfa97032037a96ab3869cf46b7180f35bb77a0; preregistration blob, fixture SHA-256, periodicity contract SHA-256 and exact producer source/commit gate PASS before integration.",
-        "Producer/configuration commit 01172a2d7b2f7f97db9a7a46e12cf328962aef52; Fixture D differs from A only in synthetic identity and combustion start angle=350 degrees."
+        "Producer/configuration commit 01172a2d7b2f7f97db9a7a46e12cf328962aef52; Fixture D differs from A only in synthetic identity and combustion start angle=350 degrees.",
+        "results/2t-commercial-core-20261002/aud-15-fixture-d-20261005-v1/: exactly two preregistered complete admissible cycles; exact restart replay cycle 1→2; 160 contiguous accepted steps/320 SSPRK2 stage geometries over P7 350–390°, all exhaust area exactly zero; conservation residuals and hashes in decision.json.",
+        "tests/test_aud15_fixture_d_campaign.py and tests/test_integrated_cycle_evidence_producer.py: 6 passed."
       ],
-      "next_action": "Run only the preregistered two complete Fixture D cycles with restart after cycle 1; check exact replay and exhaust geometry remains closed over the accepted P7 350–390 degree event. No convergence acceptance or calibration claim."
+      "next_action": "AUD-15 diagnostic is complete; retain the result as synthetic timing evidence only, with no convergence or calibration claim."
     },
     {
       "id": "AUD-16",
@@ -1327,7 +1329,7 @@
       "AUD-12": "RESOLVED_BY_LATER_COMMIT",
       "AUD-13": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
       "AUD-14": "RESOLVED_BY_LATER_COMMIT",
-      "AUD-15": "IN_PROGRESS",
+      "AUD-15": "RESOLVED_BY_LATER_COMMIT",
       "AUD-16": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
       "AUD-17": "OPEN",
       "AUD-18": "OPEN"
@@ -1347,7 +1349,7 @@
       "AUD-12": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-13": "Bounded chamber/transfer mesh sensitivity and conservation recorded; lack of an acceptance threshold prevents a mesh-adequacy claim.",
       "AUD-14": "V3 now explicitly names gross crossing metrics and intake species ratio, leaves trapped/burned AFR undefined, and derives specific consumption only from positive prescribed P7 fuel sink and power. V1/V2 remain unchanged.",
-      "AUD-15": "Configuration, producer and separately committed preregistration are bound and validated before integration; no campaign result yet.",
+      "AUD-15": "Two fixed preregistered cycles are admissible; exact restart replay passes; all accepted SSPRK2 evaluations during P7 event 350–390 degrees have exhaust area exactly zero. Synthetic diagnostic only.",
       "AUD-16": "READY/PARTIAL: callback shadowing resolved by 9eada5d; stage-rate recomputation, restored-trace validation, tautological comparison, and volume/rate cross-check remain open.",
       "AUD-17": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
       "AUD-18": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded."
@@ -1368,7 +1370,7 @@
       "AUD-11": "3 focused forensic diagnostics + 4 existing preflight tests PASS; OpenSpec strict PASS; no simulation or KT100 run.",
       "AUD-13": "1 bounded diagnostic test PASS; nine isolated solver meshes completed; OpenSpec strict not rerun since AUD-11 (previous strict PASS remains).",
       "AUD-14": "58 tests passed across test_engineering_outputs.py and test_integrated_2t.py; strict V3 validation and unchanged V2 validation exercised.",
-      "AUD-15": "Prerequisite gate PASS: canonical config hash 91c2e9a2bf5d3250515f30007274d461d5e1e1f91372be3e0bbe480e61603a59, preregistration commit 57dfa97032037a96ab3869cf46b7180f35bb77a0, producer commit 01172a2d7b2f7f97db9a7a46e12cf328962aef52; two-cycle campaign not yet run."
+      "AUD-15": "PASS: two complete admissible cycles, exact cycle-1 restart replay, 160 contiguous event steps/320 SSPRK2 stage evaluations with exhaust area exactly zero; 6 offline evidence/producer tests pass. No convergence or calibration claim."
     }
   },
   "last_status_reviewed_head": "57dfa97032037a96ab3869cf46b7180f35bb77a0"
