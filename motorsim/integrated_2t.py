@@ -840,9 +840,17 @@ class IntegratedEngine2T:
         return normalized
 
     def _geometry(self, angle, rpm=None):
-        result = self.geometry(float(angle) % 360.0)
-        if not isinstance(result, EngineGeometry2T):
-            raise ValueError("geometry callback must return EngineGeometry2T")
+        if self.slider_crank is not None and self.port_binding is not None:
+            # These explicit models resolve every field. Do not invoke an
+            # otherwise-obsolete caller callback whose behavior is not captured
+            # by the reconstructible configuration contract.
+            result = EngineGeometry2T(
+                1.0, 1.0, 0.0, 0.0, 0.0,
+                tuple(0.0 for _ in self.transfers), 0.0)
+        else:
+            result = self.geometry(float(angle) % 360.0)
+            if not isinstance(result, EngineGeometry2T):
+                raise ValueError("geometry callback must return EngineGeometry2T")
         if self.slider_crank is not None:
             crankcase_volume, cylinder_volume, crankcase_rate, cylinder_rate = (
                 self.slider_crank.resolve(float(angle) % 360.0,

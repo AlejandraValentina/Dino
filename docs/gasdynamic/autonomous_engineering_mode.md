@@ -339,12 +339,14 @@ registra como decisión en la sección 17.
 
 ## 15. Objetivo actual
 
-Continuar la integración end-to-end del núcleo 2T reutilizando el estado
-SSPRK2 común y la evidencia primaria existentes. Los volúmenes finitos en los
-endpoints externos intake-left y exhaust-right ya participan del estado común y
-del output V2. Próximo trabajo independiente: hacer explícita y reproducible la
-configuración integrada para reconstruir el motor sin callbacks externos.
-Mantener fuera del alcance cualquier campaña KT100.
+La fábrica `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1` ya reconstruye las
+configuraciones explícitamente resueltas por slider-crank y puertos genéricos.
+La ruta explícita resuelve toda la geometría sin invocar el callback externo,
+que no forma parte del contrato serializable. La cola durable no tiene tareas
+`READY` ni `IN_PROGRESS`. No iniciar otra capability física sin un contrato
+defendible: continuar sólo con trabajo no físico que cierre evidencia o con
+integraciones nuevas cuya semántica ya esté especificada. KT100 permanece
+congelado.
 
 ## 16. Arquitectura vigente
 
@@ -355,7 +357,13 @@ helper Riemann P3 existente y la composición real del donante; inventario
 global, CFL, checkpoint y output reconstruible incluyen cada nodo. Los
 enlaces son ideales y sin masa: su longitud efectiva se serializa, pero no
 representa inertancia ni propagación acústica. El checkpoint actual es V7;
-V6 no es compatible para restore.
+V6 no es compatible para restore. `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1`
+reconstruye el subconjunto cuyo estado geométrico completo deriva de
+`SliderCrankChambers2T` y `IntegratedPortBinding2T`. En ese caso el callback de
+geometría del constructor no se consulta; configuraciones con geometría
+arbitraria definida únicamente por callbacks siguen fuera del contrato. La
+identidad canónica se comprueba antes de exportar/restaurar y la deriva viva se
+rechaza.
 
 ## 17. Decisiones científicas
 
@@ -363,6 +371,7 @@ V6 no es compatible para restore.
 |---|---|---|---|---|
 | 2026-10-05 | El enlace integrado finito de admisión reutiliza P3 ideal; no se añade una frontera atmosférica ni una nueva política de reservoir | Integrar solo el endpoint existente; tratar longitud efectiva como acústica sería una capability distinta | 99 pruebas focales integradas/P5-C/P6/P7/red/reed/puertos PASS; estado primario/output de un ciclo y conservation rebuild verificados | Revisión adversarial de solo lectura sin defecto en el delta; no es revisión completa del motor |
 | 2026-10-05 | Generalizar volúmenes integrados a caras externas intake-left y exhaust-right conserva el helper P3 y el ledger existente; no añade aristas internas de red | Mantener un solo nodo de admisión; o modelar redes internas/acústica como otra capability | 100 pruebas integradas/P5-C/P6/P7/red/reed/puertos PASS; replay V7 de dos nodos, ciclo completo, outputs muestreados contra el estado y ledgers globales | Revisión adversarial de solo lectura sin defecto; punctual, no review total del motor |
+| 2026-10-05 | La configuración V1 serializa sólo geometría reconstruible desde modelos explícitos. Si slider-crank y binding de puertos resuelven todos los campos, el callback legado queda ignorado y no es parte de la identidad | Ejecutar también el callback podría introducir efectos laterales o fallos que la configuración no puede reproducir; callbacks arbitrarios requerirían otro contrato | JSON canónico y snapshot inicial exactos, guard de deriva y cinco pruebas focales; la regresión integrada amplia actual está registrada en `program-status.json` | Revisión independiente read-only del delta; acotada a la ruta geométrica, no aceptación del motor completo |
 
 ## 18. Convenciones
 
@@ -386,8 +395,15 @@ contrato propios.
   que se requiere decisión de modelado; no integrar por splitting ni inferir
   esas asignaciones.
 - AFR estequiométrica y enlace de `Q_F` con LHV siguen sin definición; las
-  cantidades dependientes permanecen UNDEFINED.
+  cantidades dependientes permanecen UNDEFINED. El pseudo-especie fuel al
+  cierre exacto de escape no equivale al total de combustible atrapado; no
+  inferir ese total desde el inventario global terminal ni desde la captura de
+  reactivos de P7.
 - El núcleo integrado/comercial sigue parcial, sintético y sujeto a
   `CONDITIONAL_ON_P4`; no hay validación experimental.
-- Falta una configuración integrada JSON/canónica que permita reconstruir el
-  motor completo sin callbacks externos; es el siguiente trabajo READY.
+- La cola no tiene trabajo `READY`. La configuración canónica cubre sólo
+  slider-crank y puertos genéricos explícitos; no serializa geometría arbitraria
+  de callback. La aceptación general sigue limitada por reed dinámica,
+  semántica de combustible, reservoir V2, generalidad de Fixture B y ausencia
+  de validación experimental. La revisión independiente disponible es puntual
+  y no acepta el Commercial Core completo.

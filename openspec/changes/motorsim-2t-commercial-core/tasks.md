@@ -519,3 +519,19 @@ place de mallas; el contrato `DuctPath2T` se endureció para aceptar solamente
 `Mesh` con arreglos tupla y la revisión confirmó el cierre. La fábrica V1 no
 serializa callbacks arbitrarios ni acredita el motor completo; clasificación
 global permanece `MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL`.
+
+### Geometría explícita ignora callback sombreado — 2026-10-05
+
+- [x] Cuando slider-crank y el binding de puertos resuelven todos los campos
+  geométricos, no invocar el callback heredado del constructor: su salida y
+  efectos laterales no forman parte de la configuración reconstruible.
+- [x] Probar que el callback puede fallar y aun así la geometría explícita se
+  resuelve igual en el motor original y el reconstruido.
+- [x] Repetir la regresión integrada/red/P5-C/P6/P7/reed/puertos completa.
+- [x] Obtener revisión independiente de solo lectura del delta.
+
+Resultado: callback con excepción no invocado en la ruta explícita; geometría
+igual en original/reconstruido. Revisión independiente sin hallazgos concretos.
+La regresión amplia afectada pasó **105 pruebas**; OpenSpec estricto pasa. La
+configuración V1 sigue limitada a slider-crank y puertos genéricos explícitos;
+no se atribuye aceptación al motor completo.

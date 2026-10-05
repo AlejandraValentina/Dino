@@ -1157,6 +1157,14 @@ def test_integrated_engine_config_roundtrip_rebuilds_without_external_callback()
     assert rebuilt.configuration_identity == system.configuration_identity
     assert rebuilt.snapshot() == system.snapshot()
 
+    def forbidden_callback(_angle):
+        raise AssertionError("explicit geometry path invoked caller callback")
+
+    system.geometry = forbidden_callback
+    rebuilt.geometry = forbidden_callback
+    assert system._geometry(0.0, system.reference_rpm) == rebuilt._geometry(
+        0.0, rebuilt.reference_rpm)
+
     system.step(1e-6, .01)
     rebuilt.restore(system.snapshot())
     assert rebuilt.snapshot() == system.snapshot()

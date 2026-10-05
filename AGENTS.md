@@ -28,8 +28,9 @@ pero NO representan el estado operativo actual cuando contradicen esta sección.
 - Revisión independiente P4–P8: `INDEPENDENT_REVIEW_PASS`
   (`results/p4-p8-independent-final-pass-20260930/review.json`). Cubre P4–P8,
   no el Commercial Core.
-- Commercial Core, delta actual: `SELF_REVIEWED`; revisión independiente
-  `NOT_PERFORMED`.
+- Commercial Core: aceptación independiente del producto completo
+  `NOT_PERFORMED`; los deltas recientes de configuración integrada recibieron
+  revisiones independientes puntuales, sin aceptación end-to-end.
 - P8 semantics: `BOUNDED_TRANSIENT_INDICATED`.
 - Regresiones P4–P8: `PASS_PREVIOUSLY_RECORDED_346_TESTS_NOT_RERUN_FOR_THIS_CLOSEOUT`;
   deben reejecutarse antes de cualquier cierre global.

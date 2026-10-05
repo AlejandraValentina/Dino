@@ -442,3 +442,22 @@ V7 rechaza checkpoints V6; el cambio no introduce una migración de checkpoints.
 La topología actual no modela aristas volumen-a-volumen ni dos volúmenes en una
 misma cara. Se mantienen los límites P3 ideales documentados para el plenum de
 admisión. La aceptación comercial global continúa parcial y condicional.
+
+### Configuración explícita y revisión de cola — 2026-10-05
+
+La configuración serializable `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1` ya
+reconstruye el subconjunto resuelto por slider-crank y puertos genéricos. En
+esa ruta, todos los campos geométricos provienen de esos modelos explícitos y
+el callback heredado queda sin invocar; una prueba con callback que lanza una
+excepción confirmó la equivalencia entre el motor original y el reconstruido.
+La revisión independiente de solo lectura del delta no encontró un defecto
+concreto. La regresión integrada/red/P5-C/P6/P7/reed/puertos pasó 105 pruebas y
+OpenSpec estricto aprobó.
+
+La auditoría de la cola confirmó que no quedan tareas `READY` o
+`IN_PROGRESS`. Continúan límites explícitos: no se serializan callbacks
+geométricos arbitrarios, la reed dinámica integrada carece de contrato
+conservativo de impacto/trabajo, los observables de combustible atrapado y
+propiedades para AFR/LHV no están definidos, y la frontera reservoir V2 sigue
+sin selección científica. No se reabrió KT100, no se alteraron P4–P9 ni su
+evidencia, y el estado del Commercial Core no se promueve.
