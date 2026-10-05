@@ -41,10 +41,12 @@ pero NO representan el estado operativo actual cuando contradicen esta sección.
 - Experimental validation: `NOT_PERFORMED`. Predictive validation: `NOT_CLAIMED`.
 - KT100: `KT100_REFERENCE_CASE_V1`, caso de referencia, no validación. La
   capability `OPEN_END_PLENUM_V2` está implementada y probada, pero la única
-  campaña V2 autorizada no produjo primarios: el escritor falló con
+  campaña original V2 no produjo primarios: el escritor falló con
   `KeyError('transfer1')` al cerrar el ciclo. La corrección del agregador está
-  probada; la campaña no se repite bajo el preregistro vigente. No hay resultado
-  de periodicidad ni calificación física de KT100.
+  probada. La evidencia R6 no permite reconstrucción offline; una enmienda R1
+  independiente está preregistrada para una única recuperación, sin modificar
+  física/configuración ni sobrescribir R6. No hay aún resultado de periodicidad
+  ni calificación física de KT100.
 
 Estado machine-readable del Commercial Core:
 `results/2t-commercial-core-20261002/program-status.json`; documentación:

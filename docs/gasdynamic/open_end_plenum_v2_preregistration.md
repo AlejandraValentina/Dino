@@ -140,6 +140,12 @@ acceptance. The mapping defect is fixed and tested, but R6 is immutable and the
 single-campaign authorization does not permit a retry. The boundary capability
 is therefore not qualified by a completed KT100 cycle campaign.
 
+The user subsequently authorized a single separately preregistered recovery.
+Offline recoverability, exact input bindings, and the recovery protocol are
+recorded in `kt100_v2_evidence_recovery_r1.md` and
+`results/2t-commercial-core-20261002/preregistration/KT100_V2_EVIDENCE_RECOVERY_R1.json`.
+That distinct R1 campaign must not overwrite R6.
+
 The campaign remains a synthetic engineering fixture. Its P4 dependency is
 `CONDITIONAL_ON_P4`; it is not experimental validation, a calibrated
 carburetor model, a Yamaha performance claim, or P9 evidence.

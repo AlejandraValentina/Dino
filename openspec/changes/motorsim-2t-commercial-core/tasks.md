@@ -25,6 +25,13 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
 - [x] Fix the evidence-layer transfer-name mapping and cover both transfers;
       `tests/test_kt100_open_end_plenum_v2.py` passes. This correction does not
       retroactively create missing R6 primary evidence.
+- [x] Inspect R6 for offline recovery: no cycles, trajectory, step trace, or
+      checkpoint is persisted, so a primary decision result cannot be rebuilt.
+- [x] Preregister and commit exactly one `KT100_V2_EVIDENCE_RECOVERY_R1` run
+      with the R6 config/controls and only the already-tested evidence mapping
+      delta; preserve R6 and write R1 into a new output directory.
+- [ ] Execute the single R1 recovery campaign and audit its primary results
+      without tuning; classify whatever outcome the frozen contract produces.
 
 - [ ] Fase 1: harness reusable y evidencia multi-ciclo. Parcial: harness y
       contrato de periodicidad implementados; KT100 r5 falla antes del ciclo 1
