@@ -461,3 +461,26 @@ conservativo de impacto/trabajo, los observables de combustible atrapado y
 propiedades para AFR/LHV no están definidos, y la frontera reservoir V2 sigue
 sin selección científica. No se reabrió KT100, no se alteraron P4–P9 ni su
 evidencia, y el estado del Commercial Core no se promueve.
+
+
+### Reconciliación de auditoría externa — 2026-10-05
+
+Se versiona sin cambios el artefacto `audit_8cdf66e.md` (SHA-256
+`df682a07074c56d92bec4a33d17335e759f1bd4765aaf5c7d5d99fa97e2cd5d3`), cuya
+revisión independiente cubre exclusivamente `ab92aee..8cdf66e`. El HEAD actual
+se contrastó hallazgo por hallazgo y se preservan `9eada5d`, `3d10f79` y los
+resultados KT100.
+
+La errata de conteo se resuelve a favor de la tabla y la instrucción de la
+auditoría: A1, A2 y A3 bloquean evidencia de ciclo. Los resultados A/B quedan
+marcados `HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT`; los archivos originales no se
+modifican. Se activa `AUDIT_REMEDIATION_MODE`; no se generará evidencia nueva
+hasta cerrar AUD-01…AUD-05 y registrar previamente el horizonte AUD-08.
+
+La conciliación y la cola AUD-01…AUD-18 están en
+`results/2t-commercial-core-20261002/program-status.json`. La inspección
+puntual de HEAD, con sus límites, está en
+`results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json`; no
+reemplaza la auditoría del rango, no acredita ciclos y no es aceptación del
+Commercial Core. AUD-11 separa el límite local de la frontera V1 de la política
+científica aún no seleccionada para V2.

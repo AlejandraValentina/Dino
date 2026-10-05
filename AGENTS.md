@@ -32,8 +32,9 @@ pero NO representan el estado operativo actual cuando contradicen esta sección.
   `NOT_PERFORMED`; los deltas recientes de configuración integrada recibieron
   revisiones independientes puntuales, sin aceptación end-to-end.
 - P8 semantics: `BOUNDED_TRANSIENT_INDICATED`.
-- Regresiones P4–P8: `PASS_PREVIOUSLY_RECORDED_346_TESTS_NOT_RERUN_FOR_THIS_CLOSEOUT`;
-  deben reejecutarse antes de cualquier cierre global.
+- Regresiones P4–P8: la revisión externa del rango `ab92aee..8cdf66e` registró
+  **300 pruebas PASS**. No usar el conteo histórico 346 como conteo vigente;
+  reejecutar la suite antes de cualquier cierre global.
 - P9: `P9_PREREGISTERED_AWAITING_EXPERIMENTAL_DATA`; contrato congelado,
   SHA-256 `79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d`
   de `openspec/changes/p9-experimental-validation/specs/p9-experimental-validation/spec.md`.
@@ -44,6 +45,18 @@ pero NO representan el estado operativo actual cuando contradicen esta sección.
 Estado machine-readable del Commercial Core:
 `results/2t-commercial-core-20261002/program-status.json`; documentación:
 `docs/gasdynamic/2t_commercial_core_status_20261002.md`.
+
+### Modo operativo actual — `AUDIT_REMEDIATION_MODE`
+
+La auditoría independiente `docs/gasdynamic/audit_8cdf66e.md` cubre exactamente
+`ab92aee..8cdf66e`; reconciliar cada hallazgo con el HEAD actual, sin revertir
+commits posteriores. Prioridades 1 `AUD-01`…`AUD-07` preceden cualquier
+capability nueva. `AUD-01`…`AUD-18` y sus estados/clasificaciones viven en
+`program-status.json`. Los ciclos A/B existentes se preservan como
+`HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT` y no sirven como evidencia vigente.
+No regenerarlos antes de cerrar A1–A3 y preregistrar el horizonte mediante
+AUD-08 en un commit previo. La errata de la auditoría que cuenta dos defectos
+se interpreta como tres: A1, A2 y A3 bloquean la evidencia de ciclos.
 
 ### Modalidad operativa vigente
 

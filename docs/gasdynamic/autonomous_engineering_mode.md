@@ -339,13 +339,13 @@ registra como decisión en la sección 17.
 
 ## 15. Objetivo actual
 
-La fábrica `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1` ya reconstruye las
-configuraciones explícitamente resueltas por slider-crank y puertos genéricos.
-La ruta explícita resuelve toda la geometría sin invocar el callback externo,
-que no forma parte del contrato serializable. La cola durable no tiene tareas
-`READY` ni `IN_PROGRESS`. No iniciar otra capability física sin un contrato
-defendible: continuar sólo con trabajo no físico que cierre evidencia o con
-integraciones nuevas cuya semántica ya esté especificada. KT100 permanece
+`AUDIT_REMEDIATION_MODE`: incorporar y reconciliar
+`docs/gasdynamic/audit_8cdf66e.md` con HEAD `3d10f79`, preservando el trabajo
+posterior a `8cdf66e`. Cerrar las prioridades 1 `AUD-01`…`AUD-07` antes de toda
+capability nueva. El primer trabajo activo es la fuerza de pared de puertos
+cerrados/parciales; `AUD-11` aplica en paralelo el protocolo forense reservoir.
+La fábrica `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1` y su ajuste de callback
+siguen incorporados; solo cubren slider-crank y puertos explícitos. KT100 sigue
 congelado.
 
 ## 16. Arquitectura vigente
@@ -401,9 +401,15 @@ contrato propios.
   reactivos de P7.
 - El núcleo integrado/comercial sigue parcial, sintético y sujeto a
   `CONDITIONAL_ON_P4`; no hay validación experimental.
-- La cola no tiene trabajo `READY`. La configuración canónica cubre sólo
-  slider-crank y puertos genéricos explícitos; no serializa geometría arbitraria
-  de callback. La aceptación general sigue limitada por reed dinámica,
-  semántica de combustible, reservoir V2, generalidad de Fixture B y ausencia
-  de validación experimental. La revisión independiente disponible es puntual
-  y no acepta el Commercial Core completo.
+- La configuración canónica cubre sólo slider-crank y puertos genéricos
+  explícitos; no serializa geometría arbitraria de callback. La auditoría
+  externa añade prioridades 1 abiertas: fuerza de
+  pared (A1), presión inicial de cámaras del fixture (A2), composición externa
+  independiente en admisión/escape (A3), redondeo de especies y retries del
+  harness (A4), productores versionados de evidencia (C1), reconciliación de
+  claims de revisión (C5) y normalización durable (C8/C9). A1–A3 invalidan para
+  aceptación la evidencia de ciclo A/B ya archivada; conservarla y marcarla
+  supersedida. La reed dinámica, combustible, reservoir V2, generalidad de
+  Fixture B y validación experimental siguen siendo límites adicionales. La
+  auditoría independiente cubre `ab92aee..8cdf66e`; las revisiones posteriores
+  de cambios locales necesitan recibos propios.

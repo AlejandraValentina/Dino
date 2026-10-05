@@ -535,3 +535,29 @@ igual en original/reconstruido. Revisión independiente sin hallazgos concretos.
 La regresión amplia afectada pasó **105 pruebas**; OpenSpec estricto pasa. La
 configuración V1 sigue limitada a slider-crank y puertos genéricos explícitos;
 no se atribuye aceptación al motor completo.
+
+
+### Ingesta de auditoría externa `audit_8cdf66e` — 2026-10-05
+
+- [x] Preservar byte por byte `docs/gasdynamic/audit_8cdf66e.md` y registrar
+  su alcance independiente exacto `ab92aee..8cdf66e`.
+- [x] Incorporar `AUD-01`…`AUD-18` con prioridad, dependencias y hallazgos en
+  `results/2t-commercial-core-20261002/program-status.json`; activar
+  `AUDIT_REMEDIATION_MODE`.
+- [x] Aplicar la errata editorial: A1, A2 y A3 son defectos y bloquean toda
+  evidencia de ciclo preexistente. Los artefactos A/B se preservan marcados
+  `HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT`; no se reutilizan como aceptación.
+- [x] Reconciliar contra HEAD `3d10f79`, sin revertir cambios posteriores. La
+  revisión puntual actual está registrada en
+  `results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json`; no es
+  aceptación end-to-end ni revisión de ciclos.
+- [ ] Cerrar AUD-01…AUD-07 antes de nuevas capabilities o campañas.
+- [ ] AUD-08 requiere preregistro en commit separado antes de regenerar ciclos.
+
+AUD-11: la prueba de frontera V1 reproduce `InvalidState` porque el invariante
+característico excede el intervalo físico de la rama entrante; esto es límite
+de capacidad local. Elegir semántica V2 sigue siendo una decisión científica
+distinta y no se hizo. AUD-16 permanece parcial: el commit `9eada5d` cubre solo
+la ruta donde los modelos explícitos sombrean por completo el callback.
+
+No se ejecutaron campañas ni se tocaron resultados KT100.
