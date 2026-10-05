@@ -461,3 +461,22 @@ snapshot is unavailable. The field is explicitly not total trapped fuel and is
 not reconstructed from global terminal inventory. The 33-test integrated/output
 suite and OpenSpec strict validation passed. Stoichiometric AFR and a Q_F-to-LHV
 binding remain unresolved; no fuel chemistry or value was inferred.
+
+### Integración de plenum finito de admisión — 2026-10-05
+
+- [x] Enlazar un plenum finito opcional con la cara izquierda del ducto de
+  admisión usando el helper conservativo P3 en ambos stages SSPRK2.
+- [x] Incluir masa, energía y cuatro especies del plenum en estado, CFL,
+  inventario global, checkpoint/replay e identidad de configuración.
+- [x] Exponer el estado del volumen de red en la evidencia primaria/output V2
+  con canales dinámicos direccionados por ID.
+- [x] Verificar flujo en ambas direcciones, donor de especie, ledgers globales,
+  límite de vaciado, replay tras serialización JSON y actualización volumétrica
+  con el promedio de ambas etapas SSPRK2 para masa, energía y las cuatro especies.
+
+Resultado de la regresión afectada: 99 pruebas integradas/red/P5-C/P6/P7/reed/
+puertos aprobadas; OpenSpec estricto, compilación Python, `git diff --check`,
+Git LFS fsck y hash P9 comprobados. La revisión independiente del delta no
+encontró defectos concretos; no es aceptación del motor completo. Ninguna
+campaña KT100 se ejecutó. El resultado sintético continúa sujeto a las etiquetas
+de dependencia vigentes y no cambia el estado global parcial.

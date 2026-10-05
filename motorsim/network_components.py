@@ -196,6 +196,7 @@ class NetworkExchange:
     species_into_volume_kg_s: tuple[float, float, float, float]
     axial_impulse_into_volume_n: float
     fallback_reason: str | None
+    wave_speeds: tuple[float, float, float]
 
     def apply(self, state: VolumeGasState, dt_s: float):
         dt = _finite(dt_s, "dt_s")
@@ -244,7 +245,8 @@ def resolve_volume_duct_interface(volume_state: VolumeGasState, volume_m3: float
     mass_into = flux.outward[0]
     species_into = donor_species(mass_into, pipe_species, volume_species)
     return NetworkExchange(mass_into, flux.outward[2], species_into,
-                           flux.outward[1], flux.fallback_reason)
+                           flux.outward[1], flux.fallback_reason,
+                           flux.wave_speeds)
 
 
 def helmholtz_frequency_hz(volume_m3: float, neck_area_m2: float,

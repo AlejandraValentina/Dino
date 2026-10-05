@@ -405,3 +405,22 @@ verificado. Esto no bloquea componentes independientes ni reabre P5 histórico.
 La última salida de fuel/cierre exacto, Fixture B y la corrección Cd=0 recibieron
 autorrevisión y tests, pero aún no revisión independiente; la revisión puntual
 V2 anterior no se presenta como cobertura de esos cambios.
+
+### Integración de plenum finito de admisión — 2026-10-05
+
+Se integró un plenum finito opcional en la cara izquierda del ducto de
+admisión. Su interfaz P3 se evalúa en ambos stages SSPRK2, intercambia flujos
+opuestos con el ducto y usa la especie del donante real. El estado del volumen
+participa en admissibility/CFL, checkpoint/replay, inventario global y
+reconstrucción del ciclo primario. Engineering output V2 emite masa, presión,
+temperatura y las cuatro especies. Un fixture de ciclo completo verificó la
+reconstrucción y los balances. La regresión integrada, red, P5-C, P6, P7, reed
+y puertos pasó **99 pruebas**.
+
+El enlace es una interfaz Riemann P3 ideal y sin masa: `effective_length_m` se
+conserva en la definición, pero no modela inertancia ni propagación acústica.
+No se añadió frontera atmosférica y `RESERVOIR_BOUNDARY_V2` permanece sin
+selección. La revisión independiente fue acotada al delta y encontró cero
+defectos concretos; no constituye aceptación independiente del motor completo.
+No se ejecutó KT100, no se modificó P4–P9, no se publicó y no se cambió la
+clasificación parcial/condicional.

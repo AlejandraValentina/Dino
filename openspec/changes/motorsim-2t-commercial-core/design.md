@@ -264,6 +264,18 @@ The duct-to-path mapping is copied into an immutable view at construction, so
 later mutation of the caller's dictionary cannot diverge stage routing from
 the checkpoint identity.
 
+The integrated network path now supports one optional finite intake plenum
+connected to the left face of the intake duct. The existing P3 interface
+resolves one mass, momentum, total-energy and donor-species flux per SSPRK2
+stage; the exact opposite mass/energy/four-species rates update the plenum and
+duct. The plenum state, constant volume, connection geometry and initial
+composition are bound into checkpoint identity, global inventories and cycle
+reconstruction. This bounded path does not add an atmosphere-to-plenum boundary
+or choose new generalized reservoir semantics. The connection currently uses
+the existing ideal, massless P3 Riemann interface: `effective_length_m` is
+retained as geometry/provenance but does not add neck inertance or acoustic
+propagation to this integrated path.
+
 The integrated geometry resolver can also consume the existing `CrankcaseGeometry`
 V2 plus a cylinder compression ratio. It derives both moving chamber volumes
 and opposite volume rates at each stage's angle and RPM, while retaining the

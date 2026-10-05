@@ -24,6 +24,8 @@ from .gas1d.boundary import Boundary
 from .gas1d.eos import IdealGas
 from .gas1d.riemann import hllc_flux
 from .kinematics import piston_position
+from .network_components import (NetworkConnection, VolumeGasState, VolumeNode,
+                                 resolve_volume_duct_interface)
 from .p6_species import (SPECIES, atmospheric_species, donor_species,
                          legacy_to_species, validate_species)
 from .p7_prescribed import (P7BurnEvent, P7Ledger, Q_F, capture_event,
@@ -223,6 +225,38 @@ class IntegratedPortBinding2T:
                 "powervalve": None if self.powervalve is None else self.powervalve.to_dict()}
 
 
+@dataclass(frozen=True)
+class IntegratedIntakePlenum2T:
+    """One finite 0D plenum conservatively connected to the intake duct inlet."""
+    node: VolumeNode
+    connection: NetworkConnection
+    initial_state: VolumeGasState
+
+    def validate(self, intake: DuctPath2T) -> None:
+        if not isinstance(self.node, VolumeNode) or not isinstance(self.connection, NetworkConnection):
+            raise ValueError("intake plenum requires existing network node and connection models")
+        self.node.validate()
+        self.connection.validate()
+        if self.node.kind != "plenum":
+            raise ValueError("integrated intake volume must have kind plenum")
+        if (self.connection.upstream != self.node.id or
+                self.connection.downstream != intake.id or intake.role != "intake"):
+            raise ValueError("intake plenum connection must terminate at the intake duct")
+        if not isinstance(self.initial_state, VolumeGasState):
+            raise ValueError("intake plenum requires an initial gas state")
+        self.initial_state.validate()
+
+    def to_dict(self) -> dict:
+        self.node.validate()
+        self.connection.validate()
+        self.initial_state.validate()
+        return {"schema": "INTEGRATED_INTAKE_PLENUM_2T_V1",
+                "node": self.node.to_dict(), "connection": self.connection.to_dict(),
+                "initial_state": {"mass_kg": self.initial_state.mass_kg,
+                                  "internal_energy_j": self.initial_state.internal_energy_j,
+                                  "species_mass_kg": list(self.initial_state.species_mass_kg)}}
+
+
 class IntegratedEngine2T:
     """One SSPRK2 state for reed/intake-ready, N-transfer, exhaust topology.
 
@@ -233,7 +267,7 @@ class IntegratedEngine2T:
     configured, contribute species and heat sources to the same cylinder
     stage RHS and are checkpointed with the integrated ledger.
     """
-    schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V5"
+    schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V6"
     dependency_status = "CONDITIONAL_ON_P4"
 
     def __init__(self, crankcase_state: tuple, cylinder_state: tuple,
@@ -249,6 +283,7 @@ class IntegratedEngine2T:
                  geometry_identity: dict | None = None,
                  reed_petals: tuple[ReedPetal, ...] = (),
                  port_binding: IntegratedPortBinding2T | None = None,
+                 intake_plenum: IntegratedIntakePlenum2T | None = None,
                  slider_crank: SliderCrankChambers2T | None = None,
                  reference_rpm: float = 1000.0,
                  thermal_system: ThermalSystem | None = None,
@@ -292,6 +327,11 @@ class IntegratedEngine2T:
         self.intake = next(path for path in ducts if path.role == "intake")
         self.exhaust = next(path for path in ducts if path.role == "exhaust")
         self.transfers = tuple(path for path in ducts if path.role == "transfer")
+        if intake_plenum is not None:
+            if not isinstance(intake_plenum, IntegratedIntakePlenum2T):
+                raise ValueError("intake_plenum must use IntegratedIntakePlenum2T")
+            intake_plenum.validate(self.intake)
+        self.intake_plenum = intake_plenum
         if port_binding is not None:
             if not isinstance(port_binding, IntegratedPortBinding2T):
                 raise ValueError("port_binding must use IntegratedPortBinding2T")
@@ -379,8 +419,16 @@ class IntegratedEngine2T:
                                                            geometry0.crankcase_volume_m3),
                 "cylinder": self._chamber_from_primitive(cylinder_state,
                                                          geometry0.cylinder_volume_m3)},
-            "ducts": {}, "species": {"chambers": {}, "ducts": {}},
+            "ducts": {}, "network_volumes": {},
+            "species": {"chambers": {}, "ducts": {}, "network_volumes": {}},
         }
+        if self.intake_plenum is not None:
+            node = self.intake_plenum.node
+            initial = self.intake_plenum.initial_state
+            self.state["network_volumes"][node.id] = (
+                initial.mass_kg, initial.internal_energy_j, node.volume_m3)
+            self.state["species"]["network_volumes"][node.id] = tuple(
+                initial.species_mass_kg)
         supplied_species = species or {}
         for name in ("crankcase", "cylinder"):
             mass = self.state["chambers"][name][0]
@@ -433,6 +481,8 @@ class IntegratedEngine2T:
                     "reed": [petal.to_dict() for petal in self.reed_petals],
                     "port_binding": (None if self.port_binding is None else
                                      self.port_binding.to_dict()),
+                    "intake_plenum": (None if self.intake_plenum is None else
+                                      self.intake_plenum.to_dict()),
                     "slider_crank": (None if self.slider_crank is None else
                                      self.slider_crank.to_dict()),
                     "reference_rpm": self.reference_rpm,
@@ -573,10 +623,14 @@ class IntegratedEngine2T:
         cc = self._chamber_state(chambers["crankcase"], species_chambers["crankcase"])
         cy = self._chamber_state(chambers["cylinder"], species_chambers["cylinder"])
         rhs_q = {"chambers": {"crankcase": [0.0, 0.0, 0.0],
-                               "cylinder": [0.0, 0.0, 0.0]}, "ducts": {}}
+                               "cylinder": [0.0, 0.0, 0.0]},
+                 "ducts": {}, "network_volumes": {}}
         chamber_outflow = {"crankcase": 0.0, "cylinder": 0.0}
         rhs_s = {"chambers": {"crankcase": [0.0] * 4,
-                               "cylinder": [0.0] * 4}, "ducts": {}}
+                               "cylinder": [0.0] * 4},
+                 "ducts": {}, "network_volumes": {}}
+        network_outflow = {}
+        network_exchanges = {}
         faces_trace = {}
         external = {"mass": 0.0, "energy": 0.0, "species": [0.0] * 4}
         fresh_air_intake_delivered_rate = 0.0
@@ -594,8 +648,46 @@ class IntegratedEngine2T:
             ss = state["species"]["ducts"][path.id]
             primitives = [self._primitive(q) for q in qs]
             if path.role == "intake":
-                external_l, species_l, speed_l = self._external_face(
-                    state, path, "left", self.inlet_boundary)
+                if self.intake_plenum is None:
+                    external_l, species_l, speed_l = self._external_face(
+                        state, path, "left", self.inlet_boundary)
+                else:
+                    binding = self.intake_plenum
+                    node = binding.node
+                    volume_state = VolumeGasState(
+                        *state["network_volumes"][node.id][:2],
+                        tuple(state["species"]["network_volumes"][node.id]))
+                    exchange_area = min(binding.connection.area_m2,
+                                        path.mesh.areas[0])
+                    exchange = resolve_volume_duct_interface(
+                        volume_state, node.volume_m3, primitives[0],
+                        self._fractions(ss[0], qs[0][0]*path.mesh.volumes[0]),
+                        exchange_area, -1, eos=self.eos)
+                    # The helper reports rates outward from the duct and into
+                    # the 0D node. Convert once back to the duct's +x face
+                    # orientation for the finite-volume divergence.
+                    external_l = (-exchange.mass_into_volume_kg_s,
+                                  -exchange.axial_impulse_into_volume_n,
+                                  -exchange.energy_into_volume_w)
+                    species_l = tuple(-value for value in
+                                      exchange.species_into_volume_kg_s)
+                    speed_l = max(abs(exchange.wave_speeds[0]),
+                                  abs(exchange.wave_speeds[-1]))
+                    rhs_q["network_volumes"][node.id] = [
+                        exchange.mass_into_volume_kg_s,
+                        exchange.energy_into_volume_w]
+                    rhs_s["network_volumes"][node.id] = list(
+                        exchange.species_into_volume_kg_s)
+                    network_outflow[node.id] = max(
+                        0.0, -exchange.mass_into_volume_kg_s)
+                    network_exchanges[node.id] = {
+                        "connection_id": binding.connection.id,
+                        "mass_into_volume_kg_s": exchange.mass_into_volume_kg_s,
+                        "energy_into_volume_w": exchange.energy_into_volume_w,
+                        "species_into_volume_kg_s": exchange.species_into_volume_kg_s,
+                        "axial_impulse_into_volume_n": exchange.axial_impulse_into_volume_n,
+                        "wave_speeds": exchange.wave_speeds,
+                        "fallback_reason": exchange.fallback_reason}
                 intake_reed_area = g.intake_area_m2
                 if self.reed_petals:
                     intake_reed_area = min(
@@ -617,9 +709,10 @@ class IntegratedEngine2T:
                     self._face_species_flux(right_face[0], ss[-1], qs[-1][0]*path.mesh.volumes[-1],
                                             species_chambers["crankcase"], chambers["crankcase"][0]))
                 # A left face points in +x; it is an external inflow when positive.
-                external["mass"] += external_l[0]
-                external["energy"] += external_l[2]
-                for j, value in enumerate(species_l): external["species"][j] += value
+                if self.intake_plenum is None:
+                    external["mass"] += external_l[0]
+                    external["energy"] += external_l[2]
+                    for j, value in enumerate(species_l): external["species"][j] += value
                 fresh_air_intake_delivered_rate += max(0.0, species_l[0])
                 fuel_delivered_rate += max(0.0, species_l[1])
                 if right_exchange is not None:
@@ -779,6 +872,8 @@ class IntegratedEngine2T:
                 thermal_rates[surface.id] = heat
         return {"q": rhs_q, "species": rhs_s, "geometry": g,
                 "chamber_outflow_kg_s": chamber_outflow,
+                "network_outflow_kg_s": network_outflow,
+                "network_exchanges": network_exchanges,
                 "external": external, "work_rates": work,
                 "fresh_air_intake_delivered_rate": fresh_air_intake_delivered_rate,
                 "fresh_delivered_rate": fresh_delivered_rate,
@@ -811,6 +906,9 @@ class IntegratedEngine2T:
             mass = state["chambers"][name][0]
             outflow_rate = assembled["chamber_outflow_kg_s"][name]
             values.append(float(dt_s) * outflow_rate / mass)
+        for node_id, outflow_rate in assembled["network_outflow_kg_s"].items():
+            mass = state["network_volumes"][node_id][0]
+            values.append(float(dt_s) * outflow_rate / mass)
         maximum = max(values, default=0.0)
         if maximum > self.max_cfl:
             self.rejected_steps += 1
@@ -830,6 +928,31 @@ class IntegratedEngine2T:
                 volume = path.mesh.volumes[i]
                 self.eos.primitive((q[0], q[1], q[2], q[0]))
                 validate_species(state["species"]["ducts"][path.id][i], q[0]*volume)
+        if self.intake_plenum is None:
+            if state.get("network_volumes") or state["species"].get("network_volumes"):
+                raise ValueError("unconfigured integrated network volume state")
+        else:
+            node_id = self.intake_plenum.node.id
+            chamber = state["network_volumes"].get(node_id)
+            species = state["species"].get("network_volumes", {}).get(node_id)
+            if (not isinstance(chamber, (tuple, list)) or len(chamber) != 3 or
+                    chamber[2] != self.intake_plenum.node.volume_m3):
+                raise ValueError("integrated intake plenum geometry mismatch")
+            if (set(state["network_volumes"]) != {node_id} or
+                    set(state["species"].get("network_volumes", {})) != {node_id}):
+                raise ValueError("integrated intake plenum state identity mismatch")
+            if (any(type(value) not in (int, float) or not isfinite(value)
+                    for value in chamber) or
+                    not isinstance(species, (tuple, list)) or len(species) != 4 or
+                    any(type(value) not in (int, float) or not isfinite(value)
+                        for value in species)):
+                raise ValueError("integrated intake plenum state contains invalid values")
+            mass, energy, volume = chamber
+            comp = validate_species(species, mass)
+            if min(mass, energy, volume) <= 0:
+                raise ValueError("integrated intake plenum state is inadmissible")
+            pressure = (self.eos.gamma - 1.0) * energy / volume
+            self.eos.validate((mass/volume, 0.0, pressure, fsum(comp[:2])/mass))
 
     def _combine(self, base, rhs0, rhs1, dt, angle):
         result = deepcopy(base)
@@ -858,6 +981,16 @@ class IntegratedEngine2T:
             for i, q in enumerate(result["ducts"][path.id]):
                 mass_density = fsum(result["species"]["ducts"][path.id][i]) / path.mesh.volumes[i]
                 result["ducts"][path.id][i] = (q[0], q[1], q[2], mass_density)
+        for node_id, q0 in base["network_volumes"].items():
+            a, b = rhs0["q"]["network_volumes"][node_id], rhs1["q"]["network_volumes"][node_id]
+            result["network_volumes"][node_id] = (
+                q0[0] + .5*dt*(a[0]+b[0]),
+                q0[1] + .5*dt*(a[1]+b[1]), q0[2])
+            s0 = base["species"]["network_volumes"][node_id]
+            sa = rhs0["species"]["network_volumes"][node_id]
+            sb = rhs1["species"]["network_volumes"][node_id]
+            result["species"]["network_volumes"][node_id] = tuple(
+                s0[j] + .5*dt*(sa[j]+sb[j]) for j in range(4))
         return result
 
     def inventory(self, state=None):
@@ -873,6 +1006,10 @@ class IntegratedEngine2T:
                                        path.mesh.volumes):
                 mass += q[0] * volume; energy += q[2] * volume
                 for j, value in enumerate(comp): species[j] += value
+        for node_id, q in state["network_volumes"].items():
+            mass += q[0]; energy += q[1]
+            for j, value in enumerate(state["species"]["network_volumes"][node_id]):
+                species[j] += value
         return {"mass_kg": mass, "energy_J": energy, "species_kg": tuple(species)}
 
     def step(self, dt_s: float, delta_angle_deg: float):
@@ -934,6 +1071,14 @@ class IntegratedEngine2T:
                 q1["species"]["ducts"][path.id].append(tuple(
                     q0["species"]["ducts"][path.id][i][j] +
                     dt_s*r0["species"]["ducts"][path.id][i][j] for j in range(4)))
+        for node_id, q in q0["network_volumes"].items():
+            rhs_q = r0["q"]["network_volumes"][node_id]
+            rhs_species = r0["species"]["network_volumes"][node_id]
+            q1["network_volumes"][node_id] = (
+                q[0] + dt_s*rhs_q[0], q[1] + dt_s*rhs_q[1], q[2])
+            q1["species"]["network_volumes"][node_id] = tuple(
+                q0["species"]["network_volumes"][node_id][j] +
+                dt_s*rhs_species[j] for j in range(4))
         g1 = self._geometry(end_angle)
         q1["chambers"]["crankcase"] = (*q1["chambers"]["crankcase"][:2], g1.crankcase_volume_m3)
         q1["chambers"]["cylinder"] = (*q1["chambers"]["cylinder"][:2], g1.cylinder_volume_m3)
@@ -992,6 +1137,8 @@ class IntegratedEngine2T:
                  "rpm": float(delta_angle_deg) / (6.0 * float(dt_s)),
                  "stage_states": (q0, q1, qn),
                  "stage_face_fluxes": (r0["faces"], r1["faces"]),
+                 "stage_network_exchanges": (r0["network_exchanges"],
+                                             r1["network_exchanges"]),
                  "stage_external": (r0["external"], r1["external"]),
                  "stage_cycle_rates": tuple({
                      "fresh_air_intake_delivery_kg_s": item[
@@ -1528,6 +1675,10 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
             "terminal_state": _jsonify(end_state),
             "duct_volumes_m3": {path.id: list(path.mesh.volumes)
                                 for path in engine.ducts},
+            "network_volume_definitions": ({} if engine.intake_plenum is None else {
+                engine.intake_plenum.node.id: {
+                    "kind": engine.intake_plenum.node.kind,
+                    "volume_m3": engine.intake_plenum.node.volume_m3}}),
             "trajectory": deepcopy(trajectory),
             "terminal_diagnostic": _jsonify(terminal_diagnostic),
             "observables": observables,
@@ -1613,6 +1764,20 @@ def make_integrated_engineering_output(cycle_record: dict, *,
                     values[prefix + f"{species_name}_mass_kg"] = composition[index]
             for face_index, face in enumerate(face_fluxes[duct_id]["all_faces"]):
                 values[f"duct:{encoded_id}:face:{face_index}:mass_flow_kg_s"] = face[0]
+        for node_id, definition in cycle_record.get(
+                "network_volume_definitions", {}).items():
+            if node_id not in state.get("network_volumes", {}):
+                raise ValueError("cycle primary network volume state is missing")
+            mass, energy, volume = state["network_volumes"][node_id]
+            composition = state["species"]["network_volumes"][node_id]
+            encoded_id = quote(node_id, safe="")
+            prefix = f"network:{encoded_id}:"
+            pressure = (gamma - 1.0) * energy / volume
+            values[prefix + "mass_kg"] = mass
+            values[prefix + "pressure_pa"] = pressure
+            values[prefix + "temperature_k"] = energy / (mass * float(cycle_record["eos_cv"]))
+            for index, species_name in enumerate(SPECIES):
+                values[prefix + f"{species_name}_mass_kg"] = composition[index]
         return values
 
     # Bind thermodynamic constants into the primary record rather than relying
@@ -1742,6 +1907,24 @@ def make_integrated_engineering_output(cycle_record: dict, *,
                 energy += q[2] * volume
                 for i, value in enumerate(composition):
                     species[i] += value
+        volume_definitions = cycle_record.get("network_volume_definitions", {})
+        network_volumes = state.get("network_volumes", {})
+        network_species = state.get("species", {}).get("network_volumes", {})
+        if (not isinstance(volume_definitions, dict) or
+                set(volume_definitions) != set(network_volumes) or
+                set(network_species) != set(network_volumes)):
+            raise ValueError("cycle primary network volume identity is missing")
+        for node_id, row in network_volumes.items():
+            if (not isinstance(row, (tuple, list)) or len(row) != 3 or
+                    row[2] != volume_definitions[node_id].get("volume_m3")):
+                raise ValueError("cycle primary network volume geometry mismatch")
+            mass += row[0]
+            energy += row[1]
+            composition = network_species[node_id]
+            if len(composition) != 4:
+                raise ValueError("cycle primary network species shape mismatch")
+            for i, value in enumerate(composition):
+                species[i] += value
         return mass, energy, species
 
     initial_inventory = inventory(_tuplify(cycle_record["start_state"]))

@@ -6,10 +6,12 @@ import pytest
 
 from motorsim.gas1d.mesh import uniform_mesh
 from motorsim.gas1d.boundary import Boundary
+from motorsim.gas1d.eos import IdealGas
 from motorsim.crankcase import CrankcaseGeometry
 from motorsim.expansion_chamber import ChamberSection, ExpansionChamber
 from motorsim.integrated_2t import (
-    DuctPath2T, EngineGeometry2T, IntegratedEngine2T, IntegratedPortBinding2T,
+    DuctPath2T, EngineGeometry2T, IntegratedEngine2T, IntegratedIntakePlenum2T,
+    IntegratedPortBinding2T,
     SliderCrankChambers2T, make_integrated_cycle_primary,
     make_integrated_engineering_output,
 )
@@ -22,6 +24,7 @@ from motorsim.reed import ReedPetal
 from motorsim.thermal import ThermalSurface, ThermalSystem
 from motorsim.two_stroke_ports import AreaKnot, DuctBinding, PortDefinition, TwoStrokePortSet
 from motorsim.mechanical import LossTerm, MechanicalLossModel
+from motorsim.network_components import NetworkConnection, VolumeGasState, VolumeNode
 
 
 def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
@@ -31,7 +34,8 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
           transfer_area=1e-5, duct_length=.02, exhaust_mesh=None,
           port_binding=None, reference_rpm=1000.0, geometry_identity=None,
           duct_species=None, slider_crank=None,
-          combustion_start_angle_deg=None, cylinder_species=None):
+          combustion_start_angle_deg=None, cylinder_species=None,
+          intake_plenum=None):
     def duct_mesh(duct_id):
         if duct_id == "exhaust" and exhaust_mesh is not None:
             return exhaust_mesh
@@ -80,7 +84,8 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
         geometry_identity=(geometry_identity or
                            {"fixture": "three-transfer-static-volume-v1"}),
         reed_petals=reed_petals,
-        port_binding=port_binding, slider_crank=slider_crank,
+        port_binding=port_binding, intake_plenum=intake_plenum,
+        slider_crank=slider_crank,
         reference_rpm=reference_rpm,
         thermal_system=thermal_system, thermal_locations=thermal_locations,
         combustion_start_angle_deg=combustion_start_angle_deg,
@@ -125,6 +130,132 @@ def test_integrated_engine_checkpoint_restart_replays_identically():
     assert json.dumps(restored.state, sort_keys=True) == json.dumps(
         continuous.state, sort_keys=True)
     assert restored.conservation_report() == continuous.conservation_report()
+
+
+def _intake_plenum(*, pressure=150000.0, fractions=(0.0, 0.5, 0.5, 0.0)):
+    eos = IdealGas()
+    volume = 0.001
+    temperature = 300.0
+    mass = pressure * volume / (eos.R * temperature)
+    state = VolumeGasState(
+        mass, pressure * volume / (eos.gamma - 1.0),
+        tuple(mass * fraction for fraction in fractions))
+    return IntegratedIntakePlenum2T(
+        VolumeNode("intake-plenum", "plenum", volume, "SYNTHETIC_ASSUMPTION"),
+        NetworkConnection("plenum-intake-neck", "intake-plenum", "intake",
+                          1e-5, 0.05, "SYNTHETIC_ASSUMPTION"), state)
+
+
+@pytest.mark.parametrize(("plenum_pressure", "duct_pressure", "plenum_fractions",
+                          "duct_fractions", "expected_donor"), [
+    (150000.0, 101325.0, (0.0, 0.5, 0.5, 0.0),
+     (1.0, 0.0, 0.0, 0.0), "plenum"),
+    (100000.0, 150000.0, (1.0, 0.0, 0.0, 0.0),
+     (0.0, 0.0, 0.0, 1.0), "duct"),
+])
+def test_integrated_finite_intake_plenum_uses_real_donor_and_global_ledgers(
+        plenum_pressure, duct_pressure, plenum_fractions, duct_fractions,
+        expected_donor):
+    intake_mesh_mass = 1.1768 * 1e-4 * .01
+    duct_species = {"intake": tuple(
+        tuple(intake_mesh_mass * fraction for fraction in duct_fractions)
+        for _ in range(2))}
+    system = _case(
+        duct_pressure=duct_pressure,
+        intake_plenum=_intake_plenum(pressure=plenum_pressure,
+                                     fractions=plenum_fractions),
+        duct_species=duct_species)
+    path = system.intake
+    def intake_subsystem():
+        node = system.intake_plenum.node.id
+        node_q = system.state["network_volumes"][node]
+        mass = node_q[0]
+        energy = node_q[1]
+        species = list(system.state["species"]["network_volumes"][node])
+        for q, comp, volume in zip(system.state["ducts"][path.id],
+                                   system.state["species"]["ducts"][path.id],
+                                   path.mesh.volumes):
+            mass += q[0] * volume
+            energy += q[2] * volume
+            for index, value in enumerate(comp):
+                species[index] += value
+        return mass, energy, tuple(species)
+    before_intake = intake_subsystem()
+    record = system.step(1e-9, .001)
+    first_stage = record["stage_network_exchanges"][0]["intake-plenum"]
+    mass_rate = first_stage["mass_into_volume_kg_s"]
+    assert mass_rate != 0.0
+    donor_fraction = (first_stage["species_into_volume_kg_s"][1] / mass_rate
+                      if expected_donor == "plenum" else
+                      first_stage["species_into_volume_kg_s"][3] / mass_rate)
+    assert donor_fraction == pytest.approx(0.5 if expected_donor == "plenum" else 1.0)
+    after_intake = intake_subsystem()
+    assert after_intake[0] == pytest.approx(before_intake[0], abs=1e-14)
+    assert after_intake[1] == pytest.approx(before_intake[1], abs=1e-10)
+    assert after_intake[2] == pytest.approx(before_intake[2], abs=1e-14)
+    report = system.conservation_report()
+    assert abs(report["mass"]["residual"]) < 1e-14
+    assert abs(report["energy"]["residual"]) < 1e-10
+    assert all(abs(item["residual"]) < 1e-14
+               for item in report["species"].values())
+
+
+def test_integrated_intake_plenum_is_checkpointed_and_replays_as_one_state():
+    binding = _intake_plenum()
+    continuous = _case(intake_plenum=binding)
+    continuous.step(1e-9, .001)
+    checkpoint = json.loads(json.dumps(continuous.snapshot()))
+    restored = _case(intake_plenum=binding)
+    restored.restore(checkpoint)
+    continuous.step(1e-9, .001)
+    restored.step(1e-9, .001)
+    assert restored.state == continuous.state
+    assert restored.inventory() == continuous.inventory()
+    assert restored.conservation_report() == continuous.conservation_report()
+    mismatch = _case(intake_plenum=_intake_plenum(pressure=149000.0))
+    with pytest.raises(ValueError, match="configuration mismatch"):
+        mismatch.restore(checkpoint)
+
+
+def test_integrated_intake_plenum_uses_both_ssprk_stages_for_volume_update():
+    binding = _intake_plenum(pressure=150000.0)
+    system = _case(intake_plenum=binding)
+    node_id = binding.node.id
+    initial_mass, initial_energy, _ = system.state["network_volumes"][node_id]
+    initial_species = system.state["species"]["network_volumes"][node_id]
+    dt = 1e-9
+
+    record = system.step(dt, .001)
+    exchanges = record["stage_network_exchanges"]
+    assert len(exchanges) == 2
+    first, second = (exchange[node_id] for exchange in exchanges)
+    assert first["mass_into_volume_kg_s"] != second["mass_into_volume_kg_s"]
+
+    final_mass, final_energy, _ = system.state["network_volumes"][node_id]
+    final_species = system.state["species"]["network_volumes"][node_id]
+    assert final_mass == pytest.approx(
+        initial_mass + .5 * dt * (first["mass_into_volume_kg_s"] +
+                                   second["mass_into_volume_kg_s"]), abs=1e-16)
+    assert final_energy == pytest.approx(
+        initial_energy + .5 * dt * (first["energy_into_volume_w"] +
+                                    second["energy_into_volume_w"]), abs=1e-12)
+    for index in range(4):
+        assert final_species[index] == pytest.approx(
+            initial_species[index] + .5 * dt * (
+                first["species_into_volume_kg_s"][index] +
+                second["species_into_volume_kg_s"][index]), abs=1e-16)
+
+
+def test_integrated_intake_plenum_outflow_participates_in_depletion_cfl():
+    binding = _intake_plenum(pressure=200000.0)
+    system = _case(intake_plenum=binding, duct_pressure=100000.0,
+                   max_cfl=0.4)
+    assembled = system._assemble(system.state, 0.0, 1000.0)
+    outflow = assembled["network_outflow_kg_s"]["intake-plenum"]
+    assert outflow > 0.0
+    dt = system.state["network_volumes"]["intake-plenum"][0] / outflow * 0.5
+    with pytest.raises(ValueError, match="CFL limit exceeded"):
+        system._cfl(system.state, assembled, dt)
 
 
 def test_integrated_engine_rejects_incomplete_or_non_generic_topology():
@@ -579,7 +710,7 @@ def test_p7_event_boundary_requires_exact_alignment_and_stops_cleanly():
 
 
 def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
-                            fixture_name=None):
+                            fixture_name=None, intake_plenum=False):
     rpm = 3000.0
     crankcase = CrankcaseGeometry(56.0, 50.0, 100.0, 80.0,
                                   "SYNTHETIC_ASSUMPTION")
@@ -671,6 +802,9 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
                            "ports": ports.to_dict(), "chamber": chamber.to_dict()},
         reed_petals=((reed,) if with_reed else ()),
         port_binding=binding, slider_crank=slider,
+        intake_plenum=(_intake_plenum(
+            pressure=101325.0, fractions=(1.0, 0.0, 0.0, 0.0))
+                       if intake_plenum else None),
         reference_rpm=rpm, thermal_system=thermal,
         thermal_locations={"cylinder-wall": "cylinder"},
         combustion_start_angle_deg=300.0, max_cfl=.4)
@@ -813,6 +947,8 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
         "cylinder_fuel_species_at_exhaust_close_kg"]["source"]
     assert abs(output["cycle_metrics"]["fuel_species_balance_residual_kg"]["value"]) < 1e-12
     assert output["cycle_metrics"]["equivalence_ratio"]["status"] == "UNDEFINED"
+
+
     prior_v2_record = deepcopy(first_cycle)
     for row in prior_v2_record["trajectory"]:
         for stage in row["stage_cycle_rates"]:
@@ -890,3 +1026,29 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
         cycle_one_checkpoint["state"], sort_keys=True)
     _advance_cycle_fixture(replay, 720.0)
     assert replay.snapshot() == system.snapshot()
+
+
+def test_finite_intake_plenum_is_bound_into_primary_cycle_and_engineering_output():
+    system = _internal_cycle_fixture(intake_plenum=True)
+    start = deepcopy(system.snapshot())
+    _advance_cycle_fixture(system, 360.0)
+    end = deepcopy(system.snapshot())
+
+    primary = make_integrated_cycle_primary(system, start, end, 1)
+    assert primary["network_volume_definitions"] == {
+        "intake-plenum": {"kind": "plenum", "volume_m3": .001}}
+    output = make_integrated_engineering_output(
+        primary, displacement_m3=system.slider_crank.crankcase.displacement_m3)
+    assert validate_integrated_engineering_output_v2(output) == output
+    channels = output["crank_angle_trace"]["channels"]
+    prefix = "network:intake-plenum:"
+    for suffix in ("mass_kg", "pressure_pa", "temperature_k",
+                   "fresh_air_mass_kg", "fuel_mass_kg", "residual_mass_kg",
+                   "burned_mass_kg"):
+        assert prefix + suffix in channels
+        assert len(channels[prefix + suffix]["values"]) == len(
+            output["crank_angle_trace"]["angle_deg"])
+    assert abs(primary["conservation"]["mass_residual_kg"]) < 1e-12
+    assert abs(primary["conservation"]["energy_residual_J"]) < 1e-9
+    assert all(abs(value) < 1e-12 for value in
+               primary["conservation"]["species_residual_kg"])

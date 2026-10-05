@@ -197,6 +197,36 @@ Resoluciones permitidas:
   `RESERVOIR_BOUNDARY_V2_SCIENTIFIC_DECISION_REQUIRED`. Escalar y continuar
   los workstreams independientes.
 
+Forensics ejecutado el 2026-10-05: V1 usa el invariante saliente de Euler y
+resuelve la entrada sub-sónica isentrópica desde el reservoir en reposo. Para
+la rama evaluada, `f(w)=w+2a(w)/(gamma-1)` es creciente en
+`[-a_sonic,0]`, con extremos `J_choke` y `J_rest`; por eso `J+ > J_rest` no
+posee raíz en el dominio contractual. El fixture de 100 kPa, 301 K y
+`u=-0.001 m/s` no prueba un bug del solver. Las formulaciones alternativas
+(Riemann con estado exterior prescrito o característica con una política de
+choking/transición explícita) pueden cambiar caudal, energía y reflexión; V2
+queda clasificada como ambigüedad material a la espera de que se agoten las
+tareas independientes. KT100 y los recibos originales siguen congelados.
+
+Como trabajo independiente prioritario, la integración ahora admite un único
+plenum finito en la entrada del ducto de admisión: el mismo helper P3 se evalúa
+en ambas etapas, los incrementos internos son opuestos, las especies usan el
+donante real, el nodo participa del inventario/CFL/restart y la salida V2 puede
+trazar presión, temperatura, masa y composición. Esto no habilita una nueva
+frontera atmosférica ni resuelve la selección de V2.
+
+Alcance acústico del enlace: el volumen intercambia mediante la interfaz P3
+ideal y sin masa; `NetworkConnection.effective_length_m` permanece como dato de
+geometría/provenance y no se aplica como inertancia ni propagación acústica en
+este camino. La documentación primaria de NASA describe tanto fronteras por
+estado de Riemann como fronteras subsónicas basadas en estado de estancamiento
+([Cart3D](https://www.nas.nasa.gov/publications/software/docs/cart3d/pages/howto/samples_power/README.html),
+[Wind-US](https://www.grc.nasa.gov/www/winddocs/user/bc.html)); los tratamientos
+de caudal estrangulado dependen además del estado total y del régimen
+([NASA mass-flow choking](https://www.grc.nasa.gov/www/k-12/BGP/mflchk.html)).
+Estas referencias documentan alternativas existentes, pero no seleccionan la
+semántica de una futura frontera MotorSim ni cambian el bloqueo científico V2.
+
 ## 8. Protocolo ante bloqueos no triviales
 
 No devolver el bloqueo automáticamente al humano. Investigaciones paralelas:
@@ -301,23 +331,43 @@ registra como decisión en la sección 17.
 
 ## 15. Objetivo actual
 
-Pendiente de la primera sesión autónoma. Primer blocker a investigar:
-`No consistent reservoir inflow branch` (sección 7).
+Continuar la integración end-to-end del núcleo 2T reutilizando el estado
+SSPRK2 común y la evidencia primaria existentes. El plenum finito en la entrada
+de admisión ya está enlazado a ese estado y a los outputs V2. Próximo trabajo:
+ampliar el enlace integrado de volúmenes de red de forma conservativa a más
+endpoints y comprobar la reconstrucción primaria en esa topología, sin cambiar
+la semántica histórica P3. Mantener fuera del alcance cualquier campaña KT100.
 
 ## 16. Arquitectura vigente
 
-Pendiente.
+`IntegratedEngine2T` avanza cámara, ductos, especies, reed estática, fuentes
+térmicas/P7 y ahora un plenum finito opcional en las mismas dos etapas SSPRK2.
+Los intercambios de red usan el helper Riemann P3 existente y la composición
+real del donante; inventario global, CFL, checkpoint y output reconstruible
+incluyen el nodo. El enlace de plenum es ideal y sin masa: su longitud efectiva
+se serializa, pero no representa inertancia ni propagación acústica.
 
 ## 17. Decisiones científicas
 
 | Fecha | Decisión | Alternativas | Evidencia | Revisión |
 |---|---|---|---|---|
+| 2026-10-05 | El enlace integrado finito de admisión reutiliza P3 ideal; no se añade una frontera atmosférica ni una nueva política de reservoir | Integrar solo el endpoint existente; tratar longitud efectiva como acústica sería una capability distinta | 99 pruebas focales integradas/P5-C/P6/P7/red/reed/puertos PASS; estado primario/output de un ciclo y conservation rebuild verificados | Revisión adversarial de solo lectura sin defecto en el delta; no es revisión completa del motor |
 
 ## 18. Convenciones
 
-Pendiente.
+Sin cambios a P4–P9, contratos, umbrales ni parámetros científicos. Artefactos
+sintéticos siguen etiquetados y no sustituyen validación experimental.
+`effective_length_m` es geometría/provenance, no una longitud activa en la
+interfaz P3 ideal. Todo cambio de semántica de reservoir requiere capability y
+contrato propios.
 
 ## 19. Blockers abiertos
 
 - Reservoir boundary: `KT100_HYBRID_V2_BLOCKED_BY_RESERVOIR_BOUNDARY_CAPABILITY`
   (`docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md`).
+- Integración SSPRK2 de reed dinámica: falta un contrato stage-coherent para
+  impacto/restitución, trabajo de presión y ledger de disipación.
+- AFR estequiométrica y enlace de `Q_F` con LHV siguen sin definición; las
+  cantidades dependientes permanecen UNDEFINED.
+- El núcleo integrado/comercial sigue parcial, sintético y sujeto a
+  `CONDITIONAL_ON_P4`; no hay validación experimental.

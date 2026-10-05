@@ -63,6 +63,16 @@ def _integrated_channel_unit(name: str) -> str | None:
     if name == "crankcase_mass_kg":
         return "kg"
     parts = name.split(":") if isinstance(name, str) else ()
+    if len(parts) == 3 and parts[0] == "network" and parts[1]:
+        try:
+            volume_id = unquote(parts[1])
+            if quote(volume_id, safe="") != parts[1]:
+                return None
+        except (ValueError, TypeError):
+            return None
+        return {"mass_kg": "kg", "pressure_pa": "Pa", "temperature_k": "K",
+                "fresh_air_mass_kg": "kg", "fuel_mass_kg": "kg",
+                "residual_mass_kg": "kg", "burned_mass_kg": "kg"}.get(parts[2])
     if len(parts) != 5 or parts[0] != "duct" or not parts[1]:
         return None
     try:

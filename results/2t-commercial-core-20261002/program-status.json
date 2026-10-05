@@ -1,9 +1,9 @@
 {
   "schema": "MOTORSIM_2T_COMMERCIAL_CORE_STATUS_V1",
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
-  "recorded_at": "2026-10-02",
+  "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "e93fd62c10478487d13a49c7181d1ef15aa601f5",
+  "status_capture_head": "8cdf66e1ff5bfec971491199324dcb9e9ff9bdea",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -224,7 +224,11 @@
         "collector_reintegrates_stage_work_species_sources_and_global_conservation_before_serializing",
         "primary_cycle_v2_exact_last_transfer_and_exhaust_closure_states",
         "same_cycle_scavenging_metrics_bound_to_p6_ledgers_and_explicit_reference_mass",
-        "state_aligned_cycle_start_and_terminal_engineering_output_samples"
+        "state_aligned_cycle_start_and_terminal_engineering_output_samples",
+        "optional_finite_intake_plenum_in_both_global_SSPRK2_stages_with_actual_donor",
+        "finite_plenum_mass_energy_four_species_in_global_inventory_CFL_and_restart",
+        "full_cycle_primary_rebuild_and_engineering_V2_network_volume_channels",
+        "stage_trapezoidal_node_update_test_and_full_cycle_global_conservation"
       ],
       "focal_tests": 21,
       "blocked_scope": [
@@ -236,7 +240,10 @@
         "equivalence_ratio_requires_explicit_stoichiometric_AFR",
         "dynamic_reed_stage_state_restart_and_SSPRK2_integration_not_implemented",
         "GENERALIZED_RESERVOIR_BOUNDARY_V2_SCIENTIFIC_DECISION_REQUIRED",
-        "fuel_trapped_inventory_not_inferred_from_terminal_global_inventory"
+        "fuel_trapped_inventory_not_inferred_from_terminal_global_inventory",
+        "only_one_finite_intake_plenum_supported_by_current_integrated_binding",
+        "atmosphere_to_plenum_reservoir_boundary_not_added",
+        "connection_effective_length_is_not_dynamic_acoustic_inertance"
       ],
       "boundary_v2": "NOT_IMPLEMENTED_NO_FALLBACK",
       "periodicity": {
@@ -290,7 +297,10 @@
         "dynamic reed stage/impact/energy coupling contract and restart",
         "stoichiometric AFR and Q_F-to-LHV semantics not configured",
         "independent review of latest fuel-output/Fixture-B/zero-Cd delta",
-        "P4 unresolved; all integrated fixtures remain CONDITIONAL_ON_P4"
+        "dynamic reed SSPRK2 impact/work/dissipation contract and restart",
+        "stoichiometric AFR and Q_F-to-LHV semantics remain undefined",
+        "generalized reservoir inflow capability remains a local scientific blocker",
+        "complete Commercial Core acceptance and experimental validation remain pending"
       ]
     },
     "17d_p7_fuel_combustion_thermal_mechanics": {
@@ -333,7 +343,7 @@
     },
     "reference_harness_openspec_strict": "PASS",
     "git_diff_check": "PASS",
-    "git_lfs_fsck": "PASS_AFTER_EXPLICIT_STAGE",
+    "git_lfs_fsck": "PASS",
     "p4_p8_regressions": {
       "result": "PASS",
       "count": 300,
@@ -344,8 +354,9 @@
     "p9_contract_sha256": "79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d",
     "integrated_regression_group_current": {
       "result": "PASS",
-      "count": 85,
-      "command": "python -m pytest tests/test_integrated_2t.py tests/test_engineering_outputs.py tests/test_p5c_integrated.py tests/test_p6_species.py tests/test_p7_full_topology.py tests/test_reed.py tests/test_two_stroke_ports_p5c.py -q"
+      "count": 99,
+      "command": ".venv\\Scripts\\python.exe -m pytest -q tests/test_integrated_2t.py tests/test_engineering_outputs.py tests/test_network_components.py tests/test_p5c_integrated.py tests/test_p6_species.py tests/test_p7_full_topology.py tests/test_reed.py tests/test_two_stroke_ports_p5c.py",
+      "run_date": "2026-10-05"
     },
     "integrated_cycle_fixture_a": {
       "result": "SIX_COMPLETE_CYCLES_EXACT_CLOSURES_CAPTURED_PERIODICITY_FAILS",
@@ -482,11 +493,18 @@
       "angle_deg": 107.65162630807096,
       "step_refinements": 25,
       "solver_changed": false
-    }
+    },
+    "integrated_intake_plenum": {
+      "result": "PASS",
+      "verification": "Both SSPRK2 stages, both flow directions, actual donor species, global mass/energy/four-species ledgers, depletion CFL, checkpoint/replay, complete-cycle primary rebuild and V2 output.",
+      "review": "Independent read-only review found no concrete defect; punctual, not full-engine acceptance.",
+      "physical_scope": "Ideal massless P3 interface; effective connection length is metadata only; no atmosphere boundary."
+    },
+    "python_compileall": "PASS (.venv Python 3.11; motorsim and tests)"
   },
   "review": {
-    "current_delta": "SELF_REVIEW_ONLY; no independent review of exact exhaust-close fuel output, zero-Cd roundtrip, or Fixture B delta.",
-    "independent_review_current_delta": "PENDING; prior V2 closure review does not cover latest changes and was not a full-engine acceptance review.",
+    "current_delta": "Independent read-only review of finite intake plenum integration and full-cycle output binding: no concrete defects; full engine remains unaccepted.",
+    "independent_review_current_delta": "PASS_PUNCTUAL_2026-10-05: SSPRK2 volume update, donor/ledger path, checkpoint, full-cycle primary/output wiring and stated ideal-interface limitation reviewed; no complete-engine acceptance.",
     "prior_harness_punctual_review": "NO_MATERIAL_DEFECT_FOUND",
     "reverse_internal_donor_fix": "INDEPENDENT_READ_ONLY_REVIEW_PASS_BOTH_DONOR_DIRECTIONS_AND_STAGE_BINDING; no complete-engine review performed",
     "slider_crank_stage_integration": "INDEPENDENT_READ_ONLY_REVIEW_PASS; geometry signs/units, stage RPM, single -pVdot ledger and checkpoint mismatch were checked; no cycle claim",
@@ -499,7 +517,7 @@
       "id": "17a-integrated-gas-species-foundation",
       "description": "SSPRK2 gas/species N-route foundation, global ledgers, cell/chamber CFL, atomic restart checks",
       "dependencies": [],
-      "state": "DONE_CONDITIONAL",
+      "state": "DONE",
       "blocker": null,
       "commits": [
         "a70917dde45ca15c62d5e0f460020599488a4d1f",
@@ -522,8 +540,8 @@
       "dependencies": [
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "BLOCKED_LOCAL_DYNAMIC_REED_COUPLING",
-      "blocker": "Static reed and crankcase geometry are integrated; dynamic reed SSPRK2/impact integration needs a declared conservative method for stops/restitution and gas-pressure work/damping-energy ledgers. Independent advance after the gas step would be unverified splitting.",
+      "state": "BLOCKED_LOCAL",
+      "blocker": "Dynamic reed SSPRK2/impact integration needs a declared conservative method for stops/restitution and gas-pressure work/damping-energy ledgers; independent advance after the gas step would be unverified splitting.",
       "commits": [
         "a70917dde45ca15c62d5e0f460020599488a4d1f",
         "d3b82f3 Integrate generic ports into accepted 2T stages"
@@ -545,7 +563,7 @@
       "dependencies": [
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "DONE_CONDITIONAL",
+      "state": "DONE",
       "blocker": "Reservoir V2 remains a separate local KT100 blocker; no retry or historical P5 change. Integrated nonreflecting synthetic fixtures are complete.",
       "commits": [
         "d3b82f3 Integrate generic ports into accepted 2T stages",
@@ -575,7 +593,7 @@
         "17b-static-reed-intake-crankcase"
       ],
       "state": "IN_PROGRESS",
-      "blocker": "Stoichiometric AFR and Q_F-to-LHV remain unspecified; this metric is only the exact remaining fuel pseudo-species in the cylinder at exhaust closure, not total trapped fuel.",
+      "blocker": "Stoichiometric AFR and Q_F-to-LHV remain unspecified; exact exhaust-close fuel species is not total trapped fuel.",
       "commits": [
         "8b04b83ccaa64a0221b380044c38e7c53d0f3cca"
       ],
@@ -599,8 +617,8 @@
         "17c-exhaust-chamber-boundary",
         "17d-fuel-combustion-thermal-mechanics"
       ],
-      "state": "DONE_CONDITIONAL",
-      "blocker": "Global readiness still waits on the dynamic-reed coupling contract, fuel stoichiometric/trapped semantics, independent review of latest delta, and P4 acceptance.",
+      "state": "DONE",
+      "blocker": "Commercial Core remains partial; independent review of the complete core and resolution of outstanding model/validation limits remain open.",
       "commits": [
         "e93fd624",
         "f846aa3",
@@ -632,8 +650,8 @@
       "dependencies": [
         "17e-cycle-evidence-collector"
       ],
-      "state": "DONE_CONDITIONAL",
-      "blocker": "Both completed internal fixtures reach P1, but overall Commercial Core remains partial due to unresolved explicit stoichiometric fuel property, dynamic reed integration and reservoir boundary V2 scientific decision.",
+      "state": "DONE",
+      "blocker": "Fixtures are synthetic and CONDITIONAL_ON_P4; this completed task does not imply full Commercial Core readiness.",
       "commits": [],
       "evidence": [
         "Fixture B 20% longer expansion chamber: 19 complete cycles, 33,434 accepted steps, P1 at cycle 19, V2 output validated per cycle; full primary+output artifact preserved.",
@@ -654,6 +672,42 @@
         "docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md"
       ],
       "next_action": "Continue independent internal fixture work; do not retry KT100 before both fixtures pass."
+    },
+    {
+      "id": "integrated-intake-plenum",
+      "description": "Integrate one optional finite intake plenum through both global SSPRK2 stages, conservation, CFL, restart, primary evidence and V2 outputs",
+      "dependencies": [
+        "17a-integrated-gas-species-foundation"
+      ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [
+        "8cdf66e1ff5bfec971491199324dcb9e9ff9bdea"
+      ],
+      "evidence": [
+        "Four directional donor/global-ledger tests and an exact two-stage trapezoidal update test cover mass, energy and all four species.",
+        "A complete synthetic 0-to-360 degree cycle rebuilds primary evidence and validates aligned V2 channels for volume mass, pressure, temperature and four species; global ledgers close.",
+        "99 integrated/network/P5-C/P6/P7/reed/port tests PASS using .venv Python 3.11.",
+        "Independent read-only review found no concrete defect; review is punctual and does not accept the full engine.",
+        "Interface is ideal and massless; connection effective length is configuration/provenance only, with no acoustic propagation or inertance.",
+        "No KT100 campaign; no P4-P9 changes; no push."
+      ],
+      "next_action": "Proceed with the READY generic multi-endpoint finite-volume network integration; leave atmospheric/reservoir semantics blocked."
+    },
+    {
+      "id": "integrated-network-multi-endpoint",
+      "description": "Generalize the accepted finite-volume SSPRK2 network coupling from one intake plenum to multiple explicitly bound, distinct duct endpoints",
+      "dependencies": [
+        "integrated-intake-plenum",
+        "17a-integrated-gas-species-foundation"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "Existing P3 volume/duct Riemann helper; bounded single-plenum integration and independent review."
+      ],
+      "next_action": "Inspect current topology contracts and design a generic endpoint binding without changing reservoir, P3, or thermodynamic semantics; preregister only if the physical contract changes."
     }
   ]
 }

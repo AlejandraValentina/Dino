@@ -96,6 +96,9 @@ def test_integrated_v2_binds_configuration_and_path_addressed_duct_channels():
             "source": "integrated duct state"},
         "duct:primary:face:1:mass_flow_kg_s": {
             "values": [0, .01, .02, .01, 0], "source": "accepted HLLC face flux"},
+        "network:intake%20plenum:pressure_pa": {
+            "values": [100_000, 101_000, 102_000, 101_000, 100_000],
+            "source": "accepted finite-volume plenum state"},
     }
     values = dict(rpm=base["operating_point"]["rpm"], cycle_number=3,
                   angles_deg=tuple(base["crank_angle_trace"]["angle_deg"]),
@@ -110,6 +113,8 @@ def test_integrated_v2_binds_configuration_and_path_addressed_duct_channels():
     assert record["configuration_sha256"] == "a" * 64
     assert record["crank_angle_trace"]["channels"][
         "duct:primary:cell:0:pressure_pa"]["unit"] == "Pa"
+    assert record["crank_angle_trace"]["channels"][
+        "network:intake%20plenum:pressure_pa"]["unit"] == "Pa"
     assert validate_integrated_engineering_output_v2(record) == record
     with pytest.raises(ValueError, match="Unsupported or malformed crank-angle channel"):
         build_integrated_engineering_output_v2(
