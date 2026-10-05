@@ -833,16 +833,17 @@
         "A1"
       ],
       "dependencies": [],
-      "state": "IN_PROGRESS",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "working-tree: AUD-01 blocked-area wall-pressure traction"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "motorsim/integrated_2t.py::_port_face_flux",
+        "tests/test_integrated_2t.py::test_uniform_static_gas_remains_at_rest_at_closed_partial_and_full_ports (3 parameter cases PASS)"
       ],
-      "next_action": "Implement blocked-area pressure traction with oriented face tests for zero, partial and full opening."
+      "next_action": "No cycle campaign until AUD-08; keep A/B evidence superseded."
     },
     {
       "id": "AUD-02",
@@ -852,16 +853,17 @@
         "A2"
       ],
       "dependencies": [],
-      "state": "READY",
-      "classification": "OPEN",
-      "blocker": null,
+      "state": "IN_PROGRESS",
+      "classification": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
+      "blocker": "The p/T setup is corrected and directly verified; the corrected fixture exposes an old downstream assertion requiring zero P7 availability limiting, so the dependent synthetic cycle regression is not fully reconciled.",
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "working-tree: correct private cycle fixture initial pressure"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "tests/test_integrated_2t.py::test_internal_cycle_fixture_starts_at_atmospheric_pressure_and_temperature (PASS)",
+        "tests/test_integrated_2t.py full module: 36 passed, 1 failed at legacy exact-zero p7_availability_limited_kg assertion; no cycle evidence claimed"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "Reconcile the changed P7 limiter behavior without using this test as cycle acceptance; do not regenerate A/B before AUD-08."
     },
     {
       "id": "AUD-03",

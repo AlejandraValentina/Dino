@@ -90,6 +90,21 @@ def _jsonify(value):
     return value
 
 
+def _port_face_flux(exchange, duct_primitive, geometric_area, effective_area):
+    """Return +x extensive flux, including pressure traction on blocked area.
+
+    The Riemann exchange covers only the open portion of the duct face. The
+    remaining geometric area is a stationary wall and carries the local duct
+    pressure traction, but no mass, energy, or species exchange.
+    """
+    blocked_area = geometric_area - effective_area
+    if blocked_area < -1e-15 * max(1.0, geometric_area):
+        raise ValueError("effective port area exceeds the duct face")
+    face = [0.0, 0.0, 0.0] if exchange is None else list(exchange.flux_x[:3])
+    face[1] += max(0.0, blocked_area) * duct_primitive[2]
+    return tuple(face)
+
+
 @dataclass(frozen=True)
 class EngineGeometry2T:
     """Resolved stage geometry in SI units, keyed by stable duct id."""
@@ -1051,8 +1066,8 @@ class IntegratedEngine2T:
                 intake_area = min(intake_reed_area, path.mesh.areas[-1])
                 right_exchange = interface_flux(cc, primitives[-1], intake_area, 1,
                                                 eos=self.eos) if intake_area else None
-                right_face = ((0.0, 0.0, 0.0) if right_exchange is None else
-                              right_exchange.flux_x[:3])
+                right_face = _port_face_flux(
+                    right_exchange, primitives[-1], path.mesh.areas[-1], intake_area)
                 speed_r = (max(abs(primitives[-1][1] - self.eos.sound_speed(primitives[-1])),
                                abs(primitives[-1][1] + self.eos.sound_speed(primitives[-1])))
                            if right_exchange is None else
@@ -1089,8 +1104,10 @@ class IntegratedEngine2T:
                                                eos=self.eos) if left_area else None
                 right_exchange = interface_flux(cy, primitives[-1], right_area, 1,
                                                 eos=self.eos) if right_area else None
-                left_face = (0.0, 0.0, 0.0) if left_exchange is None else left_exchange.flux_x[:3]
-                right_face = (0.0, 0.0, 0.0) if right_exchange is None else right_exchange.flux_x[:3]
+                left_face = _port_face_flux(
+                    left_exchange, primitives[0], path.mesh.areas[0], left_area)
+                right_face = _port_face_flux(
+                    right_exchange, primitives[-1], path.mesh.areas[-1], right_area)
                 speed_l = (max(abs(primitives[0][1] - self.eos.sound_speed(primitives[0])),
                                abs(primitives[0][1] + self.eos.sound_speed(primitives[0])))
                            if left_exchange is None else
@@ -1149,7 +1166,8 @@ class IntegratedEngine2T:
                         "axial_impulse_into_volume_n": exchange.axial_impulse_into_volume_n,
                         "wave_speeds": exchange.wave_speeds,
                         "fallback_reason": exchange.fallback_reason}
-                left_face = (0.0, 0.0, 0.0) if left_exchange is None else left_exchange.flux_x[:3]
+                left_face = _port_face_flux(
+                    left_exchange, primitives[0], path.mesh.areas[0], exhaust_area)
                 speed_l = (max(abs(primitives[0][1] - self.eos.sound_speed(primitives[0])),
                                abs(primitives[0][1] + self.eos.sound_speed(primitives[0])))
                            if left_exchange is None else

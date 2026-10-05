@@ -114,6 +114,46 @@ def test_integrated_topology_resolves_three_transfer_routes_and_ledgers():
         for i, values in enumerate(system.state["species"]["ducts"][path_id]))
 
 
+@pytest.mark.parametrize("opening_fraction", (0.0, 0.5, 1.0))
+def test_uniform_static_gas_remains_at_rest_at_closed_partial_and_full_ports(
+        opening_fraction):
+    mesh_area = 1e-4
+    opening = opening_fraction * mesh_area
+
+    def geometry(_angle):
+        return EngineGeometry2T(
+            .00015, .00018, 0.0, 0.0, opening,
+            (opening, opening, opening), opening)
+
+    system = _case(
+        crankcase_pressure=101325.0, cylinder_pressure=101325.0,
+        duct_pressure=101325.0, transfer_pressure=101325.0,
+        geometry=geometry)
+    assembled = system._assemble(system.state, 0.0, 1000.0)
+
+    for path in system.ducts:
+        assert all(cell_rhs[1] == pytest.approx(0.0, abs=1e-10)
+                   for cell_rhs in assembled["q"]["ducts"][path.id])
+        faces = assembled["faces"][path.id]
+        expected_wall_traction = 101325.0 * mesh_area
+        if path.role == "intake":
+            assert faces["right"][1] == pytest.approx(expected_wall_traction)
+        elif path.role == "transfer":
+            assert faces["left"][1] == pytest.approx(expected_wall_traction)
+            assert faces["right"][1] == pytest.approx(expected_wall_traction)
+        else:
+            assert faces["left"][1] == pytest.approx(expected_wall_traction)
+
+
+def test_internal_cycle_fixture_starts_at_atmospheric_pressure_and_temperature():
+    system = _internal_cycle_fixture()
+    for name, (mass, energy, volume) in system.state["chambers"].items():
+        pressure = (system.eos.gamma - 1.0) * energy / volume
+        temperature = pressure / ((mass / volume) * system.eos.R)
+        assert pressure == pytest.approx(101325.0)
+        assert temperature == pytest.approx(300.0, abs=0.01)
+
+
 def test_integrated_engine_checkpoint_restart_replays_identically():
     continuous = _case()
     continuous.step(1e-8, .01)
@@ -814,9 +854,8 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
         "cylinder-wall", "cylinder_wall", 1e-4, 1000.0,
         "SYNTHETIC_ASSUMPTION", wall_temperature_K=290.0),))
     return IntegratedEngine2T(
-        # Start every gas component at the same atmospheric pressure.  With
-        # gamma=1.35 this energy density gives p=(gamma-1)*rhoE=101325 Pa.
-        (1.1768, 0.0, 289500.0, 1.0), (1.1768, 0.0, 289500.0, 1.0),
+        # Start both chambers at the same atmospheric p/T as the ducts.
+        (1.1768, 0.0, 101325.0, 1.0), (1.1768, 0.0, 101325.0, 1.0),
         paths, states, geometry, species=species,
         atmosphere_species=(.98, .02, 0.0, 0.0),
         inlet_boundary=Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0)),

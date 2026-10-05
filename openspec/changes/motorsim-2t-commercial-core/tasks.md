@@ -561,3 +561,23 @@ distinta y no se hizo. AUD-16 permanece parcial: el commit `9eada5d` cubre solo
 la ruta donde los modelos explícitos sombrean por completo el callback.
 
 No se ejecutaron campañas ni se tocaron resultados KT100.
+
+
+### Correcciones prioritarias AUD-01 / AUD-02 — 2026-10-05
+
+- [x] AUD-01: sumar la tracción `p_duct * (A_mesh - A_open)` a la cara
+  de ducto en admisión, ambas caras de transfer y escape. La parte abierta
+  conserva el flujo Riemann; la parte bloqueada aporta solo momento, sin
+  masa, energía ni especie.
+- [x] AUD-01: verificar gas uniforme en reposo con apertura 0 %, 50 % y 100 %;
+  las celdas conservan RHS de momento nulo y la tracción integrada es `p*A`.
+- [x] AUD-02: reemplazar la presión de cámara errónea de 289500 Pa por
+  101325 Pa y verificar p/T de ambos estados iniciales (101325 Pa, 300 K).
+- [ ] AUD-02: reconciliar el test sintético de dos ciclos que, tras corregir
+  el estado inicial, observa `p7_availability_limited_kg = 1.0249018819007915e-07`
+  frente a su aserción histórica exacta de cero. No usar el resultado como
+  evidencia de ciclo ni cambiar el valor esperado sin analizar el contrato.
+
+Pruebas focales: 4 PASS. El módulo `tests/test_integrated_2t.py` terminó con
+36 PASS y 1 FAIL en la aserción histórica de P7 descrita arriba; no se declara
+PASS de ciclo. A/B permanecen supersedidos hasta AUD-08.
