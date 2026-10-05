@@ -4012,5 +4012,12 @@
       "wall_seconds": 13.890999999828637
     }
   ],
-  "wall_seconds": 68.59399999957532
+  "wall_seconds": 68.59399999957532,
+  "source_sha256_lf": {
+    "simulation.py": "7caea136881441457d83b0ec38420c69e8a4093fba1f2d3ec5f2f2069a265ef5",
+    "simulation_case.py": "69f72c7e1ac00bdd61d89327f5b851121750689ab2f9466bb0bdbadd784833b2",
+    "adaptive.py": "94353c94c3edb4c630bdc1028a829d2581546b0179368e4f6ad3b8f8d198de29",
+    "prototype.py": "4bd559427c9c20aed9c8a694cc92516979e9b2ba618a6a8dc17eee728b098671",
+    "rpm_domain.py": "116c8b805e4af393b6c52669a8c30b39dade6e8bbe2b3903bde10d1001ce56cc"
+  }
 }

@@ -673,6 +673,21 @@ Validación: `python -m pytest tests/test_integrated_2t.py -q` — **48 passed**
 Validación focal: `python -m pytest tests/test_reference_harness.py -q` —
 **13 passed**. OpenSpec estricto queda por ejecutar tras los cambios AUD-16/17.
 
+### AUD-18 — pruebas sin escritura y hashes portables (2026-10-05)
+
+- [x] Hacer que la prueba del generador use un root de repositorio temporal y
+  otro directorio de trabajo; ejecutar dos veces, comprobar bytes deterministas
+  y verificar que `examples/projects/` del checkout no cambia.
+- [x] Preservar los hashes crudos históricos de la campaña de frontera baja y
+  añadir `source_sha256_lf`; la prueba compara texto LF normalizado para que
+  LF y CRLF identifiquen el mismo código.
+- [x] Añadir prueba directa que demuestra igualdad de hash para fuentes LF y
+  CRLF.
+
+Validación focal: `python -m pytest tests/test_example_projects.py
+tests/test_low_rpm_diagnostics.py -q` — **11 passed**; `examples/projects/`
+permanece sin cambios.
+
 
 ### Correcciones prioritarias AUD-01 / AUD-02 — 2026-10-05
 

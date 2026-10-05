@@ -1,8 +1,8 @@
 """JSON públicos reales: identidad, equivalencia y persistencia; sin solver."""
 import json
 from dataclasses import replace
+import os
 from pathlib import Path
-import subprocess
 import sys
 import tempfile
 import unittest
@@ -48,8 +48,22 @@ class PhysicalExampleTests(unittest.TestCase):
     def test_generator_is_deterministic_from_another_directory(self):
         files=[ROOT/'examples/projects'/name for name in PROJECT_FILES.values()]
         before={path:path.read_bytes() for path in files}
-        with tempfile.TemporaryDirectory() as tmp:
-            subprocess.run([sys.executable,str(ROOT/'tools/generate_example_projects.py')],cwd=tmp,check=True,capture_output=True)
+        with tempfile.TemporaryDirectory() as tmp, redirect_stdout(StringIO()):
+            temporary_root=Path(tmp)/'temporary-repository'
+            alternate_cwd=Path(tmp)/'different-working-directory'
+            alternate_cwd.mkdir()
+            with patch.object(generator,'ROOT',temporary_root):
+                previous=os.getcwd()
+                try:
+                    os.chdir(alternate_cwd)
+                    generator.generate()
+                    generated={p.name:p.read_bytes() for p in
+                               (temporary_root/'examples/projects').iterdir()}
+                    generator.generate()
+                    self.assertEqual(generated,{p.name:p.read_bytes() for p in
+                                                (temporary_root/'examples/projects').iterdir()})
+                finally:
+                    os.chdir(previous)
         self.assertEqual(before,{path:path.read_bytes() for path in files})
     def test_generator_preserves_other_files_and_rejects_invalid_before_writes(self):
         with tempfile.TemporaryDirectory() as tmp, patch.object(generator,'ROOT',Path(tmp)), redirect_stdout(StringIO()):

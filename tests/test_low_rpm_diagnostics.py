@@ -18,15 +18,23 @@ EVIDENCE=ROOT/'results/frontera-baja-2t-20260917'
 def read(name): return json.loads((EVIDENCE/name).read_text(encoding='utf-8'))
 
 
+def source_sha256(raw):
+    """Hash source text identically for LF and CRLF checkouts."""
+    return hashlib.sha256(raw.replace(b'\r\n',b'\n')).hexdigest()
+
+
 class LowRpmDiagnosticsTests(unittest.TestCase):
     def test_core_hashes_and_contract_preserved(self):
-        for name,expected in read('campaign.json')['source_sha256'].items():
+        campaign=read('campaign.json')
+        self.assertEqual(set(campaign['source_sha256']),set(campaign['source_sha256_lf']))
+        for name,expected in campaign['source_sha256_lf'].items():
             source=(ROOT/'motorsim'/name).read_bytes()
+            source=source.replace(b'\r\n',b'\n')
             if name == 'rpm_domain.py':
                 # Authorization after P0 changes only the public 2T upper bound.
                 # Reconstruct the historical bytes, preserving its recorded hash.
                 source=source.replace(b"'2T': (2500, 15000)", b"'2T': (2500, 3500)")
-            self.assertEqual(hashlib.sha256(source).hexdigest(),expected,name)
+            self.assertEqual(source_sha256(source),expected,name)
         from motorsim.rpm_domain import PUBLIC_DOMAINS
         self.assertEqual(PUBLIC_DOMAINS,{'2T':(2500,15000),'4T':(2500,3500)})
 
@@ -37,6 +45,10 @@ class LowRpmDiagnosticsTests(unittest.TestCase):
             self.assertEqual(current['case'],previous['case'])
             for key,value in previous['result'].items():
                 if key!='seconds': self.assertEqual(current['result'][key],value,(rpm,key))
+
+    def test_source_hash_is_line_ending_independent(self):
+        self.assertEqual(source_sha256(b'alpha\nbeta\n'),
+                         source_sha256(b'alpha\r\nbeta\r\n'))
 
     def test_boundary_records_and_counts(self):
         campaign=read('campaign.json')
