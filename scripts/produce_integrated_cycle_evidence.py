@@ -85,6 +85,17 @@ def _require_preregistration(path: Path, fixture_id: str,
         raise ValueError("preregistration content differs from its recorded commit")
     subprocess.run(["git", "merge-base", "--is-ancestor", commit, "HEAD"],
                    cwd=ROOT, check=True, capture_output=True)
+    producer_commit = prereg.get("producer_commit")
+    if producer_commit is not None:
+        producer_path = Path(__file__).resolve().relative_to(ROOT).as_posix()
+        producer_blob = subprocess.run(
+            ["git", "show", f"{producer_commit}:{producer_path}"], cwd=ROOT,
+            check=True, capture_output=True).stdout
+        producer_source = Path(__file__).read_bytes().replace(b"\r\n", b"\n")
+        if producer_blob.replace(b"\r\n", b"\n") != producer_source:
+            raise ValueError("producer source differs from its preregistered commit")
+        subprocess.run(["git", "merge-base", "--is-ancestor", producer_commit, "HEAD"],
+                       cwd=ROOT, check=True, capture_output=True)
     return prereg, _sha256(_canonical_bytes(committed_document))
 
 
@@ -230,6 +241,9 @@ def produce(fixture_id: str, horizon: int, restart_cycle: int,
         "engine_configuration_sha256": config_hash,
         "preregistration_sha256": prereg_hash,
         "preregistration_commit": preregistration_commit,
+        "producer_commit": prereg.get("producer_commit"),
+        "producer_source_sha256": _sha256(
+            Path(__file__).read_bytes().replace(b"\r\n", b"\n")),
         "horizon_cycles": horizon,
         "restart_cycle": restart_cycle,
         "continuous_rejected_trials": rejected,

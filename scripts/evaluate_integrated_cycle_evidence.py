@@ -82,6 +82,20 @@ def evaluate(output_dir: Path, preregistration_path: Path | None = None) -> dict
                 preregistration.get("cycle_convergence_contract_sha256") !=
                 _sha256(PERIODICITY_CONTRACT)):
             raise ValueError("preregistration binding does not match cycle evidence")
+        producer_commit = preregistration.get("producer_commit")
+        if producer_commit is not None:
+            producer_path = ROOT / "scripts/produce_integrated_cycle_evidence.py"
+            relative_producer = producer_path.relative_to(ROOT).as_posix()
+            producer_blob = subprocess.run(
+                ["git", "show", f"{producer_commit}:{relative_producer}"], cwd=ROOT,
+                check=True, capture_output=True).stdout.replace(b"\r\n", b"\n")
+            producer_source = producer_path.read_bytes().replace(b"\r\n", b"\n")
+            subprocess.run(["git", "merge-base", "--is-ancestor", producer_commit, "HEAD"],
+                           cwd=ROOT, check=True, capture_output=True)
+            if (producer_blob != producer_source or
+                    manifest.get("producer_commit") != producer_commit or
+                    manifest.get("producer_source_sha256") != _sha256(producer_source)):
+                raise ValueError("producer source binding does not match cycle evidence")
     elif manifest.get("fixture_status") == "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT":
         raise ValueError("historical fixture evaluation requires its preregistration")
     restart = json.loads((output_dir / "restart-audit.json").read_text(encoding="utf-8"))
@@ -159,6 +173,8 @@ def evaluate(output_dir: Path, preregistration_path: Path | None = None) -> dict
         "preregistration": (None if preregistration is None else {
             "commit": manifest["preregistration_commit"],
             "sha256": manifest["preregistration_sha256"],
+            "producer_commit": manifest.get("producer_commit"),
+            "producer_source_sha256": manifest.get("producer_source_sha256"),
         }),
         "restart_gate": {"status": restart["status"],
                          "restart_cycle": restart["restart_cycle"],
