@@ -200,16 +200,21 @@ cycle spans and altered units. Periodicity defaults to `NOT_EVALUATED`;
 experimental validation remains `NOT_PERFORMED` and predictive validation
 `NOT_CLAIMED`. Channels remain optional until a producing solver path exists.
 
-The fixed V1 contract remains unchanged. The integrated cycle collector uses
-`MOTORSIM_ENGINEERING_OUTPUTS_V2`, which binds the configuration SHA-256 and
-adds strict path-addressed duct-cell channels (pressure, temperature, Mach,
-four extensive species masses) and duct-face signed mass-flow channels. Channel
-keys encode the URL-quoted stable duct id plus cell/face index; unknown forms
-remain invalid. Port openings and integrated interface flows use the existing
-fixed area/flow channel names. V2 re-integrates work, species/external exchange,
-P7/thermal sources and energy conservation from the saved SSPRK2 stages before
-building the artifact; cycle summaries are cross-checks, never the output
-authority.
+The fixed V1 contract remains unchanged and V2 remains available unchanged.
+The integrated cycle collector now uses
+`MOTORSIM_ENGINEERING_OUTPUTS_V3`, which retains V2's configuration SHA-256 and
+path-addressed duct-cell/face channels while correcting fuel and scavenging
+metric semantics. V3 calls the sum of positive fresh-air-plus-fuel crossings
+into the cylinder gross delivery; recrossings are not tracked as unique
+molecules. Short-circuit mass is the gross outward fresh species crossing the
+exhaust while transfer and exhaust areas are open; reverse exhaust flow is not
+counted. The gross intake air/fuel ratio describes only intake-boundary species
+delivery, not trapped or burned AFR. ISFC/BSFC use the prescribed P7 fuel
+pseudo-species sink and remain undefined with zero sink or nonpositive power.
+That sink is bookkeeping, not experimental fuel burn. V3 continues to
+re-integrate work, species/external exchange, P7/thermal sources and energy
+conservation from saved SSPRK2 stages before building the artifact; cycle
+summaries are cross-checks, never the output authority.
 
 ## Exploratory measurement import `MOTORSIM_MEASUREMENT_DATA_V1`
 

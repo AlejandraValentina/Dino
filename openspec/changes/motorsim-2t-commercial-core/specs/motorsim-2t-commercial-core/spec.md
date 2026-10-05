@@ -535,16 +535,29 @@ share its SSPRK stages and global ledgers.
 
 The existing fixed-channel `MOTORSIM_ENGINEERING_OUTPUTS_V1` MUST retain its
 strict 360-degree 2T convention, RPM/cycle identity, explicit P4 dependency
-status, crank-angle trace and cycle metrics. Integrated cycle evidence MUST
-use the distinct `MOTORSIM_ENGINEERING_OUTPUTS_V2` schema, binding the engine
-configuration SHA-256 and supporting path-addressed duct-cell and duct-face
-channels alongside the supported fixed channels. Every channel and metric
-MUST declare units and source. Undefined values MUST carry null, status and
+status, crank-angle trace and cycle metrics. The integrated V2 schema binds
+the engine configuration SHA-256 and supports path-addressed duct-cell and
+duct-face channels alongside the supported fixed channels; its builder remains
+available for existing records. Every channel and metric MUST declare units
+and source. Undefined values MUST carry null, status and
 reason. Nonfinite/bool values, unknown V2 channel forms, mismatched sample
 counts, incomplete cycles, invalid configuration identity or altered units
-MUST be rejected. Both schemas MUST keep periodicity `NOT_EVALUATED`,
+MUST be rejected. All schemas MUST keep periodicity `NOT_EVALUATED`,
 experimental validation `NOT_PERFORMED`, and predictive validation
 `NOT_CLAIMED`.
+
+The integrated collector MUST emit `MOTORSIM_ENGINEERING_OUTPUTS_V3` for
+cycle-derived metrics whose semantics were corrected by AUD-14, while V1 and
+V2 builders remain available with their original meanings. V3 MUST identify
+gross fresh-charge transfer delivery and gross outward short-circuit crossings
+by name; these positive-crossing integrals may count recrossings and MUST NOT
+be described as unique net mass. `gross_intake_air_fuel_ratio` MUST mean only
+the gross fresh-air/fuel species ratio crossing the engine intake boundary;
+`afr` MUST be undefined unless a trapped or burned AFR is directly available.
+ISFC and BSFC MUST use the P7 prescribed fuel-species sink, and MUST be
+undefined when that sink or the corresponding power is nonpositive. The output
+MUST state that P7 consumption is prescribed bookkeeping, not measured or
+experimentally validated fuel burn.
 
 #### Scenario: Build a trace with unavailable metric
 
@@ -570,6 +583,20 @@ experimental validation `NOT_PERFORMED`, and predictive validation
 - **WHEN** a cycle summary disagrees with the accepted SSPRK2 trajectory or
   global conservation reconstructed from that trajectory
 - **THEN** V2 output construction rejects it and does not serialize the summary.
+
+#### Scenario: Label gross delivery and short-circuit outputs
+
+- **WHEN** a complete integrated cycle is converted to engineering output
+- **THEN** V3 labels gross fresh-air-plus-fuel crossings explicitly, records
+  that recrossings are not deduplicated, excludes reverse exhaust from
+  short-circuit mass, and does not claim a net or unique-mass interpretation.
+
+#### Scenario: Report fuel consumption without conflating intake with burn
+
+- **WHEN** an integrated cycle has intake fuel delivery but no positive P7
+  fuel-species sink
+- **THEN** the gross intake ratio may be reported, AFR stays undefined, and
+  ISFC/BSFC stay undefined rather than reporting zero consumption.
 
 #### Scenario: Rebuild fuel mass accounting from the integrated cycle
 

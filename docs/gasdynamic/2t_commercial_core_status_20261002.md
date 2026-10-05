@@ -233,15 +233,19 @@ limitada verificada para el fixture es cero. La presión inicial sintética de
 cárter/cilindro se igualó con los 101325 Pa de la atmósfera, derivada de la EOS
 existente.
 
-`make_integrated_engineering_output` genera `MOTORSIM_ENGINEERING_OUTPUTS_V2`
+`make_integrated_engineering_output` genera `MOTORSIM_ENGINEERING_OUTPUTS_V3`
 para una trayectoria completa con hash de configuración, señales de ambas
 cámaras, especies por celda y cuatro masas por especie/celda de cada ducto,
 Mach/estado por celda, flujo firmado por cara, áreas/flujos de puerto, calor P7
 y de pared, trabajo indicado y caudal de combustible ligado al ledger P6. El
 collector reintegra los valores desde la trayectoria antes de emitir y rechaza
-resúmenes corruptos. V1 queda intacto. Las pérdidas al freno requieren pasar un
-`MechanicalLossModel` explícito. AFR, BSFC/ISFC y métricas de retención/scavenging
-permanecen indefinidas hasta disponer de las magnitudes de entrada necesarias.
+resúmenes corruptos. V1/V2 conservan sus constructores originales; V3 explicita
+cruces frescos brutos y no los presenta como masa neta única. El cociente bruto
+de aire/combustible de admisión no se etiqueta AFR atrapado/quemado. ISFC/BSFC
+usan el sumidero prescrito de pseudo-especie combustible P7 y quedan indefinidos
+si ese sumidero o la potencia correspondiente no son positivos. Esto no afirma
+combustión medida. Las pérdidas al freno requieren un `MechanicalLossModel`
+explícito.
 
 Se extendió el diagnóstico del mismo fixture A a seis ciclos, sin cambiar
 solver, malla, CFL ni contrato. El ciclo 1 tiene trabajo indicado negativo; la

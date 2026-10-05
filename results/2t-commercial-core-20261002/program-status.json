@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "f57185fdbb9d57ac8e7714242be7989179d04b8c",
+  "status_capture_head": "9efa092e26edb4a596a2b2acc425ae3def059f7b",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -1104,7 +1104,8 @@
       "classification": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
       "blocker": "Forensic protocol concludes C: V1 is bounded and internally consistent for its contract, but multiple standard boundary models produce materially different fluxes; the configured physical apparatus/control mode is unspecified. No V2 policy may be selected by numerical convenience.",
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "audit-range:ab92aee..8cdf66e",
+        "9efa092"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md",
@@ -1150,16 +1151,19 @@
       "dependencies": [
         "AUD-01"
       ],
-      "state": "READY",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "docs/gasdynamic/audit_8cdf66e.md",
+        "scripts/aud13_mesh_study.py: reproducible bounded isolated 1D study",
+        "results/2t-commercial-core-20261002/aud-13-mesh-study-20261005.json: nine fixed-horizon meshes, sensor traces, CFL and conservation",
+        "tests/test_aud13_mesh_study.py: all cases complete and exact chamber volume preserved; 1 passed"
       ],
-      "next_action": "Proceed as an independent priority-3 audit workstream; no reservoir V2 or KT100 activity."
+      "next_action": "Mesh sensitivity is quantified, but no adequacy threshold was specified; retain this as diagnostic evidence and make no wave-resolution acceptance claim."
     },
     {
       "id": "AUD-14",
@@ -1172,16 +1176,18 @@
       "dependencies": [
         "AUD-03"
       ],
-      "state": "READY",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "docs/gasdynamic/audit_8cdf66e.md",
+        "MOTORSIM_ENGINEERING_OUTPUTS_V3: V2 builders/validators preserved; explicit gross fresh-charge delivery, gross short-circuit, intake ratio, P7 consumption semantics",
+        "tests/test_engineering_outputs.py: V3 roundtrip and V2 strictness; tests/test_integrated_2t.py: P7-consumption specific fuel output, zero consumption undefined, reverse exhaust exclusion; 58 passed"
       ],
-      "next_action": "Proceed as an independent priority-3 audit workstream; no reservoir V2 or KT100 activity."
+      "next_action": "Use V3 for new integrated engineering outputs; do not reinterpret the older V2 metric semantics or claim experimentally measured AFR/fuel burn."
     },
     {
       "id": "AUD-15",
@@ -1297,7 +1303,7 @@
     }
   },
   "audit_reconciliation": {
-    "head": "346823a795abc931b3f52e6227ca79d6c05a2080",
+    "head": "9efa092e26edb4a596a2b2acc425ae3def059f7b",
     "findings": {
       "AUD-01": "RESOLVED_BY_LATER_COMMIT",
       "AUD-02": "RESOLVED_BY_LATER_COMMIT",
@@ -1311,8 +1317,8 @@
       "AUD-10": "RESOLVED_BY_LATER_COMMIT",
       "AUD-11": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
       "AUD-12": "RESOLVED_BY_LATER_COMMIT",
-      "AUD-13": "OPEN",
-      "AUD-14": "OPEN",
+      "AUD-13": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
+      "AUD-14": "RESOLVED_BY_LATER_COMMIT",
       "AUD-15": "OPEN",
       "AUD-16": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
       "AUD-17": "OPEN",
@@ -1331,8 +1337,8 @@
       "AUD-10": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-11": "C outcome: V1 branch characterized; scientific model selection unresolved; decision package is docs/gasdynamic/aud11_reservoir_forensic.md. Independent priority-3 queue proceeds.",
       "AUD-12": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
-      "AUD-13": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
-      "AUD-14": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
+      "AUD-13": "Bounded chamber/transfer mesh sensitivity and conservation recorded; lack of an acceptance threshold prevents a mesh-adequacy claim.",
+      "AUD-14": "V3 now explicitly names gross crossing metrics and intake species ratio, leaves trapped/burned AFR undefined, and derives specific consumption only from positive prescribed P7 fuel sink and power. V1/V2 remain unchanged.",
       "AUD-15": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
       "AUD-16": "READY/PARTIAL: callback shadowing resolved by 9eada5d; stage-rate recomputation, restored-trace validation, tautological comparison, and volume/rate cross-check remain open.",
       "AUD-17": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
@@ -1351,7 +1357,9 @@
       "producer_tests": "3 passed; validate-only off-CWD; missing preregistration rejected; canonical hash independent of LF/CRLF+BOM",
       "queue": "29 entries; valid states; commit refs normalized; P4 remains PASS; cycle evidence superseded",
       "preregistration_blob_gate": "PASS: commit cdafa6e1b37978bb825bb04b0260a17544802e06 matches structured JSON and canonical hashes",
-      "AUD-11": "3 focused forensic diagnostics + 4 existing preflight tests PASS; OpenSpec strict PASS; no simulation or KT100 run."
+      "AUD-11": "3 focused forensic diagnostics + 4 existing preflight tests PASS; OpenSpec strict PASS; no simulation or KT100 run.",
+      "AUD-13": "1 bounded diagnostic test PASS; nine isolated solver meshes completed; OpenSpec strict not rerun since AUD-11 (previous strict PASS remains).",
+      "AUD-14": "58 tests passed across test_engineering_outputs.py and test_integrated_2t.py; strict V3 validation and unchanged V2 validation exercised."
     }
   },
   "last_status_reviewed_head": "cdafa6e1b37978bb825bb04b0260a17544802e06"

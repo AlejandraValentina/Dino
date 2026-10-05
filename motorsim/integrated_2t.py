@@ -105,6 +105,13 @@ def _port_face_flux(exchange, duct_primitive, geometric_area, effective_area):
     return tuple(face)
 
 
+def _gross_fresh_short_circuit_rate(exhaust_area, transfer_areas, species_flux):
+    """Gross outward fresh species through an open exhaust/transfer path only."""
+    if exhaust_area <= 0.0 or not any(area > 0.0 for area in transfer_areas):
+        return 0.0
+    return max(0.0, species_flux[0] + species_flux[1])
+
+
 def _duct_ids_by_role(duct_roles: dict) -> dict[str, tuple[str, ...]]:
     """Resolve CONFIG_V2 output channels from role metadata, never literal ids."""
     if not isinstance(duct_roles, dict) or not duct_roles:
@@ -1237,10 +1244,12 @@ class IntegratedEngine2T:
                     self._face_species_flux(left_face[0], species_chambers["cylinder"],
                                             chambers["cylinder"][0], ss[0],
                                             qs[0][0]*path.mesh.volumes[0]))
-                if (left_exchange is not None and g.exhaust_area_m2 > 0 and
-                        any(area > 0 for area in g.transfer_areas_m2)):
-                    fresh_short_circuit_rate += max(0.0, left_species[0] + left_species[1])
-                    fuel_short_circuited_rate += max(0.0, left_species[1])
+                if left_exchange is not None:
+                    fresh_short_circuit_rate += _gross_fresh_short_circuit_rate(
+                        g.exhaust_area_m2, g.transfer_areas_m2, left_species)
+                    if (g.exhaust_area_m2 > 0.0 and
+                            any(area > 0.0 for area in g.transfer_areas_m2)):
+                        fuel_short_circuited_rate += max(0.0, left_species[1])
                 if left_exchange is not None:
                     chamber_outflow["cylinder"] += max(0.0, -left_exchange.outward[0])
                     rhs_q["chambers"]["cylinder"][0] += left_exchange.outward[0]
@@ -2152,6 +2161,16 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
             "evidence_source": "accepted IntegratedEngine2T SSPRK2 stage trajectory"}
 
 
+def _specific_consumption_value(fuel_consumed_kg: float, duration_s: float,
+                                power_w: float) -> float | None:
+    """Return g/kWh only for positive prescribed consumed fuel and output power."""
+    if (not all(isfinite(value) for value in
+                (fuel_consumed_kg, duration_s, power_w)) or
+            fuel_consumed_kg <= 0.0 or duration_s <= 0.0 or power_w <= 0.0):
+        return None
+    return fuel_consumed_kg / duration_s * 3.6e9 / power_w
+
+
 def make_integrated_engineering_output(cycle_record: dict, *,
                                        displacement_m3: float,
                                        mechanical_loss_model=None,
@@ -2163,7 +2182,7 @@ def make_integrated_engineering_output(cycle_record: dict, *,
     through the existing mechanical model are defined.  Fuel properties and
     exact port-closure states are intentionally not inferred here.
     """
-    from .engineering_outputs import build_integrated_engineering_output_v2
+    from .engineering_outputs import build_integrated_engineering_output_v3
 
     if (not isinstance(cycle_record, dict) or
             cycle_record.get("schema") != "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2" or
@@ -2467,13 +2486,15 @@ def make_integrated_engineering_output(cycle_record: dict, *,
             "accepted integrated cylinder state samples")
     defined("angle_of_peak_pressure_deg", rows[peak_index][0] - float(start),
             "accepted integrated crank-angle samples relative to cycle start")
-    defined("fresh_delivery_kg", integrals["fresh_delivery_kg"],
-            "stage-integrated fresh_air donor flow into the cylinder")
-    defined("fresh_short_circuit_kg", integrals["fresh_short_circuit_kg"],
-            "stage-integrated fresh_air donor flow out the exhaust while transfer routes are open")
+    defined("gross_fresh_charge_delivery_kg", integrals["fresh_delivery_kg"],
+            "Gross sum of fresh_air + fuel species crossing transfer outlets into the cylinder; "
+            "re-crossings are counted and mass is not deduplicated")
+    defined("gross_fresh_charge_short_circuit_kg", integrals["fresh_short_circuit_kg"],
+            "Gross outward fresh_air + fuel species crossing the exhaust while transfer and "
+            "exhaust areas are open; reverse exhaust flow is excluded")
     defined("fuel_flow_kg_s",
             integrals["fuel_delivery_kg"] / duration,
-            "integrated P6 fuel-species inflow at the engine intake boundary / cycle duration")
+            "Gross integrated P6 fuel-species inflow at the engine intake boundary / cycle duration")
     defined("fuel_delivered_per_cycle_kg", integrals["fuel_delivery_kg"],
             "accepted P6 fuel-species donor flow into the engine intake boundary")
     defined("fresh_air_intake_delivered_per_cycle_kg",
@@ -2491,18 +2512,36 @@ def make_integrated_engineering_output(cycle_record: dict, *,
             "independent global fuel-species balance from accepted trajectory")
     intake_fuel = integrals["fuel_delivery_kg"]
     if intake_fuel > 0.0:
-        defined("afr", integrals["fresh_air_intake_delivery_kg"] / intake_fuel,
-                "gross fresh_air and fuel species delivered through the engine intake boundary")
+        defined("gross_intake_air_fuel_ratio",
+                integrals["fresh_air_intake_delivery_kg"] / intake_fuel,
+                "Gross fresh_air / fuel species crossing the engine intake boundary; "
+                "an intake charge ratio, not trapped or burned AFR")
     else:
-        undefined("afr", "No positive fuel-species delivery at the intake boundary.")
+        undefined("gross_intake_air_fuel_ratio",
+                  "No positive fuel-species delivery at the intake boundary.")
+    undefined("afr", "Trapped or burned air/fuel ratio is unavailable; this output only "
+              "contains gross intake species delivery and prescribed P7 conversion.")
     undefined("equivalence_ratio", "Stoichiometric AFR is not configured for this fuel.")
     indicated_power = work * rpm / 60.0
-    if indicated_power > 0.0:
-        defined("isfc_g_kwh", integrals["fuel_delivery_kg"] / duration *
-                3.6e9 / indicated_power,
-                "integrated fuel-species flow / positive indicated power; no LHV required")
-    else:
-        undefined("isfc_g_kwh", "Indicated power is nonpositive for this cycle.")
+    p7_fuel_consumption = -p7_species[1]
+    defined("p7_fuel_consumption_flow_kg_s", p7_fuel_consumption / duration,
+            "P7 prescribed fuel pseudo-species sink / cycle duration; not measured fuel burn")
+
+    def specific_consumption(power_w: float, metric: str) -> None:
+        value = _specific_consumption_value(p7_fuel_consumption, duration, power_w)
+        if value is None:
+            if power_w <= 0.0:
+                undefined(metric, "The corresponding indicated/brake power is nonpositive.")
+            elif p7_fuel_consumption <= 0.0:
+                undefined(metric, "No positive P7 fuel pseudo-species consumption is recorded.")
+            else:
+                undefined(metric, "Fuel mass, cycle duration, or power is invalid.")
+        else:
+            defined(metric, value,
+                    "P7 prescribed fuel pseudo-species consumption / positive power; "
+                    "no LHV or experimental burn claim")
+
+    specific_consumption(indicated_power, "isfc_g_kwh")
     defined("wall_heat_loss_j", integrals["wall_heat_loss_J"],
             "accepted SSPRK2 thermal source integral")
     defined("energy_balance_residual_j", energy_residual,
@@ -2523,9 +2562,7 @@ def make_integrated_engineering_output(cycle_record: dict, *,
             defined(name, float(result[key]), f"MechanicalLossModel.evaluate_2t: {key}")
         brake_power = float(result["brake_power_w"])
     if brake_power is not None and brake_power > 0.0:
-        defined("bsfc_g_kwh", integrals["fuel_delivery_kg"] / duration *
-                3.6e9 / brake_power,
-                "integrated fuel-species flow / positive brake power; no LHV required")
+        specific_consumption(brake_power, "bsfc_g_kwh")
     else:
         undefined("bsfc_g_kwh", "Positive brake power requires an explicit loss model.")
     for name in ("gross_work_j", "net_work_j"):
@@ -2564,7 +2601,7 @@ def make_integrated_engineering_output(cycle_record: dict, *,
     for name in ("ca10_deg", "ca50_deg", "ca90_deg"):
         undefined(name, "Combustion-fraction landmarks are not part of the current P7 source record.")
 
-    return build_integrated_engineering_output_v2(
+    return build_integrated_engineering_output_v3(
         rpm=rpm, cycle_number=cycle_number,
         angles_deg=tuple(row[0] - float(start) for row in rows),
         channels=channels, cycle_metrics=metrics,

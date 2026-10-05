@@ -5,8 +5,10 @@ import pytest
 from motorsim.engineering_outputs import (
     build_engineering_output,
     build_integrated_engineering_output_v2,
+    build_integrated_engineering_output_v3,
     validate_engineering_output,
     validate_integrated_engineering_output_v2,
+    validate_integrated_engineering_output_v3,
 )
 from motorsim.scavenging import (ScavengingInput, calculate_scavenging_metrics,
                                  scavenging_engineering_records)
@@ -83,6 +85,9 @@ def test_schema_accepts_geometry_bound_scavenging_diagnostics():
     validated = validate_engineering_output(record)
     assert validated["cycle_metrics"]["purity_at_transfer_close"]["value"] == pytest.approx(0.4)
     assert validated["cycle_metrics"]["fresh_retained_kg"]["value"] == pytest.approx(0.005)
+    assert metrics["flow_semantics"]["net_unique_fresh_mass"] == "NOT_AVAILABLE"
+    assert "recrossings counted" in metrics["flow_semantics"]["fresh_delivered"]
+    assert "reverse flow excluded" in metrics["flow_semantics"]["fresh_short_circuit"]
 
 
 def test_integrated_v2_binds_configuration_and_path_addressed_duct_channels():
@@ -130,3 +135,22 @@ def test_integrated_v2_binds_configuration_and_path_addressed_duct_channels():
     with pytest.raises(ValueError, match="Unsupported or malformed cycle metric"):
         build_engineering_output(**{key: value for key, value in v1_only.items()
                                     if key != "configuration_sha256"})
+
+    v3_values = {**values, "cycle_metrics": {
+        **values["cycle_metrics"],
+        "gross_fresh_charge_delivery_kg": {
+            "value": .001, "status": "DEFINED", "reason": None,
+            "source": "gross crossing ledger"},
+        "gross_intake_air_fuel_ratio": {
+            "value": 49.0, "status": "DEFINED", "reason": None,
+            "source": "gross intake species"},
+        "afr": {"value": None, "status": "UNDEFINED",
+                "reason": "No trapped/burned AFR", "source": "not available"},
+        "isfc_g_kwh": {"value": None, "status": "UNDEFINED",
+                        "reason": "No P7 consumed fuel", "source": "not available"},
+    }}
+    record_v3 = build_integrated_engineering_output_v3(**v3_values)
+    assert record_v3["schema"] == "MOTORSIM_ENGINEERING_OUTPUTS_V3"
+    assert validate_integrated_engineering_output_v3(record_v3) == record_v3
+    with pytest.raises(ValueError, match="Unsupported or malformed cycle metric"):
+        build_integrated_engineering_output_v2(**v3_values)

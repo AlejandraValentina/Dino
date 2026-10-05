@@ -15,8 +15,9 @@ from motorsim.integrated_2t import (
     IntegratedPortBinding2T,
     SliderCrankChambers2T, make_integrated_cycle_primary,
     make_integrated_engineering_output, _duct_ids_by_role, _role_face_outputs,
+    _specific_consumption_value, _gross_fresh_short_circuit_rate,
 )
-from motorsim.engineering_outputs import validate_integrated_engineering_output_v2
+from motorsim.engineering_outputs import validate_integrated_engineering_output_v3
 from motorsim.reference_harness.convergence import PeriodicDetector, compare_cycles
 from motorsim.kinematics import piston_position
 from motorsim.p6_species import SPECIES
@@ -26,6 +27,27 @@ from motorsim.thermal import ThermalSurface, ThermalSystem
 from motorsim.two_stroke_ports import AreaKnot, DuctBinding, PortDefinition, TwoStrokePortSet
 from motorsim.mechanical import LossTerm, MechanicalLossModel
 from motorsim.network_components import NetworkConnection, VolumeGasState, VolumeNode
+
+
+@pytest.mark.parametrize("fuel, duration, power", [
+    (0.0, 1.0, 1000.0), (1e-6, 0.0, 1000.0), (1e-6, 1.0, 0.0),
+])
+def test_specific_fuel_consumption_is_undefined_without_positive_fuel_time_and_power(
+        fuel, duration, power):
+    assert _specific_consumption_value(fuel, duration, power) is None
+
+
+def test_specific_fuel_consumption_uses_positive_p7_consumed_mass():
+    assert _specific_consumption_value(0.01, 2.0, 1000.0) == pytest.approx(
+        0.01 / 2.0 * 3.6e9 / 1000.0)
+
+
+def test_reverse_exhaust_and_closed_paths_do_not_count_as_short_circuit():
+    assert _gross_fresh_short_circuit_rate(1e-5, (1e-5, 0.0), (-2e-5, 0.0, 0.0, 0.0)) == 0.0
+    assert _gross_fresh_short_circuit_rate(0.0, (1e-5,), (2e-5, 0.0, 0.0, 0.0)) == 0.0
+    assert _gross_fresh_short_circuit_rate(1e-5, (0.0,), (2e-5, 0.0, 0.0, 0.0)) == 0.0
+    assert _gross_fresh_short_circuit_rate(
+        1e-5, (1e-5,), (2e-5, 1e-5, 0.0, 0.0)) == pytest.approx(3e-5)
 
 
 def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
@@ -1058,7 +1080,7 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     output = make_integrated_engineering_output(
         first_cycle, displacement_m3=system.slider_crank.crankcase.displacement_m3,
         scavenging_reference_mass_kg=1e-4)
-    assert validate_integrated_engineering_output_v2(output) == output
+    assert validate_integrated_engineering_output_v3(output) == output
     assert output["operating_point"]["rpm"] == pytest.approx(3000.0)
     assert len(output["crank_angle_trace"]["angle_deg"]) == len(first_cycle["trajectory"]) + 1
     trace_channels = output["crank_angle_trace"]["channels"]
@@ -1074,10 +1096,15 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     assert output["cycle_metrics"]["bsfc_g_kwh"]["status"] == "UNDEFINED"
     assert output["cycle_metrics"]["fuel_flow_kg_s"]["status"] == "DEFINED"
     assert output["cycle_metrics"]["fuel_flow_kg_s"]["value"] > 0.0
-    assert output["cycle_metrics"]["afr"]["status"] == "DEFINED"
-    assert output["cycle_metrics"]["afr"]["value"] == pytest.approx(
+    assert output["cycle_metrics"]["afr"]["status"] == "UNDEFINED"
+    assert output["cycle_metrics"]["gross_intake_air_fuel_ratio"]["status"] == "DEFINED"
+    assert output["cycle_metrics"]["gross_intake_air_fuel_ratio"]["value"] == pytest.approx(
         first_cycle["observables"]["fresh_air_intake_delivery_kg"] /
         first_cycle["observables"]["fuel_delivered_kg"])
+    assert output["cycle_metrics"]["gross_fresh_charge_delivery_kg"]["source"].startswith(
+        "Gross sum of fresh_air + fuel")
+    assert output["cycle_metrics"]["gross_fresh_charge_short_circuit_kg"]["source"].find(
+        "reverse exhaust flow is excluded") >= 0
     assert output["cycle_metrics"]["fuel_delivered_per_cycle_kg"]["value"] == pytest.approx(
         first_cycle["observables"]["fuel_delivered_kg"])
     assert output["cycle_metrics"]["fuel_consumed_by_p7_per_cycle_kg"]["value"] == pytest.approx(
@@ -1107,8 +1134,8 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
         prior_v2_record["observables"].pop(key, None)
     prior_output = make_integrated_engineering_output(
         prior_v2_record, displacement_m3=system.slider_crank.crankcase.displacement_m3)
-    assert prior_output["cycle_metrics"]["afr"]["value"] == pytest.approx(
-        output["cycle_metrics"]["afr"]["value"])
+    assert prior_output["cycle_metrics"]["gross_intake_air_fuel_ratio"]["value"] == pytest.approx(
+        output["cycle_metrics"]["gross_intake_air_fuel_ratio"]["value"])
     tampered_intake_rate = deepcopy(first_cycle)
     tampered_intake_rate["trajectory"][0]["stage_cycle_rates"][0][
         "fresh_air_intake_delivery_kg_s"] += 1e-4
@@ -1154,7 +1181,7 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     output_with_losses = make_integrated_engineering_output(
         second_cycle, displacement_m3=system.slider_crank.crankcase.displacement_m3,
         mechanical_loss_model=mechanical)
-    assert validate_integrated_engineering_output_v2(output_with_losses) == output_with_losses
+    assert validate_integrated_engineering_output_v3(output_with_losses) == output_with_losses
     assert output_with_losses["cycle_metrics"]["brake_power_w"]["value"] == pytest.approx(
         second_cycle["observables"]["work_J"] * 3000.0 / 60.0 -
         brake["mechanical_loss_power_w"])
@@ -1162,7 +1189,7 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
         brake["brake_work_j"])
     assert output_with_losses["cycle_metrics"]["isfc_g_kwh"]["status"] == "DEFINED"
     assert output_with_losses["cycle_metrics"]["bsfc_g_kwh"]["status"] == "DEFINED"
-    expected_fuel_flow = second_cycle["cycle_ledgers"]["fuel_delivered_kg"] * 50.0
+    expected_fuel_flow = second_cycle["observables"]["p7_fuel_consumed_kg"] * 50.0
     assert output_with_losses["cycle_metrics"]["isfc_g_kwh"]["value"] == pytest.approx(
         expected_fuel_flow * 3.6e9 /
         output_with_losses["cycle_metrics"]["indicated_power_w"]["value"])
@@ -1222,7 +1249,7 @@ def test_multiple_finite_network_volumes_rebuild_cycle_and_engineering_output():
         "exhaust-receiver": {"kind": "airbox", "volume_m3": .003}}
     output = make_integrated_engineering_output(
         primary, displacement_m3=system.slider_crank.crankcase.displacement_m3)
-    assert validate_integrated_engineering_output_v2(output) == output
+    assert validate_integrated_engineering_output_v3(output) == output
     channels = output["crank_angle_trace"]["channels"]
     for node_id in ("intake-plenum", "exhaust-receiver"):
         prefix = f"network:{node_id}:"

@@ -93,8 +93,11 @@ def calculate_scavenging_metrics(inputs: ScavengingInput) -> dict[str, Any]:
 
     `species_at_transfer_close_kg` is sampled after the last transfer closes;
     `species_at_exhaust_close_kg` is sampled after the last exhaust aperture
-    closes. `fresh_short_circuit_kg` must be the P6 outward exhaust ledger.
-    This function never infers a lost mass from a reverse exhaust flow.
+    closes. `fresh_delivered_kg` is the gross positive fresh-air-plus-fuel
+    flow across transfer outlets; repeated crossings are not deduplicated.
+    `fresh_short_circuit_kg` is gross positive fresh species flow outward
+    across the exhaust while transfer and exhaust are open. Reverse exhaust
+    flow is excluded. Neither value is a unique-molecule or net-mass count.
     """
     reference = _number(inputs.reference_mass_kg, "reference_mass_kg")
     delivered = _number(inputs.fresh_delivered_kg, "fresh_delivered_kg")
@@ -122,7 +125,12 @@ def calculate_scavenging_metrics(inputs: ScavengingInput) -> dict[str, Any]:
     }
     return {
         "schema": "MOTORSIM_2T_SCAVENGING_METRICS_V1",
-        "basis": "P6 four-species inventories and outward-flow ledgers",
+        "basis": "P6 four-species inventories and gross crossing ledgers",
+        "flow_semantics": {
+            "fresh_delivered": "gross positive fresh_air + fuel across transfer outlets; recrossings counted",
+            "fresh_short_circuit": "gross outward fresh_air + fuel across exhaust while transfer and exhaust are open; reverse flow excluded",
+            "net_unique_fresh_mass": "NOT_AVAILABLE",
+        },
         "species_order": list(SPECIES),
         "masses_kg": {"reference": reference, "fresh_delivered": delivered,
                       "fresh_retained": retained, "fresh_lost": lost,
@@ -133,7 +141,7 @@ def calculate_scavenging_metrics(inputs: ScavengingInput) -> dict[str, Any]:
                       "exhaust_close_residual": exhaust[2]},
         "ratios": {name: value.to_dict() for name, value in metrics.items()},
         "formulae": {
-            "delivery_ratio": "fresh_delivered / reference_mass",
+            "delivery_ratio": "gross_fresh_delivered / reference_mass",
             "trapping_efficiency": "fresh_retained / fresh_delivered",
             "scavenging_efficiency": "fresh_retained / exhaust_close_total",
             "charging_efficiency": "fresh_retained / reference_mass",
@@ -141,7 +149,7 @@ def calculate_scavenging_metrics(inputs: ScavengingInput) -> dict[str, Any]:
             "residual_fraction": "exhaust_close_residual / exhaust_close_total",
             "purity_at_transfer_close": "transfer_close_fresh / transfer_close_total",
             "purity_at_exhaust_close": "exhaust_close_fresh / exhaust_close_total",
-            "short_circuit_fraction": "fresh_lost / fresh_delivered",
+            "short_circuit_fraction": "gross_fresh_short_circuit / gross_fresh_delivered",
         },
     }
 
@@ -346,12 +354,12 @@ def scavenging_engineering_records(metrics: dict[str, Any]) -> dict[str, dict[st
         result[target] = {"value": row.get("value") if available else None,
                           "status": "DEFINED" if available else "UNDEFINED",
                           "reason": None if available else row.get("reason"),
-                          "source": "MOTORSIM_2T_SCAVENGING_METRICS_V1 P6 ledger"}
+                          "source": "MOTORSIM_2T_SCAVENGING_METRICS_V1 P6 gross crossing ledger"}
     for source, target in (("fresh_delivered", "fresh_delivery_kg"),
                            ("fresh_retained", "fresh_retained_kg"),
                            ("fresh_lost", "fresh_short_circuit_kg"),
                            ("fresh_lost", "fresh_lost_kg")):
         value = _number(masses.get(source), f"masses_kg.{source}")
         result[target] = {"value": value, "status": "DEFINED", "reason": None,
-                          "source": "MOTORSIM_2T_SCAVENGING_METRICS_V1 P6 ledger"}
+                          "source": "MOTORSIM_2T_SCAVENGING_METRICS_V1 P6 gross crossing ledger"}
     return result

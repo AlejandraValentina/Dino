@@ -566,7 +566,53 @@ blocker; independent AUD-13…18 tasks continue. This was sequential self-review
 not independent review. AUD-16 remains partial: commit `9eada5d` covers only
 the path where explicit models fully shadow the callback.
 
+### AUD-13 — bounded mesh diagnostic (2026-10-05)
+
+- [x] Preserve the existing five-section synthetic expansion-chamber geometry
+  and compare 7, 33, 65, and 130 finite volumes (target dx 0.13, 0.02, 0.01,
+  and 0.005 m).
+- [x] Compare a straight 50 mm synthetic transfer duct at 2, 4, 8, 16, and 32
+  cells; use the existing first-order gas1d solver, identical smooth pressure
+  pulse, closed wall ends, CFL 0.4, and a fixed 0.35 L/a observation horizon.
+- [x] Record mesh, sensor trace, steps, rejected steps, CFL and normalized
+  conservation ledger in `results/2t-commercial-core-20261002/aud-13-mesh-study-20261005.json`.
+
+Reproduction: `python scripts/aud13_mesh_study.py
+results/2t-commercial-core-20261002/aud-13-mesh-study-20261005.json`.
+`python -m pytest tests/test_aud13_mesh_study.py -q` — 1 passed. All nine runs
+completed and conserved to floating-point scale. The coarse 7-cell chamber
+sensor increment was 15.07 Pa, versus 76.88 Pa at 65 cells and 76.88 Pa at
+130 cells; the 2-cell transfer result was likewise strongly mesh-sensitive.
+These values are diagnostic, not a convergence gate. No adequacy threshold was
+specified, so this closes the missing-study task but does not claim that any
+production mesh resolves all waves or is physically sufficient.
+
 No se ejecutaron campañas ni se tocaron resultados KT100.
+
+### AUD-14 — métrica de entrega/short-circuit y combustible (2026-10-05)
+
+- [x] Definir entrega y cortocircuito como integrales brutas de cruces de
+  especies frescas (fresh_air + fuel), sin deduplicación de recirculaciones ni
+  afirmación de masa neta única. El cortocircuito solo cuenta especie fresca
+  saliente cuando admisión por transfer y escape están abiertos; flujo inverso
+  por escape queda fuera.
+- [x] Publicar esas semánticas con nombres explícitos en
+  `MOTORSIM_ENGINEERING_OUTPUTS_V3`; conservar validadores y builders V1/V2
+  intactos.
+- [x] Separar el cociente bruto de especies de entrada
+  (`gross_intake_air_fuel_ratio`) de AFR atrapado/quemado, que queda UNDEFINED.
+- [x] Calcular ISFC/BSFC desde el sumidero de combustible pseudo-especie P7,
+  no desde la entrega por admisión. Con cero consumo P7 o potencia no positiva,
+  el resultado queda UNDEFINED, nunca 0 g/kWh.
+- [x] Añadir prueba de que retroflujo de escape y áreas cerradas no cuentan como
+  cortocircuito; distinguir explícitamente entrega fresh_air de carga fresca
+  total fresh_air + fuel.
+
+V3 registra que el sumidero P7 es conversión prescrita de contabilidad, no
+combustión medida ni validación experimental. `python -m pytest
+tests/test_engineering_outputs.py tests/test_integrated_2t.py -q` — 58 passed.
+La salida V2 queda disponible con la semántica anterior para los consumidores
+existentes; los nuevos resultados integrados usan V3.
 
 
 ### Correcciones prioritarias AUD-01 / AUD-02 — 2026-10-05
