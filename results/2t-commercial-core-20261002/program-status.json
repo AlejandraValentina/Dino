@@ -228,7 +228,10 @@
         "optional_finite_intake_plenum_in_both_global_SSPRK2_stages_with_actual_donor",
         "finite_plenum_mass_energy_four_species_in_global_inventory_CFL_and_restart",
         "full_cycle_primary_rebuild_and_engineering_V2_network_volume_channels",
-        "stage_trapezoidal_node_update_test_and_full_cycle_global_conservation"
+        "stage_trapezoidal_node_update_test_and_full_cycle_global_conservation",
+        "multiple_finite_volumes_on_distinct_external_intake_left_and_exhaust_right_endpoints",
+        "two_volume_checkpoint_json_restore_replay_exact",
+        "multi_volume_cycle_output_initial_midpoint_terminal_samples_match_primary_states"
       ],
       "focal_tests": 21,
       "blocked_scope": [
@@ -243,7 +246,9 @@
         "fuel_trapped_inventory_not_inferred_from_terminal_global_inventory",
         "only_one_finite_intake_plenum_supported_by_current_integrated_binding",
         "atmosphere_to_plenum_reservoir_boundary_not_added",
-        "connection_effective_length_is_not_dynamic_acoustic_inertance"
+        "connection_effective_length_is_not_dynamic_acoustic_inertance",
+        "no_volume_to_volume_connections_or_repeated_face_bindings",
+        "no_callback_free_serializable_integrated_engine_factory_yet"
       ],
       "boundary_v2": "NOT_IMPLEMENTED_NO_FALLBACK",
       "periodicity": {
@@ -300,7 +305,9 @@
         "dynamic reed SSPRK2 impact/work/dissipation contract and restart",
         "stoichiometric AFR and Q_F-to-LHV semantics remain undefined",
         "generalized reservoir inflow capability remains a local scientific blocker",
-        "complete Commercial Core acceptance and experimental validation remain pending"
+        "complete Commercial Core acceptance and experimental validation remain pending",
+        "integrated configuration is not yet reconstructible from a JSON-safe factory without external geometry callback",
+        "dynamic reed stage coupling requires an explicit policy for pressure work and dissipation"
       ]
     },
     "17d_p7_fuel_combustion_thermal_mechanics": {
@@ -354,7 +361,7 @@
     "p9_contract_sha256": "79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d",
     "integrated_regression_group_current": {
       "result": "PASS",
-      "count": 99,
+      "count": 100,
       "command": ".venv\\Scripts\\python.exe -m pytest -q tests/test_integrated_2t.py tests/test_engineering_outputs.py tests/test_network_components.py tests/test_p5c_integrated.py tests/test_p6_species.py tests/test_p7_full_topology.py tests/test_reed.py tests/test_two_stroke_ports_p5c.py",
       "run_date": "2026-10-05"
     },
@@ -500,11 +507,17 @@
       "review": "Independent read-only review found no concrete defect; punctual, not full-engine acceptance.",
       "physical_scope": "Ideal massless P3 interface; effective connection length is metadata only; no atmosphere boundary."
     },
-    "python_compileall": "PASS (.venv Python 3.11; motorsim and tests)"
+    "python_compileall": "PASS (.venv Python 3.11; motorsim and tests)",
+    "integrated_multi_volume_checkpoint_focus": {
+      "result": "PASS",
+      "count": 1,
+      "command": ".venv\\Scripts\\python.exe -m pytest -q tests/test_integrated_2t.py::test_multiple_finite_network_volumes_rebuild_cycle_and_engineering_output",
+      "details": "Exact JSON restore/replay and stage/primary output sample agreement for two finite volumes."
+    }
   },
   "review": {
-    "current_delta": "Independent read-only review of finite intake plenum integration and full-cycle output binding: no concrete defects; full engine remains unaccepted.",
-    "independent_review_current_delta": "PASS_PUNCTUAL_2026-10-05: SSPRK2 volume update, donor/ledger path, checkpoint, full-cycle primary/output wiring and stated ideal-interface limitation reviewed; no complete-engine acceptance.",
+    "current_delta": "Independent read-only review of multi-endpoint V7 network-volume integration: no concrete defect in sign/orientation, ledgers, CFL, restart, or primary/output; full engine remains unaccepted.",
+    "independent_review_current_delta": "PASS_PUNCTUAL_2026-10-05: intake-left/exhaust-right finite nodes, two-node checkpoint replay and aligned initial/mid/terminal output samples reviewed; no complete-engine acceptance.",
     "prior_harness_punctual_review": "NO_MATERIAL_DEFECT_FOUND",
     "reverse_internal_donor_fix": "INDEPENDENT_READ_ONLY_REVIEW_PASS_BOTH_DONOR_DIRECTIONS_AND_STAGE_BINDING; no complete-engine review performed",
     "slider_crank_stage_integration": "INDEPENDENT_READ_ONLY_REVIEW_PASS; geometry signs/units, stage RPM, single -pVdot ledger and checkpoint mismatch were checked; no cycle claim",
@@ -702,13 +715,50 @@
         "integrated-intake-plenum",
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
+      "blocker": null,
+      "commits": [
+        "c92a924"
+      ],
+      "evidence": [
+        "IntegratedNetworkVolume2T binds distinct intake-left and exhaust-right endpoints with validated direction, node/connection identity and positive face area; legacy intake-plenum input normalizes to the same binding.",
+        "Both nodes participate in the same SSPRK2 flux graph, real species donor selection, external ledger exclusion, depletion CFL, global inventory, V7 configuration/checkpoint identity and cycle reconstruction.",
+        "A full synthetic cycle with both nodes has nonzero exchange at each endpoint, closes global mass/energy/four-species ledgers, and checks initial/intermediate/terminal V2 samples against primary states.",
+        "Two-node checkpoint JSON restore/replay produces exact snapshot, inventory and conservation-report equality.",
+        "100 integrated/network/P5-C/P6/P7/reed/port tests PASS; after the full run the strengthened multi-node replay/output test passed again in isolation.",
+        "Independent read-only review found no concrete sign, ledger, CFL, restart or output defect; this is punctual, not complete-engine acceptance.",
+        "Checkpoint V7 rejects V6; no migration. No volume-to-volume edges, repeated face bindings, atmospheric boundary or dynamic acoustic length."
+      ],
+      "next_action": "Continue with the READY serializable integrated-engine configuration so checkpoints can be reconstructed without external callbacks; preserve all stated topology limits."
+    },
+    {
+      "id": "integrated-engine-config-roundtrip",
+      "description": "Create a deterministic JSON-safe configuration and factory that reconstructs an existing supported IntegratedEngine2T without an external geometry callback",
+      "dependencies": [
+        "17a-integrated-gas-species-foundation",
+        "integrated-network-multi-endpoint"
+      ],
+      "state": "READY",
       "blocker": null,
       "commits": [],
       "evidence": [
-        "Existing P3 volume/duct Riemann helper; bounded single-plenum integration and independent review."
+        "Engine configuration identity is already canonical JSON and checkpoints bind it; engine construction still requires caller-supplied geometry callback."
       ],
-      "next_action": "Implement a generic immutable binding for finite volumes on distinct external intake-left and exhaust-right endpoints; reuse P3 exchange and run end-to-end cycle evidence before review."
+      "next_action": "Inspect existing component serializers and geometry resolver, then design a bounded versioned config/factory with round-trip and exact replay tests; do not invent defaults."
+    },
+    {
+      "id": "dynamic-reed-stage-coupling",
+      "description": "Integrate dynamic reed mechanics into the common SSPRK2 engine state and energy ledger",
+      "dependencies": [
+        "17a-integrated-gas-species-foundation"
+      ],
+      "state": "BLOCKED_LOCAL",
+      "blocker": "Pressure forcing, impact treatment, pressure-work location and damping/impact dissipation destination lack one scientifically selected coupled contract.",
+      "commits": [],
+      "evidence": [
+        "Independent technical review is documented in docs/gasdynamic/autonomous_engineering_mode.md."
+      ],
+      "next_action": "Do not implement by splitting; continue independent READY tasks and revisit once a policy is authorized."
     }
   ]
 }

@@ -227,6 +227,14 @@ de caudal estrangulado dependen además del estado total y del régimen
 Estas referencias documentan alternativas existentes, pero no seleccionan la
 semántica de una futura frontera MotorSim ni cambian el bloqueo científico V2.
 
+La integración se generalizó luego a volúmenes finitos en endpoints externos
+distintos: intake-left y exhaust-right. El grafo reusa P3 en ambas etapas, y el
+estado V7 incorpora ambos volúmenes en configuración, CFL, conservación,
+checkpoint/replay, primary cycle y output V2. Una revisión adversarial puntual
+no encontró defectos de orientación, balance, restart ni muestras de salida.
+V7 no conserva compatibilidad de restore con V6, y no admite conexiones
+volumen-a-volumen ni más de un volumen en la misma cara.
+
 ## 8. Protocolo ante bloqueos no triviales
 
 No devolver el bloqueo automáticamente al humano. Investigaciones paralelas:
@@ -332,26 +340,29 @@ registra como decisión en la sección 17.
 ## 15. Objetivo actual
 
 Continuar la integración end-to-end del núcleo 2T reutilizando el estado
-SSPRK2 común y la evidencia primaria existentes. El plenum finito en la entrada
-de admisión ya está enlazado a ese estado y a los outputs V2. Próximo trabajo:
-ampliar el enlace integrado de volúmenes de red de forma conservativa a más
-endpoints y comprobar la reconstrucción primaria en esa topología, sin cambiar
-la semántica histórica P3. Mantener fuera del alcance cualquier campaña KT100.
+SSPRK2 común y la evidencia primaria existentes. Los volúmenes finitos en los
+endpoints externos intake-left y exhaust-right ya participan del estado común y
+del output V2. Próximo trabajo independiente: hacer explícita y reproducible la
+configuración integrada para reconstruir el motor sin callbacks externos.
+Mantener fuera del alcance cualquier campaña KT100.
 
 ## 16. Arquitectura vigente
 
 `IntegratedEngine2T` avanza cámara, ductos, especies, reed estática, fuentes
-térmicas/P7 y ahora un plenum finito opcional en las mismas dos etapas SSPRK2.
-Los intercambios de red usan el helper Riemann P3 existente y la composición
-real del donante; inventario global, CFL, checkpoint y output reconstruible
-incluyen el nodo. El enlace de plenum es ideal y sin masa: su longitud efectiva
-se serializa, pero no representa inertancia ni propagación acústica.
+térmicas/P7 y volúmenes finitos opcionales en los endpoints intake-left y
+exhaust-right en las mismas dos etapas SSPRK2. Los intercambios de red usan el
+helper Riemann P3 existente y la composición real del donante; inventario
+global, CFL, checkpoint y output reconstruible incluyen cada nodo. Los
+enlaces son ideales y sin masa: su longitud efectiva se serializa, pero no
+representa inertancia ni propagación acústica. El checkpoint actual es V7;
+V6 no es compatible para restore.
 
 ## 17. Decisiones científicas
 
 | Fecha | Decisión | Alternativas | Evidencia | Revisión |
 |---|---|---|---|---|
 | 2026-10-05 | El enlace integrado finito de admisión reutiliza P3 ideal; no se añade una frontera atmosférica ni una nueva política de reservoir | Integrar solo el endpoint existente; tratar longitud efectiva como acústica sería una capability distinta | 99 pruebas focales integradas/P5-C/P6/P7/red/reed/puertos PASS; estado primario/output de un ciclo y conservation rebuild verificados | Revisión adversarial de solo lectura sin defecto en el delta; no es revisión completa del motor |
+| 2026-10-05 | Generalizar volúmenes integrados a caras externas intake-left y exhaust-right conserva el helper P3 y el ledger existente; no añade aristas internas de red | Mantener un solo nodo de admisión; o modelar redes internas/acústica como otra capability | 100 pruebas integradas/P5-C/P6/P7/red/reed/puertos PASS; replay V7 de dos nodos, ciclo completo, outputs muestreados contra el estado y ledgers globales | Revisión adversarial de solo lectura sin defecto; punctual, no review total del motor |
 
 ## 18. Convenciones
 
@@ -365,9 +376,18 @@ contrato propios.
 
 - Reservoir boundary: `KT100_HYBRID_V2_BLOCKED_BY_RESERVOIR_BOUNDARY_CAPABILITY`
   (`docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md`).
-- Integración SSPRK2 de reed dinámica: falta un contrato stage-coherent para
-  impacto/restitución, trabajo de presión y ledger de disipación.
+- Reed dinámica integrada: revisión de dominio encontró decisiones materiales
+  aún sin contrato. La ecuación existente es
+  `m*x'' + c*x' + k*x = Δp*Ap`; entre impactos
+  `dE_reed/dt = Δp*Ap*x' - c*x'^2` y cada impacto disipa
+  `0.5*m*(1-e^2)*(v^-)^2`. No está definido cómo discretizar presión variable
+  dentro de SSPRK2/impactos, cómo localizar presión/trabajo en gas upstream vs
+  cárter, ni dónde depositar disipación de damper/impacto. La revisión concluye
+  que se requiere decisión de modelado; no integrar por splitting ni inferir
+  esas asignaciones.
 - AFR estequiométrica y enlace de `Q_F` con LHV siguen sin definición; las
   cantidades dependientes permanecen UNDEFINED.
 - El núcleo integrado/comercial sigue parcial, sintético y sujeto a
   `CONDITIONAL_ON_P4`; no hay validación experimental.
+- Falta una configuración integrada JSON/canónica que permita reconstruir el
+  motor completo sin callbacks externos; es el siguiente trabajo READY.

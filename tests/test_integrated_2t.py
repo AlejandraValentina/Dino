@@ -11,6 +11,7 @@ from motorsim.crankcase import CrankcaseGeometry
 from motorsim.expansion_chamber import ChamberSection, ExpansionChamber
 from motorsim.integrated_2t import (
     DuctPath2T, EngineGeometry2T, IntegratedEngine2T, IntegratedIntakePlenum2T,
+    IntegratedNetworkVolume2T,
     IntegratedPortBinding2T,
     SliderCrankChambers2T, make_integrated_cycle_primary,
     make_integrated_engineering_output,
@@ -35,7 +36,7 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
           port_binding=None, reference_rpm=1000.0, geometry_identity=None,
           duct_species=None, slider_crank=None,
           combustion_start_angle_deg=None, cylinder_species=None,
-          intake_plenum=None):
+          intake_plenum=None, network_volumes=()):
     def duct_mesh(duct_id):
         if duct_id == "exhaust" and exhaust_mesh is not None:
             return exhaust_mesh
@@ -85,6 +86,7 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
                            {"fixture": "three-transfer-static-volume-v1"}),
         reed_petals=reed_petals,
         port_binding=port_binding, intake_plenum=intake_plenum,
+        network_volumes=network_volumes,
         slider_crank=slider_crank,
         reference_rpm=reference_rpm,
         thermal_system=thermal_system, thermal_locations=thermal_locations,
@@ -256,6 +258,32 @@ def test_integrated_intake_plenum_outflow_participates_in_depletion_cfl():
     dt = system.state["network_volumes"]["intake-plenum"][0] / outflow * 0.5
     with pytest.raises(ValueError, match="CFL limit exceeded"):
         system._cfl(system.state, assembled, dt)
+
+
+def test_integrated_network_volume_rejects_bad_face_orientation_and_duplicates():
+    base = _intake_plenum()
+    wrong_orientation = IntegratedNetworkVolume2T(
+        base.node,
+        NetworkConnection("reversed", "intake", base.node.id, 1e-5, .05,
+                          "SYNTHETIC_ASSUMPTION"),
+        "intake", "left", base.initial_state)
+    with pytest.raises(ValueError, match="orientation"):
+        _case(network_volumes=(wrong_orientation,))
+
+    right_side_of_intake = IntegratedNetworkVolume2T(
+        base.node, base.connection, "intake", "right", base.initial_state)
+    with pytest.raises(ValueError, match="external duct endpoints"):
+        _case(network_volumes=(right_side_of_intake,))
+
+    duplicate_endpoint = IntegratedNetworkVolume2T(
+        base.node,
+        NetworkConnection("duplicate", base.node.id, "intake", 1e-5, .06,
+                          "SYNTHETIC_ASSUMPTION"),
+        "intake", "left", base.initial_state)
+    valid = IntegratedNetworkVolume2T(
+        base.node, base.connection, "intake", "left", base.initial_state)
+    with pytest.raises(ValueError, match="ids must be unique"):
+        _case(network_volumes=(valid, duplicate_endpoint))
 
 
 def test_integrated_engine_rejects_incomplete_or_non_generic_topology():
@@ -710,7 +738,8 @@ def test_p7_event_boundary_requires_exact_alignment_and_stops_cleanly():
 
 
 def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
-                            fixture_name=None, intake_plenum=False):
+                            fixture_name=None, intake_plenum=False,
+                            network_volumes=()):
     rpm = 3000.0
     crankcase = CrankcaseGeometry(56.0, 50.0, 100.0, 80.0,
                                   "SYNTHETIC_ASSUMPTION")
@@ -805,6 +834,7 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
         intake_plenum=(_intake_plenum(
             pressure=101325.0, fractions=(1.0, 0.0, 0.0, 0.0))
                        if intake_plenum else None),
+        network_volumes=network_volumes,
         reference_rpm=rpm, thermal_system=thermal,
         thermal_locations={"cylinder-wall": "cylinder"},
         combustion_start_angle_deg=300.0, max_cfl=.4)
@@ -1028,27 +1058,91 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     assert replay.snapshot() == system.snapshot()
 
 
-def test_finite_intake_plenum_is_bound_into_primary_cycle_and_engineering_output():
-    system = _internal_cycle_fixture(intake_plenum=True)
+def test_multiple_finite_network_volumes_rebuild_cycle_and_engineering_output():
+    eos = IdealGas()
+
+    def volume_state(volume, fractions):
+        pressure, temperature = 101325.0, 300.0
+        mass = pressure * volume / (eos.R * temperature)
+        return VolumeGasState(
+            mass, pressure * volume / (eos.gamma - 1.0),
+            tuple(mass * fraction for fraction in fractions))
+
+    intake_node = VolumeNode("intake-plenum", "plenum", .001,
+                             "SYNTHETIC_ASSUMPTION")
+    exhaust_node = VolumeNode("exhaust-receiver", "airbox", .003,
+                              "SYNTHETIC_ASSUMPTION")
+    bindings = (
+        IntegratedNetworkVolume2T(
+            intake_node,
+            NetworkConnection("intake-neck", intake_node.id, "intake",
+                              1e-4, .05, "SYNTHETIC_ASSUMPTION"),
+            "intake", "left", volume_state(.001, (1.0, 0.0, 0.0, 0.0))),
+        IntegratedNetworkVolume2T(
+            exhaust_node,
+            NetworkConnection("exhaust-neck", "exhaust", exhaust_node.id,
+                              1e-4, .08, "SYNTHETIC_ASSUMPTION"),
+            "exhaust", "right", volume_state(.003, (0.0, 0.0, 0.0, 1.0))),
+    )
+    probe = _internal_cycle_fixture(network_volumes=bindings)
+    replay = _internal_cycle_fixture(network_volumes=bindings)
+    checkpoint = json.loads(json.dumps(probe.snapshot()))
+    probe.step(1e-7, .001)
+    replay.restore(checkpoint)
+    replay.step(1e-7, .001)
+    assert replay.snapshot() == probe.snapshot()
+    assert replay.inventory() == probe.inventory()
+    assert replay.conservation_report() == probe.conservation_report()
+
+    system = _internal_cycle_fixture(network_volumes=bindings)
     start = deepcopy(system.snapshot())
     _advance_cycle_fixture(system, 360.0)
     end = deepcopy(system.snapshot())
 
     primary = make_integrated_cycle_primary(system, start, end, 1)
     assert primary["network_volume_definitions"] == {
-        "intake-plenum": {"kind": "plenum", "volume_m3": .001}}
+        "intake-plenum": {"kind": "plenum", "volume_m3": .001},
+        "exhaust-receiver": {"kind": "airbox", "volume_m3": .003}}
     output = make_integrated_engineering_output(
         primary, displacement_m3=system.slider_crank.crankcase.displacement_m3)
     assert validate_integrated_engineering_output_v2(output) == output
     channels = output["crank_angle_trace"]["channels"]
-    prefix = "network:intake-plenum:"
-    for suffix in ("mass_kg", "pressure_pa", "temperature_k",
-                   "fresh_air_mass_kg", "fuel_mass_kg", "residual_mass_kg",
-                   "burned_mass_kg"):
-        assert prefix + suffix in channels
-        assert len(channels[prefix + suffix]["values"]) == len(
-            output["crank_angle_trace"]["angle_deg"])
+    for node_id in ("intake-plenum", "exhaust-receiver"):
+        prefix = f"network:{node_id}:"
+        for suffix in ("mass_kg", "pressure_pa", "temperature_k",
+                       "fresh_air_mass_kg", "fuel_mass_kg", "residual_mass_kg",
+                       "burned_mass_kg"):
+            assert prefix + suffix in channels
+            assert len(channels[prefix + suffix]["values"]) == len(
+                output["crank_angle_trace"]["angle_deg"])
+        sample_indices = (0, len(primary["trajectory"]) // 2, -1)
+        for sample_index in sample_indices:
+            state = (primary["terminal_state"] if sample_index == -1 else
+                     primary["trajectory"][sample_index]["stage_states"][0])
+            mass, energy, volume = state["network_volumes"][node_id]
+            composition = state["species"]["network_volumes"][node_id]
+            expected = {
+                "mass_kg": mass,
+                "pressure_pa": (eos.gamma - 1.0) * energy / volume,
+                "temperature_k": energy / (mass * eos.cv),
+                **{f"{name}_mass_kg": composition[index]
+                   for index, name in enumerate(("fresh_air", "fuel", "residual", "burned"))},
+            }
+            channel_index = (len(primary["trajectory"]) if sample_index == -1 else
+                             sample_index)
+            for suffix, value in expected.items():
+                assert channels[prefix + suffix]["values"][channel_index] == pytest.approx(value)
+    exchange_nodes = {node_id for row in primary["trajectory"]
+                      for stage in row["stage_network_exchanges"]
+                      for node_id, exchange in stage.items()
+                      if exchange["mass_into_volume_kg_s"] != 0.0}
+    assert exchange_nodes == {"intake-plenum", "exhaust-receiver"}
     assert abs(primary["conservation"]["mass_residual_kg"]) < 1e-12
     assert abs(primary["conservation"]["energy_residual_J"]) < 1e-9
     assert all(abs(value) < 1e-12 for value in
                primary["conservation"]["species_residual_kg"])
+    malformed = deepcopy(primary)
+    malformed["network_volume_definitions"]["intake-plenum"]["volume_m3"] = True
+    with pytest.raises(ValueError, match="definition is malformed"):
+        make_integrated_engineering_output(
+            malformed, displacement_m3=system.slider_crank.crankcase.displacement_m3)

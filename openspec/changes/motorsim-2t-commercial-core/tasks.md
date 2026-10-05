@@ -480,3 +480,22 @@ Git LFS fsck y hash P9 comprobados. La revisión independiente del delta no
 encontró defectos concretos; no es aceptación del motor completo. Ninguna
 campaña KT100 se ejecutó. El resultado sintético continúa sujeto a las etiquetas
 de dependencia vigentes y no cambia el estado global parcial.
+
+### Volúmenes de red en endpoints externos múltiples — 2026-10-05
+
+- [x] Normalizar el plenum heredado y permitir nodos finitos inmutables en los
+  endpoints intake-left y exhaust-right, con orientación y unicidad validadas.
+- [x] Integrar los flujos opuestos de cada nodo en ambas etapas SSPRK2, cuatro
+  especies, CFL, estado/restart, identidad, inventario global y ciclo primario.
+- [x] Reconstruir siete señales V2 por volumen y rechazar identidades de nodo,
+  geometrías o definiciones malformadas.
+- [x] Verificar un ciclo sintético completo con dos volúmenes simultáneos,
+  intercambios no nulos y cierres globales de masa, energía y especies.
+
+Resultado: 100 pruebas integradas/red/P5-C/P6/P7/reed/puertos aprobadas y la
+prueba focal de replay multi-volumen pasó tras añadir comparación de muestras
+inicial, intermedia y terminal con el estado primario. OpenSpec estricto pasó.
+La revisión independiente no encontró defectos concretos. No se agregó una
+nueva ley de interfaz, frontera atmosférica o propagación acústica;
+`effective_length_m` sigue siendo metadata en el enlace ideal P3. La
+clasificación global continúa parcial y condicional.

@@ -424,3 +424,21 @@ selección. La revisión independiente fue acotada al delta y encontró cero
 defectos concretos; no constituye aceptación independiente del motor completo.
 No se ejecutó KT100, no se modificó P4–P9, no se publicó y no se cambió la
 clasificación parcial/condicional.
+
+### Volúmenes en endpoints externos múltiples — 2026-10-05
+
+El estado integrado se extendió a un volumen finito en cada uno de dos
+endpoints distintos: intake-left y exhaust-right. El checkpoint V7 enlaza las
+definiciones; estado, CFL, inventarios, restart, primary cycle y output V2
+recorren todos los nodos. Una integración sintética de ciclo completo con dos
+volúmenes tuvo intercambios no nulos, replay JSON exacto del paso y balances
+globales cerrados. Los canales iniciales, intermedios y terminales se
+compararon con sus estados de trayectoria. La regresión afectada fue de 100
+pruebas y pasó; la prueba focal de replay multi-volumen también pasó después
+del último refuerzo de aserciones. OpenSpec estricto y revisión independiente
+puntual aprobaron este delta.
+
+V7 rechaza checkpoints V6; el cambio no introduce una migración de checkpoints.
+La topología actual no modela aristas volumen-a-volumen ni dos volúmenes en una
+misma cara. Se mantienen los límites P3 ideales documentados para el plenum de
+admisión. La aceptación comercial global continúa parcial y condicional.

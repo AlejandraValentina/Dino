@@ -264,17 +264,21 @@ The duct-to-path mapping is copied into an immutable view at construction, so
 later mutation of the caller's dictionary cannot diverge stage routing from
 the checkpoint identity.
 
-The integrated network path now supports one optional finite intake plenum
-connected to the left face of the intake duct. The existing P3 interface
+The integrated network path supports finite gas volumes at distinct external
+duct endpoints: intake-left and exhaust-right. The existing P3 interface
 resolves one mass, momentum, total-energy and donor-species flux per SSPRK2
-stage; the exact opposite mass/energy/four-species rates update the plenum and
-duct. The plenum state, constant volume, connection geometry and initial
-composition are bound into checkpoint identity, global inventories and cycle
-reconstruction. This bounded path does not add an atmosphere-to-plenum boundary
-or choose new generalized reservoir semantics. The connection currently uses
-the existing ideal, massless P3 Riemann interface: `effective_length_m` is
-retained as geometry/provenance but does not add neck inertance or acoustic
-propagation to this integrated path.
+stage; exact opposite mass/energy/four-species rates update each volume and its
+duct. Volume states, fixed geometry, connection definitions and initial
+compositions are bound into checkpoint identity, global inventories and cycle
+reconstruction. The legacy `intake_plenum` input normalizes to the same generic
+binding. These connections do not add an atmosphere-to-plenum boundary or
+choose new generalized reservoir semantics. Each connection uses the existing
+ideal, massless P3 Riemann interface: `effective_length_m` is retained as
+geometry/provenance but does not add neck inertance or acoustic propagation to
+this integrated path. The checkpoint schema is V7 and intentionally rejects
+V6 checkpoints whose configuration identity did not contain network endpoint
+bindings. The current integrated topology does not support intermediate
+volume-to-volume connections or multiple volumes on one duct face.
 
 The integrated geometry resolver can also consume the existing `CrankcaseGeometry`
 V2 plus a cylinder compression ratio. It derives both moving chamber volumes
