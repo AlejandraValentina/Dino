@@ -255,7 +255,7 @@ def produce(fixture_id: str, horizon: int, restart_cycle: int,
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--fixture", choices=("A", "B", "C"), required=True)
+    parser.add_argument("--fixture", choices=("A", "B", "C", "D"), required=True)
     parser.add_argument("--validate-only", action="store_true",
                         help="load and round-trip the committed fixture; do not integrate")
     parser.add_argument("--horizon", type=int)

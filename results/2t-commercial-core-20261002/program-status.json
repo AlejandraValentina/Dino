@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "350d36a4dc3f94bf374b5340b3222d0b00470968",
+  "status_capture_head": "48ad21b70ca99d49b91cbda0029712abcc77dfd7",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -1205,13 +1205,16 @@
       "classification": "OPEN",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "audit-range:ab92aee..8cdf66e",
+        "48ad21b70ca99d49b91cbda0029712abcc77dfd7"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md",
-        "scripts/produce_integrated_cycle_evidence.py now recognizes D as a separately identified AUDIT_REMEDIATION_FIXTURE; configuration and preregistration are not yet committed and no campaign has run."
+        "scripts/produce_integrated_cycle_evidence.py now recognizes D as a separately identified AUDIT_REMEDIATION_FIXTURE; configuration and preregistration are not yet committed and no campaign has run.",
+        "results/2t-commercial-core-20261002/fixtures/fixture-d-engine-config-v2.json: config differs from A only in fixture identity and combustion_start_angle_deg=350; V2 validate-only PASS",
+        "Geometry-only preflight samples the complete P7 350–390 degree interval every 0.5 degrees and reports exhaust area exactly zero; no integration run."
       ],
-      "next_action": "Create the distinct closed-exhaust near-PMS configuration, preregister it in a separate pre-campaign commit with producer source binding, then run the bounded horizon only after the commit gate."
+      "next_action": "Commit fixture D and producer support, then commit the separately bound two-cycle preregistration before any integration."
     },
     {
       "id": "AUD-16",
@@ -1306,7 +1309,7 @@
     }
   },
   "audit_reconciliation": {
-    "head": "350d36a4dc3f94bf374b5340b3222d0b00470968",
+    "head": "48ad21b70ca99d49b91cbda0029712abcc77dfd7",
     "findings": {
       "AUD-01": "RESOLVED_BY_LATER_COMMIT",
       "AUD-02": "RESOLVED_BY_LATER_COMMIT",
@@ -1342,7 +1345,7 @@
       "AUD-12": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-13": "Bounded chamber/transfer mesh sensitivity and conservation recorded; lack of an acceptance threshold prevents a mesh-adequacy claim.",
       "AUD-14": "V3 now explicitly names gross crossing metrics and intake species ratio, leaves trapped/burned AFR undefined, and derives specific consumption only from positive prescribed P7 fuel sink and power. V1/V2 remain unchanged.",
-      "AUD-15": "IN_PROGRESS: producer now recognizes the separate D audit fixture; configuration and preregistration must be committed before any campaign.",
+      "AUD-15": "IN_PROGRESS: Fixture D has been created/validated; P7 350–390° sees zero exhaust area in geometry-only sampling. No integrated campaign. Preregistration still required.",
       "AUD-16": "READY/PARTIAL: callback shadowing resolved by 9eada5d; stage-rate recomputation, restored-trace validation, tautological comparison, and volume/rate cross-check remain open.",
       "AUD-17": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded.",
       "AUD-18": "OPEN; independent priority-3 workstream is READY. Reservoir V2/KT100 are excluded."
@@ -1362,8 +1365,9 @@
       "preregistration_blob_gate": "PASS: commit cdafa6e1b37978bb825bb04b0260a17544802e06 matches structured JSON and canonical hashes",
       "AUD-11": "3 focused forensic diagnostics + 4 existing preflight tests PASS; OpenSpec strict PASS; no simulation or KT100 run.",
       "AUD-13": "1 bounded diagnostic test PASS; nine isolated solver meshes completed; OpenSpec strict not rerun since AUD-11 (previous strict PASS remains).",
-      "AUD-14": "58 tests passed across test_engineering_outputs.py and test_integrated_2t.py; strict V3 validation and unchanged V2 validation exercised."
+      "AUD-14": "58 tests passed across test_engineering_outputs.py and test_integrated_2t.py; strict V3 validation and unchanged V2 validation exercised.",
+      "AUD-15": "Producer/config validation: 5 tests PASS; validate-only off-CWD PASS; geometry-only exhaust closure through 350–390° PASS; no integration run."
     }
   },
-  "last_status_reviewed_head": "350d36a4dc3f94bf374b5340b3222d0b00470968"
+  "last_status_reviewed_head": "48ad21b70ca99d49b91cbda0029712abcc77dfd7"
 }

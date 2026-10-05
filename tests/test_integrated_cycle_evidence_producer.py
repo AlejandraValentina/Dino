@@ -13,7 +13,7 @@ import produce_integrated_cycle_evidence as producer
 
 
 def test_committed_synthetic_fixture_configs_load_from_outside_repository(tmp_path):
-    for fixture_id in ("A", "B", "C"):
+    for fixture_id in ("A", "B", "C", "D"):
         result = subprocess.run(
             [sys.executable, str(PRODUCER), "--fixture", fixture_id,
              "--validate-only"],
@@ -24,8 +24,25 @@ def test_committed_synthetic_fixture_configs_load_from_outside_repository(tmp_pa
             "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2")
         assert len(output["engine_configuration_sha256"]) == 64
         assert output["fixture_status"] == (
-            "AUDIT_REMEDIATION_FIXTURE" if fixture_id == "C" else
+            "AUDIT_REMEDIATION_FIXTURE" if fixture_id in {"C", "D"} else
             "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT")
+
+
+def test_aud15_fixture_d_changes_only_identity_and_timing_and_closes_exhaust():
+    base = json.loads((producer.FIXTURES / "fixture-a-engine-config-v2.json").read_text())
+    candidate = json.loads((producer.FIXTURES / "fixture-d-engine-config-v2.json").read_text())
+    assert candidate["selection_status"] == "AUDIT_REMEDIATION_FIXTURE"
+    base_config = base["engine_configuration"]
+    d_config = candidate["engine_configuration"]
+    normalized = json.loads(json.dumps(d_config))
+    normalized["combustion_start_angle_deg"] = base_config["combustion_start_angle_deg"]
+    normalized["geometry_identity"]["fixture"] = base_config["geometry_identity"]["fixture"]
+    assert normalized == base_config
+    assert d_config["combustion_start_angle_deg"] == 350.0
+
+    engine, _, _ = producer.load_engine("D")
+    assert max(engine._geometry(350.0 + i * .5).exhaust_area_m2
+               for i in range(81)) == 0.0
 
 
 def test_producer_refuses_to_integrate_without_preregistration(tmp_path):

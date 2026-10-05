@@ -618,12 +618,17 @@ existentes; los nuevos resultados integrados usan V3.
 
 - [x] Extender la validación del productor para admitir Fixture D marcado como
   `AUDIT_REMEDIATION_FIXTURE`; no se ha iniciado una campaña.
-- [ ] Crear y revisar la configuración D, idéntica a la base salvo identidad
-  sintética y timing P7 alineado cerca del PMS con el escape cerrado.
+- [x] Crear `fixture-d-engine-config-v2.json`, idéntico a A salvo identidad
+  sintética y P7 de 350° a 390°. Una evaluación geométrica sin integración
+  confirma área de escape cero en todo el intervalo, muestreado cada 0.5°.
 - [ ] Commitear configuración y preregistro antes de toda integración.
 - [ ] Ejecutar únicamente el horizonte preregistrado y comprobar el área de
   escape cero durante el evento P7; no usar el resultado como calibración ni
   cambiar los fixtures científicos A/B existentes.
+
+Validación previa de configuración: `tests/test_integrated_cycle_evidence_producer.py`
+— 5 passed; `--validate-only` funciona fuera del repositorio. No se ha ejecutado
+ninguna integración con Fixture D.
 
 
 ### Correcciones prioritarias AUD-01 / AUD-02 — 2026-10-05
