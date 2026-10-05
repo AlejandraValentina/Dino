@@ -332,7 +332,7 @@ class IntegratedEngine2T:
     stage RHS and are checkpointed with the integrated ledger.
     """
     schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V7"
-    configuration_schema = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1"
+    configuration_schema = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2"
     dependency_status = "CONDITIONAL_ON_P4"
 
     def __init__(self, crankcase_state: tuple, cylinder_state: tuple,
@@ -342,6 +342,7 @@ class IntegratedEngine2T:
                  species: dict | None = None,
                  atmosphere: tuple = (101325.0, 300.0),
                  atmosphere_species: tuple | None = None,
+                 outlet_species: tuple | None = None,
                  inlet_boundary: Boundary | None = None,
                  outlet_boundary: Boundary | None = None,
                  max_cfl: float = 0.4,
@@ -442,8 +443,12 @@ class IntegratedEngine2T:
             raise ValueError("atmosphere pressure and temperature must be positive")
         self.atmosphere_state = self.eos.validate((p_atm / (self.eos.R * t_atm), 0.0,
                                                    p_atm, 1.0))
-        self.atmosphere_species = tuple(atmosphere_species or atmospheric_species())
+        self.atmosphere_species = tuple(
+            atmospheric_species() if atmosphere_species is None else atmosphere_species)
         validate_species(self.atmosphere_species, 1.0)
+        self.outlet_species = tuple(
+            atmospheric_species() if outlet_species is None else outlet_species)
+        validate_species(self.outlet_species, 1.0)
         self.inlet_boundary = inlet_boundary or Boundary(
             "reservoir", p0=p_atm, T0=t_atm, Y0=1.0)
         self.outlet_boundary = outlet_boundary or Boundary(
@@ -561,9 +566,10 @@ class IntegratedEngine2T:
                                  duct_primitives, atmosphere):
         """Capture a JSON-safe constructor contract for reconstructible geometry.
 
-        V1 intentionally supports only explicit slider-crank volumes and a
+        V2 intentionally supports only explicit slider-crank volumes and a
         generic port binding. Those two models resolve every geometry field;
         arbitrary callbacks cannot be serialized or represented as reproducible.
+        V2 records separate inlet and outlet donor compositions.
         """
         if self.slider_crank is None or self.port_binding is None:
             return None
@@ -596,6 +602,7 @@ class IntegratedEngine2T:
             "eos": {"R": self.eos.R, "gamma": self.eos.gamma},
             "atmosphere": list(atmosphere),
             "atmosphere_species": list(self.atmosphere_species),
+            "outlet_species": list(self.outlet_species),
             "boundaries": {"inlet": _jsonify(vars(self.inlet_boundary)),
                            "outlet": _jsonify(vars(self.outlet_boundary))},
             "max_cfl": self.max_cfl,
@@ -614,11 +621,11 @@ class IntegratedEngine2T:
         }
 
     def configuration_dict(self) -> dict:
-        """Return a detached constructor configuration, if V1 can represent it."""
+        """Return a detached V2 constructor configuration when representable."""
         self._assert_configuration_unchanged(check_identity=True)
         if self._configuration_spec is None:
             raise ValueError(
-                "configuration V1 requires explicit slider-crank and generic-port geometry")
+                "configuration V2 requires explicit slider-crank and generic-port geometry")
         result = deepcopy(self._configuration_spec)
         try:
             json.dumps(result, sort_keys=True, separators=(",", ":"),
@@ -637,6 +644,7 @@ class IntegratedEngine2T:
                 id(self.intake), id(self.exhaust),
                 tuple(id(path) for path in self.transfers),
                 tuple(self.atmosphere_state), tuple(self.atmosphere_species),
+                tuple(self.outlet_species),
                 id(self.inlet_boundary), id(self.outlet_boundary), self.max_cfl,
                 self.geometry_sha256, id(self.configuration_identity),
                 tuple(id(petal) for petal in self.reed_petals),
@@ -682,7 +690,7 @@ class IntegratedEngine2T:
     @classmethod
     def from_configuration_dict(cls, value: dict) -> "IntegratedEngine2T":
         """Rebuild a supported engine without caller code or geometry callbacks."""
-        fields = {"schema", "geometry_contract", "initial_chambers", "ducts",
+        common_fields = {"schema", "geometry_contract", "initial_chambers", "ducts",
                   "resolved_topology", "initial_duct_states", "duct_species",
                   "eos", "atmosphere",
                   "atmosphere_species", "boundaries", "max_cfl",
@@ -690,8 +698,14 @@ class IntegratedEngine2T:
                   "network_volumes", "slider_crank", "reference_rpm",
                   "thermal_system", "thermal_locations", "thermal_load",
                   "combustion_start_angle_deg"}
-        if (not isinstance(value, dict) or set(value) != fields or
-                value.get("schema") != cls.configuration_schema or
+        if not isinstance(value, dict):
+            raise ValueError("integrated engine configuration schema is invalid")
+        source_schema = value.get("schema")
+        legacy_v1 = (source_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1" and
+                     set(value) == common_fields)
+        current_v2 = (source_schema == cls.configuration_schema and
+                      set(value) == common_fields | {"outlet_species"})
+        if (not (legacy_v1 or current_v2) or
                 value.get("geometry_contract") !=
                 "SLIDER_CRANK_AND_GENERIC_PORTS_V1"):
             raise ValueError("integrated engine configuration schema is invalid")
@@ -797,6 +811,8 @@ class IntegratedEngine2T:
             eos=IdealGas(**eos_data), species=species,
             atmosphere=tuple(value["atmosphere"]),
             atmosphere_species=tuple(value["atmosphere_species"]),
+            outlet_species=tuple(value.get("outlet_species",
+                                           value["atmosphere_species"])),
             inlet_boundary=boundary_data["inlet"],
             outlet_boundary=boundary_data["outlet"], max_cfl=value["max_cfl"],
             geometry_identity=deepcopy(value["geometry_identity"]),
@@ -808,7 +824,11 @@ class IntegratedEngine2T:
             thermal_locations=deepcopy(value["thermal_locations"]),
             thermal_load=value["thermal_load"],
             combustion_start_angle_deg=value["combustion_start_angle_deg"])
-        if engine.configuration_dict() != value:
+        canonical_input = deepcopy(value)
+        canonical_input["schema"] = cls.configuration_schema
+        canonical_input["outlet_species"] = list(
+            value.get("outlet_species", value["atmosphere_species"]))
+        if engine.configuration_dict() != canonical_input:
             raise ValueError("integrated engine resolved topology/configuration mismatch")
         return engine
 
@@ -821,7 +841,8 @@ class IntegratedEngine2T:
     def _configuration_identity(self):
         initial_payload = {"state": self.state,
                            "atmosphere": self.atmosphere_state,
-                           "atmosphere_species": self.atmosphere_species}
+                           "atmosphere_species": self.atmosphere_species,
+                           "outlet_species": self.outlet_species}
         initial_bytes = json.dumps(initial_payload, sort_keys=True, separators=(",", ":"),
                                    allow_nan=False).encode("utf-8")
         identity = {"ducts": [{"id": path.id, "role": path.role,
@@ -969,7 +990,7 @@ class IntegratedEngine2T:
         else:
             left_comp = species[index]
             left_mass = cells[index][0] * path.mesh.volumes[index]
-            right_comp = self.atmosphere_species
+            right_comp = self.outlet_species
             right_mass = 1.0
         species_flux = self._face_species_flux(face[0], left_comp, left_mass,
                                                right_comp, right_mass)

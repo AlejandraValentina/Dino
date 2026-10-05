@@ -484,3 +484,10 @@ puntual de HEAD, con sus límites, está en
 reemplaza la auditoría del rango, no acredita ciclos y no es aceptación del
 Commercial Core. AUD-11 separa el límite local de la frontera V1 de la política
 científica aún no seleccionada para V2.
+
+
+La remediación AUD-03 agregó composición independiente de salida: las nuevas
+configuraciones V2 usan fresh-air para backflow de escape y conservan la mezcla
+configurada para admisión. El lector V1 conserva la semántica previa al cargar
+archivos antiguos y los vuelve a emitir como V2 en un guardado explícito. Esto
+no genera resultados de ciclo ni cambia P4–P9.

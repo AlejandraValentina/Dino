@@ -344,7 +344,8 @@ registra como decisión en la sección 17.
 posterior a `8cdf66e`. Cerrar las prioridades 1 `AUD-01`…`AUD-07` antes de toda
 capability nueva. El primer trabajo activo es la fuerza de pared de puertos
 cerrados/parciales; `AUD-11` aplica en paralelo el protocolo forense reservoir.
-La fábrica `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1` y su ajuste de callback
+La fábrica `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2` (con lectura compatible
+V1 para preservar replay histórico) y su ajuste de callback
 siguen incorporados; solo cubren slider-crank y puertos explícitos. KT100 sigue
 congelado.
 

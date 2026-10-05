@@ -574,10 +574,26 @@ No se ejecutaron campañas ni se tocaron resultados KT100.
 - [x] AUD-02: reemplazar la presión de cámara errónea de 289500 Pa por
   101325 Pa y verificar p/T de ambos estados iniciales (101325 Pa, 300 K).
 - [ ] AUD-02: reconciliar el test sintético de dos ciclos que, tras corregir
-  el estado inicial, observa `p7_availability_limited_kg = 1.0249018819007915e-07`
-  frente a su aserción histórica exacta de cero. No usar el resultado como
+  el estado inicial, observa `p7_availability_limited_kg = 1.0249018819006299e-07`
+  frente a su aserción histórica exacta de cero; al repetir el módulo después
+  de AUD-03 se obtuvieron 38 PASS y ese mismo único fallo. No usar el resultado como
   evidencia de ciclo ni cambiar el valor esperado sin analizar el contrato.
 
 Pruebas focales: 4 PASS. El módulo `tests/test_integrated_2t.py` terminó con
 36 PASS y 1 FAIL en la aserción histórica de P7 descrita arriba; no se declara
 PASS de ciclo. A/B permanecen supersedidos hasta AUD-08.
+
+
+### Separación de composición externa AUD-03 — 2026-10-05
+
+- [x] Separar el donante de admisión (`atmosphere_species`) del ambiente de
+  salida (`outlet_species`), cuyo valor por defecto es fresh-air puro.
+- [x] En flujo inverso por escape, verificar que el intercambio trae fresh-air
+  y cero fuel aunque el reservoir de admisión contenga combustible.
+- [x] Evolucionar la configuración reconstruible a
+  `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2`; conservar lectura V1 con la
+  composición anterior aplicada a ambos extremos para preservar su replay.
+- [x] Incluir ambas composiciones en guard, identidad y JSON canónico.
+
+Pruebas focales de AUD-03 y configuración: 3 PASS; incluye roundtrip V2,
+lectura compatible V1 y backflow de escape sin introducir combustible.

@@ -861,7 +861,7 @@
       ],
       "evidence": [
         "tests/test_integrated_2t.py::test_internal_cycle_fixture_starts_at_atmospheric_pressure_and_temperature (PASS)",
-        "tests/test_integrated_2t.py full module: 36 passed, 1 failed at legacy exact-zero p7_availability_limited_kg assertion; no cycle evidence claimed"
+        "tests/test_integrated_2t.py full module after AUD-01..03: 38 passed, 1 failed only at legacy exact-zero P7-availability assertion (1.0249018819006299e-07 kg); no cycle acceptance evidence claimed"
       ],
       "next_action": "Reconcile the changed P7 limiter behavior without using this test as cycle acceptance; do not regenerate A/B before AUD-08."
     },
@@ -873,16 +873,20 @@
         "A3"
       ],
       "dependencies": [],
-      "state": "READY",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "7afd8f1: port force and corrected pressure fixture",
+        "working-tree: separate inlet/outlet composition and config V2"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "motorsim/integrated_2t.py: outlet_species, V2 configuration and V1 reader",
+        "tests/test_integrated_2t.py::test_exhaust_backflow_uses_fresh_air_not_the_intake_reservoir_mixture",
+        "tests/test_integrated_2t.py::test_integrated_engine_config_roundtrip_rebuilds_without_external_callback",
+        "tests/test_integrated_2t.py::test_integrated_engine_config_v1_read_preserves_legacy_outlet_composition (PASS)"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "No evidence campaign until AUD-08 preregistration."
     },
     {
       "id": "AUD-04",
@@ -1208,14 +1212,19 @@
     "current_head_reconciled": "3d10f79",
     "next_action": "Close all Priority 1 AUD tasks before using integrated cycle PASS or adding capabilities.",
     "reconciled_head": "3d10f79",
-    "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json"
+    "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
+    "current_remediation": [
+      "AUD-01 RESOLVED_BY_LATER_COMMIT",
+      "AUD-02 PARTIALLY_RESOLVED_BY_LATER_COMMIT",
+      "AUD-03 RESOLVED_BY_LATER_COMMIT"
+    ]
   },
   "audit_reconciliation": {
     "head": "3d10f79",
     "findings": {
       "AUD-01": "OPEN",
       "AUD-02": "OPEN",
-      "AUD-03": "OPEN",
+      "AUD-03": "RESOLVED_BY_LATER_COMMIT",
       "AUD-04": "OPEN",
       "AUD-05": "OPEN",
       "AUD-06": "OPEN",
@@ -1234,8 +1243,8 @@
     },
     "notes": {
       "AUD-01": "OPEN: later commits do not add blocked-area traction.",
-      "AUD-02": "OPEN: cycle helper still passes 289500 Pa to a pressure slot; constructor sets E=pV/(gamma-1).",
-      "AUD-03": "OPEN: atmosphere_species still donates on both intake and exhaust boundaries.",
+      "AUD-02": "PARTIAL: initial pressure is 101325 Pa and T is verified as 300 K; the affected legacy cycle regression now fails only its exact-zero P7 availability-limiter assertion (1.0249018819006299e-07 kg), so this downstream behavior remains unreconciled.",
+      "AUD-03": "RESOLVED: new V2 defaults exhaust backflow to fresh-air; V1 reader preserves its prior shared-composition semantics.",
       "AUD-04": "OPEN: species tolerance and EOS fraction validation still disagree; harness retries inadmissibility without a durable rejected-step record.",
       "AUD-05": "OPEN: commercial cycle producer and versioned engine fixture config are still test-only/private.",
       "AUD-06": "OPEN: only the external audit artifact is currently certified as independent for its exact range; unreceipted later/historical prose claims are not independently certified.",
@@ -1253,5 +1262,15 @@
       "AUD-18": "OPEN: limited source inspection found writes use temporary paths, but the original suite-wide side-effect/line-ending allegation has not been fully discriminated."
     },
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json"
+  },
+  "configuration_schema": "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2",
+  "verification": {
+    "audit_remediation_current": {
+      "focused_tests": "9 passed",
+      "integrated_test_module": "38 passed, 1 failed",
+      "known_failure": "Corrected fixture changes the old P7 availability-limiter result from an asserted exact zero to 1.0249018819006299e-07 kg. This is not cycle acceptance evidence and remains under AUD-02 review.",
+      "openspec": "STRICT PASS",
+      "compileall": "PASS for integrated_2t.py and test_integrated_2t.py"
+    }
   }
 }

@@ -154,6 +154,21 @@ def test_internal_cycle_fixture_starts_at_atmospheric_pressure_and_temperature()
         assert temperature == pytest.approx(300.0, abs=0.01)
 
 
+def test_exhaust_backflow_uses_fresh_air_not_the_intake_reservoir_mixture():
+    system = _internal_cycle_fixture()
+    assert system.atmosphere_species == pytest.approx((.98, .02, 0.0, 0.0))
+    assert system.outlet_species == (1.0, 0.0, 0.0, 0.0)
+    external = Boundary(
+        "fixed", state=(150000.0 / (system.eos.R * 300.0),
+                        0.0, 150000.0, 1.0))
+
+    face, species_flux, _ = system._external_face(
+        system.state, system.exhaust, "right", external)
+
+    assert face[0] < 0.0
+    assert species_flux == pytest.approx((face[0], 0.0, 0.0, 0.0))
+
+
 def test_integrated_engine_checkpoint_restart_replays_identically():
     continuous = _case()
     continuous.step(1e-8, .01)
@@ -1210,6 +1225,19 @@ def test_integrated_engine_config_roundtrip_rebuilds_without_external_callback()
     rebuilt.step(1e-6, .01)
     system.step(1e-6, .01)
     assert rebuilt.snapshot() == system.snapshot()
+
+
+def test_integrated_engine_config_v1_read_preserves_legacy_outlet_composition():
+    legacy = json.loads(_internal_cycle_fixture().configuration_json())
+    legacy.pop("outlet_species")
+    legacy["schema"] = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1"
+
+    rebuilt = IntegratedEngine2T.from_configuration_dict(legacy)
+
+    assert rebuilt.outlet_species == tuple(legacy["atmosphere_species"])
+    current = rebuilt.configuration_dict()
+    assert current["schema"] == IntegratedEngine2T.configuration_schema
+    assert current["outlet_species"] == legacy["atmosphere_species"]
 
 
 def test_integrated_engine_config_roundtrip_preserves_network_bindings():
