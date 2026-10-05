@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "5b473866bb8459e874f0e7826f202e3838fe7a85",
+  "status_capture_head": "0e9c6abb664e08be1cf44610ff06ee04bdcd9e88",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -750,7 +750,9 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "0e9c6abb664e08be1cf44610ff06ee04bdcd9e88"
+      ],
       "evidence": [
         "Added MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1, a strict JSON-safe factory for setups fully resolved by existing slider-crank chambers and generic ports; arbitrary geometry callbacks remain unsupported.",
         "Configuration round-trip preserves initial gas/species state, meshes, EOS, atmosphere, boundaries, reed, ports/powervalve, finite endpoint volumes, slider-crank, thermal inputs, RPM, and P7 start; canonical configuration and engine identity match exactly.",
