@@ -491,3 +491,30 @@ configuraciones V2 usan fresh-air para backflow de escape y conservan la mezcla
 configurada para admisión. El lector V1 conserva la semántica previa al cargar
 archivos antiguos y los vuelve a emitir como V2 en un guardado explícito. Esto
 no genera resultados de ciclo ni cambia P4–P9.
+
+
+### Estado de claims de revisión — AUD-06
+
+La auditoría externa es independiente solo para `ab92aee..8cdf66e`. El recibo
+`audit-triage-3d10f79.json` documenta una lectura separada y acotada al HEAD
+`3d10f79`, sin aceptación del motor. Los claims históricos del Commercial
+Core que carecen de recibo durable identificable se clasifican ahora como
+`SELF_REVIEW`; no se borran sus notas ni se extiende la cobertura del artefacto
+externo. Los informes P4–P8 permanecen separados y conservan su ámbito propio.
+
+
+### Normalización de estado AUD-07
+
+`program-status.json` distingue la implementación integrada de la aceptación
+de ciclos: el productor AUD-05 está listo, pero los resultados A/B previos
+permanecen supersedidos. P4 sigue `P4_PASS`. El dato de 300 pruebas P4–P8
+pertenece a la corrida histórica citada por la auditoría externa, no es una
+corrida nueva de esta remediación. Los artefactos de P4–P8 y sus revisiones no
+se atribuyen al Commercial Core.
+
+
+La validación `--validate-only` del productor AUD-05 puede ejecutarse desde
+cualquier carpeta sin integrar. Una campaña requiere un archivo de preregistro
+tracked y el hash del commit que lo contiene como argumento separado; el archivo
+se comprueba contra el blob exacto antes de crear resultados. AUD-08 sigue siendo
+el gate previo de evidencia.

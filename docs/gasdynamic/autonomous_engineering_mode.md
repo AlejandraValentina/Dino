@@ -339,15 +339,14 @@ registra como decisión en la sección 17.
 
 ## 15. Objetivo actual
 
-`AUDIT_REMEDIATION_MODE`: incorporar y reconciliar
-`docs/gasdynamic/audit_8cdf66e.md` con HEAD `3d10f79`, preservando el trabajo
-posterior a `8cdf66e`. Cerrar las prioridades 1 `AUD-01`…`AUD-07` antes de toda
-capability nueva. El primer trabajo activo es la fuerza de pared de puertos
-cerrados/parciales; `AUD-11` aplica en paralelo el protocolo forense reservoir.
-La fábrica `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2` (con lectura compatible
-V1 para preservar replay histórico) y su ajuste de callback siguen incorporados;
-solo cubren slider-crank y puertos explícitos. AUD-05 añade fixtures V2 y un
-productor de evidencia bloqueado hasta un preregistro en commit separado. KT100 sigue
+`AUDIT_REMEDIATION_MODE`: prioridades 1 `AUD-01`…`AUD-07` quedaron cerradas
+con cambios trazables. El trabajo activo es `AUD-08`: registrar en un commit
+separado la selección de Fixture A, el horizonte fijo y el restart audit antes
+de cualquier integración. El productor rechaza campañas sin ese preregistro.
+`AUD-11` reprodujo el límite de capacidad de reservoir V1; seleccionar política
+V2 sigue siendo una cuestión científica separada. No ejecutar KT100 ni reutilizar
+los ciclos A/B históricos. La fábrica de configuración V2 conserva lectura V1
+por compatibilidad y solo cubre slider-crank/puertos explícitos. KT100 permanece
 congelado.
 
 ## 16. Arquitectura vigente
@@ -359,7 +358,7 @@ helper Riemann P3 existente y la composición real del donante; inventario
 global, CFL, checkpoint y output reconstruible incluyen cada nodo. Los
 enlaces son ideales y sin masa: su longitud efectiva se serializa, pero no
 representa inertancia ni propagación acústica. El checkpoint actual es V7;
-V6 no es compatible para restore. `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1`
+V6 no es compatible para restore. `MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2` (con lectura compatible V1)
 reconstruye el subconjunto cuyo estado geométrico completo deriva de
 `SliderCrankChambers2T` y `IntegratedPortBinding2T`. En ese caso el callback de
 geometría del constructor no se consulta; configuraciones con geometría
@@ -371,9 +370,9 @@ rechaza.
 
 | Fecha | Decisión | Alternativas | Evidencia | Revisión |
 |---|---|---|---|---|
-| 2026-10-05 | El enlace integrado finito de admisión reutiliza P3 ideal; no se añade una frontera atmosférica ni una nueva política de reservoir | Integrar solo el endpoint existente; tratar longitud efectiva como acústica sería una capability distinta | 99 pruebas focales integradas/P5-C/P6/P7/red/reed/puertos PASS; estado primario/output de un ciclo y conservation rebuild verificados | Revisión adversarial de solo lectura sin defecto en el delta; no es revisión completa del motor |
-| 2026-10-05 | Generalizar volúmenes integrados a caras externas intake-left y exhaust-right conserva el helper P3 y el ledger existente; no añade aristas internas de red | Mantener un solo nodo de admisión; o modelar redes internas/acústica como otra capability | 100 pruebas integradas/P5-C/P6/P7/red/reed/puertos PASS; replay V7 de dos nodos, ciclo completo, outputs muestreados contra el estado y ledgers globales | Revisión adversarial de solo lectura sin defecto; punctual, no review total del motor |
-| 2026-10-05 | La configuración V1 serializa sólo geometría reconstruible desde modelos explícitos. Si slider-crank y binding de puertos resuelven todos los campos, el callback legado queda ignorado y no es parte de la identidad | Ejecutar también el callback podría introducir efectos laterales o fallos que la configuración no puede reproducir; callbacks arbitrarios requerirían otro contrato | JSON canónico y snapshot inicial exactos, guard de deriva y cinco pruebas focales; la regresión integrada amplia actual está registrada en `program-status.json` | Revisión independiente read-only del delta; acotada a la ruta geométrica, no aceptación del motor completo |
+| 2026-10-05 | El enlace integrado finito de admisión reutiliza P3 ideal; no se añade una frontera atmosférica ni una nueva política de reservoir | Integrar solo el endpoint existente; tratar longitud efectiva como acústica sería una capability distinta | 99 pruebas focales integradas/P5-C/P6/P7/red/reed/puertos PASS; estado primario/output de un ciclo y conservation rebuild verificados | SELF_REVIEW; no hay recibo independiente durable del delta |
+| 2026-10-05 | Generalizar volúmenes integrados a caras externas intake-left y exhaust-right conserva el helper P3 y el ledger existente; no añade aristas internas de red | Mantener un solo nodo de admisión; o modelar redes internas/acústica como otra capability | 100 pruebas integradas/P5-C/P6/P7/red/reed/puertos PASS; replay V7 de dos nodos, ciclo completo, outputs muestreados contra el estado y ledgers globales | SELF_REVIEW; no hay recibo independiente durable del delta |
+| 2026-10-05 | La configuración V1 serializa sólo geometría reconstruible desde modelos explícitos. Si slider-crank y binding de puertos resuelven todos los campos, el callback legado queda ignorado y no es parte de la identidad | Ejecutar también el callback podría introducir efectos laterales o fallos que la configuración no puede reproducir; callbacks arbitrarios requerirían otro contrato | JSON canónico y snapshot inicial exactos, guard de deriva y cinco pruebas focales; la regresión integrada amplia actual está registrada en `program-status.json` | SELF_REVIEW conforme AUD-06; no hay recibo independiente durable para este delta |
 
 ## 18. Convenciones
 
@@ -385,33 +384,21 @@ contrato propios.
 
 ## 19. Blockers abiertos
 
-- Reservoir boundary: `KT100_HYBRID_V2_BLOCKED_BY_RESERVOIR_BOUNDARY_CAPABILITY`
-  (`docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md`).
-- Reed dinámica integrada: revisión de dominio encontró decisiones materiales
-  aún sin contrato. La ecuación existente es
-  `m*x'' + c*x' + k*x = Δp*Ap`; entre impactos
-  `dE_reed/dt = Δp*Ap*x' - c*x'^2` y cada impacto disipa
-  `0.5*m*(1-e^2)*(v^-)^2`. No está definido cómo discretizar presión variable
-  dentro de SSPRK2/impactos, cómo localizar presión/trabajo en gas upstream vs
-  cárter, ni dónde depositar disipación de damper/impacto. La revisión concluye
-  que se requiere decisión de modelado; no integrar por splitting ni inferir
-  esas asignaciones.
-- AFR estequiométrica y enlace de `Q_F` con LHV siguen sin definición; las
-  cantidades dependientes permanecen UNDEFINED. El pseudo-especie fuel al
-  cierre exacto de escape no equivale al total de combustible atrapado; no
-  inferir ese total desde el inventario global terminal ni desde la captura de
-  reactivos de P7.
-- El núcleo integrado/comercial sigue parcial, sintético y sujeto a
-  `CONDITIONAL_ON_P4`; no hay validación experimental.
-- La configuración canónica cubre sólo slider-crank y puertos genéricos
-  explícitos; no serializa geometría arbitraria de callback. La auditoría
-  externa añade prioridades 1 abiertas: fuerza de
-  pared (A1), presión inicial de cámaras del fixture (A2), composición externa
-  independiente en admisión/escape (A3), redondeo de especies y retries del
-  harness (A4), productores versionados de evidencia (C1), reconciliación de
-  claims de revisión (C5) y normalización durable (C8/C9). A1–A3 invalidan para
-  aceptación la evidencia de ciclo A/B ya archivada; conservarla y marcarla
-  supersedida. La reed dinámica, combustible, reservoir V2, generalidad de
-  Fixture B y validación experimental siguen siendo límites adicionales. La
-  auditoría independiente cubre `ab92aee..8cdf66e`; las revisiones posteriores
-  de cambios locales necesitan recibos propios.
+- AUD-08 está activo: preregistrar el horizonte y selección de Fixture A en un
+  commit independiente antes de cualquier ciclo. AUD-09 depende de este paso;
+  no usar los artefactos A/B supersedidos.
+- AUD-10 y AUD-12 están READY en prioridad 2 porque no dependen de AUD-08;
+  AUD-09 espera la preregistración; las tareas 13–18 esperan sus dependencias
+  y prioridades anteriores. La cola machine-readable es la fuente de estado.
+- Reservoir V1 rechaza correctamente el estado de entrada fuera de su rama
+  característica admisible. Una política V2 de reservoir todavía no está
+  seleccionada; no ejecutar KT100 ni adivinar una semántica de frontera.
+- Reed dinámica integrada sigue sin contrato conservativo de impacto, trabajo
+  de presión y disipación. AFR estequiométrica, LHV y combustible atrapado
+  siguen indefinidos; las magnitudes derivadas permanecen `UNDEFINED`.
+- El Commercial Core continúa parcial y `CONDITIONAL_ON_P4`, sin validación
+  experimental ni aceptación completa. Las salidas de ciclo A/B anteriores
+  se conservan solo como historia y están supersedidas por la auditoría.
+- `audit_8cdf66e.md` es independiente solo para `ab92aee..8cdf66e`; el recibo
+  `audit-triage-3d10f79.json` es una revisión acotada del HEAD de entrada. Los
+  demás claims sin artefacto se clasifican `SELF_REVIEW`.

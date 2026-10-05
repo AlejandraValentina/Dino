@@ -3,14 +3,14 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "3d10f79",
+  "status_capture_head": "a10d2dca698369f0eb95c310b78d48226ac63037",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
   "kt100_policy": "FROZEN_NO_RERUNS_OR_ADJUSTMENTS_IN_THIS_MISSION",
   "phases": {
     "1_reference_harness": {
-      "status": "LOCAL_BLOCKER",
+      "status": "AUD-05_PRODUCER_READY_AWAITING_AUD-08_PREREGISTRATION",
       "verified_scope": [
         "period_1_and_period_2_fixtures",
         "offline_audit",
@@ -60,7 +60,8 @@
       "historical_scope": [
         "fixture_A_period_1_at_cycle_16",
         "fixture_B_period_1_at_cycle_19"
-      ]
+      ],
+      "dependency_status": "CONDITIONAL_ON_P4"
     },
     "5_reed": {
       "status": "COMPONENT_IMPLEMENTED_P5C_STAGE_INTEGRATION_BLOCKED",
@@ -592,10 +593,10 @@
       "blocker": null,
       "commits": [
         "a70917dde45ca15c62d5e0f460020599488a4d1f",
-        "2c93e6c",
-        "f846aa3",
-        "b50507b",
-        "a489f07"
+        "2c93e6cb4af791fcd20eb5498e4a6b2486681952",
+        "f846aa3c5816021fd08b38caf6614ed108f0ebf5",
+        "b50507bcdd2e69e4571d8d59b876a0f5308fb54c",
+        "a489f07678e3299363d8002c8c082d0706610feb"
       ],
       "evidence": [
         "tests/test_integrated_2t.py:13",
@@ -615,7 +616,7 @@
       "blocker": "Dynamic reed SSPRK2/impact integration needs a declared conservative method for stops/restitution and gas-pressure work/damping-energy ledgers; independent advance after the gas step would be unverified splitting.",
       "commits": [
         "a70917dde45ca15c62d5e0f460020599488a4d1f",
-        "d3b82f3 Integrate generic ports into accepted 2T stages"
+        "d3b82f3b49c3f3ac78b1280490e6af24b49e890c Integrate generic ports into accepted 2T stages"
       ],
       "evidence": [
         "tests/test_integrated_2t.py:13",
@@ -637,9 +638,9 @@
       "state": "DONE",
       "blocker": "Reservoir V2 remains a separate local KT100 blocker; no retry or historical P5 change. Integrated nonreflecting synthetic fixtures are complete.",
       "commits": [
-        "d3b82f3 Integrate generic ports into accepted 2T stages",
-        "b50507b",
-        "a489f07"
+        "d3b82f3b49c3f3ac78b1280490e6af24b49e890c Integrate generic ports into accepted 2T stages",
+        "b50507bcdd2e69e4571d8d59b876a0f5308fb54c",
+        "a489f07678e3299363d8002c8c082d0706610feb"
       ],
       "evidence": [
         "tests/test_integrated_2t.py:15; multi-section ExpansionChamber mesh is accepted and advanced as exhaust",
@@ -692,28 +693,30 @@
       "blocker": "Implementation exists, but Fixture A cycle evidence is HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT because A1-A3 invalidate current-cycle claims; regeneration waits for AUD-01..AUD-08.",
       "commits": [
         "e93fd62c10478487d13a49c7181d1ef15aa601f5",
-        "f846aa3",
-        "b50507b",
-        "a489f07"
+        "f846aa3c5816021fd08b38caf6614ed108f0ebf5",
+        "b50507bcdd2e69e4571d8d59b876a0f5308fb54c",
+        "a489f07678e3299363d8002c8c082d0706610feb"
       ],
       "evidence": [
-        "fixture A completes two full cycles; checkpoint at 360 degrees reproduces the terminal 720-degree JSON snapshot exactly under an absolute-angle scheduler",
-        "Six admissible synthetic cycles completed; no P1/P2 convergence. Cycle work sign was checked against the energy RHS convention.",
-        "Integrated engineering output V1 derives chamber/species/P7/thermal/work/fuel-flow values from cycle-primary trace; undefined inputs remain UNDEFINED.",
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: fixture A completes two full cycles; checkpoint at 360 degrees reproduces the terminal 720-degree JSON snapshot exactly under an absolute-angle scheduler",
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Six admissible synthetic cycles completed; no P1/P2 convergence. Cycle work sign was checked against the energy RHS convention.",
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Integrated engineering output V1 derives chamber/species/P7/thermal/work/fuel-flow values from cycle-primary trace; undefined inputs remain UNDEFINED.",
         "21 integrated tests, 32 combined output/foundation tests and 73 integrated/P5-C/P6/P7/reed/ports regressions PASS; OpenSpec strict PASS.",
         "Engineering output V2 binds configuration SHA-256 and path-addressed duct cell/face signals; fixed V1 remains unchanged.",
         "V2 independently rebuilds work, species/external exchange, P7/thermal sources and conservation from trajectory before emitting output; summary tampering is rejected.",
         "33 focal output/foundation tests and 85 integrated/P5-C/P6/P7/reed/ports/output regressions PASS; OpenSpec strict PASS.",
-        "Updated synthetic exhaust geometry has actual closed intervals; six full V2 primary cycles capture exact transfer/exhaust snapshots and same-cycle scavenging; 33/33 focal and 85/85 integrated regression tests pass.",
-        "Terminal angular output point is evaluated read-only from the accepted terminal state; P7 requested endpoint rate is pre-limiter and excluded from cycle integrals.",
-        "Updated synthetic exhaust geometry has actual closed intervals; six full V2 primary cycles capture exact transfer/exhaust snapshots and same-cycle scavenging; 33/33 focal, 85/85 integrated regression, and 300 P4–P8 tests pass.",
-        "Terminal angular output point is evaluated read-only from the accepted terminal state; P7 requested endpoint rate is pre-limiter and excluded from cycle integrals.",
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Updated synthetic exhaust geometry has actual closed intervals; six full V2 primary cycles capture exact transfer/exhaust snapshots and same-cycle scavenging; 33/33 focal and 85/85 integrated regression tests pass.",
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Terminal angular output point is evaluated read-only from the accepted terminal state; P7 requested endpoint rate is pre-limiter and excluded from cycle integrals.",
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Updated synthetic exhaust geometry has actual closed intervals; six full V2 primary cycles capture exact transfer/exhaust snapshots and same-cycle scavenging; 33/33 focal, 85/85 integrated regression, and 300 P4–P8 tests pass.",
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Terminal angular output point is evaluated read-only from the accepted terminal state; P7 requested endpoint rate is pre-limiter and excluded from cycle integrals.",
         "SELF_REVIEW (historical claim retained; no durable review receipt identified in AUD-06): Independent read-only review of V2 closure/output delta PASS; no material findings; full-engine acceptance remains open.",
-        "Two independent six-cycle Fixture A runs (one continuous, one checkpoint/restart after cycle 3) had exact full snapshot, primary-cycle and validated V2-output equality; 11,176 accepted steps; P1/P2 still fail.",
-        "Fixture A primary campaign reached PERIOD_1 at cycle 16 after 3 consecutive PASS comparisons (13→14→15→16); full P1 artifact preserved; no solver/threshold changes.",
-        "Fixture A P1 at cycle 16 and Fixture B P1 at cycle 19; full outputs validated per cycle; six-cycle checkpoint/replay is exact; synthetic and CONDITIONAL_ON_P4."
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Two independent six-cycle Fixture A runs (one continuous, one checkpoint/restart after cycle 3) had exact full snapshot, primary-cycle and validated V2-output equality; 11,176 accepted steps; P1/P2 still fail.",
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Fixture A primary campaign reached PERIOD_1 at cycle 16 after 3 consecutive PASS comparisons (13→14→15→16); full P1 artifact preserved; no solver/threshold changes.",
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Fixture A P1 at cycle 16 and Fixture B P1 at cycle 19; full outputs validated per cycle; six-cycle checkpoint/replay is exact; synthetic and CONDITIONAL_ON_P4."
       ],
-      "next_action": "Keep implementation and historical artifacts; regenerate only after A1-A3 fixes and separate AUD-08 preregistration."
+      "next_action": "Keep implementation and historical artifacts; regenerate only after A1-A3 fixes and separate AUD-08 preregistration.",
+      "cycle_evidence_status": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
+      "cycle_evidence_current_acceptance_use": false
     },
     {
       "id": "18-fixture-b-regressions",
@@ -724,16 +727,18 @@
       "state": "BLOCKED_LOCAL",
       "blocker": "The P4-P8 test run is historical (300 PASS), but Fixture B is only a 20% chamber-length variant and its cycle PASS is superseded by A1-A3. No significantly distinct acceptance fixture is established.",
       "commits": [
-        "b50507b",
-        "8cdf66e"
+        "b50507bcdd2e69e4571d8d59b876a0f5308fb54c",
+        "8cdf66e1ff5bfec971491199324dcb9e9ff9bdea"
       ],
       "evidence": [
-        "Fixture B 20% longer expansion chamber: 19 complete cycles, 33,434 accepted steps, P1 at cycle 19, V2 output validated per cycle; full primary+output artifact preserved.",
-        "P4-P8 selected regression suite current run: 300 passed, four pre-existing NumPy deprecation warnings.",
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Fixture B 20% longer expansion chamber: 19 complete cycles, 33,434 accepted steps, P1 at cycle 19, V2 output validated per cycle; full primary+output artifact preserved.",
+        "External audit historical P4-P8 regression run: 300 passed, four pre-existing NumPy deprecation warnings.",
         "No-reed piston-port alternative failed admissibility at 107.651626 degrees after 25 step reductions; retained only as failed candidate evidence.",
         "Final current run: 85 integrated/P5-C/P6/P7/reed/port tests PASS; 300 P4-P8 tests PASS (4 pre-existing NumPy deprecation warnings); OpenSpec strict PASS."
       ],
-      "next_action": "After AUD-01..AUD-08, build a materially distinct Fixture B; rerun P4-P8 separately only for global closeout."
+      "next_action": "After AUD-01..AUD-08, build a materially distinct Fixture B; rerun P4-P8 separately only for global closeout.",
+      "cycle_evidence_status": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
+      "cycle_evidence_current_acceptance_use": false
     },
     {
       "id": "reservoir-boundary-v2",
@@ -779,7 +784,7 @@
       "state": "DONE",
       "blocker": null,
       "commits": [
-        "c92a924",
+        "c92a92493751ca0a9cf5c1de6fe973c4dbf562e9",
         "5b473866bb8459e874f0e7826f202e3838fe7a85"
       ],
       "evidence": [
@@ -804,7 +809,7 @@
       "blocker": null,
       "commits": [
         "0e9c6abb664e08be1cf44610ff06ee04bdcd9e88",
-        "9eada5d"
+        "9eada5d700a5435c76c841f79e35d78a385e4b61"
       ],
       "evidence": [
         "Added MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V1, a strict JSON-safe factory for setups fully resolved by existing slider-crank chambers and generic ports; arbitrary geometry callbacks remain unsupported.",
@@ -814,7 +819,7 @@
         "SELF_REVIEW (historical claim retained; no durable review receipt identified in AUD-06): Independent read-only review confirmed the bounded geometry resolution, identity guard and immutable Mesh requirement; no full-engine acceptance.",
         "SELF_REVIEW (historical claim retained; no durable review receipt identified in AUD-06): Callback-raising regression proves fully explicit geometry skips the shadowed callback and original/rebuilt geometry are equal; independent read-only review found no concrete defect; current affected broad regression 105 PASS."
       ],
-      "next_action": "DONE: deterministic config V1 is verified for explicit slider-crank/generic-port geometry. No READY task remains; preserve documented physical blockers and partial classification."
+      "next_action": "Base V1 configuration work is complete; AUD-03 extends it to V2 with split boundary compositions. Continue only the active audit queue."
     },
     {
       "id": "dynamic-reed-stage-coupling",
@@ -828,7 +833,7 @@
       "evidence": [
         "SELF_REVIEW (historical claim retained; no durable review receipt identified in AUD-06): Independent technical review is documented in docs/gasdynamic/autonomous_engineering_mode.md."
       ],
-      "next_action": "Do not implement by splitting; continue independent READY tasks and revisit once a policy is authorized."
+      "next_action": "Remain BLOCKED_LOCAL pending a conservative impact/work contract; no implementation until that decision is resolved and P1 remediation closes."
     },
     {
       "id": "AUD-01",
@@ -842,7 +847,7 @@
       "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "7afd8f1"
+        "7afd8f13ba2ca0f3730d56cb2e53bb5f0b274e15"
       ],
       "evidence": [
         "motorsim/integrated_2t.py::_port_face_flux",
@@ -862,8 +867,8 @@
       "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "7afd8f1",
-        "6ab2259"
+        "7afd8f13ba2ca0f3730d56cb2e53bb5f0b274e15",
+        "6ab22590b806a221548077c2d7717e902d3d194d"
       ],
       "evidence": [
         "tests/test_integrated_2t.py::test_internal_cycle_fixture_starts_at_atmospheric_pressure_and_temperature (PASS)",
@@ -883,7 +888,7 @@
       "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "8341929"
+        "83419293cfa3fc2bf87d279f99467cdd828947b7"
       ],
       "evidence": [
         "motorsim/integrated_2t.py: outlet_species, V2 configuration and V1 reader",
@@ -905,7 +910,7 @@
       "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "6ab2259"
+        "6ab22590b806a221548077c2d7717e902d3d194d"
       ],
       "evidence": [
         "motorsim/integrated_2t.py::_fractions normalizes derived composition without mutating extensive species",
@@ -927,7 +932,7 @@
       "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "working-tree: versioned fixture configs and preregistration-gated producer"
+        "a10d2dca698369f0eb95c310b78d48226ac63037"
       ],
       "evidence": [
         "results/2t-commercial-core-20261002/fixtures/fixture-a-engine-config-v2.json",
@@ -945,16 +950,18 @@
         "C5"
       ],
       "dependencies": [],
-      "state": "IN_PROGRESS",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "current audit-reconciliation commit"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "docs/gasdynamic/audit_8cdf66e.md: independently reviewed exact range only",
+        "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json: bounded current-head read-only triage only",
+        "program-status review fields and historical queue prose downgraded to SELF_REVIEW where no matching durable receipt was identified"
       ],
-      "next_action": "Downgrade historical review claims without durable receipts; preserve the audit as independent only for ab92aee..8cdf66e."
+      "next_action": "Only claim independent review when a durable receipt identifies exact range and scope."
     },
     {
       "id": "AUD-07",
@@ -965,16 +972,20 @@
         "C9"
       ],
       "dependencies": [],
-      "state": "IN_PROGRESS",
-      "classification": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "working-tree: normalized status, refs, scope and evidence provenance"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "program-status.json has 29 queue entries and only allowed state enums",
+        "all resolvable commit refs normalized to full object ids",
+        "phase 1 now identifies AUD-08 as the remaining cycle gate; A/B marked superseded",
+        "P4–P8 count identified as historical external audit 300, not a fresh run",
+        "P4 remains PASS; no P4–P9 state was changed"
       ],
-      "next_action": "Complete current HEAD normalization for phase scope, dependency blockers, status capture ref and regression-count wording."
+      "next_action": "Status normalized at the recorded capture head; keep audit queue current with each task change."
     },
     {
       "id": "AUD-08",
@@ -992,16 +1003,16 @@
         "AUD-04",
         "AUD-05"
       ],
-      "state": "BLOCKED_LOCAL",
+      "state": "IN_PROGRESS",
       "classification": "OPEN",
-      "blocker": "Requires AUD-01..AUD-05 and a dedicated preregistration commit before regenerating evidence.",
+      "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "Create the separate preregistration commit for Fixture A, a fixed 20-cycle horizon and restart cycle 3; do not run the producer until that commit exists."
     },
     {
       "id": "AUD-09",
@@ -1036,16 +1047,16 @@
         "B3"
       ],
       "dependencies": [],
-      "state": "BLOCKED_LOCAL",
+      "state": "READY",
       "classification": "OPEN",
-      "blocker": "Priority 1 AUD-01..AUD-07 must close before Priority 2 work.",
+      "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "Implement role-based cycle collection and resolve or version the supported port-role cardinality with focused tests."
     },
     {
       "id": "AUD-11",
@@ -1076,16 +1087,16 @@
         "C6"
       ],
       "dependencies": [],
-      "state": "BLOCKED_LOCAL",
+      "state": "READY",
       "classification": "OPEN",
-      "blocker": "Priority 1 AUD-01..AUD-07 must close before Priority 2 work.",
+      "blocker": null,
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
       "evidence": [
         "docs/gasdynamic/audit_8cdf66e.md"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "Review the existing Cd=0 acceptance; version its contract semantics or restore the prior rejection behavior and its test."
     },
     {
       "id": "AUD-13",
@@ -1099,7 +1110,7 @@
       ],
       "state": "BLOCKED_LOCAL",
       "classification": "OPEN",
-      "blocker": "Depends on AUD-01 and earlier priorities.",
+      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
@@ -1121,7 +1132,7 @@
       ],
       "state": "BLOCKED_LOCAL",
       "classification": "OPEN",
-      "blocker": "Depends on AUD-03 and earlier priorities.",
+      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
@@ -1142,7 +1153,7 @@
       ],
       "state": "BLOCKED_LOCAL",
       "classification": "OPEN",
-      "blocker": "Depends on AUD-08 preregistration and earlier priorities.",
+      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
@@ -1162,7 +1173,7 @@
       "dependencies": [],
       "state": "BLOCKED_LOCAL",
       "classification": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
-      "blocker": "9eada5d only skips callback when slider-crank plus port binding resolve all fields; stage replay/rate audit, trace restore validation, tautology removal, mixed callback/model checks and RPM propagation remain open.",
+      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
@@ -1183,7 +1194,7 @@
       "dependencies": [],
       "state": "BLOCKED_LOCAL",
       "classification": "OPEN",
-      "blocker": "Priority 1 and 2 audit remediation precedes detector changes.",
+      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
@@ -1202,7 +1213,7 @@
       "dependencies": [],
       "state": "BLOCKED_LOCAL",
       "classification": "OPEN",
-      "blocker": "Inspection of two later tests did not reproduce the reported side effect, but the complete suite/source paths and line-ending-independent hash behavior remain unverified.",
+      "blocker": "Earlier priority 2 AUD-08..AUD-12 tasks must be resolved first, subject to the listed direct dependencies.",
       "commits": [
         "audit-range:ab92aee..8cdf66e"
       ],
@@ -1221,26 +1232,29 @@
     "editorial_erratum": "A1, A2 and A3 are all DEFECT and all block current cycle evidence.",
     "historical_cycle_evidence": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
     "current_head_reconciled": "3d10f79",
-    "next_action": "Close all Priority 1 AUD tasks before using integrated cycle PASS or adding capabilities.",
-    "reconciled_head": "3d10f79",
+    "next_action": "Finish AUD-08 preregistration before any cycle generation; continue independent READY Priority 2 tasks.",
+    "reconciled_head": "a10d2dca698369f0eb95c310b78d48226ac63037",
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
     "current_remediation": [
       "AUD-01 RESOLVED_BY_LATER_COMMIT",
       "AUD-02 RESOLVED_BY_LATER_COMMIT",
       "AUD-03 RESOLVED_BY_LATER_COMMIT",
-      "AUD-04 RESOLVED_BY_LATER_COMMIT"
+      "AUD-04 RESOLVED_BY_LATER_COMMIT",
+      "AUD-05 RESOLVED_BY_LATER_COMMIT",
+      "AUD-06 RESOLVED_BY_LATER_COMMIT",
+      "AUD-07 RESOLVED_BY_LATER_COMMIT"
     ]
   },
   "audit_reconciliation": {
-    "head": "3d10f79",
+    "head": "a10d2dca698369f0eb95c310b78d48226ac63037",
     "findings": {
       "AUD-01": "OPEN",
       "AUD-02": "RESOLVED_BY_LATER_COMMIT",
       "AUD-03": "RESOLVED_BY_LATER_COMMIT",
       "AUD-04": "RESOLVED_BY_LATER_COMMIT",
       "AUD-05": "OPEN",
-      "AUD-06": "OPEN",
-      "AUD-07": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
+      "AUD-06": "RESOLVED_BY_LATER_COMMIT",
+      "AUD-07": "RESOLVED_BY_LATER_COMMIT",
       "AUD-08": "OPEN",
       "AUD-09": "OPEN",
       "AUD-10": "OPEN",
@@ -1259,13 +1273,13 @@
       "AUD-03": "RESOLVED: new V2 defaults exhaust backflow to fresh-air; V1 reader preserves its prior shared-composition semantics.",
       "AUD-04": "RESOLVED: derive composition by normalizing the validated species sum without modifying extensive masses; fixture retries now record each rejection before halving.",
       "AUD-05": "OPEN: commercial cycle producer and versioned engine fixture config are still test-only/private.",
-      "AUD-06": "OPEN: only the external audit artifact is currently certified as independent for its exact range; unreceipted later/historical prose claims are not independently certified.",
-      "AUD-07": "PARTIAL: enum values and several stale next-actions were normalized by later commits; dependent DONE gates, phase-1 scope, status head and provenance/count references still need correction.",
-      "AUD-08": "OPEN: no retrospective preregistration; any regenerated A/B must use a new pre-campaign commit after AUD-01..AUD-05.",
+      "AUD-06": "RESOLVED: only audit_8cdf66e is independent for its exact range; the current triage receipt is bounded and all other unreceipted Commercial Core review claims are labeled SELF_REVIEW.",
+      "AUD-07": "RESOLVED: queue state enums/dependency blockers and full commit refs normalized; phase scope and historical cycle statuses corrected; P4 remains PASS and 300 is attributed only to the external audit run.",
+      "AUD-08": "IN_PROGRESS: preregistration draft selects Fixture A only, fixed 20-cycle horizon, restart audit after cycle 3; no integration will run before the separate commit is present.",
       "AUD-09": "OPEN: piston-port candidate failed, successful B changes chamber length only.",
-      "AUD-10": "OPEN: collector still has id coupling and topology still requires >=3 transfers/one intake/one exhaust.",
+      "AUD-10": "READY: no dependency on AUD-08; proceed with collector/topology review after Priority 1.",
       "AUD-11": "PARTIAL: independent current-head reproduction confirms V1 capability limit; V2 scientific policy unresolved. Receipt records test and direct reproduction.",
-      "AUD-12": "OPEN: Cd=0 acceptance remains an in-place generic-port contract change.",
+      "AUD-12": "READY: no dependency on AUD-08; version or revert the existing Cd=0 behavior without changing other criteria.",
       "AUD-13": "OPEN: mesh-resolution study absent.",
       "AUD-14": "OPEN: gross delivery/short-circuit and fuel metric semantics remain as audited.",
       "AUD-15": "OPEN: current synthetic timing is unchanged.",
@@ -1283,7 +1297,9 @@
       "openspec": "STRICT PASS before AUD-04 changes; rerun after documentation update",
       "compileall": "PASS before AUD-04 test updates; rerun after documentation update",
       "cycle_evidence": "No campaign artifacts regenerated; existing A/B results remain HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
-      "producer_tests": "2 passed; fixtures load/rebuild off-CWD; unregistered integration rejected; no campaign run"
+      "producer_tests": "2 passed; validate-only from off-CWD; missing committed preregistration rejected; no campaign run",
+      "queue": "29 entries; valid states; commit refs normalized; P4 remains PASS; cycle evidence superseded"
     }
-  }
+  },
+  "last_status_reviewed_head": "a10d2dca698369f0eb95c310b78d48226ac63037"
 }

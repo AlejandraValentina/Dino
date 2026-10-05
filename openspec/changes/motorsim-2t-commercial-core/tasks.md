@@ -629,3 +629,34 @@ persistieron artefactos A/B nuevos.
 
 Comprobaciones: `pytest tests/test_integrated_cycle_evidence_producer.py`
 (**2 PASS**); no se ejecutó ninguna integración ni se generaron ciclos.
+
+
+### Reconciliación de revisión AUD-06 — 2026-10-05
+
+- [x] Conservar `audit_8cdf66e.md` como revisión independiente únicamente
+  del delta `ab92aee..8cdf66e`.
+- [x] Registrar el recibo `audit-triage-3d10f79.json` como lectura independiente
+  acotada al HEAD de entrada y a los hallazgos enumerados; no equivale a
+  aceptación del motor ni revisa el código posterior.
+- [x] Downgradear a `SELF_REVIEW` los claims históricos del Commercial Core
+  sin recibo durable identificable; preservar su texto y alcance histórico.
+- [x] Mantener como `SELF_REVIEW` la inspección local de este delta.
+
+P4–P8 conserva sus artefactos de revisión independientes separados; no se
+modificaron ni se atribuyó su alcance al Commercial Core.
+
+
+### Normalización durable AUD-07 — 2026-10-05
+
+- [x] Mantener P4=`P4_PASS` y el resultado P4–P8 de 300 pruebas como
+  conteo histórico de la auditoría externa; no atribuirlo a una corrida actual.
+- [x] Corregir el alcance del harness: el productor/configuración ya existen;
+  el siguiente bloqueo de ciclos es el preregistro independiente AUD-08.
+- [x] Marcar las campañas A/B y los claims de Fixture B como históricos
+  supersedidos, preservando sus JSON originales.
+- [x] Normalizar estados, referencias a commits, bloqueos de dependencias y
+  próximos pasos; el registro actual contiene 29 tareas con enums válidos.
+- [x] Separar la evidencia independiente P4–P8 de la revisión Comercial Core.
+
+Captura de estado reconciliada contra `a10d2dca698369f0eb95c310b78d48226ac63037`;
+los próximos commits de este modo deben actualizar esa referencia.

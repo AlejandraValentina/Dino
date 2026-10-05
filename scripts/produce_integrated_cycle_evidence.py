@@ -52,7 +52,8 @@ def load_engine(fixture_id: str) -> tuple[IntegratedEngine2T, dict, str]:
 
 def _require_preregistration(path: Path, fixture_id: str,
                              config_sha256: str, horizon: int,
-                             restart_cycle: int) -> tuple[dict, str]:
+                             restart_cycle: int,
+                             recorded_commit: str) -> tuple[dict, str]:
     prereg = json.loads(path.read_text(encoding="utf-8"))
     required = {
         "schema": "MOTORSIM_COMMERCIAL_CYCLE_PREREGISTRATION_V1",
@@ -64,10 +65,10 @@ def _require_preregistration(path: Path, fixture_id: str,
     }
     if any(prereg.get(key) != value for key, value in required.items()):
         raise ValueError("preregistration does not match fixture, horizon or contract")
-    if not prereg.get("selection_rationale") or not prereg.get("recorded_commit"):
-        raise ValueError("preregistration requires rationale and recorded_commit")
+    if not prereg.get("selection_rationale"):
+        raise ValueError("preregistration requires selection_rationale")
     relative = path.resolve().relative_to(ROOT).as_posix()
-    commit = str(prereg["recorded_commit"])
+    commit = str(recorded_commit)
     blob = subprocess.run(["git", "show", f"{commit}:{relative}"], cwd=ROOT,
                           check=True, capture_output=True).stdout
     if blob != path.read_bytes():
@@ -137,10 +138,12 @@ def _write_gzip_json(path: Path, value: object) -> None:
 
 
 def produce(fixture_id: str, horizon: int, restart_cycle: int,
-            preregistration_path: Path, output: Path) -> None:
+            preregistration_path: Path, preregistration_commit: str,
+            output: Path) -> None:
     engine, wrapper, config_hash = load_engine(fixture_id)
     prereg, prereg_hash = _require_preregistration(
-        preregistration_path, fixture_id, config_hash, horizon, restart_cycle)
+        preregistration_path, fixture_id, config_hash, horizon, restart_cycle,
+        preregistration_commit)
     output.mkdir(parents=True, exist_ok=False)
     start = engine.snapshot()
     rejected: list[dict] = []
@@ -177,7 +180,7 @@ def produce(fixture_id: str, horizon: int, restart_cycle: int,
         "fixture_status": wrapper["selection_status"],
         "engine_configuration_sha256": config_hash,
         "preregistration_sha256": prereg_hash,
-        "preregistration_commit": prereg["recorded_commit"],
+        "preregistration_commit": preregistration_commit,
         "horizon_cycles": horizon,
         "restart_cycle": restart_cycle,
         "continuous_rejected_trials": rejected,
@@ -195,6 +198,7 @@ def main() -> int:
     parser.add_argument("--horizon", type=int)
     parser.add_argument("--restart-cycle", type=int)
     parser.add_argument("--preregistration", type=Path)
+    parser.add_argument("--preregistration-commit")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     try:
@@ -209,10 +213,12 @@ def main() -> int:
         if (args.horizon is None or args.horizon < 2 or
                 args.restart_cycle is None or
                 not 1 <= args.restart_cycle < args.horizon or
-                args.preregistration is None or args.output is None):
-            parser.error("integration requires horizon >= 2, restart cycle, preregistration and output")
+                args.preregistration is None or
+                args.preregistration_commit is None or args.output is None):
+            parser.error("integration requires horizon >= 2, restart cycle, committed preregistration and output")
         produce(args.fixture, args.horizon, args.restart_cycle,
-                args.preregistration.resolve(), args.output.resolve())
+                args.preregistration.resolve(), args.preregistration_commit,
+                args.output.resolve())
         return 0
     except (OSError, ValueError, subprocess.CalledProcessError) as exc:
         parser.exit(2, f"producer blocked: {exc}\n")
