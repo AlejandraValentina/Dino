@@ -573,14 +573,14 @@ No se ejecutaron campañas ni se tocaron resultados KT100.
   las celdas conservan RHS de momento nulo y la tracción integrada es `p*A`.
 - [x] AUD-02: reemplazar la presión de cámara errónea de 289500 Pa por
   101325 Pa y verificar p/T de ambos estados iniciales (101325 Pa, 300 K).
-- [ ] AUD-02: reconciliar el test sintético de dos ciclos que, tras corregir
+- [x] AUD-02: reconciliar el test sintético de dos ciclos que, tras corregir
   el estado inicial, observa `p7_availability_limited_kg = 1.0249018819006299e-07`
-  frente a su aserción histórica exacta de cero; al repetir el módulo después
-  de AUD-03 se obtuvieron 38 PASS y ese mismo único fallo. No usar el resultado como
-  evidencia de ciclo ni cambiar el valor esperado sin analizar el contrato.
+  frente a su aserción histórica exacta de cero. Se sustituyó por verificación
+  del ledger del limitador (incluida su cota de escala), derivada del estado
+  inicial ya corregido. No se usa el resultado como evidencia de ciclo.
 
 Pruebas focales: 4 PASS. El módulo `tests/test_integrated_2t.py` terminó con
-36 PASS y 1 FAIL en la aserción histórica de P7 descrita arriba; no se declara
+40 PASS tras actualizar la aserción de P7 descrita arriba; no se declara
 PASS de ciclo. A/B permanecen supersedidos hasta AUD-08.
 
 
@@ -597,3 +597,17 @@ PASS de ciclo. A/B permanecen supersedidos hasta AUD-08.
 
 Pruebas focales de AUD-03 y configuración: 3 PASS; incluye roundtrip V2,
 lectura compatible V1 y backflow de escape sin introducir combustible.
+
+
+### Cierre focal AUD-04 — 2026-10-05
+
+- [x] Normalizar solo las fracciones derivadas por la suma validada de especies;
+  conservar sin mutación las masas extensivas admitidas por tolerancia de
+  redondeo.
+- [x] Registrar en helpers de fixture el ángulo, paso intentado y razón exacta
+  antes de reducir el paso; la aserción del harness inspecciona esos registros.
+- [x] Prueba de roundoff confirma que una fracción derivada no excede 1 y que
+  los valores extensivos originales permanecen intactos.
+
+El módulo afectado terminó con **40 PASS** en 51,90 s. No se generaron ni
+persistieron artefactos A/B nuevos.

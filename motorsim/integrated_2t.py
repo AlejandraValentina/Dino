@@ -913,7 +913,7 @@ class IntegratedEngine2T:
         if mass <= 0 or energy <= 0 or volume <= 0:
             raise ValueError("inadmissible 0D chamber state")
         pressure = (self.eos.gamma - 1.0) * energy / volume
-        fresh_fraction = fsum(species[:2]) / mass
+        fresh_fraction = fsum(self._fractions(species, mass)[:2])
         return ChamberState(mass, energy, mass * fresh_fraction, volume)
 
     def _primitive(self, q):
@@ -921,8 +921,14 @@ class IntegratedEngine2T:
 
     @staticmethod
     def _fractions(species, mass):
-        validate_species(species, mass)
-        return tuple(value / mass for value in species)
+        values = validate_species(species, mass)
+        total = fsum(values)
+        if total == 0.0:
+            return (0.0, 0.0, 0.0, 0.0)
+        # Species masses remain untouched. Normalizing by their validated sum
+        # keeps EOS composition in [0, 1] when gas/species totals differ only
+        # by accepted floating-point roundoff.
+        return tuple(value / total for value in values)
 
     def _face_species_flux(self, mass_flux, left_species, left_mass,
                            right_species, right_mass):
@@ -1337,7 +1343,9 @@ class IntegratedEngine2T:
             if min(mass, energy, volume) <= 0:
                 raise ValueError(f"{name} state is inadmissible")
             pressure = (self.eos.gamma - 1.0) * energy / volume
-            self.eos.validate((mass/volume, 0.0, pressure, fsum(comp[:2])/mass))
+            fractions = self._fractions(comp, mass)
+            self.eos.validate((mass/volume, 0.0, pressure,
+                               fsum(fractions[:2])))
         for path in self.ducts:
             for i, q in enumerate(state["ducts"][path.id]):
                 volume = path.mesh.volumes[i]
@@ -1365,7 +1373,9 @@ class IntegratedEngine2T:
             if min(mass, energy, volume) <= 0:
                 raise ValueError("integrated network volume state is inadmissible")
             pressure = (self.eos.gamma - 1.0) * energy / volume
-            self.eos.validate((mass/volume, 0.0, pressure, fsum(comp[:2])/mass))
+            fractions = self._fractions(comp, mass)
+            self.eos.validate((mass/volume, 0.0, pressure,
+                               fsum(fractions[:2])))
 
     def _combine(self, base, rhs0, rhs1, dt, angle):
         result = deepcopy(base)

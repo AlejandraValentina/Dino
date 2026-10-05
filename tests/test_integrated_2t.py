@@ -169,6 +169,21 @@ def test_exhaust_backflow_uses_fresh_air_not_the_intake_reservoir_mixture():
     assert species_flux == pytest.approx((face[0], 0.0, 0.0, 0.0))
 
 
+def test_species_roundoff_keeps_extensive_values_without_eos_y_overshoot():
+    system = _case()
+    state = deepcopy(system.state)
+    mass = state["chambers"]["crankcase"][0]
+    slightly_over = (mass + 5e-16, 0.0, 0.0, 0.0)
+    state["species"]["chambers"]["crankcase"] = slightly_over
+
+    system._validate(state)
+
+    assert state["species"]["chambers"]["crankcase"] == slightly_over
+    fractions = system._fractions(slightly_over, mass)
+    assert fractions == (1.0, 0.0, 0.0, 0.0)
+    assert sum(slightly_over) != mass
+
+
 def test_integrated_engine_checkpoint_restart_replays_identically():
     continuous = _case()
     continuous.step(1e-8, .01)
@@ -766,6 +781,7 @@ def test_p7_event_boundary_requires_exact_alignment_and_stops_cleanly():
     system = _case(combustion_start_angle_deg=0.0,
                    cylinder_species=initial_species,
                    transfer_area=0.0, exhaust_area=0.0, duct_length=.2)
+    rejected_trials = []
     def advance_to(target):
         while system.crank_angle_unwrapped_deg < target - 1e-12:
             delta = min(.05, target - system.crank_angle_unwrapped_deg)
@@ -776,6 +792,9 @@ def test_p7_event_boundary_requires_exact_alignment_and_stops_cleanly():
                 except ValueError as error:
                     if "inadmissible species mass" not in str(error):
                         raise
+                    rejected_trials.append({"angle_deg": system.crank_angle_unwrapped_deg,
+                                            "step_deg": delta,
+                                            "reason": str(error)})
                     delta /= 2.0
                     assert delta > 1e-7
     advance_to(39.95)
@@ -790,6 +809,8 @@ def test_p7_event_boundary_requires_exact_alignment_and_stops_cleanly():
     advance_to(40.0)
     assert system.crank_angle_unwrapped_deg == pytest.approx(40.0)
     assert system.trace[-1]["stage_p7_source_rates"][1]["heat_w"] == pytest.approx(0.0)
+    assert all(row["step_deg"] > 0 and "inadmissible species mass" in row["reason"]
+               for row in rejected_trials)
 
 
 def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
@@ -895,6 +916,10 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
 
 
 def _advance_cycle_fixture(system, target_angle):
+    rejected_trials = getattr(system, "fixture_rejected_trials", None)
+    if rejected_trials is None:
+        rejected_trials = []
+        system.fixture_rejected_trials = rejected_trials
     rpm = 3000.0
     binding = system.port_binding
     ports = binding.port_set
@@ -928,6 +953,9 @@ def _advance_cycle_fixture(system, target_angle):
                            ("inadmissible species mass", "CFL limit exceeded",
                             "rho/p/Y inadmissible")):
                     raise
+                rejected_trials.append({"angle_deg": angle,
+                                        "attempted_step_deg": step,
+                                        "reason": str(error)})
                 step *= .5
         else:
             raise AssertionError(f"fixture could not accept a step at {angle} degrees")
@@ -978,7 +1006,16 @@ def test_internal_synthetic_integrated_engine_completes_two_cycles_and_replays()
     assert all(abs(value) < 1e-12 for value in
                first_cycle["conservation"]["species_residual_kg"])
     assert second_cycle["CFL"]["max"] <= .4
-    assert system.ledger["p7_availability_limited_kg"] == pytest.approx(0.0, abs=1e-15)
+    assert all(row["attempted_step_deg"] > 0 and row["reason"]
+               for row in system.fixture_rejected_trials)
+    # With the corrected atmospheric chamber fixture, prescribed P7 can be
+    # availability-limited. Check that every accepted increment is visible in
+    # the ledger instead of freezing the obsolete (wrong-initial-state) zero.
+    assert system.ledger["p7_availability_limited_kg"] >= 0.0
+    assert sum(trace["p7_availability_limited_kg"] for trace in system.trace) == \
+        pytest.approx(system.ledger["p7_availability_limited_kg"], abs=1e-15)
+    assert all(0.0 <= limiter["scale"] <= 1.0
+               for trace in system.trace for limiter in trace["stage_p7_limiter"])
     comparison = compare_cycles(first_cycle, second_cycle)
     assert first_cycle["observables"]["work_J"] < 0.0
     assert second_cycle["observables"]["work_J"] > 0.0

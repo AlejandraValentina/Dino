@@ -853,17 +853,17 @@
         "A2"
       ],
       "dependencies": [],
-      "state": "IN_PROGRESS",
-      "classification": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
-      "blocker": "The p/T setup is corrected and directly verified; the corrected fixture exposes an old downstream assertion requiring zero P7 availability limiting, so the dependent synthetic cycle regression is not fully reconciled.",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
+      "blocker": null,
       "commits": [
-        "working-tree: correct private cycle fixture initial pressure"
+        "uncommitted: corrected atmospheric fixture and revalidated P7 limiter ledger"
       ],
       "evidence": [
         "tests/test_integrated_2t.py::test_internal_cycle_fixture_starts_at_atmospheric_pressure_and_temperature (PASS)",
-        "tests/test_integrated_2t.py full module after AUD-01..03: 38 passed, 1 failed only at legacy exact-zero P7-availability assertion (1.0249018819006299e-07 kg); no cycle acceptance evidence claimed"
+        "tests/test_integrated_2t.py full module after AUD-01..04: 40 passed; corrected P7 limiter is ledgered, no cycle acceptance claim"
       ],
-      "next_action": "Reconcile the changed P7 limiter behavior without using this test as cycle acceptance; do not regenerate A/B before AUD-08."
+      "next_action": "Keep A/B superseded; do not regenerate until AUD-08 preregistration."
     },
     {
       "id": "AUD-03",
@@ -896,16 +896,19 @@
         "A4"
       ],
       "dependencies": [],
-      "state": "READY",
-      "classification": "OPEN",
+      "state": "DONE",
+      "classification": "RESOLVED_BY_LATER_COMMIT",
       "blocker": null,
       "commits": [
-        "audit-range:ab92aee..8cdf66e"
+        "uncommitted: composition normalization and explicit fixture retry records"
       ],
       "evidence": [
-        "docs/gasdynamic/audit_8cdf66e.md"
+        "motorsim/integrated_2t.py::_fractions normalizes derived composition without mutating extensive species",
+        "tests/test_integrated_2t.py::test_species_roundoff_keeps_extensive_values_without_eos_y_overshoot (PASS)",
+        "test helpers record angle, attempted step and exact rejection reason before reducing dt",
+        "tests/test_integrated_2t.py full module: 40 passed"
       ],
-      "next_action": "Review against current HEAD, implement only supported correction, add focused tests and record evidence."
+      "next_action": "No further AUD-04 changes; future cycle evidence still requires AUD-08."
     },
     {
       "id": "AUD-05",
@@ -1215,17 +1218,18 @@
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
     "current_remediation": [
       "AUD-01 RESOLVED_BY_LATER_COMMIT",
-      "AUD-02 PARTIALLY_RESOLVED_BY_LATER_COMMIT",
-      "AUD-03 RESOLVED_BY_LATER_COMMIT"
+      "AUD-02 RESOLVED_BY_LATER_COMMIT",
+      "AUD-03 RESOLVED_BY_LATER_COMMIT",
+      "AUD-04 RESOLVED_BY_LATER_COMMIT"
     ]
   },
   "audit_reconciliation": {
     "head": "3d10f79",
     "findings": {
       "AUD-01": "OPEN",
-      "AUD-02": "OPEN",
+      "AUD-02": "RESOLVED_BY_LATER_COMMIT",
       "AUD-03": "RESOLVED_BY_LATER_COMMIT",
-      "AUD-04": "OPEN",
+      "AUD-04": "RESOLVED_BY_LATER_COMMIT",
       "AUD-05": "OPEN",
       "AUD-06": "OPEN",
       "AUD-07": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
@@ -1243,9 +1247,9 @@
     },
     "notes": {
       "AUD-01": "OPEN: later commits do not add blocked-area traction.",
-      "AUD-02": "PARTIAL: initial pressure is 101325 Pa and T is verified as 300 K; the affected legacy cycle regression now fails only its exact-zero P7 availability-limiter assertion (1.0249018819006299e-07 kg), so this downstream behavior remains unreconciled.",
+      "AUD-02": "RESOLVED: initial chambers start at 101325 Pa/300 K. Replaced the obsolete exact-zero P7 limiter fixture assertion with ledger accounting and bounded scale checks; the 40-test affected module passes.",
       "AUD-03": "RESOLVED: new V2 defaults exhaust backflow to fresh-air; V1 reader preserves its prior shared-composition semantics.",
-      "AUD-04": "OPEN: species tolerance and EOS fraction validation still disagree; harness retries inadmissibility without a durable rejected-step record.",
+      "AUD-04": "RESOLVED: derive composition by normalizing the validated species sum without modifying extensive masses; fixture retries now record each rejection before halving.",
       "AUD-05": "OPEN: commercial cycle producer and versioned engine fixture config are still test-only/private.",
       "AUD-06": "OPEN: only the external audit artifact is currently certified as independent for its exact range; unreceipted later/historical prose claims are not independently certified.",
       "AUD-07": "PARTIAL: enum values and several stale next-actions were normalized by later commits; dependent DONE gates, phase-1 scope, status head and provenance/count references still need correction.",
@@ -1266,11 +1270,11 @@
   "configuration_schema": "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2",
   "verification": {
     "audit_remediation_current": {
-      "focused_tests": "9 passed",
-      "integrated_test_module": "38 passed, 1 failed",
-      "known_failure": "Corrected fixture changes the old P7 availability-limiter result from an asserted exact zero to 1.0249018819006299e-07 kg. This is not cycle acceptance evidence and remains under AUD-02 review.",
-      "openspec": "STRICT PASS",
-      "compileall": "PASS for integrated_2t.py and test_integrated_2t.py"
+      "focused_tests": "9 passed after AUD-01..03; 7 passed after AUD-04",
+      "integrated_test_module": "40 passed in 51.90 s after all affected fixes",
+      "openspec": "STRICT PASS before AUD-04 changes; rerun after documentation update",
+      "compileall": "PASS before AUD-04 test updates; rerun after documentation update",
+      "cycle_evidence": "No campaign artifacts regenerated; existing A/B results remain HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT"
     }
   }
 }
