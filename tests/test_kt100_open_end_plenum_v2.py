@@ -6,6 +6,7 @@ from motorsim.gas1d.boundary import Boundary
 from motorsim.gas1d.open_end_plenum_v2 import OpenEndPlenumV2Boundary
 from motorsim.reference_harness.config import validate_config
 from motorsim.reference_harness.runtime import build_system
+from motorsim.reference_harness.evidence import _duct_observables
 from scripts.build_kt100_hybrid_fixture_v2 import build as build_base
 from scripts.build_kt100_open_end_plenum_v2 import build as build_open
 
@@ -69,6 +70,17 @@ def test_kt100_runtime_selects_v2_at_intake_and_exhaust_edges():
     assert external == tuple(area * value for value in expected)
     assert external != tuple(area * value for value in legacy)
     assert len(exhaust_rhs) == len(exhaust_q)
+
+
+def test_cycle_evidence_maps_transfer_output_names_to_p6_species_names():
+    system, _, _ = build_system(build_open())
+    gas = system.gas
+    for output_name, path in (
+            ("transfer1", gas.core.transfers[0]),
+            ("transfer2", gas.core.transfers[1])):
+        rows = _duct_observables(system, output_name, path)
+        assert len(rows) == len(path.cells)
+        assert all(len(row["species_mass_fractions"]) == 4 for row in rows)
 
 
 def test_p6_external_species_donors_follow_actual_boundary_flow_direction():

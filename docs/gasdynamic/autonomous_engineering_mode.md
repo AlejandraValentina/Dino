@@ -176,28 +176,27 @@ obligatorios de los factores de ciclo 2T.
   AFR, caudal de combustible, ISFC/BSFC, presión pico y ángulo del pico.
 - Termo: P-V, lazo de bombeo, balance de energía.
 
-## 7. Reservoir boundary (bloqueo actual)
+## 7. Reservoir boundary — decisión y estado operativo
 
-Aplicar el protocolo de la sección 8 a `No consistent reservoir inflow branch`
-(ver `docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md`). No aceptar
-de nuevo la excepción como conclusión. Investigar: estructura característica,
-ecuaciones de rama, interpretación del reservoir, magnitudes totales/estáticas,
-orientación, entrada y salida subsónicas, inversión, estado casi sónico,
-reconstrucción primitiva, etapa SSPRK, área efectiva, especie donante, energía
-y admisibilidad.
+AUD-11 fue resuelto por decisión humana/científica como
+`CASE B — CAPABILITY LIMITATION`, no como `SCIENTIFIC_DECISION_REQUIRED`.
+`LEGACY_CHARACTERISTIC_V1` se conserva para reproducción histórica; su nombre
+`nonreflecting` solo se documenta como `EXTERNAL_STATE_RIEMANN / FARFIELD`, sin
+reinterpretar evidencia. `OPEN_END_PLENUM_V2` implementa el modelo sintético
+preregistrado de plenum abierto; sus ecuaciones y tests no modifican V1,
+Fixtures A/B ni P3-R1. La interfaz futura `RESTRICTED_NOZZLE_V1` no tiene
+valores implementados, y no se añade `MASS_FLOW_INLET`.
 
-Resoluciones permitidas:
-- **A — Bug**: corregir si es inequívoco y proteger los resultados históricos.
-- **B — Limitación de capability**: si V1 es válida pero limitada y existe una
-  extensión física estándar clara, crear `RESERVOIR_BOUNDARY_V2` como
-  capability nueva, sin tocar V1. La semántica se preregistra y commitea antes
-  de cualquier campaña.
-- **C — Ambigüedad científica**: solo si hay varias formulaciones plausibles
-  con consecuencias materiales y sin criterio de elección:
-  `RESERVOIR_BOUNDARY_V2_SCIENTIFIC_DECISION_REQUIRED`. Escalar y continuar
-  los workstreams independientes.
+La única campaña preregistrada de KT100 V2 se ejecutó una vez. Los cinco puntos
+alcanzaron 390° y pasaron los gates de estado/admisibilidad/especies, pero el
+constructor de evidencia falló con `KeyError('transfer1')` antes de emitir
+primarios. El mapeo de nombres está corregido y probado; no se repite R6 bajo la
+autorización de una campaña. No hay conclusión de periodicidad ni calificación
+física del resultado KT100. Ver el recibo
+`results/2t-commercial-core-20261002/aud-11-kt100-v2-campaign-audit.json`.
 
-El protocolo forense AUD-11 quedó documentado en
+Registro del análisis forense previo a la decisión humana (histórico):
+el protocolo AUD-11 quedó documentado en
 `docs/gasdynamic/aud11_reservoir_forensic.md`. V1 usa el invariante saliente de
 Euler y resuelve la entrada subsónica isentrópica desde el reservoir en reposo.
 Para la rama evaluada, `f(w)=w+2a(w)/(gamma-1)` es estrictamente creciente en
@@ -205,19 +204,18 @@ Para la rama evaluada, `f(w)=w+2a(w)/(gamma-1)` es estrictamente creciente en
 posee raíz en el dominio contractual. La reproducción a 100 kPa, 301 K y
 `u=-0.001 m/s` no demuestra un bug del solver. Las pasadas forensics/domain/
 skeptic/discriminator se hicieron secuencialmente por el mismo autor y son
-autorrevisión, no revisión independiente. La clasificación es C: frontera V1
-válida y limitada, pero existen alternativas físicas estándar con consecuencias
-materiales y no hay datos del aparato o modo de control que permitan escoger.
-No se seleccionó ni implementó V2. AUD-11 queda como bloqueo científico local;
-los workstreams Priority 3 independientes continúan. KT100 y sus recibos siguen
-congelados.
+autorrevisión, no revisión independiente. Ese análisis preliminar clasificó C:
+alternativas estándar con consecuencias materiales y sin criterio disponible.
+La decisión humana posterior seleccionó CASE B, autorizó `OPEN_END_PLENUM_V2`,
+y quedó registrada arriba; por tanto esta conclusión preliminar no es el estado
+operativo vigente.
 
 Como trabajo independiente prioritario, la integración ahora admite un único
 plenum finito en la entrada del ducto de admisión: el mismo helper P3 se evalúa
 en ambas etapas, los incrementos internos son opuestos, las especies usan el
 donante real, el nodo participa del inventario/CFL/restart y la salida V2 puede
-trazar presión, temperatura, masa y composición. Esto no habilita una nueva
-frontera atmosférica ni resuelve la selección de V2.
+trazar presión, temperatura, masa y composición. Ese trabajo sigue siendo
+distinto de la frontera atmosférica `OPEN_END_PLENUM_V2`.
 
 Alcance acústico del enlace: el volumen intercambia mediante la interfaz P3
 ideal y sin masa; `NetworkConnection.effective_length_m` permanece como dato de
@@ -343,7 +341,10 @@ registra como decisión en la sección 17.
 
 ## 15. Objetivo actual
 
-`AUDIT_REMEDIATION_MODE`: prioridades 1 `AUD-01`…`AUD-07` quedaron cerradas
+`MOTORSIM_AUTONOMOUS_ENGINEERING_TEAM`: la revisión independiente
+`audit_8cdf66e.md` cubre exactamente `ab92aee..8cdf66e`; sus 18 hallazgos fueron
+ingeridos y reconciliados con commits posteriores, sin revertirlos. Las
+prioridades 1 `AUD-01`…`AUD-07` quedaron cerradas
 con cambios trazables. `AUD-08` ejecutó Fixture A desde su preregistro aislado:
 20/20 ciclos admisibles, replay exacto ciclo 3→4 y ninguna convergencia de
 periodicidad dentro del horizonte. La evaluación está guardada con la evidencia;
@@ -351,11 +352,12 @@ no acredita aceptación del Commercial Core. `AUD-09` completó Fixture C piston
 sin reed: 20/20 ciclos, replay exacto y `PERIOD_1` en el ciclo 20. La traza
 histórica cruda no existe, por lo que no se atribuye causa exacta; la ejecución
 actual no reprodujo el fallo.
-`AUD-11` reprodujo el límite de capacidad de reservoir V1; seleccionar política
-V2 sigue siendo una cuestión científica separada. No ejecutar KT100 ni reutilizar
-los ciclos A/B históricos. La fábrica de configuración V2 conserva lectura V1
-por compatibilidad y solo cubre slider-crank/puertos explícitos. KT100 permanece
-congelado.
+`AUD-11` quedó como CASE B y `OPEN_END_PLENUM_V2` fue preregistrado antes de
+implementarse. El preregistro de una sola campaña se consumió; su defecto de
+escritura de primarios está corregido, pero no se repite la campaña ni se
+reinterpreta como resultado físico. Los ciclos A/B históricos permanecen
+supersedidos. La fábrica de configuración V2 conserva lectura V1 por
+compatibilidad y solo cubre slider-crank/puertos explícitos.
 
 ## 16. Arquitectura vigente
 
@@ -381,6 +383,7 @@ rechaza.
 | 2026-10-05 | El enlace integrado finito de admisión reutiliza P3 ideal; no se añade una frontera atmosférica ni una nueva política de reservoir | Integrar solo el endpoint existente; tratar longitud efectiva como acústica sería una capability distinta | 99 pruebas focales integradas/P5-C/P6/P7/red/reed/puertos PASS; estado primario/output de un ciclo y conservation rebuild verificados | SELF_REVIEW; no hay recibo independiente durable del delta |
 | 2026-10-05 | Generalizar volúmenes integrados a caras externas intake-left y exhaust-right conserva el helper P3 y el ledger existente; no añade aristas internas de red | Mantener un solo nodo de admisión; o modelar redes internas/acústica como otra capability | 100 pruebas integradas/P5-C/P6/P7/red/reed/puertos PASS; replay V7 de dos nodos, ciclo completo, outputs muestreados contra el estado y ledgers globales | SELF_REVIEW; no hay recibo independiente durable del delta |
 | 2026-10-05 | La configuración V1 serializa sólo geometría reconstruible desde modelos explícitos. Si slider-crank y binding de puertos resuelven todos los campos, el callback legado queda ignorado y no es parte de la identidad | Ejecutar también el callback podría introducir efectos laterales o fallos que la configuración no puede reproducir; callbacks arbitrarios requerirían otro contrato | JSON canónico y snapshot inicial exactos, guard de deriva y cinco pruebas focales; la regresión integrada amplia actual está registrada en `program-status.json` | SELF_REVIEW conforme AUD-06; no hay recibo independiente durable para este delta |
+| 2026-10-05 | AUD-11: `OPEN_END_PLENUM_V2` representa una abertura ideal, estacionaria e isentrópica como `SYNTHETIC_ASSUMPTION`; no es un carburador calibrado ni dato del WB40 | `LEGACY_CHARACTERISTIC_V1` se preserva para reproducción; una tobera restringida exige Cd/área documentados y otro contrato | Preregistro y tests analíticos V2 PASS; la campaña KT100 única no creó ciclos por fallo de agregación, no por un criterio de selección de frontera | Decisión científica humana CASE B; revisión puntual de implementación, no aceptación completa del Commercial Core |
 
 ## 18. Convenciones
 
@@ -393,17 +396,29 @@ contrato propios.
 ## 19. Blockers abiertos
 
 - AUD-08 está completada con evidencia sintética fija de Fixture A: 20 ciclos,
-  restart exacto y sin periodicidad aceptada; no reutilizar A/B históricos.
+  restart exacto y sin periodicidad aceptada; no reutilizar los ciclos A/B
+  anteriores supersedidos.
 - AUD-10 y AUD-12 se resolvieron: colector por roles y límite CONFIG_V2
   explícito; Cd=0 rechazado otra vez por GENERIC_2T_PORTS_V1.
 - AUD-09 completó Fixture C piston-port sin reed: 20/20 ciclos, replay exacto y
   `PERIOD_1` al ciclo 20. No reprodujo el fallo histórico; como no hay traza
   cruda, no se atribuye una causa exacta. La evidencia es sintética y condicional
-  a P4. AUD-11 sigue activo bajo protocolo forense; AUD-13–18 esperan
-  dependencias y prioridades anteriores. La cola machine-readable es la fuente.
-- Reservoir V1 rechaza correctamente el estado de entrada fuera de su rama
-  característica admisible. Una política V2 de reservoir todavía no está
-  seleccionada; no ejecutar KT100 ni adivinar una semántica de frontera.
+  a P4. AUD-11 está resuelto como CASE B. La cola machine-readable conserva los
+  bloqueos locales de reed dinámica, fuel/AFR, Fixture B y la evidencia primaria
+  de KT100 V2.
+- `OPEN_END_PLENUM_V2` está implementada según el contrato CASE B y sus tests
+  analíticos pasan. R6 no tiene ciclos primarios por el defecto recuperable del
+  agregador ya corregido; no se vuelve a ejecutar bajo el preregistro consumido.
+- La integración de reed dinámica sigue bloqueada por la falta de un contrato
+  conservativo seleccionado para impacto, trabajo de presión y disipación. El
+  trabajo de combustible con métricas atrapadas sigue bloqueado por observables
+  y propiedades de combustible no definidos. Mantener estos items
+  `BLOCKED_LOCAL`; no convertirlos en bugs ni inventar parámetros.
+- La cola durable no tiene tareas `READY`: además de los bloqueos anteriores,
+  la evidencia primaria de KT100 V2 no se puede recuperar dentro del único
+  preregistro consumido y Fixture B depende de cerrar el collector integrado.
+  Continuar cuando una dependencia se resuelva o se autorice un preregistro
+  científico distinto; no ejecutar otra campaña con el contrato consumido.
 - Reed dinámica integrada sigue sin contrato conservativo de impacto, trabajo
   de presión y disipación. AFR estequiométrica, LHV y combustible atrapado
   siguen indefinidos; las magnitudes derivadas permanecen `UNDEFINED`.

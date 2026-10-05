@@ -94,7 +94,10 @@ def _primitive_and_inventory(system, name):
 
 def _duct_observables(system, name, path):
     eos = system.gas.eos
-    mass_cells = system.species_mass[name]
+    # Product-facing output labels differ from the P6 state keys for the two
+    # transfer paths. Keep that translation at the evidence boundary.
+    species_name = {"transfer1": "tr1", "transfer2": "tr2"}.get(name, name)
+    mass_cells = system.species_mass[species_name]
     records = []
     for cell, volume, species in zip(path.cells, path.mesh.volumes, mass_cells):
         q = cell.conservative

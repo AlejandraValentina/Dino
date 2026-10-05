@@ -8,15 +8,23 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       implementation/campaign; audit remediation mode exited because no other
       AUD items remain open.
 - [x] Additive boundary module and P5-C opt-in wiring implemented; V1 defaults,
-      equations, Fixtures A/B and P3-R1 are unchanged. Twenty-one focused tests
+      equations, Fixtures A/B and P3-R1 are unchanged. Focused tests
       pass; see `tests/test_open_end_plenum_v2.py` and
       `tests/test_kt100_open_end_plenum_v2.py`.
 - [x] Replayed and instrumented all five preserved r5 failure faces; every RPM
       matches its original accepted-step count, failure angle and error exactly.
       Receipt: `results/2t-commercial-core-20261002/aud-11-kt100-r5-failure-face-instrumentation-v2.json`.
-- [ ] Execute exactly one preregistered five-point KT100 V2 campaign using the
-      committed `OPEN_END_PLENUM_V2` config; accept and audit its result without
-      tuning. Command: `python scripts/run_kt100_open_end_plenum_v2.py`.
+- [x] Execute exactly one preregistered five-point KT100 V2 campaign using the
+      committed `OPEN_END_PLENUM_V2` config. All five points reached 390° and
+      passed state/admissibility/species checks, then cycle-primary construction
+      failed with `KeyError('transfer1')` because the evidence writer used the
+      product label instead of P6 key `tr1`. No primary cycle was emitted; this
+      is not a physical boundary failure or periodicity result. Raw R6 artifacts
+      are preserved and the campaign is not rerun. Receipt:
+      `results/2t-commercial-core-20261002/aud-11-kt100-v2-campaign-audit.json`.
+- [x] Fix the evidence-layer transfer-name mapping and cover both transfers;
+      `tests/test_kt100_open_end_plenum_v2.py` passes. This correction does not
+      retroactively create missing R6 primary evidence.
 
 - [ ] Fase 1: harness reusable y evidencia multi-ciclo. Parcial: harness y
       contrato de periodicidad implementados; KT100 r5 falla antes del ciclo 1
@@ -24,10 +32,10 @@ solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
       period-1/2, auditoría y restart de paso aceptado; el multi-ciclo de un
       motor no queda verificado. No declarar VERIFIED.
 - [ ] Fase 2: KT100 V2, cinco puntos exploratorios y provenance. Parcial:
-      fixture/configuración generados; 0/5 ciclos completos, sin periodicidad,
-      checkpoint de campaña ni performance. Preservar r2–r5. Estado congelado:
-      `KT100_HYBRID_V2_BLOCKED_BY_RESERVOIR_BOUNDARY_CAPABILITY`; no más runs,
-      retries, ajustes ni sensitivities en esta misión.
+      capability V2 y sus pruebas focales pasan, pero la única campaña R6 no
+      emitió primarios por el defecto del agregador descrito arriba. No se
+      obtuvo evidencia de convergencia ni performance. Preservar r2–r6; no
+      reejecutar esta campaña ni declarar fallo físico de la frontera.
 - [ ] Fase 3: geometría genérica 2T: transferencias múltiples, escape complejo,
       perfiles de área, piston-port y asociaciones con conductos.
 - [x] Fase 3a: API/configuración separada `GENERIC_2T_PORTS_V1`; conserva los
@@ -458,9 +466,10 @@ P6, P7, P8 y P9 no fueron modificados.
 
 ### Addendum 2026-10-02 — generic-port contract and periodic fixtures
 
-`GENERIC_2T_PORTS_V1` now accepts a finite nonnegative discharge coefficient:
-`Cd = 0` represents a valid closed-flow path and resolves to zero effective
-area. Focused validation: 40 tests across generic ports, the P5-C adapter,
+Historical implementation note: `GENERIC_2T_PORTS_V1` temporarily accepted a
+finite nonnegative discharge coefficient and treated `Cd = 0` as a closed-flow
+path. AUD-12 later restored the frozen positive-finite contract; zero is now
+rejected. Focused validation: 40 tests across generic ports, the P5-C adapter,
 powervalve, and integrated engine; OpenSpec strict validation passed. Fixture A
 reached `PERIOD_1` at cycle 16 and Fixture B at cycle 19; their V2 outputs and
 P6-linked scavenging quantities were validated per cycle. These internal
@@ -574,12 +583,15 @@ no se atribuye aceptación al motor completo.
 AUD-11 forensic protocol (2026-10-05): see
 `docs/gasdynamic/aud11_reservoir_forensic.md`. The bounded monotone V1 branch,
 orientation mirror, and full-state Riemann discriminator were checked; 7
-focused tests pass. Outcome C: multiple standard boundary formulations have
-materially different fluxes, with no configured apparatus criterion to select
-one. No V2 policy or KT100 run was performed. AUD-11 is a local scientific
-blocker; independent AUD-13…18 tasks continue. This was sequential self-review,
-not independent review. AUD-16 remains partial: commit `9eada5d` covers only
-the path where explicit models fully shadow the callback.
+focused tests pass. That historical forensic analysis recorded outcome C;
+the subsequent explicit human/scientific decision is CASE B and authorizes the
+separate `OPEN_END_PLENUM_V2` contract. The capability and analytical tests are
+implemented, and the one preregistered KT100 campaign was executed. Its five
+points reached the terminal angle, but the evidence writer failed before any
+cycle primary was emitted. See the R6 audit receipt; the mapping bug is fixed,
+the campaign is not repeated, and no convergence or physical KT100 claim is
+made. The audit review itself remains independent only for its exact range;
+later implementation review is punctual/self-review, not whole-core acceptance.
 
 ### AUD-13 — bounded mesh diagnostic (2026-10-05)
 

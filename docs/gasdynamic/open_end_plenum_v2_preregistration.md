@@ -1,6 +1,6 @@
 # `OPEN_END_PLENUM_V2` preregistration
 
-Status: **PREREGISTERED — implementation and KT100 campaign not started**
+Status: **IMPLEMENTED; the single preregistered KT100 campaign was executed, but its evidence writer failed before emitting cycle primaries**
 Contract: `OPEN_END_PLENUM_V2 / OPEN_END_PLENUM_CONTRACT_V1`
 Decision authority: user's scientific decision recorded 2026-10-05.
 
@@ -125,6 +125,20 @@ to a new `...-r6-open-end-plenum-v2` result directory. Do not overwrite or
 reinterpret r2–r5. Execute exactly once; preserve the outcome, including
 nonconvergence or numerical failure. Boundary selection is based on this
 preregistered physical model, never on convergence.
+
+### Recorded campaign outcome (2026-10-05)
+
+The one authorized command, `python scripts/run_kt100_open_end_plenum_v2.py`,
+was executed once. Each of the five RPM points advanced to 390° and passed the
+integrator's state, admissibility, and species-sum checks. Cycle-primary
+construction then failed in `_duct_observables` with `KeyError('transfer1')`:
+the evidence labels `transfer1`/`transfer2` did not match the P6 state keys
+`tr1`/`tr2`. Consequently R6 contains zero durable cycle primaries and no
+periodicity result. The offline audit's `PASS` means the explicit failure
+receipt and source binding are internally consistent; it is not a simulation
+acceptance. The mapping defect is fixed and tested, but R6 is immutable and the
+single-campaign authorization does not permit a retry. The boundary capability
+is therefore not qualified by a completed KT100 cycle campaign.
 
 The campaign remains a synthetic engineering fixture. Its P4 dependency is
 `CONDITIONAL_ON_P4`; it is not experimental validation, a calibrated

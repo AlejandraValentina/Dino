@@ -39,8 +39,12 @@ pero NO representan el estado operativo actual cuando contradicen esta sección.
   SHA-256 `79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d`
   de `openspec/changes/p9-experimental-validation/specs/p9-experimental-validation/spec.md`.
 - Experimental validation: `NOT_PERFORMED`. Predictive validation: `NOT_CLAIMED`.
-- KT100: `KT100_REFERENCE_CASE_V1`, caso de referencia, no validación; híbrido
-  V2 bloqueado por la capability de reservoir boundary.
+- KT100: `KT100_REFERENCE_CASE_V1`, caso de referencia, no validación. La
+  capability `OPEN_END_PLENUM_V2` está implementada y probada, pero la única
+  campaña V2 autorizada no produjo primarios: el escritor falló con
+  `KeyError('transfer1')` al cerrar el ciclo. La corrección del agregador está
+  probada; la campaña no se repite bajo el preregistro vigente. No hay resultado
+  de periodicidad ni calificación física de KT100.
 
 Estado machine-readable del Commercial Core:
 `results/2t-commercial-core-20261002/program-status.json`; documentación:

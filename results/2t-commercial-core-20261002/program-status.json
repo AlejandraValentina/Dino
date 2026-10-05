@@ -3,11 +3,11 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-05",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "5b8f67dd7080967faa108263ce88789ecd379944",
+  "status_capture_head": "8529a89ac4566caa85d95d9eae4a3786d44e1594",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
-  "kt100_policy": "FROZEN_NO_RERUNS_OR_ADJUSTMENTS_IN_THIS_MISSION",
+  "kt100_policy": "ONE_PREREGISTERED_OPEN_END_PLENUM_V2_CAMPAIGN_EXECUTED_ONCE; R6_EMITTED_NO_CYCLE_PRIMARY_DUE_TO_TRANSFER_LABEL_KEYERROR; EVIDENCE_MAPPING_FIXED_AND_TESTED; NO_RETRY_UNDER_CONSUMED_PREREGISTRATION",
   "phases": {
     "1_reference_harness": {
       "status": "AUD-08_A_NONCONVERGED_AUD-09_C_PERIOD1_AT_CYCLE20",
@@ -29,8 +29,13 @@
     },
     "2_kt100_v2": {
       "status": "LOCAL_BLOCKER",
-      "classification": "KT100_HYBRID_V2_BLOCKED_BY_RESERVOIR_BOUNDARY_CAPABILITY",
-      "campaign_rerun_authorized": false
+      "classification": "KT100_V2_PRIMARY_EVIDENCE_UNAVAILABLE_AFTER_EVIDENCE_WRITER_FAILURE",
+      "campaign_invocations": 1,
+      "complete_cycle_primaries": 0,
+      "periodicity": "NOT_AVAILABLE",
+      "campaign_rerun_authorized": false,
+      "evidence": "results/2t-commercial-core-20261002/aud-11-kt100-v2-campaign-audit.json",
+      "note": "OPEN_END_PLENUM_V2 implementation and analytical tests pass; R6 is not a physical boundary failure or periodicity result."
     },
     "3_generic_2t_ports": {
       "status": "GEOMETRY_IMPLEMENTED_CORE_TOPOLOGY_PARTIAL",
@@ -45,10 +50,10 @@
         "zero_discharge_coefficient_closed_route"
       ],
       "blocked_scope": "P5-C binding supports two existing transfer paths only; arbitrary path topology, project persistence and GUI remain open.",
-      "discharge_coefficient_contract": "finite and nonnegative; Cd=0 is valid and yields zero effective flow area"
+      "discharge_coefficient_contract": "GENERIC_2T_PORTS_V1 requires finite strictly positive discharge coefficients; Cd=0 is rejected and does not create a closed route."
     },
     "4_scavenging": {
-      "status": "METRICS_AND_OUTPUT_SCHEMA_IMPLEMENTED_CYCLE_ACCEPTANCE_SUPERSEDED_BY_POSTHOC_AUDIT",
+      "status": "OUTPUT_IMPLEMENTED_FIXTURE_A_C_SYNTHETIC_EVIDENCE_AVAILABLE_GLOBAL_ACCEPTANCE_OPEN",
       "verified_scope": [
         "four_species_metrics",
         "exact_geometry_closure_snapshots",
@@ -57,11 +62,11 @@
         "synthetic_evidence_conditional_on_P4_not_experimental"
       ],
       "remaining": [
-        "regenerate fixture cycle evidence only after AUD-01..AUD-05 and separate AUD-08 preregistration commit",
-        "independent review of the updated fuel/output delta",
-        "no claim of full commercial core readiness"
+        "KT100 V2 R6 emitted no cycle primary after the evidence-writer KeyError; corrected writer is tested, but the consumed one-run preregistration forbids retry.",
+        "A distinct Fixture B and complete integrated cycle evidence remain open.",
+        "Independent review of later fuel/output work and whole Commercial Core acceptance remain outstanding."
       ],
-      "cycle_evidence_status": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
+      "cycle_evidence_status": "AUD08_FIXTURE_A_AND_AUD09_FIXTURE_C_SYNTHETIC_ONLY; OLDER_A_B_CYCLES_SUPERSEDED",
       "cycle_evidence_current_acceptance_use": false,
       "historical_scope": [
         "fixture_A_period_1_at_cycle_16",
@@ -696,7 +701,7 @@
         "17d-fuel-combustion-thermal-mechanics"
       ],
       "state": "BLOCKED_LOCAL",
-      "blocker": "Implementation exists, but Fixture A cycle evidence is HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT because A1-A3 invalidate current-cycle claims; regeneration waits for AUD-01..AUD-08.",
+      "blocker": "AUD-01..AUD-08 are closed and current synthetic Fixture A/C evidence exists. This integration workstream remains blocked by dependencies 17b-static-reed-intake-crankcase and 17d-fuel-combustion-thermal-mechanics; their dynamic-impact and trapped-fuel/AFR contracts are unresolved.",
       "commits": [
         "e93fd62c10478487d13a49c7181d1ef15aa601f5",
         "f846aa3c5816021fd08b38caf6614ed108f0ebf5",
@@ -714,14 +719,15 @@
         "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Updated synthetic exhaust geometry has actual closed intervals; six full V2 primary cycles capture exact transfer/exhaust snapshots and same-cycle scavenging; 33/33 focal and 85/85 integrated regression tests pass.",
         "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Terminal angular output point is evaluated read-only from the accepted terminal state; P7 requested endpoint rate is pre-limiter and excluded from cycle integrals.",
         "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Updated synthetic exhaust geometry has actual closed intervals; six full V2 primary cycles capture exact transfer/exhaust snapshots and same-cycle scavenging; 33/33 focal, 85/85 integrated regression, and 300 P4–P8 tests pass.",
-        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Terminal angular output point is evaluated read-only from the accepted terminal state; P7 requested endpoint rate is pre-limiter and excluded from cycle integrals.",
         "SELF_REVIEW (historical claim retained; no durable review receipt identified in AUD-06): Independent read-only review of V2 closure/output delta PASS; no material findings; full-engine acceptance remains open.",
         "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Two independent six-cycle Fixture A runs (one continuous, one checkpoint/restart after cycle 3) had exact full snapshot, primary-cycle and validated V2-output equality; 11,176 accepted steps; P1/P2 still fail.",
         "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Fixture A primary campaign reached PERIOD_1 at cycle 16 after 3 consecutive PASS comparisons (13→14→15→16); full P1 artifact preserved; no solver/threshold changes.",
-        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Fixture A P1 at cycle 16 and Fixture B P1 at cycle 19; full outputs validated per cycle; six-cycle checkpoint/replay is exact; synthetic and CONDITIONAL_ON_P4."
+        "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT: Fixture A P1 at cycle 16 and Fixture B P1 at cycle 19; full outputs validated per cycle; six-cycle checkpoint/replay is exact; synthetic and CONDITIONAL_ON_P4.",
+        "results/2t-commercial-core-20261002/aud-08-fixture-a-20261005-v1/decision.json: 20 fixed-horizon admissible cycles, exact restart replay, no convergence",
+        "results/2t-commercial-core-20261002/aud-09-fixture-c-20261005-v1/decision.json: 20 fixed-horizon admissible cycles, exact restart replay, period-1 at cycle 20"
       ],
-      "next_action": "Keep implementation and historical artifacts; regenerate only after A1-A3 fixes and separate AUD-08 preregistration.",
-      "cycle_evidence_status": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
+      "next_action": "Keep current AUD-08/AUD-09 artifacts as synthetic evidence; do not reopen old A/B results. Resume only if 17b/17d contracts are resolved or a genuinely independent collector task is split out.",
+      "cycle_evidence_status": "CURRENT_AUD08_FIXTURE_A_AND_AUD09_FIXTURE_C_SYNTHETIC_ONLY; NO_COMMERCIAL_CORE_ACCEPTANCE",
       "cycle_evidence_current_acceptance_use": false
     },
     {
@@ -749,16 +755,27 @@
     {
       "id": "reservoir-boundary-v2",
       "description": "Resolve reservoir inlet branch via a new versioned capability if formulation is unambiguous",
-      "dependencies": ["AUD-11"],
-      "state": "IN_PROGRESS",
-      "blocker": null,
-      "commits": ["80fcf626e160ad582cacfafae2102a72b2df7bed"],
+      "dependencies": [
+        "AUD-11"
+      ],
+      "state": "BLOCKED_LOCAL",
+      "blocker": "The single preregistered campaign ran once; each of five RPM points reached 390 degrees, then cycle-primary construction failed with KeyError(transfer1) because the evidence writer used product labels instead of P6 keys tr1/tr2. The mapping defect is fixed and tested, but R6 has zero primary cycles and the one-run authorization is consumed; no retry.",
+      "commits": [
+        "80fcf626e160ad582cacfafae2102a72b2df7bed",
+        "8529a89ac4566caa85d95d9eae4a3786d44e1594"
+      ],
       "evidence": [
         "docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md",
         "docs/gasdynamic/open_end_plenum_v2_preregistration.md",
-        "results/2t-commercial-core-20261002/preregistration/open-end-plenum-v2.json"
+        "results/2t-commercial-core-20261002/preregistration/open-end-plenum-v2.json",
+        "results/2t-commercial-core-20261002/aud-11-kt100-v2-campaign-audit.json",
+        "results/kt100-hybrid-model-fixture-v2-harness-20261002-r6-open-end-plenum-v2/: immutable raw failure receipts; 5/5 at 390 degrees, 0 primary cycles",
+        "tests/test_kt100_open_end_plenum_v2.py::test_cycle_evidence_maps_transfer_output_names_to_p6_species_names (PASS)",
+        "24 relevant reference-harness and producer tests PASS after correction",
+        "tests/test_kt100_open_end_plenum_v2.py::test_cycle_evidence_maps_transfer_output_names_to_p6_species_names",
+        "24 campaign-producer/reference-harness tests PASS after evidence-writer correction; OpenSpec all-strict 32/32 PASS"
       ],
-      "next_action": "Run the one preregistered five-point campaign once after the implementation commit; accept the observed outcome and audit its receipts without tuning or rerunning."
+      "next_action": "Do not rerun the consumed campaign or infer boundary physics from the writer failure. No other READY task exists; retain this local blocker until a future separate preregistration is authorized."
     },
     {
       "id": "integrated-intake-plenum",
@@ -1117,9 +1134,10 @@
         "tests/test_reservoir_forensic_diagnostic.py: bounded monotone branch, orientation mirror, V1 reject versus finite full-state Riemann flux",
         "NASA Cart3D and NASA Glenn references recorded in the forensic decision package",
         "Human/scientific decision 2026-10-05: CASE B — CAPABILITY LIMITATION; OPEN_END_PLENUM_V2 authorized as ideal stationary-plenum SYNTHETIC_ASSUMPTION, not calibrated WB40",
-        "docs/gasdynamic/open_end_plenum_v2_preregistration.md and results/2t-commercial-core-20261002/preregistration/open-end-plenum-v2.json"
+        "docs/gasdynamic/open_end_plenum_v2_preregistration.md and results/2t-commercial-core-20261002/preregistration/open-end-plenum-v2.json",
+        "results/2t-commercial-core-20261002/aud-11-kt100-v2-campaign-audit.json"
       ],
-      "next_action": "AUD-11 closed: the forensic evidence and human decision resolve the audit finding as CASE B. Continue the separately queued OPEN_END_PLENUM_V2 capability and one preregistered KT100 campaign."
+      "next_action": "AUD-11 finding closed as CASE B by human/scientific decision. OPEN_END_PLENUM_V2 is implemented and analytically tested. The single KT100 V2 campaign failed before emitting cycle primaries due to an evidence-writer bug, now fixed; preserve R6 and do not retry under the consumed preregistration."
     },
     {
       "id": "AUD-12",
@@ -1306,8 +1324,8 @@
     "editorial_erratum": "A1, A2 and A3 are all DEFECT and all block current cycle evidence.",
     "historical_cycle_evidence": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
     "current_head_reconciled": "3d10f79",
-    "next_action": "AUD-01..AUD-18 are resolved or completed at the audit-finding level. AUD-11 is CASE B, resolved by the user's decision; continue MOTORSIM_AUTONOMOUS_ENGINEERING_TEAM with OPEN_END_PLENUM_V2 implementation, tests, instrumentation, and its preregistered KT100 campaign.",
-    "reconciled_head": "a10d2dca698369f0eb95c310b78d48226ac63037",
+    "next_action": "AUD-01..AUD-18 are present in the durable queue and reconciled; priority-1 findings are closed and audit_remediation_mode is false. AUD-11 is CASE B, not SCIENTIFIC_DECISION_REQUIRED. OPEN_END_PLENUM_V2 analytical implementation is tested; the sole preregistered KT100 campaign failed before cycle-primary emission due to the fixed transfer-label mapping defect and cannot be retried under that preregistration. The autonomous queue currently has zero READY tasks and six BLOCKED_LOCAL items; see continuation_status. Do not create a new campaign or invent unresolved physics.",
+    "reconciled_head": "8529a89ac4566caa85d95d9eae4a3786d44e1594",
     "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
     "current_remediation": [
       "AUD-01 RESOLVED_BY_LATER_COMMIT",
@@ -1316,7 +1334,18 @@
       "AUD-04 RESOLVED_BY_LATER_COMMIT",
       "AUD-05 RESOLVED_BY_LATER_COMMIT",
       "AUD-06 RESOLVED_BY_LATER_COMMIT",
-      "AUD-07 RESOLVED_BY_LATER_COMMIT"
+      "AUD-07 RESOLVED_BY_LATER_COMMIT",
+      "AUD-08 RESOLVED_BY_LATER_COMMIT",
+      "AUD-09 RESOLVED_BY_LATER_COMMIT",
+      "AUD-10 RESOLVED_BY_LATER_COMMIT",
+      "AUD-11 RESOLVED_BY_LATER_COMMIT",
+      "AUD-12 RESOLVED_BY_LATER_COMMIT",
+      "AUD-13 PARTIALLY_RESOLVED_BY_LATER_COMMIT",
+      "AUD-14 RESOLVED_BY_LATER_COMMIT",
+      "AUD-15 RESOLVED_BY_LATER_COMMIT",
+      "AUD-16 RESOLVED_BY_LATER_COMMIT",
+      "AUD-17 RESOLVED_BY_LATER_COMMIT",
+      "AUD-18 RESOLVED_BY_LATER_COMMIT"
     ],
     "preregistration": {
       "path": "results/2t-commercial-core-20261002/preregistration/AUD-08-fixture-a.json",
@@ -1326,10 +1355,13 @@
       "restart_cycle": 3,
       "campaign_run": "NOT_YET_RUN",
       "blob_gate": "PASS (semantic JSON and line-ending-independent canonical hash)"
+    },
+    "human_decision": {
+      "AUD-11": "CASE B — CAPABILITY LIMITATION; not SCIENTIFIC_DECISION_REQUIRED"
     }
   },
   "audit_reconciliation": {
-    "head": "5b8f67dd7080967faa108263ce88789ecd379944",
+    "head": "8529a89ac4566caa85d95d9eae4a3786d44e1594",
     "findings": {
       "AUD-01": "RESOLVED_BY_LATER_COMMIT",
       "AUD-02": "RESOLVED_BY_LATER_COMMIT",
@@ -1341,7 +1373,7 @@
       "AUD-08": "RESOLVED_BY_LATER_COMMIT",
       "AUD-09": "RESOLVED_BY_LATER_COMMIT",
       "AUD-10": "RESOLVED_BY_LATER_COMMIT",
-      "AUD-11": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
+      "AUD-11": "RESOLVED_BY_LATER_COMMIT",
       "AUD-12": "RESOLVED_BY_LATER_COMMIT",
       "AUD-13": "PARTIALLY_RESOLVED_BY_LATER_COMMIT",
       "AUD-14": "RESOLVED_BY_LATER_COMMIT",
@@ -1361,7 +1393,7 @@
       "AUD-08": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-09": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-10": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
-      "AUD-11": "BLOCKED_LOCAL / outcome C: V1 bounded branch and full-state Riemann discriminator both characterized. Multiple physically legitimate models produce material flux differences; no configured apparatus/control criterion selects one. Await scientific decision. No reservoir V2 or KT100 run.",
+      "AUD-11": "The audit finding was resolved as CASE B by explicit human/scientific decision. The additive OPEN_END_PLENUM_V2 contract is preregistered, implemented, and analytically tested. Its single KT100 campaign emitted no cycle primary because the evidence writer failed with KeyError(transfer1); the bug is fixed but the consumed campaign is not retried.",
       "AUD-12": "RESOLVED_BY_LATER_COMMIT; see durable queue evidence and task record.",
       "AUD-13": "Bounded chamber/transfer mesh sensitivity and conservation recorded; lack of an acceptance threshold prevents a mesh-adequacy claim.",
       "AUD-14": "V3 now explicitly names gross crossing metrics and intake species ratio, leaves trapped/burned AFR undefined, and derives specific consumption only from positive prescribed P7 fuel sink and power. V1/V2 remain unchanged.",
@@ -1370,7 +1402,13 @@
       "AUD-17": "Additive signed-work detector V2 preserves the V1 implementation and thresholds; V2 snapshots are distinct and history-replay validated. No campaign was run.",
       "AUD-18": "Generator tests no longer write checked-in project JSON; source hashes preserve raw provenance and add normalized LF fingerprints for OS-independent text comparison."
     },
-    "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json"
+    "triage_receipt": "results/2t-commercial-core-20261002/audits/audit-triage-3d10f79.json",
+    "current_delta": {
+      "range": "8529a89ac4566caa85d95d9eae4a3786d44e1594..WORKING_TREE",
+      "review_kind": "SELF_REVIEW",
+      "result": "The current delta does not reopen any AUD finding. It corrects the evidence writer and reconciles campaign/governance state; current campaign receipt records five post-advance evidence failures and no cycle-primary acceptance.",
+      "evidence": "results/2t-commercial-core-20261002/aud-11-kt100-v2-campaign-audit.json"
+    }
   },
   "configuration_schema": "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2",
   "verification": {
@@ -1398,7 +1436,28 @@
         "git_diff_check": "PASS",
         "review_kind": "sequential self-review of AUD-15..18; no new independent review claimed"
       }
+    },
+    "aud11_open_end_plenum_v2": {
+      "campaign": "Exactly one preregistered run; 5/5 points reached 390 degrees, 0 durable primary cycles because evidence writer raised KeyError(transfer1).",
+      "post_campaign_fix": "Transfer evidence labels map to P6 keys tr1/tr2; focused unit test added and passed.",
+      "relevant_tests": "24 campaign-producer/reference-harness tests and 22 open-end capability tests passed.",
+      "openspec": "32/32 all strict passed.",
+      "review_kind": "Sequential self-review; no independent review of the post-8cdf66e delta claimed."
     }
   },
-  "last_status_reviewed_head": "5b8f67dd7080967faa108263ce88789ecd379944"
+  "last_status_reviewed_head": "8529a89ac4566caa85d95d9eae4a3786d44e1594",
+  "continuation_status": {
+    "mode": "MOTORSIM_AUTONOMOUS_ENGINEERING_TEAM",
+    "audit_remediation_mode": false,
+    "ready_tasks": 0,
+    "local_blockers": [
+      "17b-static-reed-intake-crankcase: conservative dynamic-reed SSPRK2 impact/pressure-work/dissipation contract unresolved",
+      "17d-fuel-combustion-thermal-mechanics: trapped fresh/fuel observables and explicit fuel-property contract unresolved",
+      "17e-cycle-evidence-collector: depends on 17b and 17d for the integrated collector scope",
+      "18-fixture-b-regressions: depends on completed integrated evidence and a materially distinct Fixture B",
+      "reservoir-boundary-v2: single preregistered KT100 run has no cycle primaries after evidence-writer failure; no retry under the consumed authorization",
+      "dynamic-reed-stage-coupling: same unresolved conservative impact/work/dissipation contract"
+    ],
+    "next_action": "Do not create another campaign or choose unresolved physics. Resume the durable queue when an existing dependency is resolved or a new scientific preregistration is explicitly authorized."
+  }
 }

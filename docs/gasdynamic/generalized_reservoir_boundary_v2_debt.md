@@ -1,7 +1,10 @@
 # Deferred scientific work: `GENERALIZED_RESERVOIR_BOUNDARY_V2`
 
-Status: the user's 2026-10-05 scientific decision resolves the blocker; the
-separately preregistered `OPEN_END_PLENUM_V2` capability is now in progress.
+Status: the user's 2026-10-05 scientific decision resolves the AUD-11 model
+selection. `OPEN_END_PLENUM_V2` is implemented and its analytical suite passes;
+the single preregistered KT100 campaign did not emit cycle primaries because
+the evidence writer raised `KeyError('transfer1')`. The mapping is fixed and
+tested, but that campaign cannot be rerun under its one-run preregistration.
 This note does not amend historical P5 or its evidence.
 
 The KT100 hybrid fixture r5 stopped before its first complete cycle at each

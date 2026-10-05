@@ -325,8 +325,12 @@ evaluated from the same stage states; each surface requires an explicit
 chamber or `duct_id:cell_index` location. Reed mechanics, combustion, complete
 fuel conversion, periodic-cycle evidence and the complete engineering
 collector remain open integration work. Existing reservoir-boundary
-inconsistency is not hidden by an automatic fallback; boundary V2 remains an
-explicit local blocker until its mathematical scope is resolved.
+inconsistency is not hidden by an automatic fallback. AUD-11's human decision
+selected CASE B and the additive `OPEN_END_PLENUM_V2` capability is implemented
+under its own preregistered contract; its analytical tests pass. The single
+preregistered KT100 V2 campaign did not emit cycle primaries because the
+evidence writer failed after angular advance, so KT100 remains unqualified and
+the campaign result is a local evidence blocker, not a boundary-physics verdict.
 
 The integrated geometry adapter also binds every existing generic port duct
 to one named integrated path. Port areas are accumulated by the mapped route;
@@ -334,7 +338,8 @@ the existing `PowerValve` may replace the configured main-exhaust roof at the
 stage RPM before resolving its area. An existing multi-section
 `ExpansionChamber.mesh()` is accepted as the exhaust path mesh. These bindings
 are exercised together at stage resolution, but they do not yet establish a
-complete angular cycle, exact scavenging closure, or reservoir-boundary V2.
+complete angular cycle or exact scavenging closure. The open-end reservoir
+capability is separately versioned and does not alter these bindings.
 The duct-to-path mapping is copied into an immutable view at construction, so
 later mutation of the caller's dictionary cannot diverge stage routing from
 the checkpoint identity.
