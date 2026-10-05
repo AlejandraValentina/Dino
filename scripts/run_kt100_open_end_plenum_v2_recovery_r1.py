@@ -96,7 +96,8 @@ def validate_inputs():
         for filename, expected_hash in expected_point["files"].items():
             if _sha256(point / filename) != expected_hash:
                 raise RuntimeError(f"original R6 artifact changed: {rpm}/{filename}")
-        manifest = json.loads(gzip.open(point / "manifest.json.gz", "rt", encoding="utf-8"))
+        with gzip.open(point / "manifest.json.gz", "rt", encoding="utf-8") as stream:
+            manifest = json.load(stream)
         if manifest["configuration_sha256"] != expected_point["configuration_sha256"]:
             raise RuntimeError(f"original config identity changed at {rpm} RPM")
         if manifest["source_sha256"] != before_sources:

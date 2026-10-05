@@ -766,7 +766,8 @@
       "commits": [
         "80fcf626e160ad582cacfafae2102a72b2df7bed",
         "8529a89ac4566caa85d95d9eae4a3786d44e1594",
-        "df5cbd7"
+        "df5cbd7",
+        "ee58b8b"
       ],
       "evidence": [
         "docs/gasdynamic/generalized_reservoir_boundary_v2_debt.md",
@@ -783,7 +784,8 @@
         "docs/gasdynamic/kt100_v2_evidence_recovery_r1.md",
         "results/2t-commercial-core-20261002/preregistration/KT100_V2_EVIDENCE_RECOVERY_R1.json",
         "scripts/run_kt100_open_end_plenum_v2_recovery_r1.py: frozen-input and no-overwrite gates",
-        "Pre-run --validate-only exposed a preregistration JSON-path defect; fixed before campaign and included in the frozen runner hash. No solver run occurred."
+        "Pre-run --validate-only exposed a preregistration JSON-path defect; fixed before campaign and included in the frozen runner hash. No solver run occurred.",
+        "Two --validate-only gate defects were fixed before campaign; neither preflight started the solver."
       ],
       "next_action": "Commit the preregistered R1 contract and runner separately; then pass --validate-only and execute the one authorized recovery campaign exactly once into its new output directory."
     },
@@ -1455,9 +1457,10 @@
       "review_kind": "Sequential self-review; no independent review of the post-8cdf66e delta claimed."
     },
     "kt100_recovery_r1_preflight": {
-      "initial_validate_only": "Failed before simulation because runner read the correct configuration hash from the wrong JSON nesting level; no campaign process or solver was started.",
-      "correction": "Runner now reads recovery_change-bound hashes; the preregistration will bind this corrected runner before execution.",
-      "campaign_started": false
+      "first_validate_only": "Failed before campaign because configuration hash was read from the wrong JSON level; fixed in preregistered runner follow-up.",
+      "second_validate_only": "Failed before campaign because manifest JSON was parsed from an open stream object; fixed in preregistered runner follow-up.",
+      "campaign_started": false,
+      "recovery_runner_hash": "5ace8e159c6905a687ae030ecca1ddb638ffe8fed6bf5f1143a7cfcf63a10234"
     }
   },
   "last_status_reviewed_head": "351e1b22ee49fe9d7c4cde53755d1d4e8caaa355",
