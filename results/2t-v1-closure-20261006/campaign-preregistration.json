@@ -1,0 +1,37 @@
+{
+  "schema": "MOTORSIM_2T_V1_CAMPAIGN_PREREGISTRATION_V1",
+  "status": "PREREGISTERED_NOT_RUN",
+  "classification": "SYNTHETIC_ASSUMPTION_CONDITIONAL_ON_P4",
+  "purpose": "Exclusive fixed-horizon A-prime/B-prime v1 closure campaigns",
+  "horizon_cycles": 20,
+  "restart_cycle": 10,
+  "no_early_stop": true,
+  "no_post_result_extension": true,
+  "selected_mesh_rule": "C12 sufficient mesh, level 0, coarsest admissible selected mesh",
+  "periodicity_detector": "motorsim.periodicity.PeriodicityDetector",
+  "periodicity_thresholds": {"work": 0.005, "cylinder": 0.005, "sensor_max": 0.005, "port": 0.002, "inventories": 0.002},
+  "periodicity_streak": 3,
+  "failure_status": "NO_CONVERGENCE_WITHIN_HORIZON",
+  "fixtures": {
+    "FIXTURE_A_PRIME": {
+      "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_a_prime-mesh-0.json",
+      "fixture_config_sha256": "97a7baceeac4ee900275f8b652aab19286e004be3e6af996c18be9b24ffaf7d1",
+      "engine_configuration_sha256": "d3f000f72dda247e11a561ad63fb93daab1145cca689105a17cd8e6ae7c71ab7",
+      "geometry_sha256": "64f5cb1079977a4b0ebc4750f887da4c97d2c45b6c2df63e2a616c7806df6804",
+      "mesh_level": 0, "rpm": 3000.0, "transfer_routes": ["primary", "secondary", "boost"], "exhaust_cells": 5
+    },
+    "FIXTURE_B_PRIME": {
+      "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_b_prime-mesh-0.json",
+      "fixture_config_sha256": "51cd1639ba6825269ce7bafe0cc07ad10e7b5c38b7bcec07590d828754d12f84",
+      "engine_configuration_sha256": "b21dd08a23679954c1ac39aae383fc2a78c702c5a358c8e2387fcecd00f2af82",
+      "geometry_sha256": "2621e850af5ddbc012dbe9b74cdc5030ff264b8d61e59b1b4cf368192711dd4f",
+      "mesh_level": 0, "rpm": 4000.0, "transfer_routes": ["primary", "secondary"], "exhaust_cells": 7
+    }
+  },
+  "source_binding": {
+    "campaign_runner": "scripts/v1_closure_campaign.py",
+    "campaign_stepper": "scripts/produce_integrated_cycle_evidence.py::advance_to",
+    "offline_auditor": "motorsim.integrated_2t.audit_integrated_cycle_primary",
+    "c12_preregistration_sha256": "702b9430e6856fd1e3212bfeb23dec27dabd0ed1b8bc07199425d785c9d25996"
+  }
+}
