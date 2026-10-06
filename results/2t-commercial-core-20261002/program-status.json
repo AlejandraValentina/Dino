@@ -1713,11 +1713,16 @@
         "C7",
         "C8"
       ],
-      "state": "READY",
+      "state": "DONE",
       "blocker": null,
       "commits": [],
-      "evidence": [],
-      "next_action": "Implement and verify this gate in declared order"
+      "evidence": [
+        "C11 restart/replay runner completed PASS via run_logged.py; summary: results/2t-v1-closure-20261006/restart-replay-c11-log/c11-restart-replay.summary.json.",
+        "A-prime and B-prime continuous primaries are equivalent to the committed C12 mesh-level-0 primaries; checkpoint at 180 degrees restores exactly and continuous/restart terminal snapshots, full primaries, ledgers, species and engineering outputs are equal.",
+        "Offline audit recomputed both continuous and restarted cycles; accepted steps/rejected trials: A-prime 1242/518, B-prime 808/85.",
+        "Result: results/2t-v1-closure-20261006/restart-replay-c11/result.json; status SYNTHETIC_ASSUMPTION_CONDITIONAL_ON_P4; runner SHA-256 ce63dc29911cc6e544b18669334c0d3947c1a29c738c37712d1ea04980dc750d."
+      ],
+      "next_action": "C11 closed; promote C13 and prepare immutable campaign preregistration"
     },
     {
       "id": "C12",
@@ -1748,7 +1753,7 @@
         "C11",
         "C12"
       ],
-      "state": "WAITING",
+      "state": "READY",
       "commits": [],
       "evidence": [],
       "next_action": "Implement and verify this gate in declared order",
@@ -2145,6 +2150,12 @@
       "task": "AGENTS_V2",
       "kind": "process",
       "summary": "Migrated program status to V2: schema -> MOTORSIM_PROGRAM_STATUS_V2; current_objective added; objectives added; owner_decisions_pending added; hard_stop added; decisions added; progress_log added; reservoir-boundary-v2: DONE_CONDITIONAL -> DONE + qualification; dynamic-reed-stage-coupling: DONE_CONDITIONAL -> DONE + qualification; 17d-fuel-properties: obsolete BLOCKED_LOCAL -> DONE (super"
+    },
+    {
+      "at": "2026-10-06T15:49:26+00:00",
+      "task": "C11",
+      "kind": "gate",
+      "summary": "C11 PASS: exact continuous/checkpoint/restart/replay for A-prime and B-prime at C12 mesh level 0; C12 primary equivalence, offline audits, snapshots, ledgers, species, and outputs all equal. Evidence in results/2t-v1-closure-20261006/restart-replay-c11; synthetic CONDITIONAL_ON_P4."
     }
   ],
   "gate_status": {
@@ -2153,14 +2164,13 @@
     "classification": null,
     "evidence": [],
     "gate_tasks_total": 18,
-    "gate_tasks_done": 11,
+    "gate_tasks_done": 12,
     "gate_task_states": {
-      "DONE": 11,
+      "DONE": 12,
       "READY": 1,
-      "WAITING": 6
+      "WAITING": 5
     },
     "remaining": [
-      "C11",
       "C13",
       "C14",
       "C15",
@@ -2168,6 +2178,6 @@
       "C17",
       "C18"
     ],
-    "updated_at": "2026-10-06T15:40:12+00:00"
+    "updated_at": "2026-10-06T15:49:26+00:00"
   }
 }

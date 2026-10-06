@@ -1,0 +1,1 @@
+{"fixtures": {"FIXTURE_A_PRIME": {"accepted_steps": 1242, "c12_primary_equivalent": true, "rejected_trials": 518}, "FIXTURE_B_PRIME": {"accepted_steps": 808, "c12_primary_equivalent": true, "rejected_trials": 85}}, "status": "PASS"}

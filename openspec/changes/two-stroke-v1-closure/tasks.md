@@ -56,7 +56,12 @@
        auditor now uses the validated nominal/retry step and checks endpoint
        agreement within four coordinate ULPs. C12's first run is preserved as
        incomplete/invalid; no campaign evidence is claimed.
-- [ ] C11 exact continuous/checkpoint/restart/replay comparisons for both primes.
+- [x] C11 exact continuous/checkpoint/restart/replay comparisons for both primes.
+      Both primes pass exact continuous vs checkpoint/restart comparison at the
+      C12-sufficient mesh, including offline replay and equivalence to the
+      committed C12 primaries. Evidence is in
+      `results/2t-v1-closure-20261006/restart-replay-c11/`; the result remains
+      synthetic and CONDITIONAL_ON_P4.
 - [x] C12 preregister and complete transfer/exhaust integrated mesh study.
       R0 and R1 remain preserved as incomplete attempts after the C10 replay
       roundoff defect and the stricter-than-contract combustion species check.
