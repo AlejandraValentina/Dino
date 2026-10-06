@@ -25,7 +25,7 @@ from motorsim.integrated_2t import (
     make_integrated_engineering_output, make_integrated_engineering_output_v4,
     _fresh_air_fuel_species_ratio, _duct_ids_by_role, _role_face_outputs,
     _specific_consumption_value, _gross_fresh_short_circuit_rate,
-    _evidence_sha256,
+    _evidence_sha256, _angle_increment_matches,
 )
 from motorsim.engineering_outputs import (validate_integrated_engineering_output_v3,
                                           validate_integrated_engineering_output_v4,
@@ -1930,6 +1930,17 @@ def test_fuel_coupled_cycle_primary_recomputes_species_and_energy_sources():
         chemistry["fuel_burned_kg"] * 43_000_000.0 * .8)
     assert abs(primary["conservation"]["energy_residual_J"]) < 1e-10
     assert abs(primary["conservation"]["species_residual_kg"][1]) < 1e-15
+
+
+def test_offline_angle_replay_uses_nominal_step_not_subtracted_float_coordinates():
+    start = 261.0177177155575
+    end = 261.13828828666817
+    attempted = 0.12057057111061908
+    # The accepted step was passed directly to SSPRK2. Reconstructing it from
+    # the accumulated angular coordinates can differ by a few ULPs and changes
+    # the replay's derived RPM/volume rates.
+    assert _angle_increment_matches(end, start, attempted)
+    assert not _angle_increment_matches(end + 1e-8, start, attempted)
 
 
 def test_offline_cycle_audit_rebuilds_supported_configuration_and_rejects_tampering():

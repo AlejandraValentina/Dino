@@ -14,7 +14,7 @@ import hashlib
 import inspect
 import json
 import sys
-from math import fsum, isclose, isfinite, pi
+from math import fsum, isclose, isfinite, pi, ulp
 from types import MappingProxyType
 from collections.abc import Mapping
 from typing import Callable
@@ -162,6 +162,19 @@ def _integrated_nominal_step_end(engine, angle: float, target_angle: float,
         if angle < boundary < end:
             end = boundary
     return end
+
+
+def _angle_increment_matches(actual_end: float, actual_start: float,
+                             expected_increment: float) -> bool:
+    """Allow only coordinate-subtraction roundoff when auditing step angles.
+
+    The accepted increment is recovered by subtracting accumulated angular
+    coordinates, whereas retry increments are stored directly. Exact equality
+    can reject a valid retry halving by a few ULPs at large crank angles.
+    """
+    actual_increment = actual_end - actual_start
+    scale = max(abs(actual_end), abs(actual_start), abs(expected_increment), 1.0)
+    return abs(actual_increment - expected_increment) <= 4.0 * ulp(scale)
 
 
 def _restore_validated_p7_event(value):
@@ -3567,16 +3580,16 @@ def audit_integrated_cycle_primary(cycle_record: dict) -> dict:
                     f"offline rejected-step attempt was admissible at {angle_start:.12g} degrees")
             previous_attempt = proposed
             consumed_rejections += 1
-        accepted_delta = float(row["angle_end_deg"]) - angle_start
-        if attempted and accepted_delta != previous_attempt / 2.0:
+        replay_step_deg = (previous_attempt / 2.0 if attempted
+                           else nominal_delta)
+        if not _angle_increment_matches(
+                float(row["angle_end_deg"]), angle_start, replay_step_deg):
             raise ValueError(
-                f"offline accepted step does not follow rejected-step halving at {angle_start:.12g} degrees")
-        if not attempted and accepted_delta != nominal_delta:
-            raise ValueError(
-                f"offline accepted step omits a rejection from the nominal proposal at {angle_start:.12g} degrees")
+                f"offline accepted step omits a rejection or does not match its "
+                f"nominal/retry step at {angle_start:.12g} degrees")
         replayed_row = replay.step(
             float(row["dt_s"]),
-            accepted_delta)
+            replay_step_deg)
         if _jsonify(replayed_row) != _jsonify(row):
             raise ValueError(
                 f"offline SSPRK2 accepted-state replay differs at step {index}")

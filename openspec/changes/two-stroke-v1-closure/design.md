@@ -140,6 +140,17 @@ trial is persisted with angle, attempted step and reason; retry/halving may not
 be silent. Restart and independent replay compare physical arrays, species,
 ledgers, events and outputs, not only digests.
 
+C12 mesh-level A1 exposed a replay-boundary defect: the auditor reconstructed
+the accepted SSPRK angle increment from `angle_end - angle_start`. At large
+unwrapped angles, that subtraction can differ by a few ULPs from the exact
+nominal/retry step passed to the solver, changing derived RPM and volume rates.
+The correction replays the validated nominal proposal or final retry half-step
+and checks the stored endpoint within four ULPs. This preserves the scheduler,
+retry chain, numerical trajectory, and all scientific thresholds. The initial
+C12 run is retained as incomplete/invalid evidence; a separately committed R1
+preregistration records the corrected replay source before any repeated mesh
+execution.
+
 Internal adversarial review is required before a candidate; it is labelled
 self-review unless a separate, actually independent reviewer and durable
 receipt exist. A terminal candidate is not experimental validation and makes

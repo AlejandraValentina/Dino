@@ -46,8 +46,12 @@
        while preserving internally consistent hashes and counters. The
        independent adversarial follow-up confirmed the identified gaps are
        closed. The affected integrated/evidence suite passes 75 tests and
-       strict OpenSpec validation passes. This closes the C10 foundation, not
-       an A'/B' campaign.
+       strict OpenSpec validation passes. C12 later exposed a further replay
+       defect: subtracting accumulated angles to recover the accepted step
+       changed a replayed RPM/volume rate by floating-point roundoff. The
+       auditor now uses the validated nominal/retry step and checks endpoint
+       agreement within four coordinate ULPs. C12's first run is preserved as
+       incomplete/invalid; no campaign evidence is claimed.
 - [ ] C11 exact continuous/checkpoint/restart/replay comparisons for both primes.
 - [ ] C12 preregister and complete transfer/exhaust integrated mesh study.
 - [ ] C13 commit immutable A'/B' campaign preregistration before any campaign.

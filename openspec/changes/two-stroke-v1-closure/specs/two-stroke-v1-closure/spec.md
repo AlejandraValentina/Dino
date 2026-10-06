@@ -151,7 +151,12 @@ accepted state by the offline auditor; the failure reason and exact half-step
 retry sequence MUST match. For every accepted start, the auditor MUST also
 reconstruct the runner's nominal 0.5-degree/event proposal and reject an
 accepted shortened step without a matching rejected-trial chain. Retry/halving
-MUST NOT be silent.
+MUST NOT be silent. During replay the accepted step increment MUST be taken
+from the validated nominal proposal or final rejected-step halving record,
+not reconstructed by subtracting accumulated angle coordinates. The persisted
+end angle MUST agree with that increment within four float64 ULPs of the angle
+coordinate; this permits coordinate-subtraction roundoff without relaxing the
+step sequence or solver replay.
 Continuous, checkpoint/restart, and independent replay MUST compare full
 physical state, species, ledgers and relevant outputs, not only digest strings.
 

@@ -32,7 +32,7 @@ from scripts.produce_integrated_cycle_evidence import advance_to  # noqa: E402
 PROGRAM = Path("results/2t-commercial-core-20261002")
 FIXTURE_DIR = PROGRAM / "fixtures" / "v1-prime-mesh"
 RUN_DIR = Path("results/2t-v1-closure-20261006/mesh-study")
-PREREG_PATH = RUN_DIR / "preregistration.json"
+RECOVERY_R1_DIR = RUN_DIR.with_name("mesh-study-r1")
 SCHEMA = "MOTORSIM_2T_V1_MESH_STUDY_PREREGISTRATION_V1"
 MESH_LEVELS = ((2, .2), (4, .1), (8, .05), (16, .025))
 MESH_TOLERANCE = .02
@@ -78,7 +78,7 @@ def mechanical_loss_model() -> dict:
     )).to_dict()
 
 
-def prepare() -> dict:
+def prepare(run_dir: Path = RUN_DIR, *, amendment: dict | None = None) -> dict:
     builder = fixture_builder()
     builder_source = inspect.getsource(builder).encode("utf-8")
     run_source = Path(__file__).read_bytes()
@@ -191,8 +191,13 @@ def prepare() -> dict:
         },
         "status": "PREREGISTERED_NOT_RUN",
     }
-    PREREG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    PREREG_PATH.write_bytes(json.dumps(prereg, sort_keys=True, indent=2,
+    prereg_path = run_dir / "preregistration.json"
+    if prereg_path.exists():
+        raise ValueError("C12 preregistration already exists; preserve it and use a new amendment path")
+    if amendment is not None:
+        prereg["amendment"] = amendment
+    prereg_path.parent.mkdir(parents=True, exist_ok=True)
+    prereg_path.write_bytes(json.dumps(prereg, sort_keys=True, indent=2,
                                        ensure_ascii=False, allow_nan=False).encode("utf-8") + b"\n")
     return prereg
 
@@ -271,8 +276,9 @@ def _pairwise(coarse: dict, fine: dict) -> dict:
             "pass": all(item["pass"] for item in rows.values())}
 
 
-def run() -> dict:
-    prereg = committed_json(PREREG_PATH.as_posix())
+def run(run_dir: Path = RUN_DIR) -> dict:
+    prereg_path = run_dir / "preregistration.json"
+    prereg = committed_json(prereg_path.as_posix())
     if prereg.get("schema") != SCHEMA or prereg.get("status") != "PREREGISTERED_NOT_RUN":
         raise ValueError("C12 preregistration is absent, changed, or already consumed")
     builder = fixture_builder()
@@ -293,7 +299,7 @@ def run() -> dict:
             wrapper = committed_json(entry["fixture_config_path"])
             if sha(canonical(wrapper)) != entry["fixture_config_sha256"]:
                 raise ValueError("C12 fixture config differs from preregistered hash")
-            fixture_dir = ROOT / RUN_DIR / fixture_id.lower()
+            fixture_dir = ROOT / run_dir / fixture_id.lower()
             fixture_dir.mkdir(parents=True, exist_ok=True)
             marker = fixture_dir / f"mesh-{entry['mesh_level']}-run-started.json"
             dest = fixture_dir / f"mesh-{entry['mesh_level']}-cycle-1.json.gz"
@@ -348,14 +354,14 @@ def run() -> dict:
     result = {"schema": "MOTORSIM_2T_V1_MESH_STUDY_RESULT_V1",
               "preregistration_sha256": sha(canonical(prereg)),
               "preregistration_commit": subprocess.run(
-                  ["git", "log", "-1", "--format=%H", "--", PREREG_PATH.as_posix()],
+                  ["git", "log", "-1", "--format=%H", "--", prereg_path.as_posix()],
                   cwd=ROOT, capture_output=True, check=True, text=True).stdout.strip(),
               "classification": "SYNTHETIC_ASSUMPTION_CONDITIONAL_ON_P4",
               "fixtures": records, "decisions": decisions,
               "overall_status": ("PASS" if all(
                   value["status"] == "PASS" for value in decisions.values())
                   else "C12_MESH_UNRESOLVED")}
-    result_path = ROOT / RUN_DIR / "result.json"
+    result_path = ROOT / run_dir / "result.json"
     result_path.parent.mkdir(parents=True, exist_ok=True)
     result_path.write_bytes(json.dumps(result, sort_keys=True, indent=2,
                                        allow_nan=False).encode()+b"\n")
@@ -364,15 +370,43 @@ def run() -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("prepare", "run"))
+    parser.add_argument("mode", choices=("prepare", "run", "prepare-r1", "run-r1"))
     args = parser.parse_args()
-    if args.mode == "prepare":
-        result = prepare()
+    if args.mode in ("prepare", "prepare-r1"):
+        run_dir = RECOVERY_R1_DIR if args.mode.endswith("-r1") else RUN_DIR
+        amendment = None
+        if args.mode == "prepare-r1":
+            amendment = {
+                "schema": "MOTORSIM_2T_V1_MESH_STUDY_AMENDMENT_R1",
+                "supersedes": RUN_DIR.as_posix() + "/preregistration.json",
+                "reason": (
+                    "The first C12 run completed and audited A mesh 0, then the "
+                    "C10 offline auditor rejected A mesh 1 because replay used "
+                    "angle_end-angle_start instead of the nominal/retry step "
+                    "actually passed to SSPRK2. Coordinate subtraction changed "
+                    "derived RPM and volume rates by roundoff. The solver, "
+                    "physics, meshes, fixture inputs, horizon, thresholds, and "
+                    "decision rules are unchanged; only replay uses the step "
+                    "frozen by the scheduler and rejection log."
+                ),
+                "prior_run_disposition": "INVALIDATED_AS_INCOMPLETE_EVIDENCE; artifacts_preserved",
+                "diagnostic_replays": (
+                    "A mesh 1 was executed twice in-memory only to isolate the "
+                    "auditor mismatch; those unpersisted records are discarded "
+                    "and are not campaign evidence. R1 reruns the complete fixed "
+                    "mesh set under its new source binding."
+                ),
+                "campaign_changes": [],
+            }
+        result = prepare(run_dir, amendment=amendment)
         print(json.dumps({"status": result["status"],
                           "levels": len(MESH_LEVELS),
-                          "fixtures": list(result["fixtures"])}, sort_keys=True))
+                          "fixtures": list(result["fixtures"]),
+                          "preregistration": (run_dir / "preregistration.json").as_posix()},
+                         sort_keys=True))
     else:
-        result = run()
+        run_dir = RECOVERY_R1_DIR if args.mode.endswith("-r1") else RUN_DIR
+        result = run(run_dir)
         print(json.dumps({"overall_status": result["overall_status"],
                           "decisions": result["decisions"]}, sort_keys=True))
         return 0 if result["overall_status"] == "PASS" else 2
