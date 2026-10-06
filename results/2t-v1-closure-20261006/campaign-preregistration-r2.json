@@ -58,7 +58,7 @@
         "detector": "22df512d6e48b95b506401005b466d37038eebd888d684a287e70c1d76cd3193",
         "fixture": "97a7baceeac4ee900275f8b652aab19286e004be3e6af996c18be9b24ffaf7d1",
         "fuel": "f84f2ae402b8030e9305345cd030a141c519adca63fc4b48b001b0eb4609cea7",
-        "producer": "350ef4d57de87eb1b4470fb60151b8ecac9fca2b30688b7556b79ed1e8bd4db8",
+        "producer": "c39a1d6b3806dc2edf63b5f2fe26e7a4bb52492908359832523847e85e999b38",
         "solver": "b4e8021eca2e32a368f6e1f977f685720a6436862fcad9b6a34798e5cf77de3d",
         "thresholds": "43419bccbbcefaf04200448148e74d576d6fa1ecb0d9adf9c26a614e67828eff"
       }
@@ -75,7 +75,7 @@
         "detector": "22df512d6e48b95b506401005b466d37038eebd888d684a287e70c1d76cd3193",
         "fixture": "51cd1639ba6825269ce7bafe0cc07ad10e7b5c38b7bcec07590d828754d12f84",
         "fuel": "f84f2ae402b8030e9305345cd030a141c519adca63fc4b48b001b0eb4609cea7",
-        "producer": "350ef4d57de87eb1b4470fb60151b8ecac9fca2b30688b7556b79ed1e8bd4db8",
+        "producer": "c39a1d6b3806dc2edf63b5f2fe26e7a4bb52492908359832523847e85e999b38",
         "solver": "b4e8021eca2e32a368f6e1f977f685720a6436862fcad9b6a34798e5cf77de3d",
         "thresholds": "43419bccbbcefaf04200448148e74d576d6fa1ecb0d9adf9c26a614e67828eff"
       }
