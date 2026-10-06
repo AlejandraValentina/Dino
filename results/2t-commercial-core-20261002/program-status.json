@@ -1,5 +1,5 @@
 {
-  "schema": "MOTORSIM_2T_COMMERCIAL_CORE_STATUS_V1",
+  "schema": "MOTORSIM_PROGRAM_STATUS_V2",
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-06",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
@@ -799,7 +799,7 @@
       "dependencies": [
         "AUD-11"
       ],
-      "state": "DONE_CONDITIONAL",
+      "state": "DONE",
       "blocker": null,
       "commits": [
         "3a951e0",
@@ -841,7 +841,8 @@
         "skeptic": "Do not infer a carburetor restriction, real fuel properties, periodicity, or physical KT100 performance from the capability tests or from reaching 390 degrees.",
         "contract": "Close implementation of the approved synthetic boundary contract as DONE_CONDITIONAL; keep boundary_physics_result NOT_QUALIFIED and KT100 unverified pending separately authorized evidence.",
         "decision": "No additional local implementation blocker for the approved synthetic boundary. Any KT100 requalification requires a new preregistration/authorization; no rerun is authorized here."
-      }
+      },
+      "qualification": "Pre-V2 state DONE_CONDITIONAL: scope limited as described in evidence/next_action; not end-to-end acceptance."
     },
     {
       "id": "integrated-intake-plenum",
@@ -918,7 +919,7 @@
       "dependencies": [
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "DONE_CONDITIONAL",
+      "state": "DONE",
       "blocker": null,
       "commits": [
         "004b1841579497fe0e2273257be0104ccaa4abd2",
@@ -940,7 +941,9 @@
         "skeptic": "No real engine dimensions were inferred. Four P6 species remain authoritative, donor state is selected by signed flow, and unsupported stop impacts fail transactionally rather than silently clamping.",
         "contract": "DYNAMIC_REED_HINGED_FLAP_GEOMETRY_V1 preregistration was committed before implementation-level verification; variable-volume SSPRK2, energy/species, identity and restart obligations are covered.",
         "decision": "DONE_CONDITIONAL for the reusable synthetic capability. Real-engine applicability and experimental claims remain outside evidence."
-      }
+      },
+      "qualification": "Pre-V2 state DONE_CONDITIONAL: scope limited as described in evidence/next_action; not end-to-end acceptance.",
+      "classification": "POST_2T_V1_BACKLOG"
     },
     {
       "id": "AUD-01",
@@ -1445,13 +1448,14 @@
       "dependencies": [
         "17d-fuel-accounting-semantics"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "No approved fuel record supplies stoichiometric AFR, LHV and provenance, and P7 prescribed Q_F is not specified as a fuel chemical energy. These values cannot be inferred from P6 pseudo-species or the V4 event ratio.",
+      "state": "DONE",
+      "blocker": null,
       "commits": [],
       "evidence": [
         "motorsim/fuel.py::FuelProperties requires explicit positive stoichiometric_afr, lower_heating_value_j_kg and provenance; no default exists.",
         "motorsim/p7_prescribed.py defines Q_F as prescribed bookkeeping and existing integrated outputs disclaim LHV equivalence.",
-        "V4 event ratio is explicitly pseudo-species fresh_air/fuel and not AFR."
+        "V4 event ratio is explicitly pseudo-species fresh_air/fuel and not AFR.",
+        "Superseded per queue items C4 and fuel-library-combustion-v2 and openspec/changes/two-stroke-v1-closure/tasks.md (C4, additive capability section)."
       ],
       "triage": {
         "forensics": "V4 now derives fresh_air/fuel pseudo-species masses at the exact last transfer/exhaust closure. FuelProperties remains an explicit separate input.",
@@ -1460,7 +1464,10 @@
         "contract": "Keep AFR/equivalence ratio and LHV outputs UNDEFINED until an explicit fuel-properties record with provenance is supplied; do not set defaults.",
         "decision": "Remain BLOCKED_LOCAL on the concrete missing external property record. This is a capability-input limit, not a reason to stop independent engineering."
       },
-      "next_action": "Resume automatically when an approved explicit fuel-properties input is part of scope; no new chemistry is added."
+      "next_action": "Resume automatically when an approved explicit fuel-properties input is part of scope; no new chemistry is added.",
+      "resolution": "SUPERSEDED_BY_LATER_CAPABILITY",
+      "previous_blocker": "No approved fuel record supplies stoichiometric AFR, LHV and provenance, and P7 prescribed Q_F is not specified as a fuel chemical energy. These values cannot be inferred from P6 pseudo-species or the V4 event ratio.",
+      "qualification": "Explicit fuel properties now exist only as SYNTHETIC_FUEL_SURROGATE_V1 (C4, FUEL_COUPLED_COMBUSTION_V1) and the MODELED_SURROGATE C8H18 profile of FUEL_LIBRARY_V1 (fuel-library-combustion-v2). ANCAP chemistry remains unknown; no real-fuel claim; P7 Q_F is still not an LHV."
     },
     {
       "id": "kt100-r1-cycle24-forensics-roundoff",
@@ -1504,8 +1511,7 @@
       "id": "dynamic-reed-coupled-two-volume-v1",
       "description": "Implement and verify preregistered synthetic hinged-flap geometry and a two-0D-volume SSPRK2/species/energy coupled reed component",
       "dependencies": [
-        "dynamic-reed-stage-coupling",
-        "004b184 dynamic reed preregistration"
+        "dynamic-reed-stage-coupling"
       ],
       "state": "DONE",
       "blocker": null,
@@ -1520,7 +1526,10 @@
         "SELF_REVIEW only; no independent review artifact",
         "Component-level evidence only; IntegratedEngine2T binding not claimed"
       ],
-      "next_action": "Standalone component contract is integrated by dynamic-reed-stage-coupling in commit 062d8eb; preserve its two-volume tests as component-level regressions."
+      "next_action": "Standalone component contract is integrated by dynamic-reed-stage-coupling in commit 062d8eb; preserve its two-volume tests as component-level regressions.",
+      "external_dependencies": [
+        "004b184 dynamic reed preregistration"
+      ]
     },
     {
       "id": "C1",
@@ -1707,9 +1716,7 @@
       "state": "READY",
       "blocker": null,
       "commits": [],
-      "evidence": [
-        []
-      ],
+      "evidence": [],
       "next_action": "Implement and verify this gate in declared order"
     },
     {
@@ -1741,13 +1748,12 @@
         "C11",
         "C12"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "C11 continuous/checkpoint/restart/replay gate remains incomplete",
+      "state": "WAITING",
       "commits": [],
-      "evidence": [
-        []
-      ],
-      "next_action": "Implement and verify this gate in declared order"
+      "evidence": [],
+      "next_action": "Implement and verify this gate in declared order",
+      "previous_blocker": "C11 continuous/checkpoint/restart/replay gate remains incomplete",
+      "blocker": null
     },
     {
       "id": "C14",
@@ -1758,13 +1764,12 @@
         "C12",
         "C13"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "Prerequisite gates not yet complete",
+      "state": "WAITING",
       "commits": [],
-      "evidence": [
-        []
-      ],
-      "next_action": "Implement and verify this gate in declared order"
+      "evidence": [],
+      "next_action": "Implement and verify this gate in declared order",
+      "previous_blocker": "Prerequisite gates not yet complete",
+      "blocker": null
     },
     {
       "id": "C15",
@@ -1775,13 +1780,12 @@
         "C12",
         "C13"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "Prerequisite gates not yet complete",
+      "state": "WAITING",
       "commits": [],
-      "evidence": [
-        []
-      ],
-      "next_action": "Implement and verify this gate in declared order"
+      "evidence": [],
+      "next_action": "Implement and verify this gate in declared order",
+      "previous_blocker": "Prerequisite gates not yet complete",
+      "blocker": null
     },
     {
       "id": "C16",
@@ -1789,13 +1793,12 @@
       "dependencies": [
         "C13"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "Prerequisite gates not yet complete",
+      "state": "WAITING",
       "commits": [],
-      "evidence": [
-        []
-      ],
-      "next_action": "Implement and verify this gate in declared order"
+      "evidence": [],
+      "next_action": "Implement and verify this gate in declared order",
+      "previous_blocker": "Prerequisite gates not yet complete",
+      "blocker": null
     },
     {
       "id": "C17",
@@ -1805,13 +1808,12 @@
         "C15",
         "C16"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "Prerequisite gates not yet complete",
+      "state": "WAITING",
       "commits": [],
-      "evidence": [
-        []
-      ],
-      "next_action": "Implement and verify this gate in declared order"
+      "evidence": [],
+      "next_action": "Implement and verify this gate in declared order",
+      "previous_blocker": "Prerequisite gates not yet complete",
+      "blocker": null
     },
     {
       "id": "C18",
@@ -1819,13 +1821,12 @@
       "dependencies": [
         "C17"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "Prerequisite gates not yet complete",
+      "state": "WAITING",
       "commits": [],
-      "evidence": [
-        []
-      ],
-      "next_action": "Implement and verify this gate in declared order"
+      "evidence": [],
+      "next_action": "Implement and verify this gate in declared order",
+      "previous_blocker": "Prerequisite gates not yet complete",
+      "blocker": null
     },
     {
       "id": "fuel-library-combustion-v2",
@@ -1834,7 +1835,7 @@
         "fuel-library-v1",
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "DONE_CONDITIONAL",
+      "state": "DONE",
       "blocker": null,
       "commits": [
         "50eefbdb6b91757eb45fe41f7b1a696d63a8ed81"
@@ -1846,7 +1847,43 @@
         "91 tests passed for fuel library, fuel combustion and IntegratedEngine2T; 16 producer/evaluator/fuel-combustion tests passed; 15 additional cycle-primary/output checks passed; OpenSpec strict and compileall passed.",
         "No campaign was run; synthetic rate parameters do not claim ANCAP properties or engine validation."
       ],
-      "next_action": "Preserve ANCAP chemistry as unknown. Any operating campaign using the modeled surrogate must be separately preregistered and must not be presented as ANCAP or experimental evidence."
+      "next_action": "Preserve ANCAP chemistry as unknown. Any operating campaign using the modeled surrogate must be separately preregistered and must not be presented as ANCAP or experimental evidence.",
+      "qualification": "Pre-V2 state DONE_CONDITIONAL: scope limited as described in evidence/next_action; not end-to-end acceptance.",
+      "classification": "POST_2T_V1_BACKLOG"
+    },
+    {
+      "id": "V2-early-regression",
+      "description": "Early L0 drift check on current HEAD: focused integrated/evidence tests and P4-P8 regression launched through scripts/agents/run_logged.py; record only the summary. Not the C17 closing run and not gate evidence.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "evidence": [],
+      "next_action": "Run with run_logged.py, log counts in progress_log, open new tasks for any failure.",
+      "objective": "MOTORSIM_2T_V1_CLOSURE",
+      "owner_role": "verification",
+      "evidence_level": "L0",
+      "write_scope": [
+        "results/2t-v1-closure-20261006/early-regression"
+      ],
+      "classification": "BLOCKS_2T_V1"
+    },
+    {
+      "id": "V2-C13-draft",
+      "description": "Non-binding draft of the A'/B' campaign preregistration content (horizon, detectors, outputs, RPM pair for C16) so C13 can be committed immediately once C11/C12 are DONE. The draft is not the C13 preregistration and fixes nothing that depends on the mesh study.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "evidence": [],
+      "next_action": "Write the draft from the closure spec/design; leave mesh-dependent values as explicit placeholders.",
+      "objective": "MOTORSIM_2T_V1_CLOSURE",
+      "owner_role": "evidence/release reviewer",
+      "evidence_level": "L0",
+      "write_scope": [
+        "docs/gasdynamic/v1_closure_campaign_preregistration_draft.md"
+      ],
+      "classification": "BLOCKS_2T_V1"
     }
   ],
   "audit_remediation_mode": false,
@@ -2040,6 +2077,97 @@
     ],
     "next_action": "Complete C11 exact continuous/checkpoint/restart/replay comparisons for A-prime and B-prime; then commit C13 preregistration before either campaign.",
     "in_progress_tasks": 0,
-    "blocker_triage_date": "2026-10-06"
+    "blocker_triage_date": "2026-10-06",
+    "superseded_by": "current_objective, gate_status, progress_log (MOTORSIM_PROGRAM_STATUS_V2)"
+  },
+  "schema_history": [
+    "MOTORSIM_2T_COMMERCIAL_CORE_STATUS_V1"
+  ],
+  "current_objective": {
+    "id": "MOTORSIM_2T_V1_CLOSURE",
+    "change": "openspec/changes/two-stroke-v1-closure",
+    "spec": "openspec/changes/two-stroke-v1-closure/specs/two-stroke-v1-closure/spec.md",
+    "completion_criterion": "All gate tasks C1-C18 DONE and a terminal classification recorded in gate_status: PASS = GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED (synthetic, CONDITIONAL_ON_P4, no experimental validation) when FIXTURE_A_PRIME and FIXTURE_B_PRIME pass every requirement of the spec; FAIL_TERMINAL = exact failed/incomplete gates stated without extending a horizon or relaxing a criterion.",
+    "gate_tasks": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15",
+      "C16",
+      "C17",
+      "C18"
+    ],
+    "durable_queue": "results/2t-commercial-core-20261002/program-status.json#queue",
+    "set_by": "owner order 2026-10-06 (AGENTS_V2)"
+  },
+  "objectives": [
+    {
+      "id": "MOTORSIM_2T_V1_CLOSURE",
+      "state": "ACTIVE",
+      "owner_approved": true
+    },
+    {
+      "id": "ENGINE_PHYSICS_V1",
+      "state": "PROPOSED",
+      "owner_approved": false,
+      "summary": "Single production core plus STANDARD_V1 engine physics (fuel-bound Wiebe, two-zone scavenging profile, port Cd, cylinder/duct heat transfer, FMEP) and plausibility gates."
+    },
+    {
+      "id": "FULL_RPM_SWEEP_V1",
+      "state": "PROPOSED",
+      "owner_approved": false,
+      "summary": "ENGINEERING FAST mode, compiled kernels, parallel RPM points with warm start; 12-15 point WOT sweep in minutes with configuration comparison."
+    },
+    {
+      "id": "TUNING_WORKFLOW_AND_REFERENCE_CORRELATION_V1",
+      "state": "PROPOSED",
+      "owner_approved": false,
+      "summary": "KT100 sanity/calibration tiers, dynamic reed V1, exhaust builder, port time-area, exhaust-port wave plots."
+    }
+  ],
+  "owner_decisions_pending": [],
+  "hard_stop": null,
+  "decisions": [],
+  "progress_log": [
+    {
+      "at": "2026-10-06T15:40:12+00:00",
+      "task": "AGENTS_V2",
+      "kind": "process",
+      "summary": "Migrated program status to V2: schema -> MOTORSIM_PROGRAM_STATUS_V2; current_objective added; objectives added; owner_decisions_pending added; hard_stop added; decisions added; progress_log added; reservoir-boundary-v2: DONE_CONDITIONAL -> DONE + qualification; dynamic-reed-stage-coupling: DONE_CONDITIONAL -> DONE + qualification; 17d-fuel-properties: obsolete BLOCKED_LOCAL -> DONE (super"
+    }
+  ],
+  "gate_status": {
+    "objective": "MOTORSIM_2T_V1_CLOSURE",
+    "state": "OPEN",
+    "classification": null,
+    "evidence": [],
+    "gate_tasks_total": 18,
+    "gate_tasks_done": 11,
+    "gate_task_states": {
+      "DONE": 11,
+      "READY": 1,
+      "WAITING": 6
+    },
+    "remaining": [
+      "C11",
+      "C13",
+      "C14",
+      "C15",
+      "C16",
+      "C17",
+      "C18"
+    ],
+    "updated_at": "2026-10-06T15:40:12+00:00"
   }
 }

@@ -1,5 +1,9 @@
 # Programa MOTORSIM_2T_COMMERCIAL_CORE
 
+> **Vista derivada, no autoridad.** El estado operativo de estas tareas vive en
+> `results/2t-commercial-core-20261002/program-status.json` → `queue` (AGENTS.md §5).
+> Ante divergencia prevalece la cola.
+
 Estado reconstruido desde `401d8d7`. Las fases son una cola durable única; marcar
 solo trabajo comprobado. Mantener P4–P9 y los recibos históricos intactos.
 

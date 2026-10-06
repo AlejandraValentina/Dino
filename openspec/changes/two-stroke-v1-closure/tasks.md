@@ -1,5 +1,9 @@
 # Closure task queue
 
+> **Vista derivada, no autoridad.** El estado operativo de estas tareas vive en
+> `results/2t-commercial-core-20261002/program-status.json` → `queue` (AGENTS.md §5).
+> Ante divergencia prevalece la cola.
+
 - [x] C1 network endpoint pressure traction and reaction/equilibrium tests.
 - [x] C2 integrate OPEN_END_PLENUM_V2 into IntegratedEngine2T config and restore;
       run only a short diagnostic before campaign preparation. (Integrated
