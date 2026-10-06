@@ -163,6 +163,20 @@ class MigrationTests(unittest.TestCase):
         self.assertEqual(states["C2"]["dependencies"], ["C1"])
         self.assertEqual(data["schema"], ps.SCHEMA_V2)
 
+    def test_dependency_wait_with_any_blocker_text_becomes_waiting(self):
+        data = self._v1()
+        data["queue"] += [
+            _task("C3", "READY"),
+            _task("C4", "BLOCKED_LOCAL", ["C3"], blocker="C3 gate remains incomplete"),
+            _task("C5", "BLOCKED_LOCAL", ["C1"], blocker="real local blocker"),
+        ]
+        ps.migrate_v2(data)
+        states = {t["id"]: t for t in data["queue"]}
+        self.assertEqual(states["C4"]["state"], "WAITING")
+        self.assertEqual(states["C4"]["previous_blocker"], "C3 gate remains incomplete")
+        # Dependencies all DONE: a genuine blocker stays BLOCKED_LOCAL for check() to flag.
+        self.assertEqual(states["C5"]["state"], "BLOCKED_LOCAL")
+
 
 class CliTests(unittest.TestCase):
     def setUp(self):

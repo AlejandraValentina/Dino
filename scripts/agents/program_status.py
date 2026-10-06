@@ -348,7 +348,17 @@ def migrate_v2(data: dict) -> list[str]:
             if tid in POST_V1_BACKLOG_IDS:
                 task.setdefault("classification", "POST_2T_V1_BACKLOG")
             changes.append(f"{tid}: DONE_CONDITIONAL -> DONE + qualification")
-        if task.get("state") == "BLOCKED_LOCAL" and task.get("blocker") == "Prerequisite gates not yet complete":
+        # A BLOCKED_LOCAL without an unblock plan whose dependencies are not all DONE
+        # is a dependency wait; the original blocker text is kept for reassessment.
+        if (
+            task.get("state") == "BLOCKED_LOCAL"
+            and not task.get("unblock_tasks")
+            and not task.get("no_local_unblock_reason")
+            and (
+                task.get("blocker") == "Prerequisite gates not yet complete"
+                or any(states.get(dep) != "DONE" for dep in task.get("dependencies", []))
+            )
+        ):
             task["state"] = "WAITING"
             task["previous_blocker"] = task.pop("blocker")
             task["blocker"] = None
