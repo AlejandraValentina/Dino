@@ -1119,7 +1119,8 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
                             open_end_plenum_v2=False,
                             fuel_coupled_combustion=None,
                             p7_enabled_with_fuel=False, rpm=3000.0,
-                            transfer_cells=2, exhaust_cell_length_m=.2):
+                            transfer_cells=2, exhaust_cell_length_m=.2,
+                            inlet_species_donor=(.98, .02, 0.0, 0.0)):
     if not math.isfinite(rpm) or rpm <= 0.0:
         raise ValueError("fixture RPM must be positive and finite")
     rpm = float(rpm)
@@ -1220,7 +1221,7 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
         # Start both chambers at the same atmospheric p/T as the ducts.
         (1.1768, 0.0, 101325.0, 1.0), (1.1768, 0.0, 101325.0, 1.0),
         paths, states, geometry, species=species,
-        atmosphere_species=(.98, .02, 0.0, 0.0),
+        atmosphere_species=inlet_species_donor,
         inlet_boundary=(OpenEndPlenumV2Boundary(101325.0, 300.0, 1.0)
                         if open_end_plenum_v2 else
                         Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0))),
@@ -1234,7 +1235,12 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
                                          if chamber_length_scale == 1.0 else
                                          "internal-cycle-b-long-chamber-synthetic-v1")),
                            "chamber_length_scale": chamber_length_scale,
-                           "ports": ports.to_dict(), "chamber": chamber.to_dict()},
+                           "ports": ports.to_dict(), "chamber": chamber.to_dict(),
+                           "intake_donor_species": list(inlet_species_donor),
+                           "intake_donor_species_provenance": "SYNTHETIC_ASSUMPTION",
+                           "intake_donor_interpretation": (
+                               "synthetic premixed intake reservoir composition; "
+                               "not ambient-air composition")},
         reed_petals=((reed,) if with_reed else ()),
         dynamic_reed_binding=dynamic_reed_binding,
         port_binding=binding, slider_crank=slider,
@@ -2097,6 +2103,9 @@ def test_internal_cycle_fixture_supports_frozen_rpm_and_nested_mesh_levels():
                if duct["role"] == "transfer")
     assert len(next(duct["mesh"]["volumes"] for duct in config["ducts"]
                     if duct["role"] == "exhaust")) > 5
+    assert config["geometry_identity"]["intake_donor_species_provenance"] == \
+        "SYNTHETIC_ASSUMPTION"
+    assert config["atmosphere_species"] == [.98, .02, 0.0, 0.0]
     assert restored.configuration_dict() == config
 
 

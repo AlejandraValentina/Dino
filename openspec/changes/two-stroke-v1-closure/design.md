@@ -94,6 +94,13 @@ combustion, thermal, and mechanical-loss capability. Both use exact
 `SYNTHETIC_ASSUMPTION` provenance for synthetic parameters. Neither rewrites A,
 B, or C.
 
+For these synthetic fixtures, the open inlet reservoir uses the inherited
+0.98 fresh-air / 0.02 fuel mass-fraction donor as an explicit
+`SYNTHETIC_ASSUMPTION` representing premixed intake charge. It is not claimed to
+be ambient-air composition or a measured carburetor setting. The outlet donor
+remains fresh-air only. This fixed input avoids adding an injection or
+carburetor model to the gate.
+
 Before either campaign, a mesh study is preregistered and completed for at
 least three systematically refined transfer and exhaust meshes with fixed
 geometry, physics, RPM, and integrator settings. The convergence observables
@@ -103,6 +110,16 @@ the coarsest tested mesh for which each observable differs from the next
 refinement by at most 2% and both meshes meet strict admissibility and ledger
 closure; campaign meshes must be no coarser. This is a numerical-sufficiency
 test, not an experimental-accuracy claim.
+
+For this gate's preregistered refinement comparison, the positive dimensional
+observables use the symmetric relative difference
+`abs(a-b)/max(abs(a),abs(b))`, with two exact zeros treated as equal and a
+single zero compared against the nonzero magnitude. Signed mass/energy ledger
+residuals instead use their already-bound primary absolute-term scale: compare
+`abs(r_fine/S_fine - r_coarse/S_coarse)` against `0.02`. This is a 2-percentage-
+point bound on the change in signed ledger-scale residual, avoids an undefined
+relative percentage at roundoff zero, and does not replace the independent
+float64 `gamma_n` conservation gate for either mesh.
 
 Each prime fixture has a fixed 20-complete-cycle horizon, no early stopping and
 no post-result extension. Campaign preregistration freezes the exact hashes of
