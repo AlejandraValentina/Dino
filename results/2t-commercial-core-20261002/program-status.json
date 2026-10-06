@@ -1758,6 +1758,7 @@
       "evidence": [
         "Exclusive preregistration committed before either campaign in commit 8120ac9dfcf8778ee1e3f1825cc525407f879573.",
         "results/2t-v1-closure-20261006/campaign-preregistration.json freezes both C12 sufficient mesh-level-0 configurations, hashes, RPMs (3000/4000), 20-cycle horizon, restart cycle 10, periodicity detector thresholds/streak, evidence runner, auditor, and explicit no-extension failure status.",
+        "Corrected R2 preregistration committed before execution in commits c41ad20 and 9b73a1e; it freezes the same inputs, real PeriodicDetectorV2 execution, SHA bindings, and horizons A-prime 111 / B-prime 47 from ceil(4*tau)+3.",
         "C13 remains SYNTHETIC_ASSUMPTION_CONDITIONAL_ON_P4; no experimental or KT100 claim."
       ],
       "next_action": "C13 closed; run the frozen A-prime and B-prime campaigns",
@@ -2243,6 +2244,12 @@
       "task": "C15",
       "kind": "decision",
       "summary": "Owner authorized OPTION_B_FIX_RUNNER_SINGLE_R2. R1 preserved; detector omission and manual status corrected in provenance. R2 horizon preregistration pending with fixed rule ceil(4*tau)+3: B-prime 47 cycles."
+    },
+    {
+      "at": "2026-10-06T17:04:52+00:00",
+      "task": "C13",
+      "kind": "preregistration",
+      "summary": "R2 preregistration committed before execution in c41ad20 + 9b73a1e: corrected PeriodicDetectorV2 runner, SHA-bound solver/detector/auditor/producer/config/fixture/fuel/thresholds, horizons A=111 and B=47 from ceil(4*tau)+3, no R3."
     }
   ],
   "gate_status": {
