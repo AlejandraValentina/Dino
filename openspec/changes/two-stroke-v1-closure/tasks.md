@@ -78,27 +78,25 @@
       The separate freeze commit records the C12-selected mesh, hashes, RPMs,
       fixed 20-cycle horizon, restart cycle, detector thresholds, and failure
       classification before either campaign.
-- [ ] C14 run corrected R2 A' campaign and offline audit.
-      The fixed-horizon campaign and all 20 offline audits pass, but the
-      preregistered detector reports `NO_CONVERGENCE_WITHIN_HORIZON`.
-      R1 provenance is historical only: the detector was not executed and
-      primaries were `NOT_EVALUATED`; independent offline forensics confirms
-      P1=0, P2 A/B=0, detected period=None. One corrected R2 is authorized.
-- [ ] C15 run corrected R2 B' campaign and offline audit.
-      The fixed-horizon campaign and all 20 offline audits pass, but the
-      preregistered detector reports `NO_CONVERGENCE_WITHIN_HORIZON`.
-      R1 provenance is historical only; one corrected R2 is authorized under
-      the same fixtures, physics, mesh, RPMs, thresholds, and criteria.
+- [x] C14 run corrected R2 A' campaign and offline audit. R2 reached
+      `PERIOD_1` at cycle 73/111 with real `PeriodicDetectorV2`; all primary
+      audits passed. R1 remains historical: detector not executed, primaries
+      `NOT_EVALUATED`, and independent offline forensics confirms no convergence.
+- [x] C15 run corrected R2 B' campaign and offline audit. R2 reached
+      `PERIOD_1` at cycle 38/47 with real `PeriodicDetectorV2`; all primary
+      audits passed under the unchanged fixtures, physics, mesh, RPMs,
+      thresholds, and criteria.
 - [x] C16 exercise at least two distinct RPMs across the primes or preregistered
        sanity fixture.
 - [x] C17 run focused integration tests, full relevant P4–P8 regressions,
-      Focused integrated suite (72 tests), OpenSpec strict, diff check, LFS
-      fsck, and the frozen P9 hash check pass.
-       OpenSpec strict, git diff check, git lfs fsck, and verify P9 hash.
+      88 focused tests, OpenSpec strict, diff check, LFS fsck, and the frozen
+      P9 hash check pass.
 - [x] C18 keep this v1 definition of done versioned in OpenSpec; classify every
       newly discovered item BLOCKS_2T_V1 or POST_2T_V1_BACKLOG.
-      Terminal classification is `FAIL_TERMINAL`: C14 and C15 fail only because
-      the preregistered 20-cycle periodicity detector did not converge.
+      Terminal classification is `PASS`:
+      `GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED` (synthetic,
+      `CONDITIONAL_ON_P4`, no experimental validation). No R3 or KT100 campaign
+      was started.
 
 ## Additive capability already present but outside this v1 closure gate
 

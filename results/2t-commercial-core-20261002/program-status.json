@@ -1774,15 +1774,18 @@
         "C12",
         "C13"
       ],
-      "state": "READY",
-      "commits": [],
+      "state": "DONE",
+      "commits": [
+        "dddf243"
+      ],
       "evidence": [
         "Frozen A-prime campaign completed exactly 20 cycles; run_logged summary: results/2t-v1-closure-20261006/campaign-a-prime-r1-log/c14-a-prime-r1.summary.json.",
         "All 20 V3 primaries were independently audited offline; restart cycle 10 -> 11 matched exactly. Evidence: results/2t-v1-closure-20261006/campaign-a-prime-r1/.",
         "R1 provenance correction: the runner did not execute the detector, wrote NO_CONVERGENCE_WITHIN_HORIZON manually, and the primary records contain periodicity NOT_EVALUATED. Independent forensics confirms R1_NO_CONVERGENCE_CONFIRMED_OFFLINE; no R1 acceptance claim is made.",
-        "Authorized R2 A-prime attempt produced 56 complete audited cycles before the original cycle-56 restore path exceeded the performance budget; preserved in results/2t-v1-closure-20261006/campaign-a-prime-r2/. Corrected compact-checkpoint runner committed in dddf243; this partial attempt is not a final R2 classification."
+        "Authorized R2 A-prime attempt produced 56 complete audited cycles before the original cycle-56 restore path exceeded the performance budget; preserved in results/2t-v1-closure-20261006/campaign-a-prime-r2/. Corrected compact-checkpoint runner committed in dddf243; this partial attempt is not a final R2 classification.",
+        "Final corrected R2: results/2t-v1-closure-20261006/campaign-a-prime-r2-corrected-log/c14-r2-a-prime-corrected.summary.json and campaign-a-prime-r2-corrected/result.json; PeriodicDetectorV2 PERIOD_1 at cycle 73 of horizon 111, all 73 primary audits PASS, with SHA bindings for solver/detector/auditor/producer/config/fixture/fuel/thresholds."
       ],
-      "next_action": "Run the single preregistered corrected-runner R2 campaign for A-prime",
+      "next_action": "Proceed to C17 final checks",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -1795,15 +1798,18 @@
         "C12",
         "C13"
       ],
-      "commits": [],
-      "state": "READY",
+      "commits": [
+        "dddf243"
+      ],
+      "state": "DONE",
       "evidence": [
         "Frozen B-prime campaign completed exactly 20 cycles; run_logged summary: results/2t-v1-closure-20261006/campaign-b-prime-r1-log/c15-b-prime-r1.summary.json.",
         "All 20 V3 primaries were independently audited offline; restart cycle 10 -> 11 matched exactly. Evidence: results/2t-v1-closure-20261006/campaign-b-prime-r1/.",
         "R1 provenance correction: the runner did not execute the detector, wrote NO_CONVERGENCE_WITHIN_HORIZON manually, and the primary records contain periodicity NOT_EVALUATED. Independent forensics confirms R1_NO_CONVERGENCE_CONFIRMED_OFFLINE; no R1 acceptance claim is made.",
-        "Authorized R2 B-prime completed with real PeriodicDetectorV2 classification PERIOD_1 at 38 cycles; summary in results/2t-v1-closure-20261006/campaign-b-prime-r2-log/. Final combined R2 evidence remains pending A-prime corrected continuation."
+        "Authorized R2 B-prime completed with real PeriodicDetectorV2 classification PERIOD_1 at 38 cycles; summary in results/2t-v1-closure-20261006/campaign-b-prime-r2-log/. Exact executed provenance is retained: preregistration SHA 37e0e6855d7acac7164ddb006d51bf505e10453e417baa78fde351632dd9ab98 and producer/runner SHA c39a1d6b3806dc2edf63b5f2fe26e7a4bb52492908359832523847e85e999b38; detector, auditor, solver, config, fixture, fuel, and thresholds are SHA-bound in result.json.",
+        "Final combined R2 evidence has A-prime PERIOD_1 and B-prime PERIOD_1; no R3 is authorized or required."
       ],
-      "next_action": "Run the single preregistered corrected-runner R2 campaign for B-prime",
+      "next_action": "Proceed to C17 final checks",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -1830,13 +1836,14 @@
         "C15",
         "C16"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "commits": [],
       "evidence": [
-        "Focused integrated suite: 72 passed; summary at results/2t-v1-closure-20261006/c17-focused-tests-log/c17-focused-integrated-tests.summary.json.",
-        "OpenSpec strict validation PASS; git diff --check PASS; git lfs fsck OK; frozen P9 specification SHA-256 matches 79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d."
+        "Focused final integrated/detector suite: 88 passed; summary at results/2t-v1-closure-20261006/c17-final-focused-tests-log/c17-final-focused-tests.summary.json.",
+        "OpenSpec strict validation PASS; git diff --check PASS; git lfs fsck OK; frozen P9 specification SHA-256 matches 79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d.",
+        "Both corrected R2 fixture results are PERIOD_1 with all completed cycle audits PASS; no untracked scientific parameter changes were introduced."
       ],
-      "next_action": "Rerun final checks after the single authorized R2 campaign",
+      "next_action": "Classify the final objective and candidate freeze",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -1846,14 +1853,14 @@
       "dependencies": [
         "C17"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "commits": [],
       "evidence": [
         "OpenSpec v1 definition of done remains versioned in openspec/changes/two-stroke-v1-closure/.",
-        "C14 and C15 are classified BLOCKS_2T_V1 terminal failures due to preregistered NO_CONVERGENCE_WITHIN_HORIZON; no horizon extension, threshold relaxation, experimental claim, or KT100 claim is made.",
-        "C11, C12, C13, C16 and C17 satisfy their recorded criteria; final objective classification is FAIL_TERMINAL with exact failed gates C14 and C15."
+        "C14 and C15 satisfy the corrected R2 periodicity gate with PERIOD_1 from the real PeriodicDetectorV2; R1 remains historical and is not reinterpreted.",
+        "C11, C12, C13, C16 and C17 satisfy their recorded criteria; C18 must record PASS as GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED, synthetic and CONDITIONAL_ON_P4, with no experimental validation claim."
       ],
-      "next_action": "Classify the final R2 result; no R3 is authorized",
+      "next_action": "Record PASS classification and candidate freeze; no R3 is authorized",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -2264,31 +2271,33 @@
       "task": "C15",
       "kind": "gate",
       "summary": "R2 B-prime completed with real PeriodicDetectorV2: PERIOD_1 at 38 cycles, all completed primaries audited and SHA-bound. Combined R2 closure pending A-prime corrected run."
+    },
+    {
+      "at": "2026-10-06T19:23:47+00:00",
+      "task": "C14",
+      "kind": "task",
+      "summary": "R2 A-prime corrected runner completed with real PeriodicDetectorV2 PERIOD_1 at cycle 73/111; all 73 primaries audit PASS; SHA bindings validated."
+    },
+    {
+      "at": "2026-10-06T19:23:47+00:00",
+      "task": "C15",
+      "kind": "task",
+      "summary": "R2 B-prime completed with real PeriodicDetectorV2 PERIOD_1 at cycle 38/47; all 38 primaries audit PASS; exact executed provenance retained."
     }
   ],
   "gate_status": {
     "objective": "MOTORSIM_2T_V1_CLOSURE",
-    "state": "OPEN",
-    "classification": null,
+    "state": "PASS",
+    "classification": "GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED",
     "evidence": [
-      "Historical R1 terminal record preserved: C14/C15 runner did not execute the detector; primary records were NOT_EVALUATED.",
-      "R1 independent offline forensics: P1 streak 0, P2 branches A=0/B=0, detected_period None, classification R1_NO_CONVERGENCE_CONFIRMED_OFFLINE.",
-      "Owner decision OWNER_DECISION_C14_C15_R2 authorizes exactly one corrected R2; no R3.",
-      "R2 B-prime reached PERIOD_1 with the real detector; R2 A-prime is being continued with compact checkpoints after a local performance failure at the old restart path."
+      "C14/C15 corrected R2: A-prime PERIOD_1 at cycle 73/111 and B-prime PERIOD_1 at cycle 38/47, both from real PeriodicDetectorV2 with SHA-bound solver/detector/auditor/producer/config/fixture/fuel/thresholds; C17 88 tests plus OpenSpec strict, diff-check, LFS fsck and frozen P9 hash PASS; C18 candidate freeze recorded; synthetic CONDITIONAL_ON_P4, no experimental validation."
     ],
     "gate_tasks_total": 18,
-    "gate_tasks_done": 14,
+    "gate_tasks_done": 18,
     "gate_task_states": {
-      "DONE": 14,
-      "READY": 2,
-      "WAITING": 2
+      "DONE": 18
     },
-    "remaining": [
-      "C14",
-      "C15",
-      "C17",
-      "C18"
-    ],
-    "updated_at": "2026-10-06T16:35:00+00:00"
+    "remaining": [],
+    "updated_at": "2026-10-06T19:29:34+00:00"
   }
 }

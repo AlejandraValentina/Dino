@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "E:\dino\Dino\scripts\v1_closure_campaign.py", line 121, in <module>
+    main()
+  File "E:\dino\Dino\scripts\v1_closure_campaign.py", line 114, in main
+    result = run(args.fixture, (ROOT / args.output).resolve())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\scripts\v1_closure_campaign.py", line 68, in run
+    audit = audit_integrated_cycle_primary(primary)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\dino\Dino\motorsim\integrated_2t.py", line 3548, in audit_integrated_cycle_primary
+    replay.restore(replay_snapshot)
+  File "E:\dino\Dino\motorsim\integrated_2t.py", line 2683, in restore
+    raise ValueError("integrated checkpoint fuel-combustion ledger mismatch")
+ValueError: integrated checkpoint fuel-combustion ledger mismatch
