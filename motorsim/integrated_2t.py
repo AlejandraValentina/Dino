@@ -26,7 +26,8 @@ from .gas1d.boundary import Boundary
 from .gas1d.eos import IdealGas
 from .gas1d.open_end_plenum_v2 import OpenEndPlenumV2Boundary
 from .fuel_combustion import (FuelCombustionEventV1,
-                              FuelCoupledCombustionV1)
+                              FuelCoupledCombustionV1,
+                              FuelCoupledCombustionV2)
 from .gas1d.mesh import Mesh
 from .gas1d.riemann import hllc_flux
 from .kinematics import piston_position
@@ -70,6 +71,8 @@ def _solver_dependency_hashes() -> dict[str, str]:
             OpenEndPlenumV2Boundary.__module__],
         FuelCoupledCombustionV1.__module__: sys.modules[
             FuelCoupledCombustionV1.__module__],
+        FuelCoupledCombustionV2.__module__: sys.modules[
+            FuelCoupledCombustionV2.__module__],
         Mesh.__module__: sys.modules[Mesh.__module__],
         hllc_flux.__module__: sys.modules[hllc_flux.__module__],
         resolve_volume_duct_interface.__module__: sys.modules[
@@ -571,7 +574,8 @@ class IntegratedEngine2T:
                  thermal_locations: dict[str, str] | None = None,
                  thermal_load: float = 0.0,
                  combustion_start_angle_deg: float | None = None,
-                 fuel_coupled_combustion: FuelCoupledCombustionV1 | None = None):
+                 fuel_coupled_combustion: (FuelCoupledCombustionV1 |
+                                            FuelCoupledCombustionV2 | None) = None):
         initial_crankcase_primitive = tuple(crankcase_state)
         initial_cylinder_primitive = tuple(cylinder_state)
         initial_duct_primitives = deepcopy(initial_duct_states)
@@ -708,14 +712,20 @@ class IntegratedEngine2T:
             None if combustion_start_angle_deg is None else
             float(combustion_start_angle_deg))
         if (fuel_coupled_combustion is not None and
-                not isinstance(fuel_coupled_combustion, FuelCoupledCombustionV1)):
-            raise ValueError("fuel_coupled_combustion must use FUEL_COUPLED_COMBUSTION_V1")
+                not isinstance(fuel_coupled_combustion,
+                               (FuelCoupledCombustionV1,
+                                FuelCoupledCombustionV2))):
+            raise ValueError("fuel_coupled_combustion schema is unsupported")
         if fuel_coupled_combustion is not None:
             fuel_coupled_combustion.validate()
             if self.combustion_start_angle_deg is not None:
                 raise ValueError("fuel-coupled combustion and historical P7 cannot be enabled together")
-            self.schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V10"
-            self.configuration_schema = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V5"
+            if isinstance(fuel_coupled_combustion, FuelCoupledCombustionV2):
+                self.schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V11"
+                self.configuration_schema = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V6"
+            else:
+                self.schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V10"
+                self.configuration_schema = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V5"
         self.fuel_coupled_combustion = fuel_coupled_combustion
         self.fuel_combustion_event: FuelCombustionEventV1 | None = None
         self.fuel_combustion_events: list[dict] = []
@@ -917,6 +927,14 @@ class IntegratedEngine2T:
             result["external_boundary_model"] = self.configuration_boundary_model
             result["external_boundary_provenance"] = self.external_boundary_provenance
             result["fuel_coupled_combustion"] = self.fuel_coupled_combustion.to_dict()
+        if self.configuration_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V6":
+            result["dynamic_reed_binding"] = (
+                None if self.dynamic_reed_binding is None else
+                self.dynamic_reed_binding.to_dict())
+            result["topology_contract"] = "POSITIVE_TRANSFER_COUNT_V1"
+            result["external_boundary_model"] = self.configuration_boundary_model
+            result["external_boundary_provenance"] = self.external_boundary_provenance
+            result["fuel_coupled_combustion"] = self.fuel_coupled_combustion.to_dict()
         return result
 
     def configuration_dict(self) -> dict:
@@ -1024,7 +1042,12 @@ class IntegratedEngine2T:
                         "dynamic_reed_binding", "topology_contract",
                         "external_boundary_model", "external_boundary_provenance",
                         "fuel_coupled_combustion"})
-        if (not (legacy_v1 or current_v2 or current_v3 or current_v4 or current_v5) or
+        current_v6 = (source_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V6" and
+                      set(value) == common_fields | {"outlet_species",
+                        "dynamic_reed_binding", "topology_contract",
+                        "external_boundary_model", "external_boundary_provenance",
+                        "fuel_coupled_combustion"})
+        if (not (legacy_v1 or current_v2 or current_v3 or current_v4 or current_v5 or current_v6) or
                 value.get("geometry_contract") !=
                 "SLIDER_CRANK_AND_GENERIC_PORTS_V1"):
             raise ValueError("integrated engine configuration schema is invalid")
@@ -1104,7 +1127,7 @@ class IntegratedEngine2T:
             if not isinstance(fields_data, dict) or set(fields_data) != {
                     "kind", "state", "p0", "T0", "Y0"}:
                 raise ValueError("integrated engine boundary configuration is invalid")
-            if current_v4 or current_v5:
+            if current_v4 or current_v5 or current_v6:
                 if value["topology_contract"] != "POSITIVE_TRANSFER_COUNT_V1":
                     raise ValueError("integrated transfer topology contract is invalid")
                 if value["external_boundary_model"] == "OPEN_END_PLENUM_V2":
@@ -1137,11 +1160,18 @@ class IntegratedEngine2T:
                         for path_id, rows in value["duct_species"].items()})
         thermal = (None if value["thermal_system"] is None else
                    ThermalSystem.from_dict(value["thermal_system"]))
-        dynamic_reed = (None if not (current_v3 or current_v4 or current_v5) or
+        dynamic_reed = (None if not (current_v3 or current_v4 or current_v5 or current_v6) or
                         value["dynamic_reed_binding"] is None else
                         DynamicReedBinding2T.from_dict(value["dynamic_reed_binding"]))
-        fuel_combustion = (FuelCoupledCombustionV1.from_dict(
-            value["fuel_coupled_combustion"]) if current_v5 else None)
+        if current_v6:
+            fuel_data = value["fuel_coupled_combustion"]
+            fuel_combustion = (
+                FuelCoupledCombustionV1.from_dict(fuel_data)
+                if fuel_data.get("schema") == "FUEL_COUPLED_COMBUSTION_V1" else
+                FuelCoupledCombustionV2.from_dict(fuel_data))
+        else:
+            fuel_combustion = (FuelCoupledCombustionV1.from_dict(
+                value["fuel_coupled_combustion"]) if current_v5 else None)
 
         def resolved_geometry(_angle):
             # Both explicit models replace every returned geometry field.
@@ -1221,7 +1251,8 @@ class IntegratedEngine2T:
             identity["external_boundary_provenance"] = self.external_boundary_provenance
         if self.configuration_schema in {
                 "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V4",
-                "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V5"}:
+                "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V5",
+                "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V6"}:
             identity["topology_contract"] = "POSITIVE_TRANSFER_COUNT_V1"
             identity["external_boundary_model"] = self.configuration_boundary_model
             identity["external_boundary_provenance"] = self.external_boundary_provenance
@@ -3141,7 +3172,7 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
         ignition_snapshot = current_fuel_event
         exhaust_close = port_closures["snapshots"].get("exhaust")
         observables["fuel_coupled_combustion"] = {
-            "schema": "FUEL_COUPLED_COMBUSTION_V1",
+            "schema": engine.fuel_coupled_combustion.schema,
             "provenance": "SYNTHETIC_ASSUMPTION",
             "fuel_snapshot": engine.fuel_coupled_combustion.fuel.snapshot(),
             "fuel_sha256": engine.fuel_coupled_combustion.fuel.sha256,
@@ -4141,8 +4172,17 @@ def make_integrated_engineering_output(cycle_record: dict, *,
                 and trapped_air >= 0.0 and trapped_fuel > 0.0):
             actual_afr = trapped_air / trapped_fuel
             from .fuel_combustion import SyntheticFuelSurrogateV1
-            stoich_afr = SyntheticFuelSurrogateV1.from_snapshot(
-                chemistry["fuel_snapshot"]).stoichiometric_afr
+            fuel_schema = chemistry["fuel_snapshot"].get("schema")
+            if fuel_schema == "SYNTHETIC_FUEL_SURROGATE_V1":
+                from .fuel_combustion import SyntheticFuelSurrogateV1
+                stoich_afr = SyntheticFuelSurrogateV1.from_snapshot(
+                    chemistry["fuel_snapshot"]).stoichiometric_afr
+            elif fuel_schema == "FUEL_SIMULATION_SNAPSHOT_V1":
+                from .fuel_library import FuelSimulationSnapshot
+                stoich_afr = FuelSimulationSnapshot.from_dict(
+                    chemistry["fuel_snapshot"]).validate().effective_stoichiometric_afr
+            else:
+                raise ValueError("combustion output has an unsupported fuel snapshot schema")
             defined("trapped_air_kg", trapped_air,
                     "accepted cylinder fresh_air species at exact ignition snapshot")
             defined("trapped_fuel_kg", trapped_fuel,

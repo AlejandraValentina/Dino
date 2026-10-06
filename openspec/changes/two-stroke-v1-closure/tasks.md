@@ -58,6 +58,19 @@
 - [ ] C18 keep this v1 definition of done versioned in OpenSpec; classify every
        newly discovered item BLOCKS_2T_V1 or POST_2T_V1_BACKLOG.
 
-Explicitly deferred: dynamic reed, commercial Fuel Library/ANCAP fuel, detailed
-carburetion, advanced scavenging, advanced thermal/friction, multi-cylinder,
-rotary, turbo/supercharger, GUI, KT100 calibration/recovery and full RPM sweeps.
+## Additive capability authorized after the original C1-C18 registration
+
+- [ ] Implement FUEL_COUPLED_COMBUSTION_V2 as an additive Fuel Library snapshot
+      consumer. ANCAP profiles remain incomplete and combustion-ineligible;
+      the pure C8H18 profile is explicitly MODELED_SURROGATE, not ANCAP fuel.
+      The SSPRK stages conserve accepted species and calculate heat only from
+      bounded burned fuel, frozen LHV, and explicitly synthetic efficiency.
+      Full primary reconstruction, AFR/equivalence-ratio output, and
+      configuration/restart roundtrip tests pass. V1 and P7 remain unchanged.
+      Record its commit in the durable queue before marking this task complete.
+
+The original C1-C18 v1 acceptance campaigns and mesh gates remain open. Other
+features outside this additive capability remain deferred: detailed
+carburetion/injection, advanced scavenging, advanced thermal/friction,
+multi-cylinder, rotary, turbo/supercharger, GUI, KT100 calibration/recovery and
+full RPM sweeps.

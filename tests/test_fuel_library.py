@@ -39,7 +39,9 @@ def test_elemental_composition_derives_stoichiometry_with_versioned_method():
 
 
 def test_uruguay_builtins_record_only_documented_identity_and_known_ron():
-    super95, premium97 = builtin_defaults()
+    profiles = {fuel.id: fuel for fuel in builtin_defaults()}
+    super95 = profiles["ANCAP_SUPER_95"]
+    premium97 = profiles["ANCAP_PREMIUM_97"]
     assert (super95.id, super95.ron) == ("ANCAP_SUPER_95", 95.0)
     assert (premium97.id, premium97.ron) == ("ANCAP_PREMIUM_97", 97.0)
     for fuel in (super95, premium97):
@@ -49,6 +51,20 @@ def test_uruguay_builtins_record_only_documented_identity_and_known_ron():
         assert fuel.ethanol_fraction is None  # source publishes a maximum only
         assert fuel.effective_stoichiometric_afr is None
         assert fuel.missing_combustion_properties()
+
+
+def test_pure_isooctane_surrogate_is_explicit_and_not_an_ancap_fuel():
+    surrogate = next(fuel for fuel in builtin_defaults()
+                     if fuel.id == "MOTORSIM_ISOOCTANE_SURROGATE_V1")
+    assert surrogate.provenance == "MODELED_SURROGATE"
+    assert surrogate.ron is None
+    assert surrogate.reference_temperature_K == 293.15
+    assert surrogate.density_kg_m3 == 691.853
+    assert surrogate.lower_heating_value_j_kg == pytest.approx(44_343_551.3904)
+    assert surrogate.effective_stoichiometric_afr == pytest.approx(15.0923574, abs=1e-7)
+    assert surrogate.missing_combustion_properties() == ()
+    assert "not ANCAP" in surrogate.note
+    assert "LHV is derived" in surrogate.sources[0].claim
 
 
 def test_snapshot_freezes_identity_version_and_full_definition():

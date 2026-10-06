@@ -48,9 +48,12 @@ pero NO representan el estado operativo actual cuando contradicen esta sección.
   física; los otros cuatro puntos no se iniciaron. No ejecutar KT100 R2 sin un
   nuevo preregistro autorizado.
 - `FUEL_LIBRARY_V1` registra ANCAP Super 95/Premium 97 con RON documentado y
-  propiedades químicas desconocidas en `null`; no proporciona AFR/LHV y no
-  desbloquea P7. Su biblioteca, provenance e instantánea versionada/hash están
-  implementadas; sin enlace a combustión ni química inventada.
+  propiedades químicas desconocidas en `null`; sus perfiles no proporcionan
+  AFR/LHV ni habilitan combustión. Su biblioteca,
+  provenance e instantánea versionada/hash están implementadas. El perfil puro
+  C8H18 `MODELED_SURROGATE` y el enlace aditivo `FUEL_COUPLED_COMBUSTION_V2`
+  consumen un snapshot completo; la combustión sintética V1 permanece intacta.
+  No se infiere propiedad de lote ANCAP ni se añade P7.
 - El collector V4 y Fixture C piston-port sin reed están verificados con
   evidencia sintética existente. Reed dinámica tiene geometría sintética
   preregistrada, componente autónomo y enlace a `IntegratedEngine2T` en las

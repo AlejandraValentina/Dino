@@ -1814,6 +1814,25 @@
         []
       ],
       "next_action": "Implement and verify this gate in declared order"
+    },
+    {
+      "id": "fuel-library-combustion-v2",
+      "description": "Additive integrated combustion V2 bound to a complete Fuel Library snapshot; preserve V1 and P7.",
+      "dependencies": [
+        "fuel-library-v1",
+        "17a-integrated-gas-species-foundation"
+      ],
+      "state": "IN_PROGRESS",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "Built-in pure C8H18 is explicitly MODELED_SURROGATE with source-bearing density/LHV and elemental-derived stoichiometry; ANCAP Super 95/Premium 97 values remain unknown where source gives only maxima.",
+        "FUEL_COUPLED_COMBUSTION_V2 binds the full FuelSimulationSnapshot and hash; incomplete profiles fail, accepted fuel/oxygen limit SSPRK2 source, and total heat is burned fuel × frozen LHV × explicit synthetic efficiency.",
+        "V2 uses the common IntegratedEngine2T SSPRK2 stages; config/state V6/V11 restore, cycle primary offline audit, and engineering AFR/equivalence-ratio output are covered.",
+        "91 tests passed for fuel library, fuel combustion and IntegratedEngine2T; 16 producer/evaluator/fuel-combustion tests passed; 15 additional cycle-primary/output checks passed; OpenSpec strict and compileall passed.",
+        "No campaign was run; synthetic rate parameters do not claim ANCAP properties or engine validation."
+      ],
+      "next_action": "Commit implementation and results, then record exact commit and mark the capability done. No campaign until independent preregistration."
     }
   ],
   "audit_remediation_mode": false,
@@ -1994,12 +2013,12 @@
     "audit_remediation_mode": false,
     "ready_tasks": 2,
     "local_blockers": [
-      "C10 offline primary/retry audit is closed; no integrated A-prime/B-prime campaign has been run.",
-      "C11 restart/replay and C12 preregistered integrated mesh study remain READY; C13-C18 depend on their completion.",
-      "KT100 R1 is consumed and remains unverified; no R2 campaign is authorized."
+      "Fuel Library combustion V2 has passing focused evidence; its implementation commit and durable DONE receipt remain to be recorded.",
+      "C10 is closed; C11 exact continuous/checkpoint/restart/replay and C12 preregistered mesh study remain READY before any A-prime/B-prime campaigns.",
+      "KT100 R1 remains consumed and unverified; no R2 campaign is authorized."
     ],
-    "next_action": "Continue C11 exact continuous/checkpoint/restart/replay comparisons and C12 preregistered mesh study; preserve the current KT100 no-rerun gate and keep Commercial Core not READY.",
-    "in_progress_tasks": 0,
+    "next_action": "Commit Fuel Library combustion V2 with tests and contract; then reconcile its queue record and continue C11/C12. Keep all campaigns preregistered and Commercial Core not READY.",
+    "in_progress_tasks": 1,
     "blocker_triage_date": "2026-10-06"
   }
 }

@@ -93,6 +93,33 @@ denominator are present.
 - **THEN** the affected outputs are `UNDEFINED` with reason/provenance and are
   never presented as measured or calibrated results.
 
+### Requirement: Fuel Library-bound combustion V2
+
+The additive `FUEL_COUPLED_COMBUSTION_V2` capability MUST bind a complete
+`FuelSimulationSnapshot` containing the fuel id, version, canonical full
+definition, and content hash. Combustion MUST be unavailable when required
+stoichiometry or LHV is absent; ANCAP product identity or an octane rating MUST
+NOT fill unknown batch properties. Any synthetic efficiency MUST carry explicit
+`SYNTHETIC_ASSUMPTION` provenance. Existing V1 fuel snapshots and historical P7
+behavior MUST remain unchanged.
+
+Delivered, ignition-trapped, burned, unburned, and short-circuited fuel MUST
+remain distinct accepted-state quantities. Actual AFR MUST be trapped fresh-air
+species divided by trapped fuel at the bound ignition snapshot; equivalence
+ratio MUST use the frozen definition's versioned elemental stoichiometry. The
+burn rate MUST be bounded by accepted fuel and oxygen availability. Chemical
+heat MUST equal burned fuel times the frozen LHV times declared efficiency;
+Wiebe progress only distributes that finite energy over crank angle. These
+changes MUST NOT add injection, fuel chemistry beyond the frozen elemental
+balance, composition-dependent gas properties, or premix lubricant combustion.
+
+#### Scenario: Fuel identity and bounded energy
+- **WHEN** V2 is configured with a complete versioned modeled-surrogate snapshot
+  and accepted cylinder species at ignition
+- **THEN** serialized configuration and primary evidence bind the full snapshot
+  and hash, AFR derives from trapped species, heat derives from actually burned
+  fuel and frozen LHV, and unavailable ANCAP properties remain unknown.
+
 ### Requirement: Bounded perfect-mixing scavenging
 
 V1 MUST declare `SINGLE_ZONE_PERFECT_MIXING_SCAVENGING_ASSUMPTION`. Metrics MUST

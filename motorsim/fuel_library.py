@@ -198,6 +198,14 @@ class FuelDefinition:
             missing.append("lower_heating_value_j_kg")
         return tuple(missing)
 
+    def snapshot(self) -> dict[str, Any]:
+        """Return the complete identity/version/hash snapshot used by V2."""
+        return FuelSimulationSnapshot.freeze(self).to_dict()
+
+    @property
+    def sha256(self) -> str:
+        return FuelSimulationSnapshot.freeze(self).content_hash
+
     def to_dict(self) -> dict[str, Any]:
         self.validate()
         return {"schema": DEFINITION_SCHEMA, "id": self.id,
@@ -305,6 +313,38 @@ def builtin_defaults() -> tuple[FuelDefinition, ...]:
                            "2026-10-06", "RON specification 97.0; ethanol maximum 10% v/v; oxygen is specified as a maximum, not a measured batch value."),
             ),
             note="Identified product profile only. Density, batch ethanol fraction, elemental composition, stoichiometric AFR and LHV are not supplied as point values; chemical outputs remain unavailable.",
+        ),
+        FuelDefinition(
+            id="MOTORSIM_ISOOCTANE_SURROGATE_V1", version="1.0.0",
+            display_name="MotorSim pure iso-octane surrogate",
+            family_category="PURE_HYDROCARBON_SURROGATE",
+            provenance="MODELED_SURROGATE", builtin=True,
+            density_kg_m3=691.853,
+            lower_heating_value_j_kg=44_343_551.390414825,
+            stoichiometry_method_version=STOICHIOMETRY_METHOD,
+            elemental_mass_fractions={
+                "C": (8 * 12.011) / (8 * 12.011 + 18 * 1.008),
+                "H": (18 * 1.008) / (8 * 12.011 + 18 * 1.008),
+            },
+            oxygen_fraction=0.0, oxygen_fraction_basis="MASS_FRACTION",
+            ethanol_fraction=0.0, ethanol_fraction_basis="VOLUME_FRACTION",
+            reference_temperature_K=293.15,
+            sources=(
+                FuelSource(
+                    "NIST Chemistry WebBook, 2,2,4-trimethylpentane",
+                    "https://webbook.nist.gov/cgi/cbook.cgi?ID=C540841&Mask=187&Units=CAL",
+                    "2026-10-06",
+                    "Chemical identity C8H18; liquid standard combustion enthalpy -1305.29 kcal/mol. LHV is derived by subtracting 9 mol water vaporization at 298.15 K and dividing by NIST molecular weight 114.2285 g/mol."),
+                FuelSource(
+                    "NIST SP 260-186, SRM 2214 density",
+                    "https://doi.org/10.6028/NIST.SP.260-186",
+                    "2026-10-06",
+                    "Certified iso-octane SRM density 691.853 kg/m3 at 20 C and 0.1 MPa."),
+            ),
+            note=("Explicit pure-compound surrogate for synthetic capability tests; "
+                  "not ANCAP Super 95/Premium 97, not a commercial gasoline blend, "
+                  "and not an engine calibration. RON is intentionally unknown in "
+                  "this record. LHV provenance is a derived thermochemical value."),
         ),
     )
 
