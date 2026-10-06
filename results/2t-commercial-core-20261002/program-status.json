@@ -1773,14 +1773,14 @@
         "C12",
         "C13"
       ],
-      "state": "DONE",
+      "state": "READY",
       "commits": [],
       "evidence": [
         "Frozen A-prime campaign completed exactly 20 cycles; run_logged summary: results/2t-v1-closure-20261006/campaign-a-prime-r1-log/c14-a-prime-r1.summary.json.",
         "All 20 V3 primaries were independently audited offline; restart cycle 10 -> 11 matched exactly. Evidence: results/2t-v1-closure-20261006/campaign-a-prime-r1/.",
-        "Terminal campaign result is NO_CONVERGENCE_WITHIN_HORIZON under the preregistered detector; no extension or relaxation performed. This gate is terminally failed for v1 acceptance."
+        "R1 provenance correction: the runner did not execute the detector, wrote NO_CONVERGENCE_WITHIN_HORIZON manually, and the primary records contain periodicity NOT_EVALUATED. Independent forensics confirms R1_NO_CONVERGENCE_CONFIRMED_OFFLINE; no R1 acceptance claim is made."
       ],
-      "next_action": "C14 campaign complete; preserve terminal NO_CONVERGENCE_WITHIN_HORIZON classification",
+      "next_action": "Run the single preregistered corrected-runner R2 campaign for A-prime",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -1794,13 +1794,13 @@
         "C13"
       ],
       "commits": [],
-      "state": "DONE",
+      "state": "READY",
       "evidence": [
         "Frozen B-prime campaign completed exactly 20 cycles; run_logged summary: results/2t-v1-closure-20261006/campaign-b-prime-r1-log/c15-b-prime-r1.summary.json.",
         "All 20 V3 primaries were independently audited offline; restart cycle 10 -> 11 matched exactly. Evidence: results/2t-v1-closure-20261006/campaign-b-prime-r1/.",
-        "Terminal campaign result is NO_CONVERGENCE_WITHIN_HORIZON under the preregistered detector; no extension or relaxation performed. This gate is terminally failed for v1 acceptance."
+        "R1 provenance correction: the runner did not execute the detector, wrote NO_CONVERGENCE_WITHIN_HORIZON manually, and the primary records contain periodicity NOT_EVALUATED. Independent forensics confirms R1_NO_CONVERGENCE_CONFIRMED_OFFLINE; no R1 acceptance claim is made."
       ],
-      "next_action": "C15 campaign complete; preserve terminal NO_CONVERGENCE_WITHIN_HORIZON classification",
+      "next_action": "Run the single preregistered corrected-runner R2 campaign for B-prime",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -1827,13 +1827,13 @@
         "C15",
         "C16"
       ],
-      "state": "DONE",
+      "state": "WAITING",
       "commits": [],
       "evidence": [
         "Focused integrated suite: 72 passed; summary at results/2t-v1-closure-20261006/c17-focused-tests-log/c17-focused-integrated-tests.summary.json.",
         "OpenSpec strict validation PASS; git diff --check PASS; git lfs fsck OK; frozen P9 specification SHA-256 matches 79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d."
       ],
-      "next_action": "C17 checks closed; classify all findings in C18",
+      "next_action": "Rerun final checks after the single authorized R2 campaign",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -1843,14 +1843,14 @@
       "dependencies": [
         "C17"
       ],
-      "state": "DONE",
+      "state": "WAITING",
       "commits": [],
       "evidence": [
         "OpenSpec v1 definition of done remains versioned in openspec/changes/two-stroke-v1-closure/.",
         "C14 and C15 are classified BLOCKS_2T_V1 terminal failures due to preregistered NO_CONVERGENCE_WITHIN_HORIZON; no horizon extension, threshold relaxation, experimental claim, or KT100 claim is made.",
         "C11, C12, C13, C16 and C17 satisfy their recorded criteria; final objective classification is FAIL_TERMINAL with exact failed gates C14 and C15."
       ],
-      "next_action": "Terminal classification recorded; no further v1 work remains",
+      "next_action": "Classify the final R2 result; no R3 is authorized",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -2164,7 +2164,25 @@
   ],
   "owner_decisions_pending": [],
   "hard_stop": null,
-  "decisions": [],
+  "decisions": [
+    {
+      "at": "2026-10-06T16:35:00+00:00",
+      "id": "OWNER_DECISION_C14_C15_R2",
+      "decision": "OPTION_B_FIX_RUNNER_SINGLE_R2",
+      "scope": "MOTORSIM_2T_V1_CLOSURE",
+      "consequence": "Reopen only C14/C15; preserve R1 and run one corrected R2 with preregistered physical horizon rule.",
+      "constraints": [
+        "fixtures unchanged",
+        "physics unchanged",
+        "mesh unchanged",
+        "RPM unchanged",
+        "thresholds unchanged",
+        "no R3"
+      ],
+      "evidence": "Independent review: FIX_REQUIRED_BEFORE_RERUN; R1 detector was not executed and primary records are NOT_EVALUATED.",
+      "recommendation": "Proceed with corrected PeriodicDetectorV2 runner and R2 preregistration."
+    }
+  ],
   "progress_log": [
     {
       "at": "2026-10-06T15:40:12+00:00",
@@ -2213,22 +2231,42 @@
       "task": "C18",
       "kind": "gate",
       "summary": "C18 terminal classification: FAIL_TERMINAL with exact failed gates C14/C15 due preregistered NO_CONVERGENCE_WITHIN_HORIZON; no extension or relaxation."
+    },
+    {
+      "at": "2026-10-06T17:03:51+00:00",
+      "task": "C14",
+      "kind": "decision",
+      "summary": "Owner authorized OPTION_B_FIX_RUNNER_SINGLE_R2. R1 preserved; detector omission and manual status corrected in provenance. R2 horizon preregistration pending with fixed rule ceil(4*tau)+3: A-prime 111 cycles."
+    },
+    {
+      "at": "2026-10-06T17:03:51+00:00",
+      "task": "C15",
+      "kind": "decision",
+      "summary": "Owner authorized OPTION_B_FIX_RUNNER_SINGLE_R2. R1 preserved; detector omission and manual status corrected in provenance. R2 horizon preregistration pending with fixed rule ceil(4*tau)+3: B-prime 47 cycles."
     }
   ],
   "gate_status": {
     "objective": "MOTORSIM_2T_V1_CLOSURE",
-    "state": "FAIL_TERMINAL",
-    "classification": "FAIL_TERMINAL",
+    "state": "OPEN",
+    "classification": null,
     "evidence": [
-      "C14 and C15 exact terminal failure: NO_CONVERGENCE_WITHIN_HORIZON at fixed 20-cycle horizon.",
-      "C17 final checks PASS; C18 preserves scope and classification."
+      "Historical R1 terminal record preserved: C14/C15 runner did not execute the detector; primary records were NOT_EVALUATED.",
+      "R1 independent offline forensics: P1 streak 0, P2 branches A=0/B=0, detected_period None, classification R1_NO_CONVERGENCE_CONFIRMED_OFFLINE.",
+      "Owner decision OWNER_DECISION_C14_C15_R2 authorizes exactly one corrected R2; no R3."
     ],
     "gate_tasks_total": 18,
-    "gate_tasks_done": 18,
+    "gate_tasks_done": 14,
     "gate_task_states": {
-      "DONE": 18
+      "DONE": 14,
+      "READY": 2,
+      "WAITING": 2
     },
-    "remaining": [],
-    "updated_at": "2026-10-06T16:28:30+00:00"
+    "remaining": [
+      "C14",
+      "C15",
+      "C17",
+      "C18"
+    ],
+    "updated_at": "2026-10-06T16:35:00+00:00"
   }
 }

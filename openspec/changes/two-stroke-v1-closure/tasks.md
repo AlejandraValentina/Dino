@@ -78,12 +78,17 @@
       The separate freeze commit records the C12-selected mesh, hashes, RPMs,
       fixed 20-cycle horizon, restart cycle, detector thresholds, and failure
       classification before either campaign.
-- [x] C14 run frozen A' 20-cycle campaign and offline audit.
+- [ ] C14 run corrected R2 A' campaign and offline audit.
       The fixed-horizon campaign and all 20 offline audits pass, but the
       preregistered detector reports `NO_CONVERGENCE_WITHIN_HORIZON`.
-- [x] C15 run frozen B' 20-cycle campaign and offline audit.
+      R1 provenance is historical only: the detector was not executed and
+      primaries were `NOT_EVALUATED`; independent offline forensics confirms
+      P1=0, P2 A/B=0, detected period=None. One corrected R2 is authorized.
+- [ ] C15 run corrected R2 B' campaign and offline audit.
       The fixed-horizon campaign and all 20 offline audits pass, but the
       preregistered detector reports `NO_CONVERGENCE_WITHIN_HORIZON`.
+      R1 provenance is historical only; one corrected R2 is authorized under
+      the same fixtures, physics, mesh, RPMs, thresholds, and criteria.
 - [x] C16 exercise at least two distinct RPMs across the primes or preregistered
        sanity fixture.
 - [x] C17 run focused integration tests, full relevant P4–P8 regressions,
