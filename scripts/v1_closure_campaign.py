@@ -56,6 +56,13 @@ def detector_status(detector: PeriodicDetectorV2, *, exhausted: bool) -> str:
     return "RUNNING"
 
 
+def reset_cycle_trace(engine: IntegratedEngine2T) -> None:
+    """Discard prior-cycle trace after its primary has been persisted."""
+    engine.trace = []
+    engine.accepted_steps = 0
+    engine.rejected_steps = 0
+
+
 def binding_hashes(wrapper: dict, config: dict) -> dict:
     fuel = config["fuel_coupled_combustion"]["fuel_snapshot"]
     return {
@@ -128,12 +135,25 @@ def run(fixture_id: str, output: Path) -> dict:
         if cycle == restart_cycle:
             restart_engine = IntegratedEngine2T.from_configuration_dict(config)
             restart_engine.restore(end)
+            # The exact restore is performed while the complete pre-restart
+            # history is still present.  After that checkpoint is validated,
+            # both continuous and restarted engines can discard persisted
+            # prior-cycle traces; the physical state, cumulative ledgers and
+            # event histories remain unchanged.
+            reset_cycle_trace(engine)
+            reset_cycle_trace(restart_engine)
+            start = engine.snapshot()
         if cycle == restart_cycle + 1 and restart_engine is not None:
             replay_rejections: list[dict] = []
             advance_to(restart_engine, float(cycle * 360), replay_rejections)
             if canonical(restart_engine.snapshot()) != canonical(end):
                 raise ValueError(f"{fixture_id}: restart cycle 11 mismatch")
-        start = end
+            reset_cycle_trace(restart_engine)
+        if cycle >= restart_cycle:
+            reset_cycle_trace(engine)
+            start = engine.snapshot()
+        else:
+            start = end
         if detector.classification is not None:
             break
     exhausted = detector.classification is None and cycle == max_cycles

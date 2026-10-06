@@ -12,7 +12,7 @@
     "rounding": "deterministic mathematical ceil; all inputs fixed before execution"
   },
   "horizon_cycles": {"FIXTURE_A_PRIME": 111, "FIXTURE_B_PRIME": 47},
-  "restart_cycle_rule": "ceil(max_cycles / 2)",
+  "restart_cycle_rule": "fixed R1-compatible checkpoint at cycle 10 before trace compaction",
   "periodicity_detector": "motorsim.reference_harness.convergence.PeriodicDetectorV2",
   "periodicity_contract": "REFERENCE_PERIODIC_CONVERGENCE_V2",
   "periodicity_thresholds": {
@@ -51,14 +51,14 @@
       "fixture_config_sha256": "97a7baceeac4ee900275f8b652aab19286e004be3e6af996c18be9b24ffaf7d1",
       "engine_configuration_sha256": "d3f000f72dda247e11a561ad63fb93daab1145cca689105a17cd8e6ae7c71ab7",
       "mesh_level": 0, "rpm": 3000.0,
-      "max_cycles": 111, "restart_cycle": 56,
+      "max_cycles": 111, "restart_cycle": 10,
       "binding_hashes": {
         "auditor": "085d6d17b6a1d2c062d37e4cdbc3ddda3da59aaee1d13178a9cb547c0bfbce22",
         "config": "d3f000f72dda247e11a561ad63fb93daab1145cca689105a17cd8e6ae7c71ab7",
         "detector": "22df512d6e48b95b506401005b466d37038eebd888d684a287e70c1d76cd3193",
         "fixture": "97a7baceeac4ee900275f8b652aab19286e004be3e6af996c18be9b24ffaf7d1",
         "fuel": "f84f2ae402b8030e9305345cd030a141c519adca63fc4b48b001b0eb4609cea7",
-        "producer": "c39a1d6b3806dc2edf63b5f2fe26e7a4bb52492908359832523847e85e999b38",
+        "producer": "a1515faf835c0e8820052bec89179873582a039732581ea053cf5ace00901f3d",
         "solver": "b4e8021eca2e32a368f6e1f977f685720a6436862fcad9b6a34798e5cf77de3d",
         "thresholds": "43419bccbbcefaf04200448148e74d576d6fa1ecb0d9adf9c26a614e67828eff"
       }
@@ -68,14 +68,14 @@
       "fixture_config_sha256": "51cd1639ba6825269ce7bafe0cc07ad10e7b5c38b7bcec07590d828754d12f84",
       "engine_configuration_sha256": "b21dd08a23679954c1ac39aae383fc2a78c702c5a358c8e2387fcecd00f2af82",
       "mesh_level": 0, "rpm": 4000.0,
-      "max_cycles": 47, "restart_cycle": 24,
+      "max_cycles": 47, "restart_cycle": 10,
       "binding_hashes": {
         "auditor": "085d6d17b6a1d2c062d37e4cdbc3ddda3da59aaee1d13178a9cb547c0bfbce22",
         "config": "b21dd08a23679954c1ac39aae383fc2a78c702c5a358c8e2387fcecd00f2af82",
         "detector": "22df512d6e48b95b506401005b466d37038eebd888d684a287e70c1d76cd3193",
         "fixture": "51cd1639ba6825269ce7bafe0cc07ad10e7b5c38b7bcec07590d828754d12f84",
         "fuel": "f84f2ae402b8030e9305345cd030a141c519adca63fc4b48b001b0eb4609cea7",
-        "producer": "c39a1d6b3806dc2edf63b5f2fe26e7a4bb52492908359832523847e85e999b38",
+        "producer": "a1515faf835c0e8820052bec89179873582a039732581ea053cf5ace00901f3d",
         "solver": "b4e8021eca2e32a368f6e1f977f685720a6436862fcad9b6a34798e5cf77de3d",
         "thresholds": "43419bccbbcefaf04200448148e74d576d6fa1ecb0d9adf9c26a614e67828eff"
       }
