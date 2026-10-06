@@ -1475,9 +1475,12 @@
         "results/2t-commercial-core-20261002/kt100_cycle24_forensics.json reproduces cycles21-23 exact and captures original cycle24 failure at 5000 RPM",
         "one-cell P5 reproducer shows rhoY exactly one float64 ULP above rho; 32-ULP excess remains rejected",
         "79 focused P5/EOS/fuel tests PASS; no campaign rerun; no KT100 periodicity or verification claim",
-        "SELF_REVIEW only; independent review artifact absent"
+        "SELF_REVIEW only; independent review artifact absent",
+        "Forensic replay includes full accepted integrated state, cylinder/crankcase/duct states, boundary and port configuration, primitive properties, both SSPRK2 stage inputs/RHS, exact failing candidate, exception traceback and ledger.",
+        "Skeptic check: reproduced the failure with strict legacy rhoY primitive admissibility; the one-cell 1-ULP reproducer accepts only the bounded P5 view and rejects a 32-ULP excess. This is a generic float64 passive-scalar view issue, not a KT100 boundary/geometry fix.",
+        "No new campaign run. KT100 R1 remains consumed; periodicity absent and KT100 unverified. External independent forensic review has not been claimed."
       ],
-      "next_action": "Keep KT100 unverified; any further KT100 execution requires separate preregistration and authorization."
+      "next_action": "Preserve the consumed R1 evidence and generic P5 roundoff adapter. Do not create KT100 R2 without its own preregistration."
     },
     {
       "id": "fuel-library-v1",
@@ -1573,7 +1576,9 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
+      "commits": [
+        "33399dac2be5a3a671ef3a925aea99cb5dbd716d"
+      ],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1587,7 +1592,9 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
+      "commits": [
+        "33399dac2be5a3a671ef3a925aea99cb5dbd716d"
+      ],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1601,7 +1608,9 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
+      "commits": [
+        "33399dac2be5a3a671ef3a925aea99cb5dbd716d"
+      ],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1615,7 +1624,9 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
+      "commits": [
+        "33399dac2be5a3a671ef3a925aea99cb5dbd716d"
+      ],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1629,7 +1640,9 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
+      "commits": [
+        "33399dac2be5a3a671ef3a925aea99cb5dbd716d"
+      ],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1643,7 +1656,9 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
+      "commits": [
+        "33399dac2be5a3a671ef3a925aea99cb5dbd716d"
+      ],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1660,16 +1675,19 @@
         "C8",
         "C9"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
-      "evidence": [
-        "C10 primary evidence V3 binds configuration, fuel definition, accepted trajectory, terminal and checkpoint state, caller retry log, campaign runner, full integrated solver dependency modules, and periodicity detector manifest.",
-        "Offline audit replays every accepted SSPRK2 step and compares complete stage traces; conservation residuals are enforced using float64 gamma-n accumulation bounds.",
-        "75 integrated primary/evidence producer/evaluator tests PASS; OpenSpec strict and git diff --check PASS.",
-        "Independent adversarial C10 review identified four gaps; fixes added and follow-up review requested."
+      "commits": [
+        "18d0e674837d40c7106c63290cee8e055de18699"
       ],
-      "next_action": "Complete independent follow-up review, commit C10, then continue C11-C12"
+      "evidence": [
+        "Primary V3 binds configuration, fuel definition, accepted trajectory, terminal/checkpoint state, retry log, campaign runner, full integrated solver dependency modules, and periodicity detector.",
+        "Offline audit replays every accepted SSPRK2 step and stage trace; applies float64 gamma-n residual bounds; re-executes every rejected trial and verifies exception reason and exact halving chain.",
+        "Shared nominal 0.5-degree/event scheduler is replayed for every accepted start; omitted rejected attempts cannot pass after changing hashes/counters. Evaluator matches the complete retry stream to the manifest.",
+        "75 integrated primary/evidence producer/evaluator tests PASS; openspec validate two-stroke-v1-closure --strict --no-interactive PASS; git diff --check PASS.",
+        "Independent adversarial follow-up confirmed prior evidence gaps closed. No A-prime/B-prime campaign evidence is claimed."
+      ],
+      "next_action": "C10 evidence gate closed; proceed with C11 restart/replay foundations and C12 preregistered mesh study."
     },
     {
       "id": "C11",
@@ -1959,19 +1977,28 @@
       "fuel_properties": "BLOCKED_LOCAL: no explicit AFR_stoich/LHV/provenance; Q_F remains prescribed bookkeeping.",
       "fuel_v4_test": "Final focused two-cycle test PASS (48.98s): geometry-derived later closure, exact accepted SSPRK2 endpoint species, tampered snapshot rejection, missing-event UNDEFINED, zero-fuel ratio helper undefined, V3 output unchanged.",
       "reservoir_boundary": "OPEN_END_PLENUM_V2 capability is DONE_CONDITIONAL under the accepted synthetic lossless-inflow assumption; KT100 qualification remains NOT_QUALIFIED and frozen after consumed R1."
+    },
+    "final_validation": {
+      "c10_retry_completeness_delta": {
+        "command": "python -m pytest tests/test_integrated_2t.py tests/test_integrated_cycle_evidence_producer.py tests/test_integrated_cycle_evaluator.py -q --tb=short",
+        "result": "75 passed in 174.42 s",
+        "openspec": "openspec validate two-stroke-v1-closure --strict --no-interactive: PASS",
+        "git_diff_check": "PASS",
+        "commit": "18d0e674837d40c7106c63290cee8e055de18699"
+      }
     }
   },
   "last_status_reviewed_head": "062d8eb43da53acdb2053ec7c25cdce33a977fc9",
   "continuation_status": {
     "mode": "MOTORSIM_AUTONOMOUS_ENGINEERING_TEAM",
     "audit_remediation_mode": false,
-    "ready_tasks": 3,
+    "ready_tasks": 2,
     "local_blockers": [
-      "C10-C12 closure foundations are READY: evidence audit, restart/replay, integrated mesh study.",
-      "A-prime/B-prime campaigns remain prohibited until C10-C12 pass and C13 preregistration is separately committed.",
-      "KT100 remains unverified and frozen; no campaign authorized."
+      "C10 offline primary/retry audit is closed; no integrated A-prime/B-prime campaign has been run.",
+      "C11 restart/replay and C12 preregistered integrated mesh study remain READY; C13-C18 depend on their completion.",
+      "KT100 R1 is consumed and remains unverified; no R2 campaign is authorized."
     ],
-    "next_action": "Continue MOTORSIM_2T_V1_CLOSURE at C10-C12; no fixture campaigns before mesh study and exclusive preregistration.",
+    "next_action": "Continue C11 exact continuous/checkpoint/restart/replay comparisons and C12 preregistered mesh study; preserve the current KT100 no-rerun gate and keep Commercial Core not READY.",
     "in_progress_tasks": 0,
     "blocker_triage_date": "2026-10-06"
   }
