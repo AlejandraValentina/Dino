@@ -17,3 +17,5 @@ results/p4-g2-v2-reaudit-20260929-r2/checkpoint_cycle*.json.gz filter=lfs diff=l
 results/2t-commercial-core-20261002/fixture-a-integrated-cycles-20261002-v2.json.gz filter=lfs diff=lfs merge=lfs -text
 results/2t-commercial-core-20261002/fixture-a-*-20261002-v1.json.gz filter=lfs diff=lfs merge=lfs -text
 results/2t-commercial-core-20261002/fixture-b-*-20261002-v1.json.gz filter=lfs diff=lfs merge=lfs -text
+# Preserve primary one-cycle C12 mesh-study evidence without oversized Git blobs.
+results/2t-v1-closure-20261006/mesh-study*/**/*-cycle-1.json.gz filter=lfs diff=lfs merge=lfs -text

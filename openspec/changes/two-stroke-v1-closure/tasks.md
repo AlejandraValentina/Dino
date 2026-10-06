@@ -53,14 +53,18 @@
        agreement within four coordinate ULPs. C12's first run is preserved as
        incomplete/invalid; no campaign evidence is claimed.
 - [ ] C11 exact continuous/checkpoint/restart/replay comparisons for both primes.
-- [ ] C12 preregister and complete transfer/exhaust integrated mesh study.
-      R0 stopped at A mesh 1 on the C10 replay-roundoff defect; R1 then audited
-      all A meshes and B meshes 0–2, but B mesh 3 stopped on a combustion-stage
-      check stricter than the integrated species admissibility tolerance. Both
-      preregistrations and all partial artifacts are preserved. R2 aligns the
-      source check with the existing 1e-14 kg tolerance while keeping reactant
-      availability nonnegative; C12 remains open until the separately frozen
-      R2 study completes and meets its unchanged pairwise criteria.
+- [x] C12 preregister and complete transfer/exhaust integrated mesh study.
+      R0 and R1 remain preserved as incomplete attempts after the C10 replay
+      roundoff defect and the stricter-than-contract combustion species check.
+      R2 was separately frozen in commit `6820185`; all eight one-cycle mesh
+      primaries pass offline audit and float64 mass/energy bounds. Every adjacent
+      comparison for A′ and B′ passes the unchanged 2% criterion. Coarsest
+      sufficient mesh is level 0 for both fixtures (2 cells per transfer route,
+      exhaust target dx=0.2 m). Largest physical-observable difference is
+      1.635% for A′ trapped fuel and 1.739% for B′ retained fresh air; ledger
+      residual differences remain below 1.1e-15. Full primaries and summaries
+      are in `results/2t-v1-closure-20261006/mesh-study-r2/` and the result
+      class remains synthetic and CONDITIONAL_ON_P4.
 - [ ] C13 commit immutable A'/B' campaign preregistration before any campaign.
 - [ ] C14 run frozen A' 20-cycle campaign and offline audit.
 - [ ] C15 run frozen B' 20-cycle campaign and offline audit.
