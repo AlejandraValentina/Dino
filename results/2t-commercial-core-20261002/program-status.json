@@ -3,7 +3,7 @@
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
   "recorded_at": "2026-10-06",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "062d8eb43da53acdb2053ec7c25cdce33a977fc9",
+  "status_capture_head": "f2c6926",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -1577,10 +1577,13 @@
       "state": "DONE",
       "blocker": null,
       "commits": [
-        "33399dac2be5a3a671ef3a925aea99cb5dbd716d"
+        "33399dac2be5a3a671ef3a925aea99cb5dbd716d",
+        "92ff28e"
       ],
       "evidence": [
-        "OpenSpec C1-C18 task queue; focused integrated/unit tests"
+        "OpenSpec C1-C18 task queue; focused integrated/unit tests",
+        "tests/test_fuel_combustion.py: 9 passed, including matching integrated species roundoff admissibility without negative fuel burn.",
+        "tests/test_integrated_2t.py: 72 passed after the correction."
       ],
       "next_action": "Complete C10-C12 foundation gates"
     },
@@ -1678,14 +1681,17 @@
       "state": "DONE",
       "blocker": null,
       "commits": [
-        "18d0e674837d40c7106c63290cee8e055de18699"
+        "18d0e674837d40c7106c63290cee8e055de18699",
+        "f557038"
       ],
       "evidence": [
         "Primary V3 binds configuration, fuel definition, accepted trajectory, terminal/checkpoint state, retry log, campaign runner, full integrated solver dependency modules, and periodicity detector.",
         "Offline audit replays every accepted SSPRK2 step and stage trace; applies float64 gamma-n residual bounds; re-executes every rejected trial and verifies exception reason and exact halving chain.",
         "Shared nominal 0.5-degree/event scheduler is replayed for every accepted start; omitted rejected attempts cannot pass after changing hashes/counters. Evaluator matches the complete retry stream to the manifest.",
         "75 integrated primary/evidence producer/evaluator tests PASS; openspec validate two-stroke-v1-closure --strict --no-interactive PASS; git diff --check PASS.",
-        "Independent adversarial follow-up confirmed prior evidence gaps closed. No A-prime/B-prime campaign evidence is claimed."
+        "Independent adversarial follow-up confirmed prior evidence gaps closed. No A-prime/B-prime campaign evidence is claimed.",
+        "C12 surfaced exact replay drift from recovering accepted increments by subtracting accumulated angle coordinates; auditor now replays the scheduler/retry step and checks endpoint agreement within four ULP.",
+        "tests/test_integrated_2t.py: 72 passed; OpenSpec strict PASS."
       ],
       "next_action": "C10 evidence gate closed; proceed with C11 restart/replay foundations and C12 preregistered mesh study."
     },
@@ -1713,13 +1719,19 @@
         "C3",
         "C9"
       ],
-      "state": "READY",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
-      "evidence": [
-        []
+      "commits": [
+        "6820185",
+        "f2c6926"
       ],
-      "next_action": "Implement and verify this gate in declared order"
+      "evidence": [
+        "R2 preregistration committed before execution; same fixtures, geometries, transfer/exhaust meshes, RPM, physics, one-cycle horizon, observables, 2% criterion and selection rule as R1.",
+        "All eight R2 primary cycle records passed offline audit and float64 gamma-n mass/energy checks.",
+        "All three adjacent comparisons pass for both primes; sufficient mesh level 0 for A-prime and B-prime. Largest physical metric differences: A-prime trapped fuel 1.635%; B-prime retained fresh air 1.739%.",
+        "Complete R0/R1 incomplete evidence and R2 evidence preserved in results/2t-v1-closure-20261006/mesh-study*; C12 outputs remain SYNTHETIC_ASSUMPTION_CONDITIONAL_ON_P4."
+      ],
+      "next_action": "C12 closed; complete C11 before C13 campaign preregistration."
     },
     {
       "id": "C13",
@@ -1730,7 +1742,7 @@
         "C12"
       ],
       "state": "BLOCKED_LOCAL",
-      "blocker": "Prerequisite gates not yet complete",
+      "blocker": "C11 continuous/checkpoint/restart/replay gate remains incomplete",
       "commits": [],
       "evidence": [
         []
@@ -2006,20 +2018,27 @@
         "openspec": "openspec validate two-stroke-v1-closure --strict --no-interactive: PASS",
         "git_diff_check": "PASS",
         "commit": "18d0e674837d40c7106c63290cee8e055de18699"
+      },
+      "c12_mesh_study": {
+        "preregistration": "results/2t-v1-closure-20261006/mesh-study-r2/preregistration.json; commit 6820185",
+        "result": "results/2t-v1-closure-20261006/mesh-study-r2/result.json; overall PASS, sufficient mesh level 0 for both primes",
+        "recovery_history": "R0 and R1 preserved as incomplete; R2 repeats all eight configurations with corrected evidence/auditor source bindings.",
+        "tests": "9 fuel-combustion tests and 72 integrated 2T tests passed after the C4 admissibility correction; OpenSpec strict PASS.",
+        "git_lfs": "git lfs fsck --objects PASS after evidence commit f2c6926.",
+        "dependency": "SYNTHETIC_ASSUMPTION_CONDITIONAL_ON_P4"
       }
     }
   },
-  "last_status_reviewed_head": "062d8eb43da53acdb2053ec7c25cdce33a977fc9",
+  "last_status_reviewed_head": "f2c6926",
   "continuation_status": {
     "mode": "MOTORSIM_AUTONOMOUS_ENGINEERING_TEAM",
     "audit_remediation_mode": false,
-    "ready_tasks": 2,
+    "ready_tasks": 1,
     "local_blockers": [
       "C11 exact continuous/checkpoint/restart/replay comparisons for both prime fixtures remain READY.",
-      "C12 integrated transfer/exhaust mesh study remains READY and must be preregistered before execution.",
-      "C13 prime campaign preregistration and all campaigns remain blocked until C10-C12 pass; KT100 R1 remains consumed and unverified."
+      "C13 campaign preregistration and C14-C16 remain blocked until C11 passes; no A-prime/B-prime campaign has started."
     ],
-    "next_action": "Continue C11 and C12 foundations. Do not start A-prime/B-prime campaigns before C13 has its own committed preregistration; do not run KT100 R2.",
+    "next_action": "Complete C11 exact continuous/checkpoint/restart/replay comparisons for A-prime and B-prime; then commit C13 preregistration before either campaign.",
     "in_progress_tasks": 0,
     "blocker_triage_date": "2026-10-06"
   }
