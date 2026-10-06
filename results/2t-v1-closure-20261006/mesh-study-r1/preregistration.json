@@ -1,0 +1,261 @@
+{
+  "amendment": {
+    "campaign_changes": [],
+    "diagnostic_replays": "A mesh 1 was executed twice in-memory only to isolate the auditor mismatch; those unpersisted records are discarded and are not campaign evidence. R1 reruns the complete fixed mesh set under its new source binding.",
+    "prior_run_disposition": "INVALIDATED_AS_INCOMPLETE_EVIDENCE; artifacts_preserved",
+    "reason": "The first C12 run completed and audited A mesh 0, then the C10 offline auditor rejected A mesh 1 because replay used angle_end-angle_start instead of the nominal/retry step actually passed to SSPRK2. Coordinate subtraction changed derived RPM and volume rates by roundoff. The solver, physics, meshes, fixture inputs, horizon, thresholds, and decision rules are unchanged; only replay uses the step frozen by the scheduler and rejection log.",
+    "schema": "MOTORSIM_2T_V1_MESH_STUDY_AMENDMENT_R1",
+    "supersedes": "results/2t-v1-closure-20261006/mesh-study/preregistration.json"
+  },
+  "campaigns": false,
+  "classification": "SYNTHETIC_ASSUMPTION_CONDITIONAL_ON_P4",
+  "fixed_physics": {
+    "A_prime": "quasi-static reed, 3 transfers, expansion chamber, 3000 RPM",
+    "B_prime": "piston-port, no reed, 2 transfers, chamber length scale 1.45, 4000 RPM",
+    "cfl": 0.4,
+    "combustion_efficiency": 0.82,
+    "external_boundary": "OPEN_END_PLENUM_V2 / SYNTHETIC_ASSUMPTION",
+    "fuel": {
+      "composition_mass_fraction": {
+        "C": 0.86,
+        "H": 0.14,
+        "O": 0.0
+      },
+      "fresh_air_oxygen_mass_fraction": 0.232,
+      "lower_heating_value_j_kg": 43000000.0,
+      "oxygen_required_kg_per_kg_fuel": 3.413333333333333,
+      "provenance": "SYNTHETIC_ASSUMPTION",
+      "schema": "SYNTHETIC_FUEL_SURROGATE_V1",
+      "sha256": "23dbb59e043824251805e1d3fadd2ee6375e9c508fc20b73873ac147d18be451",
+      "stoichiometric_afr": 14.712643678160918,
+      "version": "1.0.0"
+    },
+    "inlet_reservoir_donor": {
+      "interpretation": "premixed intake charge; not ambient-air composition or measured carburetor setting",
+      "provenance": "SYNTHETIC_ASSUMPTION",
+      "species_mass_fractions": {
+        "burned": 0.0,
+        "fresh_air": 0.98,
+        "fuel": 0.02,
+        "residual": 0.0
+      }
+    },
+    "integrator": "existing IntegratedEngine2T SSPRK2",
+    "mechanical_losses": {
+      "cycle_convention": "2T_360_DEG_ONE_CYCLE_PER_REV",
+      "schema": "MECHANICAL_LOSS_MODEL_V1",
+      "terms": [
+        {
+          "id": "synthetic-piston-ring",
+          "mep_pa": 1000.0,
+          "operating_map": null,
+          "provenance": "SYNTHETIC_ASSUMPTION",
+          "source": "piston_ring"
+        },
+        {
+          "id": "synthetic-bearing-accessory",
+          "mep_pa": 500.0,
+          "operating_map": null,
+          "provenance": "SYNTHETIC_ASSUMPTION",
+          "source": "bearing_accessory"
+        }
+      ]
+    },
+    "nominal_proposal_deg": 0.5,
+    "outlet_reservoir_donor": {
+      "provenance": "SYNTHETIC_ASSUMPTION",
+      "species_mass_fractions": {
+        "burned": 0.0,
+        "fresh_air": 1.0,
+        "fuel": 0.0,
+        "residual": 0.0
+      }
+    },
+    "thermal": "CONSTANT_H_V1 fixture cylinder wall, SYNTHETIC_ASSUMPTION"
+  },
+  "fixtures": {
+    "FIXTURE_A_PRIME": [
+      {
+        "engine_configuration_sha256": "d3f000f72dda247e11a561ad63fb93daab1145cca689105a17cd8e6ae7c71ab7",
+        "exhaust_cells": 5,
+        "exhaust_target_cell_length_m": 0.2,
+        "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_a_prime-mesh-0.json",
+        "fixture_config_sha256": "97a7baceeac4ee900275f8b652aab19286e004be3e6af996c18be9b24ffaf7d1",
+        "geometry_sha256": "64f5cb1079977a4b0ebc4750f887da4c97d2c45b6c2df63e2a616c7806df6804",
+        "mesh_level": 0,
+        "rpm": 3000.0,
+        "transfer_cells_each": 2,
+        "transfer_routes": [
+          "primary",
+          "secondary",
+          "boost"
+        ]
+      },
+      {
+        "engine_configuration_sha256": "e4faee7a901dfac09db2d5230dad36ad028808746d9ae6ea3a28fc2c25423f75",
+        "exhaust_cells": 8,
+        "exhaust_target_cell_length_m": 0.1,
+        "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_a_prime-mesh-1.json",
+        "fixture_config_sha256": "2ae117534654e260b47e882cffecdf270f2a4c4e3cd62b559c74047ebcd7dddb",
+        "geometry_sha256": "64f5cb1079977a4b0ebc4750f887da4c97d2c45b6c2df63e2a616c7806df6804",
+        "mesh_level": 1,
+        "rpm": 3000.0,
+        "transfer_cells_each": 4,
+        "transfer_routes": [
+          "primary",
+          "secondary",
+          "boost"
+        ]
+      },
+      {
+        "engine_configuration_sha256": "58a61eea6bc0585890843ccae6d6e883e803eb6340a366ee227603daa024ad79",
+        "exhaust_cells": 15,
+        "exhaust_target_cell_length_m": 0.05,
+        "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_a_prime-mesh-2.json",
+        "fixture_config_sha256": "ad245f92349052d426a96b93094d170873c442151ea5d5c2d0e2eeca8da593a7",
+        "geometry_sha256": "64f5cb1079977a4b0ebc4750f887da4c97d2c45b6c2df63e2a616c7806df6804",
+        "mesh_level": 2,
+        "rpm": 3000.0,
+        "transfer_cells_each": 8,
+        "transfer_routes": [
+          "primary",
+          "secondary",
+          "boost"
+        ]
+      },
+      {
+        "engine_configuration_sha256": "eebf307408b8decffc04244db6caf6668c17096df4ff27426c3e287df6f9a7e8",
+        "exhaust_cells": 28,
+        "exhaust_target_cell_length_m": 0.025,
+        "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_a_prime-mesh-3.json",
+        "fixture_config_sha256": "bc6ef7a24e4fc397d11b65fdb8246e98ae90b2dffe0d2c195d097d22ce9f90e0",
+        "geometry_sha256": "64f5cb1079977a4b0ebc4750f887da4c97d2c45b6c2df63e2a616c7806df6804",
+        "mesh_level": 3,
+        "rpm": 3000.0,
+        "transfer_cells_each": 16,
+        "transfer_routes": [
+          "primary",
+          "secondary",
+          "boost"
+        ]
+      }
+    ],
+    "FIXTURE_B_PRIME": [
+      {
+        "engine_configuration_sha256": "b21dd08a23679954c1ac39aae383fc2a78c702c5a358c8e2387fcecd00f2af82",
+        "exhaust_cells": 7,
+        "exhaust_target_cell_length_m": 0.2,
+        "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_b_prime-mesh-0.json",
+        "fixture_config_sha256": "51cd1639ba6825269ce7bafe0cc07ad10e7b5c38b7bcec07590d828754d12f84",
+        "geometry_sha256": "2621e850af5ddbc012dbe9b74cdc5030ff264b8d61e59b1b4cf368192711dd4f",
+        "mesh_level": 0,
+        "rpm": 4000.0,
+        "transfer_cells_each": 2,
+        "transfer_routes": [
+          "primary",
+          "secondary"
+        ]
+      },
+      {
+        "engine_configuration_sha256": "d461ea71afb041858245fee8a279481ef03e2782793daf921c9e7ca7dd1a83db",
+        "exhaust_cells": 12,
+        "exhaust_target_cell_length_m": 0.1,
+        "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_b_prime-mesh-1.json",
+        "fixture_config_sha256": "f8c47a24404472dd12112e935ebf2d16c3dee889d913ff19a96d5bfe5a069dc2",
+        "geometry_sha256": "2621e850af5ddbc012dbe9b74cdc5030ff264b8d61e59b1b4cf368192711dd4f",
+        "mesh_level": 1,
+        "rpm": 4000.0,
+        "transfer_cells_each": 4,
+        "transfer_routes": [
+          "primary",
+          "secondary"
+        ]
+      },
+      {
+        "engine_configuration_sha256": "d65922d25c3ae15e7ba81afb27b2396a02052d72557abb60984142d3a8eca4c1",
+        "exhaust_cells": 21,
+        "exhaust_target_cell_length_m": 0.05,
+        "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_b_prime-mesh-2.json",
+        "fixture_config_sha256": "3876b6c42a5fac3dff7ae882d16af9d8a9d7af909e2f736c360688f12aa75e0b",
+        "geometry_sha256": "2621e850af5ddbc012dbe9b74cdc5030ff264b8d61e59b1b4cf368192711dd4f",
+        "mesh_level": 2,
+        "rpm": 4000.0,
+        "transfer_cells_each": 8,
+        "transfer_routes": [
+          "primary",
+          "secondary"
+        ]
+      },
+      {
+        "engine_configuration_sha256": "0e3e9b6662215b7ec19aa9e9175da1b346a248d8707dbdd92f9ef286369ef9fc",
+        "exhaust_cells": 39,
+        "exhaust_target_cell_length_m": 0.025,
+        "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_b_prime-mesh-3.json",
+        "fixture_config_sha256": "857978411eb1b3258aab688fbeaef6c80ff903e32b4023939a1e1adab4d8639f",
+        "geometry_sha256": "2621e850af5ddbc012dbe9b74cdc5030ff264b8d61e59b1b4cf368192711dd4f",
+        "mesh_level": 3,
+        "rpm": 4000.0,
+        "transfer_cells_each": 16,
+        "transfer_routes": [
+          "primary",
+          "secondary"
+        ]
+      }
+    ]
+  },
+  "horizon_cycles_per_mesh": 1,
+  "levels": [
+    {
+      "exhaust_target_cell_length_m": 0.2,
+      "mesh_level": 0,
+      "transfer_cells_each": 2
+    },
+    {
+      "exhaust_target_cell_length_m": 0.1,
+      "mesh_level": 1,
+      "transfer_cells_each": 4
+    },
+    {
+      "exhaust_target_cell_length_m": 0.05,
+      "mesh_level": 2,
+      "transfer_cells_each": 8
+    },
+    {
+      "exhaust_target_cell_length_m": 0.025,
+      "mesh_level": 3,
+      "transfer_cells_each": 16
+    }
+  ],
+  "no_tuning": "No solver, EOS, boundary, initial state, geometry, RPM, CFL, physics, or tolerance changes across each fixture's levels.",
+  "observables": {
+    "cylinder_indicated_work_J": "accepted-cycle integral(p_cyl dV_cyl)",
+    "energy_residual_fraction": "signed residual / (residual bound energy_abs_j / gamma_n)",
+    "mass_residual_fraction": "signed residual / (residual bound mass_abs_kg / gamma_n)",
+    "peak_cylinder_pressure_Pa": "maximum EOS pressure over every accepted cylinder stage state",
+    "retained_fresh_air_kg": "fresh_air species mass at exact last transfer-close snapshot",
+    "trapped_fuel_kg": "fuel at the exact configured ignition snapshot"
+  },
+  "pairwise_sufficiency": {
+    "ledger_gate": "each mesh separately passes gamma_n float64 conservation and primary offline audit",
+    "mesh_tolerance": 0.02,
+    "observables": [
+      "peak_cylinder_pressure_Pa",
+      "retained_fresh_air_kg",
+      "trapped_fuel_kg",
+      "cylinder_indicated_work_J"
+    ],
+    "positive_or_signed_physical_metric": "abs(a-b)/max(abs(a),abs(b)) <= 0.02; two exact zeros compare equal; one zero uses the nonzero magnitude",
+    "selection": "coarsest level whose pair with its next finer level satisfies every observable; if none, C12 fails and campaigns remain blocked",
+    "signed_ledger_residual": "abs(r_fine/S_fine-r_coarse/S_coarse) <= 0.02, with S=absolute primary ledger-term scale"
+  },
+  "purpose": "C12 integrated transfer/exhaust mesh sufficiency; one cycle per mesh only",
+  "schema": "MOTORSIM_2T_V1_MESH_STUDY_PREREGISTRATION_V1",
+  "source_binding": {
+    "campaign_producer_source_sha256": "2eb2c442e16bb0d262bef272fd72899a7306e9e1fefdca8a3b0e9613a47bc67e",
+    "campaign_stepper_source_sha256": "28d49f6c98a63a6a50b90a7d093416681b0ca97eafbcf0d45d282804b57e8b40",
+    "fixture_builder_source_sha256": "ee3d870807f98d64d26c7611081df6e57ce90b6b36290ba5871dd33ed2e7e844",
+    "integrated_solver_dependency_sha256": "60031a8dfe578fa4be6d335046a403f8f162b4db277c31110fe829a60324c170",
+    "mesh_study_runner_sha256": "066d2d403df64e4b5496e2c3fb3e10a7974157f57f42521cd4cc82a853c4dcd3"
+  },
+  "status": "PREREGISTERED_NOT_RUN"
+}
