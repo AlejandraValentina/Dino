@@ -954,3 +954,17 @@ blob del productor; cinco pruebas focales de productor/evaluador pasan.
   sigue estricto y el caso a 32 ULP continúa rechazado. 79 pruebas focales
   aprobadas. La trayectoria cycle24 no se reintentó; R1 está consumida, no hay
   evidencia de periodicidad KT100 y no se autorizó R2.
+
+### Reed dinámica — ejecución autorizada pendiente
+
+- [ ] Commit de la preregistración antes de cualquier prueba numérica acoplada:
+  forma lineal de lámina articulada, relación entre ancho, largo, área de
+  cortina y área de volumen barrido, balance de presión-trabajo y disipación;
+  provenance `SYNTHETIC_ASSUMPTION` en
+  `docs/gasdynamic/dynamic_reed_coupling_v1_preregistration.md`.
+- [ ] Implementar geometría versionada, estado acoplado, SSPRK2 común y ledger
+  de energía/especies, con rechazo atómico de contacto/out-of-domain.
+- [ ] Ejecutar únicamente fixtures sintéticos acotados preregistrados y
+  comprobar restart/determinismo; no repetir Fixture A/C ni campañas KT100.
+- [ ] Evaluar después el binding a P5-C/engine completo sin alterar P5/P6
+  históricos ni llamar verificada a la reed integrada end-to-end.

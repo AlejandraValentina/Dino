@@ -427,3 +427,18 @@ The built-in records preserve source URLs and the individual claims they
 support. ANCAP product pages and 2024-06 datasheets are the primary source for
 RON and published specification limits; the datasheets do not provide the
 missing point properties needed for AFR/LHV calculations.
+
+### Dynamic reed coupling preregistration
+
+The next reed increment is registered in
+`docs/gasdynamic/dynamic_reed_coupling_v1_preregistration.md` before any coupled
+fixture run. `DYNAMIC_REED_HINGED_FLAP_GEOMETRY_V1` is a synthetic linear flap
+with declared width/length, curtain area `Cd W x` and swept-volume coefficient
+`W L/2`; the existing pressure-force area must match that swept coefficient.
+The first verification target is a coupled pair of well-mixed gas control
+volumes, not an undocumented real-engine layout. Both adjacent volume-work
+terms, petal force work, SSPRK2 stage RHS, P6 donor species, and mechanical
+dissipation are explicitly bound into one energy/species ledger. Stop-contact
+stages are rejected atomically until a separately versioned event contract is
+available. Existing static reed and standalone `DYNAMIC_REED_V1` behavior is
+preserved. The preregistration is not evidence of implementation or acceptance.

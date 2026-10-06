@@ -905,14 +905,15 @@
         "BLOCKER_TRIAGE_2026-10-05 FORENSICS: motorsim/reed.py advances DYNAMIC_REED_V1 under constant dp and computes flow curtain area from width*lift; integrated_2t binds only static reed area into the common stages and checkpoints no dynamic petal state.",
         "DOMAIN/RESEARCH: a stage-coherent moving interface can pair pressure force work with equal/opposite gas volume work, but only after its swept-volume coefficient and neighboring control volumes are declared.",
         "SKEPTIC: pressure_area_m2 and effective_width_m*lift_m are distinct configured quantities; treating the latter as swept volume or assigning all displacement to crankcase would silently invent geometry.",
-        "CONTRACT/DECISION: concrete missing topology/geometry binding; keep BLOCKED_LOCAL. No independent review is claimed."
+        "CONTRACT/DECISION: concrete missing topology/geometry binding; keep BLOCKED_LOCAL. No independent review is claimed.",
+        "2026-10-06 preregistration draft: docs/gasdynamic/dynamic_reed_coupling_v1_preregistration.md; no coupled numerical campaign has been run"
       ],
-      "next_action": "Write and commit the synthetic geometry/energy preregistration before running any coupled fixture campaign.",
+      "next_action": "Strict-validate and commit the preregistration; then implement tests and coupled fixture as a separate post-preregistration delta.",
       "triage": {
         "forensics": "motorsim/reed.py already provides independent petal force area, lift and curtain-flow area; integrated engine currently binds only static reed area.",
         "domain_research": "Define a synthetic interface geometry with dV/dlift bound to pressure_area_m2, adjacent gas control volumes on each face, opposite geometric volume changes, and pressure work equal and opposite to reed generalized force work.",
         "skeptic": "Do not equate effective_width_m*lift flow area with swept volume, assign full displacement to crankcase, or use a real KT100 geometry without sources. Damping/impact loss must appear in the energy balance.",
-        "contract": "Create versioned synthetic geometry/preregistration and commit it before any numerical fixture campaign; preserve DYNAMIC_REED_V1 and static path.",
+        "contract": "Preregistration fixes DYNAMIC_REED_HINGED_FLAP_GEOMETRY_V1, two adjacent synthetic 0D control volumes, opposite swept volumes, stage-shared donor flow and energy/dissipation accounting. Commit this contract before the bounded fixture campaign.",
         "decision": "Proceed with the explicit synthetic interface capability authorized in the 2026-10-06 order; no real-motor geometry or claim."
       }
     },

@@ -823,4 +823,52 @@ heat-release physics.
 - **THEN** user operations MUST preserve built-in immutability, require a new
   version on edits, reject identity collisions, and keep deleted/disabled
   profiles unavailable for simulation selection without altering prior
-  snapshots.
+snapshots.
+
+### Requirement: Explicit dynamic-reed geometry and stage-coherent coupling
+
+The integrated dynamic reed capability MUST use a versioned geometry record
+`DYNAMIC_REED_HINGED_FLAP_GEOMETRY_V1`. The record MUST distinguish flow
+curtain width from swept-volume area and MUST define a provenance-bearing
+lift shape and adjacent gas control volumes. For the preregistered linear
+hinged-flap shape, `A_flow = Cd W x`,
+`A_sweep = dV_left/dx = W L/2`,
+`V_left = V_left,0 + A_sweep x`, and
+`V_right = V_right,0 - A_sweep x`. The generalized pressure-force area MUST
+equal `A_sweep`; a configuration mismatch MUST be rejected. It MUST NOT infer
+geometry from an undocumented real engine or use `effective_width * lift` as
+swept volume.
+
+The first coupled capability MUST advance gas, the four P6 species, reed
+position/velocity and its energy ledger in the same SSPRK2 stages, using each
+stage's pressure, lift-dependent flow area and actual signed donor composition.
+Mass and donor enthalpy transfers MUST be applied with opposite signs to the
+two adjacent control volumes. The gas volume-work terms and pressure-force work
+on the petal MUST be equal and opposite. Damping loss MUST appear explicitly
+in an energy sink ledger; no clipping, post-step reed update or operator
+splitting is allowed. Unsupported contact/out-of-domain stages MUST reject
+transactionally. The standalone `DYNAMIC_REED_V1` and static path remain
+unchanged; this synthetic component is not real-motor validation.
+
+#### Scenario: Reject invented or inconsistent reed geometry
+
+- **WHEN** a coupled reed definition has missing provenance, nonpositive
+  adjacent volume, out-of-range lift, or a pressure-area mismatch with the
+  declared flap geometry
+- **THEN** configuration MUST be rejected before state advancement and no
+  geometry may be inferred from a real reference engine.
+
+#### Scenario: Preserve mass and energy through dynamic reed stages
+
+- **WHEN** an admissible two-volume synthetic state advances through SSPRK2
+  with forward or reverse reed flow
+- **THEN** gas and four-species mass MUST exchange using the current donor at
+  each stage, the interface fluxes MUST cancel globally, and total gas plus
+  reed stored energy plus the explicit reed-dissipation ledger MUST close.
+
+#### Scenario: Reject out-of-domain coupled stages atomically
+
+- **WHEN** a proposed SSPRK2 stage crosses the declared lift or positive-volume
+  domain
+- **THEN** the step MUST reject without modifying gas, species, reed state or
+  ledgers; the solver MUST NOT clip the state.
