@@ -442,3 +442,11 @@ dissipation are explicitly bound into one energy/species ledger. Stop-contact
 stages are rejected atomically until a separately versioned event contract is
 available. Existing static reed and standalone `DYNAMIC_REED_V1` behavior is
 preserved. The preregistration is not evidence of implementation or acceptance.
+
+The preregistered component now exists as
+`motorsim.reed_coupling.DynamicReedTwoVolumeCouplingV1`. It has its own global
+mass/species/energy ledger, replayable local checkpoint and bounded synthetic
+tests. It remains component-level: the existing `IntegratedEngine2T` intake
+face uses a fixed-volume 1D endpoint cell, so the moving-volume law is not yet
+bound into the full engine state/configuration, CFL calculation or collector.
+No full-cycle reed claim is made.

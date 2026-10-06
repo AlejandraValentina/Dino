@@ -86,18 +86,31 @@
       "dependency_status": "CONDITIONAL_ON_P4"
     },
     "5_reed": {
-      "status": "DYNAMIC_REED_GEOMETRY_AND_STAGE_COUPLING_IN_PROGRESS",
+      "status": "SYNTHETIC_TWO_VOLUME_SSPRK2_COMPONENT_VERIFIED; FULL_ENGINE_BINDING_PENDING",
       "verified_scope": [
-        "static_and_dynamic_multi_petal_model",
-        "serialization",
-        "unit_restart_replay"
+        "DYNAMIC_REED_HINGED_FLAP_GEOMETRY_V1",
+        "explicit_linear_lift_shape_and_swept_volume_area",
+        "two_finite_0D_volumes_in_shared_SSPRK2",
+        "four_species_actual_donor_forward_and_reverse",
+        "pressure_force_and_gas_volume_work_pairing",
+        "damping_energy_sink_ledger",
+        "atomic_domain_rejection",
+        "configuration_and_state_hash_checkpoint_restart"
       ],
       "pending_scope": [
         "preregister explicit synthetic swept-volume/control-volume geometry",
         "commit preregistration before fixture campaign",
         "integrate dynamic petal state, flow, energy exchange and dissipation accounting in SSPRK2",
         "checkpoint/restart and ledger tests"
-      ]
+      ],
+      "evidence": "docs/gasdynamic/dynamic_reed_coupling_v1_implementation.md; tests/test_reed_coupling.py + tests/test_reed.py: 26 passed",
+      "not_verified": [
+        "IntegratedEngine2T stage binding",
+        "variable volume on finite-volume intake endpoint cell",
+        "engine CFL/configuration/checkpoint/collector binding",
+        "full-cycle dynamic reed trajectory"
+      ],
+      "dependency_status": "CONDITIONAL_ON_P4"
     },
     "6_expansion_chamber": {
       "status": "COMPONENT_AND_INTEGRATED_SYNTHETIC_EXHAUST_VERIFIED_CONDITIONAL",
@@ -898,7 +911,7 @@
         "17a-integrated-gas-species-foundation"
       ],
       "state": "IN_PROGRESS",
-      "blocker": null,
+      "blocker": "Full engine binding remains: the intake side is a finite-volume 1D endpoint cell with fixed mesh volume; the component uses two explicit volumes. Bind its swept-volume law into endpoint cell volume/density, crankcase volume-work, stage CFL, configuration/restart identity and collector without splitting SSPRK2.",
       "commits": [],
       "evidence": [
         "SELF_REVIEW (historical claim retained; no durable review receipt identified in AUD-06): Independent technical review is documented in docs/gasdynamic/autonomous_engineering_mode.md.",
@@ -906,9 +919,10 @@
         "DOMAIN/RESEARCH: a stage-coherent moving interface can pair pressure force work with equal/opposite gas volume work, but only after its swept-volume coefficient and neighboring control volumes are declared.",
         "SKEPTIC: pressure_area_m2 and effective_width_m*lift_m are distinct configured quantities; treating the latter as swept volume or assigning all displacement to crankcase would silently invent geometry.",
         "CONTRACT/DECISION: concrete missing topology/geometry binding; keep BLOCKED_LOCAL. No independent review is claimed.",
-        "2026-10-06 preregistration draft: docs/gasdynamic/dynamic_reed_coupling_v1_preregistration.md; no coupled numerical campaign has been run"
+        "2026-10-06 preregistration draft: docs/gasdynamic/dynamic_reed_coupling_v1_preregistration.md; no coupled numerical campaign has been run",
+        "Component subtask completed in motorsim.reed_coupling; 26 reed tests PASS. Full IntegratedEngine2T coupling remains unimplemented and is tracked separately."
       ],
-      "next_action": "Strict-validate and commit the preregistration; then implement tests and coupled fixture as a separate post-preregistration delta.",
+      "next_action": "Design and implement a stage-coherent engine binding for the variable-volume intake endpoint and crankcase; preserve the standalone component tests and all historical P5/P6 contracts.",
       "triage": {
         "forensics": "motorsim/reed.py already provides independent petal force area, lift and curtain-flow area; integrated engine currently binds only static reed area.",
         "domain_research": "Define a synthetic interface geometry with dV/dlift bound to pressure_area_m2, adjacent gas control volumes on each face, opposite geometric volume changes, and pressure work equal and opposite to reed generalized force work.",
@@ -1443,7 +1457,9 @@
       "dependencies": [],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "e3f5bc0de7b7c1df7936d1e1b8b48ac1d08a8380"
+      ],
       "evidence": [
         "results/2t-commercial-core-20261002/kt100_cycle24_forensics.json reproduces cycles21-23 exact and captures original cycle24 failure at 5000 RPM",
         "one-cell P5 reproducer shows rhoY exactly one float64 ULP above rho; 32-ULP excess remains rejected",
@@ -1458,7 +1474,9 @@
       "dependencies": [],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "e3f5bc0de7b7c1df7936d1e1b8b48ac1d08a8380"
+      ],
       "evidence": [
         "motorsim/fuel_library.py implements strict versioned definitions, canonical frozen snapshots, built-in/user lifecycle, atomic persistence and import/export",
         "ANCAP sources establish RON and bounds only; unspecified density, elemental composition, stoichiometric AFR and LHV remain null",
@@ -1467,6 +1485,28 @@
         "FUEL_LIBRARY does not feed combustion, P7 Q_F, chemistry or P6 pseudo-AFR"
       ],
       "next_action": "Keep fuel chemistry metrics undefined absent an explicit evidenced fuel record and approved event semantics."
+    },
+    {
+      "id": "dynamic-reed-coupled-two-volume-v1",
+      "description": "Implement and verify preregistered synthetic hinged-flap geometry and a two-0D-volume SSPRK2/species/energy coupled reed component",
+      "dependencies": [
+        "dynamic-reed-stage-coupling",
+        "004b184 dynamic reed preregistration"
+      ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [
+        "004b1841579497fe0e2273257be0104ccaa4abd2",
+        "PENDING_COMPONENT_COMMIT"
+      ],
+      "evidence": [
+        "motorsim/reed_coupling.py::HingedFlapGeometryV1 validates W*L/2 swept volume and matching petal force area; no real geometry inferred",
+        "DynamicReedTwoVolumeCouplingV1 uses same SSPRK2 stages for two gas volumes, four species, actual donor, petal state and damping sink",
+        "26 tests across test_reed_coupling.py and test_reed.py pass; forward/reverse species, conservation, admissibility rejection, exact replay and configuration/state hash validated",
+        "SELF_REVIEW only; no independent review artifact",
+        "Component-level evidence only; IntegratedEngine2T binding not claimed"
+      ],
+      "next_action": "No further standalone component tuning. Use this component contract as the basis for a separate stage-coherent binding to the engine 1D intake endpoint and crankcase."
     }
   ],
   "audit_remediation_mode": false,
@@ -1637,11 +1677,11 @@
     "audit_remediation_mode": false,
     "ready_tasks": 0,
     "local_blockers": [
-      "dynamic-reed-stage-coupling: currently writing a preregistered synthetic interface geometry and conservative energy contract before a fixture campaign",
-      "17d-fuel-properties: FUEL_LIBRARY_V1 exists, but no evidenced point ANCAP chemistry/LHV or approved mapping of prescribed P7 Q_F to fuel chemical energy",
-      "KT100: recovery R1 is consumed after cycle24 failure; any R2 requires separate preregistration and authorization"
+      "dynamic-reed-stage-coupling: bind the verified two-volume component to the integrated 1D intake endpoint and crankcase in common SSPRK2, variable volumes, CFL, state/restart/config and collector",
+      "17d-fuel-properties: no evidenced point ANCAP chemistry/LHV or approved mapping of prescribed P7 Q_F to chemical energy",
+      "KT100 remains unverified; R1 cycle24 correction is not a trajectory result and no R2 is authorized"
     ],
-    "next_action": "Finish and commit the dynamic-reed synthetic swept-volume/adjacent-control-volume/energy preregistration, then implement and verify it. Collector V4 and Fixture C have current evidence and require no rerun; keep P4-P8 and Commercial Core classifications unchanged.",
+    "next_action": "Continue dynamic reed full-engine integration from the committed 0D component without operator splitting. Keep fuel chemistry fields undefined and KT100 frozen. Do not rerun collector, Fixture C, P4-P8 or KT100.",
     "in_progress_tasks": 1,
     "blocker_triage_date": "2026-10-06"
   }

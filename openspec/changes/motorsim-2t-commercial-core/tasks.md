@@ -957,14 +957,19 @@ blob del productor; cinco pruebas focales de productor/evaluador pasan.
 
 ### Reed dinámica — ejecución autorizada pendiente
 
-- [ ] Commit de la preregistración antes de cualquier prueba numérica acoplada:
+- [x] Commit de la preregistración antes de cualquier prueba numérica acoplada:
   forma lineal de lámina articulada, relación entre ancho, largo, área de
   cortina y área de volumen barrido, balance de presión-trabajo y disipación;
   provenance `SYNTHETIC_ASSUMPTION` en
-  `docs/gasdynamic/dynamic_reed_coupling_v1_preregistration.md`.
-- [ ] Implementar geometría versionada, estado acoplado, SSPRK2 común y ledger
-  de energía/especies, con rechazo atómico de contacto/out-of-domain.
-- [ ] Ejecutar únicamente fixtures sintéticos acotados preregistrados y
-  comprobar restart/determinismo; no repetir Fixture A/C ni campañas KT100.
-- [ ] Evaluar después el binding a P5-C/engine completo sin alterar P5/P6
-  históricos ni llamar verificada a la reed integrada end-to-end.
+  `docs/gasdynamic/dynamic_reed_coupling_v1_preregistration.md`; congelado en
+  `004b1841579497fe0e2273257be0104ccaa4abd2` antes de los tests acoplados.
+- [x] Implementar geometría versionada y un acoplamiento stage-coherent SSPRK2
+  de dos volúmenes 0D, cuatro especies, reed y ledger de disipación, con rechazo
+  atómico fuera de dominio. `tests/test_reed_coupling.py` y
+  `tests/test_reed.py`: 26 aprobados; OpenSpec estricto aprobado.
+- [x] Verificar fixtures sintéticos breves, donor forward/reverse, conservación,
+  restart exacto y determinismo. No se repitieron Fixture A/C ni KT100.
+- [ ] Enlazar posteriormente la interfaz al estado P5-C/engine completo,
+  incluyendo el volumen variable del endpoint de ducto 1D, CFL, identidad de
+  configuración/checkpoint y collector. El acoplamiento 0D aislado NO acredita
+  reed dinámica integrada end-to-end.
