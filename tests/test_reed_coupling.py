@@ -112,6 +112,20 @@ def test_rejected_out_of_domain_stage_is_transactional():
     assert system.state == before
 
 
+@pytest.mark.parametrize("p_left,p_right,lift", [
+    (100_000.0, 120_000.0, 0.0),
+    (150_000.0, 100_000.0, 1e-3),
+])
+def test_unsupported_stop_contact_rejects_instead_of_constraining_petals(
+        p_left, p_right, lift):
+    system, _ = setup_case(p_left=p_left, p_right=p_right, lift=lift,
+                           damping=0.0)
+    before = system.state
+    with pytest.raises(ValueError, match="versioned event contract"):
+        system.step(1e-8)
+    assert system.state == before
+
+
 def test_checkpoint_restore_replays_exactly_and_rejects_configuration_drift():
     system, config = setup_case()
     for _ in range(5):

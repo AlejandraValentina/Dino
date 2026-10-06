@@ -89,6 +89,15 @@ def _integrated_channel_unit(name: str) -> str | None:
         return {"mass_kg": "kg", "pressure_pa": "Pa", "temperature_k": "K",
                 "fresh_air_mass_kg": "kg", "fuel_mass_kg": "kg",
                 "residual_mass_kg": "kg", "burned_mass_kg": "kg"}.get(parts[2])
+    if len(parts) == 3 and parts[0] == "reed" and parts[1]:
+        try:
+            reed_id = unquote(parts[1])
+            if quote(reed_id, safe="") != parts[1]:
+                return None
+        except (ValueError, TypeError):
+            return None
+        return {"position_m": "m", "velocity_m_s": "m/s",
+                "mechanical_energy_j": "J", "dissipation_j": "J"}.get(parts[2])
     if len(parts) != 5 or parts[0] != "duct" or not parts[1]:
         return None
     try:

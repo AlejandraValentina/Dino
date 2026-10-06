@@ -942,10 +942,9 @@ blob del productor; cinco pruebas focales de productor/evaluador pasan.
   operaciones de biblioteca e import/export JSON; `tests/test_fuel_library.py`
   y regresión `tests/test_fuel.py` pasan. Sin integración de combustión, sin
   valores químicos ANCAP inferidos y sin cambiar pseudo-AFR V4.
-- [ ] Resolver la geometría y el acoplamiento SSPRK2 de reed dinámica usando un
-  fixture sintético preregistrado; mantener separado el caso real KT100.
-  Diseño geométrico/energético aún requiere preregistro y commit separado antes
-  de ejecutar fixtures de campaña.
+- [x] Resolver la geometría y el acoplamiento SSPRK2 de reed dinámica usando un
+  fixture sintético preregistrado; mantener separado el caso real KT100. Diseño
+  y preregistro congelados antes de las pruebas acopladas.
 
 - [x] Registrar el fallo de KT100 R1 cycle24 desde el checkpoint cycle20,
   reproducir cycles21–23 exactamente y recuperar el paso inválido del cycle24.
@@ -955,7 +954,7 @@ blob del productor; cinco pruebas focales de productor/evaluador pasan.
   aprobadas. La trayectoria cycle24 no se reintentó; R1 está consumida, no hay
   evidencia de periodicidad KT100 y no se autorizó R2.
 
-### Reed dinámica — ejecución autorizada pendiente
+### Reed dinámica — integración sintética verificada, sin validación real
 
 - [x] Commit de la preregistración antes de cualquier prueba numérica acoplada:
   forma lineal de lámina articulada, relación entre ancho, largo, área de
@@ -969,7 +968,28 @@ blob del productor; cinco pruebas focales de productor/evaluador pasan.
   `tests/test_reed.py`: 26 aprobados; OpenSpec estricto aprobado.
 - [x] Verificar fixtures sintéticos breves, donor forward/reverse, conservación,
   restart exacto y determinismo. No se repitieron Fixture A/C ni KT100.
-- [ ] Enlazar posteriormente la interfaz al estado P5-C/engine completo,
-  incluyendo el volumen variable del endpoint de ducto 1D, CFL, identidad de
-  configuración/checkpoint y collector. El acoplamiento 0D aislado NO acredita
-  reed dinámica integrada end-to-end.
+- [x] Enlazar el estado al endpoint 1D terminal de admisión y al cárter de
+  `IntegratedEngine2T`: volumen de ducto `Vmesh + (W L / 2) x`, volumen de
+  cárter `Vbase - (W L / 2) x`, ecuaciones de volumen móvil y términos `p dV`
+  dentro de ambos stages SSPRK2; actualizar conservativas extensivas de la celda
+  móvil antes de recuperar densidades; derivar masa de las cuatro especies P6;
+  flujo de área limitado por la geometría y área disponible; donor de cuatro
+  especies derivado del signo del flujo.
+- [x] Versionar configuración V3/estado V8 solo para binding dinámico; vincular
+  geometría y estado al hash/configuración, checkpoint/restart y prueba de
+  round-trip. El CFL usa el volumen efectivo de la celda terminal.
+- [x] Incluir energía cinética/elástica y ledger explícito de disipación en el
+  inventario global; el ciclo primario y collector V4 reconstruyen volúmenes,
+  balance energético y señales `reed:*` desde estados aceptados.
+- [x] Comprobar donor forward/reverse, balances, round-trip, restart y una vuelta
+  sintética completa reconstruida por el collector V4. Evidencia automatizada
+  nueva: `tests/test_integrated_2t.py`; no es una campaña de un motor real.
+- [x] Regresión final de este delta: `tests/test_integrated_2t.py` **55 passed**;
+  `tests/test_reed_coupling.py tests/test_reed.py` **28 passed**; regresiones
+  P5-C/P6 `tests/test_p5c_integrated.py tests/test_p5b_integrated_coupling.py
+  tests/test_p6_species.py` **62 passed**; OpenSpec estricto y `py_compile`
+  aprobados. Revisión adversarial fue autorrevisión secuencial; no se declara
+  revisión independiente ni aceptación del Commercial Core.
+- [ ] Geometría real, selección de parámetros, contacto con stops y validación
+  experimental siguen fuera de este contrato; los stages que cruzan el dominio
+  se rechazan sin clipping.

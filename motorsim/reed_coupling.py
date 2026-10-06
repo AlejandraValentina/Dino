@@ -87,12 +87,19 @@ class HingedFlapGeometryV1:
         return self.discharge_coefficient * self.width_m * lift
 
     def volumes_m3(self, lift_m: float) -> tuple[float, float]:
+        return self.volumes_from_base_m3(self.left_closed_volume_m3,
+                                         self.right_closed_volume_m3, lift_m)
+
+    def volumes_from_base_m3(self, left_base_m3: float, right_base_m3: float,
+                             lift_m: float) -> tuple[float, float]:
+        left_base = _finite(left_base_m3, "left_base_m3")
+        right_base = _finite(right_base_m3, "right_base_m3")
         lift = _finite(lift_m, "lift_m")
         if not 0.0 <= lift <= self.lift_stop_m:
             raise ValueError("lift is outside the declared geometry")
         area = self.swept_volume_area_m2
-        left = self.left_closed_volume_m3 + area * lift
-        right = self.right_closed_volume_m3 - area * lift
+        left = left_base + area * lift
+        right = right_base - area * lift
         if left <= 0.0 or right <= 0.0:
             raise ValueError("reed displacement leaves a nonpositive control volume")
         return left, right
@@ -230,12 +237,12 @@ class DynamicReedTwoVolumeCouplingV1:
         reed_accel = (pressure_force - self.petal.stiffness_n_m * x -
                       self.petal.damping_n_s_m * v) / self.petal.mass_kg
         dx = v
-        # A petal at rest on a stop may remain there under a force into that
-        # stop; no state clipping is used for an incoming impact.
+        # Contact/impact mechanics are not part of this contract. Reject an
+        # outward force at rest on a stop instead of silently constraining it.
         if x == 0.0 and v == 0.0 and reed_accel < 0.0:
-            dx, reed_accel = 0.0, 0.0
+            raise ValueError("dynamic reed stop contact requires a versioned event contract")
         elif x == self.geometry.lift_stop_m and v == 0.0 and reed_accel > 0.0:
-            dx, reed_accel = 0.0, 0.0
+            raise ValueError("dynamic reed stop contact requires a versioned event contract")
         work_left = -pl * sweep * dx
         work_right = pr * sweep * dx
         return (-mdot, -enthalpy_rate + work_left, *(-q for q in species_flux),

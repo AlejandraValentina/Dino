@@ -443,10 +443,21 @@ stages are rejected atomically until a separately versioned event contract is
 available. Existing static reed and standalone `DYNAMIC_REED_V1` behavior is
 preserved. The preregistration is not evidence of implementation or acceptance.
 
-The preregistered component now exists as
+The preregistered component exists as
 `motorsim.reed_coupling.DynamicReedTwoVolumeCouplingV1`. It has its own global
 mass/species/energy ledger, replayable local checkpoint and bounded synthetic
-tests. It remains component-level: the existing `IntegratedEngine2T` intake
-face uses a fixed-volume 1D endpoint cell, so the moving-volume law is not yet
-bound into the full engine state/configuration, CFL calculation or collector.
-No full-cycle reed claim is made.
+tests. The V1 engine binding now couples the intake duct's terminal 1D cell,
+crankcase and petal in the common SSPRK2 stages. Its state/configuration schema,
+variable endpoint volume, crankcase volume-work, CFL, checkpoint/restart, cycle
+primary and V4 channels carry the synthetic geometry and mechanics. A full
+synthetic cycle was rebuilt and its collector validated. This does not qualify
+real-engine reed dimensions, KT100, periodic convergence or Commercial Core
+acceptance; stop-contact stages remain rejected rather than clipped.
+
+For the moving terminal cell, SSPRK2 updates extensive mass, momentum and energy
+before recovering stage densities from the effective cell volume. Total mass is
+derived from the four authoritative P6 species. This avoids a product-rule
+roundoff mismatch between a density update and a changing cell volume. The
+energy increment includes the explicit boundary pressure work `-p dV`; the
+crankcase receives the opposite reed volume-work term, while petal spring/kinetic
+energy and damping loss close the global balance.

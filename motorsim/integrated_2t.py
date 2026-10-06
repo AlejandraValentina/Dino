@@ -33,6 +33,8 @@ from .p7_prescribed import (P7BurnEvent, P7Ledger, Q_F, capture_event,
                             restore_event, snapshot_event)
 from .powervalve import PowerValve
 from .reed import ReedPetal, static_area
+from .reed import ReedState
+from .reed_coupling import HingedFlapGeometryV1
 from .thermal import ThermalSystem
 from .two_stroke_ports import TwoStrokePortSet
 
@@ -226,6 +228,59 @@ class DuctPath2T:
 
 
 @dataclass(frozen=True)
+class DynamicReedBinding2T:
+    """Bind one synthetic moving reed to the intake endpoint/crankcase pair."""
+    duct_id: str
+    geometry: HingedFlapGeometryV1
+    petal: ReedPetal
+    initial_state: ReedState
+
+    def validate(self, paths: tuple[DuctPath2T, ...], crankcase_volume_m3: float,
+                 static_petals: tuple[ReedPetal, ...]) -> None:
+        if not isinstance(self.duct_id, str) or not self.duct_id:
+            raise ValueError("dynamic reed binding requires an intake duct id")
+        path = next((item for item in paths if item.id == self.duct_id), None)
+        if path is None or path.role != "intake":
+            raise ValueError("dynamic reed can only bind the intake duct endpoint")
+        if static_petals:
+            raise ValueError("static and dynamic reed bindings cannot be combined")
+        self.geometry.validate(self.petal)
+        if not isclose(self.geometry.left_closed_volume_m3,
+                       path.mesh.volumes[-1], rel_tol=1e-12, abs_tol=1e-18):
+            raise ValueError("dynamic reed left reference volume must match intake endpoint cell")
+        if not isclose(self.geometry.right_closed_volume_m3,
+                       crankcase_volume_m3, rel_tol=1e-12, abs_tol=1e-18):
+            raise ValueError("dynamic reed right reference volume must match initial crankcase")
+        x, v = self.initial_state.position_m, self.initial_state.velocity_m_s
+        if (type(x) not in (int, float) or type(v) not in (int, float) or
+                not isfinite(x) or not isfinite(v) or
+                not 0.0 <= x <= self.geometry.lift_stop_m):
+            raise ValueError("dynamic reed initial state is inadmissible")
+        if (x == 0.0 and v < 0.0) or (x == self.geometry.lift_stop_m and v > 0.0):
+            raise ValueError("dynamic reed initial velocity points outside its stop")
+        self.geometry.volumes_from_base_m3(
+            path.mesh.volumes[-1], crankcase_volume_m3, x)
+
+    def to_dict(self) -> dict:
+        return {"schema": "INTEGRATED_DYNAMIC_REED_BINDING_2T_V1",
+                "duct_id": self.duct_id,
+                "geometry": self.geometry.to_dict(),
+                "petal": self.petal.to_dict(),
+                "initial_state": {"position_m": self.initial_state.position_m,
+                                  "velocity_m_s": self.initial_state.velocity_m_s}}
+
+    @classmethod
+    def from_dict(cls, value: dict) -> "DynamicReedBinding2T":
+        if (not isinstance(value, dict) or set(value) != {
+                "schema", "duct_id", "geometry", "petal", "initial_state"} or
+                value.get("schema") != "INTEGRATED_DYNAMIC_REED_BINDING_2T_V1"):
+            raise ValueError("integrated dynamic reed binding schema mismatch")
+        return cls(value["duct_id"], HingedFlapGeometryV1.from_dict(value["geometry"]),
+                   ReedPetal.from_dict(value["petal"]),
+                   ReedState.from_dict(value["initial_state"]))
+
+
+@dataclass(frozen=True)
 class IntegratedPortBinding2T:
     """Bind existing generic port ducts to the integrated finite-volume paths."""
     port_set: TwoStrokePortSet
@@ -387,6 +442,7 @@ class IntegratedEngine2T:
                  max_cfl: float = 0.4,
                  geometry_identity: dict | None = None,
                  reed_petals: tuple[ReedPetal, ...] = (),
+                 dynamic_reed_binding: DynamicReedBinding2T | None = None,
                  port_binding: IntegratedPortBinding2T | None = None,
                  intake_plenum: IntegratedIntakePlenum2T | None = None,
                  network_volumes: tuple[IntegratedNetworkVolume2T, ...] = (),
@@ -416,6 +472,13 @@ class IntegratedEngine2T:
         for petal in reed_petals:
             petal.validate()
         self.reed_petals = reed_petals
+        if (dynamic_reed_binding is not None and
+                not isinstance(dynamic_reed_binding, DynamicReedBinding2T)):
+            raise ValueError("dynamic_reed_binding must use DynamicReedBinding2T")
+        self.dynamic_reed_binding = dynamic_reed_binding
+        if self.dynamic_reed_binding is not None:
+            self.schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V8"
+            self.configuration_schema = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V3"
         if type(reference_rpm) not in (int, float) or not isfinite(reference_rpm) or reference_rpm <= 0:
             raise ValueError("reference_rpm must be positive and finite")
         self.reference_rpm = float(reference_rpm)
@@ -549,17 +612,32 @@ class IntegratedEngine2T:
                        "p7_heat_added_J": 0.0,
                        "p7_availability_limited_kg": 0.0,
                        "p7_source_species_kg": [0.0] * 4}
+        if self.dynamic_reed_binding is not None:
+            self.ledger["reed_dissipation_J"] = 0.0
         self.trace = []
         geometry0 = self._geometry(self.angle_deg, self.reference_rpm)
+        if self.dynamic_reed_binding is not None:
+            self.dynamic_reed_binding.validate(
+                ducts, geometry0.crankcase_volume_m3, self.reed_petals)
+        initial_lift = (0.0 if self.dynamic_reed_binding is None else
+                        self.dynamic_reed_binding.initial_state.position_m)
+        initial_swept_area = (0.0 if self.dynamic_reed_binding is None else
+                              self.dynamic_reed_binding.geometry.swept_volume_area_m2)
         self.state = {
             "chambers": {
                 "crankcase": self._chamber_from_primitive(crankcase_state,
-                                                           geometry0.crankcase_volume_m3),
+                                                           geometry0.crankcase_volume_m3 -
+                                                           initial_swept_area * initial_lift),
                 "cylinder": self._chamber_from_primitive(cylinder_state,
                                                          geometry0.cylinder_volume_m3)},
             "ducts": {}, "network_volumes": {},
             "species": {"chambers": {}, "ducts": {}, "network_volumes": {}},
         }
+        if self.dynamic_reed_binding is not None:
+            self.state["dynamic_reed"] = {
+                "position_m": self.dynamic_reed_binding.initial_state.position_m,
+                "velocity_m_s": self.dynamic_reed_binding.initial_state.velocity_m_s,
+                "dissipation_J": 0.0}
         for binding in self.network_volumes:
             node = binding.node
             initial = binding.initial_state
@@ -585,6 +663,10 @@ class IntegratedEngine2T:
                 rho, velocity, pressure, _ = self.eos.validate(tuple(primitive))
                 q = self.eos.conservative((rho, velocity, pressure, 1.0))
                 volume = path.mesh.volumes[i]
+                if (self.dynamic_reed_binding is not None and
+                        path.id == self.dynamic_reed_binding.duct_id and
+                        i == len(path.mesh.volumes) - 1):
+                    volume += initial_swept_area * initial_lift
                 self.state["ducts"][path.id].append(q)
                 cell_mass = q[0] * volume
                 comp = (tuple(supplied_path[i]) if supplied_path is not None else
@@ -607,14 +689,14 @@ class IntegratedEngine2T:
                                  duct_primitives, atmosphere):
         """Capture a JSON-safe constructor contract for reconstructible geometry.
 
-        V2 intentionally supports only explicit slider-crank volumes and a
+        V2/V3 intentionally support only explicit slider-crank volumes and a
         generic port binding. Those two models resolve every geometry field;
         arbitrary callbacks cannot be serialized or represented as reproducible.
         V2 records separate inlet and outlet donor compositions.
         """
         if self.slider_crank is None or self.port_binding is None:
             return None
-        return {
+        result = {
             "schema": self.configuration_schema,
             "geometry_contract": "SLIDER_CRANK_AND_GENERIC_PORTS_V1",
             "initial_chambers": {
@@ -660,9 +742,12 @@ class IntegratedEngine2T:
             "thermal_load": self.thermal_load,
             "combustion_start_angle_deg": self.combustion_start_angle_deg,
         }
+        if self.dynamic_reed_binding is not None:
+            result["dynamic_reed_binding"] = self.dynamic_reed_binding.to_dict()
+        return result
 
     def configuration_dict(self) -> dict:
-        """Return a detached V2 constructor configuration when representable."""
+        """Return a detached supported V2/V3 constructor configuration."""
         self._assert_configuration_unchanged(check_identity=True)
         if self._configuration_spec is None:
             raise ValueError(
@@ -690,6 +775,11 @@ class IntegratedEngine2T:
                 self.geometry_sha256, id(self.configuration_identity),
                 tuple(id(petal) for petal in self.reed_petals),
                 id(self.port_binding),
+                id(self.dynamic_reed_binding),
+                (None if self.dynamic_reed_binding is None else
+                 (id(self.dynamic_reed_binding.geometry),
+                  id(self.dynamic_reed_binding.petal),
+                  self.dynamic_reed_binding.duct_id)),
                 None if self.port_binding is None else (
                     id(self.port_binding.port_set), id(self.port_binding.powervalve),
                     tuple(sorted(self.port_binding.path_by_duct.items()))),
@@ -746,7 +836,10 @@ class IntegratedEngine2T:
                      set(value) == common_fields)
         current_v2 = (source_schema == cls.configuration_schema and
                       set(value) == common_fields | {"outlet_species"})
-        if (not (legacy_v1 or current_v2) or
+        current_v3 = (source_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V3" and
+                      set(value) == common_fields | {"outlet_species",
+                                                     "dynamic_reed_binding"})
+        if (not (legacy_v1 or current_v2 or current_v3) or
                 value.get("geometry_contract") !=
                 "SLIDER_CRANK_AND_GENERIC_PORTS_V1"):
             raise ValueError("integrated engine configuration schema is invalid")
@@ -837,6 +930,8 @@ class IntegratedEngine2T:
                         for path_id, rows in value["duct_species"].items()})
         thermal = (None if value["thermal_system"] is None else
                    ThermalSystem.from_dict(value["thermal_system"]))
+        dynamic_reed = (None if not current_v3 else
+                        DynamicReedBinding2T.from_dict(value["dynamic_reed_binding"]))
 
         def resolved_geometry(_angle):
             # Both explicit models replace every returned geometry field.
@@ -859,6 +954,7 @@ class IntegratedEngine2T:
             geometry_identity=deepcopy(value["geometry_identity"]),
             reed_petals=tuple(ReedPetal.from_dict(row)
                               for row in value["reed_petals"]),
+            dynamic_reed_binding=dynamic_reed,
             port_binding=binding, network_volumes=tuple(network),
             slider_crank=slider, reference_rpm=value["reference_rpm"],
             thermal_system=thermal,
@@ -866,7 +962,7 @@ class IntegratedEngine2T:
             thermal_load=value["thermal_load"],
             combustion_start_angle_deg=value["combustion_start_angle_deg"])
         canonical_input = deepcopy(value)
-        canonical_input["schema"] = cls.configuration_schema
+        canonical_input["schema"] = engine.configuration_schema
         canonical_input["outlet_species"] = list(
             value.get("outlet_species", value["atmosphere_species"]))
         if engine.configuration_dict() != canonical_input:
@@ -909,6 +1005,8 @@ class IntegratedEngine2T:
                     "thermal_load": self.thermal_load,
                     "p7": {"schema": "P7_PRESCRIBED_V1",
                            "start_angle_deg": self.combustion_start_angle_deg}}
+        if self.dynamic_reed_binding is not None:
+            identity["dynamic_reed_binding"] = self.dynamic_reed_binding.to_dict()
         encoded = json.dumps(identity, sort_keys=True, separators=(",", ":"),
                              allow_nan=False)
         normalized = json.loads(encoded)
@@ -948,6 +1046,34 @@ class IntegratedEngine2T:
         result.validate(tuple(path.id for path in self.transfers) if hasattr(self, "transfers")
                         else tuple(path.id for path in self.ducts if path.role == "transfer"))
         return result
+
+    def _reed_lift(self, state):
+        if self.dynamic_reed_binding is None:
+            return 0.0
+        return float(state["dynamic_reed"]["position_m"])
+
+    def _reed_velocity(self, state):
+        if self.dynamic_reed_binding is None:
+            return 0.0
+        return float(state["dynamic_reed"]["velocity_m_s"])
+
+    def _duct_cell_volume(self, path, cell_index, state):
+        volume = path.mesh.volumes[cell_index]
+        binding = self.dynamic_reed_binding
+        if (binding is not None and path.id == binding.duct_id and
+                cell_index == len(path.mesh.volumes) - 1):
+            volume += binding.geometry.swept_volume_area_m2 * self._reed_lift(state)
+        if not isfinite(volume) or volume <= 0.0:
+            raise ValueError("dynamic reed intake endpoint volume is inadmissible")
+        return volume
+
+    def _crankcase_volume_for_stage(self, base_volume, state):
+        binding = self.dynamic_reed_binding
+        volume = (base_volume if binding is None else
+                  base_volume - binding.geometry.swept_volume_area_m2 * self._reed_lift(state))
+        if not isfinite(volume) or volume <= 0.0:
+            raise ValueError("dynamic reed crankcase volume is inadmissible")
+        return volume
 
     def _chamber_state(self, chamber, species):
         mass, energy, volume = chamber
@@ -1131,6 +1257,12 @@ class IntegratedEngine2T:
                         static_area(self.reed_petals,
                                     primitives[-1][2] -
                                     cc.thermodynamics(self.eos)[1]))
+                if (self.dynamic_reed_binding is not None and
+                        path.id == self.dynamic_reed_binding.duct_id):
+                    intake_reed_area = min(
+                        intake_reed_area,
+                        self.dynamic_reed_binding.geometry.flow_area_m2(
+                            self._reed_lift(state)))
                 intake_area = min(intake_reed_area, path.mesh.areas[-1])
                 right_exchange = interface_flux(cc, primitives[-1], intake_area, 1,
                                                 eos=self.eos) if intake_area else None
@@ -1142,7 +1274,7 @@ class IntegratedEngine2T:
                            max(abs(right_exchange.wave_speeds[0]),
                                abs(right_exchange.wave_speeds[-1])))
                 right_species = ((0.0,) * 4 if right_exchange is None else
-                    self._face_species_flux(right_face[0], ss[-1], qs[-1][0]*path.mesh.volumes[-1],
+                    self._face_species_flux(right_face[0], ss[-1], qs[-1][0]*self._duct_cell_volume(path, len(qs)-1, state),
                                             species_chambers["crankcase"], chambers["crankcase"][0]))
                 # A left face points in +x; it is an external inflow when positive.
                 if network is None:
@@ -1275,8 +1407,8 @@ class IntegratedEngine2T:
                 # Keep states in geometric left/right order.  The shared donor
                 # selector inside _face_species_flux chooses right for reverse
                 # flow; preselecting here would reverse that decision twice.
-                left_mass = qs[i][0] * path.mesh.volumes[i]
-                right_mass = qs[i + 1][0] * path.mesh.volumes[i + 1]
+                left_mass = qs[i][0] * self._duct_cell_volume(path, i, state)
+                right_mass = qs[i + 1][0] * self._duct_cell_volume(path, i + 1, state)
                 sf = self._face_species_flux(mflux, ss[i], left_mass,
                                              ss[i + 1], right_mass)
                 faces.append(gas_face); species_faces.append(sf)
@@ -1285,8 +1417,17 @@ class IntegratedEngine2T:
             face_speeds.append(speed_r)
             dq, ds = [], []
             for i, (q, comp) in enumerate(zip(qs, ss)):
-                vol = path.mesh.volumes[i]
+                vol = self._duct_cell_volume(path, i, state)
                 rhs = [-(faces[i+1][k]-faces[i][k])/vol for k in range(3)]
+                if (self.dynamic_reed_binding is not None and
+                        path.id == self.dynamic_reed_binding.duct_id and
+                        i == len(qs) - 1):
+                    sweep = self.dynamic_reed_binding.geometry.swept_volume_area_m2
+                    volume_rate = sweep * self._reed_velocity(state)
+                    rho, _, pressure, _ = primitives[i]
+                    rhs[0] -= rho * volume_rate / vol
+                    rhs[1] -= qs[i][1] * volume_rate / vol
+                    rhs[2] -= (qs[i][2] + pressure) * volume_rate / vol
                 # Existing quasi-1D solver's geometric pressure source.
                 rhs[1] += primitives[i][2] * (
                     path.mesh.areas[i+1] - path.mesh.areas[i]) / vol
@@ -1299,6 +1440,35 @@ class IntegratedEngine2T:
             faces_trace[path.id]["face_speeds"] = face_speeds
         for name in ("crankcase", "cylinder"):
             rhs_q["chambers"][name][1] += work[name]
+        dynamic_reed_rhs = None
+        reed_dissipation_rate = 0.0
+        if self.dynamic_reed_binding is not None:
+            binding = self.dynamic_reed_binding
+            path = next(item for item in self.ducts if item.id == binding.duct_id)
+            q_endpoint = state["ducts"][path.id][-1]
+            duct_pressure = self._primitive(q_endpoint)[2]
+            crankcase_volume = self._crankcase_volume_for_stage(
+                g.crankcase_volume_m3, state)
+            crankcase_pressure = ((self.eos.gamma - 1.0) *
+                                  chambers["crankcase"][1] / crankcase_volume)
+            x, v = self._reed_lift(state), self._reed_velocity(state)
+            petal = binding.petal
+            sweep = binding.geometry.swept_volume_area_m2
+            acceleration = ((duct_pressure - crankcase_pressure) * sweep -
+                            petal.stiffness_n_m * x - petal.damping_n_s_m * v) / petal.mass_kg
+            dx = v
+            if x == 0.0 and v == 0.0 and acceleration < 0.0:
+                raise ValueError(
+                    "dynamic reed stop contact requires a versioned event contract")
+            elif x == binding.geometry.lift_stop_m and v == 0.0 and acceleration > 0.0:
+                raise ValueError(
+                    "dynamic reed stop contact requires a versioned event contract")
+            dynamic_reed_rhs = (dx, acceleration,
+                                petal.damping_n_s_m * v * v)
+            # This p dV transfer is internal to the duct/crankcase/reed system;
+            # the existing crankcase work ledger remains piston-only.
+            rhs_q["chambers"]["crankcase"][1] += crankcase_pressure * sweep * v
+            reed_dissipation_rate = dynamic_reed_rhs[2]
         p7_species_rate = (0.0, 0.0, 0.0, 0.0)
         p7_heat_rate = 0.0
         stage_p7_event = (self.p7_event if p7_event is _USE_ACTIVE_P7_EVENT else
@@ -1334,7 +1504,26 @@ class IntegratedEngine2T:
                     rhs_q["ducts"][duct_id][cell_index] = tuple(
                         rhs_q["ducts"][duct_id][cell_index])
                 thermal_rates[surface.id] = heat
+        dynamic_duct_cell = None
+        if self.dynamic_reed_binding is not None:
+            binding = self.dynamic_reed_binding
+            path = next(item for item in self.ducts if item.id == binding.duct_id)
+            cell_index = len(path.mesh.volumes) - 1
+            q = state["ducts"][path.id][cell_index]
+            volume = self._duct_cell_volume(path, cell_index, state)
+            volume_rate = binding.geometry.swept_volume_area_m2 * self._reed_velocity(state)
+            density_rhs = rhs_q["ducts"][path.id][cell_index]
+            dynamic_duct_cell = {
+                "duct_id": path.id, "cell_index": cell_index,
+                "q": tuple(q[:3]), "volume_m3": volume,
+                "volume_rate_m3_s": volume_rate,
+                # Convert the moving-cell density RHS back to extensive rates.
+                "extensive_rate": tuple(density_rhs[k] * volume + q[k] * volume_rate
+                                         for k in range(3))}
         return {"q": rhs_q, "species": rhs_s, "geometry": g,
+                "dynamic_reed_rhs": dynamic_reed_rhs,
+                "reed_dissipation_rate_W": reed_dissipation_rate,
+                "dynamic_duct_cell": dynamic_duct_cell,
                 "chamber_outflow_kg_s": chamber_outflow,
                 "network_outflow_kg_s": network_outflow,
                 "network_exchanges": network_exchanges,
@@ -1360,7 +1549,8 @@ class IntegratedEngine2T:
                 first = width / signal
                 denominator = (path.mesh.areas[i] * face_speeds[i] +
                                path.mesh.areas[i+1] * face_speeds[i+1])
-                second = (2.0 * path.mesh.volumes[i] / denominator
+                volume = self._duct_cell_volume(path, i, state)
+                second = (2.0 * volume / denominator
                           if denominator > 0 else float("inf"))
                 values.append(float(dt_s) / min(first, second))
         # A connected 0D chamber has no mesh width. Bound gross outward flux
@@ -1380,6 +1570,22 @@ class IntegratedEngine2T:
         return maximum
 
     def _validate(self, state):
+        if self.dynamic_reed_binding is None:
+            if "dynamic_reed" in state:
+                raise ValueError("unexpected dynamic reed state without a binding")
+        else:
+            reed_state = state.get("dynamic_reed")
+            if not isinstance(reed_state, dict) or set(reed_state) != {
+                    "position_m", "velocity_m_s", "dissipation_J"}:
+                raise ValueError("integrated dynamic reed state schema mismatch")
+            x, v, diss = (reed_state[name] for name in
+                          ("position_m", "velocity_m_s", "dissipation_J"))
+            if (any(type(value) not in (int, float) or not isfinite(value)
+                    for value in (x, v, diss)) or
+                    not 0.0 <= x <= self.dynamic_reed_binding.geometry.lift_stop_m or
+                    diss < 0.0 or (x == 0.0 and v < 0.0) or
+                    (x == self.dynamic_reed_binding.geometry.lift_stop_m and v > 0.0)):
+                raise ValueError("integrated dynamic reed state is inadmissible")
         for name, chamber in state["chambers"].items():
             mass, energy, volume = chamber
             comp = validate_species(state["species"]["chambers"][name], mass)
@@ -1391,7 +1597,7 @@ class IntegratedEngine2T:
                                fsum(fractions[:2])))
         for path in self.ducts:
             for i, q in enumerate(state["ducts"][path.id]):
-                volume = path.mesh.volumes[i]
+                volume = self._duct_cell_volume(path, i, state)
                 self.eos.primitive((q[0], q[1], q[2], q[0]))
                 validate_species(state["species"]["ducts"][path.id][i], q[0]*volume)
         expected_node_ids = {binding.node.id for binding in self.network_volumes}
@@ -1425,6 +1631,13 @@ class IntegratedEngine2T:
         g = self._geometry(angle)
         for name, volume in (("crankcase", g.crankcase_volume_m3),
                              ("cylinder", g.cylinder_volume_m3)):
+            if name == "crankcase" and self.dynamic_reed_binding is not None:
+                sweep = self.dynamic_reed_binding.geometry.swept_volume_area_m2
+                reed0 = base["dynamic_reed"]
+                dx0 = rhs0["dynamic_reed_rhs"][0]
+                dx1 = rhs1["dynamic_reed_rhs"][0]
+                volume = (volume - sweep * reed0["position_m"] -
+                          .5 * dt * sweep * (dx0 + dx1))
             q0 = base["chambers"][name]
             a, b = rhs0["q"]["chambers"][name], rhs1["q"]["chambers"][name]
             result["chambers"][name] = tuple(q0[i] + .5*dt*(a[i]+b[i])
@@ -1445,7 +1658,8 @@ class IntegratedEngine2T:
                                                             for j in range(4))
                                                     for i in range(len(s0))]
             for i, q in enumerate(result["ducts"][path.id]):
-                mass_density = fsum(result["species"]["ducts"][path.id][i]) / path.mesh.volumes[i]
+                mass_density = fsum(result["species"]["ducts"][path.id][i]) / self._duct_cell_volume(
+                    path, i, result)
                 result["ducts"][path.id][i] = (q[0], q[1], q[2], mass_density)
         for node_id, q0 in base["network_volumes"].items():
             a, b = rhs0["q"]["network_volumes"][node_id], rhs1["q"]["network_volumes"][node_id]
@@ -1457,6 +1671,26 @@ class IntegratedEngine2T:
             sb = rhs1["species"]["network_volumes"][node_id]
             result["species"]["network_volumes"][node_id] = tuple(
                 s0[j] + .5*dt*(sa[j]+sb[j]) for j in range(4))
+        if self.dynamic_reed_binding is not None:
+            a, b = rhs0["dynamic_reed_rhs"], rhs1["dynamic_reed_rhs"]
+            reed = base["dynamic_reed"]
+            result["dynamic_reed"] = {
+                "position_m": reed["position_m"] + .5 * dt * (a[0] + b[0]),
+                "velocity_m_s": reed["velocity_m_s"] + .5 * dt * (a[1] + b[1]),
+                "dissipation_J": reed["dissipation_J"] + .5 * dt * (a[2] + b[2])}
+            stage0, stage1 = rhs0["dynamic_duct_cell"], rhs1["dynamic_duct_cell"]
+            path = next(item for item in self.ducts
+                        if item.id == self.dynamic_reed_binding.duct_id)
+            index = stage0["cell_index"]
+            volume_n = self._duct_cell_volume(path, index, result)
+            q0 = base["ducts"][path.id][index]
+            qn = [(q0[k] * stage0["volume_m3"] + .5 * dt * (
+                stage0["extensive_rate"][k] + stage1["extensive_rate"][k])) / volume_n
+                  for k in range(3)]
+            qn[0] = (fsum(result["species"]["ducts"][path.id][index]) /
+                     volume_n)
+            result["ducts"][path.id][index] = tuple(qn) + (
+                fsum(result["species"]["ducts"][path.id][index]) / volume_n,)
         return result
 
     def inventory(self, state=None):
@@ -1467,11 +1701,16 @@ class IntegratedEngine2T:
             mass += q[0]; energy += q[1]
             for j, value in enumerate(state["species"]["chambers"][name]): species[j] += value
         for path in self.ducts:
-            for q, comp, volume in zip(state["ducts"][path.id],
-                                       state["species"]["ducts"][path.id],
-                                       path.mesh.volumes):
+            for index, (q, comp) in enumerate(zip(state["ducts"][path.id],
+                                                   state["species"]["ducts"][path.id])):
+                volume = self._duct_cell_volume(path, index, state)
                 mass += q[0] * volume; energy += q[2] * volume
                 for j, value in enumerate(comp): species[j] += value
+        if self.dynamic_reed_binding is not None:
+            reed = state["dynamic_reed"]
+            petal = self.dynamic_reed_binding.petal
+            energy += (0.5 * petal.mass_kg * reed["velocity_m_s"] ** 2 +
+                       0.5 * petal.stiffness_n_m * reed["position_m"] ** 2)
         for node_id, q in state["network_volumes"].items():
             mass += q[0]; energy += q[1]
             for j, value in enumerate(state["species"]["network_volumes"][node_id]):
@@ -1530,14 +1769,34 @@ class IntegratedEngine2T:
             q1["species"]["chambers"][name] = tuple(
                 q0["species"]["chambers"][name][j] + dt_s*r0["species"]["chambers"][name][j]
                 for j in range(4))
+        if self.dynamic_reed_binding is not None:
+            reed0 = q0["dynamic_reed"]
+            dx, dv, ddiss = r0["dynamic_reed_rhs"]
+            q1["dynamic_reed"] = {
+                "position_m": reed0["position_m"] + dt_s * dx,
+                "velocity_m_s": reed0["velocity_m_s"] + dt_s * dv,
+                "dissipation_J": reed0["dissipation_J"] + dt_s * ddiss}
         for path in self.ducts:
             q1["ducts"][path.id] = []
             q1["species"]["ducts"][path.id] = []
             for i, (q, rhs) in enumerate(zip(q0["ducts"][path.id], r0["q"]["ducts"][path.id])):
-                q1["ducts"][path.id].append(tuple(q[k]+dt_s*rhs[k] for k in range(3)) + (0.0,))
                 q1["species"]["ducts"][path.id].append(tuple(
                     q0["species"]["ducts"][path.id][i][j] +
                     dt_s*r0["species"]["ducts"][path.id][i][j] for j in range(4)))
+                if (self.dynamic_reed_binding is not None and
+                        path.id == self.dynamic_reed_binding.duct_id and
+                        i == len(path.mesh.volumes) - 1):
+                    volume0 = self._duct_cell_volume(path, i, q0)
+                    volume1 = self._duct_cell_volume(path, i, q1)
+                    extensive_rate = r0["dynamic_duct_cell"]["extensive_rate"]
+                    q_predictor = [
+                        (q[k] * volume0 + dt_s * extensive_rate[k]) / volume1
+                        for k in range(3)]
+                    q_predictor[0] = fsum(q1["species"]["ducts"][path.id][i]) / volume1
+                    q1["ducts"][path.id].append(tuple(q_predictor) + (0.0,))
+                else:
+                    q1["ducts"][path.id].append(
+                        tuple(q[k]+dt_s*rhs[k] for k in range(3)) + (0.0,))
         for node_id, q in q0["network_volumes"].items():
             rhs_q = r0["q"]["network_volumes"][node_id]
             rhs_species = r0["species"]["network_volumes"][node_id]
@@ -1547,11 +1806,14 @@ class IntegratedEngine2T:
                 q0["species"]["network_volumes"][node_id][j] +
                 dt_s*rhs_species[j] for j in range(4))
         g1 = self._geometry(end_angle)
-        q1["chambers"]["crankcase"] = (*q1["chambers"]["crankcase"][:2], g1.crankcase_volume_m3)
+        q1["chambers"]["crankcase"] = (
+            *q1["chambers"]["crankcase"][:2],
+            self._crankcase_volume_for_stage(g1.crankcase_volume_m3, q1))
         q1["chambers"]["cylinder"] = (*q1["chambers"]["cylinder"][:2], g1.cylinder_volume_m3)
         for path in self.ducts:
             for i, q in enumerate(q1["ducts"][path.id]):
-                rho = fsum(q1["species"]["ducts"][path.id][i])/path.mesh.volumes[i]
+                rho = fsum(q1["species"]["ducts"][path.id][i])/self._duct_cell_volume(
+                    path, i, q1)
                 q1["ducts"][path.id][i] = (q[0], q[1], q[2], rho)
         self._validate(q1)
         r1 = self._assemble(q1, end_angle, rpm, step_p7_event)
@@ -1582,6 +1844,11 @@ class IntegratedEngine2T:
                                                      r1["work_rates"]["crankcase"])
         self.ledger["cylinder_work_J"] += .5*dt_s*(r0["work_rates"]["cylinder"]+
                                                    r1["work_rates"]["cylinder"])
+        reed_dissipation_increment = 0.0
+        if self.dynamic_reed_binding is not None:
+            reed_dissipation_increment = .5 * dt_s * (
+                r0["reed_dissipation_rate_W"] + r1["reed_dissipation_rate_W"])
+            self.ledger["reed_dissipation_J"] += reed_dissipation_increment
         p7_species_increment = tuple(.5 * float(dt_s) * (
             r0["p7_species_rate"][j] + r1["p7_species_rate"][j]) for j in range(4))
         p7_heat_increment = .5 * float(dt_s) * (r0["p7_heat_rate"] + r1["p7_heat_rate"])
@@ -1630,6 +1897,10 @@ class IntegratedEngine2T:
                  "heat_to_wall_J": heat_to_wall,
                  "stage_cfl": (cfl0, cfl1),
                  "inventory": self.inventory(qn), "dependency": self.dependency_status}
+        if self.dynamic_reed_binding is not None:
+            trace["stage_dynamic_reed_rhs"] = (r0["dynamic_reed_rhs"],
+                                               r1["dynamic_reed_rhs"])
+            trace["reed_dissipation_increment_J"] = reed_dissipation_increment
         self.state = qn
         self.crank_angle_unwrapped_deg = end_angle
         self.angle_deg = end_angle % 360.0
@@ -1643,7 +1914,7 @@ class IntegratedEngine2T:
         final = self.inventory()
         delta_species = tuple(final["species_kg"][i]-self.initial_inventory["species_kg"][i]
                               for i in range(4))
-        return {"mass": {"initial": self.initial_inventory["mass_kg"],
+        report = {"mass": {"initial": self.initial_inventory["mass_kg"],
                           "final": final["mass_kg"],
                           "external": self.ledger["external_mass_kg"],
                           "residual": final["mass_kg"]-self.initial_inventory["mass_kg"]-
@@ -1658,7 +1929,8 @@ class IntegratedEngine2T:
                                       self.ledger["p7_heat_added_J"]-
                                       self.ledger["crankcase_work_J"]-
                                        self.ledger["cylinder_work_J"]+
-                                       self.ledger["heat_to_wall_J"]},
+                                       self.ledger["heat_to_wall_J"]+
+                                       self.ledger.get("reed_dissipation_J", 0.0)},
                 "species": {SPECIES[i]: {"initial": self.initial_inventory["species_kg"][i],
                                          "final": final["species_kg"][i],
                                          "external": self.ledger["external_species_kg"][i],
@@ -1667,6 +1939,9 @@ class IntegratedEngine2T:
                                                     self.ledger["external_species_kg"][i]-
                                                     self.ledger["p7_source_species_kg"][i]}
                             for i in range(4)}}
+        if self.dynamic_reed_binding is not None:
+            report["energy"]["reed_dissipation"] = self.ledger["reed_dissipation_J"]
+        return report
 
     def snapshot(self):
         self._assert_configuration_unchanged(check_identity=True)
@@ -1714,10 +1989,13 @@ class IntegratedEngine2T:
         # checkpoints before mutating the live engine.
         restored_geometry = self._geometry(float(unwrapped))
         for chamber_name, expected_volume in (
-                ("crankcase", restored_geometry.crankcase_volume_m3),
+                ("crankcase", self._crankcase_volume_for_stage(
+                    restored_geometry.crankcase_volume_m3, state)),
                 ("cylinder", restored_geometry.cylinder_volume_m3)):
             actual_volume = state["chambers"][chamber_name][2]
-            if actual_volume != expected_volume:
+            if (actual_volume != expected_volume and
+                    not (self.dynamic_reed_binding is not None and isclose(
+                        actual_volume, expected_volume, rel_tol=1e-13, abs_tol=1e-18))):
                 raise ValueError(
                     f"integrated engine checkpoint {chamber_name} geometry mismatch")
         ledger = deepcopy(snapshot.get("ledger"))
@@ -1727,6 +2005,8 @@ class IntegratedEngine2T:
                          "heat_to_wall_J", "cylinder_work_J", "crankcase_work_J",
                          "p7_heat_added_J", "p7_availability_limited_kg",
                          "p7_source_species_kg"}
+        if self.dynamic_reed_binding is not None:
+            ledger_fields.add("reed_dissipation_J")
         if not isinstance(ledger, dict) or set(ledger) != ledger_fields:
             raise ValueError("integrated engine checkpoint ledger schema mismatch")
         if (not isinstance(ledger["external_species_kg"], (list, tuple)) or
@@ -1739,6 +2019,11 @@ class IntegratedEngine2T:
                                   {"external_species_kg", "p7_source_species_kg"} else
                                   (value,)))):
             raise ValueError("integrated engine checkpoint ledger contains invalid values")
+        if (self.dynamic_reed_binding is not None and
+                not isclose(state["dynamic_reed"]["dissipation_J"],
+                            ledger["reed_dissipation_J"],
+                            rel_tol=1e-13, abs_tol=1e-18)):
+            raise ValueError("integrated engine checkpoint reed dissipation mismatch")
         baseline = json.loads(json.dumps(self.initial_inventory, sort_keys=True))
         initial = json.loads(json.dumps(snapshot.get("initial_inventory"), sort_keys=True))
         if initial != baseline:
@@ -1760,6 +2045,9 @@ class IntegratedEngine2T:
                         "stage_p7_limiter", "p7_availability_limited_kg",
                         "p7_source_species_increment_kg", "p7_heat_increment_j",
                         "heat_to_wall_J", "inventory", "dependency"}
+            if self.dynamic_reed_binding is not None:
+                required |= {"stage_dynamic_reed_rhs",
+                             "reed_dissipation_increment_J"}
             if not required.issubset(row):
                 raise ValueError("integrated engine checkpoint trace row is incomplete")
             angle0, angle1 = row["angle_start_deg"], row["angle_end_deg"]
@@ -1781,6 +2069,30 @@ class IntegratedEngine2T:
             stage_states = [_tuplify(deepcopy(value)) for value in stages]
             for stage_state in stage_states:
                 self._validate(stage_state)
+            if self.dynamic_reed_binding is not None:
+                reed_rhs = row["stage_dynamic_reed_rhs"]
+                if (not isinstance(reed_rhs, (list, tuple)) or len(reed_rhs) != 2 or
+                        any(not isinstance(stage_rhs, (list, tuple)) or len(stage_rhs) != 3
+                            for stage_rhs in reed_rhs)):
+                    raise ValueError("integrated checkpoint dynamic reed trace is incomplete")
+                reed0, reed1, reedn = (stage["dynamic_reed"] for stage in stage_states)
+                expected_predictor = tuple(
+                    reed0[name] + dt * reed_rhs[0][index]
+                    for index, name in enumerate(
+                        ("position_m", "velocity_m_s", "dissipation_J")))
+                actual_predictor = tuple(reed1[name] for name in
+                                         ("position_m", "velocity_m_s", "dissipation_J"))
+                expected_corrector = tuple(
+                    reed0[name] + .5 * dt * (reed_rhs[0][index] + reed_rhs[1][index])
+                    for index, name in enumerate(
+                        ("position_m", "velocity_m_s", "dissipation_J")))
+                actual_corrector = tuple(reedn[name] for name in
+                                         ("position_m", "velocity_m_s", "dissipation_J"))
+                if (actual_predictor != expected_predictor or
+                        actual_corrector != expected_corrector or
+                        row["reed_dissipation_increment_J"] !=
+                        .5 * dt * (reed_rhs[0][2] + reed_rhs[1][2])):
+                    raise ValueError("integrated checkpoint dynamic reed SSPRK trace mismatch")
             if (prior_terminal_state is not None and
                     _jsonify(stage_states[0]) != prior_terminal_state):
                 raise ValueError("integrated engine checkpoint trace state is discontinuous")
@@ -1794,14 +2106,33 @@ class IntegratedEngine2T:
                 expected_volumes = (expected_geometry["crankcase_volume_m3"],
                                     expected_geometry["cylinder_volume_m3"])
                 state_index = 0 if stage_index == 0 else 1
+                if self.dynamic_reed_binding is not None:
+                    stage_state = stage_states[state_index]
+                    expected_volumes = (
+                        self._crankcase_volume_for_stage(
+                            expected_volumes[0], stage_state), expected_volumes[1])
                 actual_volumes = tuple(stage_states[state_index]["chambers"][name][2]
                                        for name in ("crankcase", "cylinder"))
-                if actual_volumes != expected_volumes:
+                if (actual_volumes != expected_volumes and
+                        not (self.dynamic_reed_binding is not None and
+                             isclose(actual_volumes[0], expected_volumes[0],
+                                     rel_tol=1e-13, abs_tol=1e-18) and
+                             actual_volumes[1] == expected_volumes[1])):
                     raise ValueError("integrated engine checkpoint trace state volume mismatch")
             final_volumes = tuple(stage_states[2]["chambers"][name][2]
                                   for name in ("crankcase", "cylinder"))
-            if final_volumes != tuple(geometries[1][name] for name in
-                                      ("crankcase_volume_m3", "cylinder_volume_m3")):
+            expected_final_volumes = tuple(geometries[1][name] for name in
+                                           ("crankcase_volume_m3", "cylinder_volume_m3"))
+            if self.dynamic_reed_binding is not None:
+                expected_final_volumes = (
+                    self._crankcase_volume_for_stage(expected_final_volumes[0],
+                                                     stage_states[2]),
+                    expected_final_volumes[1])
+            if (final_volumes != expected_final_volumes and
+                    not (self.dynamic_reed_binding is not None and
+                         isclose(final_volumes[0], expected_final_volumes[0],
+                                 rel_tol=1e-13, abs_tol=1e-18) and
+                         final_volumes[1] == expected_final_volumes[1])):
                 raise ValueError("integrated engine checkpoint trace terminal volume mismatch")
             prior_angle = angle1
             prior_time = time0 + dt
@@ -2007,7 +2338,8 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                       "fuel_delivery_kg": 0.0,
                       "fuel_short_circuit_kg": 0.0,
                       "cylinder_work_J": 0.0,
-                      "crankcase_work_J": 0.0}
+                      "crankcase_work_J": 0.0,
+                      "reed_dissipation_J": 0.0}
     start_p7 = start_checkpoint.get("p7")
     if (not isinstance(start_p7, dict) or
             not isinstance(start_p7.get("completed_events"), list)):
@@ -2081,6 +2413,11 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                                       expected_p7, f"stage {stage_index} P7 source")
             _assert_trace_value_equal(row["stage_p7_limiter"][stage_index], limiter,
                                       f"stage {stage_index} P7 limiter")
+            if engine.dynamic_reed_binding is not None:
+                _assert_trace_value_equal(
+                    row["stage_dynamic_reed_rhs"][stage_index],
+                    assembled["dynamic_reed_rhs"],
+                    f"stage {stage_index} dynamic reed RHS")
         if current_p7_event is not None:
             r0, r1 = (assembled for assembled, _ in recomputed_stages)
             accepted_species = tuple(.5 * float(row["dt_s"]) *
@@ -2109,6 +2446,10 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
             for stage in row["stage_p7_limiter"])
         wall_heat += .5 * dt * sum(
             sum(stage.values()) for stage in row["stage_thermal_rates"])
+        if engine.dynamic_reed_binding is not None:
+            rates_integral["reed_dissipation_J"] += .5 * dt * sum(
+                assembled["reed_dissipation_rate_W"]
+                for assembled, _ in recomputed_stages)
         for rate_name, trace_name in (
                 ("fresh_delivery_kg", "fresh_delivery_kg_s"),
                 ("fresh_short_circuit_kg", "fresh_short_circuit_kg_s"),
@@ -2149,6 +2490,8 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
         "p7_availability_limited_kg": p7_limited_mass,
         "p7_source_species_kg": p7_species,
     }
+    if engine.dynamic_reed_binding is not None:
+        recomputed["reed_dissipation_J"] = rates_integral["reed_dissipation_J"]
     if (not isinstance(end_ledger, dict) or not isinstance(start_ledger, dict) or
             set(end_ledger) != set(start_ledger) or
             not set(recomputed).issubset(end_ledger)):
@@ -2174,9 +2517,10 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
     ducts = {}
     for path in engine.ducts:
         cells = []
-        for q, composition, volume in zip(
+        for index, (q, composition) in enumerate(zip(
                 end_state["ducts"][path.id],
-                end_state["species"]["ducts"][path.id], path.mesh.volumes):
+                end_state["species"]["ducts"][path.id])):
+            volume = engine._duct_cell_volume(path, index, end_state)
             rho, momentum, energy_density, _ = q
             velocity = momentum / rho
             pressure = (engine.eos.gamma - 1.0) * (
@@ -2279,10 +2623,21 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                        p7_species[1]),
                    "p7_burned_produced_kg": p7_species[3],
                    "p7_heat_J": p7_heat}
+    if engine.dynamic_reed_binding is not None:
+        reed = end_state["dynamic_reed"]
+        petal = engine.dynamic_reed_binding.petal
+        observables["dynamic_reed"] = {
+            "binding": engine.dynamic_reed_binding.to_dict(),
+            "position_m": reed["position_m"],
+            "velocity_m_s": reed["velocity_m_s"],
+            "mechanical_energy_J": (0.5 * petal.mass_kg * reed["velocity_m_s"] ** 2 +
+                                     0.5 * petal.stiffness_n_m * reed["position_m"] ** 2),
+            "dissipation_since_initial_J": rates_integral["reed_dissipation_J"]}
     mass_residual = end_inventory["mass_kg"] - start_inventory["mass_kg"] - external_mass
     energy_residual = (end_inventory["energy_J"] - start_inventory["energy_J"] -
                        external_energy - p7_heat - rates_integral["cylinder_work_J"] -
-                       rates_integral["crankcase_work_J"] + wall_heat)
+                       rates_integral["crankcase_work_J"] + wall_heat +
+                       rates_integral["reed_dissipation_J"])
     species_residual = [end_inventory["species_kg"][i] -
                         start_inventory["species_kg"][i] - external_species[i] -
                         p7_species[i] for i in range(4)]
@@ -2300,7 +2655,7 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
         "p7_heat_requested_W": terminal_rhs["p7_heat_rate"],
         "thermal_rates_W": terminal_rhs["thermal_rates"],
         "p7_rate_semantics": "instantaneous prescribed rate before any future-step availability limiter"}
-    return {"schema": "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2",
+    primary = {"schema": "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2",
             "contract": "REFERENCE_PERIODIC_CONVERGENCE_V1",
             "cycle_index": cycle_index,
             "configuration_hash": engine.configuration_identity["configuration_sha256"],
@@ -2330,6 +2685,13 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
             "P7_availability_limited_kg": p7_limited_mass,
             "admissible": True,
             "evidence_source": "accepted IntegratedEngine2T SSPRK2 stage trajectory"}
+    if engine.dynamic_reed_binding is not None:
+        primary["duct_cell_volumes_m3"] = {
+            path.id: [engine._duct_cell_volume(path, index, end_state)
+                      for index in range(len(path.mesh.volumes))]
+            for path in engine.ducts}
+        primary["dynamic_reed_binding"] = engine.dynamic_reed_binding.to_dict()
+    return primary
 
 
 def _specific_consumption_value(fuel_consumed_kg: float, duration_s: float,
@@ -2389,6 +2751,31 @@ def make_integrated_engineering_output(cycle_record: dict, *,
         raise ValueError("cycle primary record lacks stable duct role identity")
     role_ids = _duct_ids_by_role(duct_roles)
     intake_duct_id = role_ids["intake"][0]
+    dynamic_binding_data = cycle_record.get("dynamic_reed_binding")
+    dynamic_geometry = dynamic_petal = None
+    if dynamic_binding_data is not None:
+        if not isinstance(dynamic_binding_data, dict):
+            raise ValueError("cycle primary dynamic reed binding is malformed")
+        dynamic_geometry = HingedFlapGeometryV1.from_dict(
+            dynamic_binding_data.get("geometry"))
+        dynamic_petal = ReedPetal.from_dict(dynamic_binding_data.get("petal"))
+        dynamic_geometry.validate(dynamic_petal)
+        if (dynamic_binding_data.get("duct_id") not in duct_roles or
+                duct_roles[dynamic_binding_data["duct_id"]] != "intake"):
+            raise ValueError("cycle primary dynamic reed is not bound to the intake path")
+
+    def duct_volumes_for_state(duct_id, state):
+        base = cycle_record["duct_volumes_m3"][duct_id]
+        if dynamic_binding_data is None or duct_id != dynamic_binding_data["duct_id"]:
+            return base
+        reed = state.get("dynamic_reed")
+        if not isinstance(reed, dict):
+            raise ValueError("cycle primary state lacks its dynamic reed position")
+        volumes = list(base)
+        volumes[-1] += dynamic_geometry.swept_volume_area_m2 * reed["position_m"]
+        if not isfinite(volumes[-1]) or volumes[-1] <= 0.0:
+            raise ValueError("cycle primary dynamic reed endpoint volume is inadmissible")
+        return volumes
 
     def sample(state, geometry, face_fluxes):
         values = {}
@@ -2469,7 +2856,7 @@ def make_integrated_engineering_output(cycle_record: dict, *,
         "fuel_delivery_kg", "fresh_delivery_kg",
         "fresh_short_circuit_kg", "fuel_short_circuit_kg",
         "wall_heat_loss_J", "p7_heat_J",
-        "crankcase_energy_work_J")}
+        "crankcase_energy_work_J", "reed_dissipation_J")}
     external_mass = external_energy = 0.0
     external_species = [0.0] * 4
     p7_species = [0.0] * 4
@@ -2499,6 +2886,13 @@ def make_integrated_engineering_output(cycle_record: dict, *,
             sum(stage.values()) for stage in row["stage_thermal_rates"])
         integrals["p7_heat_J"] += .5 * dt * sum(
             stage["heat_w"] for stage in row["stage_p7_source_rates"])
+        if dynamic_binding_data is not None:
+            for stage_index in range(2):
+                reed_state = row["stage_states"][stage_index]["dynamic_reed"]
+                if not isinstance(reed_state, dict):
+                    raise ValueError("dynamic reed SSPRK stage state is missing")
+                integrals["reed_dissipation_J"] += .5 * dt * (
+                    dynamic_petal.damping_n_s_m * reed_state["velocity_m_s"] ** 2)
         for stage in row["stage_external"]:
             external_mass += .5 * dt * stage["mass"]
             external_energy += .5 * dt * stage["energy"]
@@ -2529,6 +2923,8 @@ def make_integrated_engineering_output(cycle_record: dict, *,
         "crankcase_work_J": integrals["crankcase_energy_work_J"],
         "p7_heat_added_J": integrals["p7_heat_J"],
     }
+    if dynamic_binding_data is not None:
+        ledger_checks["reed_dissipation_J"] = integrals["reed_dissipation_J"]
     for key, actual in ledger_checks.items():
         if not isclose(float(ledgers[key]), actual, rel_tol=1e-10, abs_tol=1e-14):
             raise ValueError(f"cycle primary ledger {key} differs from accepted stages")
@@ -2551,7 +2947,7 @@ def make_integrated_engineering_output(cycle_record: dict, *,
             for i, value in enumerate(state["species"]["chambers"][name]):
                 species[i] += value
         for duct, cells in state["ducts"].items():
-            duct_volumes = volumes[duct]
+            duct_volumes = duct_volumes_for_state(duct, state)
             duct_species = state["species"]["ducts"][duct]
             if len(cells) != len(duct_volumes) or len(cells) != len(duct_species):
                 raise ValueError("cycle primary duct inventory shape mismatch")
@@ -2560,6 +2956,10 @@ def make_integrated_engineering_output(cycle_record: dict, *,
                 energy += q[2] * volume
                 for i, value in enumerate(composition):
                     species[i] += value
+        if dynamic_binding_data is not None:
+            reed = state["dynamic_reed"]
+            energy += (.5 * dynamic_petal.mass_kg * reed["velocity_m_s"] ** 2 +
+                       .5 * dynamic_petal.stiffness_n_m * reed["position_m"] ** 2)
         volume_definitions = network_volume_definitions
         network_volumes = state.get("network_volumes", {})
         network_species = state.get("species", {}).get("network_volumes", {})
@@ -2588,7 +2988,8 @@ def make_integrated_engineering_output(cycle_record: dict, *,
     mass_residual = terminal_inventory[0] - initial_inventory[0] - external_mass
     energy_residual = (terminal_inventory[1] - initial_inventory[1] - external_energy -
                        integrals["p7_heat_J"] - integrals["cylinder_energy_work_J"] -
-                       integrals["crankcase_energy_work_J"] + integrals["wall_heat_loss_J"])
+                       integrals["crankcase_energy_work_J"] + integrals["wall_heat_loss_J"] +
+                       integrals["reed_dissipation_J"])
     species_residual = [terminal_inventory[2][i] - initial_inventory[2][i] -
                         external_species[i] - p7_species[i] for i in range(4)]
     trace_recomputable = {
@@ -2879,6 +3280,34 @@ def make_integrated_engineering_output_v4(cycle_record: dict, *,
         scavenging_reference_mass_kg=scavenging_reference_mass_kg)
     channels = {name: {"values": row["values"], "source": row["source"]}
                 for name, row in v3["crank_angle_trace"]["channels"].items()}
+    dynamic_binding = cycle_record.get("dynamic_reed_binding")
+    if dynamic_binding is not None:
+        geometry = HingedFlapGeometryV1.from_dict(dynamic_binding["geometry"])
+        petal = ReedPetal.from_dict(dynamic_binding["petal"])
+        initial_reed = cycle_record["start_state"].get("dynamic_reed")
+        if not isinstance(initial_reed, dict):
+            raise ValueError("dynamic reed primary record lacks its start state")
+        reed_states = [initial_reed] + [
+            row["stage_states"][2]["dynamic_reed"]
+            for row in cycle_record["trajectory"]]
+        channel_values = {
+            "position_m": [state["position_m"] for state in reed_states],
+            "velocity_m_s": [state["velocity_m_s"] for state in reed_states],
+            "mechanical_energy_j": [
+                .5 * petal.mass_kg * state["velocity_m_s"] ** 2 +
+                .5 * petal.stiffness_n_m * state["position_m"] ** 2
+                for state in reed_states],
+            "dissipation_j": [state["dissipation_J"] for state in reed_states],
+        }
+        if any(len(values) != len(v3["crank_angle_trace"]["angle_deg"])
+               for values in channel_values.values()):
+            raise ValueError("dynamic reed collector channels do not match accepted angles")
+        encoded_id = quote(dynamic_binding["petal"]["id"], safe="")
+        for field, values in channel_values.items():
+            source = (f"Accepted IntegratedEngine2T SSPRK2 state for synthetic reed "
+                      f"{dynamic_binding['petal']['id']} ({geometry.id} {geometry.version})")
+            channels[f"reed:{encoded_id}:{field}"] = {
+                "values": values, "source": source}
     metrics = {name: {key: row[key] for key in ("value", "status", "reason", "source")}
                for name, row in v3["cycle_metrics"].items()}
 

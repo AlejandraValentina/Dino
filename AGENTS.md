@@ -52,8 +52,12 @@ pero NO representan el estado operativo actual cuando contradicen esta sección.
   desbloquea P7. Su biblioteca, provenance e instantánea versionada/hash están
   implementadas; sin enlace a combustión ni química inventada.
 - El collector V4 y Fixture C piston-port sin reed están verificados con
-  evidencia sintética existente. Reed dinámica sigue pendiente de preregistro
-  geométrico/energético e integración SSPRK2.
+  evidencia sintética existente. Reed dinámica tiene geometría sintética
+  preregistrada, componente autónomo y enlace a `IntegratedEngine2T` en las
+  mismas etapas SSPRK2, incluyendo volumen variable del endpoint de admisión,
+  trabajo de cárter, CFL, identidad/restart y señales V4. La comprobación es
+  sintética y acotada; no valida un motor real ni KT100, y no acepta el
+  Commercial Core.
 
 Estado machine-readable del Commercial Core:
 `results/2t-commercial-core-20261002/program-status.json`; documentación:

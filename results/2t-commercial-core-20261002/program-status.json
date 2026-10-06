@@ -1497,7 +1497,7 @@
       "blocker": null,
       "commits": [
         "004b1841579497fe0e2273257be0104ccaa4abd2",
-        "PENDING_COMPONENT_COMMIT"
+        "e9e2f59aee0dfc219c67c64f0b4f60a798f0abcf"
       ],
       "evidence": [
         "motorsim/reed_coupling.py::HingedFlapGeometryV1 validates W*L/2 swept volume and matching petal force area; no real geometry inferred",

@@ -10,7 +10,7 @@ from motorsim.gas1d.eos import IdealGas
 from motorsim.crankcase import CrankcaseGeometry
 from motorsim.expansion_chamber import ChamberSection, ExpansionChamber
 from motorsim.integrated_2t import (
-    DuctPath2T, EngineGeometry2T, IntegratedEngine2T, IntegratedIntakePlenum2T,
+    DuctPath2T, DynamicReedBinding2T, EngineGeometry2T, IntegratedEngine2T, IntegratedIntakePlenum2T,
     IntegratedNetworkVolume2T,
     IntegratedPortBinding2T,
     SliderCrankChambers2T, make_integrated_cycle_primary,
@@ -25,6 +25,8 @@ from motorsim.kinematics import piston_position
 from motorsim.p6_species import SPECIES
 from motorsim.powervalve import PowerValve
 from motorsim.reed import ReedPetal
+from motorsim.reed import ReedState
+from motorsim.reed_coupling import HingedFlapGeometryV1
 from motorsim.thermal import ThermalSurface, ThermalSystem
 from motorsim.two_stroke_ports import AreaKnot, DuctBinding, PortDefinition, TwoStrokePortSet
 from motorsim.mechanical import LossTerm, MechanicalLossModel
@@ -60,7 +62,7 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
           port_binding=None, reference_rpm=1000.0, geometry_identity=None,
           duct_species=None, slider_crank=None,
           combustion_start_angle_deg=None, cylinder_species=None,
-          intake_plenum=None, network_volumes=()):
+          intake_plenum=None, network_volumes=(), dynamic_reed_binding=None):
     def duct_mesh(duct_id):
         if duct_id == "exhaust" and exhaust_mesh is not None:
             return exhaust_mesh
@@ -100,6 +102,10 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
             component_species[path.id] = tuple(
                 (1.1768 * volume, 0.0, 0.0, 0.0) for volume in path.mesh.volumes)
     component_species.update(duct_species or {})
+    if dynamic_reed_binding is not None:
+        cc_volume = (.00015 - dynamic_reed_binding.geometry.swept_volume_area_m2 *
+                     dynamic_reed_binding.initial_state.position_m)
+        component_species["crankcase"] = (0.0, 0.0, 1.1768 * cc_volume, 0.0)
     return IntegratedEngine2T(
         (1.1768, 0.0, crankcase_pressure, 1.0),
         (1.1768, 0.0, cylinder_pressure, 1.0),
@@ -109,6 +115,7 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
         geometry_identity=(geometry_identity or
                            {"fixture": "three-transfer-static-volume-v1"}),
         reed_petals=reed_petals,
+        dynamic_reed_binding=dynamic_reed_binding,
         port_binding=port_binding, intake_plenum=intake_plenum,
         network_volumes=network_volumes,
         slider_crank=slider_crank,
@@ -116,6 +123,190 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
         thermal_system=thermal_system, thermal_locations=thermal_locations,
         combustion_start_angle_deg=combustion_start_angle_deg,
         max_cfl=max_cfl)
+
+
+def test_dynamic_reed_binds_to_integrated_intake_stage_volumes_and_restart():
+    intake_mesh = uniform_mesh(2, .02, 1e-4)
+    petal = ReedPetal("synthetic-integrated", .001, .0001, .01,
+                      10.0, .01, .002, .8, "SYNTHETIC_ASSUMPTION")
+    geometry = HingedFlapGeometryV1(
+        "synthetic-integrated", "1", "SYNTHETIC_ASSUMPTION", .01, .02,
+        intake_mesh.volumes[-1], .00015, .002, .8)
+    binding = DynamicReedBinding2T(
+        "intake", geometry, petal, ReedState(.001, 0.0))
+    system = _case(
+        crankcase_pressure=101325.0, cylinder_pressure=101325.0,
+        duct_pressure=101325.0, intake_area=1e-5, transfer_area=0.0,
+        exhaust_area=0.0, dynamic_reed_binding=binding)
+    initial = system.inventory()
+    initial_q = system.state["ducts"]["intake"][-1]
+    start_lift = system.state["dynamic_reed"]["position_m"]
+
+    trace = system.step(1e-7, .0006)
+
+    assert trace["stage_states"][0]["dynamic_reed"]["position_m"] == start_lift
+    assert len(trace["stage_dynamic_reed_rhs"]) == 2
+    assert trace["stage_states"][1]["dynamic_reed"]["velocity_m_s"] < 0.0
+    assert system.state["dynamic_reed"]["position_m"] < start_lift
+    endpoint_volume = system._duct_cell_volume(
+        next(path for path in system.ducts if path.id == "intake"), 1, system.state)
+    assert endpoint_volume == pytest.approx(
+        intake_mesh.volumes[-1] + geometry.swept_volume_area_m2 *
+        system.state["dynamic_reed"]["position_m"])
+    assert system.state["ducts"]["intake"][-1][0] == pytest.approx(initial_q[0])
+    assert system.ledger["reed_dissipation_J"] >= 0.0
+    assert system.inventory()["energy_J"] == pytest.approx(
+        initial["energy_J"], rel=0.0, abs=2e-11)
+    assert abs(system.conservation_report()["energy"]["residual"]) < 2e-11
+
+    restored = _case(
+        crankcase_pressure=101325.0, cylinder_pressure=101325.0,
+        duct_pressure=101325.0, intake_area=1e-5, transfer_area=0.0,
+        exhaust_area=0.0, dynamic_reed_binding=binding)
+    restored.restore(system.snapshot())
+    assert restored.snapshot() == system.snapshot()
+
+
+def test_dynamic_reed_integrated_configuration_roundtrip_is_versioned():
+    system = _internal_cycle_fixture(with_reed=False)
+    intake = next(path for path in system.ducts if path.role == "intake")
+    cc_volume = system._geometry(0.0, system.reference_rpm).crankcase_volume_m3
+    petal = ReedPetal("synthetic-config", .001, .0001, .01,
+                      10.0, .01, .002, .8, "SYNTHETIC_ASSUMPTION")
+    geometry = HingedFlapGeometryV1(
+        "synthetic-config", "1", "SYNTHETIC_ASSUMPTION", .01, .02,
+        intake.mesh.volumes[-1], cc_volume, .002, .8)
+    binding = DynamicReedBinding2T(
+        intake.id, geometry, petal, ReedState(0.0, 0.0))
+    config = system.configuration_dict()
+    config["schema"] = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V3"
+    config["dynamic_reed_binding"] = binding.to_dict()
+
+    rebuilt = IntegratedEngine2T.from_configuration_dict(config)
+
+    assert rebuilt.configuration_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V3"
+    assert rebuilt.configuration_dict() == config
+    assert rebuilt.snapshot()["schema"] == "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V8"
+    assert rebuilt.state["dynamic_reed"] == {
+        "position_m": 0.0, "velocity_m_s": 0.0, "dissipation_J": 0.0}
+
+
+@pytest.mark.parametrize(("crankcase_pressure", "direction", "donor"), [
+    (90000.0, 1.0, "duct"), (120000.0, -1.0, "crankcase")])
+def test_dynamic_reed_integrated_face_uses_actual_signed_species_donor(
+        crankcase_pressure, direction, donor):
+    intake_mesh = uniform_mesh(2, .02, 1e-4)
+    petal = ReedPetal("synthetic-donor", .001, .0001, .01,
+                      10.0, .01, .002, .8, "SYNTHETIC_ASSUMPTION")
+    geometry = HingedFlapGeometryV1(
+        "synthetic-donor", "1", "SYNTHETIC_ASSUMPTION", .01, .02,
+        intake_mesh.volumes[-1], .00015, .002, .8)
+    binding = DynamicReedBinding2T(
+        "intake", geometry, petal, ReedState(.001, 0.0))
+    duct_volumes = (*intake_mesh.volumes[:-1],
+                    intake_mesh.volumes[-1] + geometry.swept_volume_area_m2 *
+                    binding.initial_state.position_m)
+    duct_cells = tuple((.8 * 1.1768 * volume, .2 * 1.1768 * volume,
+                        0.0, 0.0) for volume in duct_volumes)
+    system = _case(
+        crankcase_pressure=crankcase_pressure, cylinder_pressure=101325.0,
+        duct_pressure=101325.0, intake_area=1e-5, transfer_area=0.0,
+        exhaust_area=0.0, duct_species={"intake": duct_cells},
+        dynamic_reed_binding=binding)
+
+    trace = system.step(1e-10, .0000006)
+    signed_flux = trace["stage_face_fluxes"][0]["intake"]["right"]
+    signed_species = trace["stage_face_fluxes"][0]["intake"]["right_species"]
+    assert signed_flux[0] * direction > 0.0
+    assert sum(signed_species) * direction > 0.0
+    donor_mass = (system.state["species"]["ducts"]["intake"][-1]
+                  if donor == "duct" else
+                  system.state["species"]["chambers"]["crankcase"])
+    total_donor_mass = sum(donor_mass)
+    total_species_flux = sum(signed_species)
+    assert tuple(value / total_species_flux for value in signed_species) == pytest.approx(
+        tuple(value / total_donor_mass for value in donor_mass))
+    report = system.conservation_report()
+    assert abs(report["mass"]["residual"]) < 1e-14
+    assert abs(report["energy"]["residual"]) < 1e-11
+    assert all(abs(value["residual"]) < 1e-14
+               for value in report["species"].values())
+
+
+def test_dynamic_reed_out_of_domain_stage_rejects_without_mutating_engine_state():
+    intake_mesh = uniform_mesh(2, .02, 1e-4)
+    petal = ReedPetal("synthetic-reject", .001, .0001, .01,
+                      10.0, .01, .002, .8, "SYNTHETIC_ASSUMPTION")
+    geometry = HingedFlapGeometryV1(
+        "synthetic-reject", "1", "SYNTHETIC_ASSUMPTION", .01, .02,
+        intake_mesh.volumes[-1], .00015, .002, .8)
+    binding = DynamicReedBinding2T(
+        "intake", geometry, petal, ReedState(.0019, 100.0))
+    system = _case(
+        crankcase_pressure=101325.0, cylinder_pressure=101325.0,
+        duct_pressure=101325.0, intake_area=1e-5, transfer_area=0.0,
+        exhaust_area=0.0, dynamic_reed_binding=binding)
+    before_state = deepcopy(system.state)
+    before_ledger = deepcopy(system.ledger)
+    before_trace = deepcopy(system.trace)
+    before_clock = (system.time_s, system.crank_angle_unwrapped_deg,
+                    system.accepted_steps, system.rejected_steps)
+
+    with pytest.raises(ValueError, match="dynamic reed state is inadmissible"):
+        system.step(1e-5, .06)
+
+    assert system.state == before_state
+    assert system.ledger == before_ledger
+    assert system.trace == before_trace
+    assert (system.time_s, system.crank_angle_unwrapped_deg,
+            system.accepted_steps, system.rejected_steps) == before_clock
+
+
+def test_dynamic_reed_stop_contact_requires_versioned_event_model():
+    intake_mesh = uniform_mesh(2, .02, 1e-4)
+    petal = ReedPetal("synthetic-stop-contact", .001, .0001, .01,
+                      10.0, .01, .002, .8, "SYNTHETIC_ASSUMPTION")
+    geometry = HingedFlapGeometryV1(
+        "synthetic-stop-contact", "1", "SYNTHETIC_ASSUMPTION", .01, .02,
+        intake_mesh.volumes[-1], .00015, .002, .8)
+    binding = DynamicReedBinding2T(
+        "intake", geometry, petal, ReedState(0.0, 0.0))
+    system = _case(
+        crankcase_pressure=120000.0, cylinder_pressure=101325.0,
+        duct_pressure=101325.0, intake_area=1e-5, transfer_area=0.0,
+        exhaust_area=0.0, dynamic_reed_binding=binding)
+    before_state = deepcopy(system.state)
+    before_ledger = deepcopy(system.ledger)
+
+    with pytest.raises(ValueError, match="versioned event contract"):
+        system.step(1e-10, .0000006)
+
+    assert system.state == before_state
+    assert system.ledger == before_ledger
+
+
+def test_dynamic_reed_full_engine_cycle_rebuilds_primary_and_v4_collector():
+    system = _internal_cycle_fixture(
+        with_reed=False, dynamic_reed=True,
+        fixture_name="dynamic-reed-integrated-synthetic-v1")
+    start = deepcopy(system.snapshot())
+
+    _advance_cycle_fixture(system, 360.0)
+
+    end = deepcopy(system.snapshot())
+    primary = make_integrated_cycle_primary(system, start, end, 1)
+    assert primary["dynamic_reed_binding"]["geometry"]["provenance"] == (
+        "SYNTHETIC_ASSUMPTION")
+    assert len(primary["duct_cell_volumes_m3"]["intake"]) == 2
+    assert abs(primary["conservation"]["energy_residual_J"]) < 1e-6
+    output = make_integrated_engineering_output_v4(
+        primary, displacement_m3=system.slider_crank.crankcase.displacement_m3)
+    validate_integrated_engineering_output_v4(output)
+    channels = output["crank_angle_trace"]["channels"]
+    for suffix in ("position_m", "velocity_m_s", "mechanical_energy_j", "dissipation_j"):
+        key = f"reed:integrated-dynamic-petal:{suffix}"
+        assert key in channels
+        assert len(channels[key]["values"]) == len(output["crank_angle_trace"]["angle_deg"])
 
 
 def test_integrated_topology_resolves_three_transfer_routes_and_ledgers():
@@ -906,7 +1097,7 @@ def test_p7_event_boundary_requires_exact_alignment_and_stops_cleanly():
 
 def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
                             fixture_name=None, intake_plenum=False,
-                            network_volumes=()):
+                            network_volumes=(), dynamic_reed=False):
     rpm = 3000.0
     crankcase = CrankcaseGeometry(56.0, 50.0, 100.0, 80.0,
                                   "SYNTHETIC_ASSUMPTION")
@@ -977,6 +1168,23 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
                                      for volume in path.mesh.volumes)
     reed = ReedPetal("intake-petal", .001, 1e-4, .01, 10.0, .01,
                      .002, .8, "SYNTHETIC_ASSUMPTION")
+    dynamic_reed_binding = None
+    if dynamic_reed:
+        if with_reed:
+            raise ValueError("synthetic test cannot combine static and dynamic reed fixtures")
+        intake_path = next(path for path in paths if path.role == "intake")
+        dynamic_petal = ReedPetal(
+            "integrated-dynamic-petal", 1000.0, .0001, .01, 10.0,
+            1000.0, .002, .8, "SYNTHETIC_ASSUMPTION")
+        dynamic_geometry = HingedFlapGeometryV1(
+            "integrated-dynamic-reed", "1", "SYNTHETIC_ASSUMPTION", .01, .02,
+            intake_path.mesh.volumes[-1], cc_vol, .002, .8)
+        dynamic_reed_binding = DynamicReedBinding2T(
+            intake_path.id, dynamic_geometry, dynamic_petal, ReedState(.001, 0.0))
+        species["crankcase"] = (
+            0.0, 0.0,
+            1.1768 * (cc_vol - dynamic_geometry.swept_volume_area_m2 * .001),
+            0.0)
     thermal = ThermalSystem((ThermalSurface(
         "cylinder-wall", "cylinder_wall", 1e-4, 1000.0,
         "SYNTHETIC_ASSUMPTION", wall_temperature_K=290.0),))
@@ -996,6 +1204,7 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
                            "chamber_length_scale": chamber_length_scale,
                            "ports": ports.to_dict(), "chamber": chamber.to_dict()},
         reed_petals=((reed,) if with_reed else ()),
+        dynamic_reed_binding=dynamic_reed_binding,
         port_binding=binding, slider_crank=slider,
         intake_plenum=(_intake_plenum(
             pressure=101325.0, fractions=(1.0, 0.0, 0.0, 0.0))
@@ -1042,7 +1251,8 @@ def _advance_cycle_fixture(system, target_angle):
             except ValueError as error:
                 if not any(reason in str(error) for reason in
                            ("inadmissible species mass", "CFL limit exceeded",
-                            "rho/p/Y inadmissible")):
+                            "rho/p/Y inadmissible",
+                            "integrated dynamic reed state is inadmissible")):
                     raise
                 rejected_trials.append({"angle_deg": angle,
                                         "attempted_step_deg": step,
