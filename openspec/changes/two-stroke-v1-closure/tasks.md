@@ -27,7 +27,9 @@
       New fuel-coupled output schema V5 requires provenance, metric definition
       version and periodicity dependency; it rejects unknown-provenance defined
       values, physical-domain violations and performance without bound periodic
-      detector/config/terminal evidence. Historical output schemas remain intact.
+      detector/config/terminal evidence. Period-two output remains undefined
+      unless a separately bound two-cycle aggregate exists (V5 defines none).
+      Regression: 13 output tests pass. Historical output schemas remain intact.
 - [x] C9 cover equilibrium and pressure reactions for port, endpoint, junction,
       and atmospheric interfaces. Static port opening fractions, both finite
       network endpoints/orientations and OPEN_END_PLENUM_V2 open ends preserve
@@ -58,16 +60,18 @@
 - [ ] C18 keep this v1 definition of done versioned in OpenSpec; classify every
        newly discovered item BLOCKS_2T_V1 or POST_2T_V1_BACKLOG.
 
-## Additive capability authorized after the original C1-C18 registration
+## Additive capability already present but outside this v1 closure gate
 
-- [x] Implement FUEL_COUPLED_COMBUSTION_V2 as an additive Fuel Library snapshot
-      consumer. ANCAP profiles remain incomplete and combustion-ineligible;
-      the pure C8H18 profile is explicitly MODELED_SURROGATE, not ANCAP fuel.
-      The SSPRK stages conserve accepted species and calculate heat only from
-      bounded burned fuel, frozen LHV, and explicitly synthetic efficiency.
-      Full primary reconstruction, AFR/equivalence-ratio output, and
-      configuration/restart roundtrip tests pass. V1 and P7 remain unchanged.
-      Commit `50eefbdb6b91757eb45fe41f7b1a696d63a8ed81`.
+- [x] Classify the existing `FUEL_COUPLED_COMBUSTION_V2` Fuel Library consumer,
+      extensible catalog/CRUD and ANCAP profiles as `POST_2T_V1_BACKLOG` under
+      the current closure order. Preserve their implementation and tests, but
+      do not use them to satisfy C4/C5 or as prime-fixture evidence; the gate
+      uses only `SYNTHETIC_FUEL_SURROGATE_V1` and
+      `FUEL_COUPLED_COMBUSTION_V1`. Existing commit:
+      `50eefbdb6b91757eb45fe41f7b1a696d63a8ed81`.
+- [x] Classify the existing dynamic-reed capability as `POST_2T_V1_BACKLOG`.
+      Prime fixtures use quasi-static reed or piston-port intake only; no
+      dynamic-reed work or evidence is part of this gate.
 
 The original C1-C18 v1 acceptance campaigns and mesh gates remain open. Other
 features outside this additive capability remain deferred: detailed

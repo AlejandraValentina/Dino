@@ -211,9 +211,12 @@ def _build_engineering_output(*, rpm: float, cycle_number: int,
             if not isinstance(record["definition_version"], str) or not record["definition_version"].strip():
                 raise ValueError(f"V5 metric {name} definition version is required")
             if (record["periodicity_dependency"] == "REQUIRED" and
-                    periodicity_status not in {"PERIOD_1", "PERIOD_2"} and
-                    status == "DEFINED"):
-                raise ValueError(f"V5 metric {name} requires an accepted periodic cycle")
+                    periodicity_status != "PERIOD_1" and status == "DEFINED"):
+                # V5 metrics describe one 360-degree cycle.  A period-2
+                # classification needs a separately defined two-cycle
+                # aggregate; V5 has no binding for such an aggregate.
+                raise ValueError(
+                    f"V5 metric {name} requires an accepted period-1 cycle")
         if not isinstance(source, str) or not source.strip():
             raise ValueError(f"Metric {name} requires source provenance")
         if status == "DEFINED":

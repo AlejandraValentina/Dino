@@ -175,11 +175,16 @@ def test_integrated_v5_requires_metric_provenance_and_periodicity_contract():
     assert record["cycle_metrics"]["indicated_work_j"]["provenance"] == \
         "SYNTHETIC_ASSUMPTION"
     assert validate_integrated_engineering_output_v5(record) == record
-    with pytest.raises(ValueError, match="accepted periodic cycle"):
+    periodic_metric = {**metric, "periodicity_dependency": "REQUIRED"}
+    with pytest.raises(ValueError, match="accepted period-1 cycle"):
         build_integrated_engineering_output_v5(**{
             **values,
-            "cycle_metrics": {"indicated_power_w": {**metric,
-                "periodicity_dependency": "REQUIRED"}}})
+            "cycle_metrics": {"indicated_power_w": periodic_metric}})
+    with pytest.raises(ValueError, match="accepted period-1 cycle"):
+        build_integrated_engineering_output_v5(**{
+            **values,
+            "cycle_metrics": {"brake_work_j": periodic_metric},
+            "periodicity_status": "PERIOD_2"})
     with pytest.raises(ValueError, match="must be positive"):
         build_integrated_engineering_output_v5(**{
             **values,

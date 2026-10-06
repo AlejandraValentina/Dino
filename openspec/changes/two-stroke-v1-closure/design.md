@@ -44,6 +44,12 @@ mass per fuel mass is `m_O2/m_f = (8/3) w_C + 8 w_H`; stoichiometric air/fuel is
 that value divided by 0.232. Configuration validation recomputes and checks
 this derived value.
 
+The closure uses `FUEL_COUPLED_COMBUSTION_V1` with the immutable surrogate
+snapshot defined above. The later additive Fuel Library consumer
+`FUEL_COUPLED_COMBUSTION_V2` is outside the v1 gate; the extensible Fuel
+Library, commercial fuels, and Uruguay-specific profiles remain
+`POST_2T_V1_BACKLOG` and are not used as prime-fixture evidence.
+
 At ignition, only the cylinder's accepted four-species inventory is eligible
 for burning. A frozen Wiebe cumulative progress `x(theta)` determines the
 requested burned fraction of the ignition-time trapped fuel; it does not set
