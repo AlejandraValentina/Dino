@@ -22,6 +22,7 @@ from .crankcase import CrankcaseGeometry
 from .coupling import ChamberState, interface_flux
 from .gas1d.boundary import Boundary
 from .gas1d.eos import IdealGas
+from .gas1d.open_end_plenum_v2 import OpenEndPlenumV2Boundary
 from .gas1d.mesh import Mesh
 from .gas1d.riemann import hllc_flux
 from .kinematics import piston_position
@@ -125,10 +126,10 @@ def _duct_ids_by_role(duct_roles: dict) -> dict[str, tuple[str, ...]]:
             raise ValueError("cycle primary record contains an invalid duct role")
         grouped[role].append(duct_id)
     if (len(grouped["intake"]) != 1 or len(grouped["exhaust"]) != 1 or
-            len(grouped["transfer"]) < 3):
+            len(grouped["transfer"]) < 1):
         raise ValueError(
             "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2 supports one intake, "
-            "at least three transfer paths and one exhaust")
+            "at least one transfer path and one exhaust")
     return {role: tuple(ids) for role, ids in grouped.items()}
 
 
@@ -417,10 +418,9 @@ class IntegratedEngine2T:
     """One SSPRK2 state for reed/intake-ready, N-transfer, exhaust topology.
 
     ``geometry(angle_deg)`` must return an :class:`EngineGeometry2T` with exact
-    stage volumes and effective areas. CONFIG_V2 supports exactly one intake,
-    at least three transfer paths and exactly one exhaust; other role
-    cardinalities require a new configuration schema. Boundary conditions are explicit
-    existing ``Boundary`` objects. The default atmosphere uses the existing
+    stage volumes and effective areas. Configurations support exactly one
+    intake, one or more transfer paths, and exactly one exhaust. Boundary
+    conditions are explicit existing ``Boundary`` objects. The default atmosphere uses the existing
     P6 composition (fresh air only). Existing prescribed P7 events, when
     configured, contribute species and heat sources to the same cylinder
     stage RHS and are checkpointed with the integrated ledger.
@@ -490,10 +490,10 @@ class IntegratedEngine2T:
         if (not isinstance(ducts, tuple) or len(ducts) < 3 or
                 sum(path.role == "intake" for path in ducts) != 1 or
                 sum(path.role == "exhaust" for path in ducts) != 1 or
-                sum(path.role == "transfer" for path in ducts) < 3):
+                sum(path.role == "transfer" for path in ducts) < 1):
             raise ValueError(
                 "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V2 supports one intake, "
-                "at least three transfer paths and one exhaust")
+                "at least one transfer path and one exhaust")
         for path in ducts:
             path.validate()
         if len({path.id for path in ducts}) != len(ducts):
@@ -557,6 +557,23 @@ class IntegratedEngine2T:
             "reservoir", p0=p_atm, T0=t_atm, Y0=1.0)
         self.outlet_boundary = outlet_boundary or Boundary(
             "reservoir", p0=p_atm, T0=t_atm, Y0=1.0)
+        open_end_flags = tuple(isinstance(boundary, OpenEndPlenumV2Boundary)
+                               for boundary in (self.inlet_boundary,
+                                                self.outlet_boundary))
+        if any(open_end_flags) and not all(open_end_flags):
+            raise ValueError("OPEN_END_PLENUM_V2 must be selected at both external ends")
+        self.external_boundary_model = (
+            "OPEN_END_PLENUM_V2" if all(open_end_flags) else None)
+        if self.external_boundary_model is not None or len(self.transfers) < 3:
+            # V4 is the additive schema for the 1+ route contract and/or the
+            # integrated atmospheric boundary. V1-V3 retain their original
+            # serialized identities and are never rewritten in place.
+            self.schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V9"
+            self.configuration_schema = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V4"
+        self.external_boundary_provenance = (
+            "SYNTHETIC_ASSUMPTION" if self.external_boundary_model is not None else None)
+        self.configuration_boundary_model = (
+            self.external_boundary_model or "LEGACY_EXPLICIT_V1")
         self.thermal_system = thermal_system
         self.thermal_load = float(thermal_load)
         if not isfinite(self.thermal_load) or self.thermal_load < 0:
@@ -744,6 +761,13 @@ class IntegratedEngine2T:
         }
         if self.dynamic_reed_binding is not None:
             result["dynamic_reed_binding"] = self.dynamic_reed_binding.to_dict()
+        if self.configuration_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V4":
+            result["dynamic_reed_binding"] = (
+                None if self.dynamic_reed_binding is None else
+                self.dynamic_reed_binding.to_dict())
+            result["topology_contract"] = "POSITIVE_TRANSFER_COUNT_V1"
+            result["external_boundary_model"] = self.configuration_boundary_model
+            result["external_boundary_provenance"] = self.external_boundary_provenance
         return result
 
     def configuration_dict(self) -> dict:
@@ -839,7 +863,12 @@ class IntegratedEngine2T:
         current_v3 = (source_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V3" and
                       set(value) == common_fields | {"outlet_species",
                                                      "dynamic_reed_binding"})
-        if (not (legacy_v1 or current_v2 or current_v3) or
+        current_v4 = (source_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V4" and
+                      set(value) == common_fields | {"outlet_species",
+                        "dynamic_reed_binding", "topology_contract",
+                        "external_boundary_model",
+                        "external_boundary_provenance"})
+        if (not (legacy_v1 or current_v2 or current_v3 or current_v4) or
                 value.get("geometry_contract") !=
                 "SLIDER_CRANK_AND_GENERIC_PORTS_V1"):
             raise ValueError("integrated engine configuration schema is invalid")
@@ -919,18 +948,41 @@ class IntegratedEngine2T:
             if not isinstance(fields_data, dict) or set(fields_data) != {
                     "kind", "state", "p0", "T0", "Y0"}:
                 raise ValueError("integrated engine boundary configuration is invalid")
-            boundary_data[name] = Boundary(
-                fields_data["kind"],
-                None if fields_data["state"] is None else
-                tuple(fields_data["state"]), fields_data["p0"],
-                fields_data["T0"], fields_data["Y0"])
+            if current_v4:
+                if value["topology_contract"] != "POSITIVE_TRANSFER_COUNT_V1":
+                    raise ValueError("integrated transfer topology contract is invalid")
+                if value["external_boundary_model"] == "OPEN_END_PLENUM_V2":
+                    if (value["external_boundary_provenance"] != "SYNTHETIC_ASSUMPTION" or
+                            fields_data["kind"] != "open_end_plenum_v2" or
+                            fields_data["state"] is not None):
+                        raise ValueError("integrated OPEN_END_PLENUM_V2 boundary identity is invalid")
+                    boundary_data[name] = OpenEndPlenumV2Boundary(
+                        p0=fields_data["p0"], T0=fields_data["T0"],
+                        Y0=fields_data["Y0"])
+                elif value["external_boundary_model"] == "LEGACY_EXPLICIT_V1":
+                    if value["external_boundary_provenance"] is not None:
+                        raise ValueError("legacy external boundary cannot claim V2 provenance")
+                    boundary_data[name] = Boundary(
+                        fields_data["kind"],
+                        None if fields_data["state"] is None else
+                        tuple(fields_data["state"]), fields_data["p0"],
+                        fields_data["T0"], fields_data["Y0"])
+                else:
+                    raise ValueError("integrated external boundary model is invalid")
+            else:
+                boundary_data[name] = Boundary(
+                    fields_data["kind"],
+                    None if fields_data["state"] is None else
+                    tuple(fields_data["state"]), fields_data["p0"],
+                    fields_data["T0"], fields_data["Y0"])
         species = {name: tuple(values) for name, values in
                    chambers["species"].items()}
         species.update({path_id: tuple(tuple(row) for row in rows)
                         for path_id, rows in value["duct_species"].items()})
         thermal = (None if value["thermal_system"] is None else
                    ThermalSystem.from_dict(value["thermal_system"]))
-        dynamic_reed = (None if not current_v3 else
+        dynamic_reed = (None if not (current_v3 or current_v4) or
+                        value["dynamic_reed_binding"] is None else
                         DynamicReedBinding2T.from_dict(value["dynamic_reed_binding"]))
 
         def resolved_geometry(_angle):
@@ -1005,6 +1057,13 @@ class IntegratedEngine2T:
                     "thermal_load": self.thermal_load,
                     "p7": {"schema": "P7_PRESCRIBED_V1",
                            "start_angle_deg": self.combustion_start_angle_deg}}
+        if self.external_boundary_model is not None:
+            identity["external_boundary_model"] = self.external_boundary_model
+            identity["external_boundary_provenance"] = self.external_boundary_provenance
+        if self.configuration_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V4":
+            identity["topology_contract"] = "POSITIVE_TRANSFER_COUNT_V1"
+            identity["external_boundary_model"] = self.configuration_boundary_model
+            identity["external_boundary_provenance"] = self.external_boundary_provenance
         if self.dynamic_reed_binding is not None:
             identity["dynamic_reed_binding"] = self.dynamic_reed_binding.to_dict()
         encoded = json.dumps(identity, sort_keys=True, separators=(",", ":"),
@@ -1152,8 +1211,18 @@ class IntegratedEngine2T:
         index = 0 if side == "left" else -1
         primitive = self._primitive(cells[index])
         normal = -1 if side == "left" else 1
-        flux, speeds, _ = boundary.flux(primitive, normal, self.eos)
         area = path.mesh.areas[0 if side == "left" else -1]
+        if isinstance(boundary, OpenEndPlenumV2Boundary):
+            resolution = boundary.resolve(primitive, normal, self.eos)
+            resolved = resolution.state
+            velocity = resolved[1]
+            sound = self.eos.sound_speed(resolved)
+            flux = self.eos.flux(resolved)
+            speeds = (velocity - sound, velocity, velocity + sound)
+            reaction = resolution.pressure_reaction_per_area * area
+        else:
+            flux, speeds, _ = boundary.flux(primitive, normal, self.eos)
+            reaction = None
         face = tuple(area * value for value in flux[:3])
         if side == "left":
             left_comp = self.atmosphere_species
@@ -1167,7 +1236,8 @@ class IntegratedEngine2T:
             right_mass = 1.0
         species_flux = self._face_species_flux(face[0], left_comp, left_mass,
                                                right_comp, right_mass)
-        return face, species_flux, max(abs(speeds[0]), abs(speeds[-1]))
+        return (face, species_flux, max(abs(speeds[0]), abs(speeds[-1])),
+                reaction)
 
     def _network_face(self, state, path, side, primitive, cell_species, cell_mass):
         binding = self.network_volume_by_endpoint.get((path.id, side))
@@ -1179,19 +1249,26 @@ class IntegratedEngine2T:
             tuple(state["species"]["network_volumes"][node.id]))
         face_index = 0 if side == "left" else -1
         exchange_area = min(binding.connection.area_m2, path.mesh.areas[face_index])
+        face_area = path.mesh.areas[face_index]
         exchange = resolve_volume_duct_interface(
             volume_state, node.volume_m3, primitive,
             self._fractions(cell_species, cell_mass), exchange_area,
             -1 if side == "left" else 1, eos=self.eos)
         # Convert the node-oriented exchange once into geometric +x face order.
         sign = -1.0 if side == "left" else 1.0
+        blocked_area = face_area - exchange_area
+        blocked_pressure_traction = blocked_area * primitive[2]
         face = (sign * exchange.mass_into_volume_kg_s,
-                sign * exchange.axial_impulse_into_volume_n,
+                sign * exchange.axial_impulse_into_volume_n +
+                blocked_pressure_traction,
                 sign * exchange.energy_into_volume_w)
         species = tuple(sign * value for value in
                         exchange.species_into_volume_kg_s)
         speed = max(abs(exchange.wave_speeds[0]), abs(exchange.wave_speeds[-1]))
-        return binding, exchange, face, species, speed
+        external_wall_reaction = (1.0 if side == "right" else -1.0) * \
+            blocked_pressure_traction
+        return (binding, exchange, face, species, speed, blocked_area,
+                blocked_pressure_traction, external_wall_reaction)
 
     def _assemble(self, state, angle, rpm, p7_event=_USE_ACTIVE_P7_EVENT):
         """Build every RHS from one immutable stage state."""
@@ -1230,10 +1307,11 @@ class IntegratedEngine2T:
                     state, path, "left", primitives[0], ss[0],
                     qs[0][0] * path.mesh.volumes[0])
                 if network is None:
-                    external_l, species_l, speed_l = self._external_face(
+                    external_l, species_l, speed_l, pressure_reaction_l = self._external_face(
                         state, path, "left", self.inlet_boundary)
                 else:
-                    binding, exchange, external_l, species_l, speed_l = network
+                    (binding, exchange, external_l, species_l, speed_l,
+                     blocked_area, blocked_traction, wall_reaction) = network
                     node_id = binding.node.id
                     rhs_q["network_volumes"][node_id] = [
                         exchange.mass_into_volume_kg_s,
@@ -1248,8 +1326,12 @@ class IntegratedEngine2T:
                         "energy_into_volume_w": exchange.energy_into_volume_w,
                         "species_into_volume_kg_s": exchange.species_into_volume_kg_s,
                         "axial_impulse_into_volume_n": exchange.axial_impulse_into_volume_n,
+                        "blocked_area_m2": blocked_area,
+                        "blocked_area_pressure_traction_n": blocked_traction,
+                        "external_wall_reaction_n": wall_reaction,
                         "wave_speeds": exchange.wave_speeds,
                         "fallback_reason": exchange.fallback_reason}
+                    pressure_reaction_l = None
                 intake_reed_area = g.intake_area_m2
                 if self.reed_petals:
                     intake_reed_area = min(
@@ -1294,6 +1376,7 @@ class IntegratedEngine2T:
                                         "left_species": species_l,
                                         "right_species": right_species,
                                         "left_speed": speed_l, "right_speed": speed_r}
+                faces_trace[path.id]["left_external_pressure_reaction_n"] = pressure_reaction_l
                 faces_trace[path.id]["effective_reed_area_m2"] = intake_area
             elif path.role == "transfer":
                 index = next(i for i, item in enumerate(self.transfers) if item.id == path.id)
@@ -1346,10 +1429,11 @@ class IntegratedEngine2T:
                     state, path, "right", primitives[-1], ss[-1],
                     qs[-1][0] * path.mesh.volumes[-1])
                 if network is None:
-                    external_r, species_r, speed_r = self._external_face(
+                    external_r, species_r, speed_r, pressure_reaction_r = self._external_face(
                         state, path, "right", self.outlet_boundary)
                 else:
-                    binding, exchange, external_r, species_r, speed_r = network
+                    (binding, exchange, external_r, species_r, speed_r,
+                     blocked_area, blocked_traction, wall_reaction) = network
                     node_id = binding.node.id
                     rhs_q["network_volumes"][node_id] = [
                         exchange.mass_into_volume_kg_s,
@@ -1364,8 +1448,12 @@ class IntegratedEngine2T:
                         "energy_into_volume_w": exchange.energy_into_volume_w,
                         "species_into_volume_kg_s": exchange.species_into_volume_kg_s,
                         "axial_impulse_into_volume_n": exchange.axial_impulse_into_volume_n,
+                        "blocked_area_m2": blocked_area,
+                        "blocked_area_pressure_traction_n": blocked_traction,
+                        "external_wall_reaction_n": wall_reaction,
                         "wave_speeds": exchange.wave_speeds,
                         "fallback_reason": exchange.fallback_reason}
+                    pressure_reaction_r = None
                 left_face = _port_face_flux(
                     left_exchange, primitives[0], path.mesh.areas[0], exhaust_area)
                 speed_l = (max(abs(primitives[0][1] - self.eos.sound_speed(primitives[0])),
@@ -1396,6 +1484,7 @@ class IntegratedEngine2T:
                                         "left_species": left_species,
                                         "right_species": species_r,
                                         "left_speed": speed_l, "right_speed": speed_r}
+                faces_trace[path.id]["right_external_pressure_reaction_n"] = pressure_reaction_r
             faces = [left_face]
             species_faces = [left_species]
             face_speeds = [speed_l]

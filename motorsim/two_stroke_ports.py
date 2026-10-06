@@ -18,6 +18,7 @@ from .ports import crossing_angle, uncovered_area
 from .project import Intake, ProjectError
 
 SCHEMA = "GENERIC_2T_PORTS_V1"
+SCHEMA_ONE_TRANSFER = "GENERIC_2T_PORTS_V2"
 PROVENANCE = {"DOCUMENTED", "DERIVED_FROM_DOCUMENTED",
               "SYNTHETIC_ASSUMPTION", "UNKNOWN"}
 DUCT_ROLES = {"intake", "transfer", "exhaust"}
@@ -213,8 +214,9 @@ class PortDefinition:
 
 
 def _base_dict(stroke_mm: float, rod_length_mm: float,
-               ducts: tuple[DuctBinding, ...], ports: tuple[PortDefinition, ...]) -> dict:
-    return {"schema": SCHEMA, "stroke_mm": stroke_mm,
+               ducts: tuple[DuctBinding, ...], ports: tuple[PortDefinition, ...],
+               schema: str = SCHEMA) -> dict:
+    return {"schema": schema, "stroke_mm": stroke_mm,
             "rod_length_mm": rod_length_mm,
             "ducts": [duct.to_dict() for duct in ducts],
             "ports": [port.to_dict() for port in ports]}
@@ -306,8 +308,12 @@ class TwoStrokePortSet:
 
         counts = {role: sum(port.role == role for port in self.ports)
                   for role in PORT_ROLES}
-        if counts["intake"] < 1 or counts["transfer"] < 2 or counts["exhaust"] < 1:
-            raise ProjectError("Se requiere intake piston-port, dos transferencias y un escape.")
+        if counts["intake"] < 1 or counts["transfer"] < 1 or counts["exhaust"] < 1:
+            raise ProjectError("Se requiere intake piston-port, al menos una transferencia y un escape.")
+
+    def _schema(self) -> str:
+        transfer_count = sum(port.role == "transfer" for port in self.ports)
+        return SCHEMA_ONE_TRANSFER if transfer_count == 1 else SCHEMA
 
     def area_at(self, port: PortDefinition, angle_deg: float) -> float:
         """Return geometric effective area in mm²; direction belongs to the flow solver."""
@@ -431,27 +437,31 @@ class TwoStrokePortSet:
         profiles = {"ports": [profile.to_dict() for profile in self.compile_profiles()],
                     "ducts": [profile.to_dict() for profile in self.compile_duct_profiles()]}
         return {"input_sha256": _hash(_base_dict(self.stroke_mm, self.rod_length_mm,
-                                                   self.ducts, self.ports)),
+                                                   self.ducts, self.ports,
+                                                   schema=self._schema())),
                 "profile_sha256": _hash(profiles), "profiles": profiles}
 
     def to_dict(self) -> dict[str, Any]:
         self.validate()
         return {**_base_dict(self.stroke_mm, self.rod_length_mm,
-                             self.ducts, self.ports),
+                             self.ducts, self.ports, schema=self._schema()),
                 "derived_profiles": self._derived()}
 
     @classmethod
     def from_dict(cls, value: Any) -> "TwoStrokePortSet":
         fields = {"schema", "stroke_mm", "rod_length_mm", "ducts", "ports",
                   "derived_profiles"}
-        if not isinstance(value, dict) or set(value) != fields or value["schema"] != SCHEMA:
-            raise ProjectError("Esquema GENERIC_2T_PORTS_V1 inválido.")
+        if (not isinstance(value, dict) or set(value) != fields or
+                value["schema"] not in {SCHEMA, SCHEMA_ONE_TRANSFER}):
+            raise ProjectError("Esquema GENERIC_2T_PORTS inválido.")
         if not isinstance(value["ducts"], list) or not isinstance(value["ports"], list):
             raise ProjectError("ducts y ports deben ser listas.")
         result = cls(value["stroke_mm"], value["rod_length_mm"],
                      tuple(DuctBinding.from_dict(item) for item in value["ducts"]),
                      tuple(PortDefinition.from_dict(item) for item in value["ports"]))
         result.validate()
+        if value["schema"] != result._schema():
+            raise ProjectError("El esquema GENERIC_2T_PORTS no coincide con la topología.")
         if value["derived_profiles"] != result._derived():
             raise ProjectError("Perfiles derivados desactualizados o con binding inválido.")
         return result

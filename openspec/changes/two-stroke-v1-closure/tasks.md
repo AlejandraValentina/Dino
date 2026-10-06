@@ -1,9 +1,10 @@
 # Closure task queue
 
-- [ ] C1 network endpoint pressure traction and reaction/equilibrium tests.
-- [ ] C2 integrate OPEN_END_PLENUM_V2 into IntegratedEngine2T config and restore;
-      run only a short diagnostic before campaign preparation.
-- [ ] C3 support any positive number of transfer routes in the integrated core.
+- [x] C1 network endpoint pressure traction and reaction/equilibrium tests.
+- [x] C2 integrate OPEN_END_PLENUM_V2 into IntegratedEngine2T config and restore;
+      run only a short diagnostic before campaign preparation. (Integrated
+      equilibrium/short-step checks pass; no campaign evidence claimed.)
+- [x] C3 support any positive number of transfer routes in the integrated core.
 - [ ] C4 implement a distinct, fuel/oxygen-limited chemical combustion capability;
       leave P7 unchanged.
 - [ ] C5 derive trapped/delivered/burned fuel metrics from accepted snapshots.

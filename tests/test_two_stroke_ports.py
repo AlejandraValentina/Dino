@@ -66,6 +66,24 @@ class GenericTwoStrokePortTests(unittest.TestCase):
                             if p.duct_id == "header")
         self.assertAlmostEqual(duct_profile.effective_area_mm2[180], 169.0)
 
+    def test_single_transfer_uses_additive_v2_schema_and_round_trips(self):
+        full = generic_fixture()
+        one_transfer = replace(
+            full,
+            ducts=tuple(duct for duct in full.ducts
+                        if duct.id not in {"transfer-b", "transfer-boost"}),
+            ports=tuple(port for port in full.ports
+                        if port.duct_id not in {"transfer-b", "transfer-boost"}))
+        encoded = one_transfer.dumps()
+        self.assertEqual(json.loads(encoded)["schema"], "GENERIC_2T_PORTS_V2")
+        self.assertEqual(TwoStrokePortSet.loads(encoded), one_transfer)
+        self.assertEqual(len(one_transfer.compile_profiles()), len(one_transfer.ports))
+
+        malformed = json.loads(encoded)
+        malformed["schema"] = "GENERIC_2T_PORTS_V1"
+        with self.assertRaisesRegex(ProjectError, "no coincide con la topología"):
+            TwoStrokePortSet.from_dict(malformed)
+
     def test_rectangular_window_event_angles_are_analytic_not_degree_samples(self):
         model = generic_fixture()
         profile = next(x for x in model.compile_profiles() if x.port_id == "tr-primary")

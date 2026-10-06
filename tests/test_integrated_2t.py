@@ -7,6 +7,7 @@ import pytest
 from motorsim.gas1d.mesh import Mesh, uniform_mesh
 from motorsim.gas1d.boundary import Boundary
 from motorsim.gas1d.eos import IdealGas
+from motorsim.gas1d.open_end_plenum_v2 import OpenEndPlenumV2Boundary
 from motorsim.crankcase import CrankcaseGeometry
 from motorsim.expansion_chamber import ChamberSection, ExpansionChamber
 from motorsim.integrated_2t import (
@@ -377,7 +378,7 @@ def test_exhaust_backflow_uses_fresh_air_not_the_intake_reservoir_mixture():
         "fixed", state=(150000.0 / (system.eos.R * 300.0),
                         0.0, 150000.0, 1.0))
 
-    face, species_flux, _ = system._external_face(
+    face, species_flux, _, _ = system._external_face(
         system.state, system.exhaust, "right", external)
 
     assert face[0] < 0.0
@@ -587,9 +588,13 @@ def test_integrated_v2_output_roles_do_not_depend_on_duct_identifiers():
     assert _duct_ids_by_role(roles) == {
         "intake": ("inlet",), "transfer": ("tr-a", "tr-b", "tr-c"),
         "exhaust": ("pipe",)}
+    two_route_roles = {"inlet": "intake", "tr-a": "transfer",
+                       "tr-b": "transfer", "pipe": "exhaust"}
+    assert _duct_ids_by_role(two_route_roles)["transfer"] == ("tr-a", "tr-b")
+    assert _duct_ids_by_role({"inlet": "intake", "tr-a": "transfer",
+                              "pipe": "exhaust"})["transfer"] == ("tr-a",)
     with pytest.raises(ValueError, match="CONFIG_V2 supports"):
-        _duct_ids_by_role({"inlet": "intake", "tr-a": "transfer",
-                           "tr-b": "transfer", "pipe": "exhaust"})
+        _duct_ids_by_role({"inlet": "intake", "pipe": "exhaust"})
     with pytest.raises(ValueError, match="CONFIG_V2 supports"):
         _duct_ids_by_role({"inlet-a": "intake", "inlet-b": "intake",
                            "tr-a": "transfer", "tr-b": "transfer",
@@ -1097,31 +1102,35 @@ def test_p7_event_boundary_requires_exact_alignment_and_stops_cleanly():
 
 def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
                             fixture_name=None, intake_plenum=False,
-                            network_volumes=(), dynamic_reed=False):
+                            network_volumes=(), dynamic_reed=False,
+                            transfer_ids=("primary", "secondary", "boost"),
+                            open_end_plenum_v2=False):
     rpm = 3000.0
     crankcase = CrankcaseGeometry(56.0, 50.0, 100.0, 80.0,
                                   "SYNTHETIC_ASSUMPTION")
     slider = SliderCrankChambers2T(crankcase, 8.0)
+    transfer_definitions = {
+        "primary": PortDefinition("primary-window", "Primary", "transfer", "primary", "primary",
+                                   "rectangular_window", .8, "SYNTHETIC_ASSUMPTION", top_mm=32.0,
+                                   height_mm=10.0, width_mm=20.0),
+        "secondary": PortDefinition("secondary-window", "Secondary", "transfer", "secondary",
+                                     "secondary", "rectangular_window", .8,
+                                     "SYNTHETIC_ASSUMPTION", top_mm=34.0,
+                                     height_mm=8.0, width_mm=12.0),
+        "boost": PortDefinition("boost-window", "Boost", "transfer", "boost", "boost",
+                                "rectangular_window", .7, "SYNTHETIC_ASSUMPTION", top_mm=36.0,
+                                height_mm=7.0, width_mm=8.0),
+    }
+    assert transfer_ids and set(transfer_ids) <= set(transfer_definitions)
     ports = TwoStrokePortSet(
         50.0, 100.0,
         (DuctBinding("inlet", "intake"),
-         DuctBinding("primary", "transfer"),
-         DuctBinding("secondary", "transfer"),
-         DuctBinding("boost", "transfer"),
+         *(DuctBinding(path_id, "transfer") for path_id in transfer_ids),
          DuctBinding("exhaust", "exhaust")),
         (PortDefinition("inlet-window", "Inlet", "intake", "piston_port", "inlet",
                         "piston_port", .9, "SYNTHETIC_ASSUMPTION", top_mm=64.0,
                         height_mm=10.0, width_mm=20.0, skirt_mm=42.0),
-         PortDefinition("primary-window", "Primary", "transfer", "primary", "primary",
-                        "rectangular_window", .8, "SYNTHETIC_ASSUMPTION", top_mm=32.0,
-                        height_mm=10.0, width_mm=20.0),
-         PortDefinition("secondary-window", "Secondary", "transfer", "secondary",
-                        "secondary", "rectangular_window", .8,
-                        "SYNTHETIC_ASSUMPTION", top_mm=34.0,
-                        height_mm=8.0, width_mm=12.0),
-         PortDefinition("boost-window", "Boost", "transfer", "boost", "boost",
-                        "rectangular_window", .7, "SYNTHETIC_ASSUMPTION", top_mm=36.0,
-                        height_mm=7.0, width_mm=8.0),
+         *(transfer_definitions[path_id] for path_id in transfer_ids),
          PortDefinition("main-exhaust", "Main exhaust", "exhaust", "main", "exhaust",
                         "rectangular_window", .9, "SYNTHETIC_ASSUMPTION", top_mm=30.0,
                         height_mm=10.0, width_mm=20.0, roof_travel_mm=4.0),
@@ -1133,9 +1142,9 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
                                       AreaKnot(360.0, 0.0)))))
     valve = PowerValve("pv", "main-exhaust", (1000.0, 5000.0), (0.0, 1.0),
                        "SYNTHETIC_ASSUMPTION")
-    binding = IntegratedPortBinding2T(
-        ports, {"inlet": "intake", "primary": "primary", "secondary": "secondary",
-                "boost": "boost", "exhaust": "exhaust"}, valve)
+    path_by_duct = {"inlet": "intake", "exhaust": "exhaust"}
+    path_by_duct.update({path_id: path_id for path_id in transfer_ids})
+    binding = IntegratedPortBinding2T(ports, path_by_duct, valve)
     assert chamber_length_scale > 0.0
     chamber = ExpansionChamber((
         ChamberSection("header", "header", 80.0 * chamber_length_scale, 20.0, 20.0),
@@ -1143,12 +1152,10 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
         ChamberSection("belly", "belly", 100.0 * chamber_length_scale, 52.0, 52.0),
         ChamberSection("baffle", "baffle_cone", 170.0 * chamber_length_scale, 52.0, 16.0),
         ChamberSection("stinger", "stinger", 120.0 * chamber_length_scale, 16.0, 16.0)))
-    paths = (
-        DuctPath2T("intake", uniform_mesh(2, .05, 1e-4), "intake"),
-        DuctPath2T("primary", uniform_mesh(2, .05, 1e-4), "transfer"),
-        DuctPath2T("secondary", uniform_mesh(2, .05, 1e-4), "transfer"),
-        DuctPath2T("boost", uniform_mesh(2, .05, 1e-4), "transfer"),
-        DuctPath2T("exhaust", chamber.mesh(.2), "exhaust"))
+    paths = (DuctPath2T("intake", uniform_mesh(2, .05, 1e-4), "intake"),
+             *(DuctPath2T(path_id, uniform_mesh(2, .05, 1e-4), "transfer")
+               for path_id in transfer_ids),
+             DuctPath2T("exhaust", chamber.mesh(.2), "exhaust"))
 
     def geometry(angle):
         cc_vol, cy_vol, cc_rate, cy_rate = slider.resolve(angle, rpm)
@@ -1193,8 +1200,12 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
         (1.1768, 0.0, 101325.0, 1.0), (1.1768, 0.0, 101325.0, 1.0),
         paths, states, geometry, species=species,
         atmosphere_species=(.98, .02, 0.0, 0.0),
-        inlet_boundary=Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0)),
-        outlet_boundary=Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0)),
+        inlet_boundary=(OpenEndPlenumV2Boundary(101325.0, 300.0, 1.0)
+                        if open_end_plenum_v2 else
+                        Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0))),
+        outlet_boundary=(OpenEndPlenumV2Boundary(101325.0, 300.0, 1.0)
+                         if open_end_plenum_v2 else
+                         Boundary("nonreflecting", state=(1.1768, 0.0, 101325.0, 1.0))),
         geometry_identity={"fixture": (fixture_name or
                                         ("internal-cycle-b-piston-port-synthetic-v1"
                                          if not with_reed else
@@ -1662,6 +1673,90 @@ def test_integrated_engine_config_roundtrip_preserves_network_bindings():
         json.loads(system.configuration_json()))
     assert rebuilt.configuration_json() == system.configuration_json()
     assert rebuilt.snapshot() == system.snapshot()
+
+
+@pytest.mark.parametrize(("duct_id", "side", "node_to", "face_side"), [
+    ("intake", "left", "intake", "left"),
+    ("exhaust", "right", "exhaust", "right"),
+])
+def test_network_endpoint_pressure_traction_covers_blocked_face_and_rest_equilibrium(
+        duct_id, side, node_to, face_side):
+    eos = IdealGas()
+    volume = .001
+    pressure, temperature = 101325.0, 300.0
+    mass = pressure * volume / (eos.R * temperature)
+    node = VolumeNode(f"{duct_id}-plenum", "plenum", volume,
+                      "SYNTHETIC_ASSUMPTION")
+    upstream, downstream = ((node.id, duct_id) if node_to == "intake" else
+                            (duct_id, node.id))
+    binding = IntegratedNetworkVolume2T(
+        node, NetworkConnection(f"{duct_id}-neck", upstream, downstream,
+                                1e-5, .05, "SYNTHETIC_ASSUMPTION"),
+        duct_id, side,
+        VolumeGasState(mass, pressure * volume / (eos.gamma - 1.0),
+                       (mass, 0.0, 0.0, 0.0)))
+    system = _case(crankcase_pressure=pressure, cylinder_pressure=pressure,
+                   intake_area=0.0, transfer_area=0.0, exhaust_area=0.0,
+                   network_volumes=(binding,))
+
+    assembled = system._assemble(system.state, 0.0, system.reference_rpm)
+    face = assembled["faces"][duct_id][face_side]
+    exchange = assembled["network_exchanges"][node.id]
+
+    assert face[0] == pytest.approx(0.0, abs=1e-14)
+    assert face[1] == pytest.approx(pressure * 1e-4, rel=1e-14)
+    assert exchange["blocked_area_m2"] == pytest.approx(9e-5)
+    assert exchange["blocked_area_pressure_traction_n"] == pytest.approx(
+        pressure * 9e-5)
+    assert exchange["external_wall_reaction_n"] == pytest.approx(
+        (1.0 if side == "right" else -1.0) * pressure * 9e-5)
+
+    initial = deepcopy(system.state)
+    system.step(1e-7, .001)
+    assert system.state["ducts"] == initial["ducts"]
+    assert system.state["chambers"] == initial["chambers"]
+    assert system.state["network_volumes"] == initial["network_volumes"]
+
+
+def test_integrated_open_end_plenum_v2_configuration_restore_and_equilibrium():
+    system = _internal_cycle_fixture(open_end_plenum_v2=True)
+    config = json.loads(system.configuration_json())
+
+    assert config["schema"] == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V4"
+    assert config["external_boundary_model"] == "OPEN_END_PLENUM_V2"
+    assert config["external_boundary_provenance"] == "SYNTHETIC_ASSUMPTION"
+    restored = IntegratedEngine2T.from_configuration_dict(config)
+    assert restored.configuration_dict() == config
+    assert restored.snapshot() == system.snapshot()
+    assert isinstance(restored.inlet_boundary, OpenEndPlenumV2Boundary)
+    assert isinstance(restored.outlet_boundary, OpenEndPlenumV2Boundary)
+
+    system.step(1e-8, .0001)
+    # The frozen synthetic prime fixture starts at ambient pressure and the
+    # first angle is at TDC with all cylinder ports closed.
+    for primitive in (system._primitive(system.state["ducts"]["intake"][0]),
+                      system._primitive(system.state["ducts"]["exhaust"][0])):
+        assert primitive[2] == pytest.approx(101325.0, abs=1e-7)
+    assert system.trace[-1]["stage_face_fluxes"][1]["intake"][
+        "left_external_pressure_reaction_n"] == pytest.approx(101325.0 * 1e-4)
+
+
+@pytest.mark.parametrize("transfer_ids", [
+    ("primary",), ("primary", "secondary"), ("primary", "secondary", "boost")])
+def test_positive_transfer_route_topologies_construct_serialize_step_and_restore(
+        transfer_ids):
+    engine = _internal_cycle_fixture(transfer_ids=transfer_ids,
+                                     open_end_plenum_v2=True)
+    encoded = engine.configuration_json()
+    config = json.loads(encoded)
+    assert config["schema"] == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V4"
+    assert config["resolved_topology"]["transfers"] == list(transfer_ids)
+    restored = IntegratedEngine2T.from_configuration_dict(config)
+    assert restored.configuration_json() == encoded
+    assert restored.snapshot() == engine.snapshot()
+    engine.step(1e-8, .0001)
+    restored.restore(engine.snapshot())
+    assert restored.snapshot() == engine.snapshot()
 
 
 def test_integrated_engine_config_rejects_unserializable_geometry_contract():
