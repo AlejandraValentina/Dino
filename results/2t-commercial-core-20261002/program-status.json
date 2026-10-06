@@ -1,9 +1,9 @@
 {
   "schema": "MOTORSIM_2T_COMMERCIAL_CORE_STATUS_V1",
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
-  "recorded_at": "2026-10-05",
+  "recorded_at": "2026-10-06",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
-  "status_capture_head": "351e1b22ee49fe9d7c4cde53755d1d4e8caaa355",
+  "status_capture_head": "062d8eb43da53acdb2053ec7c25cdce33a977fc9",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
@@ -86,7 +86,7 @@
       "dependency_status": "CONDITIONAL_ON_P4"
     },
     "5_reed": {
-      "status": "SYNTHETIC_TWO_VOLUME_SSPRK2_COMPONENT_VERIFIED; FULL_ENGINE_BINDING_PENDING",
+      "status": "SYNTHETIC_TWO_VOLUME_AND_INTEGRATED_SSPRK2_VERIFIED_CONDITIONAL",
       "verified_scope": [
         "DYNAMIC_REED_HINGED_FLAP_GEOMETRY_V1",
         "explicit_linear_lift_shape_and_swept_volume_area",
@@ -95,20 +95,19 @@
         "pressure_force_and_gas_volume_work_pairing",
         "damping_energy_sink_ledger",
         "atomic_domain_rejection",
-        "configuration_and_state_hash_checkpoint_restart"
+        "configuration_and_state_hash_checkpoint_restart",
+        "IntegratedEngine2T common-stage binding to the intake terminal 1D cell and crankcase",
+        "extensive moving-cell mass/momentum/energy updates; four P6 species remain authoritative for total mass",
+        "variable cell and crankcase volumes, stage CFL, dynamic configuration V3/state V8 and transactional restart",
+        "cycle-primary reconstruction and V4 reed position/velocity/energy/dissipation channels"
       ],
-      "pending_scope": [
-        "preregister explicit synthetic swept-volume/control-volume geometry",
-        "commit preregistration before fixture campaign",
-        "integrate dynamic petal state, flow, energy exchange and dissipation accounting in SSPRK2",
-        "checkpoint/restart and ledger tests"
-      ],
-      "evidence": "docs/gasdynamic/dynamic_reed_coupling_v1_implementation.md; tests/test_reed_coupling.py + tests/test_reed.py: 26 passed",
+      "pending_scope": [],
+      "evidence": "Commit 062d8eb: tests/test_integrated_2t.py 55 passed, including one full synthetic cycle and V4 collector rebuild; tests/test_reed_coupling.py + tests/test_reed.py 28 passed; P5-C/P6 focused regressions 62 passed; OpenSpec strict PASS.",
       "not_verified": [
-        "IntegratedEngine2T stage binding",
-        "variable volume on finite-volume intake endpoint cell",
-        "engine CFL/configuration/checkpoint/collector binding",
-        "full-cycle dynamic reed trajectory"
+        "real-engine reed dimensions, parameter qualification or KT100 applicability",
+        "experimental validation and periodic convergence",
+        "stop-contact/impact events, which are rejected pending a separately versioned event contract",
+        "Commercial Core acceptance"
       ],
       "dependency_status": "CONDITIONAL_ON_P4"
     },
@@ -762,9 +761,10 @@
         "results/2t-commercial-core-20261002/aud-09-fixture-c-20261005-v1/decision.json: 20 fixed-horizon admissible cycles, exact restart replay, period-1 at cycle 20",
         "BLOCKER_TRIAGE_2026-10-05: SKEPTIC checked that current V3 outputs retain UNDEFINED statuses when an exact closure snapshot/property is absent and reject tampered primary inputs; 65 relevant integrated-cycle/output/fuel tests PASS.",
         "DECISION: remove stale dependencies on dynamic reed and unspecified fuel chemistry; collector remains synthetic and CONDITIONAL_ON_P4.",
-        "2026-10-05: additive V4 event-specific last-cylinder-port-close pseudo-species output; targeted two-cycle integrated test passed, V1-V3 unchanged."
+        "2026-10-05: additive V4 event-specific last-cylinder-port-close pseudo-species output; targeted two-cycle integrated test passed, V1-V3 unchanged.",
+        "2026-10-06: dynamic reed signals (position, velocity, mechanical energy, dissipation) are rebuilt from the full accepted synthetic cycle in ENGINEERING_OUTPUTS_V4; covered by the 55-test integrated module. No experimental or product acceptance claim."
       ],
-      "next_action": "Collector is complete for represented supported inputs; V4 reports only exact last-port-close pseudo-species observables. Missing explicit fuel properties remain separate.",
+      "next_action": "Collector and V4 reed signals are complete for represented synthetic inputs; explicit fuel properties and event semantics remain separate blockers.",
       "cycle_evidence_status": "CURRENT_AUD08_FIXTURE_A_AND_AUD09_FIXTURE_C_SYNTHETIC_ONLY; NO_COMMERCIAL_CORE_ACCEPTANCE",
       "cycle_evidence_current_acceptance_use": false
     },
@@ -789,7 +789,7 @@
         "SKEPTIC: this does not revive the old 20%-longer chamber Fixture B result and does not establish experimental validity or Commercial Core acceptance.",
         "DECISION: use Fixture C as the current second-fixture evidence without renaming its artifact; run the existing P4-P8 regression suite separately as an independent READY task."
       ],
-      "next_action": "AUD-09 Fixture C is the current independent second fixture (piston-port, no reed); retain its name and provenance rather than relabeling historical Fixture B.",
+      "next_action": "AUD-09 Fixture C is the audited distinct piston-port/no-reed candidate resumed after audit fixes; preserve its Fixture C identity and artifact. It satisfies the second-topology investigation without reviving the superseded long-chamber Fixture B or launching another campaign.",
       "cycle_evidence_status": "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT",
       "cycle_evidence_current_acceptance_use": false
     },
@@ -799,11 +799,10 @@
       "dependencies": [
         "AUD-11"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "KT100_V2_EVIDENCE_RECOVERY_R1 was invoked once and stopped at the first point because in-memory cycle records aliased mutable state and the post-run audit raised trajectory terminal species mismatch. Offline reconstruction from persisted point data is valid only for 5000 RPM: 23 cycles, no detected period, cycle-24 NUMERICAL_FAILURE at 142.19487248520613 degrees. The other four points were never started; the preregistered one-run allowance is consumed.",
+      "state": "DONE_CONDITIONAL",
+      "blocker": null,
       "commits": [
-        "80fcf626e160ad582cacfafae2102a72b2df7bed",
-        "8529a89ac4566caa85d95d9eae4a3786d44e1594",
+        "3a951e0",
         "df5cbd7",
         "1c3d897",
         "ee58b8b",
@@ -831,9 +830,18 @@
         "R1 campaign attempted exactly once after preregistration; only rpm-5000 primary cycles exist.",
         "Offline receipt results/2t-commercial-core-20261002/kt100_v2_recovery_r1_5000_offline_audit.json: evidence audit PASS from 23 persisted cycles; source binding, initial replay and restart replay PASS; classification NUMERICAL_FAILURE; no periodicity.",
         "The previously raised trajectory terminal species mismatch was caused by in-memory aliasing: audit_cycles over freshly deserialized persisted primary records and audit_campaign_directory both PASS after summary reconstruction; no solver was run for this audit.",
-        "R1 campaign execution halted before rpm 7000/9000/11000/13000 due to the audit exception. No result exists for those points."
+        "R1 campaign execution halted before rpm 7000/9000/11000/13000 due to the audit exception. No result exists for those points.",
+        "AUD-11 CASE_B_CAPABILITY_LIMITATION is resolved for the synthetic capability: OPEN_END_PLENUM_V2 is implemented/preregistered with lossless isentropic inflow explicitly labeled SYNTHETIC_ASSUMPTION; LEGACY_CHARACTERISTIC_V1 remains for historical replay, and no Cd/area or real carburetor is inferred.",
+        "KT100 evidence qualification is separate and remains NOT_QUALIFIED: R6 persisted only 390-degree failure receipts with no full cycle primary; the single R1 recovery at 5000 rpm reconstructs 23 cycles then NUMERICAL_FAILURE at cycle 24; other RPM points never ran. Do not rerun or call the boundary experimentally verified."
       ],
-      "next_action": "Do not rerun under consumed R1. Preserve the partial valid 5000-RPM result. Any future full five-point recovery requires a new explicit authorization and a preregistered immutable harness/evidence fix; no KT100 verification claim."
+      "next_action": "Synthetic OPEN_END_PLENUM_V2 implementation is complete conditionally. Preserve KT100 as unverified and frozen; the consumed R1 cannot be repeated and current receipts do not support a physical decision.",
+      "triage": {
+        "forensics": "R6 artifacts contain manifests/summaries/failure receipts but no cycle primary, trajectory, accepted-step trace or checkpoint for offline reconstruction. R1 provides audited 5000-rpm persisted cycles through cycle 23 and a numerical failure in cycle 24; it does not qualify a converged result.",
+        "domain_research": "The approved OPEN_END_PLENUM_V2 formulation is a separate synthetic open-end/plenum capability with explicit external-reservoir thermodynamics and donor composition. The accepted human ruling says this is not calibrated WB40 data; restricted-nozzle Cd/area remains a separate future interface.",
+        "skeptic": "Do not infer a carburetor restriction, real fuel properties, periodicity, or physical KT100 performance from the capability tests or from reaching 390 degrees.",
+        "contract": "Close implementation of the approved synthetic boundary contract as DONE_CONDITIONAL; keep boundary_physics_result NOT_QUALIFIED and KT100 unverified pending separately authorized evidence.",
+        "decision": "No additional local implementation blocker for the approved synthetic boundary. Any KT100 requalification requires a new preregistration/authorization; no rerun is authorized here."
+      }
     },
     {
       "id": "integrated-intake-plenum",
@@ -910,25 +918,28 @@
       "dependencies": [
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "IN_PROGRESS",
-      "blocker": "Full engine binding remains: the intake side is a finite-volume 1D endpoint cell with fixed mesh volume; the component uses two explicit volumes. Bind its swept-volume law into endpoint cell volume/density, crankcase volume-work, stage CFL, configuration/restart identity and collector without splitting SSPRK2.",
-      "commits": [],
-      "evidence": [
-        "SELF_REVIEW (historical claim retained; no durable review receipt identified in AUD-06): Independent technical review is documented in docs/gasdynamic/autonomous_engineering_mode.md.",
-        "BLOCKER_TRIAGE_2026-10-05 FORENSICS: motorsim/reed.py advances DYNAMIC_REED_V1 under constant dp and computes flow curtain area from width*lift; integrated_2t binds only static reed area into the common stages and checkpoints no dynamic petal state.",
-        "DOMAIN/RESEARCH: a stage-coherent moving interface can pair pressure force work with equal/opposite gas volume work, but only after its swept-volume coefficient and neighboring control volumes are declared.",
-        "SKEPTIC: pressure_area_m2 and effective_width_m*lift_m are distinct configured quantities; treating the latter as swept volume or assigning all displacement to crankcase would silently invent geometry.",
-        "CONTRACT/DECISION: concrete missing topology/geometry binding; keep BLOCKED_LOCAL. No independent review is claimed.",
-        "2026-10-06 preregistration draft: docs/gasdynamic/dynamic_reed_coupling_v1_preregistration.md; no coupled numerical campaign has been run",
-        "Component subtask completed in motorsim.reed_coupling; 26 reed tests PASS. Full IntegratedEngine2T coupling remains unimplemented and is tracked separately."
+      "state": "DONE_CONDITIONAL",
+      "blocker": null,
+      "commits": [
+        "004b1841579497fe0e2273257be0104ccaa4abd2",
+        "e9e2f59aee0dfc219c67c64f0b4f60a798f0abcf",
+        "062d8eb"
       ],
-      "next_action": "Design and implement a stage-coherent engine binding for the variable-volume intake endpoint and crankcase; preserve the standalone component tests and all historical P5/P6 contracts.",
+      "evidence": [
+        "2026-10-06 preregistration docs/gasdynamic/dynamic_reed_coupling_v1_preregistration.md was committed before implementation-level verification; no real-engine geometry or campaign claim.",
+        "IntegratedEngine2T binds the explicitly synthetic swept volume to the intake terminal 1D finite-volume cell and crankcase in the same global SSPRK2 stages; endpoint extensive mass, momentum and energy are updated, with four P6 species authoritative for total mass.",
+        "Variable volumes participate in stage CFL, configuration identity V3, checkpoint/restart state V8, cycle-primary reconstruction and ENGINEERING_OUTPUTS_V4 reed channels.",
+        "Forward and reverse donor composition, pressure/volume work, damping sink, admissibility and stop-contact transactional rejection are tested; unsupported stop-impact events remain rejected.",
+        "tests/test_integrated_2t.py: 55 passed including a complete synthetic cycle and V4 rebuild; tests/test_reed_coupling.py tests/test_reed.py: 28 passed; P5-C/P6 focused regressions: 62 passed; OpenSpec strict and py_compile passed.",
+        "SELF_REVIEW only. No independent review, real-engine validation, experimental validation, periodic convergence, or Commercial Core acceptance is claimed."
+      ],
+      "next_action": "Synthetic integrated capability is verified conditionally. Preserve real geometry, impact-law, KT100 applicability, experimental validation and whole-product acceptance as unresolved; do not run KT100 or promote Commercial Core readiness.",
       "triage": {
-        "forensics": "motorsim/reed.py already provides independent petal force area, lift and curtain-flow area; integrated engine currently binds only static reed area.",
-        "domain_research": "Define a synthetic interface geometry with dV/dlift bound to pressure_area_m2, adjacent gas control volumes on each face, opposite geometric volume changes, and pressure work equal and opposite to reed generalized force work.",
-        "skeptic": "Do not equate effective_width_m*lift flow area with swept volume, assign full displacement to crankcase, or use a real KT100 geometry without sources. Damping/impact loss must appear in the energy balance.",
-        "contract": "Preregistration fixes DYNAMIC_REED_HINGED_FLAP_GEOMETRY_V1, two adjacent synthetic 0D control volumes, opposite swept volumes, stage-shared donor flow and energy/dissipation accounting. Commit this contract before the bounded fixture campaign.",
-        "decision": "Proceed with the explicit synthetic interface capability authorized in the 2026-10-06 order; no real-motor geometry or claim."
+        "forensics": "Standalone reed component and current IntegratedEngine2T paths were inspected; static area-only binding was replaced by a stage-coherent dynamic endpoint binding.",
+        "domain_research": "An explicit synthetic hinged-flap geometry defines swept volume W*L/2 per lift and separate curtain flow area; paired gas pressure work closes against petal force work, with damping separately ledgered.",
+        "skeptic": "No real engine dimensions were inferred. Four P6 species remain authoritative, donor state is selected by signed flow, and unsupported stop impacts fail transactionally rather than silently clamping.",
+        "contract": "DYNAMIC_REED_HINGED_FLAP_GEOMETRY_V1 preregistration was committed before implementation-level verification; variable-volume SSPRK2, energy/species, identity and restart obligations are covered.",
+        "decision": "DONE_CONDITIONAL for the reusable synthetic capability. Real-engine applicability and experimental claims remain outside evidence."
       }
     },
     {
@@ -1506,7 +1517,7 @@
         "SELF_REVIEW only; no independent review artifact",
         "Component-level evidence only; IntegratedEngine2T binding not claimed"
       ],
-      "next_action": "No further standalone component tuning. Use this component contract as the basis for a separate stage-coherent binding to the engine 1D intake endpoint and crankcase."
+      "next_action": "Standalone component contract is integrated by dynamic-reed-stage-coupling in commit 062d8eb; preserve its two-volume tests as component-level regressions."
     }
   ],
   "audit_remediation_mode": false,
@@ -1661,28 +1672,28 @@
     },
     "current_blocker_triage": {
       "review_kind": "SELF_REVIEW; no independent review claimed",
-      "collector": "65 focused integrated cycle/output/fuel tests PASS; collector separated from dynamic reed/fuel-properties",
-      "fixture_second_case": "Existing AUD-09 Fixture C is a materially distinct piston-port/no-reed case; no historical Fixture B relabeling",
-      "dynamic_reed": "BLOCKED_LOCAL on missing explicit swept-volume/adjacent control-volume binding",
+      "collector": "Collector V4 now also rebuilds the integrated dynamic-reed position, velocity, energy and dissipation channels from the accepted full synthetic cycle; focused integration/output evidence is current. Fuel properties remain separate.",
+      "fixture_second_case": "AUD-09 Fixture C is the post-audit resumed piston-port/no-reed candidate and remains the distinct second case under its own identity; do not relabel it or revive superseded long-chamber Fixture B.",
+      "dynamic_reed": "DONE_CONDITIONAL in commit 062d8eb: explicit synthetic geometry, common SSPRK2 endpoint/crankcase binding, species donors, energy, CFL, V3/V8 identity/restart and V4 cycle outputs. No real-engine claim.",
       "fuel_semantics": "DONE for exact event-specific pseudo-species outputs: V4 reports values at the last exact cylinder-port closure and the pseudo-species ratio; no total chemical trapped fuel/AFR claim.",
-      "next": "Run task 18-current-p4-p8-regression; no campaign.",
+      "next": "No READY tasks remain. Retain only concrete blockers for explicit fuel properties and frozen KT100 evidence; no KT100 rerun or new scientific campaign.",
       "p4_p8_regression": "25 modules, 300 passed, 4 pre-existing NumPy 1.25 DeprecationWarnings, 177.49s after additive V4 implementation; final V4-only closure-validation refinement passed targeted test.",
       "fuel_properties": "BLOCKED_LOCAL: no explicit AFR_stoich/LHV/provenance; Q_F remains prescribed bookkeeping.",
-      "fuel_v4_test": "Final focused two-cycle test PASS (48.98s): geometry-derived later closure, exact accepted SSPRK2 endpoint species, tampered snapshot rejection, missing-event UNDEFINED, zero-fuel ratio helper undefined, V3 output unchanged."
+      "fuel_v4_test": "Final focused two-cycle test PASS (48.98s): geometry-derived later closure, exact accepted SSPRK2 endpoint species, tampered snapshot rejection, missing-event UNDEFINED, zero-fuel ratio helper undefined, V3 output unchanged.",
+      "reservoir_boundary": "OPEN_END_PLENUM_V2 capability is DONE_CONDITIONAL under the accepted synthetic lossless-inflow assumption; KT100 qualification remains NOT_QUALIFIED and frozen after consumed R1."
     }
   },
-  "last_status_reviewed_head": "04045ffcca05b7f2ecfcb250ef39bbda0c0341fc",
+  "last_status_reviewed_head": "062d8eb43da53acdb2053ec7c25cdce33a977fc9",
   "continuation_status": {
     "mode": "MOTORSIM_AUTONOMOUS_ENGINEERING_TEAM",
     "audit_remediation_mode": false,
     "ready_tasks": 0,
     "local_blockers": [
-      "dynamic-reed-stage-coupling: bind the verified two-volume component to the integrated 1D intake endpoint and crankcase in common SSPRK2, variable volumes, CFL, state/restart/config and collector",
-      "17d-fuel-properties: no evidenced point ANCAP chemistry/LHV or approved mapping of prescribed P7 Q_F to chemical energy",
-      "KT100 remains unverified; R1 cycle24 correction is not a trajectory result and no R2 is authorized"
+      "17d-fuel-properties: no evidenced point ANCAP chemistry/LHV or approved mapping of prescribed P7 Q_F to chemical energy; retain those outputs undefined.",
+      "KT100 remains unverified; R1 cycle24 numerical failure is not a trajectory result and its one-run authorization is consumed; no R2 is authorized."
     ],
-    "next_action": "Continue dynamic reed full-engine integration from the committed 0D component without operator splitting. Keep fuel chemistry fields undefined and KT100 frozen. Do not rerun collector, Fixture C, P4-P8 or KT100.",
-    "in_progress_tasks": 1,
+    "next_action": "Continue autonomous blocker triage without treating an empty READY queue as a stop signal. Keep fuel chemistry undefined absent sourced properties, keep KT100 frozen absent a separately approved preregistration, preserve Fixture C identity, and do not claim Commercial Core READY.",
+    "in_progress_tasks": 0,
     "blocker_triage_date": "2026-10-06"
   }
 }
