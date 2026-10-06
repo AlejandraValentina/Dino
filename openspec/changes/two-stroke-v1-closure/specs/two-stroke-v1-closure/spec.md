@@ -140,7 +140,12 @@ Primary cycle evidence MUST bind producer, detector, configuration, fixture,
 fuel snapshot, accepted trajectory, terminal state, and restart/replay identities
 by hashes. The offline auditor MUST reconstruct relevant RHS/fluxes, sources,
 ledgers and outputs from persisted accepted state data. Every rejected
-admissibility trial MUST be persisted; retry/halving MUST NOT be silent.
+admissibility trial MUST be persisted and re-executed from its preceding
+accepted state by the offline auditor; the failure reason and exact half-step
+retry sequence MUST match. For every accepted start, the auditor MUST also
+reconstruct the runner's nominal 0.5-degree/event proposal and reject an
+accepted shortened step without a matching rejected-trial chain. Retry/halving
+MUST NOT be silent.
 Continuous, checkpoint/restart, and independent replay MUST compare full
 physical state, species, ledgers and relevant outputs, not only digest strings.
 

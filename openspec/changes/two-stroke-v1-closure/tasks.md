@@ -36,10 +36,16 @@
        independently replays every accepted SSPRK2 step, enforces float64
        gamma-n ledger residual bounds, and binds cycle retry records, accepted
        trajectory, terminal/checkpoint state, solver dependencies, campaign
-       runner, and detector sources. `75` integrated/evidence producer/evaluator
-       tests pass; OpenSpec strict and `git diff --check` pass. Independent
-       adversarial review found four evidence gaps; all four were corrected and
-       retested. This closes the C10 foundation, not an A'/B' campaign.
+       runner, and detector sources. The auditor reexecutes each rejection,
+       verifies its failure reason and half-step chain, and the evaluator
+       cross-checks the complete retry stream against the manifest. A final
+       completeness check also verifies each accepted step against the shared
+       nominal event/CFL scheduler, so a rejected attempt cannot be removed
+       while preserving internally consistent hashes and counters. The
+       independent adversarial follow-up confirmed the identified gaps are
+       closed. The affected integrated/evidence suite passes 75 tests and
+       strict OpenSpec validation passes. This closes the C10 foundation, not
+       an A'/B' campaign.
 - [ ] C11 exact continuous/checkpoint/restart/replay comparisons for both primes.
 - [ ] C12 preregister and complete transfer/exhaust integrated mesh study.
 - [ ] C13 commit immutable A'/B' campaign preregistration before any campaign.

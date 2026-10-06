@@ -10,7 +10,6 @@ import argparse
 import gzip
 import hashlib
 import json
-import math
 from pathlib import Path
 import subprocess
 import sys
@@ -19,7 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from motorsim.integrated_2t import (  # noqa: E402
-    IntegratedEngine2T, make_integrated_cycle_primary,
+    IntegratedEngine2T, _integrated_nominal_step_end,
+    _integrated_scheduled_angles, make_integrated_cycle_primary,
 )
 from motorsim.powervalve import PowerValve  # noqa: E402
 
@@ -99,39 +99,13 @@ def _require_preregistration(path: Path, fixture_id: str,
     return prereg, _sha256(_canonical_bytes(committed_document))
 
 
-def _scheduled_angles(engine: IntegratedEngine2T, target_angle: float) -> set[float]:
-    scheduled = {0.0, target_angle}
-    for cycle in range(math.floor(target_angle / 360.0) + 1):
-        scheduled.add(float(cycle * 360.0))
-        start = engine.combustion_start_angle_deg
-        if start is not None:
-            scheduled.add(cycle * 360.0 + float(start))
-            scheduled.add(cycle * 360.0 + float(start) + 40.0)
-    binding = engine.port_binding
-    if binding is not None:
-        ports = binding.port_set
-        if binding.powervalve is not None:
-            valve = binding.powervalve
-            ports = type(ports)(ports.stroke_mm, ports.rod_length_mm,
-                ports.ducts, tuple(valve.apply(port, engine.reference_rpm)
-                                    if port.id == valve.exhaust_port_id else port
-                                    for port in ports.ports))
-        closing = [angle for duct in ports.ducts
-                   for angle in ports.duct_closing_angles(duct.id)]
-        for cycle in range(math.floor(target_angle / 360.0) + 1):
-            scheduled.update(cycle * 360.0 + value for value in closing)
-    return {angle for angle in scheduled if 0.0 <= angle <= target_angle}
-
-
 def advance_to(engine: IntegratedEngine2T, target_angle: float,
                rejected_trials: list[dict]) -> None:
-    scheduled = _scheduled_angles(engine, target_angle)
+    scheduled_angles = _integrated_scheduled_angles(engine, target_angle)
     while engine.crank_angle_unwrapped_deg < target_angle - 1e-10:
         angle = engine.crank_angle_unwrapped_deg
-        target = min(target_angle, (int((angle + 1e-10) / .5) + 1) * .5)
-        for boundary in scheduled:
-            if angle < boundary < target:
-                target = boundary
+        target = _integrated_nominal_step_end(
+            engine, angle, target_angle, scheduled_angles)
         step = target - angle
         for attempt in range(25):
             try:

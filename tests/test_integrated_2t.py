@@ -1869,6 +1869,12 @@ def test_offline_cycle_audit_rebuilds_supported_configuration_and_rejects_tamper
     with pytest.raises(ValueError, match="residual bounds"):
         audit_integrated_cycle_primary(tampered_bounds)
     if primary["rejected_trials"]:
+        false_rejection = deepcopy(primary)
+        false_rejection["rejected_trials"][0]["attempted_step_deg"] *= .99
+        false_rejection["evidence_binding"]["rejection_records_sha256"] = (
+            _evidence_sha256(false_rejection["rejected_trials"]))
+        with pytest.raises(ValueError, match="rejected-step|rejection reason"):
+            audit_integrated_cycle_primary(false_rejection)
         missing_rejection = deepcopy(primary)
         missing_rejection["rejected_trials"].pop()
         missing_rejection["evidence_binding"]["rejected_trial_count"] -= 1
@@ -1876,6 +1882,33 @@ def test_offline_cycle_audit_rebuilds_supported_configuration_and_rejects_tamper
             _evidence_sha256(missing_rejection["rejected_trials"]))
         with pytest.raises(ValueError, match="rejection|rejected"):
             audit_integrated_cycle_primary(missing_rejection)
+        counts = {}
+        for index, row in enumerate(primary["rejected_trials"]):
+            if "CFL limit exceeded" in row["reason"]:
+                counts[row["angle_deg"]] = counts.get(row["angle_deg"], 0) + 1
+        omitted_angle = next(angle for angle, count in counts.items() if count == 1)
+        omitted = deepcopy(primary)
+        omitted["rejected_trials"] = [
+            row for row in omitted["rejected_trials"]
+            if row["angle_deg"] != omitted_angle]
+        binding = omitted["checkpoint_binding"]
+        binding["end_rejected_steps"] -= 1
+        evidence = omitted["evidence_binding"]
+        evidence["rejected_trial_count"] = len(omitted["rejected_trials"])
+        evidence["rejected_cfl_count"] -= 1
+        evidence["rejection_records_sha256"] = _evidence_sha256(
+            omitted["rejected_trials"])
+        evidence["restart_terminal_sha256"] = _evidence_sha256({
+            "state": omitted["terminal_state"],
+            "ledger": binding["end_ledger"], "p7": binding["end_p7"],
+            "fuel_combustion": binding["end_fuel_combustion"],
+            "time_s": binding["end_time_s"],
+            "accepted_steps": binding["end_accepted_steps"],
+            "rejected_steps": binding["end_rejected_steps"],
+            "angle_deg": omitted["cycle_end_deg"],
+            "initial_inventory": binding["initial_inventory"]})
+        with pytest.raises(ValueError, match="CFL limit exceeded|omits a rejection"):
+            audit_integrated_cycle_primary(omitted)
     corrupted_stage = deepcopy(primary)
     corrupted_stage["trajectory"][0]["stage_states"][1]["chambers"][
         "cylinder"][0] *= 1.000001

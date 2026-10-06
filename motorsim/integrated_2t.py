@@ -114,6 +114,53 @@ def _validated_rejection_records(records, *, cycle_start: float,
     return normalized
 
 
+def _integrated_scheduled_angles(engine, target_angle: float) -> set[float]:
+    """Exact event boundaries used by the registered integrated runner."""
+    scheduled = {0.0, float(target_angle)}
+    cycles = range(int(float(target_angle) // 360.0) + 1)
+    for cycle in cycles:
+        scheduled.add(float(cycle * 360.0))
+        p7_start = engine.combustion_start_angle_deg
+        if p7_start is not None:
+            scheduled.add(cycle * 360.0 + float(p7_start))
+            scheduled.add(cycle * 360.0 + float(p7_start) + 40.0)
+        fuel = engine.fuel_coupled_combustion
+        if fuel is not None:
+            fuel_start = cycle * 360.0 + float(fuel.ignition_timing_deg)
+            scheduled.add(fuel_start)
+            for component in fuel.components:
+                scheduled.add(fuel_start + float(component.delay_deg))
+                scheduled.add(fuel_start + float(component.delay_deg) +
+                              float(component.duration_deg))
+    binding = engine.port_binding
+    if binding is not None:
+        ports = binding.port_set
+        if binding.powervalve is not None:
+            valve = binding.powervalve
+            ports = replace(ports, ports=tuple(
+                valve.apply(port, engine.reference_rpm)
+                if port.id == valve.exhaust_port_id else port
+                for port in ports.ports))
+        closing = [angle for duct in ports.ducts
+                   for angle in ports.duct_closing_angles(duct.id)]
+        for cycle in cycles:
+            scheduled.update(cycle * 360.0 + value for value in closing)
+    return {float(angle) for angle in scheduled
+            if 0.0 <= angle <= float(target_angle)}
+
+
+def _integrated_nominal_step_end(engine, angle: float, target_angle: float,
+                                 scheduled_angles: set[float] | None = None) -> float:
+    end = min(float(target_angle),
+              (int((float(angle) + 1e-10) / .5) + 1) * .5)
+    boundaries = (_integrated_scheduled_angles(engine, target_angle)
+                  if scheduled_angles is None else scheduled_angles)
+    for boundary in boundaries:
+        if angle < boundary < end:
+            end = boundary
+    return end
+
+
 def _restore_validated_p7_event(value):
     event_fields = {"start", "fresh_air", "fuel", "ledger"}
     ledger_fields = set(vars(P7Ledger()))
@@ -3455,13 +3502,57 @@ def audit_integrated_cycle_primary(cycle_record: dict) -> dict:
     if replay.fuel_coupled_combustion is not None:
         replay_snapshot["fuel_combustion"] = binding["start_fuel_combustion"]
     replay.restore(replay_snapshot)
+    scheduled_angles = _integrated_scheduled_angles(replay, end_angle)
+    rejected_by_angle: dict[float, list[dict]] = {}
+    for rejected in rejection_records:
+        rejected_by_angle.setdefault(float(rejected["angle_deg"]), []).append(rejected)
+    consumed_rejections = 0
     for index, row in enumerate(trajectory):
+        angle_start = float(row["angle_start_deg"])
+        nominal_end = _integrated_nominal_step_end(
+            engine, angle_start, end_angle, scheduled_angles)
+        nominal_delta = nominal_end - angle_start
+        if nominal_delta <= 0.0:
+            raise ValueError("offline runner produced a nonpositive nominal step")
+        attempted = rejected_by_angle.pop(angle_start, [])
+        if attempted and float(attempted[0]["attempted_step_deg"]) != nominal_delta:
+            raise ValueError(
+                f"offline rejected-step log omits or changes nominal proposal at {angle_start:.12g} degrees")
+        previous_attempt = None
+        for rejection in attempted:
+            proposed = float(rejection["attempted_step_deg"])
+            if (proposed > .5 or
+                    (previous_attempt is not None and proposed != previous_attempt / 2.0)):
+                raise ValueError(
+                    f"offline rejected-step retry sequence is invalid at {angle_start:.12g} degrees")
+            try:
+                replay.step(proposed / (6.0 * float(row["rpm"])), proposed)
+            except ValueError as exc:
+                if str(exc) != rejection["reason"]:
+                    raise ValueError(
+                        f"offline rejected-step reason differs at {angle_start:.12g} degrees") from exc
+            else:
+                raise ValueError(
+                    f"offline rejected-step attempt was admissible at {angle_start:.12g} degrees")
+            previous_attempt = proposed
+            consumed_rejections += 1
+        accepted_delta = float(row["angle_end_deg"]) - angle_start
+        if attempted and accepted_delta != previous_attempt / 2.0:
+            raise ValueError(
+                f"offline accepted step does not follow rejected-step halving at {angle_start:.12g} degrees")
+        if not attempted and accepted_delta != nominal_delta:
+            raise ValueError(
+                f"offline accepted step omits a rejection from the nominal proposal at {angle_start:.12g} degrees")
         replayed_row = replay.step(
             float(row["dt_s"]),
-            float(row["angle_end_deg"]) - float(row["angle_start_deg"]))
+            accepted_delta)
         if _jsonify(replayed_row) != _jsonify(row):
             raise ValueError(
                 f"offline SSPRK2 accepted-state replay differs at step {index}")
+    if rejected_by_angle or consumed_rejections != len(rejection_records):
+        raise ValueError("offline rejected-step log contains records outside accepted trajectory")
+    if replay.rejected_steps != evidence.get("rejected_cfl_count"):
+        raise ValueError("offline rejected CFL replay count differs from primary evidence")
     if replay.time_s != binding["end_time_s"]:
         raise ValueError("offline SSPRK2 replay terminal time differs from checkpoint")
     rebuilt = make_integrated_cycle_primary(

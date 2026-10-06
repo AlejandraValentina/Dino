@@ -117,6 +117,7 @@ def evaluate(output_dir: Path, preregistration_path: Path | None = None) -> dict
     lag2 = []
     cycle_artifacts = []
     primary_audits = []
+    primary_rejections = []
     prior = []
     configuration_hash = None
     for index in range(1, horizon + 1):
@@ -140,6 +141,7 @@ def evaluate(output_dir: Path, preregistration_path: Path | None = None) -> dict
                     manifest.get("producer_source_sha256")):
                 raise ValueError(f"cycle {index} producer hash differs from campaign manifest")
             primary_audits.append({"cycle": index, **audit})
+            primary_rejections.extend(record["rejected_trials"])
         elif preregistration is not None or manifest.get("fixture_id") != "TEST":
             raise ValueError("registered campaign requires auditable primary schema V3")
         else:
@@ -182,6 +184,10 @@ def evaluate(output_dir: Path, preregistration_path: Path | None = None) -> dict
         prior = prior[-2:]
         cycle_artifacts.append({"cycle": index, "file": path.name,
                                 "sha256": _sha256(path)})
+
+    if (manifest.get("fixture_id") != "TEST" and
+            primary_rejections != manifest.get("continuous_rejected_trials")):
+        raise ValueError("cycle rejection logs differ from campaign runner manifest")
 
     lag1_counts = {status: sum(x["status"] == status for x in lag1)
                    for status in ("PASS", "FAIL", "INVALID")}
