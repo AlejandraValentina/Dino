@@ -9,6 +9,7 @@ SCHEMA = "MOTORSIM_ENGINEERING_OUTPUTS_V1"
 SCHEMA_V2 = "MOTORSIM_ENGINEERING_OUTPUTS_V2"
 SCHEMA_V3 = "MOTORSIM_ENGINEERING_OUTPUTS_V3"
 SCHEMA_V4 = "MOTORSIM_ENGINEERING_OUTPUTS_V4"
+SCHEMA_V5 = "MOTORSIM_ENGINEERING_OUTPUTS_V5"
 DEPENDENCIES = {"INDEPENDENT_OF_P4", "CONDITIONAL_ON_P4", "REVALIDATED_ON_P4_PASS"}
 CHANNEL_UNITS = {
     "cylinder_pressure_pa": "Pa", "crankcase_pressure_pa": "Pa",
@@ -65,11 +66,28 @@ METRIC_UNITS_V4 = {
     "cylinder_fresh_air_species_at_last_port_close_kg": "kg",
     "fresh_air_fuel_species_ratio_at_last_port_close": "1",
 }
+METRIC_UNITS_V5 = {
+    **METRIC_UNITS_V4,
+    "cylinder_indicated_work_j": "J",
+    "crankcase_gas_work_j": "J",
+    "net_piston_gas_work_j": "J",
+    "net_piston_mep_pa": "Pa",
+    "trapped_air_kg": "kg",
+    "trapped_fuel_kg": "kg",
+    "fuel_burned_per_cycle_kg": "kg",
+    "fuel_unburned_at_ignition_snapshot_kg": "kg",
+}
+PERIODIC_METRICS_V5 = frozenset({
+    "indicated_power_w", "indicated_torque_nm", "imep_pa",
+    "brake_work_j", "brake_power_w", "brake_torque_nm", "bmep_pa", "fmep_pa",
+    "isfc_g_kwh", "bsfc_g_kwh", "net_piston_mep_pa",
+})
 
 
 def _metric_unit(name: str, schema: str) -> str | None:
     return {SCHEMA: METRIC_UNITS, SCHEMA_V2: METRIC_UNITS_V2,
-            SCHEMA_V3: METRIC_UNITS_V3, SCHEMA_V4: METRIC_UNITS_V4}[schema].get(name)
+            SCHEMA_V3: METRIC_UNITS_V3, SCHEMA_V4: METRIC_UNITS_V4,
+            SCHEMA_V5: METRIC_UNITS_V5}[schema].get(name)
 
 
 def _integrated_channel_unit(name: str) -> str | None:
@@ -131,7 +149,8 @@ def _build_engineering_output(*, rpm: float, cycle_number: int,
                               dependency_status: str,
                               cycle_period_deg: float,
                               schema: str,
-                              configuration_sha256: str | None = None) -> dict[str, Any]:
+                              configuration_sha256: str | None = None,
+                              periodicity_status: str = "NOT_EVALUATED") -> dict[str, Any]:
     speed = _finite(rpm, "rpm")
     period = _finite(cycle_period_deg, "cycle_period_deg")
     if speed <= 0 or period != 360.0:
@@ -168,16 +187,49 @@ def _build_engineering_output(*, rpm: float, cycle_number: int,
     metrics = {}
     for name, record in cycle_metrics.items():
         unit = _metric_unit(name, schema)
-        if unit is None or not isinstance(record, dict) or set(record) != {
-                "value", "status", "reason", "source"}:
+        allowed_record_keys = ({"value", "status", "reason", "source", "provenance",
+                                "periodicity_dependency", "definition_version"}
+                               if schema == SCHEMA_V5 else
+                               {"value", "status", "reason", "source"})
+        if unit is None or not isinstance(record, dict) or set(record) != allowed_record_keys:
             raise ValueError(f"Unsupported or malformed cycle metric: {name}")
         status, value, reason, source = (record[key] for key in ("status", "value", "reason", "source"))
+        if schema == SCHEMA_V5:
+            required = {"value", "status", "reason", "source", "provenance",
+                        "periodicity_dependency", "definition_version"}
+            if set(record) != required:
+                raise ValueError(f"V5 metric {name} lacks explicit provenance/dependency metadata")
+            if record["provenance"] not in {
+                    "DOCUMENTED", "DERIVED_FROM_DOCUMENTED",
+                    "SYNTHETIC_ASSUMPTION", "UNKNOWN"}:
+                raise ValueError(f"V5 metric {name} provenance is invalid")
+            if record["periodicity_dependency"] not in {"REQUIRED", "NOT_REQUIRED"}:
+                raise ValueError(f"V5 metric {name} periodicity dependency is invalid")
+            expected_dependency = "REQUIRED" if name in PERIODIC_METRICS_V5 else "NOT_REQUIRED"
+            if record["periodicity_dependency"] != expected_dependency:
+                raise ValueError(f"V5 metric {name} has an invalid periodicity dependency")
+            if not isinstance(record["definition_version"], str) or not record["definition_version"].strip():
+                raise ValueError(f"V5 metric {name} definition version is required")
+            if (record["periodicity_dependency"] == "REQUIRED" and
+                    periodicity_status not in {"PERIOD_1", "PERIOD_2"} and
+                    status == "DEFINED"):
+                raise ValueError(f"V5 metric {name} requires an accepted periodic cycle")
         if not isinstance(source, str) or not source.strip():
             raise ValueError(f"Metric {name} requires source provenance")
         if status == "DEFINED":
             value = _finite(value, name)
             if reason is not None:
                 raise ValueError(f"Defined metric {name} cannot have an undefined reason")
+            if schema == SCHEMA_V5:
+                if record["provenance"] == "UNKNOWN":
+                    raise ValueError(f"V5 metric {name} cannot be DEFINED with UNKNOWN provenance")
+                if name in {"afr", "bsfc_g_kwh"} and value <= 0.0:
+                    raise ValueError(f"V5 metric {name} must be positive")
+                if name in {"trapping_efficiency", "scavenging_efficiency",
+                            "charging_efficiency", "residual_fraction",
+                            "purity_at_transfer_close", "purity_at_exhaust_close",
+                            "short_circuit_fraction"} and not 0.0 <= value <= 1.0:
+                    raise ValueError(f"V5 metric {name} is outside [0,1]")
         elif status == "UNDEFINED":
             if value is not None or not isinstance(reason, str) or not reason.strip():
                 raise ValueError(f"Undefined metric {name} requires null value and reason")
@@ -185,6 +237,9 @@ def _build_engineering_output(*, rpm: float, cycle_number: int,
             raise ValueError(f"Metric {name} status must be DEFINED or UNDEFINED")
         metrics[name] = {"value": value, "unit": unit,
                          "status": status, "reason": reason, "source": source}
+        if schema == SCHEMA_V5:
+            metrics[name].update({key: record[key] for key in (
+                "provenance", "periodicity_dependency", "definition_version")})
 
     output = {"schema": schema,
               "operating_point": {"cycle_convention": "2T_360_DEG_ONE_CYCLE_PER_REV",
@@ -192,10 +247,10 @@ def _build_engineering_output(*, rpm: float, cycle_number: int,
                                   "dependency_status": dependency_status},
               "crank_angle_trace": {"angle_deg": list(angles), "channels": trace},
               "cycle_metrics": metrics,
-              "claims": {"periodicity": "NOT_EVALUATED",
+              "claims": {"periodicity": periodicity_status if schema == SCHEMA_V5 else "NOT_EVALUATED",
                          "experimental_validation": "NOT_PERFORMED",
                          "predictive_validation": "NOT_CLAIMED"}}
-    if schema in (SCHEMA_V2, SCHEMA_V3, SCHEMA_V4):
+    if schema in (SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5):
         if (not isinstance(configuration_sha256, str) or
                 len(configuration_sha256) != 64 or
                 any(ch not in "0123456789abcdef" for ch in configuration_sha256)):
@@ -263,10 +318,30 @@ def build_integrated_engineering_output_v4(*, rpm: float, cycle_number: int,
         schema=SCHEMA_V4, configuration_sha256=configuration_sha256)
 
 
+def build_integrated_engineering_output_v5(*, rpm: float, cycle_number: int,
+                                           angles_deg: tuple[float, ...],
+                                           channels: dict[str, dict[str, Any]],
+                                           cycle_metrics: dict[str, dict[str, Any]],
+                                           dependency_status: str,
+                                           configuration_sha256: str,
+                                           periodicity_status: str = "NOT_EVALUATED",
+                                           cycle_period_deg: float = 360.0) -> dict[str, Any]:
+    """V5 carries metric definition, provenance and periodicity dependency."""
+    if periodicity_status not in {
+            "NOT_EVALUATED", "PERIOD_1", "PERIOD_2", "NO_CONVERGENCE", "INVALID"}:
+        raise ValueError("V5 periodicity status is invalid")
+    return _build_engineering_output(
+        rpm=rpm, cycle_number=cycle_number, angles_deg=angles_deg,
+        channels=channels, cycle_metrics=cycle_metrics,
+        dependency_status=dependency_status, cycle_period_deg=cycle_period_deg,
+        schema=SCHEMA_V5, configuration_sha256=configuration_sha256,
+        periodicity_status=periodicity_status)
+
+
 def _validate_engineering_output(value: Any, schema: str) -> dict[str, Any]:
     if not isinstance(value, dict) or value.get("schema") != schema:
         raise ValueError("Engineering output schema is invalid")
-    if schema in (SCHEMA_V2, SCHEMA_V3, SCHEMA_V4):
+    if schema in (SCHEMA_V2, SCHEMA_V3, SCHEMA_V4, SCHEMA_V5):
         config_hash = value.get("configuration_sha256")
         if (not isinstance(config_hash, str) or len(config_hash) != 64 or
                 any(ch not in "0123456789abcdef" for ch in config_hash)):
@@ -280,9 +355,13 @@ def _validate_engineering_output(value: Any, schema: str) -> dict[str, Any]:
             or not isinstance(trace["channels"], dict)):
         raise ValueError("Engineering output sections are missing")
     claims = value.get("claims")
-    if claims != {"periodicity": "NOT_EVALUATED",
+    if (not isinstance(claims, dict) or claims != {
+                  "periodicity": claims.get("periodicity"),
                   "experimental_validation": "NOT_PERFORMED",
-                  "predictive_validation": "NOT_CLAIMED"}:
+                  "predictive_validation": "NOT_CLAIMED"} or
+            (schema != SCHEMA_V5 and claims["periodicity"] != "NOT_EVALUATED") or
+            (schema == SCHEMA_V5 and claims["periodicity"] not in {
+                "NOT_EVALUATED", "PERIOD_1", "PERIOD_2", "NO_CONVERGENCE", "INVALID"})):
         raise ValueError("Engineering output claim controls were altered")
     metrics = value.get("cycle_metrics")
     if not isinstance(metrics, dict):
@@ -301,7 +380,10 @@ def _validate_engineering_output(value: Any, schema: str) -> dict[str, Any]:
             name: {"values": row.get("values"), "source": row.get("source")}
             for name, row in trace.get("channels", {}).items()},
         cycle_metrics={name: {key: row.get(key) for key in
-                              ("value", "status", "reason", "source")}
+                              (("value", "status", "reason", "source", "provenance",
+                                "periodicity_dependency", "definition_version")
+                               if schema == SCHEMA_V5 else
+                               ("value", "status", "reason", "source"))}
                        for name, row in metrics.items()},
         dependency_status=op.get("dependency_status"),
         cycle_period_deg=360.0)
@@ -313,6 +395,10 @@ def _validate_engineering_output(value: Any, schema: str) -> dict[str, Any]:
     if schema == SCHEMA_V3:
         return build_integrated_engineering_output_v3(
             **args, configuration_sha256=value["configuration_sha256"])
+    if schema == SCHEMA_V5:
+        return build_integrated_engineering_output_v5(
+            **args, configuration_sha256=value["configuration_sha256"],
+            periodicity_status=claims["periodicity"])
     return build_integrated_engineering_output_v4(
         **args, configuration_sha256=value["configuration_sha256"])
 
@@ -335,3 +421,8 @@ def validate_integrated_engineering_output_v3(value: Any) -> dict[str, Any]:
 def validate_integrated_engineering_output_v4(value: Any) -> dict[str, Any]:
     """Validate event-specific cylinder species output and V3 semantics."""
     return _validate_engineering_output(value, SCHEMA_V4)
+
+
+def validate_integrated_engineering_output_v5(value: Any) -> dict[str, Any]:
+    """Validate explicit metric provenance and periodicity-dependent outputs."""
+    return _validate_engineering_output(value, SCHEMA_V5)

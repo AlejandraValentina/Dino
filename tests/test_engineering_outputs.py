@@ -6,9 +6,11 @@ from motorsim.engineering_outputs import (
     build_engineering_output,
     build_integrated_engineering_output_v2,
     build_integrated_engineering_output_v3,
+    build_integrated_engineering_output_v5,
     validate_engineering_output,
     validate_integrated_engineering_output_v2,
     validate_integrated_engineering_output_v3,
+    validate_integrated_engineering_output_v5,
 )
 from motorsim.scavenging import (ScavengingInput, calculate_scavenging_metrics,
                                  scavenging_engineering_records)
@@ -154,3 +156,38 @@ def test_integrated_v2_binds_configuration_and_path_addressed_duct_channels():
     assert validate_integrated_engineering_output_v3(record_v3) == record_v3
     with pytest.raises(ValueError, match="Unsupported or malformed cycle metric"):
         build_integrated_engineering_output_v2(**v3_values)
+
+
+def test_integrated_v5_requires_metric_provenance_and_periodicity_contract():
+    base = output()
+    metric = {"value": 42.0, "status": "DEFINED", "reason": None,
+              "source": "accepted primary", "provenance": "SYNTHETIC_ASSUMPTION",
+              "periodicity_dependency": "NOT_REQUIRED",
+              "definition_version": "TEST_METRIC_V1"}
+    values = dict(
+        rpm=base["operating_point"]["rpm"], cycle_number=3,
+        angles_deg=tuple(base["crank_angle_trace"]["angle_deg"]),
+        channels={name: {"values": row["values"], "source": row["source"]}
+                  for name, row in base["crank_angle_trace"]["channels"].items()},
+        cycle_metrics={"indicated_work_j": metric},
+        dependency_status="CONDITIONAL_ON_P4", configuration_sha256="b" * 64)
+    record = build_integrated_engineering_output_v5(**values)
+    assert record["cycle_metrics"]["indicated_work_j"]["provenance"] == \
+        "SYNTHETIC_ASSUMPTION"
+    assert validate_integrated_engineering_output_v5(record) == record
+    with pytest.raises(ValueError, match="accepted periodic cycle"):
+        build_integrated_engineering_output_v5(**{
+            **values,
+            "cycle_metrics": {"indicated_power_w": {**metric,
+                "periodicity_dependency": "REQUIRED"}}})
+    with pytest.raises(ValueError, match="must be positive"):
+        build_integrated_engineering_output_v5(**{
+            **values,
+            "cycle_metrics": {"afr": {**metric, "value": 0.0}}})
+    brake = {**metric, "value": None, "status": "UNDEFINED",
+             "reason": "periodicity pending", "periodicity_dependency": "REQUIRED"}
+    brake_values = {**values, "cycle_metrics": {"brake_work_j": brake}}
+    record = build_integrated_engineering_output_v5(**brake_values)
+    record["cycle_metrics"]["brake_work_j"]["periodicity_dependency"] = "NOT_REQUIRED"
+    with pytest.raises(ValueError, match="invalid periodicity dependency"):
+        validate_integrated_engineering_output_v5(record)

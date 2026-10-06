@@ -1981,3 +1981,15 @@ atmosférica P5-C no pudo resolver una rama de entrada consistente. Por eso no h
 convergencia, métricas por ciclo ni restart/replay de campaña. El `tasks.md` del
 cambio registra resultados y causa; esta salida del modelo no es validación
 experimental ni predictiva.
+
+### Cierre del core 2T v1 (en curso)
+
+El cambio OpenSpec `two-stroke-v1-closure` contiene los gates de cierre C1–C18.
+`OPEN_END_PLENUM_V2` está integrado como frontera atmosférica sintética sin
+pérdidas. `FUEL_COUPLED_COMBUSTION_V1` usa el surrogate versionado y hash-bound
+`SYNTHETIC_FUEL_SURROGATE_V1` (composición C/H/O 0.86/0.14/0, AFR estequiométrica
+derivada, LHV sintético 43 MJ/kg); no representa combustible medido ni ANCAP.
+La combustión nueva limita cada etapa por combustible y oxígeno del estado
+disponible y conserva P7 como ruta histórica separada. La campaña fija A′/B′,
+el estudio de malla y la auditoría completa de evidencia siguen pendientes;
+no se reclama todavía `GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED`.

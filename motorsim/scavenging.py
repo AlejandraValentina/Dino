@@ -154,6 +154,31 @@ def calculate_scavenging_metrics(inputs: ScavengingInput) -> dict[str, Any]:
     }
 
 
+def calculate_scavenging_metrics_v2(inputs: ScavengingInput) -> dict[str, Any]:
+    """Apply explicit single-zone semantics without clipping derived metrics.
+
+    Gross crossing ledgers can count a parcel more than once, so they do not
+    always identify a physical retained fraction. A bounded metric outside its
+    domain is therefore UNDEFINED in this schema rather than exposed as an
+    efficiency greater than one or silently clipped.
+    """
+    result = calculate_scavenging_metrics(inputs)
+    bounded = ("trapping_efficiency", "scavenging_efficiency",
+               "charging_efficiency", "residual_fraction",
+               "purity_at_transfer_close", "purity_at_exhaust_close",
+               "short_circuit_fraction")
+    for name in bounded:
+        ratio = result["ratios"][name]
+        if ratio["status"] == "AVAILABLE" and not 0.0 <= ratio["value"] <= 1.0:
+            ratio["value"] = None
+            ratio["status"] = "UNDEFINED"
+            ratio["reason"] = "OUTSIDE_PHYSICAL_DOMAIN_WITH_GROSS_CROSSING_BASIS"
+    result["schema"] = "MOTORSIM_2T_SCAVENGING_METRICS_V2"
+    result["assumption"] = "SINGLE_ZONE_PERFECT_MIXING_SCAVENGING_ASSUMPTION"
+    result["domain_policy"] = "MARK_UNDEFINED_OUT_OF_DOMAIN; NEVER_CLIP"
+    return result
+
+
 def scavenging_input_from_cycle(cycle: dict[str, Any], *, reference_mass_kg: float,
                                 transfer_close_angle_deg: float,
                                 exhaust_close_angle_deg: float) -> ScavengingInput:
@@ -331,12 +356,20 @@ def scavenging_series_from_primary_cycles(cycles: list[dict[str, Any]], *, ports
 
 def scavenging_engineering_records(metrics: dict[str, Any]) -> dict[str, dict[str, Any]]:
     """Translate audited scavenging metrics to the stable output-schema shape."""
-    if not isinstance(metrics, dict) or metrics.get("schema") != "MOTORSIM_2T_SCAVENGING_METRICS_V1":
+    if (not isinstance(metrics, dict) or metrics.get("schema") not in {
+            "MOTORSIM_2T_SCAVENGING_METRICS_V1",
+            "MOTORSIM_2T_SCAVENGING_METRICS_V2"}):
         raise ValueError("Scavenging metric schema is invalid.")
     ratios = metrics.get("ratios")
     masses = metrics.get("masses_kg")
     if not isinstance(ratios, dict) or not isinstance(masses, dict):
         raise ValueError("Scavenging metrics lack ratios or masses.")
+    schema = metrics["schema"]
+    source_label = f"{schema} P6 gross crossing ledger"
+    if schema == "MOTORSIM_2T_SCAVENGING_METRICS_V2":
+        source_label += (
+            f"; assumption={metrics.get('assumption')}; "
+            f"domain_policy={metrics.get('domain_policy')}")
     result = {}
     for source, target in (("delivery_ratio", "delivery_ratio"),
                            ("trapping_efficiency", "trapping_efficiency"),
@@ -354,12 +387,12 @@ def scavenging_engineering_records(metrics: dict[str, Any]) -> dict[str, dict[st
         result[target] = {"value": row.get("value") if available else None,
                           "status": "DEFINED" if available else "UNDEFINED",
                           "reason": None if available else row.get("reason"),
-                          "source": "MOTORSIM_2T_SCAVENGING_METRICS_V1 P6 gross crossing ledger"}
+                          "source": source_label}
     for source, target in (("fresh_delivered", "fresh_delivery_kg"),
                            ("fresh_retained", "fresh_retained_kg"),
                            ("fresh_lost", "fresh_short_circuit_kg"),
                            ("fresh_lost", "fresh_lost_kg")):
         value = _number(masses.get(source), f"masses_kg.{source}")
         result[target] = {"value": value, "status": "DEFINED", "reason": None,
-                          "source": "MOTORSIM_2T_SCAVENGING_METRICS_V1 P6 gross crossing ledger"}
+                          "source": source_label}
     return result

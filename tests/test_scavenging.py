@@ -2,6 +2,7 @@ import math
 import unittest
 
 from motorsim.scavenging import (ScavengingInput, calculate_scavenging_metrics,
+                                 calculate_scavenging_metrics_v2,
                                  reference_charge_mass,
                                  scavenging_metrics_from_cycle,
                                  scavenging_metrics_from_generic_ports,
@@ -77,6 +78,46 @@ class ScavengingMetricTests(unittest.TestCase):
         self.assertEqual(records["purity_at_transfer_close"]["status"], "DEFINED")
         self.assertAlmostEqual(records["purity_at_exhaust_close"]["value"], 0.5)
         self.assertEqual(records["fresh_lost_kg"]["value"], 0.002)
+
+    def test_v2_declares_perfect_mixing_and_preserves_valid_metrics(self):
+        result = calculate_scavenging_metrics_v2(self.inputs)
+        self.assertEqual(result["schema"], "MOTORSIM_2T_SCAVENGING_METRICS_V2")
+        self.assertEqual(result["assumption"],
+                         "SINGLE_ZONE_PERFECT_MIXING_SCAVENGING_ASSUMPTION")
+        self.assertEqual(result["domain_policy"],
+                         "MARK_UNDEFINED_OUT_OF_DOMAIN; NEVER_CLIP")
+        self.assertAlmostEqual(result["ratios"]["trapping_efficiency"]["value"],
+                               5.0 / 12.0)
+        records = scavenging_engineering_records(result)
+        self.assertEqual(records["trapping_efficiency"]["status"], "DEFINED")
+        self.assertIn("SINGLE_ZONE_PERFECT_MIXING_SCAVENGING_ASSUMPTION",
+                      records["trapping_efficiency"]["source"])
+        self.assertIn("MARK_UNDEFINED_OUT_OF_DOMAIN; NEVER_CLIP",
+                      records["trapping_efficiency"]["source"])
+
+    def test_v2_marks_unidentifiable_out_of_domain_metrics_undefined(self):
+        cases = (
+            ("trapping_efficiency", ScavengingInput(
+                0.01, 0.001, 0.0, (0.1, 0.0, 0.9, 0.0),
+                (0.002, 0.0, 0.0, 0.0))),
+            ("short_circuit_fraction", ScavengingInput(
+                0.01, 0.001, 0.002, (0.001, 0.0, 0.0, 0.0),
+                (0.001, 0.0, 0.0, 0.0))),
+            ("charging_efficiency", ScavengingInput(
+                0.001, 0.01, 0.0, (0.001, 0.0, 0.0, 0.0),
+                (0.002, 0.0, 0.0, 0.0))),
+        )
+        for name, source in cases:
+            with self.subTest(name=name):
+                result = calculate_scavenging_metrics_v2(source)
+                metric = result["ratios"][name]
+                self.assertIsNone(metric["value"])
+                self.assertEqual(metric["status"], "UNDEFINED")
+                self.assertEqual(
+                    metric["reason"],
+                    "OUTSIDE_PHYSICAL_DOMAIN_WITH_GROSS_CROSSING_BASIS")
+                record = scavenging_engineering_records(result)[name]
+                self.assertEqual(record["status"], "UNDEFINED")
 
     def test_reference_mass_uses_single_cylinder_swept_volume(self):
         mass = reference_charge_mass(52.0, 46.0, 101325.0, 300.0, 287.0)

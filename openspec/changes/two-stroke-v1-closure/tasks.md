@@ -5,14 +5,33 @@
       run only a short diagnostic before campaign preparation. (Integrated
       equilibrium/short-step checks pass; no campaign evidence claimed.)
 - [x] C3 support any positive number of transfer routes in the integrated core.
-- [ ] C4 implement a distinct, fuel/oxygen-limited chemical combustion capability;
-      leave P7 unchanged.
-- [ ] C5 derive trapped/delivered/burned fuel metrics from accepted snapshots.
-- [ ] C6 enforce physical domains and explicit perfect-mixing scavenging semantics.
-- [ ] C7 use cylinder, crankcase and net piston gas work consistently.
-- [ ] C8 version and validate status/provenance/periodicity-aware outputs.
-- [ ] C9 cover equilibrium and pressure reactions for port, endpoint, junction,
-      and atmospheric interfaces.
+- [x] C4 implement a distinct, fuel/oxygen-limited chemical combustion capability;
+      leave P7 unchanged. `FUEL_COUPLED_COMBUSTION_V1` uses the frozen synthetic
+      surrogate, ignition-snapshot oxygen/fuel availability, stage-local SSPRK2
+      limitation, four-species conversion, and LHV/efficiency heat identity.
+      Integrated P7 and the historical P7 event remain mutually exclusive and
+      unchanged; focused legacy P7 regressions pass.
+- [x] C5 derive trapped/delivered/burned fuel metrics from accepted snapshots.
+      The cycle primary keeps intake delivery and exhaust short-circuit totals,
+      exact port-close species states, ignition-time trapped fuel, chemically
+      burned fuel, and terminal unburned inventory as distinct quantities.
+- [x] C6 enforce physical domains and explicit perfect-mixing scavenging semantics.
+      Additive metrics V2 preserves historical V1 and marks bounded gross-ledger
+      ratios outside [0,1] UNDEFINED without clipping; it declares and propagates
+      SINGLE_ZONE_PERFECT_MIXING_SCAVENGING_ASSUMPTION.
+- [x] C7 use cylinder, crankcase and net piston gas work consistently.
+      Primary/output report W_cyl, W_crankcase and W_net = W_cyl + W_crankcase;
+      the new mechanical-loss API consumes W_net exactly once. IMEP/loss
+      displacement is bound to configured slider-crank swept volume.
+- [x] C8 version and validate status/provenance/periodicity-aware outputs.
+      New fuel-coupled output schema V5 requires provenance, metric definition
+      version and periodicity dependency; it rejects unknown-provenance defined
+      values, physical-domain violations and performance without bound periodic
+      detector/config/terminal evidence. Historical output schemas remain intact.
+- [x] C9 cover equilibrium and pressure reactions for port, endpoint, junction,
+      and atmospheric interfaces. Static port opening fractions, both finite
+      network endpoints/orientations and OPEN_END_PLENUM_V2 open ends preserve
+      uniform rest; pressure reaction identities are checked at each boundary.
 - [ ] C10 make primary-evidence audit reconstruct fluxes, RHS and decisions;
        persist every rejection and numerical residual bound.
 - [ ] C11 exact continuous/checkpoint/restart/replay comparisons for both primes.

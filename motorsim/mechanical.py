@@ -136,8 +136,35 @@ class MechanicalLossModel:
 
     def evaluate_2t(self, *, indicated_work_j: float, displacement_m3: float,
                     rpm: float, load: float) -> dict[str, Any]:
+        return self._evaluate_2t(work_j=indicated_work_j,
+                                 work_name="indicated_work_j",
+                                 displacement_m3=displacement_m3, rpm=rpm,
+                                 load=load)
+
+    def evaluate_2t_net_piston_work(self, *, net_piston_gas_work_j: float,
+                                    displacement_m3: float, rpm: float,
+                                    load: float) -> dict[str, Any]:
+        """Apply mechanical losses once to cylinder plus crankcase gas work.
+
+        This additive API keeps the historical indicated-work API intact and
+        makes the input basis explicit for the integrated v1 engine.
+        """
+        result = self._evaluate_2t(work_j=net_piston_gas_work_j,
+                                   work_name="net_piston_gas_work_j",
+                                   displacement_m3=displacement_m3, rpm=rpm,
+                                   load=load)
+        result["schema"] = "MOTORSIM_MECHANICAL_LOSSES_2T_V2_NET_PISTON_WORK"
+        result["net_piston_gas_work_j"] = result.pop("indicated_work_j")
+        result["net_piston_mep_pa"] = result.pop("indicated_mep_pa")
+        result["net_piston_power_w"] = result.pop("indicated_power_w")
+        result["net_piston_torque_nm"] = result.pop("indicated_torque_nm")
+        return result
+
+    def _evaluate_2t(self, *, work_j: float, work_name: str,
+                     displacement_m3: float, rpm: float,
+                     load: float) -> dict[str, Any]:
         self.validate()
-        work = _finite(indicated_work_j, "indicated_work_j")
+        work = _finite(work_j, work_name)
         displacement = _finite(displacement_m3, "displacement_m3")
         speed = _finite(rpm, "rpm")
         load_value = _finite(load, "load")

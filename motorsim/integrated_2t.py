@@ -11,6 +11,7 @@ from __future__ import annotations
 from copy import deepcopy
 from dataclasses import dataclass, replace
 import hashlib
+import inspect
 import json
 from math import fsum, isclose, isfinite, pi
 from types import MappingProxyType
@@ -23,6 +24,8 @@ from .coupling import ChamberState, interface_flux
 from .gas1d.boundary import Boundary
 from .gas1d.eos import IdealGas
 from .gas1d.open_end_plenum_v2 import OpenEndPlenumV2Boundary
+from .fuel_combustion import (FuelCombustionEventV1,
+                              FuelCoupledCombustionV1)
 from .gas1d.mesh import Mesh
 from .gas1d.riemann import hllc_flux
 from .kinematics import piston_position
@@ -40,6 +43,12 @@ from .thermal import ThermalSystem
 from .two_stroke_ports import TwoStrokePortSet
 
 _USE_ACTIVE_P7_EVENT = object()
+_USE_ACTIVE_FUEL_EVENT = object()
+
+
+def _source_sha256(*objects) -> str:
+    source = "\n\n".join(inspect.getsource(item) for item in objects)
+    return hashlib.sha256(source.encode("utf-8")).hexdigest()
 
 
 def _restore_validated_p7_event(value):
@@ -451,7 +460,8 @@ class IntegratedEngine2T:
                  thermal_system: ThermalSystem | None = None,
                  thermal_locations: dict[str, str] | None = None,
                  thermal_load: float = 0.0,
-                 combustion_start_angle_deg: float | None = None):
+                 combustion_start_angle_deg: float | None = None,
+                 fuel_coupled_combustion: FuelCoupledCombustionV1 | None = None):
         initial_crankcase_primitive = tuple(crankcase_state)
         initial_cylinder_primitive = tuple(cylinder_state)
         initial_duct_primitives = deepcopy(initial_duct_states)
@@ -587,6 +597,20 @@ class IntegratedEngine2T:
         self.combustion_start_angle_deg = (
             None if combustion_start_angle_deg is None else
             float(combustion_start_angle_deg))
+        if (fuel_coupled_combustion is not None and
+                not isinstance(fuel_coupled_combustion, FuelCoupledCombustionV1)):
+            raise ValueError("fuel_coupled_combustion must use FUEL_COUPLED_COMBUSTION_V1")
+        if fuel_coupled_combustion is not None:
+            fuel_coupled_combustion.validate()
+            if self.combustion_start_angle_deg is not None:
+                raise ValueError("fuel-coupled combustion and historical P7 cannot be enabled together")
+            self.schema = "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V10"
+            self.configuration_schema = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V5"
+        self.fuel_coupled_combustion = fuel_coupled_combustion
+        self.fuel_combustion_event: FuelCombustionEventV1 | None = None
+        self.fuel_combustion_events: list[dict] = []
+        self.fuel_combustion_heat_added_j = 0.0
+        self.fuel_combustion_source_species_kg = [0.0] * 4
         self.p7_event: P7BurnEvent | None = None
         self.p7_events: list[dict] = []
         self.p7_heat_added_j = 0.0
@@ -631,6 +655,9 @@ class IntegratedEngine2T:
                        "p7_source_species_kg": [0.0] * 4}
         if self.dynamic_reed_binding is not None:
             self.ledger["reed_dissipation_J"] = 0.0
+        if self.fuel_coupled_combustion is not None:
+            self.ledger["fuel_combustion_heat_added_J"] = 0.0
+            self.ledger["fuel_combustion_source_species_kg"] = [0.0] * 4
         self.trace = []
         geometry0 = self._geometry(self.angle_deg, self.reference_rpm)
         if self.dynamic_reed_binding is not None:
@@ -701,6 +728,10 @@ class IntegratedEngine2T:
         if self.combustion_start_angle_deg == 0.0:
             self.p7_event = capture_event(
                 0.0, self.state["species"]["chambers"]["cylinder"])
+        if (self.fuel_coupled_combustion is not None and
+                self.fuel_coupled_combustion.ignition_timing_deg == 0.0):
+            self.fuel_combustion_event = self.fuel_coupled_combustion.capture(
+                0.0, self.state["species"]["chambers"]["cylinder"])
 
     def _make_configuration_spec(self, crankcase_primitive, cylinder_primitive,
                                  duct_primitives, atmosphere):
@@ -768,6 +799,14 @@ class IntegratedEngine2T:
             result["topology_contract"] = "POSITIVE_TRANSFER_COUNT_V1"
             result["external_boundary_model"] = self.configuration_boundary_model
             result["external_boundary_provenance"] = self.external_boundary_provenance
+        if self.configuration_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V5":
+            result["dynamic_reed_binding"] = (
+                None if self.dynamic_reed_binding is None else
+                self.dynamic_reed_binding.to_dict())
+            result["topology_contract"] = "POSITIVE_TRANSFER_COUNT_V1"
+            result["external_boundary_model"] = self.configuration_boundary_model
+            result["external_boundary_provenance"] = self.external_boundary_provenance
+            result["fuel_coupled_combustion"] = self.fuel_coupled_combustion.to_dict()
         return result
 
     def configuration_dict(self) -> dict:
@@ -796,6 +835,8 @@ class IntegratedEngine2T:
                 tuple(self.atmosphere_state), tuple(self.atmosphere_species),
                 tuple(self.outlet_species),
                 id(self.inlet_boundary), id(self.outlet_boundary), self.max_cfl,
+                (None if self.fuel_coupled_combustion is None else
+                 self.fuel_coupled_combustion.to_dict()),
                 self.geometry_sha256, id(self.configuration_identity),
                 tuple(id(petal) for petal in self.reed_petals),
                 id(self.port_binding),
@@ -868,7 +909,12 @@ class IntegratedEngine2T:
                         "dynamic_reed_binding", "topology_contract",
                         "external_boundary_model",
                         "external_boundary_provenance"})
-        if (not (legacy_v1 or current_v2 or current_v3 or current_v4) or
+        current_v5 = (source_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V5" and
+                      set(value) == common_fields | {"outlet_species",
+                        "dynamic_reed_binding", "topology_contract",
+                        "external_boundary_model", "external_boundary_provenance",
+                        "fuel_coupled_combustion"})
+        if (not (legacy_v1 or current_v2 or current_v3 or current_v4 or current_v5) or
                 value.get("geometry_contract") !=
                 "SLIDER_CRANK_AND_GENERIC_PORTS_V1"):
             raise ValueError("integrated engine configuration schema is invalid")
@@ -948,7 +994,7 @@ class IntegratedEngine2T:
             if not isinstance(fields_data, dict) or set(fields_data) != {
                     "kind", "state", "p0", "T0", "Y0"}:
                 raise ValueError("integrated engine boundary configuration is invalid")
-            if current_v4:
+            if current_v4 or current_v5:
                 if value["topology_contract"] != "POSITIVE_TRANSFER_COUNT_V1":
                     raise ValueError("integrated transfer topology contract is invalid")
                 if value["external_boundary_model"] == "OPEN_END_PLENUM_V2":
@@ -981,9 +1027,11 @@ class IntegratedEngine2T:
                         for path_id, rows in value["duct_species"].items()})
         thermal = (None if value["thermal_system"] is None else
                    ThermalSystem.from_dict(value["thermal_system"]))
-        dynamic_reed = (None if not (current_v3 or current_v4) or
+        dynamic_reed = (None if not (current_v3 or current_v4 or current_v5) or
                         value["dynamic_reed_binding"] is None else
                         DynamicReedBinding2T.from_dict(value["dynamic_reed_binding"]))
+        fuel_combustion = (FuelCoupledCombustionV1.from_dict(
+            value["fuel_coupled_combustion"]) if current_v5 else None)
 
         def resolved_geometry(_angle):
             # Both explicit models replace every returned geometry field.
@@ -1012,7 +1060,8 @@ class IntegratedEngine2T:
             thermal_system=thermal,
             thermal_locations=deepcopy(value["thermal_locations"]),
             thermal_load=value["thermal_load"],
-            combustion_start_angle_deg=value["combustion_start_angle_deg"])
+            combustion_start_angle_deg=value["combustion_start_angle_deg"],
+            fuel_coupled_combustion=fuel_combustion)
         canonical_input = deepcopy(value)
         canonical_input["schema"] = engine.configuration_schema
         canonical_input["outlet_species"] = list(
@@ -1060,12 +1109,16 @@ class IntegratedEngine2T:
         if self.external_boundary_model is not None:
             identity["external_boundary_model"] = self.external_boundary_model
             identity["external_boundary_provenance"] = self.external_boundary_provenance
-        if self.configuration_schema == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V4":
+        if self.configuration_schema in {
+                "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V4",
+                "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V5"}:
             identity["topology_contract"] = "POSITIVE_TRANSFER_COUNT_V1"
             identity["external_boundary_model"] = self.configuration_boundary_model
             identity["external_boundary_provenance"] = self.external_boundary_provenance
         if self.dynamic_reed_binding is not None:
             identity["dynamic_reed_binding"] = self.dynamic_reed_binding.to_dict()
+        if self.fuel_coupled_combustion is not None:
+            identity["fuel_coupled_combustion"] = self.fuel_coupled_combustion.to_dict()
         encoded = json.dumps(identity, sort_keys=True, separators=(",", ":"),
                              allow_nan=False)
         normalized = json.loads(encoded)
@@ -1270,7 +1323,8 @@ class IntegratedEngine2T:
         return (binding, exchange, face, species, speed, blocked_area,
                 blocked_pressure_traction, external_wall_reaction)
 
-    def _assemble(self, state, angle, rpm, p7_event=_USE_ACTIVE_P7_EVENT):
+    def _assemble(self, state, angle, rpm, p7_event=_USE_ACTIVE_P7_EVENT,
+                  fuel_event=_USE_ACTIVE_FUEL_EVENT, dt_s=None):
         """Build every RHS from one immutable stage state."""
         g = self._geometry(angle, rpm)
         chambers = state["chambers"]
@@ -1569,6 +1623,27 @@ class IntegratedEngine2T:
             for index, rate in enumerate(p7_species_rate):
                 rhs_s["chambers"]["cylinder"][index] += rate
             rhs_q["chambers"]["cylinder"][1] += p7_heat_rate
+        fuel_combustion_source = {"species_kg_s": (0.0, 0.0, 0.0, 0.0),
+                                  "heat_w": 0.0,
+                                  "requested_fuel_rate_kg_s": 0.0,
+                                  "burned_fuel_rate_kg_s": 0.0,
+                                  "oxygen_limited_fuel_rate_kg_s": 0.0,
+                                  "energy_per_burned_fuel_j_kg": 0.0}
+        stage_fuel_event = (self.fuel_combustion_event
+                            if fuel_event is _USE_ACTIVE_FUEL_EVENT else fuel_event)
+        if self.fuel_coupled_combustion is not None and stage_fuel_event is not None:
+            if dt_s is None:
+                raise ValueError("fuel-coupled SSPRK stage requires its timestep")
+            cylinder_species = state["species"]["chambers"]["cylinder"]
+            nonchem_species_rhs = tuple(rhs_s["chambers"]["cylinder"])
+            fuel_combustion_source = self.fuel_coupled_combustion.stage_source(
+                event=stage_fuel_event, angle_deg=float(angle), rpm=float(rpm),
+                species_mass_kg=cylinder_species,
+                noncombustion_species_rhs_kg_s=nonchem_species_rhs,
+                dt_s=float(dt_s))
+            for index, rate in enumerate(fuel_combustion_source["species_kg_s"]):
+                rhs_s["chambers"]["cylinder"][index] += rate
+            rhs_q["chambers"]["cylinder"][1] += fuel_combustion_source["heat_w"]
         if self.thermal_system is not None:
             for surface in self.thermal_system.surfaces:
                 location = self.thermal_locations[surface.id]
@@ -1624,6 +1699,7 @@ class IntegratedEngine2T:
                 "fuel_short_circuited_rate": fuel_short_circuited_rate,
                 "p7_species_rate": p7_species_rate,
                 "p7_heat_rate": p7_heat_rate,
+                "fuel_combustion_source": fuel_combustion_source,
                 "thermal_rates": thermal_rates,
                 "faces": faces_trace}
 
@@ -1842,10 +1918,46 @@ class IntegratedEngine2T:
                     step_p7_event = capture_event(
                         cycle_ignition,
                         self.state["species"]["chambers"]["cylinder"])
+        step_fuel_event = self.fuel_combustion_event
+        archived_fuel_event = None
+        if self.fuel_coupled_combustion is not None:
+            profile = self.fuel_coupled_combustion
+            cycle_ignition = (int(start_angle // 360.0) * 360.0 +
+                              profile.ignition_timing_deg)
+            if cycle_ignition < start_angle - 1e-10:
+                if (step_fuel_event is None or
+                        abs(step_fuel_event.start_angle_deg - cycle_ignition) > 1e-10):
+                    raise ValueError(
+                        "fuel-coupled combustion ignition was skipped; align steps to ignition")
+            ignition = cycle_ignition
+            active_here = (step_fuel_event is not None and
+                           abs(step_fuel_event.start_angle_deg - cycle_ignition) <= 1e-10)
+            if abs(start_angle - cycle_ignition) <= 1e-10 and not active_here:
+                if step_fuel_event is not None:
+                    archived_fuel_event = step_fuel_event.to_dict()
+                step_fuel_event = profile.capture(
+                    cycle_ignition,
+                    self.state["species"]["chambers"]["cylinder"])
+                active_here = True
+            fuel_boundaries = []
+            if ignition > start_angle + 1e-10:
+                fuel_boundaries.append(ignition)
+            if active_here:
+                fuel_boundaries.extend(
+                    step_fuel_event.start_angle_deg + item.delay_deg
+                    for item in profile.components)
+                fuel_boundaries.extend(
+                    step_fuel_event.start_angle_deg + item.delay_deg + item.duration_deg
+                    for item in profile.components)
+            if any(start_angle + 1e-10 < boundary < end_angle - 1e-10
+                   for boundary in fuel_boundaries):
+                raise ValueError(
+                    "fuel-coupled SSPRK steps must align to ignition and Wiebe support boundaries")
         q0 = deepcopy(self.state)
         self._validate(q0)
         rpm = float(delta_angle_deg) / (6.0 * float(dt_s))
-        r0 = self._assemble(q0, start_angle, rpm, step_p7_event)
+        r0 = self._assemble(q0, start_angle, rpm, step_p7_event,
+                            step_fuel_event, float(dt_s))
         limiter0 = self._limit_p7_stage_source(q0, r0, float(dt_s))
         cfl0 = self._cfl(q0, r0, float(dt_s))
         q1 = deepcopy(q0)
@@ -1905,7 +2017,8 @@ class IntegratedEngine2T:
                     path, i, q1)
                 q1["ducts"][path.id][i] = (q[0], q[1], q[2], rho)
         self._validate(q1)
-        r1 = self._assemble(q1, end_angle, rpm, step_p7_event)
+        r1 = self._assemble(q1, end_angle, rpm, step_p7_event,
+                            step_fuel_event, float(dt_s))
         limiter1 = self._limit_p7_stage_source(q1, r1, float(dt_s))
         cfl1 = self._cfl(q1, r1, float(dt_s))
         qn = self._combine(q0, r0, r1, float(dt_s), end_angle)
@@ -1955,6 +2068,24 @@ class IntegratedEngine2T:
         self.ledger["p7_heat_added_J"] += p7_heat_increment
         self.ledger["p7_availability_limited_kg"] += p7_limited_increment
         self.ledger["p7_source_species_kg"] = list(self.p7_source_species_kg)
+        fuel_combustion_species_increment = tuple(.5 * float(dt_s) * (
+            r0["fuel_combustion_source"]["species_kg_s"][j] +
+            r1["fuel_combustion_source"]["species_kg_s"][j]) for j in range(4))
+        fuel_combustion_heat_increment = .5 * float(dt_s) * (
+            r0["fuel_combustion_source"]["heat_w"] +
+            r1["fuel_combustion_source"]["heat_w"])
+        if self.fuel_coupled_combustion is not None:
+            self.fuel_combustion_event = step_fuel_event
+            if archived_fuel_event is not None:
+                self.fuel_combustion_events.append(archived_fuel_event)
+            self.fuel_combustion_source_species_kg = [
+                self.fuel_combustion_source_species_kg[j] +
+                fuel_combustion_species_increment[j] for j in range(4)]
+            self.fuel_combustion_heat_added_j += fuel_combustion_heat_increment
+            self.ledger["fuel_combustion_source_species_kg"] = list(
+                self.fuel_combustion_source_species_kg)
+            self.ledger["fuel_combustion_heat_added_J"] = (
+                self.fuel_combustion_heat_added_j)
         trace = {"angle_start_deg": start_angle, "angle_end_deg": end_angle,
                  "time_start_s": self.time_s, "dt_s": float(dt_s),
                  "rpm": float(delta_angle_deg) / (6.0 * float(dt_s)),
@@ -1990,6 +2121,14 @@ class IntegratedEngine2T:
             trace["stage_dynamic_reed_rhs"] = (r0["dynamic_reed_rhs"],
                                                r1["dynamic_reed_rhs"])
             trace["reed_dissipation_increment_J"] = reed_dissipation_increment
+        if self.fuel_coupled_combustion is not None:
+            trace["fuel_combustion_event"] = (
+                None if step_fuel_event is None else step_fuel_event.to_dict())
+            trace["stage_fuel_combustion_source_rates"] = (
+                r0["fuel_combustion_source"], r1["fuel_combustion_source"])
+            trace["fuel_combustion_source_species_increment_kg"] = (
+                fuel_combustion_species_increment)
+            trace["fuel_combustion_heat_increment_j"] = fuel_combustion_heat_increment
         self.state = qn
         self.crank_angle_unwrapped_deg = end_angle
         self.angle_deg = end_angle % 360.0
@@ -2016,6 +2155,8 @@ class IntegratedEngine2T:
                           "residual": final["energy_J"]-self.initial_inventory["energy_J"]-
                                       self.ledger["external_energy_J"]-
                                       self.ledger["p7_heat_added_J"]-
+                                      self.ledger.get(
+                                          "fuel_combustion_heat_added_J", 0.0)-
                                       self.ledger["crankcase_work_J"]-
                                        self.ledger["cylinder_work_J"]+
                                        self.ledger["heat_to_wall_J"]+
@@ -2026,15 +2167,24 @@ class IntegratedEngine2T:
                                          "source": self.ledger["p7_source_species_kg"][i],
                                          "residual": delta_species[i]-
                                                     self.ledger["external_species_kg"][i]-
-                                                    self.ledger["p7_source_species_kg"][i]}
+                                                    self.ledger["p7_source_species_kg"][i]-
+                                                    self.ledger.get(
+                                                        "fuel_combustion_source_species_kg",
+                                                        [0.0] * 4)[i]}
                             for i in range(4)}}
         if self.dynamic_reed_binding is not None:
             report["energy"]["reed_dissipation"] = self.ledger["reed_dissipation_J"]
+        if self.fuel_coupled_combustion is not None:
+            report["energy"]["fuel_combustion_heat_added"] = self.ledger[
+                "fuel_combustion_heat_added_J"]
+            for index, name in enumerate(SPECIES):
+                report["species"][name]["fuel_combustion_source"] = self.ledger[
+                    "fuel_combustion_source_species_kg"][index]
         return report
 
     def snapshot(self):
         self._assert_configuration_unchanged(check_identity=True)
-        return {"schema": self.schema, "configuration_identity": deepcopy(self.configuration_identity),
+        result = {"schema": self.schema, "configuration_identity": deepcopy(self.configuration_identity),
                 "state": _jsonify(self.state), "angle_deg": self.angle_deg,
                 "crank_angle_unwrapped_deg": self.crank_angle_unwrapped_deg,
                 "time_s": self.time_s, "cycle": self.cycle,
@@ -2047,6 +2197,12 @@ class IntegratedEngine2T:
                        "completed_events": deepcopy(self.p7_events)},
                 "initial_inventory": _jsonify(self.initial_inventory),
                 "trace": _jsonify(self.trace)}
+        if self.fuel_coupled_combustion is not None:
+            result["fuel_combustion"] = {
+                "active_event": (None if self.fuel_combustion_event is None else
+                                 self.fuel_combustion_event.to_dict()),
+                "completed_events": deepcopy(self.fuel_combustion_events)}
+        return result
 
     def restore(self, snapshot):
         self._assert_configuration_unchanged(check_identity=True)
@@ -2096,16 +2252,23 @@ class IntegratedEngine2T:
                          "p7_source_species_kg"}
         if self.dynamic_reed_binding is not None:
             ledger_fields.add("reed_dissipation_J")
+        if self.fuel_coupled_combustion is not None:
+            ledger_fields |= {"fuel_combustion_heat_added_J",
+                              "fuel_combustion_source_species_kg"}
         if not isinstance(ledger, dict) or set(ledger) != ledger_fields:
             raise ValueError("integrated engine checkpoint ledger schema mismatch")
         if (not isinstance(ledger["external_species_kg"], (list, tuple)) or
                 len(ledger["external_species_kg"]) != 4 or
                 not isinstance(ledger["p7_source_species_kg"], (list, tuple)) or
                 len(ledger["p7_source_species_kg"]) != 4 or
+                (self.fuel_coupled_combustion is not None and
+                 (not isinstance(ledger["fuel_combustion_source_species_kg"], (list, tuple)) or
+                  len(ledger["fuel_combustion_source_species_kg"]) != 4)) or
                 any(type(value) not in (int, float) or not isfinite(value)
                     for key, value in ledger.items()
                     for value in (ledger[key] if key in
-                                  {"external_species_kg", "p7_source_species_kg"} else
+                                  {"external_species_kg", "p7_source_species_kg",
+                                   "fuel_combustion_source_species_kg"} else
                                   (value,)))):
             raise ValueError("integrated engine checkpoint ledger contains invalid values")
         if (self.dynamic_reed_binding is not None and
@@ -2137,6 +2300,11 @@ class IntegratedEngine2T:
             if self.dynamic_reed_binding is not None:
                 required |= {"stage_dynamic_reed_rhs",
                              "reed_dissipation_increment_J"}
+            if self.fuel_coupled_combustion is not None:
+                required |= {"fuel_combustion_event",
+                             "stage_fuel_combustion_source_rates",
+                             "fuel_combustion_source_species_increment_kg",
+                             "fuel_combustion_heat_increment_j"}
             if not required.issubset(row):
                 raise ValueError("integrated engine checkpoint trace row is incomplete")
             angle0, angle1 = row["angle_start_deg"], row["angle_end_deg"]
@@ -2306,6 +2474,59 @@ class IntegratedEngine2T:
                             fsum(event.ledger.heat_added for event in p7_all_events),
                             rel_tol=1e-12, abs_tol=1e-12)):
             raise ValueError("integrated engine checkpoint P7 aggregate ledger is inconsistent")
+        fuel_event_state = snapshot.get("fuel_combustion")
+        if self.fuel_coupled_combustion is None:
+            if fuel_event_state is not None:
+                raise ValueError("integrated checkpoint has unconfigured fuel combustion state")
+            active_fuel_event = None
+            completed_fuel_events = []
+        else:
+            if (not isinstance(fuel_event_state, dict) or
+                    set(fuel_event_state) != {"active_event", "completed_events"} or
+                    not isinstance(fuel_event_state["completed_events"], list)):
+                raise ValueError("integrated checkpoint fuel combustion state is invalid")
+            active_fuel_event = (None if fuel_event_state["active_event"] is None else
+                FuelCombustionEventV1.from_dict(fuel_event_state["active_event"]))
+            completed_fuel_events = [FuelCombustionEventV1.from_dict(row).to_dict()
+                                     for row in fuel_event_state["completed_events"]]
+            phase = self.fuel_coupled_combustion.ignition_timing_deg
+            if active_fuel_event is not None and (
+                    abs((active_fuel_event.start_angle_deg % 360.0) - phase) > 1e-10 or
+                    active_fuel_event.start_angle_deg > float(unwrapped) + 1e-10):
+                raise ValueError("integrated checkpoint fuel-combustion event identity mismatch")
+            completed_starts = [row["start_angle_deg"] for row in completed_fuel_events]
+            if any(abs((start % 360.0) - phase) > 1e-10 or
+                   start > float(unwrapped) + 1e-10 for start in completed_starts):
+                raise ValueError("integrated checkpoint fuel-combustion history identity mismatch")
+            if completed_starts != sorted(set(completed_starts)):
+                raise ValueError("integrated checkpoint fuel-combustion history chronology is invalid")
+            source_sum = [0.0] * 4
+            heat_sum = 0.0
+            for row in trace:
+                rates = row["stage_fuel_combustion_source_rates"]
+                if not isinstance(rates, (tuple, list)) or len(rates) != 2:
+                    raise ValueError("integrated checkpoint fuel-combustion stages are invalid")
+                expected_species_increment = tuple(.5 * row["dt_s"] * (
+                    rates[0]["species_kg_s"][index] +
+                    rates[1]["species_kg_s"][index]) for index in range(4))
+                expected_heat_increment = .5 * row["dt_s"] * (
+                    rates[0]["heat_w"] + rates[1]["heat_w"])
+                if (not isclose(row["fuel_combustion_heat_increment_j"],
+                                expected_heat_increment, rel_tol=1e-12, abs_tol=1e-15) or
+                        any(not isclose(row["fuel_combustion_source_species_increment_kg"][i],
+                                        expected_species_increment[i],
+                                        rel_tol=1e-12, abs_tol=1e-15)
+                            for i in range(4))):
+                    raise ValueError("integrated checkpoint fuel-combustion increment mismatch")
+                for index in range(4):
+                    source_sum[index] += expected_species_increment[index]
+                heat_sum += expected_heat_increment
+            if (any(not isclose(ledger["fuel_combustion_source_species_kg"][i],
+                                source_sum[i], rel_tol=1e-12, abs_tol=1e-15)
+                    for i in range(4)) or
+                    not isclose(ledger["fuel_combustion_heat_added_J"], heat_sum,
+                                rel_tol=1e-12, abs_tol=1e-15)):
+                raise ValueError("integrated checkpoint fuel-combustion ledger mismatch")
         # Commit restored values only after the entire checkpoint passes validation.
         self.state = state
         self.angle_deg = float(angle)
@@ -2317,6 +2538,13 @@ class IntegratedEngine2T:
         self.p7_events = [snapshot_event(item) for item in completed_events]
         self.p7_heat_added_j = float(ledger["p7_heat_added_J"])
         self.p7_source_species_kg = list(ledger["p7_source_species_kg"])
+        self.fuel_combustion_event = active_fuel_event
+        self.fuel_combustion_events = deepcopy(completed_fuel_events)
+        if self.fuel_coupled_combustion is not None:
+            self.fuel_combustion_heat_added_j = float(
+                ledger["fuel_combustion_heat_added_J"])
+            self.fuel_combustion_source_species_kg = list(
+                ledger["fuel_combustion_source_species_kg"])
         self.initial_inventory = deepcopy(snapshot["initial_inventory"])
         self.trace = deepcopy(trace)
 
@@ -2367,10 +2595,11 @@ def _validate_trace_tree(value, path="trace"):
     raise ValueError(f"integrated engine checkpoint {path} has an invalid value")
 
 
-def _recompute_trace_stage(engine, row, stage_index, p7_event):
+def _recompute_trace_stage(engine, row, stage_index, p7_event, fuel_event=None):
     state = _tuplify(row["stage_states"][stage_index])
     angle = row["angle_start_deg"] if stage_index == 0 else row["angle_end_deg"]
-    assembled = engine._assemble(state, angle, row["rpm"], p7_event)
+    assembled = engine._assemble(state, angle, row["rpm"], p7_event,
+                                 fuel_event, row["dt_s"])
     limiter = engine._limit_p7_stage_source(state, assembled, row["dt_s"])
     return assembled, limiter
 
@@ -2435,6 +2664,18 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
         raise ValueError("integrated cycle start checkpoint P7 state is invalid")
     current_p7_event = (None if start_p7.get("active_event") is None else
                         _restore_validated_p7_event(start_p7["active_event"]))
+    start_fuel_state = start_checkpoint.get("fuel_combustion")
+    if engine.fuel_coupled_combustion is not None:
+        if (not isinstance(start_fuel_state, dict) or
+                set(start_fuel_state) != {"active_event", "completed_events"}):
+            raise ValueError("integrated cycle start checkpoint lacks fuel-combustion state")
+        current_fuel_event = (None if start_fuel_state["active_event"] is None else
+                              FuelCombustionEventV1.from_dict(
+                                  start_fuel_state["active_event"]))
+    else:
+        current_fuel_event = None
+    fuel_combustion_heat = 0.0
+    fuel_combustion_species = [0.0] * 4
     for row in trajectory:
         if (not isinstance(row, dict) or row.get("angle_start_deg") != prior_end or
                 len(row.get("stage_states", ())) != 3 or
@@ -2461,9 +2702,24 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
             if abs(float(row["angle_start_deg"]) - ignition) <= 1e-10:
                 current_p7_event = capture_event(
                     ignition, _tuplify(row["stage_states"][0])[
-                        "species"]["chambers"]["cylinder"])
+                    "species"]["chambers"]["cylinder"])
+        if engine.fuel_coupled_combustion is not None:
+            phase = engine.fuel_coupled_combustion.ignition_timing_deg
+            angle_start = float(row["angle_start_deg"])
+            ignition = int(angle_start // 360.0) * 360.0 + phase
+            if abs(angle_start - ignition) <= 1e-10 and (
+                    current_fuel_event is None or
+                    abs(current_fuel_event.start_angle_deg - ignition) > 1e-10):
+                current_fuel_event = engine.fuel_coupled_combustion.capture(
+                    ignition, _tuplify(row["stage_states"][0])["species"]
+                    ["chambers"]["cylinder"])
+            _assert_trace_value_equal(
+                row["fuel_combustion_event"],
+                None if current_fuel_event is None else current_fuel_event.to_dict(),
+                "fuel-combustion event snapshot")
         recomputed_stages = [
-            _recompute_trace_stage(engine, row, stage_index, current_p7_event)
+            _recompute_trace_stage(engine, row, stage_index, current_p7_event,
+                                   current_fuel_event)
             for stage_index in range(2)
         ]
         for stage_index, (assembled, limiter) in enumerate(recomputed_stages):
@@ -2502,6 +2758,11 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                                       expected_p7, f"stage {stage_index} P7 source")
             _assert_trace_value_equal(row["stage_p7_limiter"][stage_index], limiter,
                                       f"stage {stage_index} P7 limiter")
+            if engine.fuel_coupled_combustion is not None:
+                _assert_trace_value_equal(
+                    row["stage_fuel_combustion_source_rates"][stage_index],
+                    assembled["fuel_combustion_source"],
+                    f"stage {stage_index} fuel-combustion source")
             if engine.dynamic_reed_binding is not None:
                 _assert_trace_value_equal(
                     row["stage_dynamic_reed_rhs"][stage_index],
@@ -2530,6 +2791,13 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                 row["stage_p7_source_rates"][1]["species_kg_s"][index])
         p7_heat += .5 * dt * sum(
             stage["heat_w"] for stage in row["stage_p7_source_rates"])
+        if engine.fuel_coupled_combustion is not None:
+            fuel_stages = row["stage_fuel_combustion_source_rates"]
+            fuel_combustion_heat += .5 * dt * sum(
+                stage["heat_w"] for stage in fuel_stages)
+            for index in range(4):
+                fuel_combustion_species[index] += .5 * dt * sum(
+                    stage["species_kg_s"][index] for stage in fuel_stages)
         p7_limited_mass += .5 * dt * sum(
             stage["limited_reactant_rate_kg_s"]
             for stage in row["stage_p7_limiter"])
@@ -2579,6 +2847,9 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
         "p7_availability_limited_kg": p7_limited_mass,
         "p7_source_species_kg": p7_species,
     }
+    if engine.fuel_coupled_combustion is not None:
+        recomputed["fuel_combustion_heat_added_J"] = fuel_combustion_heat
+        recomputed["fuel_combustion_source_species_kg"] = fuel_combustion_species
     if engine.dynamic_reed_binding is not None:
         recomputed["reed_dissipation_J"] = rates_integral["reed_dissipation_J"]
     if (not isinstance(end_ledger, dict) or not isinstance(start_ledger, dict) or
@@ -2588,7 +2859,8 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
     for key, value in recomputed.items():
         expected = [end_ledger[key][i] - start_ledger[key][i]
                     for i in range(4)] if key in {
-                        "external_species_kg", "p7_source_species_kg"} else (
+                        "external_species_kg", "p7_source_species_kg",
+                        "fuel_combustion_source_species_kg"} else (
                             end_ledger[key] - start_ledger[key])
         if isinstance(value, list):
             if any(not isclose(value[i], expected[i], rel_tol=1e-10, abs_tol=1e-14)
@@ -2695,6 +2967,11 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                    # Indicated work produced by the cylinder is its negative.
                    "work_J": -rates_integral["cylinder_work_J"],
                    "cylinder_energy_work_J": rates_integral["cylinder_work_J"],
+                   "cylinder_indicated_work_J": -rates_integral["cylinder_work_J"],
+                   "crankcase_gas_work_J": -rates_integral["crankcase_work_J"],
+                   "net_piston_gas_work_J": -(
+                       rates_integral["cylinder_work_J"] +
+                       rates_integral["crankcase_work_J"]),
                    "fresh_delivery_kg": rates_integral["fresh_delivery_kg"],
                    "fresh_short_circuit_kg": rates_integral["fresh_short_circuit_kg"],
                    "fresh_air_intake_delivery_kg": rates_integral[
@@ -2709,9 +2986,44 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                    "fuel_mass_balance_residual_kg": (
                        end_inventory["species_kg"][1] -
                        start_inventory["species_kg"][1] - external_species[1] -
-                       p7_species[1]),
+                       p7_species[1] - fuel_combustion_species[1]),
                    "p7_burned_produced_kg": p7_species[3],
                    "p7_heat_J": p7_heat}
+    if engine.fuel_coupled_combustion is not None:
+        ignition_snapshot = current_fuel_event
+        exhaust_close = port_closures["snapshots"].get("exhaust")
+        observables["fuel_coupled_combustion"] = {
+            "schema": "FUEL_COUPLED_COMBUSTION_V1",
+            "provenance": "SYNTHETIC_ASSUMPTION",
+            "fuel_snapshot": engine.fuel_coupled_combustion.fuel.snapshot(),
+            "fuel_sha256": engine.fuel_coupled_combustion.fuel.sha256,
+            "fuel_burned_kg": -fuel_combustion_species[1],
+            "fresh_air_consumed_kg": -fuel_combustion_species[0],
+            "burned_products_kg": fuel_combustion_species[3],
+            "fuel_delivered_gross_kg": rates_integral["fuel_delivery_kg"],
+            "fuel_short_circuited_gross_kg": rates_integral[
+                "fuel_short_circuit_kg"],
+            "fuel_trapped_at_ignition_snapshot_kg": (
+                None if ignition_snapshot is None else
+                ignition_snapshot.fuel_at_ignition_kg),
+            "fresh_air_trapped_at_ignition_snapshot_kg": (
+                None if ignition_snapshot is None else
+                ignition_snapshot.fresh_air_at_ignition_kg),
+            "fuel_available_from_ignition_snapshot_kg": (
+                None if ignition_snapshot is None else
+                ignition_snapshot.fuel_available_for_burn_kg),
+            "unburned_fuel_at_exhaust_close_kg": (
+                None if exhaust_close is None else
+                exhaust_close["cylinder_species_kg"][1]),
+            "exhaust_close_snapshot_status": port_closures["status"],
+            "unburned_fuel_in_cylinder_terminal_kg":
+                end_state["species"]["chambers"]["cylinder"][1],
+            "unburned_fuel_terminal_kg": end_inventory["species_kg"][1],
+            "chemical_heat_added_J": fuel_combustion_heat,
+            "species_source_kg": list(fuel_combustion_species),
+            "energy_per_burned_fuel_j_kg": (
+                engine.fuel_coupled_combustion.fuel.lower_heating_value_j_kg *
+                engine.fuel_coupled_combustion.combustion_efficiency)}
     if engine.dynamic_reed_binding is not None:
         reed = end_state["dynamic_reed"]
         petal = engine.dynamic_reed_binding.petal
@@ -2724,19 +3036,28 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
             "dissipation_since_initial_J": rates_integral["reed_dissipation_J"]}
     mass_residual = end_inventory["mass_kg"] - start_inventory["mass_kg"] - external_mass
     energy_residual = (end_inventory["energy_J"] - start_inventory["energy_J"] -
-                       external_energy - p7_heat - rates_integral["cylinder_work_J"] -
+                       external_energy - p7_heat - fuel_combustion_heat -
+                       rates_integral["cylinder_work_J"] -
                        rates_integral["crankcase_work_J"] + wall_heat +
                        rates_integral["reed_dissipation_J"])
     species_residual = [end_inventory["species_kg"][i] -
                         start_inventory["species_kg"][i] - external_species[i] -
-                        p7_species[i] for i in range(4)]
+                        p7_species[i] - fuel_combustion_species[i]
+                        for i in range(4)]
     terminal_rpm = float(trajectory[-1]["rpm"])
     p7_state = end_checkpoint.get("p7", {})
     if not isinstance(p7_state, dict):
         raise ValueError("integrated cycle terminal checkpoint lacks P7 state")
     terminal_event = (_restore_validated_p7_event(p7_state["active_event"])
                       if p7_state.get("active_event") is not None else None)
-    terminal_rhs = engine._assemble(end_state, end_angle, terminal_rpm, terminal_event)
+    terminal_fc_state = end_checkpoint.get("fuel_combustion", {})
+    terminal_fc_event = (None if not isinstance(terminal_fc_state, dict) or
+                         terminal_fc_state.get("active_event") is None else
+                         FuelCombustionEventV1.from_dict(
+                             terminal_fc_state["active_event"]))
+    terminal_rhs = engine._assemble(
+        end_state, end_angle, terminal_rpm, terminal_event,
+        terminal_fc_event, float(trajectory[-1]["dt_s"]))
     terminal_diagnostic = {
         "state_source": "accepted terminal state; read-only instantaneous RHS evaluation",
         "geometry": vars(terminal_rhs["geometry"]),
@@ -2748,6 +3069,9 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
             "contract": "REFERENCE_PERIODIC_CONVERGENCE_V1",
             "cycle_index": cycle_index,
             "configuration_hash": engine.configuration_identity["configuration_sha256"],
+            "swept_displacement_m3": (
+                None if engine.slider_crank is None else
+                engine.slider_crank.crankcase.displacement_m3),
             "eos_R": engine.eos.R, "eos_gamma": engine.eos.gamma,
             "eos_cv": engine.eos.cv,
             "duct_roles": {path.id: path.role for path in engine.ducts},
@@ -2794,10 +3118,11 @@ def _specific_consumption_value(fuel_consumed_kg: float, duration_s: float,
 
 
 def make_integrated_engineering_output(cycle_record: dict, *,
-                                       displacement_m3: float,
-                                       mechanical_loss_model=None,
-                                       load: float = 0.0,
-                                       scavenging_reference_mass_kg: float | None = None) -> dict:
+                                      displacement_m3: float | None = None,
+                                      mechanical_loss_model=None,
+                                      load: float = 0.0,
+                                      scavenging_reference_mass_kg: float | None = None,
+                                      periodicity_status: str = "NOT_EVALUATED") -> dict:
     """Build the existing engineering-output schema from one primary cycle.
 
     Only quantities present in the accepted trajectory or explicitly supplied
@@ -2831,9 +3156,25 @@ def make_integrated_engineering_output(cycle_record: dict, *,
     if (type(start) not in (int, float) or type(end) not in (int, float) or
             not isclose(end - start, 360.0, rel_tol=0.0, abs_tol=1e-10)):
         raise ValueError("engineering output requires one complete 360-degree cycle")
-    displacement = float(displacement_m3)
-    if not isfinite(displacement) or displacement <= 0.0:
-        raise ValueError("engineering output requires positive displacement")
+    initial_observables = cycle_record.get("observables", {})
+    has_fuel_chemistry = (isinstance(initial_observables, dict) and
+                          isinstance(initial_observables.get("fuel_coupled_combustion"), dict))
+    if has_fuel_chemistry:
+        frozen_displacement = cycle_record.get("swept_displacement_m3")
+        if (type(frozen_displacement) not in (int, float) or
+                not isfinite(frozen_displacement) or frozen_displacement <= 0.0):
+            raise ValueError("fuel-coupled output requires config-bound swept displacement")
+        if (displacement_m3 is not None and
+                (type(displacement_m3) not in (int, float) or
+                 not isclose(float(displacement_m3), float(frozen_displacement),
+                             rel_tol=1e-12, abs_tol=1e-15))):
+            raise ValueError("caller displacement differs from the frozen engine geometry")
+        displacement = float(frozen_displacement)
+    else:
+        if (type(displacement_m3) not in (int, float) or
+                not isfinite(displacement_m3) or displacement_m3 <= 0.0):
+            raise ValueError("engineering output requires positive displacement")
+        displacement = float(displacement_m3)
     duct_roles = cycle_record.get("duct_roles")
     if (not isinstance(duct_roles, dict) or
             set(duct_roles) != set(cycle_record.get("duct_volumes_m3", {}))):
@@ -2946,6 +3287,8 @@ def make_integrated_engineering_output(cycle_record: dict, *,
         "fresh_short_circuit_kg", "fuel_short_circuit_kg",
         "wall_heat_loss_J", "p7_heat_J",
         "crankcase_energy_work_J", "reed_dissipation_J")}
+    fuel_combustion_heat_J = 0.0
+    fuel_combustion_species_kg = [0.0] * 4
     external_mass = external_energy = 0.0
     external_species = [0.0] * 4
     p7_species = [0.0] * 4
@@ -2975,6 +3318,20 @@ def make_integrated_engineering_output(cycle_record: dict, *,
             sum(stage.values()) for stage in row["stage_thermal_rates"])
         integrals["p7_heat_J"] += .5 * dt * sum(
             stage["heat_w"] for stage in row["stage_p7_source_rates"])
+        if "fuel_coupled_combustion" in cycle_record.get("observables", {}):
+            fuel_stages = row.get("stage_fuel_combustion_source_rates")
+            if not isinstance(fuel_stages, list) or len(fuel_stages) != 2:
+                raise ValueError("fuel-coupled output lacks both accepted SSPRK source stages")
+            for stage in fuel_stages:
+                if (not isinstance(stage, dict) or
+                        not isinstance(stage.get("species_kg_s"), list) or
+                        len(stage["species_kg_s"]) != 4):
+                    raise ValueError("fuel-coupled output source stage is malformed")
+            fuel_combustion_heat_J += .5 * dt * sum(
+                float(stage["heat_w"]) for stage in fuel_stages)
+            for index in range(4):
+                fuel_combustion_species_kg[index] += .5 * dt * sum(
+                    float(stage["species_kg_s"][index]) for stage in fuel_stages)
         if dynamic_binding_data is not None:
             for stage_index in range(2):
                 reed_state = row["stage_states"][stage_index]["dynamic_reed"]
@@ -2999,7 +3356,28 @@ def make_integrated_engineering_output(cycle_record: dict, *,
     ledgers = cycle_record.get("cycle_ledgers")
     if not isinstance(obs, dict) or not isinstance(ledgers, dict):
         raise ValueError("engineering output requires cycle-primary derived observables and ledgers")
+    chemistry = obs.get("fuel_coupled_combustion")
+    if periodicity_status in {"PERIOD_1", "PERIOD_2"}:
+        evidence = cycle_record.get("periodicity_evidence")
+        if (not isinstance(evidence, dict) or
+                evidence.get("status") != periodicity_status or
+                evidence.get("configuration_hash") != cycle_record.get("configuration_hash") or
+                evidence.get("terminal_cycle") != cycle_record.get("cycle_index") or
+                not isinstance(evidence.get("detector_sha256"), str) or
+                len(evidence["detector_sha256"]) != 64 or
+                any(ch not in "0123456789abcdef" for ch in evidence["detector_sha256"])):
+            raise ValueError("accepted periodicity output requires detector/config/terminal-bound evidence")
     work = -integrals["cylinder_energy_work_J"]
+    crankcase_gas_work = -integrals["crankcase_energy_work_J"]
+    net_piston_gas_work = work + crankcase_gas_work
+    if "fuel_coupled_combustion" in cycle_record.get("observables", {}):
+        for key, actual in (("cylinder_indicated_work_J", work),
+                            ("crankcase_gas_work_J", crankcase_gas_work),
+                            ("net_piston_gas_work_J", net_piston_gas_work)):
+            if key not in cycle_record["observables"] or not isclose(
+                    float(cycle_record["observables"][key]), actual,
+                    rel_tol=1e-10, abs_tol=1e-14):
+                raise ValueError(f"cycle primary observable {key} differs from accepted work stages")
     ledger_checks = {
         "external_mass_kg": external_mass,
         "external_energy_J": external_energy,
@@ -3076,11 +3454,13 @@ def make_integrated_engineering_output(cycle_record: dict, *,
     terminal_inventory = inventory(_tuplify(cycle_record["terminal_state"]))
     mass_residual = terminal_inventory[0] - initial_inventory[0] - external_mass
     energy_residual = (terminal_inventory[1] - initial_inventory[1] - external_energy -
-                       integrals["p7_heat_J"] - integrals["cylinder_energy_work_J"] -
+                       integrals["p7_heat_J"] - fuel_combustion_heat_J -
+                       integrals["cylinder_energy_work_J"] -
                        integrals["crankcase_energy_work_J"] + integrals["wall_heat_loss_J"] +
                        integrals["reed_dissipation_J"])
     species_residual = [terminal_inventory[2][i] - initial_inventory[2][i] -
-                        external_species[i] - p7_species[i] for i in range(4)]
+                        external_species[i] - p7_species[i] -
+                        fuel_combustion_species_kg[i] for i in range(4)]
     trace_recomputable = {
         "fresh_air_intake_delivery_kg", "fuel_delivered_kg",
         "fuel_short_circuited_kg", "p7_fuel_consumed_kg",
@@ -3212,9 +3592,13 @@ def make_integrated_engineering_output(cycle_record: dict, *,
         for name in ("brake_work_j", "brake_power_w", "brake_torque_nm", "bmep_pa", "fmep_pa"):
             undefined(name, "No mechanical-loss model was explicitly configured for this cycle.")
     else:
-        result = mechanical_loss_model.evaluate_2t(
-            indicated_work_j=work, displacement_m3=displacement,
-            rpm=rpm, load=load)
+        result = (mechanical_loss_model.evaluate_2t_net_piston_work(
+            net_piston_gas_work_j=net_piston_gas_work,
+            displacement_m3=displacement, rpm=rpm, load=load)
+            if isinstance(chemistry, dict) else
+            mechanical_loss_model.evaluate_2t(
+                indicated_work_j=work, displacement_m3=displacement,
+                rpm=rpm, load=load))
         for name, key in (("brake_work_j", "brake_work_j"),
                           ("brake_power_w", "brake_power_w"),
                           ("brake_torque_nm", "brake_torque_nm"),
@@ -3226,8 +3610,23 @@ def make_integrated_engineering_output(cycle_record: dict, *,
         specific_consumption(brake_power, "bsfc_g_kwh")
     else:
         undefined("bsfc_g_kwh", "Positive brake power requires an explicit loss model.")
-    for name in ("gross_work_j", "net_work_j"):
-        undefined(name, "Gross/net work separation is not defined by this integrated model.")
+    if isinstance(chemistry, dict):
+        defined("cylinder_indicated_work_j", work,
+                "accepted cylinder pressure-volume integral; W_cyl = integral(p_cyl dV_cyl)")
+        defined("crankcase_gas_work_j", crankcase_gas_work,
+                "accepted crankcase gas boundary work with physical piston sign")
+        defined("net_piston_gas_work_j", net_piston_gas_work,
+                "W_net,piston = W_cyl + W_crankcase")
+        defined("net_piston_mep_pa", net_piston_gas_work / displacement,
+                "net piston gas work / geometry-derived displacement")
+        defined("net_work_j", net_piston_gas_work,
+                "W_cyl + W_crankcase; before mechanical losses")
+        if mechanical_loss_model is not None:
+            defined("gross_work_j", work,
+                    "cylinder indicated work before crankcase gas work and mechanical losses")
+    else:
+        for name in ("gross_work_j", "net_work_j"):
+            undefined(name, "Gross/net work separation is not defined by this integrated model.")
     for name in ("delivery_ratio", "trapping_efficiency", "scavenging_efficiency",
                  "charging_efficiency", "trapping_ratio", "residual_fraction",
                  "purity_at_transfer_close", "purity_at_exhaust_close",
@@ -3248,20 +3647,136 @@ def make_integrated_engineering_output(cycle_record: dict, *,
                 "not total trapped fuel")
     if (scavenging_reference_mass_kg is not None and isinstance(closures, dict) and
             closures.get("status") == "EXACT_EVENT_STATES_CAPTURED"):
-        from .scavenging import ScavengingInput, calculate_scavenging_metrics
-        metrics_record = calculate_scavenging_metrics(ScavengingInput(
+        from .scavenging import (ScavengingInput, calculate_scavenging_metrics,
+                                 calculate_scavenging_metrics_v2)
+        scavenging_input = ScavengingInput(
             reference_mass_kg=scavenging_reference_mass_kg,
             fresh_delivered_kg=integrals["fresh_delivery_kg"],
             fresh_short_circuit_kg=integrals["fresh_short_circuit_kg"],
             species_at_transfer_close_kg=tuple(
                 closures["snapshots"]["transfer"]["cylinder_species_kg"]),
             species_at_exhaust_close_kg=tuple(
-                closures["snapshots"]["exhaust"]["cylinder_species_kg"])))
+                closures["snapshots"]["exhaust"]["cylinder_species_kg"]))
+        metrics_record = (
+            calculate_scavenging_metrics_v2(scavenging_input)
+            if "fuel_coupled_combustion" in obs else
+            calculate_scavenging_metrics(scavenging_input))
         from .scavenging import scavenging_engineering_records
         metrics.update(scavenging_engineering_records(metrics_record))
+    if isinstance(chemistry, dict):
+        trapped_air = chemistry.get("fresh_air_trapped_at_ignition_snapshot_kg")
+        trapped_fuel = chemistry.get("fuel_trapped_at_ignition_snapshot_kg")
+        if (type(trapped_air) in (int, float) and type(trapped_fuel) in (int, float)
+                and trapped_air >= 0.0 and trapped_fuel > 0.0):
+            actual_afr = trapped_air / trapped_fuel
+            from .fuel_combustion import SyntheticFuelSurrogateV1
+            stoich_afr = SyntheticFuelSurrogateV1.from_snapshot(
+                chemistry["fuel_snapshot"]).stoichiometric_afr
+            defined("trapped_air_kg", trapped_air,
+                    "accepted cylinder fresh_air species at exact ignition snapshot")
+            defined("trapped_fuel_kg", trapped_fuel,
+                    "accepted cylinder fuel species at exact ignition snapshot")
+            if actual_afr > 0.0:
+                defined("afr", actual_afr,
+                        "fresh_air / fuel at exact ignition snapshot; synthetic species basis")
+                defined("equivalence_ratio", stoich_afr / actual_afr,
+                        "synthetic stoichiometric AFR / ignition-snapshot actual AFR")
+            else:
+                undefined("afr", "A positive trapped fresh-air/fuel ratio is required.")
+                undefined("equivalence_ratio", "A positive trapped AFR is required.")
+        else:
+            for name in ("trapped_air_kg", "trapped_fuel_kg", "afr",
+                         "equivalence_ratio"):
+                undefined(name, "Positive trapped fuel and exact ignition species snapshot are required.")
+        burned = chemistry.get("fuel_burned_kg")
+        if type(burned) in (int, float) and burned >= 0.0:
+            defined("fuel_burned_per_cycle_kg", burned,
+                    "accepted fuel-coupled SSPRK2 chemical species source ledger")
+            if type(trapped_fuel) in (int, float):
+                remaining_ignition_fuel = float(trapped_fuel) - burned
+                if remaining_ignition_fuel < 0.0:
+                    raise ValueError("burned fuel exceeds the exact ignition fuel inventory")
+                defined("fuel_unburned_at_ignition_snapshot_kg",
+                        remaining_ignition_fuel,
+                        "ignition trapped fuel less accepted burned fuel")
+            else:
+                undefined("fuel_unburned_at_ignition_snapshot_kg",
+                          "The exact ignition fuel inventory is unavailable.")
+            defined("fuel_flow_kg_s", integrals["fuel_delivery_kg"] / duration,
+                    "accepted gross engine-intake fuel species flux / cycle duration")
+            defined("fuel_delivered_per_cycle_kg", integrals["fuel_delivery_kg"],
+                    "accepted gross engine-intake fuel species flux")
+            defined("fuel_short_circuited_per_cycle_kg",
+                    float(chemistry.get("fuel_short_circuited_gross_kg", 0.0)),
+                    "accepted gross outward exhaust fuel species flux")
+            defined("fuel_unburned_terminal_global_kg",
+                    float(chemistry["unburned_fuel_terminal_kg"]),
+                    "accepted terminal global four-species fuel inventory")
+        else:
+            undefined("fuel_burned_per_cycle_kg", "Fuel-coupled source ledger is unavailable.")
+            undefined("fuel_unburned_at_ignition_snapshot_kg", "Fuel inventory is unavailable.")
+        undefined("isfc_g_kwh", "A single cycle is not an accepted periodic cycle.")
+        undefined("bsfc_g_kwh", "A single cycle is not an accepted periodic cycle.")
+        periodic_performance = ("indicated_power_w", "indicated_torque_nm", "imep_pa",
+                               "brake_work_j", "brake_power_w", "brake_torque_nm",
+                               "bmep_pa", "fmep_pa", "net_piston_mep_pa")
+        if periodicity_status != "PERIOD_1":
+            reason = ("A PERIOD_2 result requires a two-cycle aggregate for performance."
+                      if periodicity_status == "PERIOD_2" else
+                      "Performance requires an accepted periodic cycle.")
+            for name in periodic_performance:
+                undefined(name, reason)
+            undefined("isfc_g_kwh", reason)
+            undefined("bsfc_g_kwh", reason)
+        else:
+            fuel_for_consumption = float(chemistry.get("fuel_burned_kg", 0.0))
+            if fuel_for_consumption > 0.0 and indicated_power > 0.0:
+                value = _specific_consumption_value(fuel_for_consumption, duration,
+                                                    indicated_power)
+                if value is not None:
+                    defined("isfc_g_kwh", value,
+                            "fuel-coupled burned fuel / accepted periodic indicated power")
+            if (brake_power is not None and brake_power > 0.0 and
+                    fuel_for_consumption > 0.0):
+                value = _specific_consumption_value(fuel_for_consumption, duration,
+                                                    brake_power)
+                if value is not None:
+                    defined("bsfc_g_kwh", value,
+                            "fuel-coupled burned fuel / accepted periodic brake power")
     for name in ("ca10_deg", "ca50_deg", "ca90_deg"):
         undefined(name, "Combustion-fraction landmarks are not part of the current P7 source record.")
 
+    if isinstance(chemistry, dict):
+        from .engineering_outputs import build_integrated_engineering_output_v5
+        from .engineering_outputs import PERIODIC_METRICS_V5
+        v5_metrics = {}
+        for name, record in metrics.items():
+            if record["status"] == "UNDEFINED":
+                provenance = "UNKNOWN"
+            elif name in {"equivalence_ratio", "isfc_g_kwh", "bsfc_g_kwh",
+                          "fuel_burned_per_cycle_kg", "fuel_unburned_at_ignition_snapshot_kg"}:
+                provenance = "SYNTHETIC_ASSUMPTION"
+            elif name in {"brake_work_j", "brake_power_w", "brake_torque_nm",
+                          "bmep_pa", "fmep_pa"} and mechanical_loss_model is not None:
+                values = {term.provenance for term in mechanical_loss_model.terms}
+                provenance = ("SYNTHETIC_ASSUMPTION" if "SYNTHETIC_ASSUMPTION" in values
+                              else "DERIVED_FROM_DOCUMENTED")
+            else:
+                provenance = "DERIVED_FROM_DOCUMENTED"
+            v5_metrics[name] = {
+                **record,
+                "provenance": provenance,
+                "periodicity_dependency": ("REQUIRED" if name in PERIODIC_METRICS_V5
+                                           else "NOT_REQUIRED"),
+                "definition_version": "MOTORSIM_2T_V1_OUTPUT_METRIC_1",
+            }
+        return build_integrated_engineering_output_v5(
+            rpm=rpm, cycle_number=cycle_number,
+            angles_deg=tuple(row[0] - float(start) for row in rows),
+            channels=channels, cycle_metrics=v5_metrics,
+            dependency_status="CONDITIONAL_ON_P4",
+            configuration_sha256=cycle_record["configuration_hash"],
+            periodicity_status=periodicity_status)
     return build_integrated_engineering_output_v3(
         rpm=rpm, cycle_number=cycle_number,
         angles_deg=tuple(row[0] - float(start) for row in rows),

@@ -8,6 +8,8 @@ from motorsim.gas1d.mesh import Mesh, uniform_mesh
 from motorsim.gas1d.boundary import Boundary
 from motorsim.gas1d.eos import IdealGas
 from motorsim.gas1d.open_end_plenum_v2 import OpenEndPlenumV2Boundary
+from motorsim.fuel_combustion import FuelCoupledCombustionV1
+from motorsim.combustion import WiebeComponent
 from motorsim.crankcase import CrankcaseGeometry
 from motorsim.expansion_chamber import ChamberSection, ExpansionChamber
 from motorsim.integrated_2t import (
@@ -20,7 +22,8 @@ from motorsim.integrated_2t import (
     _specific_consumption_value, _gross_fresh_short_circuit_rate,
 )
 from motorsim.engineering_outputs import (validate_integrated_engineering_output_v3,
-                                          validate_integrated_engineering_output_v4)
+                                          validate_integrated_engineering_output_v4,
+                                          validate_integrated_engineering_output_v5)
 from motorsim.reference_harness.convergence import PeriodicDetector, compare_cycles
 from motorsim.kinematics import piston_position
 from motorsim.p6_species import SPECIES
@@ -63,7 +66,8 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
           port_binding=None, reference_rpm=1000.0, geometry_identity=None,
           duct_species=None, slider_crank=None,
           combustion_start_angle_deg=None, cylinder_species=None,
-          intake_plenum=None, network_volumes=(), dynamic_reed_binding=None):
+          intake_plenum=None, network_volumes=(), dynamic_reed_binding=None,
+          fuel_coupled_combustion=None):
     def duct_mesh(duct_id):
         if duct_id == "exhaust" and exhaust_mesh is not None:
             return exhaust_mesh
@@ -122,7 +126,9 @@ def _case(*, crankcase_pressure=130000.0, cylinder_pressure=101325.0,
         slider_crank=slider_crank,
         reference_rpm=reference_rpm,
         thermal_system=thermal_system, thermal_locations=thermal_locations,
-        combustion_start_angle_deg=combustion_start_angle_deg,
+        combustion_start_angle_deg=(None if fuel_coupled_combustion is not None else
+                                    combustion_start_angle_deg),
+        fuel_coupled_combustion=fuel_coupled_combustion,
         max_cfl=max_cfl)
 
 
@@ -1104,7 +1110,9 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
                             fixture_name=None, intake_plenum=False,
                             network_volumes=(), dynamic_reed=False,
                             transfer_ids=("primary", "secondary", "boost"),
-                            open_end_plenum_v2=False):
+                            open_end_plenum_v2=False,
+                            fuel_coupled_combustion=None,
+                            p7_enabled_with_fuel=False):
     rpm = 3000.0
     crankcase = CrankcaseGeometry(56.0, 50.0, 100.0, 80.0,
                                   "SYNTHETIC_ASSUMPTION")
@@ -1223,7 +1231,9 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
         network_volumes=network_volumes,
         reference_rpm=rpm, thermal_system=thermal,
         thermal_locations={"cylinder-wall": "cylinder"},
-        combustion_start_angle_deg=300.0, max_cfl=.4)
+        combustion_start_angle_deg=(
+            300.0 if p7_enabled_with_fuel or fuel_coupled_combustion is None else None),
+        fuel_coupled_combustion=fuel_coupled_combustion, max_cfl=.4)
 
 
 def _advance_cycle_fixture(system, target_angle):
@@ -1737,8 +1747,14 @@ def test_integrated_open_end_plenum_v2_configuration_restore_and_equilibrium():
     for primitive in (system._primitive(system.state["ducts"]["intake"][0]),
                       system._primitive(system.state["ducts"]["exhaust"][0])):
         assert primitive[2] == pytest.approx(101325.0, abs=1e-7)
+        assert primitive[1] == pytest.approx(0.0, abs=1e-10)
     assert system.trace[-1]["stage_face_fluxes"][1]["intake"][
         "left_external_pressure_reaction_n"] == pytest.approx(101325.0 * 1e-4)
+    exhaust_face_area = next(path for path in system.ducts
+                             if path.id == "exhaust").mesh.areas[-1]
+    assert system.trace[-1]["stage_face_fluxes"][1]["exhaust"][
+        "right_external_pressure_reaction_n"] == pytest.approx(
+            -101325.0 * exhaust_face_area)
 
 
 @pytest.mark.parametrize("transfer_ids", [
@@ -1757,6 +1773,142 @@ def test_positive_transfer_route_topologies_construct_serialize_step_and_restore
     engine.step(1e-8, .0001)
     restored.restore(engine.snapshot())
     assert restored.snapshot() == engine.snapshot()
+
+
+def test_fuel_coupled_chemistry_uses_both_ssprk_stages_and_restores_independently_of_p7():
+    combustion = FuelCoupledCombustionV1(
+        (WiebeComponent(1.0, 40.0, 5.0, 2.0),),
+        ignition_timing_deg=0.0, combustion_efficiency=.8)
+    engine = _internal_cycle_fixture(fuel_coupled_combustion=combustion,
+                                     open_end_plenum_v2=True)
+    config = engine.configuration_dict()
+    assert config["schema"] == "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V5"
+    rebuilt = IntegratedEngine2T.from_configuration_dict(config)
+    assert rebuilt.configuration_dict() == config
+    assert rebuilt.schema == "MOTORSIM_INTEGRATED_ENGINE_2T_STATE_V10"
+    assert rebuilt.p7_event is None
+    assert rebuilt.fuel_combustion_event == engine.fuel_combustion_event
+
+    rebuilt.step(.1 / (6.0 * rebuilt.reference_rpm), .1)
+    trace = rebuilt.trace[-1]
+    sources = trace["stage_fuel_combustion_source_rates"]
+    assert sources[0]["burned_fuel_rate_kg_s"] == 0.0
+    assert sources[1]["burned_fuel_rate_kg_s"] > 0.0
+    assert trace["fuel_combustion_heat_increment_j"] > 0.0
+    assert sum(trace["fuel_combustion_source_species_increment_kg"]) == pytest.approx(
+        0.0, abs=1e-18)
+    assert trace["fuel_combustion_source_species_increment_kg"][2] == 0.0
+    assert trace["fuel_combustion_source_species_increment_kg"][3] > 0.0
+
+    restored = IntegratedEngine2T.from_configuration_dict(config)
+    restored.restore(rebuilt.snapshot())
+    assert restored.snapshot() == rebuilt.snapshot()
+
+
+def test_fuel_coupled_combustion_rejects_simultaneous_historical_p7():
+    combustion = FuelCoupledCombustionV1(
+        (WiebeComponent(1.0, 40.0, 5.0, 2.0),),
+        ignition_timing_deg=0.0, combustion_efficiency=.8)
+    with pytest.raises(ValueError, match="cannot be enabled together"):
+        _internal_cycle_fixture(fuel_coupled_combustion=combustion,
+                                fixture_name="simultaneous-p7",
+                                p7_enabled_with_fuel=True)
+
+
+def test_fuel_coupled_cycle_primary_recomputes_species_and_energy_sources():
+    combustion = FuelCoupledCombustionV1(
+        (WiebeComponent(1.0, 40.0, 5.0, 2.0),),
+        ignition_timing_deg=0.0, combustion_efficiency=.8)
+    engine = _case(
+        duct_length=.5, reference_rpm=1000.0,
+        cylinder_species=(.00015, 1e-7, .000211824 - .0001501, 0.0),
+        fuel_coupled_combustion=combustion)
+    start = engine.snapshot()
+    for _ in range(360):
+        engine.step(1.0 / (6.0 * engine.reference_rpm), 1.0)
+    end = engine.snapshot()
+    primary = make_integrated_cycle_primary(engine, start, end, 1)
+    chemistry = primary["observables"]["fuel_coupled_combustion"]
+
+    assert chemistry["fuel_sha256"] == combustion.fuel.sha256
+    assert chemistry["fuel_burned_kg"] > 0.0
+    assert chemistry["fuel_burned_kg"] <= 1e-7
+    assert chemistry["chemical_heat_added_J"] == pytest.approx(
+        chemistry["fuel_burned_kg"] * 43_000_000.0 * .8)
+    assert abs(primary["conservation"]["energy_residual_J"]) < 1e-10
+    assert abs(primary["conservation"]["species_residual_kg"][1]) < 1e-15
+
+
+def test_fuel_coupled_observables_bind_delivered_trapped_burned_and_unburned_snapshots():
+    combustion = FuelCoupledCombustionV1(
+        (WiebeComponent(1.0, 40.0, 5.0, 2.0),),
+        ignition_timing_deg=0.0, combustion_efficiency=.01)
+    engine = _internal_cycle_fixture(fuel_coupled_combustion=combustion,
+                                     open_end_plenum_v2=True)
+    start = engine.snapshot()
+    _advance_cycle_fixture(engine, 360.0)
+    primary = make_integrated_cycle_primary(engine, start, engine.snapshot(), 1)
+    metrics = primary["observables"]["fuel_coupled_combustion"]
+    exhaust_snapshot = primary["port_closure_snapshots"]["snapshots"]["exhaust"]
+
+    assert metrics["fuel_delivered_gross_kg"] == pytest.approx(
+        primary["observables"]["fuel_delivered_kg"])
+    assert metrics["fuel_short_circuited_gross_kg"] == pytest.approx(
+        primary["observables"]["fuel_short_circuited_kg"])
+    assert metrics["fuel_trapped_at_ignition_snapshot_kg"] > 0.0
+    assert metrics["fuel_available_from_ignition_snapshot_kg"] <= \
+        metrics["fuel_trapped_at_ignition_snapshot_kg"]
+    assert metrics["unburned_fuel_at_exhaust_close_kg"] == pytest.approx(
+        exhaust_snapshot["cylinder_species_kg"][1])
+    assert metrics["fuel_burned_kg"] > 0.0
+    assert metrics["unburned_fuel_in_cylinder_terminal_kg"] >= 0.0
+
+
+def test_fuel_coupled_output_uses_net_piston_work_and_v5_periodicity_metadata():
+    combustion = FuelCoupledCombustionV1(
+        (WiebeComponent(1.0, 40.0, 5.0, 2.0),),
+        ignition_timing_deg=0.0, combustion_efficiency=.8)
+    engine = _internal_cycle_fixture(fuel_coupled_combustion=combustion,
+                                     open_end_plenum_v2=True)
+    start = engine.snapshot()
+    _advance_cycle_fixture(engine, 360.0)
+    primary = make_integrated_cycle_primary(engine, start, engine.snapshot(), 1)
+    model = MechanicalLossModel((LossTerm(
+        "loss", "piston_ring", "SYNTHETIC_ASSUMPTION", mep_pa=1000.0),))
+    output = make_integrated_engineering_output(primary, mechanical_loss_model=model)
+    metrics = output["cycle_metrics"]
+    obs = primary["observables"]
+
+    assert output["schema"] == "MOTORSIM_ENGINEERING_OUTPUTS_V5"
+    assert metrics["cylinder_indicated_work_j"]["value"] == pytest.approx(
+        obs["cylinder_indicated_work_J"])
+    assert metrics["crankcase_gas_work_j"]["value"] == pytest.approx(
+        obs["crankcase_gas_work_J"])
+    assert metrics["net_piston_gas_work_j"]["value"] == pytest.approx(
+        obs["net_piston_gas_work_J"])
+    assert metrics["brake_work_j"]["status"] == "UNDEFINED"
+    assert metrics["brake_work_j"]["periodicity_dependency"] == "REQUIRED"
+    assert output["claims"]["periodicity"] == "NOT_EVALUATED"
+    assert validate_integrated_engineering_output_v5(output) == output
+    periodic_primary = deepcopy(primary)
+    periodic_primary["periodicity_evidence"] = {
+        "status": "PERIOD_1",
+        "configuration_hash": primary["configuration_hash"],
+        "terminal_cycle": primary["cycle_index"],
+        "detector_sha256": "a" * 64,
+    }
+    periodic_output = make_integrated_engineering_output(
+        periodic_primary, mechanical_loss_model=model,
+        periodicity_status="PERIOD_1")
+    periodic_metrics = periodic_output["cycle_metrics"]
+    displacement = primary["swept_displacement_m3"]
+    assert periodic_metrics["brake_work_j"]["value"] == pytest.approx(
+        obs["net_piston_gas_work_J"] - 1000.0 * displacement)
+    assert periodic_metrics["bsfc_g_kwh"]["status"] == "UNDEFINED"
+    assert validate_integrated_engineering_output_v5(periodic_output) == periodic_output
+    with pytest.raises(ValueError, match="differs from the frozen engine geometry"):
+        make_integrated_engineering_output(
+            primary, displacement_m3=1e-3, mechanical_loss_model=model)
 
 
 def test_integrated_engine_config_rejects_unserializable_geometry_contract():

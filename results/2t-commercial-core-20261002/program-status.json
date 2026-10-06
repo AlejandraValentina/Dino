@@ -1518,6 +1518,281 @@
         "Component-level evidence only; IntegratedEngine2T binding not claimed"
       ],
       "next_action": "Standalone component contract is integrated by dynamic-reed-stage-coupling in commit 062d8eb; preserve its two-volume tests as component-level regressions."
+    },
+    {
+      "id": "C1",
+      "description": "Network endpoint pressure traction and equilibrium reactions",
+      "dependencies": [],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [
+        "5e336093fe59856a87856b5aba37019e37c23607"
+      ],
+      "evidence": [
+        "OpenSpec C1-C18 task queue; focused integrated/unit tests"
+      ],
+      "next_action": "Complete C10-C12 foundation gates"
+    },
+    {
+      "id": "C2",
+      "description": "Integrate OPEN_END_PLENUM_V2 into integrated configuration/restore and short diagnostic",
+      "dependencies": [
+        "C1"
+      ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [
+        "5e336093fe59856a87856b5aba37019e37c23607"
+      ],
+      "evidence": [
+        "OpenSpec C1-C18 task queue; focused integrated/unit tests"
+      ],
+      "next_action": "Complete C10-C12 foundation gates"
+    },
+    {
+      "id": "C3",
+      "description": "Positive transfer-route topology support",
+      "dependencies": [
+        "C1"
+      ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [
+        "5e336093fe59856a87856b5aba37019e37c23607"
+      ],
+      "evidence": [
+        "OpenSpec C1-C18 task queue; focused integrated/unit tests"
+      ],
+      "next_action": "Complete C10-C12 foundation gates"
+    },
+    {
+      "id": "C4",
+      "description": "Fuel/oxygen-limited combustion V1 in both SSPRK2 stages, separate from P7",
+      "dependencies": [
+        "C3"
+      ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "OpenSpec C1-C18 task queue; focused integrated/unit tests"
+      ],
+      "next_action": "Complete C10-C12 foundation gates"
+    },
+    {
+      "id": "C5",
+      "description": "Fuel, trapped, burned and unburned cycle observables",
+      "dependencies": [
+        "C3"
+      ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "OpenSpec C1-C18 task queue; focused integrated/unit tests"
+      ],
+      "next_action": "Complete C10-C12 foundation gates"
+    },
+    {
+      "id": "C6",
+      "description": "Physical-domain scavenging V2 with explicit perfect-mixing assumption",
+      "dependencies": [
+        "C3"
+      ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "OpenSpec C1-C18 task queue; focused integrated/unit tests"
+      ],
+      "next_action": "Complete C10-C12 foundation gates"
+    },
+    {
+      "id": "C7",
+      "description": "Cylinder, crankcase and net-piston work semantics with geometry-bound losses",
+      "dependencies": [
+        "C3"
+      ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "OpenSpec C1-C18 task queue; focused integrated/unit tests"
+      ],
+      "next_action": "Complete C10-C12 foundation gates"
+    },
+    {
+      "id": "C8",
+      "description": "V5 engineering output provenance, definitions and periodicity contract",
+      "dependencies": [
+        "C3"
+      ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "OpenSpec C1-C18 task queue; focused integrated/unit tests"
+      ],
+      "next_action": "Complete C10-C12 foundation gates"
+    },
+    {
+      "id": "C9",
+      "description": "Equilibrium/reaction coverage for ports, endpoints, network and atmospheric ends",
+      "dependencies": [
+        "C3"
+      ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "OpenSpec C1-C18 task queue; focused integrated/unit tests"
+      ],
+      "next_action": "Complete C10-C12 foundation gates"
+    },
+    {
+      "id": "C10",
+      "description": "Primary-evidence offline reconstruction of fluxes, RHS, decisions and rejection bounds",
+      "dependencies": [
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "C8",
+        "C9"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        []
+      ],
+      "next_action": "Implement and verify this gate in declared order"
+    },
+    {
+      "id": "C11",
+      "description": "Continuous/checkpoint/restart/replay exact comparison for A-prime and B-prime",
+      "dependencies": [
+        "C4",
+        "C5",
+        "C7",
+        "C8"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        []
+      ],
+      "next_action": "Implement and verify this gate in declared order"
+    },
+    {
+      "id": "C12",
+      "description": "Preregistered integrated transfer/exhaust mesh sufficiency study",
+      "dependencies": [
+        "C3",
+        "C9"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        []
+      ],
+      "next_action": "Implement and verify this gate in declared order"
+    },
+    {
+      "id": "C13",
+      "description": "Exclusive immutable A-prime/B-prime campaign preregistration commit",
+      "dependencies": [
+        "C10",
+        "C11",
+        "C12"
+      ],
+      "state": "BLOCKED_LOCAL",
+      "blocker": "Prerequisite gates not yet complete",
+      "commits": [],
+      "evidence": [
+        []
+      ],
+      "next_action": "Implement and verify this gate in declared order"
+    },
+    {
+      "id": "C14",
+      "description": "Run frozen A-prime campaign and primary-evidence audit",
+      "dependencies": [
+        "C10",
+        "C11",
+        "C12",
+        "C13"
+      ],
+      "state": "BLOCKED_LOCAL",
+      "blocker": "Prerequisite gates not yet complete",
+      "commits": [],
+      "evidence": [
+        []
+      ],
+      "next_action": "Implement and verify this gate in declared order"
+    },
+    {
+      "id": "C15",
+      "description": "Run frozen B-prime campaign and primary-evidence audit",
+      "dependencies": [
+        "C10",
+        "C11",
+        "C12",
+        "C13"
+      ],
+      "state": "BLOCKED_LOCAL",
+      "blocker": "Prerequisite gates not yet complete",
+      "commits": [],
+      "evidence": [
+        []
+      ],
+      "next_action": "Implement and verify this gate in declared order"
+    },
+    {
+      "id": "C16",
+      "description": "Exercise two preregistered RPM values across materially distinct primes",
+      "dependencies": [
+        "C13"
+      ],
+      "state": "BLOCKED_LOCAL",
+      "blocker": "Prerequisite gates not yet complete",
+      "commits": [],
+      "evidence": [
+        []
+      ],
+      "next_action": "Implement and verify this gate in declared order"
+    },
+    {
+      "id": "C17",
+      "description": "Run focused integration and full P4-P8/OpenSpec/LFS/P9 final checks",
+      "dependencies": [
+        "C14",
+        "C15",
+        "C16"
+      ],
+      "state": "BLOCKED_LOCAL",
+      "blocker": "Prerequisite gates not yet complete",
+      "commits": [],
+      "evidence": [
+        []
+      ],
+      "next_action": "Implement and verify this gate in declared order"
+    },
+    {
+      "id": "C18",
+      "description": "Keep v1 definition of done versioned in OpenSpec and classify all findings",
+      "dependencies": [
+        "C17"
+      ],
+      "state": "BLOCKED_LOCAL",
+      "blocker": "Prerequisite gates not yet complete",
+      "commits": [],
+      "evidence": [
+        []
+      ],
+      "next_action": "Implement and verify this gate in declared order"
     }
   ],
   "audit_remediation_mode": false,
@@ -1687,12 +1962,13 @@
   "continuation_status": {
     "mode": "MOTORSIM_AUTONOMOUS_ENGINEERING_TEAM",
     "audit_remediation_mode": false,
-    "ready_tasks": 0,
+    "ready_tasks": 3,
     "local_blockers": [
-      "17d-fuel-properties: no evidenced point ANCAP chemistry/LHV or approved mapping of prescribed P7 Q_F to chemical energy; retain those outputs undefined.",
-      "KT100 remains unverified; R1 cycle24 numerical failure is not a trajectory result and its one-run authorization is consumed; no R2 is authorized."
+      "C10-C12 closure foundations are READY: evidence audit, restart/replay, integrated mesh study.",
+      "A-prime/B-prime campaigns remain prohibited until C10-C12 pass and C13 preregistration is separately committed.",
+      "KT100 remains unverified and frozen; no campaign authorized."
     ],
-    "next_action": "Continue autonomous blocker triage without treating an empty READY queue as a stop signal. Keep fuel chemistry undefined absent sourced properties, keep KT100 frozen absent a separately approved preregistration, preserve Fixture C identity, and do not claim Commercial Core READY.",
+    "next_action": "Continue MOTORSIM_2T_V1_CLOSURE at C10-C12; no fixture campaigns before mesh study and exclusive preregistration.",
     "in_progress_tasks": 0,
     "blocker_triage_date": "2026-10-06"
   }

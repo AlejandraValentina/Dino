@@ -30,6 +30,18 @@ def test_two_stroke_indicated_to_brake_analytic_accounting():
     assert result["cycle_convention"] == "2T_360_DEG_ONE_CYCLE_PER_REV"
 
 
+def test_net_piston_work_api_applies_losses_once_to_combined_gas_work():
+    result = model().evaluate_2t_net_piston_work(
+        net_piston_gas_work_j=80.0, displacement_m3=0.001,
+        rpm=6000, load=0.5)
+    assert result["schema"] == "MOTORSIM_MECHANICAL_LOSSES_2T_V2_NET_PISTON_WORK"
+    assert result["net_piston_gas_work_j"] == pytest.approx(80.0)
+    assert result["brake_work_j"] == pytest.approx(45.0)
+    assert result["brake_mep_pa"] == pytest.approx(45_000.0)
+    assert result["mechanical_loss_power_w"] == pytest.approx(3500.0)
+    assert result["clipped"] is False
+
+
 def test_map_inputs_interpolate_without_extrapolation():
     loss_map = OperatingMap((1000.0, 3000.0), (0.0, 1.0),
                             ((10_000.0, 20_000.0), (30_000.0, 40_000.0)))
