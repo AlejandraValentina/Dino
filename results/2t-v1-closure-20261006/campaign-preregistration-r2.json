@@ -1,0 +1,85 @@
+{
+  "schema": "MOTORSIM_2T_V1_CAMPAIGN_PREREGISTRATION_R2_V1",
+  "status": "PREREGISTERED_NOT_RUN",
+  "classification": "SYNTHETIC_ASSUMPTION_CONDITIONAL_ON_P4",
+  "purpose": "Single authorized corrected-runner R2 for C14/C15",
+  "residence_rule": {
+    "exhaust_residence_cycles": {"FIXTURE_A_PRIME": 27, "FIXTURE_B_PRIME": 11},
+    "time_constant_factor": 4,
+    "required_convergence_streak": 3,
+    "formula": "ceil(4 * exhaust_residence_cycles) + required_convergence_streak",
+    "physical_basis": "approximately four exponential-mode time constants before the fixed detector streak",
+    "rounding": "deterministic mathematical ceil; all inputs fixed before execution"
+  },
+  "horizon_cycles": {"FIXTURE_A_PRIME": 111, "FIXTURE_B_PRIME": 47},
+  "restart_cycle_rule": "ceil(max_cycles / 2)",
+  "periodicity_detector": "motorsim.reference_harness.convergence.PeriodicDetectorV2",
+  "periodicity_contract": "REFERENCE_PERIODIC_CONVERGENCE_V2",
+  "periodicity_thresholds": {
+    "chamber_mass_relative": 0.002,
+    "chamber_total_energy_relative": 0.002,
+    "chamber_pressure_relative": 0.005,
+    "chamber_temperature_relative": 0.005,
+    "duct_cell_mass_relative": 0.002,
+    "duct_cell_total_energy_relative": 0.002,
+    "duct_cell_pressure_relative": 0.005,
+    "duct_cell_temperature_relative": 0.005,
+    "duct_cell_species_mass_fraction_absolute": 0.002,
+    "duct_cell_velocity_over_sound_speed_absolute": 0.005,
+    "global_species_inventory_over_total_mass": 0.002,
+    "work_relative_floor_1J": 0.005,
+    "fresh_delivery_fraction_of_cycle_start_mass": 0.002,
+    "fresh_short_circuit_fraction_of_cycle_start_mass": 0.002,
+    "p7_burned_species_fraction_of_cycle_start_mass": 0.002,
+    "p7_heat_fraction_of_cycle_start_energy": 0.002
+  },
+  "convergence_streak": 3,
+  "allowed_final_statuses": ["PERIOD_1", "PERIOD_2", "NO_CONVERGENCE_WITHIN_HORIZON", "NUMERICAL_FAILURE", "PHYSICAL_INVALID"],
+  "r1_provenance": {
+    "preserved": true,
+    "runner_executed_detector": false,
+    "primary_periodicity": "NOT_EVALUATED",
+    "offline_classification": "R1_NO_CONVERGENCE_CONFIRMED_OFFLINE",
+    "forensics": [
+      "results/2t-v1-closure-20261006/campaign-a-prime-r1/r1-forensics.json",
+      "results/2t-v1-closure-20261006/campaign-b-prime-r1/r1-forensics.json"
+    ]
+  },
+  "fixtures": {
+    "FIXTURE_A_PRIME": {
+      "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_a_prime-mesh-0.json",
+      "fixture_config_sha256": "97a7baceeac4ee900275f8b652aab19286e004be3e6af996c18be9b24ffaf7d1",
+      "engine_configuration_sha256": "d3f000f72dda247e11a561ad63fb93daab1145cca689105a17cd8e6ae7c71ab7",
+      "mesh_level": 0, "rpm": 3000.0,
+      "max_cycles": 111, "restart_cycle": 56,
+      "binding_hashes": {
+        "auditor": "085d6d17b6a1d2c062d37e4cdbc3ddda3da59aaee1d13178a9cb547c0bfbce22",
+        "config": "d3f000f72dda247e11a561ad63fb93daab1145cca689105a17cd8e6ae7c71ab7",
+        "detector": "22df512d6e48b95b506401005b466d37038eebd888d684a287e70c1d76cd3193",
+        "fixture": "97a7baceeac4ee900275f8b652aab19286e004be3e6af996c18be9b24ffaf7d1",
+        "fuel": "f84f2ae402b8030e9305345cd030a141c519adca63fc4b48b001b0eb4609cea7",
+        "producer": "350ef4d57de87eb1b4470fb60151b8ecac9fca2b30688b7556b79ed1e8bd4db8",
+        "solver": "b4e8021eca2e32a368f6e1f977f685720a6436862fcad9b6a34798e5cf77de3d",
+        "thresholds": "43419bccbbcefaf04200448148e74d576d6fa1ecb0d9adf9c26a614e67828eff"
+      }
+    },
+    "FIXTURE_B_PRIME": {
+      "fixture_config_path": "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_b_prime-mesh-0.json",
+      "fixture_config_sha256": "51cd1639ba6825269ce7bafe0cc07ad10e7b5c38b7bcec07590d828754d12f84",
+      "engine_configuration_sha256": "b21dd08a23679954c1ac39aae383fc2a78c702c5a358c8e2387fcecd00f2af82",
+      "mesh_level": 0, "rpm": 4000.0,
+      "max_cycles": 47, "restart_cycle": 24,
+      "binding_hashes": {
+        "auditor": "085d6d17b6a1d2c062d37e4cdbc3ddda3da59aaee1d13178a9cb547c0bfbce22",
+        "config": "b21dd08a23679954c1ac39aae383fc2a78c702c5a358c8e2387fcecd00f2af82",
+        "detector": "22df512d6e48b95b506401005b466d37038eebd888d684a287e70c1d76cd3193",
+        "fixture": "51cd1639ba6825269ce7bafe0cc07ad10e7b5c38b7bcec07590d828754d12f84",
+        "fuel": "f84f2ae402b8030e9305345cd030a141c519adca63fc4b48b001b0eb4609cea7",
+        "producer": "350ef4d57de87eb1b4470fb60151b8ecac9fca2b30688b7556b79ed1e8bd4db8",
+        "solver": "b4e8021eca2e32a368f6e1f977f685720a6436862fcad9b6a34798e5cf77de3d",
+        "thresholds": "43419bccbbcefaf04200448148e74d576d6fa1ecb0d9adf9c26a614e67828eff"
+      }
+    }
+  },
+  "evidence_semantics": "V3 primary, offline audit every completed cycle, detector classification only; no R3 authorized"
+}
