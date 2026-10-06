@@ -600,3 +600,13 @@ pruebas pasaron en 177,49 s con cuatro warnings NumPy preexistentes. La prueba
 focal V4 final (48,98 s) valida cierres contra geometría y endpoints aceptados,
 rechaza species snapshots adulterados y conserva V1–V3. OpenSpec estricto pasó
 32/32; no se declara readiness.
+
+### Continuación autónoma — KT100 cycle24 y FUEL_LIBRARY_V1 (2026-10-06)
+
+La única recuperación autorizada R1 está consumida: el punto 5000 RPM repite exactamente cycles21–23 desde el checkpoint cycle20 y reproduce el fallo de cycle24 en 142.19487248520613°. En el estado de admisión, el escalar legado `rhoY` excede `rho` por una ULP. Se añadió una vista conservadora P5 tolerante hasta 8 ULP, sin modificar estado persistido ni ecuaciones termodinámicas; el validador EOS general permanece estricto y un exceso de 32 ULP se rechaza. Esta corrección no demuestra continuación de cycle24, periodicidad o validez física. Los otros cuatro puntos no se iniciaron. R1 no se repite y no hay KT100 R2 autorizada. Ver el recibo `results/2t-commercial-core-20261002/kt100_cycle24_forensics.json`.
+
+`FUEL_LIBRARY_V1` almacena perfiles versionados y fuente/provenance, congela una instantánea canónica completa con SHA-256, protege contra edición anidada accidental y permite operaciones CRUD/import/export. ANCAP Súper 95 y Premium 97 registran la identidad y RON documentados; máximos de etanol/oxígeno permanecen como límites de fuente, no puntos de composición. Densidad, AFR estequiométrica, composición elemental y LHV siguen desconocidos. No se añadieron química, combustión ni enlace de `Q_F` a LHV; estas métricas continúan bloqueadas.
+
+El collector V4 existente y el Fixture C piston-port sin reed ya tienen evidencia sintética registrada; no fueron repetidos. Sigue en progreso la investigación de reed dinámica. La campaña acoplada se ejecutará solo tras un preregistro versionado y un commit que fije el área de barrido, volúmenes de control adyacentes y destino contable de disipación; no se usará geometría inferida de KT100.
+
+Pruebas focales del delta: 79 PASS. OpenSpec estricto aprobado para `motorsim-2t-commercial-core`. Esto es autorrevisión del cambio, no revisión independiente; no es aceptación del Commercial Core ni verificación KT100. P4–P8 y el estado condicional anterior no se reinterpretan.

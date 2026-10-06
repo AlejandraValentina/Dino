@@ -1,6 +1,6 @@
 """Calorically perfect ideal gas. Primitive order: rho, u, p, Y."""
 from dataclasses import dataclass
-from math import isfinite, sqrt
+from math import isfinite, ulp, sqrt
 
 
 class InvalidState(ValueError):
@@ -42,6 +42,31 @@ class IdealGas:
             raise InvalidState('Conserved rho/species inadmissible')
         u=m/r;p=(self.gamma-1)*(e-0.5*m*u)
         return self.validate((r,u,p,z/r))
+
+    def primitive_with_mass_fraction_roundoff(self, q, *, ulps=8):
+        """Convert a passive ``rho*Y`` state with a bounded upper-bound ULP drift.
+
+        P5's legacy passive scalar is updated alongside the authoritative P6
+        species inventory. Independent float64 accumulation can put rho*Y a
+        few representable numbers above rho for pure-fresh gas. This adapter
+        accepts only that machine-roundoff envelope and derives Y=1 for the
+        primitive view; it does not mutate or rewrite the conservative state.
+        The strict ``primitive`` contract remains unchanged for other callers.
+        """
+        if type(ulps) is not int or ulps < 0:
+            raise ValueError("ulps must be a nonnegative integer")
+        try:
+            r, m, energy, z = q
+        except Exception as error:
+            raise InvalidState("Conserved rho/species inadmissible") from error
+        if (not all(isfinite(value) for value in q) or r <= 0.0 or z < 0.0):
+            raise InvalidState("Conserved rho/species inadmissible")
+        if z > r:
+            tolerance = ulps * ulp(r)
+            if z - r > tolerance:
+                raise InvalidState("Conserved rho/species inadmissible")
+            z = r
+        return self.primitive((r, m, energy, z))
 
     def sound_speed(self,w): return sqrt(self.gamma*w[2]/w[0])
 

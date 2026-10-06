@@ -76,14 +76,15 @@ class IntegratedP5C:
     def admissible(self):
         self.core.admissible()
         for q in self.exhaust.conservative():
-            self.eos.primitive(q)
+            self.eos.primitive_with_mass_fraction_roundoff(q)
         return True
 
     def _exhaust_step(self, dt):
         cyl_inv = self.core.cylinder.inventory(self.eos)
         chamber = ChamberState(cyl_inv[0], cyl_inv[2], cyl_inv[1],
                                self.core.cylinder.volume)
-        first = self.eos.primitive(self.exhaust.cells[0].conservative)
+        first = self.eos.primitive_with_mass_fraction_roundoff(
+            self.exhaust.cells[0].conservative)
         face = port_flux(chamber, first, self.port_area, self.exhaust_area,
                          eos=self.eos)
         flux = face["flux"]
@@ -92,13 +93,16 @@ class IntegratedP5C:
                                      self.eos)
         self.exhaust.cells[0].apply_flux(flux, dt, self.eos, sign=1.0)
         for i in range(len(self.exhaust.cells) - 1):
-            a = self.eos.primitive(self.exhaust.cells[i].conservative)
-            b = self.eos.primitive(self.exhaust.cells[i + 1].conservative)
+            a = self.eos.primitive_with_mass_fraction_roundoff(
+                self.exhaust.cells[i].conservative)
+            b = self.eos.primitive_with_mass_fraction_roundoff(
+                self.exhaust.cells[i + 1].conservative)
             f, _, _ = hllc_flux(a, b, self.eos)
             extensive = tuple(self.exhaust_mesh.areas[i + 1] * x for x in f)
             self.exhaust.cells[i].apply_flux(extensive, dt, self.eos, sign=-1.0)
             self.exhaust.cells[i + 1].apply_flux(extensive, dt, self.eos, sign=1.0)
-        outlet = self.eos.primitive(self.exhaust.cells[-1].conservative)
+        outlet = self.eos.primitive_with_mass_fraction_roundoff(
+            self.exhaust.cells[-1].conservative)
         outlet_boundary = self.external_boundary_model or Boundary("outflow")
         out = outlet_boundary.flux(outlet, 1, self.eos)[0]
         ext = tuple(self.exhaust_mesh.areas[-1] * x for x in out)
@@ -118,7 +122,7 @@ class IntegratedP5C:
     def _exhaust_rhs(self, q, cyl_q, dt_angle, stage_angle=None):
         """Return exhaust duct RHS and its single cylinder-facing flux."""
         chamber = ChamberState(cyl_q[0], cyl_q[2], cyl_q[3], cyl_q[4])
-        prim = [self.eos.primitive(x) for x in q]
+        prim = [self.eos.primitive_with_mass_fraction_roundoff(x) for x in q]
         exhaust_area = self.exhaust_area
         if self.geometry_callback is not None:
             geometry = self.geometry_callback(float(self.angle if stage_angle is None else stage_angle))

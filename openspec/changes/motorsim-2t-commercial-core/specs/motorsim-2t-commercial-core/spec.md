@@ -779,3 +779,48 @@ or pipeline.
 - **WHEN** an exploratory overlay is produced
 - **THEN** it cannot emit P9 PASS/validation status and remains explicitly
   ineligible for preregistered decisions.
+
+### Requirement: Versioned fuel library and simulation snapshots
+
+`FUEL_LIBRARY_V1` MUST store immutable, versioned `FuelDefinition` records with
+identity, display name, family/category, provenance, source records, optional
+RON, density and reference temperature, LHV, explicit stoichiometric AFR or
+complete elemental mass fractions, optional oxygen and ethanol fractions with
+their basis, and built-in/user-defined identity. Missing properties MUST remain
+unknown; a profile is not eligible for derived combustion outputs unless its
+required properties are explicit or derivable by the versioned elemental
+stoichiometry method. User definitions MUST be versioned when edited. A
+simulation selection MUST freeze fuel id, version, canonical content hash and
+the full definition snapshot so later library changes cannot alter historical
+simulation provenance. Built-ins may be disabled but MUST NOT be physically
+deleted or edited; user profiles support create, duplicate, versioned edit,
+enable/disable, delete, import and export. Restore defaults MUST restore built-in
+profiles without deleting user profiles. Lubricant definitions and premix ratio
+are separate future interfaces and MUST NOT be embedded in fuel properties.
+This library does not define fuel delivery, trapped fuel, combustion or
+heat-release physics.
+
+#### Scenario: Preserve incomplete documented fuel identities
+
+- **WHEN** an official fuel source gives product identity/RON and only bounds
+  or maxima for composition while density, elemental composition, stoichiometry
+  or LHV are unavailable
+- **THEN** the profile MUST preserve the known claims and source provenance,
+  leave unknown fields null, and keep property-dependent combustion outputs
+  unavailable; bounds MUST NOT be converted into point values.
+
+#### Scenario: Freeze the selected fuel definition
+
+- **WHEN** a simulation selects an enabled, versioned fuel definition
+- **THEN** its id, version, full canonical definition and matching SHA-256 MUST
+  be captured, and editing or restoring the library MUST NOT change that frozen
+  snapshot.
+
+#### Scenario: Manage built-in and user-defined profiles
+
+- **WHEN** a user creates, duplicates, edits, imports, exports, disables,
+  deletes or restores fuel definitions
+- **THEN** user operations MUST preserve built-in immutability, require a new
+  version on edits, reject identity collisions, and keep deleted/disabled
+  profiles unavailable for simulation selection without altering prior
+  snapshots.

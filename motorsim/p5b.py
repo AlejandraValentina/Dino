@@ -156,7 +156,8 @@ class Single0D1DFixture:
     def _rhs(self, state):
         chamber_q, duct_q = state
         chamber = ChamberState(chamber_q[0], chamber_q[2], chamber_q[3], self.chamber.volume)
-        duct_primitive = [self.eos.primitive(q) for q in duct_q]
+        duct_primitive = [self.eos.primitive_with_mass_fraction_roundoff(q)
+                          for q in duct_q]
         shared = interface_flux(
             chamber, duct_primitive[0], self.mesh.areas[0], -1, eos=self.eos
         ).outward
@@ -177,7 +178,7 @@ class Single0D1DFixture:
         chamber, duct = state
         ChamberState(chamber[0], chamber[2], chamber[3], self.chamber.volume).thermodynamics(self.eos)
         for q in duct:
-            self.eos.primitive(q)
+            self.eos.primitive_with_mass_fraction_roundoff(q)
 
     @staticmethod
     def _combine(a, b, scale):
@@ -229,7 +230,7 @@ class Single0D1DFixture:
         chamber, duct = self._state()
         ChamberState(chamber[0], chamber[2], chamber[3], self.chamber.volume).thermodynamics(self.eos)
         for q in duct:
-            self.eos.primitive(q)
+            self.eos.primitive_with_mass_fraction_roundoff(q)
         return True
 
 
@@ -311,7 +312,8 @@ class OneTransferFixture:
         cc_q, cy_q, duct_q = state
         cc = ChamberState(cc_q[0], cc_q[2], cc_q[3], cc_q[4])
         cy = ChamberState(cy_q[0], cy_q[2], cy_q[3], cy_q[4])
-        duct_primitive = [self.eos.primitive(q) for q in duct_q]
+        duct_primitive = [self.eos.primitive_with_mass_fraction_roundoff(q)
+                          for q in duct_q]
 
         # These are the only two interface solves in a stage.  Zero area is
         # handled by interface_exchange as an exact closed-port zero flux.
@@ -362,7 +364,7 @@ class OneTransferFixture:
         ChamberState(cc[0], cc[2], cc[3], cc[4]).thermodynamics(self.eos)
         ChamberState(cy[0], cy[2], cy[3], cy[4]).thermodynamics(self.eos)
         for q in duct:
-            self.eos.primitive(q)
+            self.eos.primitive_with_mass_fraction_roundoff(q)
 
     def step(self, dt):
         if not isinstance(dt, (int, float)) or not isfinite(dt) or dt <= 0:
@@ -597,7 +599,8 @@ class TwoTransferFixture:
         return {key: fsum(values) for key, values in self._component_values(state).items()}
 
     def _path_rhs(self, cc, cy, path, duct_q):
-        duct_primitive = [self.eos.primitive(q) for q in duct_q]
+        duct_primitive = [self.eos.primitive_with_mass_fraction_roundoff(q)
+                          for q in duct_q]
         left = interface_exchange(cc, duct_primitive[0], path.interface_areas[0], -1, eos=self.eos)
         right = interface_exchange(cy, duct_primitive[-1], path.interface_areas[1], 1, eos=self.eos)
         left_flux, right_flux = tuple(left["outward"]), tuple(right["outward"])
@@ -656,7 +659,7 @@ class TwoTransferFixture:
         ChamberState(cy[0], cy[2], cy[3], cy[4]).thermodynamics(self.eos)
         for path in paths:
             for q in path:
-                self.eos.primitive(q)
+                self.eos.primitive_with_mass_fraction_roundoff(q)
 
     def step(self, dt):
         if not isinstance(dt, (int, float)) or not isfinite(dt) or dt <= 0:
@@ -1020,8 +1023,9 @@ class IntegratedIntakeTransfer:
         cc_q, cy_q, intake_q, tr1_q, tr2_q = state
         cc = ChamberState(cc_q[0], cc_q[2], cc_q[3], cc_q[4])
         cy = ChamberState(cy_q[0], cy_q[2], cy_q[3], cy_q[4])
-        intake_p = [self.eos.primitive(q) for q in intake_q]
-        tr_p = [[self.eos.primitive(q) for q in duct]
+        intake_p = [self.eos.primitive_with_mass_fraction_roundoff(q)
+                    for q in intake_q]
+        tr_p = [[self.eos.primitive_with_mass_fraction_roundoff(q) for q in duct]
                 for duct in (tr1_q, tr2_q)]
         if self.geometry_callback is None:
             ai, at1, at2 = self._areas(angle)
@@ -1106,7 +1110,7 @@ class IntegratedIntakeTransfer:
         ChamberState(cy[0], cy[2], cy[3], cy[4]).thermodynamics(self.eos)
         for duct in ducts:
             for q in duct:
-                self.eos.primitive(q)
+                self.eos.primitive_with_mass_fraction_roundoff(q)
 
     def admissible(self):
         self._validate_state(self._state())

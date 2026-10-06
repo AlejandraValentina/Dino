@@ -395,3 +395,35 @@ from the accepted terminal state, rather than pairing that state with the
 provisional SSPRK2 second-stage flux. Its P7 value is the instantaneous
 prescribed request before a future-step availability limiter and is descriptive
 only; it is excluded from all accepted-cycle integrals and conservation terms.
+
+### Fuel library V1, independent of combustion integration
+
+`FuelDefinition` is a versioned catalog record, not a per-engine bag of
+untraceable numbers. Every simulation can freeze the selected ID/version, the
+canonical full record and its SHA-256. User edits create a new version; built-in
+profiles can be disabled but cannot be overwritten. Library persistence and
+import/export use strict JSON schemas. Lubricant identity and premix ratio are
+separate future interfaces; neither is part of the fuel record.
+
+The initial Uruguay catalog records only documented identity and RON for ANCAP
+Super 95 and Premium 97. The 2024-06 product specifications state maximum
+ethanol/oxygen levels, not the batch composition; those maxima are not converted
+into point values. Density, LHV, elemental composition and stoichiometric AFR
+therefore remain null. A profile with missing stoichiometry/LHV cannot produce
+chemistry-derived outputs. No modeled surrogate is introduced until an explicit
+versioned assumption and source basis are registered.
+
+`FUEL_LIBRARY_V1` may store explicit complete elemental mass fractions. When
+stoichiometric AFR is absent, method
+`ELEMENTAL_MASS_BALANCE_DRY_AIR_V1` calculates oxygen demand per unit fuel mass
+as `n_C + n_H/4 + n_S - n_O/2`, multiplied by the O2 molar mass and divided by
+the versioned dry-air oxygen mass fraction. Negative/nonpositive oxygen demand
+is rejected. This definition-level derivation does not add reaction chemistry,
+select a combustion event, alter the four P6 pseudo-species, interpret P7 `Q_F`
+as chemical energy, or couple any energy release to the gas solver. Existing V4
+pseudo-species ratios keep their separate name and meaning.
+
+The built-in records preserve source URLs and the individual claims they
+support. ANCAP product pages and 2024-06 datasheets are the primary source for
+RON and published specification limits; the datasheets do not provide the
+missing point properties needed for AFR/LHV calculations.

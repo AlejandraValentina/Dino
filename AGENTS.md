@@ -40,13 +40,20 @@ pero NO representan el estado operativo actual cuando contradicen esta sección.
   de `openspec/changes/p9-experimental-validation/specs/p9-experimental-validation/spec.md`.
 - Experimental validation: `NOT_PERFORMED`. Predictive validation: `NOT_CLAIMED`.
 - KT100: `KT100_REFERENCE_CASE_V1`, caso de referencia, no validación. La
-  capability `OPEN_END_PLENUM_V2` está implementada y probada, pero la única
-  campaña original V2 no produjo primarios: el escritor falló con
-  `KeyError('transfer1')` al cerrar el ciclo. La corrección del agregador está
-  probada. La evidencia R6 no permite reconstrucción offline; una enmienda R1
-  independiente está preregistrada para una única recuperación, sin modificar
-  física/configuración ni sobrescribir R6. No hay aún resultado de periodicidad
-  ni calificación física de KT100.
+  campaña de recuperación R1 está consumida y KT100 no está verificado. R1
+  terminó en 5000 RPM durante cycle24 a 142.19487248520613°; se reprodujeron
+  exactamente cycles21–23 desde el checkpoint cycle20. El fallo se atribuyó a
+  `rhoY` legado una ULP sobre `rho`, y se añadió un adaptador P5 acotado sin
+  cambiar las ecuaciones termodinámicas. No hay periodicidad ni calificación
+  física; los otros cuatro puntos no se iniciaron. No ejecutar KT100 R2 sin un
+  nuevo preregistro autorizado.
+- `FUEL_LIBRARY_V1` registra ANCAP Super 95/Premium 97 con RON documentado y
+  propiedades químicas desconocidas en `null`; no proporciona AFR/LHV y no
+  desbloquea P7. Su biblioteca, provenance e instantánea versionada/hash están
+  implementadas; sin enlace a combustión ni química inventada.
+- El collector V4 y Fixture C piston-port sin reed están verificados con
+  evidencia sintética existente. Reed dinámica sigue pendiente de preregistro
+  geométrico/energético e integración SSPRK2.
 
 Estado machine-readable del Commercial Core:
 `results/2t-commercial-core-20261002/program-status.json`; documentación:

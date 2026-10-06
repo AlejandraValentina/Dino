@@ -7,7 +7,7 @@
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
   "push_performed": false,
-  "kt100_policy": "R6_ONE_ORIGINAL_CAMPAIGN_NO_PRIMARY; RECOVERY_R1_PREREGISTERED_AND_COMMIT_PENDING; AFTER_FREEZE_ONE_RECOVERY_RUN_ONLY",
+  "kt100_policy": "R6_ORIGINAL_NO_PRIMARY; RECOVERY_R1_CONSUMED_CYCLE24_FLOAT64_ADMISSIBILITY_FAILURE; KT100_UNVERIFIED; NO_R2_AUTHORIZATION",
   "phases": {
     "1_reference_harness": {
       "status": "AUD-08_A_NONCONVERGED_AUD-09_C_PERIOD1_AT_CYCLE20",
@@ -28,17 +28,25 @@
       "blocked_scope": "Fixture A did not converge within 20 cycles. Distinct piston-port/no-reed Fixture C completed 20 cycles and reached period-1 at cycle 20 after three consecutive PASS comparisons; evidence is synthetic CONDITIONAL_ON_P4 and does not accept the Commercial Core."
     },
     "2_kt100_v2": {
-      "status": "RECOVERY_R1_PREREGISTERED_PENDING_COMMIT",
-      "classification": "KT100_V2_PRIMARY_EVIDENCE_UNAVAILABLE_AFTER_EVIDENCE_WRITER_FAILURE",
+      "status": "RECOVERY_R1_CONSUMED_NUMERICAL_FAILURE_NOT_VERIFIED",
+      "classification": "KT100_R1_CYCLE24_LEGACY_RHOY_ONE_ULP_ADMISSIBILITY_FAILURE",
       "original_campaign_invocations": 1,
       "original_complete_cycle_primaries": 0,
       "original_periodicity": "NOT_AVAILABLE",
-      "offline_recovery": "IMPOSSIBLE_NO_PRIMARY_TRAJECTORY_OR_CHECKPOINT",
+      "offline_recovery": "cycle20 checkpoint replayed cycles21-23 exact; cycle24 failure reproduced, but no full cycle24 primary or periodicity could be reconstructed",
       "recovery_preregistration": "results/2t-commercial-core-20261002/preregistration/KT100_V2_EVIDENCE_RECOVERY_R1.json",
       "recovery_campaign_runs_authorized": 1,
-      "recovery_campaign_started": false,
-      "boundary_physics_result": "NOT_YET_QUALIFIED",
-      "p4_dependency": "CONDITIONAL_ON_P4"
+      "recovery_campaign_started": true,
+      "boundary_physics_result": "NOT_QUALIFIED",
+      "p4_dependency": "CONDITIONAL_ON_P4",
+      "r1_point_results": {
+        "5000_rpm": "NUMERICAL_FAILURE cycle24 at 142.19487248520613 deg",
+        "other_four_rpm_points": "NOT_STARTED"
+      },
+      "forensic_receipt": "results/2t-commercial-core-20261002/kt100_cycle24_forensics.json",
+      "recovery_campaign_complete": false,
+      "numerical_fix": "bounded P5 rhoY primitive-view adapter; strict general EOS primitive check retained",
+      "next_authorization": "KT100 R2 requires a new preregistration and is not authorized by this forensic fix"
     },
     "3_generic_2t_ports": {
       "status": "GEOMETRY_IMPLEMENTED_CORE_TOPOLOGY_PARTIAL",
@@ -65,8 +73,8 @@
         "synthetic_evidence_conditional_on_P4_not_experimental"
       ],
       "remaining": [
-        "KT100 V2 R6 emitted no cycle primary after the evidence-writer KeyError; corrected writer is tested, but the consumed one-run preregistration forbids retry.",
-        "A distinct Fixture B and complete integrated cycle evidence remain open.",
+        "KT100 R1 reached cycle24 failure at 5000 RPM; no periodicity; R1 consumed and no KT100 R2 authorized.",
+        "A distinct Fixture C piston-port/no-reed has 20-cycle synthetic evidence; it is not renamed Fixture B and remains CONDITIONAL_ON_P4.",
         "Independent review of later fuel/output work and whole Commercial Core acceptance remain outstanding."
       ],
       "cycle_evidence_status": "AUD08_FIXTURE_A_AND_AUD09_FIXTURE_C_SYNTHETIC_ONLY; OLDER_A_B_CYCLES_SUPERSEDED",
@@ -78,11 +86,17 @@
       "dependency_status": "CONDITIONAL_ON_P4"
     },
     "5_reed": {
-      "status": "COMPONENT_IMPLEMENTED_P5C_STAGE_INTEGRATION_BLOCKED",
+      "status": "DYNAMIC_REED_GEOMETRY_AND_STAGE_COUPLING_IN_PROGRESS",
       "verified_scope": [
         "static_and_dynamic_multi_petal_model",
         "serialization",
         "unit_restart_replay"
+      ],
+      "pending_scope": [
+        "preregister explicit synthetic swept-volume/control-volume geometry",
+        "commit preregistration before fixture campaign",
+        "integrate dynamic petal state, flow, energy exchange and dissipation accounting in SSPRK2",
+        "checkpoint/restart and ledger tests"
       ]
     },
     "6_expansion_chamber": {
@@ -138,17 +152,19 @@
       ]
     },
     "11_fuel": {
-      "status": "INTEGRATED_P6_FUEL_OUTPUTS_WITH_EXACT_EXHAUST_CLOSE_SPECIES; STOICHIOMETRY_UNDEFINED",
+      "status": "FUEL_LIBRARY_V1_IMPLEMENTED; INTEGRATED_STOICHIOMETRY_UNDEFINED",
       "verified_scope": [
-        "standalone_FuelAccounting_with_explicit_stoichiometric_AFR_and_LHV",
-        "integrated_gross_delivered_AFR_and_cycle_fuel_flow_when_defined",
-        "integrated_P7_fuel_species_consumption_and_global_fuel_ledger",
-        "integrated_fuel_pseudo_species_at_exact_exhaust_close_or_explicit_UNDEFINED"
+        "ANCAP_SUPER_95_AND_PREMIUM_97_documented_RON_only",
+        "unknown_physical_properties_remain_null",
+        "versioned_definitions_and_provenance",
+        "canonical_full_snapshot_with_SHA256",
+        "user_CRUD_enable_restore_import_export",
+        "versioned_elemental_stoichiometry_definition"
       ],
-      "blocked_scope": [
-        "integrated_trapped_fresh_air_and_fuel_are_not_bound_to_cycle_evidence",
-        "integrated_stoichiometric_AFR_and_Q_F_to_LHV_not_configured_or_authorized",
-        "P7_captured_reactant_pool_is_not_assumed_equivalent_to_total_trapped_fuel"
+      "remaining": [
+        "no approved point ANCAP density/composition/stoichiometric AFR/LHV",
+        "FUEL_LIBRARY snapshot API is not a combustion model or P7 energy binding",
+        "total trapped fuel/event semantics remain separate"
       ]
     },
     "12_powervalve": {
@@ -881,8 +897,8 @@
       "dependencies": [
         "17a-integrated-gas-species-foundation"
       ],
-      "state": "BLOCKED_LOCAL",
-      "blocker": "DYNAMIC_REED_V1 specifies force area, flow curtain width/lift, constant-pressure oscillator and stop restitution, but the integrated topology provides no reed swept-volume/control-volume placement binding. Without that binding, pressure work from reed motion cannot be assigned conservatively to adjacent gas volumes; independent post-step advance would be operator splitting.",
+      "state": "IN_PROGRESS",
+      "blocker": null,
       "commits": [],
       "evidence": [
         "SELF_REVIEW (historical claim retained; no durable review receipt identified in AUD-06): Independent technical review is documented in docs/gasdynamic/autonomous_engineering_mode.md.",
@@ -891,7 +907,14 @@
         "SKEPTIC: pressure_area_m2 and effective_width_m*lift_m are distinct configured quantities; treating the latter as swept volume or assigning all displacement to crankcase would silently invent geometry.",
         "CONTRACT/DECISION: concrete missing topology/geometry binding; keep BLOCKED_LOCAL. No independent review is claimed."
       ],
-      "next_action": "Remain BLOCKED_LOCAL pending an explicit supported interface geometry (swept-volume coefficient and adjacent control volumes) that is consistent with configured reed provenance; preserve the standalone reed capability and static integrated path."
+      "next_action": "Write and commit the synthetic geometry/energy preregistration before running any coupled fixture campaign.",
+      "triage": {
+        "forensics": "motorsim/reed.py already provides independent petal force area, lift and curtain-flow area; integrated engine currently binds only static reed area.",
+        "domain_research": "Define a synthetic interface geometry with dV/dlift bound to pressure_area_m2, adjacent gas control volumes on each face, opposite geometric volume changes, and pressure work equal and opposite to reed generalized force work.",
+        "skeptic": "Do not equate effective_width_m*lift flow area with swept volume, assign full displacement to crankcase, or use a real KT100 geometry without sources. Damping/impact loss must appear in the energy balance.",
+        "contract": "Create versioned synthetic geometry/preregistration and commit it before any numerical fixture campaign; preserve DYNAMIC_REED_V1 and static path.",
+        "decision": "Proceed with the explicit synthetic interface capability authorized in the 2026-10-06 order; no real-motor geometry or claim."
+      }
     },
     {
       "id": "AUD-01",
@@ -1412,6 +1435,37 @@
         "decision": "Remain BLOCKED_LOCAL on the concrete missing external property record. This is a capability-input limit, not a reason to stop independent engineering."
       },
       "next_action": "Resume automatically when an approved explicit fuel-properties input is part of scope; no new chemistry is added."
+    },
+    {
+      "id": "kt100-r1-cycle24-forensics-roundoff",
+      "description": "Forensic replay of accepted R1 checkpoint and bounded generic P5 rhoY roundoff correction",
+      "dependencies": [],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "results/2t-commercial-core-20261002/kt100_cycle24_forensics.json reproduces cycles21-23 exact and captures original cycle24 failure at 5000 RPM",
+        "one-cell P5 reproducer shows rhoY exactly one float64 ULP above rho; 32-ULP excess remains rejected",
+        "79 focused P5/EOS/fuel tests PASS; no campaign rerun; no KT100 periodicity or verification claim",
+        "SELF_REVIEW only; independent review artifact absent"
+      ],
+      "next_action": "Keep KT100 unverified; any further KT100 execution requires separate preregistration and authorization."
+    },
+    {
+      "id": "fuel-library-v1",
+      "description": "Reusable versioned fuel definitions, provenance, incomplete ANCAP profiles and immutable simulation snapshot API",
+      "dependencies": [],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "evidence": [
+        "motorsim/fuel_library.py implements strict versioned definitions, canonical frozen snapshots, built-in/user lifecycle, atomic persistence and import/export",
+        "ANCAP sources establish RON and bounds only; unspecified density, elemental composition, stoichiometric AFR and LHV remain null",
+        "tests/test_fuel_library.py tests derivation versioning, snapshot identity/hash, deep immutability, CRUD, persistence, import/export and invalid data",
+        "79 focused P5/EOS/fuel tests PASS; OpenSpec strict PASS",
+        "FUEL_LIBRARY does not feed combustion, P7 Q_F, chemistry or P6 pseudo-AFR"
+      ],
+      "next_action": "Keep fuel chemistry metrics undefined absent an explicit evidenced fuel record and approved event semantics."
     }
   ],
   "audit_remediation_mode": false,
@@ -1582,12 +1636,12 @@
     "audit_remediation_mode": false,
     "ready_tasks": 0,
     "local_blockers": [
-      "dynamic-reed-stage-coupling: missing swept-volume/control-volume topology binding for conservative pressure work",
-      "17d-fuel-properties: no explicit stoichiometric AFR/LHV record with provenance; P7 Q_F is not declared as fuel chemical energy",
-      "reservoir-boundary-v2: R1 allowance consumed; only 5000 RPM reconstructed and numerical-failed; four points absent"
+      "dynamic-reed-stage-coupling: currently writing a preregistered synthetic interface geometry and conservative energy contract before a fixture campaign",
+      "17d-fuel-properties: FUEL_LIBRARY_V1 exists, but no evidenced point ANCAP chemistry/LHV or approved mapping of prescribed P7 Q_F to fuel chemical energy",
+      "KT100: recovery R1 is consumed after cycle24 failure; any R2 requires separate preregistration and authorization"
     ],
-    "next_action": "All resolvable local work from this order is complete. Continue the autonomous team without treating zero READY as program completion; the remaining blockers require their concrete interface geometry, explicit fuel-properties record, or a new KT100 recovery authorization.",
-    "in_progress_tasks": 0,
-    "blocker_triage_date": "2026-10-05"
+    "next_action": "Finish and commit the dynamic-reed synthetic swept-volume/adjacent-control-volume/energy preregistration, then implement and verify it. Collector V4 and Fixture C have current evidence and require no rerun; keep P4-P8 and Commercial Core classifications unchanged.",
+    "in_progress_tasks": 1,
+    "blocker_triage_date": "2026-10-06"
   }
 }

@@ -912,3 +912,45 @@ Artefactos: `results/2t-commercial-core-20261002/aud-09-fixture-c-20261005-v1/`.
 
 Evaluador de evidencia: la campaña C se verificó offline con su preregistro y
 blob del productor; cinco pruebas focales de productor/evaluador pasan.
+
+### Continuidad autónoma — auditoría cycle 24 y biblioteca de combustible — 2026-10-06
+
+- [x] Confirmar que la R1 persistida no tiene estado de fallo suficiente para
+  inspeccionar el paso inválido y usar únicamente el checkpoint aceptado cycle20
+  del mismo punto de 5000 RPM; reproducir cycle21–23 exactamente antes de
+  detener el diagnóstico en el fallo de cycle24. No iniciar otra campaña ni
+  escribir en el directorio R1.
+- [x] Guardar en
+  `results/2t-commercial-core-20261002/kt100_cycle24_forensics.json` el estado
+  aceptado, ambos estados RHS SSPRK2, el candidato, ductos/cámaras/especies,
+  fronteras, áreas, termodinámica, CFL/dt, ledger, excepción y hashes de las
+  fuentes primarias.
+- [x] Clasificar la causa inmediata como `rhoY` del escalar legado una ULP por
+  encima de `rho` en una celda de admisión casi pura. El estado P6 de cuatro
+  especies permanece válido; no hay evidencia de fallo de densidad ni de
+  especie negativa. No cambian las ecuaciones termodinámicas de EOS, solver, flujo, geometría, frontera ni CFL; sí se añade el adaptador de vista primitiva P5 acotado.
+- [x] Añadir un adaptador P5 explícito con tolerancia máxima de 8 ULP solo para
+  la conversión conservativa→primitiva del escalar `rhoY`; el `IdealGas.primitive`
+  general permanece estricto. Un estado 32 ULP fuera del límite se rechaza.
+- [x] Reproducir el caso capturado como fixture P5 de una celda y conservar un
+  test para el exceso de 1 ULP y otro para el exceso no físico fuera de cota.
+- [ ] Repetir una prueba de trayectoria/fixed-horizon KT100: **no autorizada**;
+  R1 consumida. La corrección de admissibility no constituye evidencia de que
+  KT100 complete cycle24.
+- [x] Implementar FUEL_LIBRARY_V1 con perfiles ANCAP incompletos, provenance,
+  snapshots de definición completa con hash, fórmula elemental versionada,
+  operaciones de biblioteca e import/export JSON; `tests/test_fuel_library.py`
+  y regresión `tests/test_fuel.py` pasan. Sin integración de combustión, sin
+  valores químicos ANCAP inferidos y sin cambiar pseudo-AFR V4.
+- [ ] Resolver la geometría y el acoplamiento SSPRK2 de reed dinámica usando un
+  fixture sintético preregistrado; mantener separado el caso real KT100.
+  Diseño geométrico/energético aún requiere preregistro y commit separado antes
+  de ejecutar fixtures de campaña.
+
+- [x] Registrar el fallo de KT100 R1 cycle24 desde el checkpoint cycle20,
+  reproducir cycles21–23 exactamente y recuperar el paso inválido del cycle24.
+  El defecto general es un `rhoY` legado que supera `rho` por una ULP. Se añadió
+  la conversión P5 acotada a 8 ULP; el validador `IdealGas.primitive` general
+  sigue estricto y el caso a 32 ULP continúa rechazado. 79 pruebas focales
+  aprobadas. La trayectoria cycle24 no se reintentó; R1 está consumida, no hay
+  evidencia de periodicidad KT100 y no se autorizó R2.

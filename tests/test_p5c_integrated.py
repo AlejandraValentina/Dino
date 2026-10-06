@@ -2,6 +2,7 @@ import copy
 import pytest
 
 from motorsim.p5c import IntegratedP5C, make_p5c_fixture
+from motorsim.gas1d.eos import InvalidState
 
 
 def test_p5c_closed_ports_and_conditional_ledger():
@@ -99,3 +100,19 @@ def test_p5c_external_ledger_closes_global_inventory_with_both_boundaries():
     for key in ("mass", "energy", "species"):
         assert after[key] - before[key] == pytest.approx(
             s._external_cumulative[key], abs=1e-10)
+
+
+def test_p5c_legacy_scalar_roundoff_reproducer_is_bounded_and_nonphysical_excess_fails():
+    s = __import__('motorsim.p5c', fromlist=['make_p5c_full_fixture']).make_p5c_full_fixture()
+    # One-ULP overshoot captured from KT100 R1 cycle 24, reduced to one P5 cell.
+    q = (0.7952109571685706, 230.51360083770064,
+         204007.64651722068, 0.7952109571685707)
+    s.core.intake.cells[0].conservative = q
+    with pytest.raises(InvalidState):
+        s.eos.primitive(q)  # the shared EOS gate remains strict
+    assert s.admissible()  # P5's explicit float64 scalar-view adapter is bounded
+
+    s.core.intake.cells[0].conservative = (
+        q[0], q[1], q[2], q[0] + 32 * __import__('math').ulp(q[0]))
+    with pytest.raises(InvalidState):
+        s.admissible()

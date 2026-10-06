@@ -23,6 +23,20 @@ class GasTests(unittest.TestCase):
             with self.assertRaises(InvalidState):self.e.conservative(w)
         with self.assertRaises(InvalidState):self.e.primitive((1.,100.,1.,.5))
 
+    def test_p5_mass_fraction_view_accepts_only_the_bounded_rho_y_roundoff(self):
+        # Captured from the accepted P5-CYCLE-24 attempt: independently
+        # updated float64 rho and rho*Y differ by one ULP near Y=1.
+        rho = 0.7952109571685706
+        rho_y = 0.7952109571685707
+        q = (rho, 230.51360083770064, 204007.64651722068, rho_y)
+        assert self.e.primitive_with_mass_fraction_roundoff(q)[3] == 1.0
+        with self.assertRaises(InvalidState):
+            self.e.primitive(q)  # general EOS validation remains strict
+
+        far_outside = (rho, q[1], q[2], rho + 32 * math.ulp(rho))
+        with self.assertRaises(InvalidState):
+            self.e.primitive_with_mass_fraction_roundoff(far_outside)
+
     def test_equal_hllc_hlle(self):
         for w in (self.w,(1.,0.,1.,1.),(1.,-1000.,10000.,.7)):
             f,s,reason=hllc_flux(w,w,self.e);self.assertIsNone(reason)
