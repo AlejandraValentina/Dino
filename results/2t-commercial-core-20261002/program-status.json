@@ -1753,10 +1753,14 @@
         "C11",
         "C12"
       ],
-      "state": "READY",
+      "state": "DONE",
       "commits": [],
-      "evidence": [],
-      "next_action": "Implement and verify this gate in declared order",
+      "evidence": [
+        "Exclusive preregistration committed before either campaign in commit 8120ac9dfcf8778ee1e3f1825cc525407f879573.",
+        "results/2t-v1-closure-20261006/campaign-preregistration.json freezes both C12 sufficient mesh-level-0 configurations, hashes, RPMs (3000/4000), 20-cycle horizon, restart cycle 10, periodicity detector thresholds/streak, evidence runner, auditor, and explicit no-extension failure status.",
+        "C13 remains SYNTHETIC_ASSUMPTION_CONDITIONAL_ON_P4; no experimental or KT100 claim."
+      ],
+      "next_action": "C13 closed; run the frozen A-prime and B-prime campaigns",
       "previous_blocker": "C11 continuous/checkpoint/restart/replay gate remains incomplete",
       "blocker": null
     },
@@ -1769,10 +1773,14 @@
         "C12",
         "C13"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "commits": [],
-      "evidence": [],
-      "next_action": "Implement and verify this gate in declared order",
+      "evidence": [
+        "Frozen A-prime campaign completed exactly 20 cycles; run_logged summary: results/2t-v1-closure-20261006/campaign-a-prime-r1-log/c14-a-prime-r1.summary.json.",
+        "All 20 V3 primaries were independently audited offline; restart cycle 10 -> 11 matched exactly. Evidence: results/2t-v1-closure-20261006/campaign-a-prime-r1/.",
+        "Terminal campaign result is NO_CONVERGENCE_WITHIN_HORIZON under the preregistered detector; no extension or relaxation performed. This gate is terminally failed for v1 acceptance."
+      ],
+      "next_action": "C14 campaign complete; preserve terminal NO_CONVERGENCE_WITHIN_HORIZON classification",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -1785,10 +1793,14 @@
         "C12",
         "C13"
       ],
-      "state": "WAITING",
       "commits": [],
-      "evidence": [],
-      "next_action": "Implement and verify this gate in declared order",
+      "state": "DONE",
+      "evidence": [
+        "Frozen B-prime campaign completed exactly 20 cycles; run_logged summary: results/2t-v1-closure-20261006/campaign-b-prime-r1-log/c15-b-prime-r1.summary.json.",
+        "All 20 V3 primaries were independently audited offline; restart cycle 10 -> 11 matched exactly. Evidence: results/2t-v1-closure-20261006/campaign-b-prime-r1/.",
+        "Terminal campaign result is NO_CONVERGENCE_WITHIN_HORIZON under the preregistered detector; no extension or relaxation performed. This gate is terminally failed for v1 acceptance."
+      ],
+      "next_action": "C15 campaign complete; preserve terminal NO_CONVERGENCE_WITHIN_HORIZON classification",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -1798,10 +1810,12 @@
       "dependencies": [
         "C13"
       ],
-      "state": "WAITING",
       "commits": [],
-      "evidence": [],
-      "next_action": "Implement and verify this gate in declared order",
+      "state": "DONE",
+      "evidence": [
+        "Both preregistered RPM values were exercised: A-prime 3000 RPM and B-prime 4000 RPM, with materially distinct prime fixtures and separate audited 20-cycle campaign outputs."
+      ],
+      "next_action": "C16 closed; complete final checks and terminal classification",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -1813,10 +1827,13 @@
         "C15",
         "C16"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "commits": [],
-      "evidence": [],
-      "next_action": "Implement and verify this gate in declared order",
+      "evidence": [
+        "Focused integrated suite: 72 passed; summary at results/2t-v1-closure-20261006/c17-focused-tests-log/c17-focused-integrated-tests.summary.json.",
+        "OpenSpec strict validation PASS; git diff --check PASS; git lfs fsck OK; frozen P9 specification SHA-256 matches 79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d."
+      ],
+      "next_action": "C17 checks closed; classify all findings in C18",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -1826,10 +1843,14 @@
       "dependencies": [
         "C17"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "commits": [],
-      "evidence": [],
-      "next_action": "Implement and verify this gate in declared order",
+      "evidence": [
+        "OpenSpec v1 definition of done remains versioned in openspec/changes/two-stroke-v1-closure/.",
+        "C14 and C15 are classified BLOCKS_2T_V1 terminal failures due to preregistered NO_CONVERGENCE_WITHIN_HORIZON; no horizon extension, threshold relaxation, experimental claim, or KT100 claim is made.",
+        "C11, C12, C13, C16 and C17 satisfy their recorded criteria; final objective classification is FAIL_TERMINAL with exact failed gates C14 and C15."
+      ],
+      "next_action": "Terminal classification recorded; no further v1 work remains",
       "previous_blocker": "Prerequisite gates not yet complete",
       "blocker": null
     },
@@ -2156,28 +2177,58 @@
       "task": "C11",
       "kind": "gate",
       "summary": "C11 PASS: exact continuous/checkpoint/restart/replay for A-prime and B-prime at C12 mesh level 0; C12 primary equivalence, offline audits, snapshots, ledgers, species, and outputs all equal. Evidence in results/2t-v1-closure-20261006/restart-replay-c11; synthetic CONDITIONAL_ON_P4."
+    },
+    {
+      "at": "2026-10-06T15:52:39+00:00",
+      "task": "C13",
+      "kind": "gate",
+      "summary": "C13 PASS: immutable campaign preregistration frozen and committed as 8120ac9 before campaigns; mesh-level-0 hashes, 3000/4000 RPM, 20 cycles, restart 10, detector contract and thresholds bound."
+    },
+    {
+      "at": "2026-10-06T16:23:36+00:00",
+      "task": "C14",
+      "kind": "gate",
+      "summary": "C14 campaign executed exactly 20 cycles with all primary offline audits and restart 10->11 exact; preregistered periodicity result NO_CONVERGENCE_WITHIN_HORIZON, terminal acceptance failure."
+    },
+    {
+      "at": "2026-10-06T16:23:36+00:00",
+      "task": "C15",
+      "kind": "gate",
+      "summary": "C15 campaign executed exactly 20 cycles with all primary offline audits and restart 10->11 exact; preregistered periodicity result NO_CONVERGENCE_WITHIN_HORIZON, terminal acceptance failure."
+    },
+    {
+      "at": "2026-10-06T16:23:36+00:00",
+      "task": "C16",
+      "kind": "gate",
+      "summary": "C16 PASS: preregistered distinct RPMs exercised across A-prime 3000 RPM and B-prime 4000 RPM."
+    },
+    {
+      "at": "2026-10-06T16:28:30+00:00",
+      "task": "C17",
+      "kind": "gate",
+      "summary": "C17 PASS: 72 integrated tests, OpenSpec strict, git diff --check, git lfs fsck, and frozen P9 SHA-256 all pass."
+    },
+    {
+      "at": "2026-10-06T16:28:30+00:00",
+      "task": "C18",
+      "kind": "gate",
+      "summary": "C18 terminal classification: FAIL_TERMINAL with exact failed gates C14/C15 due preregistered NO_CONVERGENCE_WITHIN_HORIZON; no extension or relaxation."
     }
   ],
   "gate_status": {
     "objective": "MOTORSIM_2T_V1_CLOSURE",
-    "state": "OPEN",
-    "classification": null,
-    "evidence": [],
-    "gate_tasks_total": 18,
-    "gate_tasks_done": 12,
-    "gate_task_states": {
-      "DONE": 12,
-      "READY": 1,
-      "WAITING": 5
-    },
-    "remaining": [
-      "C13",
-      "C14",
-      "C15",
-      "C16",
-      "C17",
-      "C18"
+    "state": "FAIL_TERMINAL",
+    "classification": "FAIL_TERMINAL",
+    "evidence": [
+      "C14 and C15 exact terminal failure: NO_CONVERGENCE_WITHIN_HORIZON at fixed 20-cycle horizon.",
+      "C17 final checks PASS; C18 preserves scope and classification."
     ],
-    "updated_at": "2026-10-06T15:49:26+00:00"
+    "gate_tasks_total": 18,
+    "gate_tasks_done": 18,
+    "gate_task_states": {
+      "DONE": 18
+    },
+    "remaining": [],
+    "updated_at": "2026-10-06T16:28:30+00:00"
   }
 }

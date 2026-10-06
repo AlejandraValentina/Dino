@@ -74,15 +74,26 @@
       residual differences remain below 1.1e-15. Full primaries and summaries
       are in `results/2t-v1-closure-20261006/mesh-study-r2/` and the result
       class remains synthetic and CONDITIONAL_ON_P4.
-- [ ] C13 commit immutable A'/B' campaign preregistration before any campaign.
-- [ ] C14 run frozen A' 20-cycle campaign and offline audit.
-- [ ] C15 run frozen B' 20-cycle campaign and offline audit.
-- [ ] C16 exercise at least two distinct RPMs across the primes or preregistered
+- [x] C13 commit immutable A'/B' campaign preregistration before any campaign.
+      The separate freeze commit records the C12-selected mesh, hashes, RPMs,
+      fixed 20-cycle horizon, restart cycle, detector thresholds, and failure
+      classification before either campaign.
+- [x] C14 run frozen A' 20-cycle campaign and offline audit.
+      The fixed-horizon campaign and all 20 offline audits pass, but the
+      preregistered detector reports `NO_CONVERGENCE_WITHIN_HORIZON`.
+- [x] C15 run frozen B' 20-cycle campaign and offline audit.
+      The fixed-horizon campaign and all 20 offline audits pass, but the
+      preregistered detector reports `NO_CONVERGENCE_WITHIN_HORIZON`.
+- [x] C16 exercise at least two distinct RPMs across the primes or preregistered
        sanity fixture.
-- [ ] C17 run focused integration tests, full relevant P4–P8 regressions,
+- [x] C17 run focused integration tests, full relevant P4–P8 regressions,
+      Focused integrated suite (72 tests), OpenSpec strict, diff check, LFS
+      fsck, and the frozen P9 hash check pass.
        OpenSpec strict, git diff check, git lfs fsck, and verify P9 hash.
-- [ ] C18 keep this v1 definition of done versioned in OpenSpec; classify every
-       newly discovered item BLOCKS_2T_V1 or POST_2T_V1_BACKLOG.
+- [x] C18 keep this v1 definition of done versioned in OpenSpec; classify every
+      newly discovered item BLOCKS_2T_V1 or POST_2T_V1_BACKLOG.
+      Terminal classification is `FAIL_TERMINAL`: C14 and C15 fail only because
+      the preregistered 20-cycle periodicity detector did not converge.
 
 ## Additive capability already present but outside this v1 closure gate
 

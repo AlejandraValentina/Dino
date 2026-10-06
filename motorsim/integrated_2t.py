@@ -3527,6 +3527,11 @@ def audit_integrated_cycle_primary(cycle_record: dict) -> dict:
     # Replay each accepted step from its persisted start state. This verifies
     # SSPRK2 stage updates, not only the RHS values sampled at stored states.
     replay = IntegratedEngine2T.from_configuration_dict(config)
+    # The cycle primary binds cumulative ledgers at its start checkpoint, but
+    # the offline replay below replays only this cycle's trajectory.  Seed the
+    # replay ledger from a fresh engine so checkpoint validation compares the
+    # replayed cycle increments rather than requiring prior-cycle fuel totals.
+    replay_ledger = deepcopy(replay.ledger)
     replay_snapshot = {
         "schema": replay.schema,
         "configuration_identity": identity,
@@ -3538,7 +3543,7 @@ def audit_integrated_cycle_primary(cycle_record: dict) -> dict:
         "accepted_steps": 0,
         "rejected_steps": 0,
         "max_cfl": replay.max_cfl,
-        "ledger": binding["start_ledger"],
+        "ledger": replay_ledger,
         "p7": binding["start_p7"],
         "initial_inventory": binding["initial_inventory"],
         "trace": [],
