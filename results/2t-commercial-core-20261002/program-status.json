@@ -1779,7 +1779,8 @@
       "evidence": [
         "Frozen A-prime campaign completed exactly 20 cycles; run_logged summary: results/2t-v1-closure-20261006/campaign-a-prime-r1-log/c14-a-prime-r1.summary.json.",
         "All 20 V3 primaries were independently audited offline; restart cycle 10 -> 11 matched exactly. Evidence: results/2t-v1-closure-20261006/campaign-a-prime-r1/.",
-        "R1 provenance correction: the runner did not execute the detector, wrote NO_CONVERGENCE_WITHIN_HORIZON manually, and the primary records contain periodicity NOT_EVALUATED. Independent forensics confirms R1_NO_CONVERGENCE_CONFIRMED_OFFLINE; no R1 acceptance claim is made."
+        "R1 provenance correction: the runner did not execute the detector, wrote NO_CONVERGENCE_WITHIN_HORIZON manually, and the primary records contain periodicity NOT_EVALUATED. Independent forensics confirms R1_NO_CONVERGENCE_CONFIRMED_OFFLINE; no R1 acceptance claim is made.",
+        "Authorized R2 A-prime attempt produced 56 complete audited cycles before the original cycle-56 restore path exceeded the performance budget; preserved in results/2t-v1-closure-20261006/campaign-a-prime-r2/. Corrected compact-checkpoint runner committed in dddf243; this partial attempt is not a final R2 classification."
       ],
       "next_action": "Run the single preregistered corrected-runner R2 campaign for A-prime",
       "previous_blocker": "Prerequisite gates not yet complete",
@@ -1799,7 +1800,8 @@
       "evidence": [
         "Frozen B-prime campaign completed exactly 20 cycles; run_logged summary: results/2t-v1-closure-20261006/campaign-b-prime-r1-log/c15-b-prime-r1.summary.json.",
         "All 20 V3 primaries were independently audited offline; restart cycle 10 -> 11 matched exactly. Evidence: results/2t-v1-closure-20261006/campaign-b-prime-r1/.",
-        "R1 provenance correction: the runner did not execute the detector, wrote NO_CONVERGENCE_WITHIN_HORIZON manually, and the primary records contain periodicity NOT_EVALUATED. Independent forensics confirms R1_NO_CONVERGENCE_CONFIRMED_OFFLINE; no R1 acceptance claim is made."
+        "R1 provenance correction: the runner did not execute the detector, wrote NO_CONVERGENCE_WITHIN_HORIZON manually, and the primary records contain periodicity NOT_EVALUATED. Independent forensics confirms R1_NO_CONVERGENCE_CONFIRMED_OFFLINE; no R1 acceptance claim is made.",
+        "Authorized R2 B-prime completed with real PeriodicDetectorV2 classification PERIOD_1 at 38 cycles; summary in results/2t-v1-closure-20261006/campaign-b-prime-r2-log/. Final combined R2 evidence remains pending A-prime corrected continuation."
       ],
       "next_action": "Run the single preregistered corrected-runner R2 campaign for B-prime",
       "previous_blocker": "Prerequisite gates not yet complete",
@@ -2250,6 +2252,18 @@
       "task": "C13",
       "kind": "preregistration",
       "summary": "R2 preregistration committed before execution in c41ad20 + 9b73a1e: corrected PeriodicDetectorV2 runner, SHA-bound solver/detector/auditor/producer/config/fixture/fuel/thresholds, horizons A=111 and B=47 from ceil(4*tau)+3, no R3."
+    },
+    {
+      "at": "2026-10-06T18:40:06+00:00",
+      "task": "C14",
+      "kind": "performance",
+      "summary": "R2 A-prime partial attempt reached 56 audited cycles; old full-history restore exceeded performance budget. Preserved partial evidence; compact checkpoint runner fix committed dddf243; corrected R2 continuation pending."
+    },
+    {
+      "at": "2026-10-06T18:40:06+00:00",
+      "task": "C15",
+      "kind": "gate",
+      "summary": "R2 B-prime completed with real PeriodicDetectorV2: PERIOD_1 at 38 cycles, all completed primaries audited and SHA-bound. Combined R2 closure pending A-prime corrected run."
     }
   ],
   "gate_status": {
@@ -2259,7 +2273,8 @@
     "evidence": [
       "Historical R1 terminal record preserved: C14/C15 runner did not execute the detector; primary records were NOT_EVALUATED.",
       "R1 independent offline forensics: P1 streak 0, P2 branches A=0/B=0, detected_period None, classification R1_NO_CONVERGENCE_CONFIRMED_OFFLINE.",
-      "Owner decision OWNER_DECISION_C14_C15_R2 authorizes exactly one corrected R2; no R3."
+      "Owner decision OWNER_DECISION_C14_C15_R2 authorizes exactly one corrected R2; no R3.",
+      "R2 B-prime reached PERIOD_1 with the real detector; R2 A-prime is being continued with compact checkpoints after a local performance failure at the old restart path."
     ],
     "gate_tasks_total": 18,
     "gate_tasks_done": 14,
