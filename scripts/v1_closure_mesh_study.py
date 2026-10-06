@@ -33,6 +33,7 @@ PROGRAM = Path("results/2t-commercial-core-20261002")
 FIXTURE_DIR = PROGRAM / "fixtures" / "v1-prime-mesh"
 RUN_DIR = Path("results/2t-v1-closure-20261006/mesh-study")
 RECOVERY_R1_DIR = RUN_DIR.with_name("mesh-study-r1")
+RECOVERY_R2_DIR = RUN_DIR.with_name("mesh-study-r2")
 SCHEMA = "MOTORSIM_2T_V1_MESH_STUDY_PREREGISTRATION_V1"
 MESH_LEVELS = ((2, .2), (4, .1), (8, .05), (16, .025))
 MESH_TOLERANCE = .02
@@ -370,10 +371,12 @@ def run(run_dir: Path = RUN_DIR) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("prepare", "run", "prepare-r1", "run-r1"))
+    parser.add_argument("mode", choices=("prepare", "run", "prepare-r1", "run-r1",
+                                         "prepare-r2", "run-r2"))
     args = parser.parse_args()
-    if args.mode in ("prepare", "prepare-r1"):
-        run_dir = RECOVERY_R1_DIR if args.mode.endswith("-r1") else RUN_DIR
+    if args.mode.startswith("prepare"):
+        run_dir = (RECOVERY_R2_DIR if args.mode.endswith("-r2") else
+                   RECOVERY_R1_DIR if args.mode.endswith("-r1") else RUN_DIR)
         amendment = None
         if args.mode == "prepare-r1":
             amendment = {
@@ -398,6 +401,24 @@ def main() -> int:
                 ),
                 "campaign_changes": [],
             }
+        elif args.mode == "prepare-r2":
+            amendment = {
+                "schema": "MOTORSIM_2T_V1_MESH_STUDY_AMENDMENT_R2",
+                "supersedes": RECOVERY_R1_DIR.as_posix() + "/preregistration.json",
+                "reason": (
+                    "The frozen R1 B-prime finest-mesh run stopped before a "
+                    "primary record when fuel combustion rejected a species "
+                    "value that the integrated state validator already admits "
+                    "within its 1e-14 kg roundoff tolerance. Combustion now "
+                    "uses that same admissibility tolerance; reactant "
+                    "availability remains clamped at zero and cannot burn a "
+                    "negative amount. Inputs, physics, meshes, horizon, "
+                    "thresholds, and selection criteria are unchanged."
+                ),
+                "prior_run_disposition": "INCOMPLETE_ADMISSIBILITY_FAILURE; artifacts_preserved",
+                "campaign_changes": [],
+                "diagnostic_replays": "none",
+            }
         result = prepare(run_dir, amendment=amendment)
         print(json.dumps({"status": result["status"],
                           "levels": len(MESH_LEVELS),
@@ -405,7 +426,8 @@ def main() -> int:
                           "preregistration": (run_dir / "preregistration.json").as_posix()},
                          sort_keys=True))
     else:
-        run_dir = RECOVERY_R1_DIR if args.mode.endswith("-r1") else RUN_DIR
+        run_dir = (RECOVERY_R2_DIR if args.mode.endswith("-r2") else
+                   RECOVERY_R1_DIR if args.mode.endswith("-r1") else RUN_DIR)
         result = run(run_dir)
         print(json.dumps({"overall_status": result["overall_status"],
                           "decisions": result["decisions"]}, sort_keys=True))

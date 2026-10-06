@@ -70,6 +70,9 @@ release only `dm_fuel_burned * LHV * combustion_efficiency`; Wiebe progress may
 distribute but MUST NOT increase this energy. Zero fuel or oxygen MUST yield
 zero chemical heat. Unburned fuel MUST remain accounted for. Global mass,
 species, and energy ledgers MUST close within frozen numerical bounds.
+Stage chemistry MUST honor the integrated species-state roundoff admissibility
+bound; tolerated tiny negative species values MUST provide zero reactant
+availability and MUST NOT create fuel burn or heat.
 
 #### Scenario: Zero fuel or insufficient oxygen
 - **WHEN** available cylinder fuel is zero, or fresh-air oxygen cannot support

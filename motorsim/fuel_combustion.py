@@ -13,6 +13,7 @@ from typing import Any
 
 from .combustion import WiebeComponent
 from .fuel_library import FuelSimulationSnapshot
+from .p6_species import validate_species
 
 
 def _finite(value: Any, name: str) -> float:
@@ -236,8 +237,10 @@ class FuelCoupledCombustionV1:
         species = tuple(_finite(value, "species_mass_kg") for value in species_mass_kg)
         rhs = tuple(_finite(value, "species_rhs_kg_s")
                     for value in noncombustion_species_rhs_kg_s)
-        if min(species) < 0.0:
-            raise ValueError("combustion stage species cannot be negative")
+        # Match the integrated state validator's 1e-14 kg roundoff domain.
+        # Availability below is clamped at zero, so a tolerated tiny negative
+        # cannot create reactant or chemical heat.
+        validate_species(species, math.fsum(species))
         derivative = math.fsum(
             item.weight * self._component_rate(item, angle, event.start_angle_deg)
             for item in self.components)

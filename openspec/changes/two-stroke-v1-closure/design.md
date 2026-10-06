@@ -151,6 +151,14 @@ C12 run is retained as incomplete/invalid evidence; a separately committed R1
 preregistration records the corrected replay source before any repeated mesh
 execution.
 
+The corrected R1 study completed and audited all four A′ meshes and B′ meshes
+0–2. B′ mesh 3 stopped before primary output because the combustion source
+rejected a tiny negative species value that the integrated state validator
+already permits within its 1e-14 kg roundoff tolerance. The R2 correction
+aligns the combustion input check with that existing validator and keeps
+available reactant amounts clamped at zero; it does not clip or burn negative
+species. R1 artifacts remain intact and are not mixed into the R2 mesh study.
+
 Internal adversarial review is required before a candidate; it is labelled
 self-review unless a separate, actually independent reviewer and durable
 receipt exist. A terminal candidate is not experimental validation and makes

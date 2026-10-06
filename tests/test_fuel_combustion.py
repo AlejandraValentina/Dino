@@ -74,6 +74,22 @@ def test_stage_source_respects_zero_fuel_and_stage_oxygen_availability():
     assert oxygen_limited["heat_w"] > 0.0
 
 
+def test_stage_source_matches_species_roundoff_admissibility_without_burning_negative_fuel():
+    combustion = model()
+    event = combustion.capture(350.0, (.01, .001, 0.0, 0.0))
+    tiny_negative = combustion.stage_source(
+        event=event, angle_deg=370.0, rpm=3000.0,
+        species_mass_kg=(.01, -1e-15, 0.0, 0.0),
+        noncombustion_species_rhs_kg_s=(0.0, 0.0, 0.0, 0.0), dt_s=1e-5)
+    assert tiny_negative["burned_fuel_rate_kg_s"] == 0.0
+    assert tiny_negative["heat_w"] == 0.0
+    with pytest.raises(ValueError, match="inadmissible species mass"):
+        combustion.stage_source(
+            event=event, angle_deg=370.0, rpm=3000.0,
+            species_mass_kg=(.01, -2e-14, 0.0, 0.0),
+            noncombustion_species_rhs_kg_s=(0.0, 0.0, 0.0, 0.0), dt_s=1e-5)
+
+
 def test_fuel_combustion_configuration_roundtrip_binds_provenance_and_hash():
     combustion = model()
     encoded = combustion.to_dict()

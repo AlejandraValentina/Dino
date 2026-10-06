@@ -54,6 +54,13 @@
        incomplete/invalid; no campaign evidence is claimed.
 - [ ] C11 exact continuous/checkpoint/restart/replay comparisons for both primes.
 - [ ] C12 preregister and complete transfer/exhaust integrated mesh study.
+      R0 stopped at A mesh 1 on the C10 replay-roundoff defect; R1 then audited
+      all A meshes and B meshes 0–2, but B mesh 3 stopped on a combustion-stage
+      check stricter than the integrated species admissibility tolerance. Both
+      preregistrations and all partial artifacts are preserved. R2 aligns the
+      source check with the existing 1e-14 kg tolerance while keeping reactant
+      availability nonnegative; C12 remains open until the separately frozen
+      R2 study completes and meets its unchanged pairwise criteria.
 - [ ] C13 commit immutable A'/B' campaign preregistration before any campaign.
 - [ ] C14 run frozen A' 20-cycle campaign and offline audit.
 - [ ] C15 run frozen B' 20-cycle campaign and offline audit.
