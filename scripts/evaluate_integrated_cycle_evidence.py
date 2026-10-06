@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import hashlib
+import inspect
 import json
 from pathlib import Path
 import subprocess
@@ -15,6 +16,7 @@ sys.path.insert(0, str(ROOT))
 from motorsim.reference_harness.convergence import (  # noqa: E402
     CONTRACT, PeriodicDetector, compare_cycles,
 )
+from motorsim.integrated_2t import audit_integrated_cycle_primary  # noqa: E402
 
 PERIODICITY_CONTRACT = ROOT / "motorsim/reference_harness/convergence.py"
 
@@ -102,6 +104,9 @@ def evaluate(output_dir: Path, preregistration_path: Path | None = None) -> dict
                 raise ValueError("producer source binding does not match cycle evidence")
     elif manifest.get("fixture_status") == "HISTORICAL_SUPERSEDED_BY_POSTHOC_AUDIT":
         raise ValueError("historical fixture evaluation requires its preregistration")
+    if (manifest.get("detector_source_sha256") is not None and
+            manifest["detector_source_sha256"] != _sha256(PERIODICITY_CONTRACT)):
+        raise ValueError("periodicity detector source differs from campaign manifest")
     restart = json.loads((output_dir / "restart-audit.json").read_text(encoding="utf-8"))
     if restart.get("status") != "EXACT_REPLAY_PASS" or restart.get("snapshot_equal") is not True:
         raise ValueError("exact restart replay gate is not satisfied")
@@ -111,6 +116,7 @@ def evaluate(output_dir: Path, preregistration_path: Path | None = None) -> dict
     lag1 = []
     lag2 = []
     cycle_artifacts = []
+    primary_audits = []
     prior = []
     configuration_hash = None
     for index in range(1, horizon + 1):
@@ -119,13 +125,28 @@ def evaluate(output_dir: Path, preregistration_path: Path | None = None) -> dict
             raise ValueError(f"missing cycle artifact {path.name}")
         with gzip.open(path, "rt", encoding="utf-8") as stream:
             record = json.load(stream)
-        if (record.get("schema") != "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2" or
+        schema = record.get("schema")
+        if (schema not in {"MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2",
+                           "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V3"} or
                 record.get("cycle_index") != index or
                 record.get("contract") != CONTRACT or
                 record.get("cycle_start_deg") != (index - 1) * 360.0 or
                 record.get("cycle_end_deg") != index * 360.0 or
                 record.get("admissible") is not True):
             raise ValueError(f"cycle {index} fails identity, span, contract or admissibility")
+        if schema == "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V3":
+            audit = audit_integrated_cycle_primary(record)
+            if (record["evidence_binding"].get("runner_sha256") !=
+                    manifest.get("producer_source_sha256")):
+                raise ValueError(f"cycle {index} producer hash differs from campaign manifest")
+            primary_audits.append({"cycle": index, **audit})
+        elif preregistration is not None or manifest.get("fixture_id") != "TEST":
+            raise ValueError("registered campaign requires auditable primary schema V3")
+        else:
+            # Isolated detector tests use minimal V2 projections; these cannot
+            # satisfy a preregistered fixture campaign or a closure gate.
+            primary_audits.append({"cycle": index,
+                                   "status": "TEST_PROJECTION_ONLY_NO_PHYSICAL_AUDIT"})
         if configuration_hash is None:
             configuration_hash = record.get("configuration_hash")
         elif record.get("configuration_hash") != configuration_hash:
@@ -185,6 +206,14 @@ def evaluate(output_dir: Path, preregistration_path: Path | None = None) -> dict
                          "compared_terminal_cycle": restart["compared_terminal_cycle"],
                          "snapshot_equal": restart["snapshot_equal"]},
         "cycle_artifacts": cycle_artifacts,
+        "primary_evidence_audits": primary_audits,
+        "decision_source_sha256": {
+            "evaluator": _sha256_bytes(
+                Path(__file__).read_bytes().replace(b"\r\n", b"\n")),
+            "detector_module": hashlib.sha256(inspect.getsource(
+                sys.modules[PeriodicDetector.__module__]).encode("utf-8")).hexdigest(),
+            "detector_contract_file": _sha256(PERIODICITY_CONTRACT),
+        },
         "period_1_comparison_counts": lag1_counts,
         "period_2_comparison_counts": lag2_counts,
         "period_1_comparisons": lag1,

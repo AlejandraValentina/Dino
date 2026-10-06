@@ -32,8 +32,14 @@
       and atmospheric interfaces. Static port opening fractions, both finite
       network endpoints/orientations and OPEN_END_PLENUM_V2 open ends preserve
       uniform rest; pressure reaction identities are checked at each boundary.
-- [ ] C10 make primary-evidence audit reconstruct fluxes, RHS and decisions;
-       persist every rejection and numerical residual bound.
+- [x] C10 primary-evidence V3 audit rebuilds configuration-bound RHS/fluxes,
+       independently replays every accepted SSPRK2 step, enforces float64
+       gamma-n ledger residual bounds, and binds cycle retry records, accepted
+       trajectory, terminal/checkpoint state, solver dependencies, campaign
+       runner, and detector sources. `75` integrated/evidence producer/evaluator
+       tests pass; OpenSpec strict and `git diff --check` pass. Independent
+       adversarial review found four evidence gaps; all four were corrected and
+       retested. This closes the C10 foundation, not an A'/B' campaign.
 - [ ] C11 exact continuous/checkpoint/restart/replay comparisons for both primes.
 - [ ] C12 preregister and complete transfer/exhaust integrated mesh study.
 - [ ] C13 commit immutable A'/B' campaign preregistration before any campaign.

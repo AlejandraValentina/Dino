@@ -1573,7 +1573,7 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1587,7 +1587,7 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1601,7 +1601,7 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1615,7 +1615,7 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1629,7 +1629,7 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1643,7 +1643,7 @@
       ],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": ["33399dac2be5a3a671ef3a925aea99cb5dbd716d"],
       "evidence": [
         "OpenSpec C1-C18 task queue; focused integrated/unit tests"
       ],
@@ -1660,13 +1660,16 @@
         "C8",
         "C9"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "evidence": [
-        []
+        "C10 primary evidence V3 binds configuration, fuel definition, accepted trajectory, terminal and checkpoint state, caller retry log, campaign runner, full integrated solver dependency modules, and periodicity detector manifest.",
+        "Offline audit replays every accepted SSPRK2 step and compares complete stage traces; conservation residuals are enforced using float64 gamma-n accumulation bounds.",
+        "75 integrated primary/evidence producer/evaluator tests PASS; OpenSpec strict and git diff --check PASS.",
+        "Independent adversarial C10 review identified four gaps; fixes added and follow-up review requested."
       ],
-      "next_action": "Implement and verify this gate in declared order"
+      "next_action": "Complete independent follow-up review, commit C10, then continue C11-C12"
     },
     {
       "id": "C11",

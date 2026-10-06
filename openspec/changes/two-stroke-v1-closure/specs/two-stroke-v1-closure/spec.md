@@ -144,6 +144,19 @@ admissibility trial MUST be persisted; retry/halving MUST NOT be silent.
 Continuous, checkpoint/restart, and independent replay MUST compare full
 physical state, species, ledgers and relevant outputs, not only digest strings.
 
+Integrated single-cycle primary records use V3. Offline audit MUST replay every
+accepted SSPRK2 step from the bound start checkpoint and compare all saved stage
+states and flux/source records. Caller retries MUST be included in an ordered
+per-cycle rejection log whose CFL count agrees with the checkpoint rejection
+counter delta; the campaign runner source is bound by hash. The primary builder,
+the complete set of Python modules used by the integrated RHS, and the campaign
+periodicity detector source are bound separately. Conservation residual limits
+use the documented float64 accumulation bound
+`gamma_n = n*u/(1-n*u)`, `n = 16 * accepted_steps`, with `u` equal to float64
+unit roundoff and each residual scale equal to the sum of absolute primary
+terms in its ledger equation. The auditor recomputes these limits and enforces
+them before accepting a primary record.
+
 #### Scenario: Summary or evidence tampering
 - **WHEN** a summary conflicts with primary states or a trial rejection is
   missing from the evidence stream

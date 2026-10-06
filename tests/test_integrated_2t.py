@@ -1,5 +1,7 @@
 from copy import deepcopy
 from dataclasses import replace
+import hashlib
+import inspect
 import json
 
 import pytest
@@ -16,10 +18,11 @@ from motorsim.integrated_2t import (
     DuctPath2T, DynamicReedBinding2T, EngineGeometry2T, IntegratedEngine2T, IntegratedIntakePlenum2T,
     IntegratedNetworkVolume2T,
     IntegratedPortBinding2T,
-    SliderCrankChambers2T, make_integrated_cycle_primary,
+    SliderCrankChambers2T, audit_integrated_cycle_primary, make_integrated_cycle_primary,
     make_integrated_engineering_output, make_integrated_engineering_output_v4,
     _fresh_air_fuel_species_ratio, _duct_ids_by_role, _role_face_outputs,
     _specific_consumption_value, _gross_fresh_short_circuit_rate,
+    _evidence_sha256,
 )
 from motorsim.engineering_outputs import (validate_integrated_engineering_output_v3,
                                           validate_integrated_engineering_output_v4,
@@ -1241,6 +1244,8 @@ def _advance_cycle_fixture(system, target_angle):
     if rejected_trials is None:
         rejected_trials = []
         system.fixture_rejected_trials = rejected_trials
+    system.fixture_rejection_runner_sha256 = hashlib.sha256(
+        inspect.getsource(_advance_cycle_fixture).encode("utf-8")).hexdigest()
     rpm = 3000.0
     binding = system.port_binding
     ports = binding.port_set
@@ -1837,6 +1842,47 @@ def test_fuel_coupled_cycle_primary_recomputes_species_and_energy_sources():
         chemistry["fuel_burned_kg"] * 43_000_000.0 * .8)
     assert abs(primary["conservation"]["energy_residual_J"]) < 1e-10
     assert abs(primary["conservation"]["species_residual_kg"][1]) < 1e-15
+
+
+def test_offline_cycle_audit_rebuilds_supported_configuration_and_rejects_tampering():
+    combustion = FuelCoupledCombustionV1(
+        (WiebeComponent(1.0, 40.0, 5.0, 2.0),),
+        ignition_timing_deg=0.0, combustion_efficiency=.01)
+    engine = _internal_cycle_fixture(
+        fuel_coupled_combustion=combustion, open_end_plenum_v2=True)
+    start = engine.snapshot()
+    _advance_cycle_fixture(engine, 360.0)
+    primary = make_integrated_cycle_primary(engine, start, engine.snapshot(), 1)
+
+    assert primary["schema"] == "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V3"
+    assert primary["evidence_binding"]["rejection_status"] == (
+        "COMPLETE_CALLER_RETRY_LOG_BOUND_TO_CYCLE")
+    assert primary["evidence_binding"]["rejected_trial_count"] == len(
+        primary["rejected_trials"])
+    assert audit_integrated_cycle_primary(primary)["status"] == "PASS"
+    tampered = deepcopy(primary)
+    tampered["trajectory"][0]["stage_face_fluxes"][0]["intake"]["left"][0] += 1e-9
+    with pytest.raises(ValueError, match="trajectory/fixture/terminal hash"):
+        audit_integrated_cycle_primary(tampered)
+    tampered_bounds = deepcopy(primary)
+    tampered_bounds["evidence_binding"]["residual_bounds"]["energy_abs_j"] *= 2
+    with pytest.raises(ValueError, match="residual bounds"):
+        audit_integrated_cycle_primary(tampered_bounds)
+    if primary["rejected_trials"]:
+        missing_rejection = deepcopy(primary)
+        missing_rejection["rejected_trials"].pop()
+        missing_rejection["evidence_binding"]["rejected_trial_count"] -= 1
+        missing_rejection["evidence_binding"]["rejection_records_sha256"] = (
+            _evidence_sha256(missing_rejection["rejected_trials"]))
+        with pytest.raises(ValueError, match="rejection|rejected"):
+            audit_integrated_cycle_primary(missing_rejection)
+    corrupted_stage = deepcopy(primary)
+    corrupted_stage["trajectory"][0]["stage_states"][1]["chambers"][
+        "cylinder"][0] *= 1.000001
+    corrupted_stage["evidence_binding"]["trajectory_sha256"] = _evidence_sha256(
+        corrupted_stage["trajectory"])
+    with pytest.raises(ValueError, match="SSPRK2 accepted-state replay"):
+        audit_integrated_cycle_primary(corrupted_stage)
 
 
 def test_fuel_coupled_observables_bind_delivered_trapped_burned_and_unburned_snapshots():

@@ -13,6 +13,7 @@ from dataclasses import dataclass, replace
 import hashlib
 import inspect
 import json
+import sys
 from math import fsum, isclose, isfinite, pi
 from types import MappingProxyType
 from collections.abc import Mapping
@@ -49,6 +50,68 @@ _USE_ACTIVE_FUEL_EVENT = object()
 def _source_sha256(*objects) -> str:
     source = "\n\n".join(inspect.getsource(item) for item in objects)
     return hashlib.sha256(source.encode("utf-8")).hexdigest()
+
+
+def _evidence_sha256(value) -> str:
+    encoded = json.dumps(_jsonify(value), sort_keys=True,
+                         separators=(",", ":"), allow_nan=False).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _solver_dependency_hashes() -> dict[str, str]:
+    """Bind the integrated solver and the implementation modules it executes."""
+    modules = {
+        __name__: sys.modules[__name__],
+        CrankcaseGeometry.__module__: sys.modules[CrankcaseGeometry.__module__],
+        ChamberState.__module__: sys.modules[ChamberState.__module__],
+        Boundary.__module__: sys.modules[Boundary.__module__],
+        IdealGas.__module__: sys.modules[IdealGas.__module__],
+        OpenEndPlenumV2Boundary.__module__: sys.modules[
+            OpenEndPlenumV2Boundary.__module__],
+        FuelCoupledCombustionV1.__module__: sys.modules[
+            FuelCoupledCombustionV1.__module__],
+        Mesh.__module__: sys.modules[Mesh.__module__],
+        hllc_flux.__module__: sys.modules[hllc_flux.__module__],
+        resolve_volume_duct_interface.__module__: sys.modules[
+            resolve_volume_duct_interface.__module__],
+        validate_species.__module__: sys.modules[validate_species.__module__],
+        P7BurnEvent.__module__: sys.modules[P7BurnEvent.__module__],
+        piston_position.__module__: sys.modules[piston_position.__module__],
+        PowerValve.__module__: sys.modules[PowerValve.__module__],
+        ReedPetal.__module__: sys.modules[ReedPetal.__module__],
+        HingedFlapGeometryV1.__module__: sys.modules[
+            HingedFlapGeometryV1.__module__],
+        ThermalSystem.__module__: sys.modules[ThermalSystem.__module__],
+        TwoStrokePortSet.__module__: sys.modules[TwoStrokePortSet.__module__],
+    }
+    return {name: hashlib.sha256(
+        inspect.getsource(module).encode("utf-8")).hexdigest()
+        for name, module in sorted(modules.items())}
+
+
+def _validated_rejection_records(records, *, cycle_start: float,
+                                 cycle_end: float) -> list[dict]:
+    if not isinstance(records, list):
+        raise ValueError("integrated cycle rejection log is missing")
+    normalized = []
+    previous_angle = cycle_start
+    for row in records:
+        if (not isinstance(row, dict) or
+                set(row) != {"angle_deg", "attempted_step_deg", "reason"}):
+            raise ValueError("integrated cycle rejection record schema is invalid")
+        angle = row["angle_deg"]
+        step = row["attempted_step_deg"]
+        reason = row["reason"]
+        if (type(angle) not in (int, float) or not isfinite(angle) or
+                not cycle_start <= angle < cycle_end or angle < previous_angle or
+                type(step) not in (int, float) or not isfinite(step) or step <= 0 or
+                type(reason) is not str or not reason.strip()):
+            raise ValueError("integrated cycle rejection record values are invalid")
+        normalized.append({"angle_deg": float(angle),
+                           "attempted_step_deg": float(step),
+                           "reason": reason})
+        previous_angle = float(angle)
+    return normalized
 
 
 def _restore_validated_p7_event(value):
@@ -2612,7 +2675,9 @@ def _assert_trace_value_equal(actual, expected, description):
 def make_integrated_cycle_primary(engine: IntegratedEngine2T,
                                  start_checkpoint: dict,
                                  end_checkpoint: dict,
-                                 cycle_index: int) -> dict:
+                                 cycle_index: int, *,
+                                 rejected_trials: list[dict] | None = None,
+                                 runner_sha256: str | None = None) -> dict:
     """Rebuild one complete 360-degree primary record from accepted stages.
 
     Checkpoint ledgers are cross-checks only. Cycle terms and periodic
@@ -2632,6 +2697,8 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
             end_checkpoint.get("crank_angle_unwrapped_deg") != end_angle or
             end_checkpoint.get("cycle") != cycle_index):
         raise ValueError("integrated cycle checkpoints must bind exact 360-degree boundaries")
+    if start_checkpoint.get("initial_inventory") != end_checkpoint.get("initial_inventory"):
+        raise ValueError("integrated cycle checkpoint initial inventory changed")
     start_index = start_checkpoint.get("accepted_steps")
     end_index = end_checkpoint.get("accepted_steps")
     if (type(start_index) is not int or type(end_index) is not int or
@@ -2643,6 +2710,40 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
     if (trajectory[0].get("angle_start_deg") != start_angle or
             trajectory[-1].get("angle_end_deg") != end_angle):
         raise ValueError("integrated cycle trajectory does not cover the exact cycle")
+    start_rejected = start_checkpoint.get("rejected_steps")
+    end_rejected = end_checkpoint.get("rejected_steps")
+    if (type(start_rejected) is not int or type(end_rejected) is not int or
+            end_rejected < start_rejected):
+        raise ValueError("integrated cycle rejection counters are invalid")
+    rejection_source = rejected_trials
+    if rejection_source is None:
+        rejection_source = getattr(engine, "fixture_rejected_trials", None)
+    if rejection_source is None and end_rejected != start_rejected:
+        raise ValueError("integrated cycle rejected trials require a caller rejection log")
+    if rejection_source is None:
+        rejection_source = []
+    if runner_sha256 is None:
+        runner_sha256 = getattr(engine, "fixture_rejection_runner_sha256", None)
+    if not isinstance(rejection_source, list):
+        raise ValueError("integrated cycle rejection log is invalid")
+    if any(not isinstance(row, dict) or
+           type(row.get("angle_deg")) not in (int, float) or
+           not isfinite(row["angle_deg"]) for row in rejection_source):
+        raise ValueError("integrated cycle rejection log contains an invalid row")
+    rejection_records = _validated_rejection_records(
+        [row for row in rejection_source
+         if start_angle <= row.get("angle_deg", float("nan")) < end_angle],
+        cycle_start=start_angle, cycle_end=end_angle)
+    cfl_rejections = sum("CFL limit exceeded" in row["reason"]
+                         for row in rejection_records)
+    if cfl_rejections != end_rejected - start_rejected:
+        raise ValueError("integrated cycle CFL rejection log differs from checkpoint counters")
+    if rejection_records and runner_sha256 is None:
+        raise ValueError("integrated cycle retry evidence requires a bound runner source")
+    if runner_sha256 is not None and (
+            type(runner_sha256) is not str or len(runner_sha256) != 64 or
+            any(ch not in "0123456789abcdef" for ch in runner_sha256)):
+        raise ValueError("integrated cycle runner source hash is invalid")
     prior_end = start_angle
     prior_state = start_checkpoint["state"]
     cfl_values = []
@@ -3034,16 +3135,54 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
             "mechanical_energy_J": (0.5 * petal.mass_kg * reed["velocity_m_s"] ** 2 +
                                      0.5 * petal.stiffness_n_m * reed["position_m"] ** 2),
             "dissipation_since_initial_J": rates_integral["reed_dissipation_J"]}
-    mass_residual = end_inventory["mass_kg"] - start_inventory["mass_kg"] - external_mass
-    energy_residual = (end_inventory["energy_J"] - start_inventory["energy_J"] -
-                       external_energy - p7_heat - fuel_combustion_heat -
-                       rates_integral["cylinder_work_J"] -
-                       rates_integral["crankcase_work_J"] + wall_heat +
-                       rates_integral["reed_dissipation_J"])
-    species_residual = [end_inventory["species_kg"][i] -
-                        start_inventory["species_kg"][i] - external_species[i] -
-                        p7_species[i] - fuel_combustion_species[i]
+    mass_residual = fsum((end_inventory["mass_kg"], -start_inventory["mass_kg"],
+                          -external_mass))
+    energy_residual = fsum((end_inventory["energy_J"],
+                            -start_inventory["energy_J"], -external_energy,
+                            -p7_heat, -fuel_combustion_heat,
+                            -rates_integral["cylinder_work_J"],
+                            -rates_integral["crankcase_work_J"], wall_heat,
+                            rates_integral["reed_dissipation_J"]))
+    species_residual = [fsum((end_inventory["species_kg"][i],
+                              -start_inventory["species_kg"][i],
+                              -external_species[i], -p7_species[i],
+                              -fuel_combustion_species[i]))
                         for i in range(4)]
+    # Standard gamma_n floating-point accumulation bound. Each accepted
+    # SSPRK2 step contributes at most 16 scalar accumulation operations to
+    # these cycle ledgers; scales are the absolute primary terms being summed.
+    operations = 16 * len(trajectory)
+    unit_roundoff = sys.float_info.epsilon
+    gamma_n = operations * unit_roundoff / (1.0 - operations * unit_roundoff)
+    energy_scale = fsum(abs(value) for value in (
+        end_inventory["energy_J"], start_inventory["energy_J"], external_energy,
+        p7_heat, fuel_combustion_heat, rates_integral["cylinder_work_J"],
+        rates_integral["crankcase_work_J"], wall_heat,
+        rates_integral["reed_dissipation_J"]))
+    mass_scale = fsum(abs(value) for value in (
+        end_inventory["mass_kg"], start_inventory["mass_kg"], external_mass))
+    species_scale = max(fsum(abs(value) for value in (
+        end_inventory["species_kg"][i], start_inventory["species_kg"][i],
+        external_species[i], p7_species[i], fuel_combustion_species[i]))
+        for i in range(4))
+    residual_bounds = {
+        "roundoff_model": "FLOAT64_GAMMA_N_16_ACCUMULATIONS_PER_ACCEPTED_STEP_V1",
+        "operations": operations,
+        "gamma_n": gamma_n,
+        "mass_abs_kg": gamma_n * mass_scale,
+        "energy_abs_j": gamma_n * energy_scale,
+        "species_abs_kg": gamma_n * species_scale,
+        "rhs_rel": 1e-12,
+        "rhs_abs": 1e-14,
+    }
+    if (abs(mass_residual) > residual_bounds["mass_abs_kg"] or
+            abs(energy_residual) > residual_bounds["energy_abs_j"] or
+            any(abs(value) > residual_bounds["species_abs_kg"]
+                for value in species_residual)):
+        raise ValueError(
+            "integrated cycle primary exceeds frozen residual bounds: "
+            f"mass={mass_residual:.17g} kg, energy={energy_residual:.17g} J, "
+            f"species={species_residual!r} kg")
     terminal_rpm = float(trajectory[-1]["rpm"])
     p7_state = end_checkpoint.get("p7", {})
     if not isinstance(p7_state, dict):
@@ -3065,10 +3204,85 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
         "p7_heat_requested_W": terminal_rhs["p7_heat_rate"],
         "thermal_rates_W": terminal_rhs["thermal_rates"],
         "p7_rate_semantics": "instantaneous prescribed rate before any future-step availability limiter"}
-    primary = {"schema": "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2",
+    checkpoint_binding = {
+        "schema": "INTEGRATED_2T_CYCLE_CHECKPOINT_BINDING_V1",
+        "start_accepted_steps": start_index,
+        "end_accepted_steps": end_index,
+        "start_rejected_steps": start_rejected,
+        "end_rejected_steps": end_rejected,
+        "start_time_s": start_checkpoint["time_s"],
+        "end_time_s": end_checkpoint["time_s"],
+        "initial_inventory": _jsonify(start_checkpoint["initial_inventory"]),
+        "start_ledger": _jsonify(start_checkpoint["ledger"]),
+        "end_ledger": _jsonify(end_checkpoint["ledger"]),
+        "start_p7": _jsonify(start_checkpoint.get("p7", {})),
+        "end_p7": _jsonify(end_checkpoint.get("p7", {})),
+        "start_fuel_combustion": _jsonify(start_checkpoint.get("fuel_combustion", {})),
+        "end_fuel_combustion": _jsonify(end_checkpoint.get("fuel_combustion", {})),
+    }
+    config_supported = engine._configuration_spec is not None
+    configuration = (engine.configuration_dict() if config_supported else None)
+    trajectory_sha = _evidence_sha256(trajectory)
+    terminal_sha = _evidence_sha256(end_state)
+    def checkpoint_identity(state, ledger, p7, fuel, time_s,
+                            accepted, rejected, angle):
+        return _evidence_sha256({
+            "state": state, "ledger": ledger, "p7": p7,
+            "fuel_combustion": fuel, "time_s": time_s,
+            "accepted_steps": accepted, "rejected_steps": rejected,
+            "angle_deg": angle, "initial_inventory": checkpoint_binding[
+                "initial_inventory"]})
+    checkpoint_sha = {
+        "start": checkpoint_identity(
+            start_state, checkpoint_binding["start_ledger"],
+            checkpoint_binding["start_p7"],
+            checkpoint_binding["start_fuel_combustion"],
+            checkpoint_binding["start_time_s"], start_index,
+            start_rejected, start_angle),
+        "end": _evidence_sha256({
+            "state": end_state, "ledger": checkpoint_binding["end_ledger"],
+            "p7": checkpoint_binding["end_p7"],
+            "fuel_combustion": checkpoint_binding["end_fuel_combustion"],
+            "time_s": checkpoint_binding["end_time_s"],
+            "accepted_steps": end_index, "rejected_steps": end_rejected,
+            "angle_deg": end_angle, "initial_inventory": checkpoint_binding[
+                "initial_inventory"]}),
+    }
+    solver_hashes = _solver_dependency_hashes() if config_supported else None
+    evidence_binding = ({
+                "producer_sha256": _source_sha256(make_integrated_cycle_primary),
+                "runner_sha256": runner_sha256,
+                "solver_dependency_sha256": solver_hashes,
+                "detector_sha256": None,
+                "detector_status": "NOT_APPLICABLE_SINGLE_CYCLE_PRIMARY",
+                "fixture_sha256": _evidence_sha256(engine.configuration_identity),
+                "fuel_sha256": (None if engine.fuel_coupled_combustion is None else
+                                engine.fuel_coupled_combustion.fuel.sha256),
+                "trajectory_sha256": trajectory_sha,
+                "terminal_state_sha256": terminal_sha,
+                "restart_start_sha256": checkpoint_sha["start"],
+                "restart_terminal_sha256": checkpoint_sha["end"],
+                "accepted_step_count": len(trajectory),
+                "rejected_trial_count": len(rejection_records),
+                "rejection_records_sha256": _evidence_sha256(rejection_records),
+                "rejected_cfl_count": cfl_rejections,
+                "rejection_status": "COMPLETE_CALLER_RETRY_LOG_BOUND_TO_CYCLE",
+                "residual_bounds": residual_bounds,
+            } if config_supported else None)
+    primary = {"schema": ("MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V3"
+                          if config_supported else
+                          "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2"),
             "contract": "REFERENCE_PERIODIC_CONVERGENCE_V1",
             "cycle_index": cycle_index,
             "configuration_hash": engine.configuration_identity["configuration_sha256"],
+            "configuration": (None if not config_supported else _jsonify(configuration)),
+            "configuration_identity": (None if not config_supported else
+                                        _jsonify(engine.configuration_identity)),
+            "checkpoint_binding": (checkpoint_binding if config_supported else None),
+            "evidence_binding": evidence_binding,
+            "rejected_trials": (rejection_records if config_supported else None),
+            "periodicity": {"status": "NOT_EVALUATED",
+                            "reason": "Single-cycle primary is not a periodicity decision."},
             "swept_displacement_m3": (
                 None if engine.slider_crank is None else
                 engine.slider_crank.crankcase.displacement_m3),
@@ -3107,6 +3321,170 @@ def make_integrated_cycle_primary(engine: IntegratedEngine2T,
     return primary
 
 
+def audit_integrated_cycle_primary(cycle_record: dict) -> dict:
+    """Rebuild one V3 cycle decision offline from its bound config and states.
+
+    The audit invokes the current solver RHS on every persisted SSPRK stage,
+    regenerates stage fluxes/sources/ledgers and compares the complete primary
+    record byte-for-byte after canonical JSON normalization.
+    """
+    if (not isinstance(cycle_record, dict) or
+            cycle_record.get("schema") != "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V3" or
+            cycle_record.get("periodicity", {}).get("status") != "NOT_EVALUATED"):
+        raise ValueError("offline cycle audit requires a V3 single-cycle primary record")
+    binding = cycle_record.get("checkpoint_binding")
+    config = cycle_record.get("configuration")
+    identity = cycle_record.get("configuration_identity")
+    trajectory = cycle_record.get("trajectory")
+    if (not isinstance(binding, dict) or
+            binding.get("schema") != "INTEGRATED_2T_CYCLE_CHECKPOINT_BINDING_V1" or
+            not isinstance(config, dict) or not isinstance(identity, dict) or
+            not isinstance(trajectory, list) or not trajectory):
+        raise ValueError("offline cycle audit binding is incomplete")
+    engine = IntegratedEngine2T.from_configuration_dict(config)
+    if (engine.configuration_identity != identity or
+            cycle_record.get("configuration_hash") !=
+            identity.get("configuration_sha256")):
+        raise ValueError("offline cycle configuration identity mismatch")
+    expected_fuel_sha = (None if engine.fuel_coupled_combustion is None else
+                         engine.fuel_coupled_combustion.fuel.sha256)
+    evidence = cycle_record.get("evidence_binding")
+    if not isinstance(evidence, dict):
+        raise ValueError("offline cycle evidence hashes are missing")
+    if (evidence.get("producer_sha256") !=
+            _source_sha256(make_integrated_cycle_primary) or
+            evidence.get("solver_dependency_sha256") !=
+            _solver_dependency_hashes()):
+        raise ValueError("offline cycle producer/solver source binding mismatch")
+    if (evidence.get("fixture_sha256") != _evidence_sha256(identity) or
+            evidence.get("fuel_sha256") != expected_fuel_sha or
+            evidence.get("trajectory_sha256") !=
+            _evidence_sha256(trajectory) or
+            evidence.get("terminal_state_sha256") !=
+            _evidence_sha256(cycle_record.get("terminal_state"))):
+        raise ValueError("offline cycle trajectory/fixture/terminal hash mismatch")
+    if evidence.get("accepted_step_count") != len(trajectory):
+        raise ValueError("offline cycle accepted trajectory count mismatch")
+    rejection_records = cycle_record.get("rejected_trials")
+    if (evidence.get("rejection_status") !=
+            "COMPLETE_CALLER_RETRY_LOG_BOUND_TO_CYCLE" or
+            not isinstance(rejection_records, list) or
+            evidence.get("rejected_trial_count") != len(rejection_records) or
+            evidence.get("rejection_records_sha256") !=
+            _evidence_sha256(rejection_records)):
+        raise ValueError("offline cycle rejection evidence is incomplete or inconsistent")
+    if (rejection_records and
+            (type(evidence.get("runner_sha256")) is not str or
+             len(evidence["runner_sha256"]) != 64 or
+             any(ch not in "0123456789abcdef"
+                 for ch in evidence["runner_sha256"]))):
+        raise ValueError("offline cycle retry runner source binding is invalid")
+    start_index = binding.get("start_accepted_steps")
+    end_index = binding.get("end_accepted_steps")
+    if (type(start_index) is not int or type(end_index) is not int or
+            end_index - start_index != len(trajectory)):
+        raise ValueError("offline cycle checkpoint step binding is invalid")
+    if (type(binding.get("start_rejected_steps")) is not int or
+            type(binding.get("end_rejected_steps")) is not int or
+            binding["end_rejected_steps"] < binding["start_rejected_steps"] or
+            sum("CFL limit exceeded" in row.get("reason", "")
+                for row in rejection_records) !=
+            binding["end_rejected_steps"] - binding["start_rejected_steps"]):
+        raise ValueError("offline cycle checkpoint rejection counters do not match log")
+    bounds = evidence.get("residual_bounds")
+    if (not isinstance(bounds, dict) or
+            bounds.get("roundoff_model") !=
+            "FLOAT64_GAMMA_N_16_ACCUMULATIONS_PER_ACCEPTED_STEP_V1" or
+            bounds.get("operations") != 16 * len(trajectory) or
+            bounds.get("rhs_rel") != 1e-12 or bounds.get("rhs_abs") != 1e-14 or
+            any(type(bounds.get(key)) not in (int, float) or
+                not isfinite(bounds[key]) or bounds[key] <= 0.0
+                for key in ("gamma_n", "mass_abs_kg", "energy_abs_j",
+                            "species_abs_kg"))):
+        raise ValueError("offline cycle residual bounds differ from frozen contract")
+    start_angle = float(cycle_record["cycle_start_deg"])
+    end_angle = float(cycle_record["cycle_end_deg"])
+    start_checkpoint = {
+        "schema": engine.schema,
+        "configuration_identity": identity,
+        "crank_angle_unwrapped_deg": start_angle,
+        "cycle": int(cycle_record["cycle_index"]) - 1,
+        "accepted_steps": start_index,
+        "rejected_steps": binding.get("start_rejected_steps"),
+        "time_s": binding.get("start_time_s"),
+        "initial_inventory": binding.get("initial_inventory"),
+        "state": cycle_record["start_state"],
+        "ledger": binding["start_ledger"],
+        "p7": binding["start_p7"],
+        "fuel_combustion": binding["start_fuel_combustion"],
+    }
+    end_checkpoint = {
+        "schema": engine.schema,
+        "configuration_identity": identity,
+        "crank_angle_unwrapped_deg": end_angle,
+        "cycle": int(cycle_record["cycle_index"]),
+        "accepted_steps": end_index,
+        "rejected_steps": binding.get("end_rejected_steps"),
+        "time_s": binding.get("end_time_s"),
+        "initial_inventory": binding.get("initial_inventory"),
+        "trace": [None] * start_index + trajectory,
+        "state": cycle_record["terminal_state"],
+        "ledger": binding["end_ledger"],
+        "p7": binding["end_p7"],
+        "fuel_combustion": binding["end_fuel_combustion"],
+    }
+    # Replay each accepted step from its persisted start state. This verifies
+    # SSPRK2 stage updates, not only the RHS values sampled at stored states.
+    replay = IntegratedEngine2T.from_configuration_dict(config)
+    replay_snapshot = {
+        "schema": replay.schema,
+        "configuration_identity": identity,
+        "state": cycle_record["start_state"],
+        "angle_deg": start_angle % 360.0,
+        "crank_angle_unwrapped_deg": start_angle,
+        "time_s": binding["start_time_s"],
+        "cycle": int(cycle_record["cycle_index"]) - 1,
+        "accepted_steps": 0,
+        "rejected_steps": 0,
+        "max_cfl": replay.max_cfl,
+        "ledger": binding["start_ledger"],
+        "p7": binding["start_p7"],
+        "initial_inventory": binding["initial_inventory"],
+        "trace": [],
+    }
+    if replay.fuel_coupled_combustion is not None:
+        replay_snapshot["fuel_combustion"] = binding["start_fuel_combustion"]
+    replay.restore(replay_snapshot)
+    for index, row in enumerate(trajectory):
+        replayed_row = replay.step(
+            float(row["dt_s"]),
+            float(row["angle_end_deg"]) - float(row["angle_start_deg"]))
+        if _jsonify(replayed_row) != _jsonify(row):
+            raise ValueError(
+                f"offline SSPRK2 accepted-state replay differs at step {index}")
+    if replay.time_s != binding["end_time_s"]:
+        raise ValueError("offline SSPRK2 replay terminal time differs from checkpoint")
+    rebuilt = make_integrated_cycle_primary(
+        engine, start_checkpoint, end_checkpoint, int(cycle_record["cycle_index"]),
+        rejected_trials=rejection_records,
+        runner_sha256=evidence.get("runner_sha256"))
+    if (_jsonify(rebuilt["evidence_binding"]["residual_bounds"]) !=
+            _jsonify(evidence["residual_bounds"])):
+        raise ValueError("offline cycle residual bounds differ from reconstructed contract")
+    if _jsonify(rebuilt) != _jsonify(cycle_record):
+        raise ValueError("offline cycle reconstruction differs from persisted primary evidence")
+    return {"status": "PASS", "configuration_hash": cycle_record["configuration_hash"],
+            "producer_sha256": evidence["producer_sha256"],
+            "runner_sha256": evidence["runner_sha256"],
+            "solver_dependency_sha256": evidence["solver_dependency_sha256"],
+            "fixture_sha256": evidence["fixture_sha256"],
+            "trajectory_sha256": evidence["trajectory_sha256"],
+            "terminal_state_sha256": evidence["terminal_state_sha256"],
+            "restart_start_sha256": evidence["restart_start_sha256"],
+            "restart_terminal_sha256": evidence["restart_terminal_sha256"],
+            "recomputed": True}
+
+
 def _specific_consumption_value(fuel_consumed_kg: float, duration_s: float,
                                 power_w: float) -> float | None:
     """Return g/kWh only for positive prescribed consumed fuel and output power."""
@@ -3132,7 +3510,9 @@ def make_integrated_engineering_output(cycle_record: dict, *,
     from .engineering_outputs import build_integrated_engineering_output_v3
 
     if (not isinstance(cycle_record, dict) or
-            cycle_record.get("schema") != "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2" or
+            cycle_record.get("schema") not in {
+                "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V2",
+                "MOTORSIM_INTEGRATED_2T_CYCLE_PRIMARY_V3"} or
             cycle_record.get("contract") != "REFERENCE_PERIODIC_CONVERGENCE_V1" or
             cycle_record.get("admissible") is not True):
         raise ValueError("engineering output requires admissible integrated cycle evidence")

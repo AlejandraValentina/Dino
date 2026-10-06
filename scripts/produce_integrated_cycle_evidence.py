@@ -194,9 +194,12 @@ def produce(fixture_id: str, horizon: int, restart_cycle: int,
     output.mkdir(parents=True, exist_ok=False)
     start = engine.snapshot()
     rejected: list[dict] = []
+    runner_sha256 = _sha256(
+        Path(__file__).read_bytes().replace(b"\r\n", b"\n"))
     restart_snapshot = None
     restart_engine = None
     for cycle in range(1, horizon + 1):
+        rejection_start = len(rejected)
         try:
             advance_to(engine, float(cycle * 360), rejected)
         except Exception as exc:
@@ -204,7 +207,10 @@ def produce(fixture_id: str, horizon: int, restart_cycle: int,
                                    engine, config_hash, prereg_hash, rejected, exc)
             raise
         end = engine.snapshot()
-        record = make_integrated_cycle_primary(engine, start, end, cycle)
+        record = make_integrated_cycle_primary(
+            engine, start, end, cycle,
+            rejected_trials=rejected[rejection_start:],
+            runner_sha256=runner_sha256)
         _write_gzip_json(output / f"cycle-{cycle:03d}.json.gz", record)
         if cycle == restart_cycle:
             restart_snapshot = end
@@ -244,6 +250,8 @@ def produce(fixture_id: str, horizon: int, restart_cycle: int,
         "producer_commit": prereg.get("producer_commit"),
         "producer_source_sha256": _sha256(
             Path(__file__).read_bytes().replace(b"\r\n", b"\n")),
+        "detector_source_sha256": _sha256(
+            PERIODICITY_CONTRACT.read_bytes().replace(b"\r\n", b"\n")),
         "horizon_cycles": horizon,
         "restart_cycle": restart_cycle,
         "continuous_rejected_trials": rejected,
