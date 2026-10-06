@@ -3,6 +3,7 @@ from dataclasses import replace
 import hashlib
 import inspect
 import json
+import math
 
 import pytest
 
@@ -1117,8 +1118,15 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
                             transfer_ids=("primary", "secondary", "boost"),
                             open_end_plenum_v2=False,
                             fuel_coupled_combustion=None,
-                            p7_enabled_with_fuel=False):
-    rpm = 3000.0
+                            p7_enabled_with_fuel=False, rpm=3000.0,
+                            transfer_cells=2, exhaust_cell_length_m=.2):
+    if not math.isfinite(rpm) or rpm <= 0.0:
+        raise ValueError("fixture RPM must be positive and finite")
+    rpm = float(rpm)
+    if type(transfer_cells) is not int or transfer_cells < 1:
+        raise ValueError("fixture transfer_cells must be a positive integer")
+    if not math.isfinite(exhaust_cell_length_m) or exhaust_cell_length_m <= 0.0:
+        raise ValueError("fixture exhaust cell length must be positive and finite")
     crankcase = CrankcaseGeometry(56.0, 50.0, 100.0, 80.0,
                                   "SYNTHETIC_ASSUMPTION")
     slider = SliderCrankChambers2T(crankcase, 8.0)
@@ -1166,9 +1174,9 @@ def _internal_cycle_fixture(*, with_reed=True, chamber_length_scale=1.0,
         ChamberSection("baffle", "baffle_cone", 170.0 * chamber_length_scale, 52.0, 16.0),
         ChamberSection("stinger", "stinger", 120.0 * chamber_length_scale, 16.0, 16.0)))
     paths = (DuctPath2T("intake", uniform_mesh(2, .05, 1e-4), "intake"),
-             *(DuctPath2T(path_id, uniform_mesh(2, .05, 1e-4), "transfer")
+             *(DuctPath2T(path_id, uniform_mesh(transfer_cells, .05, 1e-4), "transfer")
                for path_id in transfer_ids),
-             DuctPath2T("exhaust", chamber.mesh(.2), "exhaust"))
+             DuctPath2T("exhaust", chamber.mesh(exhaust_cell_length_m), "exhaust"))
 
     def geometry(angle):
         cc_vol, cy_vol, cc_rate, cy_rate = slider.resolve(angle, rpm)
@@ -2072,6 +2080,24 @@ def test_integrated_engine_config_rejects_unserializable_geometry_contract():
     malformed["geometry_contract"] = "CALLBACK_V1"
     with pytest.raises(ValueError, match="configuration schema is invalid"):
         IntegratedEngine2T.from_configuration_dict(malformed)
+
+
+def test_internal_cycle_fixture_supports_frozen_rpm_and_nested_mesh_levels():
+    engine = _internal_cycle_fixture(
+        fixture_name="mesh-level-check", rpm=4000.0, transfer_cells=8,
+        exhaust_cell_length_m=.05, transfer_ids=("primary", "secondary"),
+        with_reed=False, open_end_plenum_v2=True)
+    config = engine.configuration_dict()
+    restored = IntegratedEngine2T.from_configuration_dict(config)
+
+    assert engine.reference_rpm == 4000.0
+    assert len([duct for duct in config["ducts"]
+                if duct["role"] == "transfer"]) == 2
+    assert all(len(duct["mesh"]["volumes"]) == 8 for duct in config["ducts"]
+               if duct["role"] == "transfer")
+    assert len(next(duct["mesh"]["volumes"] for duct in config["ducts"]
+                    if duct["role"] == "exhaust")) > 5
+    assert restored.configuration_dict() == config
 
 
 def test_integrated_engine_rejects_live_configuration_drift():
