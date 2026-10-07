@@ -3,8 +3,8 @@
   "head": "53f66c6ed40cdf8eb81b6d9b2ed2f6cbc6ff7db9",
   "started_at": "2026-10-07T11:04:20+00:00",
   "finished_at": "2026-10-07T11:07:38+00:00",
-  "command": "python scripts/agents/run_logged.py --name p4-p8-regression-b2-complete --out results/2t-v1-closure-20261006/p4-p8-regression-b2-complete --timeout 1800 -- python -m pytest tests/test_p4_*.py tests/test_p5*.py tests/test_p6*.py tests/test_p7*.py tests/test_p8*.py tests/test_two_stroke_ports_p5c.py -q -p no:cacheprovider",
-  "selection": "26 modules: test_p4_*.py, test_p5*.py, test_p6*.py, test_p7*.py, test_p8*.py, test_two_stroke_ports_p5c.py",
+  "command": "The summary JSON command array is authoritative: python -m pytest with 26 explicit absolute module paths, -q. The run was launched through scripts/agents/run_logged.py as p4-p8-regression-b2-complete.",
+  "selection": "26 modules: test_p4_*.py, test_p5*.py, test_p6*.py, test_p7*.py, test_p8*.py, test_two_stroke_ports_p5c.py; PowerShell expanded these globs to the explicit paths recorded in the summary.",
   "result": {
     "exit_code": 0,
     "passed": 304,
