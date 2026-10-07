@@ -78,25 +78,28 @@
       The separate freeze commit records the C12-selected mesh, hashes, RPMs,
       fixed 20-cycle horizon, restart cycle, detector thresholds, and failure
       classification before either campaign.
-- [x] C14 run corrected R2 A' campaign and offline audit. R2 reached
-      `PERIOD_1` at cycle 73/111 with real `PeriodicDetectorV2`; all primary
-      audits passed. R1 remains historical: detector not executed, primaries
-      `NOT_EVALUATED`, and independent offline forensics confirms no convergence.
-- [x] C15 run corrected R2 B' campaign and offline audit. R2 reached
-      `PERIOD_1` at cycle 38/47 with real `PeriodicDetectorV2`; all primary
-      audits passed under the unchanged fixtures, physics, mesh, RPMs,
-      thresholds, and criteria.
+- [x] C14 original v1.0 A' gate: `FAIL_TERMINAL` after the exact 20-cycle
+      R1 horizon. The detector was not executed online; primary records were
+      `NOT_EVALUATED`; offline V2 gives P1=0, P2=0, detected period=None.
+      R2 evidence is superseding-only and is recorded in
+      `openspec/changes/two-stroke-v1-closure-r2/`.
+- [x] C15 original v1.0 B' gate: `FAIL_TERMINAL` after the exact 20-cycle
+      R1 horizon, with the same offline V2 non-convergence result. R2 reached
+      `PERIOD_1` at cycle 38/47, but that result is not retroactively assigned
+      to the original gate.
 - [x] C16 exercise at least two distinct RPMs across the primes or preregistered
        sanity fixture.
 - [x] C17 run focused integration tests, full relevant P4–P8 regressions,
-      88 focused tests, OpenSpec strict, diff check, LFS fsck, and the frozen
-      P9 hash check pass.
+      durable P4–P8 evidence records 304 passed and 4 pre-existing NumPy
+      warnings in `results/2t-v1-closure-20261006/p4-p8-regression-b2-complete/`;
+      88 focused tests, OpenSpec strict, diff check, LFS fsck, and frozen P9
+      hash also pass.
 - [x] C18 keep this v1 definition of done versioned in OpenSpec; classify every
       newly discovered item BLOCKS_2T_V1 or POST_2T_V1_BACKLOG.
-      Terminal classification is `PASS`:
-      `GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED` (synthetic,
-      `CONDITIONAL_ON_P4`, no experimental validation). No R3 or KT100 campaign
-      was started.
+      Original terminal classification is `FAIL_TERMINAL` for C14/C15 under
+      the exact 20-cycle gate. The separate superseding R2 gate is `REVIEW`,
+      not PASS, pending a new external review of the B1–B3 repair. No R3 or
+      KT100 campaign was started.
 
 ## Additive capability already present but outside this v1 closure gate
 

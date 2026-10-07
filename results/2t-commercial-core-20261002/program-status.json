@@ -1783,7 +1783,7 @@
         "All 20 V3 primaries were independently audited offline; restart cycle 10 -> 11 matched exactly. Evidence: results/2t-v1-closure-20261006/campaign-a-prime-r1/.",
         "R1 provenance correction: the runner did not execute the detector, wrote NO_CONVERGENCE_WITHIN_HORIZON manually, and the primary records contain periodicity NOT_EVALUATED. Independent forensics confirms R1_NO_CONVERGENCE_CONFIRMED_OFFLINE; no R1 acceptance claim is made.",
         "Authorized R2 A-prime attempt produced 56 complete audited cycles before the original cycle-56 restore path exceeded the performance budget; preserved in results/2t-v1-closure-20261006/campaign-a-prime-r2/. Corrected compact-checkpoint runner committed in dddf243; this partial attempt is not a final R2 classification.",
-        "Final corrected R2: results/2t-v1-closure-20261006/campaign-a-prime-r2-corrected-log/c14-r2-a-prime-corrected.summary.json and campaign-a-prime-r2-corrected/result.json; PeriodicDetectorV2 PERIOD_1 at cycle 73 of horizon 111, all 73 primary audits PASS, with SHA bindings for solver/detector/auditor/producer/config/fixture/fuel/thresholds."
+        "Original v1.0 result is FAIL_TERMINAL after exactly 20 cycles: R1 online periodicity was NOT_EVALUATED and offline PeriodicDetectorV2 confirms P1 streak 0, P2 branches 0, detected_period None. Superseding R2 evidence remains separately recorded in two-stroke-v1-closure-r2; it reached PERIOD_1 at cycle 73/111."
       ],
       "next_action": "Proceed to C17 final checks",
       "previous_blocker": "Prerequisite gates not yet complete",
@@ -1807,7 +1807,7 @@
         "All 20 V3 primaries were independently audited offline; restart cycle 10 -> 11 matched exactly. Evidence: results/2t-v1-closure-20261006/campaign-b-prime-r1/.",
         "R1 provenance correction: the runner did not execute the detector, wrote NO_CONVERGENCE_WITHIN_HORIZON manually, and the primary records contain periodicity NOT_EVALUATED. Independent forensics confirms R1_NO_CONVERGENCE_CONFIRMED_OFFLINE; no R1 acceptance claim is made.",
         "Authorized R2 B-prime completed with real PeriodicDetectorV2 classification PERIOD_1 at 38 cycles; summary in results/2t-v1-closure-20261006/campaign-b-prime-r2-log/. Exact executed provenance is retained: preregistration SHA 37e0e6855d7acac7164ddb006d51bf505e10453e417baa78fde351632dd9ab98 and producer/runner SHA c39a1d6b3806dc2edf63b5f2fe26e7a4bb52492908359832523847e85e999b38; detector, auditor, solver, config, fixture, fuel, and thresholds are SHA-bound in result.json.",
-        "Final combined R2 evidence has A-prime PERIOD_1 and B-prime PERIOD_1; no R3 is authorized or required."
+        "Original v1.0 result is FAIL_TERMINAL after exactly 20 cycles: offline PeriodicDetectorV2 confirms P1 streak 0, P2 branches 0, detected_period None. Superseding R2 B-prime evidence reached PERIOD_1 at cycle 38/47; it is not retroactively assigned to v1.0."
       ],
       "next_action": "Proceed to C17 final checks",
       "previous_blocker": "Prerequisite gates not yet complete",
@@ -1839,7 +1839,8 @@
       "state": "DONE",
       "commits": [],
       "evidence": [
-        "Focused final integrated/detector suite: 88 passed; summary at results/2t-v1-closure-20261006/c17-final-focused-tests-log/c17-final-focused-tests.summary.json.",
+        "Original v1.0 closure focused suite: 88 passed; summary at results/2t-v1-closure-20261006/c17-final-focused-tests-log/c17-final-focused-tests.summary.json.",
+        "Durable P4-P8 regression: results/2t-v1-closure-20261006/p4-p8-regression-b2-complete/p4-p8-regression-b2-complete.summary.json and manifest.json record 304 passed, 4 warnings, exit 0.",
         "OpenSpec strict validation PASS; git diff --check PASS; git lfs fsck OK; frozen P9 specification SHA-256 matches 79fbe9b88d26fc4af5083d65d468f59c9208535f0ab389d2f3cb9a7654b88a4d.",
         "Both corrected R2 fixture results are PERIOD_1 with all completed cycle audits PASS; no untracked scientific parameter changes were introduced."
       ],
@@ -1857,11 +1858,84 @@
       "commits": [],
       "evidence": [
         "OpenSpec v1 definition of done remains versioned in openspec/changes/two-stroke-v1-closure/.",
-        "C14 and C15 satisfy the corrected R2 periodicity gate with PERIOD_1 from the real PeriodicDetectorV2; R1 remains historical and is not reinterpreted.",
-        "C11, C12, C13, C16 and C17 satisfy their recorded criteria; C18 must record PASS as GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED, synthetic and CONDITIONAL_ON_P4, with no experimental validation claim."
+        "Original v1.0 C14/C15 remain FAIL_TERMINAL under the exact 20-cycle contract; R2 PERIOD_1 results are superseding evidence only.",
+        "The original gate is not classified GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED. The superseding R2 gate is REVIEW pending external review of B1-B3."
       ],
-      "next_action": "Record PASS classification and candidate freeze; no R3 is authorized",
+      "next_action": "Preserve original FAIL_TERMINAL and defer R2 classification to the superseding REVIEW gate",
       "previous_blocker": "Prerequisite gates not yet complete",
+      "blocker": null
+    },
+    {
+      "id": "R2-B1",
+      "description": "Create and document the superseding R2 gate without rewriting v1.0.",
+      "dependencies": [],
+      "state": "DONE",
+      "commits": [],
+      "evidence": [
+        "New OpenSpec change openspec/changes/two-stroke-v1-closure-r2/ explicitly records v1.0 FAIL_TERMINAL, the post-observation status of the R2 spec, owner decision, pre-execution preregistration basis, and unchanged scientific inputs.",
+        "AGENTS.md now names MOTORSIM_2T_V1_CLOSURE_R2 as the current objective; the original objective remains a terminal historical objective."
+      ],
+      "next_action": "Maintain historical v1.0 and superseding R2 separation",
+      "blocker": null
+    },
+    {
+      "id": "R2-B2",
+      "description": "Persist the complete P4-P8 regression with exact command and real result.",
+      "dependencies": [],
+      "state": "DONE",
+      "commits": [],
+      "evidence": [
+        "Reusable complete artifact: results/2t-v1-closure-20261006/p4-p8-regression-b2-complete/p4-p8-regression-b2-complete.summary.json and .log; command includes 26 modules and -p no:cacheprovider.",
+        "HEAD at execution was 53f66c6; result was 304 passed, 4 pre-existing NumPy 1.25 DeprecationWarnings, exit 0, 196.83 seconds. The earlier p4-p8-regression-b2 artifact is preserved separately as 301 passed because it omitted test_two_stroke_ports_p5c.py."
+      ],
+      "next_action": "Reference the durable B2 summary from R2 C17",
+      "blocker": null
+    },
+    {
+      "id": "R2-B3",
+      "description": "Persist and hash the external adversarial review of HEAD 53f66c6.",
+      "dependencies": [],
+      "state": "DONE",
+      "commits": [],
+      "evidence": [
+        "External artifact docs/gasdynamic/v1_closure_r2_independent_review_53f66c6.md is tracked unchanged; SHA-256 4185c01cbfd3df4cbce3ac22d78a2edcca0d42ee29836308e74295d8131cddc9.",
+        "It covers R2 and HEAD 53f66c6 only, records B1-B3 and N1-N7, reproduces A′/B′, and does not review this subsequent repair.",
+        "Local repair receipt docs/gasdynamic/v1_closure_r2_contractual_fix_self_review_0c1008b.md is explicitly SELF_REVIEW; SHA-256 cc07111437724ff0a7629f987ad405775862f65825d29aabe306a7a0bbaab99f."
+      ],
+      "next_action": "Await a new external review of this repair",
+      "blocker": null
+    },
+    {
+      "id": "R2-EXTERNAL-REVIEW",
+      "description": "Obtain a new short external review of the B1-B3 repair.",
+      "dependencies": [
+        "R2-B1",
+        "R2-B2",
+        "R2-B3"
+      ],
+      "state": "REVIEW",
+      "commits": [],
+      "evidence": [
+        "The HEAD 53f66c6 artifact is an independent review of the pre-repair state, not of this fix. This task remains open for a new external review.",
+        "Current fix classification is SELF_REVIEW; R2 gate must remain REVIEW and no freeze candidate is declared."
+      ],
+      "next_action": "External reviewer must assess B1-B3 and the exact provenance wiring",
+      "blocker": null
+    },
+    {
+      "id": "R2-N1-N7-BACKLOG",
+      "description": "Register non-blocking R2 provenance/debt findings N1-N7 without changing numerical evidence.",
+      "dependencies": [],
+      "state": "DONE",
+      "classification": "POST_2T_V1_BACKLOG",
+      "commits": [],
+      "evidence": [
+        "N1 operational preregistration amendment, double A-prime attempt, and B-prime producer difference.",
+        "N2 restart literal; N3 partial auditor-source hash coverage; N4 CONTRACT V1/V2 naming.",
+        "N5 lag-1 semantics; N6 high synthetic short-circuit; N7 pytest collection errors outside the gate.",
+        "The external review remains the authoritative wording; no numerical or scientific correction is made here."
+      ],
+      "next_action": "Leave deferred until separately authorized scope",
       "blocker": null
     },
     {
@@ -2120,38 +2194,33 @@
     "MOTORSIM_2T_COMMERCIAL_CORE_STATUS_V1"
   ],
   "current_objective": {
-    "id": "MOTORSIM_2T_V1_CLOSURE",
-    "change": "openspec/changes/two-stroke-v1-closure",
-    "spec": "openspec/changes/two-stroke-v1-closure/specs/two-stroke-v1-closure/spec.md",
-    "completion_criterion": "All gate tasks C1-C18 DONE and a terminal classification recorded in gate_status: PASS = GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED (synthetic, CONDITIONAL_ON_P4, no experimental validation) when FIXTURE_A_PRIME and FIXTURE_B_PRIME pass every requirement of the spec; FAIL_TERMINAL = exact failed/incomplete gates stated without extending a horizon or relaxing a criterion.",
+    "id": "MOTORSIM_2T_V1_CLOSURE_R2",
+    "change": "openspec/changes/two-stroke-v1-closure-r2",
+    "spec": "openspec/changes/two-stroke-v1-closure-r2/specs/two-stroke-v1-closure-r2/spec.md",
+    "completion_criterion": "B1-B3 contractual/evidence repair is complete and an external review of the repair is recorded; until then the superseding R2 gate remains REVIEW. The historical MOTORSIM_2T_V1_CLOSURE_V1_0 remains FAIL_TERMINAL.",
     "gate_tasks": [
-      "C1",
-      "C2",
-      "C3",
-      "C4",
-      "C5",
-      "C6",
-      "C7",
-      "C8",
-      "C9",
-      "C10",
-      "C11",
-      "C12",
-      "C13",
-      "C14",
-      "C15",
-      "C16",
-      "C17",
-      "C18"
+      "R2-B1",
+      "R2-B2",
+      "R2-B3",
+      "R2-EXTERNAL-REVIEW"
     ],
     "durable_queue": "results/2t-commercial-core-20261002/program-status.json#queue",
-    "set_by": "owner order 2026-10-06 (AGENTS_V2)"
+    "set_by": "owner order 2026-10-07"
   },
   "objectives": [
     {
       "id": "MOTORSIM_2T_V1_CLOSURE",
+      "state": "FAIL_TERMINAL",
+      "owner_approved": true,
+      "classification": "MOTORSIM_2T_V1_CLOSURE_V1_0_FAIL_TERMINAL",
+      "summary": "Original exact-20-cycle gate: R1 A-prime and B-prime did not converge; offline V2 P1 streak 0, P2 branches 0, detected_period None. No post-hoc horizon extension is attributed to v1.0."
+    },
+    {
+      "id": "MOTORSIM_2T_V1_CLOSURE_R2",
       "state": "ACTIVE",
-      "owner_approved": true
+      "owner_approved": true,
+      "summary": "Superseding contractual/evidence gate using existing owner-authorized R2 evidence; current state REVIEW pending a new external review of B1-B3.",
+      "change": "openspec/changes/two-stroke-v1-closure-r2"
     },
     {
       "id": "ENGINE_PHYSICS_V1",
@@ -2283,21 +2352,57 @@
       "task": "C15",
       "kind": "task",
       "summary": "R2 B-prime completed with real PeriodicDetectorV2 PERIOD_1 at cycle 38/47; all 38 primaries audit PASS; exact executed provenance retained."
+    },
+    {
+      "at": "2026-10-07T11:18:28+00:00",
+      "task": "R2-B1",
+      "kind": "task",
+      "summary": "B1 complete: original v1.0 remains FAIL_TERMINAL at exact 20-cycle R1; superseding two-stroke-v1-closure-r2 created and current objective switched to R2 REVIEW."
+    },
+    {
+      "at": "2026-10-07T11:18:28+00:00",
+      "task": "R2-B2",
+      "kind": "task",
+      "summary": "B2 complete and reusable: p4-p8-regression-b2-complete records 304 passed, 4 warnings, exit 0, exact command/HEAD/timestamps/log/summary and SHA receipt."
+    },
+    {
+      "at": "2026-10-07T11:18:28+00:00",
+      "task": "R2-B3",
+      "kind": "task",
+      "summary": "B3 complete: external review artifact for HEAD 53f66c6 preserved unchanged with SHA 4185c01cbfd3df4cbce3ac22d78a2edcca0d42ee29836308e74295d8131cddc9; this repair remains SELF_REVIEW pending a new external review."
     }
   ],
-  "gate_status": {
-    "objective": "MOTORSIM_2T_V1_CLOSURE",
-    "state": "PASS",
-    "classification": "GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED",
+  "legacy_gate_status": {
+    "objective": "MOTORSIM_2T_V1_CLOSURE_V1_0",
+    "state": "FAIL_TERMINAL",
+    "classification": "MOTORSIM_2T_V1_CLOSURE_V1_0_FAIL_TERMINAL",
     "evidence": [
-      "C14/C15 corrected R2: A-prime PERIOD_1 at cycle 73/111 and B-prime PERIOD_1 at cycle 38/47, both from real PeriodicDetectorV2 with SHA-bound solver/detector/auditor/producer/config/fixture/fuel/thresholds; C17 88 tests plus OpenSpec strict, diff-check, LFS fsck and frozen P9 hash PASS; C18 candidate freeze recorded; synthetic CONDITIONAL_ON_P4, no experimental validation."
+      "Original gate required exactly 20 complete cycles and prohibited post-hoc horizon extension.",
+      "R1 A-prime and B-prime did not converge within 20 cycles; offline PeriodicDetectorV2 gives P1 streak 0, P2 branches A=0/B=0, detected_period=None for both fixtures.",
+      "Historical R1 artifacts are preserved and not reinterpreted."
     ],
-    "gate_tasks_total": 18,
-    "gate_tasks_done": 18,
+    "source_change": "openspec/changes/two-stroke-v1-closure/"
+  },
+  "gate_status": {
+    "objective": "MOTORSIM_2T_V1_CLOSURE_R2",
+    "state": "REVIEW",
+    "classification": "R2_CONTRACTUAL_EVIDENCE_REPAIR_SELF_REVIEW",
+    "evidence": [
+      "Computational R2 evidence is retained: A-prime PERIOD_1 at cycle 73/111 and B-prime PERIOD_1 at cycle 38/47 from real PeriodicDetectorV2.",
+      "B1 complete: new superseding OpenSpec change documents the post-observation R2 contract while v1.0 remains FAIL_TERMINAL.",
+      "B2 complete: durable complete regression artifact results/2t-v1-closure-20261006/p4-p8-regression-b2-complete/ records 304 passed and 4 warnings with exact command, HEAD, timestamps and log.",
+      "B3 complete: external review docs/gasdynamic/v1_closure_r2_independent_review_53f66c6.md is preserved unchanged with SHA-256 4185c01cbfd3df4cbce3ac22d78a2edcca0d42ee29836308e74295d8131cddc9; it covers HEAD 53f66c6, not this repair.",
+      "N1-N7 are recorded as POST_2T_V1_BACKLOG/provenance debt; this repair is SELF_REVIEW and awaits a new external review."
+    ],
+    "gate_tasks_total": 4,
+    "gate_tasks_done": 3,
     "gate_task_states": {
-      "DONE": 18
+      "DONE": 3,
+      "REVIEW": 1
     },
-    "remaining": [],
-    "updated_at": "2026-10-06T19:29:34+00:00"
+    "remaining": [
+      "R2-EXTERNAL-REVIEW"
+    ],
+    "updated_at": "2026-10-07T11:20:00+00:00"
   }
 }
