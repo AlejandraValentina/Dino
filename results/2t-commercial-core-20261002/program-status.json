@@ -2320,14 +2320,13 @@
       "dependencies": [
         "EP-R2"
       ],
-      "state": "BLOCKED_LOCAL",
+      "state": "IN_PROGRESS",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "orchestrator",
       "evidence_level": "L2",
-      "blocker": "The single preregistered recovery campaign reached the 120-minute gate-critical timeout with A3000 PERIOD_1@73, A4000 PERIOD_1@88, B3000 PERIOD_1@34 and B4000 only 9 persisted cycles; no second campaign/R3 is authorized.",
-      "unblock_tasks": [
-        "EP-R3-TIMEOUT-FORENSICS"
-      ],
+      "continuation_mode": "OWNER_AUTHORIZED_OPERATIONAL_CONTINUATION",
+      "restart_mode": "B4000_OPERATIONAL_RESTART_AFTER_TIMEOUT",
+      "restart_contract": "Original initial condition; deterministic reproduction of persisted B4000 cycles 1-9 required before continuing through cycle 47.",
       "write_scope": [
         "openspec/changes/engine-physics-v1",
         "results/engine-physics-v1/recovery",
@@ -2338,11 +2337,10 @@
       "id": "EP-R3-TIMEOUT-FORENSICS",
       "description": "Persist and independently inspect the single recovery timeout, completed-point detector receipts and incomplete B4000 progress without starting another campaign.",
       "dependencies": [],
-      "state": "READY",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "evidence/release reviewer",
       "evidence_level": "L2",
-      "state": "DONE",
       "resolution": "Timeout, completed detector receipts, incomplete B4000 progress and SHA-256 manifest persisted without launching another campaign.",
       "write_scope": [
         "results/engine-physics-v1/recovery-campaign-data-v2/campaign-closure-receipt.json",
@@ -2631,7 +2629,8 @@
   "owner_decisions_pending": [
     {
       "id": "EP-R3-TIMEOUT-OWNER-DECISION",
-      "status": "OPEN",
+      "status": "RESOLVED",
+      "selected_option": "B",
       "objective": "ENGINE_PHYSICS_V1",
       "decision_id": "EP-R3-TIMEOUT-OWNER-DECISION",
       "question": "The single preregistered recovery campaign completed three periodic points but timed out before B4000 terminal classification. How should the incomplete fourth point be classified under the no-second-campaign/no-R3 constraint?",
@@ -2652,7 +2651,7 @@
         "results/engine-physics-v1/recovery-runlogs-v2/engine-physics-v1-recovery-v2.summary.json",
         "A3000 PERIOD_1 @ cycle 73; A4000 PERIOD_1 @ cycle 88; B3000 PERIOD_1 @ cycle 34; B4000 persisted 9/47 cycles"
       ],
-      "recommendation": "A: classify the recovery gate terminally without PASS, because the owner instruction explicitly forbids a second campaign/R3 and B4000 lacks a terminal detector outcome."
+      "recommendation": "B selected by owner: authorize one operational B4000-only continuation, with no further extension or R3."
     }
   ],
   "hard_stop": null,
@@ -2873,6 +2872,12 @@
       "task": "EP-R3-TIMEOUT-FORENSICS",
       "kind": "task",
       "summary": "Single recovery campaign timeout receipt persisted: A3000 PERIOD_1@73, A4000 PERIOD_1@88, B3000 PERIOD_1@34, B4000 persisted 9/47 with no terminal result; hashes recorded; no second campaign or R3."
+    },
+    {
+      "at": "2026-10-07T16:08:06+00:00",
+      "task": "EP-R3",
+      "kind": "task",
+      "summary": "Owner selected B: one OWNER_AUTHORIZED_OPERATIONAL_CONTINUATION for B4000 only. No valid cycle-9 checkpoint exists; restart from original initial condition with deterministic comparison cycles 1-9, then continue max through preregistered cycle 47. Decision committed before execution."
     }
   ],
   "legacy_gate_status": {
