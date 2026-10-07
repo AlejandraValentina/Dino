@@ -73,12 +73,18 @@ def reset_trace(engine: IntegratedEngine2T) -> None:
 
 
 def checkpoint_equivalent(left: dict, right: dict) -> bool:
-    """Treat 0 and 360 as the same wrapped angle at a cycle boundary."""
-    a = json.loads(json.dumps(left, sort_keys=True))
-    b = json.loads(json.dumps(right, sort_keys=True))
-    for value in (a, b):
-        if abs(float(value["angle_deg"]) - 360.0) <= 1e-12:
-            value["angle_deg"] = 0.0
+    """Compare the physical checkpoint; wrapped angle is a representation detail.
+
+    ``restore`` validates the complete trace before assignment.  The next
+    cycle replay below is the stronger end-to-end equality check, so this
+    checkpoint comparison intentionally focuses on state, ledgers, clocks and
+    event histories rather than the serialized trace container.
+    """
+    fields = ("schema", "configuration_identity", "state", "crank_angle_unwrapped_deg",
+              "time_s", "cycle", "accepted_steps", "rejected_steps", "max_cfl",
+              "ledger", "p7", "initial_inventory", "fuel_combustion")
+    a = {key: left.get(key) for key in fields}
+    b = {key: right.get(key) for key in fields}
     return canonical(a) == canonical(b)
 
 
