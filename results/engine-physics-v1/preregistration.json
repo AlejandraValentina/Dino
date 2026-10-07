@@ -1,0 +1,47 @@
+{
+  "schema": "ENGINE_PHYSICS_V1_PREREGISTRATION",
+  "status": "PREREGISTERED_NOT_RUN",
+  "objective": "ENGINE_PHYSICS_V1",
+  "baseline_commit": "1a58b2a5c23447f81308609acc37ab74a8bd5de5",
+  "production_core": "motorsim.integrated_2t.IntegratedEngine2T",
+  "evidence_classification": "SYNTHETIC_ENGINEERING_ONLY",
+  "no_rerun_scope": [
+    "MOTORSIM_2T_V1_CLOSURE_R2",
+    "KT100",
+    "R3",
+    "P0-P8 historical evidence"
+  ],
+  "models": {
+    "port_coefficients": "STANDARD_V1",
+    "scavenging": "SCAVENGING_MODEL_V1",
+    "fuel": "SYNTHETIC_GASOLINE_V1",
+    "fuel_metering": "IDEAL_FUEL_METERING",
+    "combustion": "FUEL_COUPLED_COMBUSTION_V2",
+    "cylinder_heat_transfer": "ANNAND_V1",
+    "duct_heat_transfer": "DUCT_HEAT_TRANSFER_STANDARD_V1",
+    "mechanical_losses": "MECHANICAL_LOSSES_STANDARD_V1",
+    "plausibility": "ENGINE_PLAUSIBILITY_GATES_V1"
+  },
+  "periodicity": {
+    "detector": "motorsim.reference_harness.convergence.PeriodicDetectorV2",
+    "contract": "REFERENCE_PERIODIC_CONVERGENCE_V2",
+    "thresholds": "frozen existing V2 thresholds",
+    "streak": 3,
+    "horizon_rule": "A/B residence-derived R2 horizons retained as engineering upper bounds: A=111, B=47 cycles; detector may terminate earlier.",
+    "not_a_new_closure_gate": true
+  },
+  "points": [
+    {"id": "ENGINE_A_3000", "fixture": "FIXTURE_A_PRIME", "rpm": 3000.0, "horizon_cycles": 111, "config_sha256": "d3f000f72dda247e11a561ad63fb93daab1145cca689105a17cd8e6ae7c71ab7"},
+    {"id": "ENGINE_A_4000", "fixture": "FIXTURE_A_PRIME", "rpm": 4000.0, "horizon_cycles": 111, "config_sha256": "8d37c0991aff9c9b7540e71277aa60d80fc49c193b73ee9806ff275557a316ca"},
+    {"id": "ENGINE_B_3000", "fixture": "FIXTURE_B_PRIME", "rpm": 3000.0, "horizon_cycles": 47, "config_sha256": "eff18b2a9ae830dfcbd984eb662f8e595fd6a547566f7a9caf1a42fbb8c948b6"},
+    {"id": "ENGINE_B_4000", "fixture": "FIXTURE_B_PRIME", "rpm": 4000.0, "horizon_cycles": 47, "config_sha256": "b21dd08a23679954c1ac39aae383fc2a78c702c5a358c8e2387fcecd00f2af82"}
+  ],
+  "acceptance": {
+    "one_campaign": true,
+    "all_points_require_durable_primary_and_engineering_output": true,
+    "hard_physical_invalid_is_terminal_for_point": true,
+    "warnings_require_explanation": true,
+    "no_placeholder_derived_values": true,
+    "no_automatic_next_objective": true
+  }
+}

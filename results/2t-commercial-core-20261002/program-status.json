@@ -2130,7 +2130,7 @@
       "dependencies": [
         "EP1"
       ],
-      "state": "READY",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "orchestrator",
       "evidence_level": "L1",
@@ -2149,7 +2149,7 @@
         "EP8",
         "EP9"
       ],
-      "state": "WAITING",
+      "state": "READY",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "implementation",
       "evidence_level": "L1",
@@ -2627,6 +2627,12 @@
       "task": "EP3",
       "kind": "task",
       "summary": "SYNTHETIC_GASOLINE_V1 is content-hash frozen and explicitly non-commercial; IDEAL_FUEL_METERING and fuel-bound provenance are tested."
+    },
+    {
+      "at": "2026-10-07T12:06:21+00:00",
+      "task": "EP9",
+      "kind": "task",
+      "summary": "Phase preregistration committed before execution: two distinct A/B configurations at 3000/4000 RPM, four bound config hashes, V2 detector and horizons A=111/B=47 as engineering upper bounds; no closure gate rewrite."
     }
   ],
   "legacy_gate_status": {
