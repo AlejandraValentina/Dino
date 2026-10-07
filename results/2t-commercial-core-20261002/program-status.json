@@ -2176,7 +2176,7 @@
       "dependencies": [
         "EP10"
       ],
-      "state": "READY",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "verification",
       "evidence_level": "L1",
