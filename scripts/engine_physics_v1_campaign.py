@@ -51,6 +51,8 @@ def config_for(fixture: str, rpm: float) -> tuple[dict, dict, str]:
     config["reference_rpm"] = float(rpm)
     fuel = synthetic_gasoline_v1()
     combustion = config["fuel_coupled_combustion"]
+    combustion["schema"] = "FUEL_COUPLED_COMBUSTION_V2"
+    combustion["combustion_efficiency_provenance"] = "SYNTHETIC_ASSUMPTION"
     combustion["fuel_snapshot"] = fuel.to_dict()
     combustion["fuel_sha256"] = fuel.content_hash
     config_hash = sha(canonical(config))
@@ -171,7 +173,7 @@ def run_point(point: dict, output_root: Path) -> dict:
 
 
 def run(output: Path) -> dict:
-    if output.exists():
+    if output.exists() and any(output.iterdir()):
         raise ValueError(f"campaign output exists: {output}")
     prereg = json.loads(PREREG.read_text())
     if prereg["status"] != "PREREGISTERED_NOT_RUN":
@@ -196,4 +198,3 @@ if __name__ == "__main__":
         {"id": item["point_id"], "status": item["status"],
          "hard_gate": item["final_hard_gate"]["classification"]}
         for item in value["points"]]}, sort_keys=True))
-
