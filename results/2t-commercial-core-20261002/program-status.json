@@ -2179,13 +2179,32 @@
       "dependencies": [
         "EP11"
       ],
-      "state": "WAITING",
+      "state": "BLOCKED_LOCAL",
+      "blocker": "Initial valid production point projection exceeds the normal campaign budget: A_3000 reached 6 cycles in roughly 4 minutes against a 111-cycle bound; the four-point run would exceed the gate-critical limit.",
+      "unblock_tasks": [
+        "EP12-PERF"
+      ],
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "verification",
       "evidence_level": "L2",
       "write_scope": [
         "results/engine-physics-v1/run"
       ]
+    },
+    {
+      "id": "EP12-PERF",
+      "description": "Diagnose and resolve phase-run performance locally using checkpoint/restart and a bounded engineering horizon; do not change solver, physics or thresholds.",
+      "dependencies": [],
+      "state": "READY",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "verification",
+      "evidence_level": "L1",
+      "write_scope": [
+        "results/engine-physics-v1/performance",
+        "results/engine-physics-v1/preregistration.json",
+        "scripts/engine_physics_v1_campaign.py"
+      ],
+      "classification": "UNBLOCKS_EP12"
     },
     {
       "id": "EP13",
@@ -2639,6 +2658,12 @@
       "task": "EP10",
       "kind": "task",
       "summary": "Single campaign producer implemented: modifies only new phase config identity to bind SYNTHETIC_GASOLINE_V1, runs IntegratedEngine2T with real PeriodicDetectorV2, exact checkpoint/restart verification, primary audits and engineering outputs."
+    },
+    {
+      "at": "2026-10-07T12:16:45+00:00",
+      "task": "EP12",
+      "kind": "task",
+      "summary": "Initial full-horizon execution was stopped as a local performance diagnostic after six A_3000 cycles; no gate classification or accepted evidence was produced. EP12-PERF opened."
     }
   ],
   "legacy_gate_status": {

@@ -1,6 +1,8 @@
 {
   "schema": "ENGINE_PHYSICS_V1_PREREGISTRATION",
   "status": "PREREGISTERED_NOT_RUN",
+  "version": "1.1",
+  "supersedes": "phase preregistration v1.0 was not accepted: its first execution was aborted as a performance diagnostic after six A_3000 cycles and produced no gate result",
   "objective": "ENGINE_PHYSICS_V1",
   "baseline_commit": "1a58b2a5c23447f81308609acc37ab74a8bd5de5",
   "production_core": "motorsim.integrated_2t.IntegratedEngine2T",
@@ -27,14 +29,14 @@
     "contract": "REFERENCE_PERIODIC_CONVERGENCE_V2",
     "thresholds": "frozen existing V2 thresholds",
     "streak": 3,
-    "horizon_rule": "A/B residence-derived R2 horizons retained as engineering upper bounds: A=111, B=47 cycles; detector may terminate earlier.",
+    "horizon_rule": "Fixed engineering observation horizon of 12 complete cycles per point, selected before the accepted run as the maximum four-point budgeted diagnostic; detector may terminate earlier. This is not the historical 20-cycle closure gate and does not claim periodic convergence.",
     "not_a_new_closure_gate": true
   },
   "points": [
-    {"id": "ENGINE_A_3000", "fixture": "FIXTURE_A_PRIME", "rpm": 3000.0, "horizon_cycles": 111, "config_sha256": "2c2de32a2fe37295799b82127c81760f9491c1a75783a64af4361176db1fdff2"},
-    {"id": "ENGINE_A_4000", "fixture": "FIXTURE_A_PRIME", "rpm": 4000.0, "horizon_cycles": 111, "config_sha256": "a8b3e47eb864a9b54150a2e8c8e96190e7bbe346ed5c405ee66254577502e500"},
-    {"id": "ENGINE_B_3000", "fixture": "FIXTURE_B_PRIME", "rpm": 3000.0, "horizon_cycles": 47, "config_sha256": "f2274e63ea65893ef6fceb43def95af61ebd9741374dbd67edf613d85c52e13c"},
-    {"id": "ENGINE_B_4000", "fixture": "FIXTURE_B_PRIME", "rpm": 4000.0, "horizon_cycles": 47, "config_sha256": "f2e7eb716b8a5fd5eae66eb9ae2213a07184886eef145f69c5640fa43ab5b47b"}
+    {"id": "ENGINE_A_3000", "fixture": "FIXTURE_A_PRIME", "rpm": 3000.0, "horizon_cycles": 12, "config_sha256": "2c2de32a2fe37295799b82127c81760f9491c1a75783a64af4361176db1fdff2"},
+    {"id": "ENGINE_A_4000", "fixture": "FIXTURE_A_PRIME", "rpm": 4000.0, "horizon_cycles": 12, "config_sha256": "a8b3e47eb864a9b54150a2e8c8e96190e7bbe346ed5c405ee66254577502e500"},
+    {"id": "ENGINE_B_3000", "fixture": "FIXTURE_B_PRIME", "rpm": 3000.0, "horizon_cycles": 12, "config_sha256": "f2274e63ea65893ef6fceb43def95af61ebd9741374dbd67edf613d85c52e13c"},
+    {"id": "ENGINE_B_4000", "fixture": "FIXTURE_B_PRIME", "rpm": 4000.0, "horizon_cycles": 12, "config_sha256": "f2e7eb716b8a5fd5eae66eb9ae2213a07184886eef145f69c5640fa43ab5b47b"}
   ],
   "acceptance": {
     "one_campaign": true,
