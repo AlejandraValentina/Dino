@@ -1,0 +1,288 @@
+{
+  "conservation": {
+    "energy_residual_J": -1.6209256159527285e-13,
+    "mass_residual_kg": 5.759824041329242e-19,
+    "species_residual_kg": [
+      3.925997710523682e-19,
+      -1.6940658945086007e-21,
+      1.6940658945086007e-20,
+      4.658681209898652e-21
+    ]
+  },
+  "cycle_index": 38,
+  "fuel": {
+    "combustion_efficiency": 0.82,
+    "energy_identity_error_J": 5.329070518200751e-15,
+    "fuel_sha256": "b8c385ce4d6ae0cf6078969f22698a4cb4881974d95097085b609c487a691792",
+    "stoichiometric_afr": 14.66435991803969
+  },
+  "hard_gate": {
+    "classification": "HARD_PHYSICAL_INVALID",
+    "hard_failures": [
+      "RELATIONSHIP_INVALID:partition_conservation"
+    ],
+    "schema": "ENGINE_PLAUSIBILITY_GATES_V2",
+    "warning_policy": "warnings require explanation and do not override physical validity",
+    "warnings": []
+  },
+  "operating_point_status": "TRANSIENT_DIAGNOSTIC",
+  "outputs": {
+    "AFR": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "value": 67.50844310680397
+    },
+    "BMEP": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "Pa",
+      "value": 1310.217374805952
+    },
+    "BSFC": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "g/kWh",
+      "value": 6606.571866475164
+    },
+    "CE": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "value": 0.7113685801797762
+    },
+    "DR": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "value": 0.3232613749566772
+    },
+    "FMEP": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "Pa",
+      "value": 1500.0
+    },
+    "ISFC": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "g/kWh",
+      "value": 515.7904380928804
+    },
+    "SE": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "value": 0.7298479473020507
+    },
+    "TE": {
+      "reason": "GROSS_CROSSING_PARTITION_INVALID",
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "UNDEFINED",
+      "value": null
+    },
+    "brake_power": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "W",
+      "value": 8.067691787420323
+    },
+    "brake_torque": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "N m",
+      "value": 0.025680260546196657
+    },
+    "crankcase_gas_work": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "J",
+      "value": -1.7206430319475667
+    },
+    "cylinder_IMEP": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "Pa",
+      "value": 16782.097162106016
+    },
+    "cylinder_indicated_work": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "J",
+      "value": 2.066722515727053
+    },
+    "exhaust_gas_temperature": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "K",
+      "value": 568.2464864965982
+    },
+    "fuel_burned": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "kg/cycle",
+      "value": 2.4861426195502605e-07
+    },
+    "fuel_delivered": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "kg/cycle",
+      "value": 2.961099199453546e-07
+    },
+    "fuel_trapped": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "kg/cycle",
+      "value": 2.3521667746487188e-07
+    },
+    "fuel_unburned": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "kg/cycle",
+      "value": 2.3521667746487188e-07
+    },
+    "heat_released": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "J/cycle",
+      "value": 8.766138876534223
+    },
+    "indicated_power": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "W",
+      "value": 103.33612578635265
+    },
+    "indicated_torque": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "N m",
+      "value": 0.3289291043772779
+    },
+    "lambda": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "value": 4.603572435763592
+    },
+    "net_piston_gas_work": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "units": "J",
+      "value": 0.3460794837794863
+    },
+    "phi": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "value": 0.2172226056945122
+    },
+    "residual_fraction": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "value": 0.021118381251640655
+    },
+    "short_circuit_fraction": {
+      "reason": "GROSS_CROSSING_PARTITION_INVALID",
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "UNDEFINED",
+      "value": null
+    },
+    "trapped_AFR": {
+      "reason": null,
+      "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+      "status": "DEFINED",
+      "value": 187.01816937285818
+    }
+  },
+  "periodicity": {
+    "status": "NOT_EVALUATED"
+  },
+  "provenance": "SYNTHETIC_ASSUMPTION",
+  "rpm": 3000.0,
+  "scavenging": {
+    "conservation": {
+      "delivered_partition_kg": 5.2906359527289956e-05,
+      "partition_identity": "fresh_delivered = fresh_short_circuit + trapped_fresh_air_at_exhaust_close",
+      "partition_residual_kg": -3.2916439843298706e-05,
+      "partition_tolerance_kg": 1e-12
+    },
+    "masses_kg": {
+      "fresh_delivered_kg": 1.998991968399125e-05,
+      "fresh_short_circuit_kg": 8.916567101843596e-06,
+      "reference_air_kg": 6.18382560758156e-05,
+      "trapped_burned_kg": 1.4774676211000256e-05,
+      "trapped_fresh_air_kg": 4.398979242544636e-05,
+      "trapped_fuel_kg": 2.3521667746487188e-07,
+      "trapped_residual_kg": 1.272858560547054e-06,
+      "trapped_total_kg": 6.0272543874458546e-05
+    },
+    "provenance": "SYNTHETIC_ASSUMPTION",
+    "ratios": {
+      "charging_efficiency": {
+        "reason": null,
+        "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+        "status": "DEFINED",
+        "value": 0.7113685801797762
+      },
+      "delivery_ratio": {
+        "reason": null,
+        "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+        "status": "DEFINED",
+        "value": 0.3232613749566772
+      },
+      "fresh_charge_fraction": {
+        "reason": null,
+        "status": "DEFINED",
+        "value": 0.7298479473020507
+      },
+      "residual_fraction": {
+        "reason": null,
+        "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+        "status": "DEFINED",
+        "value": 0.021118381251640655
+      },
+      "scavenging_efficiency": {
+        "reason": null,
+        "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+        "status": "DEFINED",
+        "value": 0.7298479473020507
+      },
+      "short_circuit_fraction": {
+        "reason": "GROSS_CROSSING_PARTITION_INVALID",
+        "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+        "status": "UNDEFINED",
+        "value": null
+      },
+      "trapping_efficiency": {
+        "reason": "GROSS_CROSSING_PARTITION_INVALID",
+        "regime_status": "NOT_USABLE_UNTIL_PERIODIC",
+        "status": "UNDEFINED",
+        "value": null
+      }
+    },
+    "schema": "SCAVENGING_MODEL_V1",
+    "snapshot_basis": "PORT_CLOSURE_SNAPSHOTS_EXACT_EVENT_STATES",
+    "zone_profile": "TWO_ZONE_PROFILE"
+  },
+  "schema": "ENGINEERING_OUTPUTS_ENGINE_PHYSICS_V2"
+}

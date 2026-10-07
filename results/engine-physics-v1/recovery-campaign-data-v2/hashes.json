@@ -1,0 +1,18 @@
+{
+  "schema": "ENGINE_PHYSICS_V1_RECOVERY_EVIDENCE_HASHES",
+  "sha256": {
+    "preregistration": "1146038f285f4105ea28699773caadb544aea387771a7563cab1e5cbe63d73d8",
+    "run_summary": "0d2a30ab2ccb10ff694894da52b2ee8bd6d303ebc9933626024e749864f7d08a",
+    "closure_receipt": "3386bee780bda7fa1606e5c864d18500b131905e943eca9918b243da94c3cad2",
+    "ENGINE_A_3000_result": "120d3373a60c361722d00f125e8d4193b666096b24b7b20e6a4f5f2b767e8d4c",
+    "ENGINE_A_4000_result": "155063cd5eba38c737fdcb43a48b39eb1239f5db52916e48300039b9e3d54a4a",
+    "ENGINE_B_3000_result": "1d808afc6ff3a1942c5f6a244decca2156ed8f540bf013e24f13d04a70408bc4",
+    "recovery_producer": "2fe1cc2c1afa3ab54e5915bccbd5abf389d391d8b28f61d5416eaf7e876fdc92"
+  },
+  "B4000": {
+    "status": "INCOMPLETE_AT_TIMEOUT",
+    "persisted_cycles": 9,
+    "horizon_cycles": 47,
+    "result_sha256": null
+  }
+}
