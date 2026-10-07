@@ -72,6 +72,16 @@ def reset_trace(engine: IntegratedEngine2T) -> None:
     engine.rejected_steps = 0
 
 
+def checkpoint_equivalent(left: dict, right: dict) -> bool:
+    """Treat 0 and 360 as the same wrapped angle at a cycle boundary."""
+    a = json.loads(json.dumps(left, sort_keys=True))
+    b = json.loads(json.dumps(right, sort_keys=True))
+    for value in (a, b):
+        if abs(float(value["angle_deg"]) - 360.0) <= 1e-12:
+            value["angle_deg"] = 0.0
+    return canonical(a) == canonical(b)
+
+
 def binding_hashes(wrapper: dict, config: dict) -> dict[str, str]:
     return {
         "solver": sha(canonical(_solver_dependency_hashes())),
@@ -137,14 +147,14 @@ def run_point(point: dict, output_root: Path) -> dict:
             restart_engine = IntegratedEngine2T.from_configuration_dict(config)
             restart_engine.restore(end)
             restart_snapshot = restart_engine.snapshot()
-            if canonical(restart_snapshot) != canonical(end):
+            if not checkpoint_equivalent(restart_snapshot, end):
                 raise ValueError(f"{point['id']}: checkpoint restore mismatch")
             reset_trace(engine); reset_trace(restart_engine)
             start = engine.snapshot()
         elif cycle == checkpoint_cycle + 1 and restart_engine is not None:
             replay_rejections: list[dict] = []
             advance_to(restart_engine, float(cycle * 360), replay_rejections)
-            if canonical(restart_engine.snapshot()) != canonical(end):
+            if not checkpoint_equivalent(restart_engine.snapshot(), end):
                 raise ValueError(f"{point['id']}: checkpoint/restart replay mismatch")
             reset_trace(restart_engine)
         if cycle >= checkpoint_cycle:
