@@ -1,0 +1,1517 @@
+{
+  "conservation": {
+    "energy_residual_J": -5.551115123125783e-16,
+    "mass_residual_kg": -4.387630666777276e-19,
+    "species_residual_kg": [
+      3.5829493668856904e-19,
+      -1.5881867761018131e-21,
+      -6.310395457044538e-20,
+      5.293955920339377e-22
+    ]
+  },
+  "cycle_index": 11,
+  "fuel": {
+    "afr": {
+      "reason": null,
+      "status": "DEFINED",
+      "value": 0.0
+    },
+    "fresh_air_delivered_kg_per_cycle": 0.0,
+    "fuel_burned_kg_per_cycle": 1.1395236239546801e-07,
+    "fuel_burned_status": "DEFINED",
+    "fuel_delivered_kg_per_cycle": 2.2502566917707765e-07,
+    "fuel_id": "SYNTHETIC_GASOLINE_V1",
+    "fuel_sha256": "b8c385ce4d6ae0cf6078969f22698a4cb4881974d95097085b609c487a691792",
+    "phi": {
+      "reason": "ZERO_AFR",
+      "status": "UNDEFINED",
+      "value": null
+    }
+  },
+  "hard_gate": {
+    "classification": "PASS",
+    "hard_failures": [],
+    "schema": "ENGINE_PLAUSIBILITY_GATES_V1",
+    "warning_policy": "warnings require explanation and do not override physical validity",
+    "warnings": [
+      "PLAUSIBILITY_WARNING:nonpositive_brake_power indicates a motoring/low-load synthetic point",
+      "PLAUSIBILITY_WARNING:nonpositive_net_piston_work indicates a motoring/low-load synthetic point"
+    ]
+  },
+  "heat_transfer": {
+    "correlation": "ANNAND_V1",
+    "heat_rate_W_by_surface": {
+      "head": 1467.0745190702428,
+      "liner": 2934.1490381404856,
+      "piston": 1467.0745190702428
+    },
+    "provenance": "SYNTHETIC_ASSUMPTION",
+    "schema": "HEAT_TRANSFER_STANDARD_V1",
+    "wall_temperature_K": 450.0
+  },
+  "model_versions": {
+    "duct_heat_transfer": "DUCT_HEAT_TRANSFER_STANDARD_V1",
+    "fuel_metering": "IDEAL_FUEL_METERING",
+    "heat_transfer": "ANNAND_V1",
+    "mechanical_losses": "MECHANICAL_LOSSES_STANDARD_V1",
+    "port_cd": "STANDARD_V1",
+    "scavenging": "SCAVENGING_MODEL_V1"
+  },
+  "performance": {
+    "brake_mep_pa": -6802.397090866729,
+    "brake_power_positive": false,
+    "brake_power_w": -55.84787603444839,
+    "brake_torque_nm": -0.13332698298098788,
+    "brake_work_j": -0.8377181405167258,
+    "clipped": false,
+    "cycle_convention": "2T_360_DEG_ONE_CYCLE_PER_REV",
+    "displacement_m3": 0.00012315043202071988,
+    "friction_mep_pa": 1500.0,
+    "friction_mep_pa_by_term": {
+      "synthetic-bearing-accessory": 500.0,
+      "synthetic-piston-ring": 1000.0
+    },
+    "load": 1.0,
+    "loss_work_j_by_term": {
+      "synthetic-bearing-accessory": 0.061575216010359944,
+      "synthetic-piston-ring": 0.12315043202071989
+    },
+    "mechanical_loss_power_w": 12.315043202071989,
+    "mechanical_loss_torque_nm": 0.0294,
+    "net_piston_gas_work_j": -0.652992492485646,
+    "net_piston_mep_pa": -5302.397090866729,
+    "net_piston_power_w": -43.5328328323764,
+    "net_piston_torque_nm": -0.10392698298098788,
+    "rpm": 4000.0,
+    "schema": "MOTORSIM_MECHANICAL_LOSSES_2T_V2_NET_PISTON_WORK"
+  },
+  "periodicity": {
+    "detector": "PeriodicDetectorV2",
+    "update": {
+      "branch_streaks": {
+        "A": 0,
+        "B": 0
+      },
+      "classification": null,
+      "cycle": 11,
+      "lag1_streak": 0,
+      "outcomes": {
+        "lag1": {
+          "contract": "REFERENCE_PERIODIC_CONVERGENCE_V2",
+          "later_cycle": 11,
+          "metrics": {
+            "crankcase.mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.010088100329010832
+            },
+            "crankcase.pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0017103908086333343
+            },
+            "crankcase.temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.01178123654356484
+            },
+            "crankcase.total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.001710390808633201
+            },
+            "cylinder.mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.026475631231354203
+            },
+            "cylinder.pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.004645940951988519
+            },
+            "cylinder.temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.030998567963975168
+            },
+            "cylinder.total_energy_J": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.004645940951988615
+            },
+            "ducts.boost[0].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.01265297538518945
+            },
+            "ducts.boost[0].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0011085943348501481
+            },
+            "ducts.boost[0].species.burned": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0014456409241050058
+            },
+            "ducts.boost[0].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03903656717399939
+            },
+            "ducts.boost[0].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0007731944329785814
+            },
+            "ducts.boost[0].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.041255402531082896
+            },
+            "ducts.boost[0].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.013747542703208583
+            },
+            "ducts.boost[0].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0011085943348502745
+            },
+            "ducts.boost[0].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 7.22324104411046e-17
+            },
+            "ducts.boost[1].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.016545900166860875
+            },
+            "ducts.boost[1].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0011085943348501481
+            },
+            "ducts.boost[1].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0030760662427468596
+            },
+            "ducts.boost[1].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03566619584162739
+            },
+            "ducts.boost[1].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0006363638527368551
+            },
+            "ducts.boost[1].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03937862593711139
+            },
+            "ducts.boost[1].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.017636151810520993
+            },
+            "ducts.boost[1].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0011085943348502745
+            },
+            "ducts.boost[1].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 5.728609594721601e-18
+            },
+            "ducts.exhaust[0].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.025371527082796844
+            },
+            "ducts.exhaust[0].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.00038572460708152047
+            },
+            "ducts.exhaust[0].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.007489395543180052
+            },
+            "ducts.exhaust[0].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.015141240821613222
+            },
+            "ducts.exhaust[0].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.00011289951225415301
+            },
+            "ducts.exhaust[0].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.02274353587704736
+            },
+            "ducts.exhaust[0].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.025747465267563236
+            },
+            "ducts.exhaust[0].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0003857202025139516
+            },
+            "ducts.exhaust[0].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 1.269949893350521e-05
+            },
+            "ducts.exhaust[1].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.018479162172160796
+            },
+            "ducts.exhaust[1].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0004177246211772302
+            },
+            "ducts.exhaust[1].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.00357160568901118
+            },
+            "ducts.exhaust[1].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.023371616580047605
+            },
+            "ducts.exhaust[1].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 3.082287753456575e-05
+            },
+            "ducts.exhaust[1].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.01976918801350197
+            },
+            "ducts.exhaust[1].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.01888916759232003
+            },
+            "ducts.exhaust[1].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0004177233546904931
+            },
+            "ducts.exhaust[1].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 3.4523469782060754e-06
+            },
+            "ducts.exhaust[2].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.014189207301098355
+            },
+            "ducts.exhaust[2].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0004323128589495705
+            },
+            "ducts.exhaust[2].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.002113744992268877
+            },
+            "ducts.exhaust[2].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.02282735100179445
+            },
+            "ducts.exhaust[2].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 2.109079542948495e-05
+            },
+            "ducts.exhaust[2].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.020692515214096235
+            },
+            "ducts.exhaust[2].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.014615385983273211
+            },
+            "ducts.exhaust[2].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0004323146017035349
+            },
+            "ducts.exhaust[2].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 3.371690012478638e-06
+            },
+            "ducts.exhaust[3].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.008353004586277133
+            },
+            "ducts.exhaust[3].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.00047617630153657205
+            },
+            "ducts.exhaust[3].species.burned": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0011075681086605551
+            },
+            "ducts.exhaust[3].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.012937141525051543
+            },
+            "ducts.exhaust[3].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 2.0062859097038163e-05
+            },
+            "ducts.exhaust[3].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.011809510557293887
+            },
+            "ducts.exhaust[3].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.008825203384983002
+            },
+            "ducts.exhaust[3].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.000476245551481616
+            },
+            "ducts.exhaust[3].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 4.7884538160029334e-05
+            },
+            "ducts.exhaust[4].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.007886370001946435
+            },
+            "ducts.exhaust[4].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 1.4706886883977136e-05
+            },
+            "ducts.exhaust[4].species.burned": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.000982121117104889
+            },
+            "ducts.exhaust[4].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.011608732633284213
+            },
+            "ducts.exhaust[4].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 2.0097903603961303e-05
+            },
+            "ducts.exhaust[4].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.010606513612575433
+            },
+            "ducts.exhaust[4].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.007871778884424151
+            },
+            "ducts.exhaust[4].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 1.0282059342728572e-05
+            },
+            "ducts.exhaust[4].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.00045327285714462373
+            },
+            "ducts.intake[0].mass_kg": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 8.90560419937392e-07
+            },
+            "ducts.intake[0].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 2.5467477317173693e-06
+            },
+            "ducts.intake[0].species.burned": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "ducts.intake[0].species.fresh_air": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 1.1102230246251565e-16
+            },
+            "ducts.intake[0].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 1.1796119636642288e-16
+            },
+            "ducts.intake[0].species.residual": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "ducts.intake[0].temperature_K": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 1.656188786581771e-06
+            },
+            "ducts.intake[0].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 1.629897144533708e-06
+            },
+            "ducts.intake[0].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 4.527357240245028e-05
+            },
+            "ducts.intake[1].mass_kg": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.00015242617793797465
+            },
+            "ducts.intake[1].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.00025552658620144704
+            },
+            "ducts.intake[1].species.burned": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "ducts.intake[1].species.fresh_air": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 1.3322676295501878e-15
+            },
+            "ducts.intake[1].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 1.2559397966072083e-15
+            },
+            "ducts.intake[1].species.residual": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "ducts.intake[1].temperature_K": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0004079138151985329
+            },
+            "ducts.intake[1].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0002629851257584278
+            },
+            "ducts.intake[1].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0002178815595887118
+            },
+            "ducts.primary[0].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.019795326056202732
+            },
+            "ducts.primary[0].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0017616212261658177
+            },
+            "ducts.primary[0].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.005141434094019549
+            },
+            "ducts.primary[0].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.02828525905945134
+            },
+            "ducts.primary[0].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0003951631095158153
+            },
+            "ducts.primary[0].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.033821856262986616
+            },
+            "ducts.primary[0].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.02152207541580914
+            },
+            "ducts.primary[0].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0017616212261657867
+            },
+            "ducts.primary[0].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 1.8947392626707877e-16
+            },
+            "ducts.primary[1].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0231498740402861
+            },
+            "ducts.primary[1].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0017616212261656868
+            },
+            "ducts.primary[1].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.006959410261263427
+            },
+            "ducts.primary[1].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.023862694411814322
+            },
+            "ducts.primary[1].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.00022722880096453027
+            },
+            "ducts.primary[1].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03104933347404215
+            },
+            "ducts.primary[1].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.024870713956959455
+            },
+            "ducts.primary[1].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.001761621226165647
+            },
+            "ducts.primary[1].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 2.6485676572209903e-16
+            },
+            "ducts.secondary[0].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.015276983866943216
+            },
+            "ducts.secondary[0].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.001350341403107566
+            },
+            "ducts.secondary[0].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0028162113372651905
+            },
+            "ducts.secondary[0].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03404786657096309
+            },
+            "ducts.secondary[0].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0006119037443219344
+            },
+            "ducts.secondary[0].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03747598165255056
+            },
+            "ducts.secondary[0].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.016606696126220545
+            },
+            "ducts.secondary[0].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0013503414031076756
+            },
+            "ducts.secondary[0].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 2.6000747773558465e-17
+            },
+            "ducts.secondary[1].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.020328452707011904
+            },
+            "ducts.secondary[1].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0013503414031078298
+            },
+            "ducts.secondary[1].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.005252948704642567
+            },
+            "ducts.secondary[1].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.028183078476025802
+            },
+            "ducts.secondary[1].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0003887356336344768
+            },
+            "ducts.secondary[1].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03382476281430291
+            },
+            "ducts.secondary[1].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.021651343758768204
+            },
+            "ducts.secondary[1].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0013503414031078166
+            },
+            "ducts.secondary[1].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 6.886293172473811e-17
+            },
+            "fresh_delivery_kg": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0007579482950884844
+            },
+            "fresh_short_circuit_kg": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.00029678302891189296
+            },
+            "global_species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.002416791926662951
+            },
+            "global_species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.015805937350743572
+            },
+            "global_species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 9.342422003878219e-05
+            },
+            "global_species.residual": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0013631132300294343
+            },
+            "p7_burned_produced_kg": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "p7_heat_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "work_J": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.15357707743066484
+            }
+          },
+          "older_cycle": 10,
+          "status": "FAIL"
+        },
+        "lag2": {
+          "contract": "REFERENCE_PERIODIC_CONVERGENCE_V2",
+          "later_cycle": 11,
+          "metrics": {
+            "crankcase.mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.02064303643881215
+            },
+            "crankcase.pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0037129047680307258
+            },
+            "crankcase.temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.024279295578422608
+            },
+            "crankcase.total_energy_J": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0037129047680306863
+            },
+            "cylinder.mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.05039980755388589
+            },
+            "cylinder.pressure_Pa": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.010326740169344081
+            },
+            "cylinder.temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.060206082006036
+            },
+            "cylinder.total_energy_J": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.010326740169344012
+            },
+            "ducts.boost[0].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.025640349257212054
+            },
+            "ducts.boost[0].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0024730356822939715
+            },
+            "ducts.boost[0].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0027817326257373893
+            },
+            "ducts.boost[0].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.08208044048128188
+            },
+            "ducts.boost[0].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0016360700909826224
+            },
+            "ducts.boost[0].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.08649824319800187
+            },
+            "ducts.boost[0].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.028049975440886443
+            },
+            "ducts.boost[0].total_energy_J": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0024730356822940266
+            },
+            "ducts.boost[0].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 5.166217504683783e-17
+            },
+            "ducts.boost[1].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03264107385726703
+            },
+            "ducts.boost[1].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.002473035682294237
+            },
+            "ducts.boost[1].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0058735301975101
+            },
+            "ducts.boost[1].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.07368105782589607
+            },
+            "ducts.boost[1].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0013350652303716513
+            },
+            "ducts.boost[1].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.08088965325377806
+            },
+            "ducts.boost[1].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.03503338699920388
+            },
+            "ducts.boost[1].total_energy_J": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.002473035682294168
+            },
+            "ducts.boost[1].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 2.059428421723075e-17
+            },
+            "ducts.exhaust[0].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.04737736389273034
+            },
+            "ducts.exhaust[0].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0008186343477021118
+            },
+            "ducts.exhaust[0].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.01381884453453086
+            },
+            "ducts.exhaust[0].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.027259108184857994
+            },
+            "ducts.exhaust[0].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0002273718490331155
+            },
+            "ducts.exhaust[0].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.04130532456842173
+            },
+            "ducts.exhaust[0].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.04815721350304611
+            },
+            "ducts.exhaust[0].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0008186269424477352
+            },
+            "ducts.exhaust[0].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 2.123704386817896e-05
+            },
+            "ducts.exhaust[1].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03548554008067469
+            },
+            "ducts.exhaust[1].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0008837525589403113
+            },
+            "ducts.exhaust[1].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.006734805949362099
+            },
+            "ducts.exhaust[1].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.04960544520696064
+            },
+            "ducts.exhaust[1].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 5.439883936049928e-05
+            },
+            "ducts.exhaust[1].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.042816240418238116
+            },
+            "ducts.exhaust[1].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.03633793220276349
+            },
+            "ducts.exhaust[1].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.000883751145371257
+            },
+            "ducts.exhaust[1].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 3.85408315772709e-06
+            },
+            "ducts.exhaust[2].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.027431374344184817
+            },
+            "ducts.exhaust[2].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0009154472898607371
+            },
+            "ducts.exhaust[2].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.00406869135753569
+            },
+            "ducts.exhaust[2].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.044956447521220966
+            },
+            "ducts.exhaust[2].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 4.115275660513453e-05
+            },
+            "ducts.exhaust[2].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.040846603407080434
+            },
+            "ducts.exhaust[2].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.028321709656744812
+            },
+            "ducts.exhaust[2].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.000915452588710631
+            },
+            "ducts.exhaust[2].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 1.0289110823190383e-05
+            },
+            "ducts.exhaust[3].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.015663350746227486
+            },
+            "ducts.exhaust[3].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0010087331222053202
+            },
+            "ducts.exhaust[3].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0020770869294023304
+            },
+            "ducts.exhaust[3].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.02441241558555629
+            },
+            "ducts.exhaust[3].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 3.9554958783413903e-05
+            },
+            "ducts.exhaust[3].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.02229577369737064
+            },
+            "ducts.exhaust[3].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.01665628372773041
+            },
+            "ducts.exhaust[3].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.00100888213639646
+            },
+            "ducts.exhaust[3].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.00010404856040898292
+            },
+            "ducts.exhaust[4].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.014741031890014772
+            },
+            "ducts.exhaust[4].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 3.0368186476802354e-05
+            },
+            "ducts.exhaust[4].species.burned": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0018253064070947803
+            },
+            "ducts.exhaust[4].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.021675075579608127
+            },
+            "ducts.exhaust[4].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 3.956904365022909e-05
+            },
+            "ducts.exhaust[4].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.01981020012886319
+            },
+            "ducts.exhaust[4].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.014711110453283566
+            },
+            "ducts.exhaust[4].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 2.113299967386898e-05
+            },
+            "ducts.exhaust[4].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0009577407085526457
+            },
+            "ducts.intake[0].mass_kg": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 1.6895024584802756e-06
+            },
+            "ducts.intake[0].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 5.070765047956949e-06
+            },
+            "ducts.intake[0].species.burned": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "ducts.intake[0].species.fresh_air": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 4.551914400963142e-15
+            },
+            "ducts.intake[0].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 4.451300439356487e-15
+            },
+            "ducts.intake[0].species.residual": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "ducts.intake[0].temperature_K": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 3.381268302023907e-06
+            },
+            "ducts.intake[0].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 3.242739875272916e-06
+            },
+            "ducts.intake[0].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 9.031444688769458e-05
+            },
+            "ducts.intake[1].mass_kg": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0003079541749345171
+            },
+            "ducts.intake[1].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0005248630871780211
+            },
+            "ducts.intake[1].species.burned": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "ducts.intake[1].species.fresh_air": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 4.651834473179406e-14
+            },
+            "ducts.intake[1].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 4.6438547451899126e-14
+            },
+            "ducts.intake[1].species.residual": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "ducts.intake[1].temperature_K": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0008326556283333417
+            },
+            "ducts.intake[1].total_energy_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.00054007085549241
+            },
+            "ducts.intake[1].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0004450713484536878
+            },
+            "ducts.primary[0].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03839470012701793
+            },
+            "ducts.primary[0].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.003634982826437854
+            },
+            "ducts.primary[0].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.009787314711071311
+            },
+            "ducts.primary[0].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.05712142385808727
+            },
+            "ducts.primary[0].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0008248814316082305
+            },
+            "ducts.primary[0].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.06773362000076666
+            },
+            "ducts.primary[0].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.04189011887786789
+            },
+            "ducts.primary[0].total_energy_J": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0036349828264378263
+            },
+            "ducts.primary[0].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 2.311666241660967e-16
+            },
+            "ducts.primary[1].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.04435257563631683
+            },
+            "ducts.primary[1].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.003634982826437984
+            },
+            "ducts.primary[1].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.013196231672365097
+            },
+            "ducts.primary[1].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.04684675941374439
+            },
+            "ducts.primary[1].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.00046924750543587057
+            },
+            "ducts.primary[1].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.06051223859154542
+            },
+            "ducts.primary[1].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.047826337612008614
+            },
+            "ducts.primary[1].total_energy_J": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.003634982826437965
+            },
+            "ducts.primary[1].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 2.0204672813248244e-16
+            },
+            "ducts.secondary[0].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03028739823085131
+            },
+            "ducts.secondary[0].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.002893898824033261
+            },
+            "ducts.secondary[0].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.00539153008759391
+            },
+            "ducts.secondary[0].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.07067246926496668
+            },
+            "ducts.secondary[0].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0012894603445820566
+            },
+            "ducts.secondary[0].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.07735345969714286
+            },
+            "ducts.secondary[0].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.03309364838876119
+            },
+            "ducts.secondary[0].total_energy_J": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.002893898824033289
+            },
+            "ducts.secondary[0].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 3.251536385112338e-17
+            },
+            "ducts.secondary[1].mass_kg": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.039326879579379886
+            },
+            "ducts.secondary[1].pressure_Pa": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 0.0028938988240332602
+            },
+            "ducts.secondary[1].species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.009993869535774663
+            },
+            "ducts.secondary[1].species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.05678349840567515
+            },
+            "ducts.secondary[1].species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0008099820460789773
+            },
+            "ducts.secondary[1].species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0675873499875288
+            },
+            "ducts.secondary[1].temperature_K": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.04210697039284528
+            },
+            "ducts.secondary[1].total_energy_J": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0028938988240332884
+            },
+            "ducts.secondary[1].velocity_over_sound_speed": {
+              "passed": true,
+              "threshold": 0.005,
+              "value": 1.7254433108847821e-16
+            },
+            "fresh_delivery_kg": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0015880871087901715
+            },
+            "fresh_short_circuit_kg": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0005850698523626655
+            },
+            "global_species.burned": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.004686630732767696
+            },
+            "global_species.fresh_air": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.03109988461096152
+            },
+            "global_species.fuel": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.000198531153216002
+            },
+            "global_species.residual": {
+              "passed": false,
+              "threshold": 0.002,
+              "value": 0.0024258472125692075
+            },
+            "p7_burned_produced_kg": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "p7_heat_J": {
+              "passed": true,
+              "threshold": 0.002,
+              "value": 0.0
+            },
+            "work_J": {
+              "passed": false,
+              "threshold": 0.005,
+              "value": 0.3231330431733266
+            }
+          },
+          "older_cycle": 9,
+          "status": "FAIL"
+        },
+        "lag2_branch": "A"
+      }
+    }
+  },
+  "provenance": "SYNTHETIC_ASSUMPTION",
+  "rpm": 4000.0,
+  "scavenging": {
+    "conservation": {
+      "delivered_partition_kg": 2.976860130399806e-05,
+      "partition_residual_kg": -2.976860130399806e-05
+    },
+    "masses_kg": {
+      "fresh_delivered_kg": 0.0,
+      "fresh_short_circuit_kg": 3.6592787696487627e-06,
+      "reference_air_kg": 1e-30,
+      "trapped_fresh_air_kg": 2.6109322534349296e-05,
+      "trapped_fuel_kg": 4.307313348286209e-11,
+      "trapped_residual_kg": 5.612041648568435e-05,
+      "trapped_total_kg": 8.222978209316713e-05
+    },
+    "provenance": "SYNTHETIC_ASSUMPTION",
+    "ratios": {
+      "charging_efficiency": {
+        "reason": "OUTSIDE_PHYSICAL_DOMAIN",
+        "status": "UNDEFINED",
+        "value": null
+      },
+      "delivery_ratio": {
+        "reason": null,
+        "status": "DEFINED",
+        "value": 0.0
+      },
+      "fresh_charge_fraction": {
+        "reason": null,
+        "status": "DEFINED",
+        "value": 0.31751662073927406
+      },
+      "residual_fraction": {
+        "reason": null,
+        "status": "DEFINED",
+        "value": 0.6824828554464535
+      },
+      "scavenging_efficiency": {
+        "reason": null,
+        "status": "DEFINED",
+        "value": 0.31751662073927406
+      },
+      "short_circuit_fraction": {
+        "reason": "GROSS_CROSSING_PARTITION_INVALID",
+        "status": "UNDEFINED",
+        "value": null
+      },
+      "trapping_efficiency": {
+        "reason": "GROSS_CROSSING_PARTITION_INVALID",
+        "status": "UNDEFINED",
+        "value": null
+      }
+    },
+    "schema": "SCAVENGING_MODEL_V1",
+    "zone_profile": "TWO_ZONE_PROFILE"
+  },
+  "schema": "ENGINEERING_OUTPUTS_ENGINE_PHYSICS_V1"
+}

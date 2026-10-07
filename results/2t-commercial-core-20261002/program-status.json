@@ -16,6 +16,17 @@
       "P9 claim"
     ]
   },
+  "engine_physics_v1_freeze_candidate": {
+    "state": "MOTORSIM_2T_V1_DEVELOPMENT_FREEZE_CANDIDATE",
+    "linked_gate": "ENGINE_PHYSICS_V1",
+    "meaning": "Administrative candidate for the additive synthetic engineering physics phase; periodic convergence was not established within the preregistered engineering horizon.",
+    "not_implied": [
+      "experimental validation",
+      "commercial fuel or engine readiness",
+      "full RPM coverage",
+      "P9 claim"
+    ]
+  },
   "push_performed": false,
   "kt100_policy": "R6_ORIGINAL_NO_PRIMARY; RECOVERY_R1_CONSUMED_CYCLE24_FLOAT64_ADMISSIBILITY_FAILURE; KT100_UNVERIFIED; NO_R2_AUTHORIZATION",
   "phases": {
@@ -2179,7 +2190,7 @@
       "dependencies": [
         "EP11"
       ],
-      "state": "BLOCKED_LOCAL",
+      "state": "DONE",
       "blocker": "Initial valid production point projection exceeds the normal campaign budget: A_3000 reached 6 cycles in roughly 4 minutes against a 111-cycle bound; the four-point run would exceed the gate-critical limit.",
       "unblock_tasks": [
         "EP12-PERF"
@@ -2195,7 +2206,10 @@
       "id": "EP12-PERF",
       "description": "Diagnose and resolve phase-run performance locally using checkpoint/restart and a bounded engineering horizon; do not change solver, physics or thresholds.",
       "dependencies": [],
-      "state": "READY",
+      "state": "DONE",
+      "evidence": [
+        "Initial 111/47 horizon projection was measured and stopped as a diagnostic; accepted v1.1 preregistration fixed 12 cycles per point before the accepted run. No solver or physics change was made."
+      ],
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "verification",
       "evidence_level": "L1",
@@ -2212,7 +2226,7 @@
       "dependencies": [
         "EP12"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "evidence/release reviewer",
       "evidence_level": "L2",
@@ -2227,7 +2241,7 @@
       "dependencies": [
         "EP13"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "orchestrator",
       "evidence_level": "L3",
@@ -2664,6 +2678,24 @@
       "task": "EP12",
       "kind": "task",
       "summary": "Initial full-horizon execution was stopped as a local performance diagnostic after six A_3000 cycles; no gate classification or accepted evidence was produced. EP12-PERF opened."
+    },
+    {
+      "at": "2026-10-07T13:07:56+00:00",
+      "task": "EP11",
+      "kind": "task",
+      "summary": "Focused ENGINE_PHYSICS_V1 and integrated closure regression complete: 87 passed; P4-P8 complete regression 304 passed with 4 existing NumPy warnings."
+    },
+    {
+      "at": "2026-10-07T13:07:56+00:00",
+      "task": "EP13",
+      "kind": "task",
+      "summary": "Durable phase audit/review and SHA manifest created. Review is explicitly SELF_REVIEW, not falsely labeled independent; four points and all warnings/hard gates are recorded."
+    },
+    {
+      "at": "2026-10-07T13:07:56+00:00",
+      "task": "EP14",
+      "kind": "task",
+      "summary": "ENGINE_PHYSICS_V1 gate PASS: four production-core points complete, hard gates PASS, periodicity explicitly NO_CONVERGENCE_WITHIN_HORIZON, synthetic engineering only; freeze candidate recorded and no next objective opened."
     }
   ],
   "legacy_gate_status": {
@@ -2679,29 +2711,23 @@
   },
   "gate_status": {
     "objective": "ENGINE_PHYSICS_V1",
-    "state": "OPEN",
-    "classification": "ENGINE_PHYSICS_V1_IN_PROGRESS",
+    "state": "PASS",
+    "classification": "ENGINE_PHYSICS_V1_PASS",
     "evidence": [
-      "Phase authorized after frozen baseline 1a58b2a; no ENGINE_PHYSICS_V1 campaign has started.",
-      "Historical R2 PASS remains preserved in r2_gate_status and is not reopened.",
-      "Current gate requires EP1-EP14, four preregistered production-core points, durable engineering outputs, hard physical gates and evidence review."
+      "Four preregistered points completed through IntegratedEngine2T: A/B configurations at 3000/4000 RPM; 12 audited cycles per point; checkpoint/restart exact physical-state verification passed.",
+      "All four ENGINE_PLAUSIBILITY_GATES_V1 hard classifications are PASS. A-point nonpositive synthetic work is retained as explicit PLAUSIBILITY_WARNING.",
+      "Real PeriodicDetectorV2 ran for every point and returned NO_CONVERGENCE_WITHIN_HORIZON; this phase PASS does not claim periodic convergence and does not alter historical R1/R2 closure gates.",
+      "Durable campaign, regression, review and SHA manifest: results/engine-physics-v1/audit/manifest.json.",
+      "Focused integrated regression: 87 passed. P4-P8 regression: 304 passed, 4 warnings. OpenSpec strict and contract checks pass.",
+      "Synthetic engineering only; experimental validation, commercial claim, KT100 and P9 remain out of scope."
     ],
     "gate_tasks_total": 14,
-    "gate_tasks_done": 8,
+    "gate_tasks_done": 14,
     "gate_task_states": {
-      "DONE": 8,
-      "READY": 1,
-      "WAITING": 5
+      "DONE": 14
     },
-    "remaining": [
-      "EP9",
-      "EP10",
-      "EP11",
-      "EP12",
-      "EP13",
-      "EP14"
-    ],
-    "updated_at": "2026-10-07T12:05:14+00:00"
+    "remaining": [],
+    "updated_at": "2026-10-07T15:00:00-03:00"
   },
   "r2_gate_status": {
     "objective": "MOTORSIM_2T_V1_CLOSURE_R2",

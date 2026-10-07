@@ -315,13 +315,20 @@ def evaluate_integrated_cycle_v1(cycle: Mapping[str, Any], *, rpm: float,
             "mass": _finite(conservation.get("mass_residual_kg", 0.0), "mass_residual_kg"),
             "energy": _finite(conservation.get("energy_residual_J", 0.0), "energy_residual_J")},
         metrics=scavenging["ratios"])
+    if performance["brake_power_w"] <= 0.0:
+        gates["warnings"].append(
+            "PLAUSIBILITY_WARNING:nonpositive_brake_power indicates a motoring/low-load synthetic point")
+    if net_work <= 0.0:
+        gates["warnings"].append(
+            "PLAUSIBILITY_WARNING:nonpositive_net_piston_work indicates a motoring/low-load synthetic point")
     return {"schema": "ENGINEERING_OUTPUTS_ENGINE_PHYSICS_V1",
             "cycle_index": cycle.get("cycle_index"), "rpm": float(rpm),
             "periodicity": cycle.get("periodicity", {"status": "NOT_EVALUATED"}),
             "hard_gate": gates, "fuel": {
                 "fuel_id": fuel.fuel_id, "fuel_sha256": fuel.content_hash,
                 "fuel_delivered_kg_per_cycle": fuel_delivered,
-                "fuel_burned_kg_per_cycle": fuel_burned,
+                "fuel_burned_kg_per_cycle": fuel_burned["value"],
+                "fuel_burned_status": fuel_burned["status"],
                 "fresh_air_delivered_kg_per_cycle": fresh_delivered,
                 "afr": afr, "phi": phi},
             "scavenging": scavenging, "heat_transfer": heat,

@@ -84,7 +84,18 @@ def test_phase_provenance_binds_fuel_ports_and_combustion():
     assert provenance["models"]["fuel"]["content_hash"] == fuel.content_hash
 
 
+def test_engineering_fuel_burned_output_is_value_or_undefined_not_ratio_record():
+    import gzip
+    import json
+    from motorsim.engine_physics_v1 import evaluate_integrated_cycle_v1
+    primary = json.load(gzip.open(
+        "results/2t-v1-closure-20261006/restart-replay-c11/fixture_a_prime/continuous-cycle-1.json.gz"))
+    record = evaluate_integrated_cycle_v1(primary, rpm=3000.0, fuel=synthetic_gasoline_v1())
+    assert record["fuel"]["fuel_burned_status"] in {"DEFINED", "UNDEFINED"}
+    assert record["fuel"]["fuel_burned_kg_per_cycle"] is None or isinstance(
+        record["fuel"]["fuel_burned_kg_per_cycle"], float)
+
+
 def test_invalid_coefficients_are_rejected():
     with pytest.raises(ValueError, match="Cd"):
         PortDischargeCoefficientsV1({"transfer": {"forward": 0.0, "reverse": 0.7}}).validate()
-
