@@ -178,7 +178,7 @@ def run(output: Path) -> dict:
     prereg = json.loads(PREREG.read_text())
     if prereg["status"] != "PREREGISTERED_NOT_RUN":
         raise ValueError("phase preregistration is not runnable")
-    output.mkdir(parents=True)
+    output.mkdir(parents=True, exist_ok=True)
     points = [run_point(point, output) for point in prereg["points"]]
     result = {"schema": "ENGINE_PHYSICS_V1_CAMPAIGN_RESULT",
               "status": "COMPLETE", "preregistration_sha256": sha(PREREG.read_bytes()),
