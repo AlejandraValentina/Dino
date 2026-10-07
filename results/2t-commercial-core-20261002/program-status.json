@@ -2320,13 +2320,14 @@
       "dependencies": [
         "EP-R2"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "orchestrator",
       "evidence_level": "L2",
       "continuation_mode": "OWNER_AUTHORIZED_OPERATIONAL_CONTINUATION",
       "restart_mode": "B4000_OPERATIONAL_RESTART_AFTER_TIMEOUT",
       "restart_contract": "Original initial condition; deterministic reproduction of persisted B4000 cycles 1-9 required before continuing through cycle 47.",
+      "resolution": "B4000 continuation completed with PERIOD_1 @ cycle 38 and deterministic continuity for cycles 1-9; all four periodic final outputs fail the corrected partition-conservation hard gate. ENGINE_PHYSICS_V1 is FAIL_TERMINAL.",
       "write_scope": [
         "openspec/changes/engine-physics-v1",
         "results/engine-physics-v1/recovery",
@@ -2651,7 +2652,7 @@
         "results/engine-physics-v1/recovery-runlogs-v2/engine-physics-v1-recovery-v2.summary.json",
         "A3000 PERIOD_1 @ cycle 73; A4000 PERIOD_1 @ cycle 88; B3000 PERIOD_1 @ cycle 34; B4000 persisted 9/47 cycles"
       ],
-      "recommendation": "B selected by owner: authorize one operational B4000-only continuation, with no further extension or R3."
+      "recommendation": "B executed exactly once; terminal gate evaluation now supersedes the pending decision. No further extension or R3."
     }
   ],
   "hard_stop": null,
@@ -2878,6 +2879,12 @@
       "task": "EP-R3",
       "kind": "task",
       "summary": "Owner selected B: one OWNER_AUTHORIZED_OPERATIONAL_CONTINUATION for B4000 only. No valid cycle-9 checkpoint exists; restart from original initial condition with deterministic comparison cycles 1-9, then continue max through preregistered cycle 47. Decision committed before execution."
+    },
+    {
+      "at": "2026-10-07T16:25:06+00:00",
+      "task": "EP-R3",
+      "kind": "task",
+      "summary": "B4000 owner-authorized restart completed: no checkpoint existed; original initial-condition restart reproduced cycles 1-9 exactly, PeriodicDetectorV2 returned PERIOD_1 @ cycle 38. All four final V2 engineering outputs are HARD_PHYSICAL_INVALID on partition_conservation; gate classified ENGINE_PHYSICS_V1_FAIL_TERMINAL with no extension."
     }
   ],
   "legacy_gate_status": {
@@ -2893,23 +2900,22 @@
   },
   "gate_status": {
     "objective": "ENGINE_PHYSICS_V1",
-    "state": "REVIEW",
-    "classification": "ENGINE_PHYSICS_V1_FAIL_RECOVERABLE",
+    "state": "FAIL_TERMINAL",
+    "classification": "ENGINE_PHYSICS_V1_FAIL_TERMINAL",
     "evidence": [
       "External independent review of HEAD 59f2926 found ENGINE_PHYSICS_V1_FAIL and FULL_RPM_SWEEP_V1_CAN_START=NO.",
       "Historical four-point evidence is preserved unchanged: all points are NO_CONVERGENCE_WITHIN_HORIZON @ 12 cycles and are not converged engineering results.",
       "Recovery scope is limited to output adapter defects, hard plausibility gates, operating-point periodicity contract, preregistered horizon and compatible warm start.",
-      "R2, KT100, FULL_RPM_SWEEP_V1 and new physics capabilities remain closed/out of scope."
+      "R2, KT100, FULL_RPM_SWEEP_V1 and new physics capabilities remain closed/out of scope.",
+      "Owner-authorized B4000 operational restart reproduced cycles 1-9 and reached PERIOD_1 @ cycle 38; all four final periodic outputs fail HARD_PHYSICAL_INVALID:partition_conservation under ENGINE_PHYSICS_GATES_V2.",
+      "results/engine-physics-v1/b4000-continuation-data-v2/gate-closure.json"
     ],
     "gate_tasks_total": 5,
-    "gate_tasks_done": 4,
+    "gate_tasks_done": 5,
     "gate_task_states": {
-      "DONE": 4,
-      "BLOCKED_LOCAL": 1
+      "DONE": 5
     },
-    "remaining": [
-      "EP-R3"
-    ],
+    "remaining": [],
     "updated_at": "2026-10-07T13:34:57+00:00"
   },
   "r2_gate_status": {
