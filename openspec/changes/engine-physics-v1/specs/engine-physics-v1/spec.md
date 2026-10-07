@@ -72,3 +72,32 @@ contracts, KT100 evidence, or experimental/P9 status.
 - **THEN** the baseline remains the frozen R2 reference and any new capability
   is identified as ENGINE_PHYSICS_V1 evidence only.
 
+### Requirement: Contract-correct engineering output adapter
+
+The V2 adapter MUST consume primary `fresh_delivery_kg`, primary
+`fuel_burned_kg`, and exact `port_closure_snapshots` with species order
+`fresh_air`, `fuel`, `residual`, `burned`. Missing or invalid dependencies MUST
+remain explicitly undefined and MUST produce a hard physical gate failure when
+the dependent output is required. Partition conservation and the fuel heat
+identity MUST be independently checked; derived heat MUST NOT replace the
+primary burned-fuel ledger.
+
+#### Scenario: Historical transient primary is regenerated offline
+
+- **WHEN** a 12-cycle primary is evaluated with `NO_CONVERGENCE_WITHIN_HORIZON`
+- **THEN** corrected outputs are written under a new versioned evidence path,
+  retain `TRANSIENT_DIAGNOSTIC` status, and are not usable as a periodic
+  engineering operating point.
+
+### Requirement: Periodic operating-point eligibility
+
+Engineering regime outputs MUST be marked usable only after the real
+`PeriodicDetectorV2` returns `PERIOD_1` or `PERIOD_2`. `NOT_EVALUATED`,
+`NO_CONVERGENCE_WITHIN_HORIZON`, and numerical or physical failures MUST
+produce diagnostics only and MUST NOT be promoted to a regime result.
+
+#### Scenario: Detector has not accepted an operating point
+
+- **WHEN** an adapter receives any non-periodic status
+- **THEN** every engineering output carries `NOT_USABLE_UNTIL_PERIODIC` and
+  the operating point carries `TRANSIENT_DIAGNOSTIC`.

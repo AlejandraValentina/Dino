@@ -99,3 +99,38 @@ def test_engineering_fuel_burned_output_is_value_or_undefined_not_ratio_record()
 def test_invalid_coefficients_are_rejected():
     with pytest.raises(ValueError, match="Cd"):
         PortDischargeCoefficientsV1({"transfer": {"forward": 0.0, "reverse": 0.7}}).validate()
+
+
+def test_v2_adapter_uses_primary_ledgers_and_blocks_transient_regime_outputs():
+    import gzip
+    import json
+    from motorsim.engine_physics_v1 import evaluate_integrated_cycle_v2
+
+    primary = json.load(gzip.open(
+        "results/engine-physics-v1/campaign-evidence-r3/engine_a_3000/cycle-012.json.gz"))
+    record = evaluate_integrated_cycle_v2(
+        primary, rpm=3000.0, fuel=synthetic_gasoline_v1(),
+        periodicity_status="NO_CONVERGENCE_WITHIN_HORIZON")
+    assert record["operating_point_status"] == "TRANSIENT_DIAGNOSTIC"
+    assert record["outputs"]["brake_power"]["regime_status"] == "NOT_USABLE_UNTIL_PERIODIC"
+    assert record["outputs"]["fuel_burned"]["value"] == pytest.approx(
+        primary["observables"]["fuel_coupled_combustion"]["fuel_burned_kg"])
+    assert record["hard_gate"]["classification"] == "HARD_PHYSICAL_INVALID"
+    assert "RELATIONSHIP_INVALID:partition_conservation" in record["hard_gate"]["hard_failures"]
+    assert record["outputs"]["AFR"]["status"] == "DEFINED"
+
+
+def test_v2_adapter_never_fabricates_missing_dependencies():
+    import gzip
+    import json
+    from motorsim.engine_physics_v1 import evaluate_integrated_cycle_v2
+
+    primary = json.load(gzip.open(
+        "results/engine-physics-v1/campaign-evidence-r3/engine_a_3000/cycle-012.json.gz"))
+    primary["observables"].pop("fresh_delivery_kg")
+    record = evaluate_integrated_cycle_v2(
+        primary, rpm=3000.0, fuel=synthetic_gasoline_v1(), periodicity_status="PERIOD_1")
+    assert record["outputs"]["AFR"]["status"] == "UNDEFINED"
+    assert record["outputs"]["AFR"]["value"] is None
+    assert record["hard_gate"]["classification"] == "HARD_PHYSICAL_INVALID"
+    assert "REQUIRED_OUTPUT_UNDEFINED:air_fuel_ratio_dependency" in record["hard_gate"]["hard_failures"]

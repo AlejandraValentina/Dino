@@ -2256,10 +2256,11 @@
       "id": "EP-R1",
       "description": "Repair ENGINE_PHYSICS_V2 output adapter: physical fresh delivery key, AFR/phi/lambda undefined semantics, primary fuel-burned ledger, trapped/scavenging snapshots, complete engineering output schema and transient status.",
       "dependencies": [],
-      "state": "READY",
-      "objective": "ENGINE_PHYSICS_V1",
-      "owner_role": "implementation",
-      "evidence_level": "L1",
+        "state": "DONE",
+        "objective": "ENGINE_PHYSICS_V1",
+        "owner_role": "implementation",
+        "evidence_level": "L1",
+        "resolution": "V2 adapter implemented and focused tests pass; offline recovery evidence is versioned under results/engine-physics-v1/recovery-offline-v2/.",
       "write_scope": [
         "motorsim/engine_physics_v1.py",
         "scripts/refresh_engine_physics_v1_outputs.py",
@@ -2269,7 +2270,11 @@
     {
       "id": "EP-R2",
       "description": "Implement ENGINE_PLAUSIBILITY_GATES_V2 hard physical checks for chemistry, mass/species, energy and scavenging partition conservation.",
-      "dependencies": ["EP-R1", "EP-R1-SCAV", "EP-R1-STATUS"],
+      "dependencies": [
+        "EP-R1",
+        "EP-R1-SCAV",
+        "EP-R1-STATUS"
+      ],
       "state": "WAITING",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "verification",
@@ -2283,21 +2288,30 @@
       "id": "EP-R1-SCAV",
       "description": "Repair scavenging snapshot semantics, species ordering, DR/TE/SE/CE definitions and partition identity from port_closure_snapshots.",
       "dependencies": [],
-      "state": "READY",
-      "objective": "ENGINE_PHYSICS_V1",
-      "owner_role": "physics/numerics",
-      "evidence_level": "L1",
-      "write_scope": ["motorsim/engine_physics_v1.py", "tests/test_engine_physics_v1.py"]
+        "state": "DONE",
+        "objective": "ENGINE_PHYSICS_V1",
+        "owner_role": "physics/numerics",
+        "evidence_level": "L1",
+        "resolution": "Exact port-closure snapshots and four-species ordering are enforced; partition conservation is a hard gate.",
+      "write_scope": [
+        "motorsim/engine_physics_v1.py",
+        "tests/test_engine_physics_v1.py"
+      ]
     },
     {
       "id": "EP-R1-STATUS",
       "description": "Define transient versus periodic engineering output status and required dependency semantics without changing solver physics.",
       "dependencies": [],
-      "state": "READY",
-      "objective": "ENGINE_PHYSICS_V1",
-      "owner_role": "architecture",
-      "evidence_level": "L0",
-      "write_scope": ["motorsim/engine_physics_v1.py", "openspec/changes/engine-physics-v1", "tests/test_engine_physics_v1.py"]
+        "state": "DONE",
+        "objective": "ENGINE_PHYSICS_V1",
+        "owner_role": "architecture",
+        "evidence_level": "L0",
+        "resolution": "Periodic outputs are usable only for PERIOD_1/PERIOD_2; all other statuses remain transient diagnostics.",
+      "write_scope": [
+        "motorsim/engine_physics_v1.py",
+        "openspec/changes/engine-physics-v1",
+        "tests/test_engine_physics_v1.py"
+      ]
     },
     {
       "id": "EP-R3",
@@ -2758,6 +2772,12 @@
       "task": "EP-EXTERNAL-REVIEW-59F",
       "kind": "task",
       "summary": "External independent review of HEAD 59f2926 overrides prior phase PASS: ENGINE_PHYSICS_V1_FAIL; FULL_RPM_SWEEP_V1_CAN_START=NO. Four historical points remain NO_CONVERGENCE_WITHIN_HORIZON @ 12 cycles. Recovery scope limited to outputs, hard gates and periodic operating-point workflow."
+    },
+    {
+      "at": "2026-10-07T13:31:21+00:00",
+      "task": "EP-R1",
+      "kind": "task",
+      "summary": "V2 output adapter now uses primary fresh delivery and fuel-burned ledgers, exact port-closure snapshots, explicit undefined dependencies, AFR/phi/lambda outputs, partition/energy/availability hard gates, and transient-only regime semantics; focused tests pass."
     }
   ],
   "legacy_gate_status": {
