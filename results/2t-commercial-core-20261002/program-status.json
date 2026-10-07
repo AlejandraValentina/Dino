@@ -2149,7 +2149,7 @@
         "EP8",
         "EP9"
       ],
-      "state": "READY",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "implementation",
       "evidence_level": "L1",
@@ -2165,7 +2165,7 @@
       "dependencies": [
         "EP10"
       ],
-      "state": "WAITING",
+      "state": "READY",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "verification",
       "evidence_level": "L1",
@@ -2633,6 +2633,12 @@
       "task": "EP9",
       "kind": "task",
       "summary": "Phase preregistration committed before execution: two distinct A/B configurations at 3000/4000 RPM, four bound config hashes, V2 detector and horizons A=111/B=47 as engineering upper bounds; no closure gate rewrite."
+    },
+    {
+      "at": "2026-10-07T12:08:19+00:00",
+      "task": "EP10",
+      "kind": "task",
+      "summary": "Single campaign producer implemented: modifies only new phase config identity to bind SYNTHETIC_GASOLINE_V1, runs IntegratedEngine2T with real PeriodicDetectorV2, exact checkpoint/restart verification, primary audits and engineering outputs."
     }
   ],
   "legacy_gate_status": {
