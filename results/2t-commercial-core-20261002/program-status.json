@@ -2269,9 +2269,7 @@
     {
       "id": "EP-R2",
       "description": "Implement ENGINE_PLAUSIBILITY_GATES_V2 hard physical checks for chemistry, mass/species, energy and scavenging partition conservation.",
-      "dependencies": [
-        "EP-R1"
-      ],
+      "dependencies": ["EP-R1", "EP-R1-SCAV", "EP-R1-STATUS"],
       "state": "WAITING",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "verification",
@@ -2280,6 +2278,26 @@
         "motorsim/engine_physics_v1.py",
         "tests/test_engine_physics_v1.py"
       ]
+    },
+    {
+      "id": "EP-R1-SCAV",
+      "description": "Repair scavenging snapshot semantics, species ordering, DR/TE/SE/CE definitions and partition identity from port_closure_snapshots.",
+      "dependencies": [],
+      "state": "READY",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "physics/numerics",
+      "evidence_level": "L1",
+      "write_scope": ["motorsim/engine_physics_v1.py", "tests/test_engine_physics_v1.py"]
+    },
+    {
+      "id": "EP-R1-STATUS",
+      "description": "Define transient versus periodic engineering output status and required dependency semantics without changing solver physics.",
+      "dependencies": [],
+      "state": "READY",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "architecture",
+      "evidence_level": "L0",
+      "write_scope": ["motorsim/engine_physics_v1.py", "openspec/changes/engine-physics-v1", "tests/test_engine_physics_v1.py"]
     },
     {
       "id": "EP-R3",
@@ -2499,9 +2517,11 @@
     "id": "ENGINE_PHYSICS_V1",
     "change": "openspec/changes/engine-physics-v1",
     "spec": "openspec/changes/engine-physics-v1/specs/engine-physics-v1/spec.md",
-    "completion_criterion": "Four preregistered engineering operating points through the single IntegratedEngine2T production core, with versioned physics provenance, periodicity/validity classification, conservation evidence and durable outputs; PASS -> ENGINE_PHYSICS_V1_PASS and phase freeze candidate. Synthetic engineering evidence only; no automatic next objective.",
+    "completion_criterion": "Recovery gate: outputs, hard plausibility gates and ENGINEERING_OPERATING_POINT_V1 must be repaired; only PASS -> ENGINE_PHYSICS_V1_PASS if all four recovery points reach accepted periodicity and regime outputs come from accepted periodic cycles. Synthetic engineering evidence only; FULL_RPM_SWEEP_V1 cannot start before this gate.",
     "gate_tasks": [
       "EP-R1",
+      "EP-R1-SCAV",
+      "EP-R1-STATUS",
       "EP-R2",
       "EP-R3"
     ],
@@ -2761,13 +2781,16 @@
       "Recovery scope is limited to output adapter defects, hard plausibility gates, operating-point periodicity contract, preregistered horizon and compatible warm start.",
       "R2, KT100, FULL_RPM_SWEEP_V1 and new physics capabilities remain closed/out of scope."
     ],
-    "gate_tasks_total": 3,
+    "gate_tasks_total": 5,
     "gate_tasks_done": 0,
     "gate_task_states": {
-      "READY": 3
+      "READY": 3,
+      "WAITING": 2
     },
     "remaining": [
       "EP-R1",
+      "EP-R1-SCAV",
+      "EP-R1-STATUS",
       "EP-R2",
       "EP-R3"
     ],
