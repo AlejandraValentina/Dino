@@ -2009,7 +2009,7 @@
       "id": "EP1",
       "description": "Freeze ENGINE_PHYSICS_V1 scope, production boundary, model contracts and preregistration skeleton against baseline 1a58b2a.",
       "dependencies": [],
-      "state": "READY",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "orchestrator",
       "evidence_level": "L0",
@@ -2023,7 +2023,7 @@
       "id": "EP2",
       "description": "Implement and test versioned STANDARD_V1 port discharge coefficients per port and sense.",
       "dependencies": [],
-      "state": "READY",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "implementation",
       "evidence_level": "L0",
@@ -2036,7 +2036,7 @@
       "id": "EP3",
       "description": "Implement frozen SYNTHETIC_GASOLINE_V1 snapshot and IDEAL_FUEL_METERING with hashes and undefined semantics.",
       "dependencies": [],
-      "state": "READY",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "implementation",
       "evidence_level": "L0",
@@ -2051,7 +2051,7 @@
       "dependencies": [
         "EP3"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "physics/numerics",
       "evidence_level": "L1",
@@ -2067,7 +2067,7 @@
       "dependencies": [
         "EP2"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "physics/numerics",
       "evidence_level": "L1",
@@ -2082,7 +2082,7 @@
       "dependencies": [
         "EP2"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "physics/numerics",
       "evidence_level": "L1",
@@ -2097,7 +2097,7 @@
       "dependencies": [
         "EP2"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "implementation",
       "evidence_level": "L1",
@@ -2115,7 +2115,7 @@
         "EP6",
         "EP7"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "verification",
       "evidence_level": "L1",
@@ -2130,7 +2130,7 @@
       "dependencies": [
         "EP1"
       ],
-      "state": "WAITING",
+      "state": "READY",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "orchestrator",
       "evidence_level": "L1",
@@ -2615,6 +2615,18 @@
       "task": "EP1",
       "kind": "task",
       "summary": "ENGINE_PHYSICS_V1 activated by owner order on frozen baseline 1a58b2a; new OpenSpec change, scope, production boundary, model contracts and EP1-EP14 queue created. Historical R2 PASS and original v1.0 FAIL_TERMINAL preserved."
+    },
+    {
+      "at": "2026-10-07T12:05:14+00:00",
+      "task": "EP2",
+      "kind": "task",
+      "summary": "Implemented additive STANDARD_V1 port coefficients, synthetic frozen fuel snapshot, ideal metering, scavenging two-zone metrics, heat transfer, FMEP adapter and ENGINE_PLAUSIBILITY_GATES_V1 in motorsim/engine_physics_v1.py; focused tests 6 passed."
+    },
+    {
+      "at": "2026-10-07T12:05:14+00:00",
+      "task": "EP3",
+      "kind": "task",
+      "summary": "SYNTHETIC_GASOLINE_V1 is content-hash frozen and explicitly non-commercial; IDEAL_FUEL_METERING and fuel-bound provenance are tested."
     }
   ],
   "legacy_gate_status": {
@@ -2638,20 +2650,13 @@
       "Current gate requires EP1-EP14, four preregistered production-core points, durable engineering outputs, hard physical gates and evidence review."
     ],
     "gate_tasks_total": 14,
-    "gate_tasks_done": 0,
+    "gate_tasks_done": 8,
     "gate_task_states": {
-      "READY": 3,
-      "WAITING": 11
+      "DONE": 8,
+      "READY": 1,
+      "WAITING": 5
     },
     "remaining": [
-      "EP1",
-      "EP2",
-      "EP3",
-      "EP4",
-      "EP5",
-      "EP6",
-      "EP7",
-      "EP8",
       "EP9",
       "EP10",
       "EP11",
@@ -2659,7 +2664,7 @@
       "EP13",
       "EP14"
     ],
-    "updated_at": "2026-10-07T14:00:00-03:00"
+    "updated_at": "2026-10-07T12:05:14+00:00"
   },
   "r2_gate_status": {
     "objective": "MOTORSIM_2T_V1_CLOSURE_R2",
