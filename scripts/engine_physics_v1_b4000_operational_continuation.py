@@ -20,9 +20,10 @@ from motorsim.integrated_2t import IntegratedEngine2T, audit_integrated_cycle_pr
 from motorsim.mechanical import MechanicalLossModel  # noqa: E402
 from motorsim.reference_harness.convergence import CONTRACT, CONTRACT_V2, PeriodicDetectorV2  # noqa: E402
 from scripts.engine_physics_v1_campaign import (  # noqa: E402
-    advance_to, binding_hashes, canonical, checkpoint_equivalent, config_for,
+    advance_to, canonical, checkpoint_equivalent, config_for,
     reset_trace, sha,
 )
+from scripts.engine_physics_v1_recovery_campaign import binding_hashes  # noqa: E402
 
 PREREG = ROOT / "results/engine-physics-v1/recovery-preregistration-v2.json"
 HISTORICAL = ROOT / "results/engine-physics-v1/recovery-campaign-data-v2/engine_b_4000"
