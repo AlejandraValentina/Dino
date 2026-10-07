@@ -49,6 +49,7 @@ def config_for(fixture: str, rpm: float) -> tuple[dict, dict, str]:
     wrapper = json.loads((CONFIG_ROOT / f"{fixture.lower()}-mesh-0.json").read_text())
     config = json.loads(json.dumps(wrapper["engine_configuration"]))
     config["reference_rpm"] = float(rpm)
+    config["schema"] = "MOTORSIM_INTEGRATED_ENGINE_2T_CONFIG_V6"
     fuel = synthetic_gasoline_v1()
     combustion = config["fuel_coupled_combustion"]
     combustion["schema"] = "FUEL_COUPLED_COMBUSTION_V2"
