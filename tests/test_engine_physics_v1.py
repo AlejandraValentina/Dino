@@ -134,3 +134,32 @@ def test_v2_adapter_never_fabricates_missing_dependencies():
     assert record["outputs"]["AFR"]["value"] is None
     assert record["hard_gate"]["classification"] == "HARD_PHYSICAL_INVALID"
     assert "REQUIRED_OUTPUT_UNDEFINED:air_fuel_ratio_dependency" in record["hard_gate"]["hard_failures"]
+
+
+def test_v2_hard_gates_reject_species_contract_fuel_overburn_and_energy_drift():
+    import copy
+    import gzip
+    import json
+    from motorsim.engine_physics_v1 import evaluate_integrated_cycle_v2
+
+    source = json.load(gzip.open(
+        "results/engine-physics-v1/campaign-evidence-r3/engine_a_3000/cycle-012.json.gz"))
+    bad_species = copy.deepcopy(source)
+    bad_species["port_closure_snapshots"]["snapshots"]["exhaust"]["species_order"] = [
+        "fuel", "fresh_air", "residual", "burned"]
+    record = evaluate_integrated_cycle_v2(
+        bad_species, rpm=3000.0, fuel=synthetic_gasoline_v1(), periodicity_status="PERIOD_1")
+    assert record["hard_gate"]["classification"] == "HARD_PHYSICAL_INVALID"
+    assert "REQUIRED_OUTPUT_UNDEFINED:partition_conservation" in record["hard_gate"]["hard_failures"]
+
+    bad_fuel = copy.deepcopy(source)
+    bad_fuel["observables"]["fuel_coupled_combustion"]["fuel_burned_kg"] = 1.0
+    record = evaluate_integrated_cycle_v2(
+        bad_fuel, rpm=3000.0, fuel=synthetic_gasoline_v1(), periodicity_status="PERIOD_1")
+    assert "RELATIONSHIP_INVALID:fuel_availability" in record["hard_gate"]["hard_failures"]
+
+    bad_energy = copy.deepcopy(source)
+    bad_energy["cycle_ledgers"]["fuel_combustion_heat_added_J"] += 1.0
+    record = evaluate_integrated_cycle_v2(
+        bad_energy, rpm=3000.0, fuel=synthetic_gasoline_v1(), periodicity_status="PERIOD_1")
+    assert "RELATIONSHIP_INVALID:fuel_energy_identity" in record["hard_gate"]["hard_failures"]

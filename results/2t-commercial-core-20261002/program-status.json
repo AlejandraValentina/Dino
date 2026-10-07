@@ -2256,11 +2256,11 @@
       "id": "EP-R1",
       "description": "Repair ENGINE_PHYSICS_V2 output adapter: physical fresh delivery key, AFR/phi/lambda undefined semantics, primary fuel-burned ledger, trapped/scavenging snapshots, complete engineering output schema and transient status.",
       "dependencies": [],
-        "state": "DONE",
-        "objective": "ENGINE_PHYSICS_V1",
-        "owner_role": "implementation",
-        "evidence_level": "L1",
-        "resolution": "V2 adapter implemented and focused tests pass; offline recovery evidence is versioned under results/engine-physics-v1/recovery-offline-v2/.",
+      "state": "DONE",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "implementation",
+      "evidence_level": "L1",
+      "resolution": "V2 adapter implemented and focused tests pass; offline recovery evidence is versioned under results/engine-physics-v1/recovery-offline-v2/.",
       "write_scope": [
         "motorsim/engine_physics_v1.py",
         "scripts/refresh_engine_physics_v1_outputs.py",
@@ -2275,10 +2275,11 @@
         "EP-R1-SCAV",
         "EP-R1-STATUS"
       ],
-      "state": "WAITING",
+      "state": "DONE",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "verification",
       "evidence_level": "L1",
+      "resolution": "ENGINE_PLAUSIBILITY_GATES_V2 is implemented through explicit dependency relationships for partition, chemistry/energy identity, primary fuel ledger, AFR dependency and fuel availability; focused tests pass.",
       "write_scope": [
         "motorsim/engine_physics_v1.py",
         "tests/test_engine_physics_v1.py"
@@ -2288,11 +2289,11 @@
       "id": "EP-R1-SCAV",
       "description": "Repair scavenging snapshot semantics, species ordering, DR/TE/SE/CE definitions and partition identity from port_closure_snapshots.",
       "dependencies": [],
-        "state": "DONE",
-        "objective": "ENGINE_PHYSICS_V1",
-        "owner_role": "physics/numerics",
-        "evidence_level": "L1",
-        "resolution": "Exact port-closure snapshots and four-species ordering are enforced; partition conservation is a hard gate.",
+      "state": "DONE",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "physics/numerics",
+      "evidence_level": "L1",
+      "resolution": "Exact port-closure snapshots and four-species ordering are enforced; partition conservation is a hard gate.",
       "write_scope": [
         "motorsim/engine_physics_v1.py",
         "tests/test_engine_physics_v1.py"
@@ -2302,11 +2303,11 @@
       "id": "EP-R1-STATUS",
       "description": "Define transient versus periodic engineering output status and required dependency semantics without changing solver physics.",
       "dependencies": [],
-        "state": "DONE",
-        "objective": "ENGINE_PHYSICS_V1",
-        "owner_role": "architecture",
-        "evidence_level": "L0",
-        "resolution": "Periodic outputs are usable only for PERIOD_1/PERIOD_2; all other statuses remain transient diagnostics.",
+      "state": "DONE",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "architecture",
+      "evidence_level": "L0",
+      "resolution": "Periodic outputs are usable only for PERIOD_1/PERIOD_2; all other statuses remain transient diagnostics.",
       "write_scope": [
         "motorsim/engine_physics_v1.py",
         "openspec/changes/engine-physics-v1",
@@ -2319,7 +2320,7 @@
       "dependencies": [
         "EP-R2"
       ],
-      "state": "WAITING",
+      "state": "READY",
       "objective": "ENGINE_PHYSICS_V1",
       "owner_role": "orchestrator",
       "evidence_level": "L2",
@@ -2327,6 +2328,37 @@
         "openspec/changes/engine-physics-v1",
         "results/engine-physics-v1/recovery",
         "scripts/engine_physics_v1_campaign.py"
+      ]
+    },
+    {
+      "id": "EP-R2-TEST",
+      "description": "Add adversarial V2 gate tests for missing dependencies, primary fuel ledger, energy identity, species ordering and partition invalidity.",
+      "dependencies": [
+        "EP-R1",
+        "EP-R1-SCAV",
+        "EP-R1-STATUS"
+      ],
+      "state": "DONE",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "verification",
+      "evidence_level": "L1",
+      "resolution": "Adversarial tests cover missing fresh delivery, invalid species order, overburn and heat identity drift.",
+      "write_scope": [
+        "tests/test_engine_physics_v1.py"
+      ]
+    },
+    {
+      "id": "EP-R3-PREREG",
+      "description": "Prepare the versioned ENGINEERING_OPERATING_POINT_V1 recovery preregistration and warm-start decision without launching a campaign.",
+      "dependencies": [],
+      "state": "DONE",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "orchestrator",
+      "evidence_level": "L2",
+      "resolution": "Recovery preregistration v2 records ENGINEERING_OPERATING_POINT_V1, fixed physical horizon rule, detector identity and no-compatible-warm-start decision.",
+      "write_scope": [
+        "results/engine-physics-v1/recovery-preregistration-v2.json",
+        "openspec/changes/engine-physics-v1"
       ]
     }
   ],
@@ -2778,6 +2810,18 @@
       "task": "EP-R1",
       "kind": "task",
       "summary": "V2 output adapter now uses primary fresh delivery and fuel-burned ledgers, exact port-closure snapshots, explicit undefined dependencies, AFR/phi/lambda outputs, partition/energy/availability hard gates, and transient-only regime semantics; focused tests pass."
+    },
+    {
+      "at": "2026-10-07T13:34:44+00:00",
+      "task": "EP-R3-PREREG",
+      "kind": "task",
+      "summary": "Recovery preregistration v2 prepared before any campaign: ENGINEERING_OPERATING_POINT_V1, fixed detector/streak, horizon ceil(4*residence)+3 = A111/B47, no compatible periodic warm start, terminal outcomes and no-R3 policy."
+    },
+    {
+      "at": "2026-10-07T13:34:44+00:00",
+      "task": "EP-R2-TEST",
+      "kind": "task",
+      "summary": "Adversarial V2 tests added for missing dependencies, species ordering, fuel availability and heat identity; focused suite passes."
     }
   ],
   "legacy_gate_status": {
@@ -2802,19 +2846,15 @@
       "R2, KT100, FULL_RPM_SWEEP_V1 and new physics capabilities remain closed/out of scope."
     ],
     "gate_tasks_total": 5,
-    "gate_tasks_done": 0,
+    "gate_tasks_done": 4,
     "gate_task_states": {
-      "READY": 3,
-      "WAITING": 2
+      "DONE": 4,
+      "READY": 1
     },
     "remaining": [
-      "EP-R1",
-      "EP-R1-SCAV",
-      "EP-R1-STATUS",
-      "EP-R2",
       "EP-R3"
     ],
-    "updated_at": "2026-10-07T16:00:00-03:00"
+    "updated_at": "2026-10-07T13:34:57+00:00"
   },
   "r2_gate_status": {
     "objective": "MOTORSIM_2T_V1_CLOSURE_R2",

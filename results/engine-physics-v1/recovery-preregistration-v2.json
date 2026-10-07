@@ -1,0 +1,67 @@
+{
+  "schema": "ENGINEERING_OPERATING_POINT_V1_RECOVERY_PREREGISTRATION",
+  "version": "2.0.0",
+  "objective": "ENGINE_PHYSICS_V1",
+  "status": "PREREGISTERED_BEFORE_RECOVERY_CAMPAIGN",
+  "scientific_scope": "Recovery of the output/gate/operating-point contract only; no solver, physics, fixture, mesh, fuel, combustion, thermal, loss, RPM, detector threshold or convergence-streak change.",
+  "historical_gate": {
+    "objective": "ENGINE_PHYSICS_V1",
+    "historical_horizon_cycles": 12,
+    "historical_result": "NO_CONVERGENCE_WITHIN_HORIZON",
+    "use": "preserved evidence only; not a periodic operating-point result"
+  },
+  "detector": {
+    "implementation": "motorsim.reference_harness.convergence.PeriodicDetectorV2",
+    "contract": "REFERENCE_PERIODIC_CONVERGENCE_V2",
+    "thresholds_sha256": "43419bccbbcefaf04200448148e74d576d6fa1ecb0d9adf9c26a614e67828eff",
+    "required_convergence_streak": 3,
+    "early_stop": true,
+    "status_source": "real detector evaluation only; no manual periodicity status"
+  },
+  "horizon_rule": {
+    "formula": "ceil(4 * exhaust_residence_cycles) + required_convergence_streak",
+    "factor": 4,
+    "factor_basis": "fixed before recovery execution as approximately four time constants of a simple exponential renewal mode",
+    "rounding": "mathematical ceiling applied to residence cycles, then integer convergence streak added",
+    "physical_inputs": {
+      "FIXTURE_A_PRIME": {
+        "exhaust_residence_cycles": 27,
+        "horizon_cycles": 111,
+        "basis": "pre-existing exhaust residence estimate from R1 diagnostic; not selected from a recovery PASS"
+      },
+      "FIXTURE_B_PRIME": {
+        "exhaust_residence_cycles": 11,
+        "horizon_cycles": 47,
+        "basis": "pre-existing exhaust residence estimate from R1 diagnostic; not selected from a recovery PASS"
+      }
+    },
+    "no_post_observation_change": true,
+    "budget_policy": "gate-critical extension permitted up to 120 minutes with checkpoint/restart; do not reduce horizon, CFL, precision or thresholds"
+  },
+  "warm_start": {
+    "policy": "compatible persisted state may be used only when fixture, RPM, solver/config identity and state schema hashes match exactly",
+    "investigation_result": "WARM_START_NOT_USED_NO_COMPATIBLE_PERSISTED_PERIODIC_STATE",
+    "initial_state": "frozen preregistered initial state",
+    "no_future_state_reuse": true
+  },
+  "points": [
+    {"id": "ENGINE_A_3000", "fixture": "FIXTURE_A_PRIME", "rpm": 3000.0, "horizon_cycles": 111, "config_sha256": "2c2de32a2fe37295799b82127c81760f9491c1a75783a64af4361176db1fdff2"},
+    {"id": "ENGINE_A_4000", "fixture": "FIXTURE_A_PRIME", "rpm": 4000.0, "horizon_cycles": 111, "config_sha256": "a8b3e47eb864a9b54150a2e8c8e96190e7bbe346ed5c405ee66254577502e500"},
+    {"id": "ENGINE_B_3000", "fixture": "FIXTURE_B_PRIME", "rpm": 3000.0, "horizon_cycles": 47, "config_sha256": "f2274e63ea65893ef6fceb43def95af61ebd9741374dbd67edf613d85c52e13c"},
+    {"id": "ENGINE_B_4000", "fixture": "FIXTURE_B_PRIME", "rpm": 4000.0, "horizon_cycles": 47, "config_sha256": "f2e7eb716b8a5fd5eae66eb9ae2213a07184886eef145f69c5640fa43ab5b47b"}
+  ],
+  "binding_hashes_inherited_without_change": {
+    "solver": "b4e8021eca2e32a368f6e1f977f685720a6436862fcad9b6a34798e5cf77de3d",
+    "detector": "22df512d6e48b95b506401005b466d37038eebd888d684a287e70c1d76cd3193",
+    "auditor": "085d6d17b6a1d2c062d37e4cdbc3ddda3da59aaee1d13178a9cb547c0bfbce22",
+    "producer": "67fe013b9bd6d5ae82edfc2e57c3caa96faae8be3dc7b5f3ddc4b8888249942d",
+    "fuel": "b8c385ce4d6ae0cf6078969f22698a4cb4881974d95097085b609c487a691792"
+  },
+  "acceptance": {
+    "periodic_regime_output_only": ["PERIOD_1", "PERIOD_2"],
+    "nonperiodic_output": "TRANSIENT_DIAGNOSTIC",
+    "accepted_terminal_outcomes": ["PERIOD_1", "PERIOD_2", "NO_CONVERGENCE_WITHIN_HORIZON", "NUMERICAL_FAILURE", "PHYSICAL_INVALID"],
+    "no_r3": true,
+    "no_pass_seeking_rerun": true
+  }
+}
