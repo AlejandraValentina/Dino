@@ -6,6 +6,16 @@
   "status_capture_head": "f2c6926",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
   "ready_claim": false,
+  "development_freeze_candidate": {
+    "state": "MOTORSIM_2T_V1_DEVELOPMENT_FREEZE_CANDIDATE",
+    "linked_gate": "MOTORSIM_2T_V1_CLOSURE_R2",
+    "meaning": "Administrative candidate only: core general-purpose synthetic 2T v1 development is complete for this phase; no new capabilities are added and later work requires a separately approved objective.",
+    "not_implied": [
+      "experimental validation",
+      "Commercial Core readiness",
+      "P9 claim"
+    ]
+  },
   "push_performed": false,
   "kt100_policy": "R6_ORIGINAL_NO_PRIMARY; RECOVERY_R1_CONSUMED_CYCLE24_FLOAT64_ADMISSIBILITY_FAILURE; KT100_UNVERIFIED; NO_R2_AUTHORIZATION",
   "phases": {
@@ -1913,13 +1923,13 @@
         "R2-B2",
         "R2-B3"
       ],
-      "state": "REVIEW",
+      "state": "DONE",
       "commits": [],
       "evidence": [
-        "The HEAD 53f66c6 artifact is an independent review of the pre-repair state, not of this fix. This task remains open for a new external review.",
-        "Current fix classification is SELF_REVIEW; R2 gate must remain REVIEW and no freeze candidate is declared."
+        "External final review docs/gasdynamic/v1_closure_r2_fix_independent_review_497e67f.md authorizes REVIEW -> PASS with verdict B1_B3_FIX_REVIEW_PASS.",
+        "Reviewed commit 17550bdeac3d4b3e64e5965b3d9a7a7331ce55f0; SHA-256 101a243685f6e332016e12dcf044e02346fbaef63a299b854a742adc8d6df78f; range 0c1008b..497e67f."
       ],
-      "next_action": "External reviewer must assess B1-B3 and the exact provenance wiring",
+      "next_action": "Closed by external review; do not start a new objective automatically",
       "blocker": null
     },
     {
@@ -2197,7 +2207,7 @@
     "id": "MOTORSIM_2T_V1_CLOSURE_R2",
     "change": "openspec/changes/two-stroke-v1-closure-r2",
     "spec": "openspec/changes/two-stroke-v1-closure-r2/specs/two-stroke-v1-closure-r2/spec.md",
-    "completion_criterion": "B1-B3 contractual/evidence repair is complete and an external review of the repair is recorded; until then the superseding R2 gate remains REVIEW. The historical MOTORSIM_2T_V1_CLOSURE_V1_0 remains FAIL_TERMINAL.",
+    "completion_criterion": "B1-B3 repair externally reviewed and superseding R2 gate terminal PASS; claim GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED is synthetic, CONDITIONAL_ON_P4, experimental validation not performed, P9 not claimed, and linked only to R2. The historical MOTORSIM_2T_V1_CLOSURE_V1_0 remains FAIL_TERMINAL.",
     "gate_tasks": [
       "R2-B1",
       "R2-B2",
@@ -2217,9 +2227,9 @@
     },
     {
       "id": "MOTORSIM_2T_V1_CLOSURE_R2",
-      "state": "ACTIVE",
+      "state": "PASS",
       "owner_approved": true,
-      "summary": "Superseding contractual/evidence gate using existing owner-authorized R2 evidence; current state REVIEW pending a new external review of B1-B3.",
+      "summary": "Superseding contractual/evidence gate PASS after external B1-B3 fix review; claim is synthetic, CONDITIONAL_ON_P4, experimental validation not performed, P9 not claimed, and linked only to R2.",
       "change": "openspec/changes/two-stroke-v1-closure-r2"
     },
     {
@@ -2370,6 +2380,12 @@
       "task": "R2-B3",
       "kind": "task",
       "summary": "B3 complete: external review artifact for HEAD 53f66c6 preserved unchanged with SHA 4185c01cbfd3df4cbce3ac22d78a2edcca0d42ee29836308e74295d8131cddc9; this repair remains SELF_REVIEW pending a new external review."
+    },
+    {
+      "at": "2026-10-07T11:42:14+00:00",
+      "task": "R2-EXTERNAL-REVIEW",
+      "kind": "task",
+      "summary": "External final review B1_B3_FIX_REVIEW_PASS verified at commit 17550bde with SHA 101a2436 and range 0c1008b..497e67f; R2 authorized REVIEW->PASS, v1.0 remains FAIL_TERMINAL, freeze candidate recorded."
     }
   ],
   "legacy_gate_status": {
@@ -2385,24 +2401,23 @@
   },
   "gate_status": {
     "objective": "MOTORSIM_2T_V1_CLOSURE_R2",
-    "state": "REVIEW",
-    "classification": "R2_CONTRACTUAL_EVIDENCE_REPAIR_SELF_REVIEW",
+    "state": "PASS",
+    "classification": "GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED",
     "evidence": [
       "Computational R2 evidence is retained: A-prime PERIOD_1 at cycle 73/111 and B-prime PERIOD_1 at cycle 38/47 from real PeriodicDetectorV2.",
       "B1 complete: new superseding OpenSpec change documents the post-observation R2 contract while v1.0 remains FAIL_TERMINAL.",
       "B2 complete: durable complete regression artifact results/2t-v1-closure-20261006/p4-p8-regression-b2-complete/ records 304 passed and 4 warnings with exact command, HEAD, timestamps and log.",
-      "B3 complete: external review docs/gasdynamic/v1_closure_r2_independent_review_53f66c6.md is preserved unchanged with SHA-256 4185c01cbfd3df4cbce3ac22d78a2edcca0d42ee29836308e74295d8131cddc9; it covers HEAD 53f66c6, not this repair.",
-      "N1-N7 are recorded as POST_2T_V1_BACKLOG/provenance debt; this repair is SELF_REVIEW and awaits a new external review."
+      "B3 complete: external review docs/gasdynamic/v1_closure_r2_independent_review_53f66c6.md is preserved unchanged with SHA-256 4185c01cbfd3df4cbce3ac22d78a2edcca0d42ee29836308e74295d8131cddc9; final fix review is docs/gasdynamic/v1_closure_r2_fix_independent_review_497e67f.md with SHA-256 101a243685f6e332016e12dcf044e02346fbaef63a299b854a742adc8d6df78f.",
+      "External final verdict B1_B3_FIX_REVIEW_PASS authorizes REVIEW -> PASS for R2 only; reviewed range 0c1008b..497e67f and commit 17550bdeac3d4b3e64e5965b3d9a7a7331ce55f0.",
+      "Claim qualifiers: SYNTHETIC; CONDITIONAL_ON_P4; EXPERIMENTAL_VALIDATION_NOT_PERFORMED; P9_NOT_CLAIMED; SUPERSEDING_GATE_R2.",
+      "N1-N7 remain POST_2T_V1_BACKLOG/provenance debt; no physical or campaign changes were made."
     ],
     "gate_tasks_total": 4,
-    "gate_tasks_done": 3,
+    "gate_tasks_done": 4,
     "gate_task_states": {
-      "DONE": 3,
-      "REVIEW": 1
+      "DONE": 4
     },
-    "remaining": [
-      "R2-EXTERNAL-REVIEW"
-    ],
-    "updated_at": "2026-10-07T11:20:00+00:00"
+    "remaining": [],
+    "updated_at": "2026-10-07T12:00:00+00:00"
   }
 }

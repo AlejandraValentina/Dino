@@ -25,9 +25,10 @@ Reglas detalladas: [docs/gasdynamic/autonomous_engineering_mode.md](docs/gasdyna
 CURRENT_OBJECTIVE: MOTORSIM_2T_V1_CLOSURE_R2
 change/spec:       openspec/changes/two-stroke-v1-closure-r2/
                    (specs/two-stroke-v1-closure-r2/spec.md es la autoridad de requisitos)
-completion:        superseding gate contractualmente en REVIEW hasta una nueva
-                   revisión externa; el gate histórico MOTORSIM_2T_V1_CLOSURE_V1_0
-                   permanece FAIL_TERMINAL y nunca se reescribe como PASS.
+completion:        superseding gate terminal PASS sólo ligado a R2, con claim
+                   sintético CONDITIONAL_ON_P4, sin validación experimental,
+                   P9 no claimado, y freeze candidate administrativo; el gate
+                   histórico MOTORSIM_2T_V1_CLOSURE_V1_0 permanece FAIL_TERMINAL.
 durable queue:     results/2t-commercial-core-20261002/program-status.json
                    → current_objective, queue, gate_status, progress_log
 ```
