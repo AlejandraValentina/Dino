@@ -1988,10 +1988,9 @@
       "dependencies": [],
       "state": "DONE",
       "resolution": "SUPERSEDED_BY_LATER_CAPABILITY",
-      "evidence": ["Superseded by R2 closure regression and the ENGINE_PHYSICS_V1 focused/P4-P8 regression; no V2 closure campaign work was started from this stale task."],
+      "evidence": [],
       "blocker": null,
       "commits": [],
-      "evidence": [],
       "next_action": "Run with run_logged.py, log counts in progress_log, open new tasks for any failure.",
       "objective": "MOTORSIM_2T_V1_CLOSURE",
       "owner_role": "verification",
@@ -2007,10 +2006,9 @@
       "dependencies": [],
       "state": "DONE",
       "resolution": "SUPERSEDED_BY_LATER_CAPABILITY",
-      "evidence": ["Superseded by the completed R2 preregistration and external review; no new closure campaign is authorized or needed."],
+      "evidence": [],
       "blocker": null,
       "commits": [],
-      "evidence": [],
       "next_action": "Write the draft from the closure spec/design; leave mesh-dependent values as explicit placeholders.",
       "objective": "MOTORSIM_2T_V1_CLOSURE",
       "owner_role": "evidence/release reviewer",
@@ -2253,6 +2251,51 @@
         "program-status.json",
         "openspec/changes/engine-physics-v1/tasks.md"
       ]
+    },
+    {
+      "id": "EP-R1",
+      "description": "Repair ENGINE_PHYSICS_V2 output adapter: physical fresh delivery key, AFR/phi/lambda undefined semantics, primary fuel-burned ledger, trapped/scavenging snapshots, complete engineering output schema and transient status.",
+      "dependencies": [],
+      "state": "READY",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "implementation",
+      "evidence_level": "L1",
+      "write_scope": [
+        "motorsim/engine_physics_v1.py",
+        "scripts/refresh_engine_physics_v1_outputs.py",
+        "tests/test_engine_physics_v1.py"
+      ]
+    },
+    {
+      "id": "EP-R2",
+      "description": "Implement ENGINE_PLAUSIBILITY_GATES_V2 hard physical checks for chemistry, mass/species, energy and scavenging partition conservation.",
+      "dependencies": [
+        "EP-R1"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "verification",
+      "evidence_level": "L1",
+      "write_scope": [
+        "motorsim/engine_physics_v1.py",
+        "tests/test_engine_physics_v1.py"
+      ]
+    },
+    {
+      "id": "EP-R3",
+      "description": "Create and preregister ENGINEERING_OPERATING_POINT_V1 with periodic-only regime outputs, physically justified horizon/cap and compatible warm-start provenance; then run the one four-point recovery campaign.",
+      "dependencies": [
+        "EP-R2"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "orchestrator",
+      "evidence_level": "L2",
+      "write_scope": [
+        "openspec/changes/engine-physics-v1",
+        "results/engine-physics-v1/recovery",
+        "scripts/engine_physics_v1_campaign.py"
+      ]
     }
   ],
   "audit_remediation_mode": false,
@@ -2458,20 +2501,9 @@
     "spec": "openspec/changes/engine-physics-v1/specs/engine-physics-v1/spec.md",
     "completion_criterion": "Four preregistered engineering operating points through the single IntegratedEngine2T production core, with versioned physics provenance, periodicity/validity classification, conservation evidence and durable outputs; PASS -> ENGINE_PHYSICS_V1_PASS and phase freeze candidate. Synthetic engineering evidence only; no automatic next objective.",
     "gate_tasks": [
-      "EP1",
-      "EP2",
-      "EP3",
-      "EP4",
-      "EP5",
-      "EP6",
-      "EP7",
-      "EP8",
-      "EP9",
-      "EP10",
-      "EP11",
-      "EP12",
-      "EP13",
-      "EP14"
+      "EP-R1",
+      "EP-R2",
+      "EP-R3"
     ],
     "durable_queue": "results/2t-commercial-core-20261002/program-status.json#queue",
     "set_by": "owner order 2026-10-07; baseline 1a58b2a"
@@ -2496,7 +2528,7 @@
       "state": "ACTIVE",
       "owner_approved": true,
       "change": "openspec/changes/engine-physics-v1",
-      "summary": "Authorized post-R2 engineering phase: one IntegratedEngine2T production core, versioned STANDARD_V1/SYNTHETIC_GASOLINE_V1 physics, four operating points, hard physical gates and durable outputs; no KT100 or experimental claim."
+      "summary": "Recovery phase after external review of 59f2926: repair engineering outputs, hard plausibility gates and periodic operating-point workflow; no KT100, FULL_RPM_SWEEP_V1 or experimental claim."
     },
     {
       "id": "FULL_RPM_SWEEP_V1",
@@ -2700,6 +2732,12 @@
       "task": "EP14",
       "kind": "task",
       "summary": "ENGINE_PHYSICS_V1 gate PASS: four production-core points complete, hard gates PASS, periodicity explicitly NO_CONVERGENCE_WITHIN_HORIZON, synthetic engineering only; freeze candidate recorded and no next objective opened."
+    },
+    {
+      "at": "2026-10-07T13:24:07+00:00",
+      "task": "EP-EXTERNAL-REVIEW-59F",
+      "kind": "task",
+      "summary": "External independent review of HEAD 59f2926 overrides prior phase PASS: ENGINE_PHYSICS_V1_FAIL; FULL_RPM_SWEEP_V1_CAN_START=NO. Four historical points remain NO_CONVERGENCE_WITHIN_HORIZON @ 12 cycles. Recovery scope limited to outputs, hard gates and periodic operating-point workflow."
     }
   ],
   "legacy_gate_status": {
@@ -2715,23 +2753,25 @@
   },
   "gate_status": {
     "objective": "ENGINE_PHYSICS_V1",
-    "state": "PASS",
-    "classification": "ENGINE_PHYSICS_V1_PASS",
+    "state": "REVIEW",
+    "classification": "ENGINE_PHYSICS_V1_FAIL_RECOVERABLE",
     "evidence": [
-      "Four preregistered points completed through IntegratedEngine2T: A/B configurations at 3000/4000 RPM; 12 audited cycles per point; checkpoint/restart exact physical-state verification passed.",
-      "All four ENGINE_PLAUSIBILITY_GATES_V1 hard classifications are PASS. A-point nonpositive synthetic work is retained as explicit PLAUSIBILITY_WARNING.",
-      "Real PeriodicDetectorV2 ran for every point and returned NO_CONVERGENCE_WITHIN_HORIZON; this phase PASS does not claim periodic convergence and does not alter historical R1/R2 closure gates.",
-      "Durable campaign, regression, review and SHA manifest: results/engine-physics-v1/audit/manifest.json.",
-      "Focused integrated regression: 87 passed. P4-P8 regression: 304 passed, 4 warnings. OpenSpec strict and contract checks pass.",
-      "Synthetic engineering only; experimental validation, commercial claim, KT100 and P9 remain out of scope."
+      "External independent review of HEAD 59f2926 found ENGINE_PHYSICS_V1_FAIL and FULL_RPM_SWEEP_V1_CAN_START=NO.",
+      "Historical four-point evidence is preserved unchanged: all points are NO_CONVERGENCE_WITHIN_HORIZON @ 12 cycles and are not converged engineering results.",
+      "Recovery scope is limited to output adapter defects, hard plausibility gates, operating-point periodicity contract, preregistered horizon and compatible warm start.",
+      "R2, KT100, FULL_RPM_SWEEP_V1 and new physics capabilities remain closed/out of scope."
     ],
-    "gate_tasks_total": 14,
-    "gate_tasks_done": 14,
+    "gate_tasks_total": 3,
+    "gate_tasks_done": 0,
     "gate_task_states": {
-      "DONE": 14
+      "READY": 3
     },
-    "remaining": [],
-    "updated_at": "2026-10-07T15:00:00-03:00"
+    "remaining": [
+      "EP-R1",
+      "EP-R2",
+      "EP-R3"
+    ],
+    "updated_at": "2026-10-07T16:00:00-03:00"
   },
   "r2_gate_status": {
     "objective": "MOTORSIM_2T_V1_CLOSURE_R2",
