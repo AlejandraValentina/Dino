@@ -2004,6 +2004,218 @@
         "docs/gasdynamic/v1_closure_campaign_preregistration_draft.md"
       ],
       "classification": "BLOCKS_2T_V1"
+    },
+    {
+      "id": "EP1",
+      "description": "Freeze ENGINE_PHYSICS_V1 scope, production boundary, model contracts and preregistration skeleton against baseline 1a58b2a.",
+      "dependencies": [],
+      "state": "READY",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "orchestrator",
+      "evidence_level": "L0",
+      "write_scope": [
+        "openspec/changes/engine-physics-v1",
+        "program-status.json",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "id": "EP2",
+      "description": "Implement and test versioned STANDARD_V1 port discharge coefficients per port and sense.",
+      "dependencies": [],
+      "state": "READY",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "implementation",
+      "evidence_level": "L0",
+      "write_scope": [
+        "motorsim/engine_physics_v1.py",
+        "tests/test_engine_physics_v1.py"
+      ]
+    },
+    {
+      "id": "EP3",
+      "description": "Implement frozen SYNTHETIC_GASOLINE_V1 snapshot and IDEAL_FUEL_METERING with hashes and undefined semantics.",
+      "dependencies": [],
+      "state": "READY",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "implementation",
+      "evidence_level": "L0",
+      "write_scope": [
+        "motorsim/engine_physics_v1.py",
+        "tests/test_engine_physics_v1.py"
+      ]
+    },
+    {
+      "id": "EP4",
+      "description": "Bind fuel-coupled oxygen-limited combustion and energy/species ledger outputs to the new production adapter.",
+      "dependencies": [
+        "EP3"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "physics/numerics",
+      "evidence_level": "L1",
+      "write_scope": [
+        "motorsim/engine_physics_v1.py",
+        "motorsim/integrated_2t.py",
+        "tests/test_engine_physics_v1.py"
+      ]
+    },
+    {
+      "id": "EP5",
+      "description": "Implement bounded SCAVENGING_MODEL_V1 two-zone/profile metrics with conservation and undefined semantics.",
+      "dependencies": [
+        "EP2"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "physics/numerics",
+      "evidence_level": "L1",
+      "write_scope": [
+        "motorsim/engine_physics_v1.py",
+        "tests/test_engine_physics_v1.py"
+      ]
+    },
+    {
+      "id": "EP6",
+      "description": "Implement cylinder and duct heat transfer with explicit wall-temperature provenance.",
+      "dependencies": [
+        "EP2"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "physics/numerics",
+      "evidence_level": "L1",
+      "write_scope": [
+        "motorsim/engine_physics_v1.py",
+        "tests/test_engine_physics_v1.py"
+      ]
+    },
+    {
+      "id": "EP7",
+      "description": "Implement FMEP and mechanical performance adapter without crankcase double counting.",
+      "dependencies": [
+        "EP2"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "implementation",
+      "evidence_level": "L1",
+      "write_scope": [
+        "motorsim/engine_physics_v1.py",
+        "tests/test_engine_physics_v1.py"
+      ]
+    },
+    {
+      "id": "EP8",
+      "description": "Implement ENGINE_PLAUSIBILITY_GATES_V1 hard physical invalid and warning classifications.",
+      "dependencies": [
+        "EP4",
+        "EP5",
+        "EP6",
+        "EP7"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "verification",
+      "evidence_level": "L1",
+      "write_scope": [
+        "motorsim/engine_physics_v1.py",
+        "tests/test_engine_physics_v1.py"
+      ]
+    },
+    {
+      "id": "EP9",
+      "description": "Freeze two materially distinct phase fixtures and two RPM points per fixture before execution.",
+      "dependencies": [
+        "EP1"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "orchestrator",
+      "evidence_level": "L1",
+      "write_scope": [
+        "results/engine-physics-v1/preregistration"
+      ]
+    },
+    {
+      "id": "EP10",
+      "description": "Integrate the versioned models and durable engineering-output producer on IntegratedEngine2T.",
+      "dependencies": [
+        "EP4",
+        "EP5",
+        "EP6",
+        "EP7",
+        "EP8",
+        "EP9"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "implementation",
+      "evidence_level": "L1",
+      "write_scope": [
+        "motorsim/integrated_2t.py",
+        "scripts/engine_physics_v1_campaign.py",
+        "tests/test_engine_physics_v1.py"
+      ]
+    },
+    {
+      "id": "EP11",
+      "description": "Run focused L0/L1 tests and contract checks for the new capability.",
+      "dependencies": [
+        "EP10"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "verification",
+      "evidence_level": "L1",
+      "write_scope": [
+        "results/engine-physics-v1/regression"
+      ]
+    },
+    {
+      "id": "EP12",
+      "description": "Execute the one preregistered four-point engineering phase run through the production core.",
+      "dependencies": [
+        "EP11"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "verification",
+      "evidence_level": "L2",
+      "write_scope": [
+        "results/engine-physics-v1/run"
+      ]
+    },
+    {
+      "id": "EP13",
+      "description": "Produce phase audit/review artifact, evidence manifest and SHA-bound receipts.",
+      "dependencies": [
+        "EP12"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "evidence/release reviewer",
+      "evidence_level": "L2",
+      "write_scope": [
+        "results/engine-physics-v1/audit",
+        "docs/gasdynamic/engine_physics_v1_review.md"
+      ]
+    },
+    {
+      "id": "EP14",
+      "description": "Evaluate ENGINE_PHYSICS_V1 terminal phase gate and record PASS or FAIL_TERMINAL without opening a next objective.",
+      "dependencies": [
+        "EP13"
+      ],
+      "state": "WAITING",
+      "objective": "ENGINE_PHYSICS_V1",
+      "owner_role": "orchestrator",
+      "evidence_level": "L3",
+      "write_scope": [
+        "program-status.json",
+        "openspec/changes/engine-physics-v1/tasks.md"
+      ]
     }
   ],
   "audit_remediation_mode": false,
@@ -2204,18 +2416,28 @@
     "MOTORSIM_2T_COMMERCIAL_CORE_STATUS_V1"
   ],
   "current_objective": {
-    "id": "MOTORSIM_2T_V1_CLOSURE_R2",
-    "change": "openspec/changes/two-stroke-v1-closure-r2",
-    "spec": "openspec/changes/two-stroke-v1-closure-r2/specs/two-stroke-v1-closure-r2/spec.md",
-    "completion_criterion": "B1-B3 repair externally reviewed and superseding R2 gate terminal PASS; claim GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED is synthetic, CONDITIONAL_ON_P4, experimental validation not performed, P9 not claimed, and linked only to R2. The historical MOTORSIM_2T_V1_CLOSURE_V1_0 remains FAIL_TERMINAL.",
+    "id": "ENGINE_PHYSICS_V1",
+    "change": "openspec/changes/engine-physics-v1",
+    "spec": "openspec/changes/engine-physics-v1/specs/engine-physics-v1/spec.md",
+    "completion_criterion": "Four preregistered engineering operating points through the single IntegratedEngine2T production core, with versioned physics provenance, periodicity/validity classification, conservation evidence and durable outputs; PASS -> ENGINE_PHYSICS_V1_PASS and phase freeze candidate. Synthetic engineering evidence only; no automatic next objective.",
     "gate_tasks": [
-      "R2-B1",
-      "R2-B2",
-      "R2-B3",
-      "R2-EXTERNAL-REVIEW"
+      "EP1",
+      "EP2",
+      "EP3",
+      "EP4",
+      "EP5",
+      "EP6",
+      "EP7",
+      "EP8",
+      "EP9",
+      "EP10",
+      "EP11",
+      "EP12",
+      "EP13",
+      "EP14"
     ],
     "durable_queue": "results/2t-commercial-core-20261002/program-status.json#queue",
-    "set_by": "owner order 2026-10-07"
+    "set_by": "owner order 2026-10-07; baseline 1a58b2a"
   },
   "objectives": [
     {
@@ -2234,9 +2456,10 @@
     },
     {
       "id": "ENGINE_PHYSICS_V1",
-      "state": "PROPOSED",
-      "owner_approved": false,
-      "summary": "Single production core plus STANDARD_V1 engine physics (fuel-bound Wiebe, two-zone scavenging profile, port Cd, cylinder/duct heat transfer, FMEP) and plausibility gates."
+      "state": "ACTIVE",
+      "owner_approved": true,
+      "change": "openspec/changes/engine-physics-v1",
+      "summary": "Authorized post-R2 engineering phase: one IntegratedEngine2T production core, versioned STANDARD_V1/SYNTHETIC_GASOLINE_V1 physics, four operating points, hard physical gates and durable outputs; no KT100 or experimental claim."
     },
     {
       "id": "FULL_RPM_SWEEP_V1",
@@ -2386,6 +2609,12 @@
       "task": "R2-EXTERNAL-REVIEW",
       "kind": "task",
       "summary": "External final review B1_B3_FIX_REVIEW_PASS verified at commit 17550bde with SHA 101a2436 and range 0c1008b..497e67f; R2 authorized REVIEW->PASS, v1.0 remains FAIL_TERMINAL, freeze candidate recorded."
+    },
+    {
+      "at": "2026-10-07T11:59:47+00:00",
+      "task": "EP1",
+      "kind": "task",
+      "summary": "ENGINE_PHYSICS_V1 activated by owner order on frozen baseline 1a58b2a; new OpenSpec change, scope, production boundary, model contracts and EP1-EP14 queue created. Historical R2 PASS and original v1.0 FAIL_TERMINAL preserved."
     }
   ],
   "legacy_gate_status": {
@@ -2400,24 +2629,43 @@
     "source_change": "openspec/changes/two-stroke-v1-closure/"
   },
   "gate_status": {
+    "objective": "ENGINE_PHYSICS_V1",
+    "state": "OPEN",
+    "classification": "ENGINE_PHYSICS_V1_IN_PROGRESS",
+    "evidence": [
+      "Phase authorized after frozen baseline 1a58b2a; no ENGINE_PHYSICS_V1 campaign has started.",
+      "Historical R2 PASS remains preserved in r2_gate_status and is not reopened.",
+      "Current gate requires EP1-EP14, four preregistered production-core points, durable engineering outputs, hard physical gates and evidence review."
+    ],
+    "gate_tasks_total": 14,
+    "gate_tasks_done": 0,
+    "gate_task_states": {
+      "READY": 3,
+      "WAITING": 11
+    },
+    "remaining": [
+      "EP1",
+      "EP2",
+      "EP3",
+      "EP4",
+      "EP5",
+      "EP6",
+      "EP7",
+      "EP8",
+      "EP9",
+      "EP10",
+      "EP11",
+      "EP12",
+      "EP13",
+      "EP14"
+    ],
+    "updated_at": "2026-10-07T14:00:00-03:00"
+  },
+  "r2_gate_status": {
     "objective": "MOTORSIM_2T_V1_CLOSURE_R2",
     "state": "PASS",
     "classification": "GENERAL_PURPOSE_2T_SIMULATION_CORE_VERIFIED",
-    "evidence": [
-      "Computational R2 evidence is retained: A-prime PERIOD_1 at cycle 73/111 and B-prime PERIOD_1 at cycle 38/47 from real PeriodicDetectorV2.",
-      "B1 complete: new superseding OpenSpec change documents the post-observation R2 contract while v1.0 remains FAIL_TERMINAL.",
-      "B2 complete: durable complete regression artifact results/2t-v1-closure-20261006/p4-p8-regression-b2-complete/ records 304 passed and 4 warnings with exact command, HEAD, timestamps and log.",
-      "B3 complete: external review docs/gasdynamic/v1_closure_r2_independent_review_53f66c6.md is preserved unchanged with SHA-256 4185c01cbfd3df4cbce3ac22d78a2edcca0d42ee29836308e74295d8131cddc9; final fix review is docs/gasdynamic/v1_closure_r2_fix_independent_review_497e67f.md with SHA-256 101a243685f6e332016e12dcf044e02346fbaef63a299b854a742adc8d6df78f.",
-      "External final verdict B1_B3_FIX_REVIEW_PASS authorizes REVIEW -> PASS for R2 only; reviewed range 0c1008b..497e67f and commit 17550bdeac3d4b3e64e5965b3d9a7a7331ce55f0.",
-      "Claim qualifiers: SYNTHETIC; CONDITIONAL_ON_P4; EXPERIMENTAL_VALIDATION_NOT_PERFORMED; P9_NOT_CLAIMED; SUPERSEDING_GATE_R2.",
-      "N1-N7 remain POST_2T_V1_BACKLOG/provenance debt; no physical or campaign changes were made."
-    ],
-    "gate_tasks_total": 4,
-    "gate_tasks_done": 4,
-    "gate_task_states": {
-      "DONE": 4
-    },
-    "remaining": [],
-    "updated_at": "2026-10-07T12:00:00+00:00"
+    "baseline_commit": "1a58b2a5c23447f81308609acc37ab74a8bd5de5",
+    "note": "Historical superseding R2 gate remains PASS, synthetic CONDITIONAL_ON_P4, experimental validation not performed, P9 not claimed; it is not reopened by ENGINE_PHYSICS_V1."
   }
 }

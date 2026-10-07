@@ -22,13 +22,14 @@ Reglas detalladas: [docs/gasdynamic/autonomous_engineering_mode.md](docs/gasdyna
 ## 1. CURRENT_OBJECTIVE
 
 ```
-CURRENT_OBJECTIVE: MOTORSIM_2T_V1_CLOSURE_R2
-change/spec:       openspec/changes/two-stroke-v1-closure-r2/
-                   (specs/two-stroke-v1-closure-r2/spec.md es la autoridad de requisitos)
-completion:        superseding gate terminal PASS sólo ligado a R2, con claim
-                   sintético CONDITIONAL_ON_P4, sin validación experimental,
-                   P9 no claimado, y freeze candidate administrativo; el gate
-                   histórico MOTORSIM_2T_V1_CLOSURE_V1_0 permanece FAIL_TERMINAL.
+CURRENT_OBJECTIVE: ENGINE_PHYSICS_V1
+change/spec:       openspec/changes/engine-physics-v1/
+                   (specs/engine-physics-v1/spec.md es la autoridad de requisitos)
+completion:        phase gate de cuatro puntos por el core productivo; PASS →
+                   ENGINE_PHYSICS_V1_PASS y freeze candidate de esta fase, con
+                   evidencia sintética únicamente y sin objetivo siguiente automático.
+                   El baseline MOTORSIM_2T_V1_CLOSURE_R2 permanece PASS y el
+                   gate histórico MOTORSIM_2T_V1_CLOSURE_V1_0 permanece FAIL_TERMINAL.
 durable queue:     results/2t-commercial-core-20261002/program-status.json
                    → current_objective, queue, gate_status, progress_log
 ```
