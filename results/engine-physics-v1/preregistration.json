@@ -31,10 +31,10 @@
     "not_a_new_closure_gate": true
   },
   "points": [
-    {"id": "ENGINE_A_3000", "fixture": "FIXTURE_A_PRIME", "rpm": 3000.0, "horizon_cycles": 111, "config_sha256": "d3f000f72dda247e11a561ad63fb93daab1145cca689105a17cd8e6ae7c71ab7"},
-    {"id": "ENGINE_A_4000", "fixture": "FIXTURE_A_PRIME", "rpm": 4000.0, "horizon_cycles": 111, "config_sha256": "8d37c0991aff9c9b7540e71277aa60d80fc49c193b73ee9806ff275557a316ca"},
-    {"id": "ENGINE_B_3000", "fixture": "FIXTURE_B_PRIME", "rpm": 3000.0, "horizon_cycles": 47, "config_sha256": "eff18b2a9ae830dfcbd984eb662f8e595fd6a547566f7a9caf1a42fbb8c948b6"},
-    {"id": "ENGINE_B_4000", "fixture": "FIXTURE_B_PRIME", "rpm": 4000.0, "horizon_cycles": 47, "config_sha256": "b21dd08a23679954c1ac39aae383fc2a78c702c5a358c8e2387fcecd00f2af82"}
+    {"id": "ENGINE_A_3000", "fixture": "FIXTURE_A_PRIME", "rpm": 3000.0, "horizon_cycles": 111, "config_sha256": "ed45bd8123cc6099cb26f1892393d524e21958808f4739512ecb121891cab2de"},
+    {"id": "ENGINE_A_4000", "fixture": "FIXTURE_A_PRIME", "rpm": 4000.0, "horizon_cycles": 111, "config_sha256": "78705415453530871abb20d2385f83dd11d8b3bf9582789f26fc530165eaf2ec"},
+    {"id": "ENGINE_B_3000", "fixture": "FIXTURE_B_PRIME", "rpm": 3000.0, "horizon_cycles": 47, "config_sha256": "e430294fb6f12d71801a7859b4e89b1d726aaa78a9510b71729a8c785e45475e"},
+    {"id": "ENGINE_B_4000", "fixture": "FIXTURE_B_PRIME", "rpm": 4000.0, "horizon_cycles": 47, "config_sha256": "93868b292dad37648c7c3f6836a8caa9ea43bb08ee7490c71a549b09e28399ac"}
   ],
   "acceptance": {
     "one_campaign": true,
