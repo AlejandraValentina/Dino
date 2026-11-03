@@ -10800,6 +10800,32 @@
       "blocker": null,
       "next_action": "Integrated rc10 Windows acceptance complete: READY_TRIAL. Candidate remains local for owner review; no rebuild/publication or further packaging diagnostics.",
       "resolution": "READY_TRIAL"
+    },
+    {
+      "id": "DESKTOP-RC11-CORRECTIONS",
+      "state": "IN_PROGRESS",
+      "description": "Verify rc10 review hypotheses; fix confirmed presentation defects and accept one integrated Windows candidate",
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_approved": true,
+      "owner_role": "implementation",
+      "dependencies": [
+        "DESKTOP-WINDOWS-INTEGRATED-RC10"
+      ],
+      "write_scope": [
+        "motorsim/desktop/",
+        "motorsim/runtime.py",
+        "tests/test_desktop_rc11_corrections.py",
+        "tests/test_desktop_rpm_curves.py",
+        "results/desktop-rc11-corrections/",
+        "tests/test_dino_commercial_desktop_v3.py"
+      ],
+      "evidence": [
+        "results/desktop-rc11-corrections/captures/rc10-exhaust-reopen.png",
+        "results/desktop-rc11-corrections/captures/rc10-exhaust-history-occlusion.png",
+        "results/desktop-rc11-corrections/captures/rc10-csv30.png"
+      ],
+      "blocker": null,
+      "next_action": "Source checks then exactly one rc11 TRIAL build and real packaged acceptance; preserve rc7/rc9/rc10."
     }
   ],
   "audit_remediation_mode": false,
@@ -15168,6 +15194,18 @@
       "task": "DESKTOP-WINDOWS-INTEGRATED-RC10",
       "kind": "task",
       "summary": "rc10 READY_TRIAL: one clean Windows build, 66 PASS/1 SKIP plus focused tests; packaged GUI creation/persistence, intake-transfer separation, compact exhaust, cancellation/exact checkpoint restore, four real parallel A/B points, CSV30 roundtrip and three resolutions PASS. No physical changes or publication."
+    },
+    {
+      "at": "2026-11-03T13:58:19+00:00",
+      "task": "DESKTOP-RC11-CORRECTIONS",
+      "kind": "task",
+      "summary": "rc10 empty exhaust reproduced as dock-induced visual occlusion, not data loss; closing history restores table. CSV+JSON30 loads in packaged rc10. Correct confirmed UI defects without changing solver or persistence contracts."
+    },
+    {
+      "at": "2026-11-03T14:22:39+00:00",
+      "task": "DESKTOP-RC11-CORRECTIONS",
+      "kind": "task",
+      "summary": "Corrections verified: rc10 empty exhaust is visual occlusion; CSV30 works. Fixed UI labels, exact-RPM warnings, visible metrics, transient opt-in, compact access/history/plots, geometry precision. Source 73 PASS/1 SKIP; final precision/editor16 PASS. Preflight PASS; next single clean rc11 build."
     }
   ],
   "legacy_gate_status": {

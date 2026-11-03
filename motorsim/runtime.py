@@ -7,7 +7,7 @@ import sys
 import traceback
 import uuid
 
-APP_VERSION = '0.1.0-rc10'
+APP_VERSION = '0.1.0-rc11'
 
 
 def resource(name):

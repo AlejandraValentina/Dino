@@ -1,4 +1,5 @@
 from __future__ import annotations
+from .presentation import EngineeringNumberDelegate,PortRoleDelegate
 from copy import deepcopy
 import math
 from PySide6.QtCore import Qt,QPointF,Signal
@@ -93,7 +94,10 @@ class EnginePage(QWidget):
         self.ports=QTableWidget(0,10);self.ports.setObjectName("integratedPortTiming");self.ports.setHorizontalHeaderLabels(["Lumbrera","Rol","Ø borde","Alt. (mm)","Ancho (mm)","Cd","Rec. (mm)","Abre (°)","Cierra (°)","Dur. (°)"])
         self.ports.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         for col,width in enumerate((105,56,78,64,55,43,55,58,58,68)):self.ports.setColumnWidth(col,width)
-        for col in (4,5,6):self.ports.setColumnHidden(col,True)
+        for col in (6,):self.ports.setColumnHidden(col,True)
+        for col in range(2,10):self.ports.setItemDelegateForColumn(col,EngineeringNumberDelegate(self.ports))
+        self.ports.setItemDelegateForColumn(1,PortRoleDelegate(self.ports))
+        for col,width in enumerate((145,70,95,70,70,55,65,55,55,55)):self.ports.setColumnWidth(col,width)
         self.port_advanced_toggle=QPushButton("Más dimensiones ▸");self.port_advanced_toggle.clicked.connect(self._toggle_advanced_ports);v.addWidget(self.port_advanced_toggle)
         self.ports.setAlternatingRowColors(True);self.ports.setMinimumHeight(248);self.ports.setMaximumHeight(254);self.ports.cellChanged.connect(self._port_changed);v.addWidget(self.ports)
         self.derived=QLabel();self.derived.setWordWrap(True);v.addWidget(self.derived)
@@ -283,12 +287,15 @@ class EnginePage(QWidget):
             timing_by_id={port.id:self._area_timing(port_set,port) for port in port_set.ports}
             self.ports.blockSignals(True);self.ports.setRowCount(len(ports))
             for i,p in enumerate(ports):
-                vals=[p["id"],p["role"],p["top_mm"],p["height_mm"],p["width_mm"],p["discharge_coefficient"],p["roof_travel_mm"],*timing_by_id.get(p["id"],(None,None,None))]
+                names={'primary':'Transferencia primaria','secondary':'Transferencia secundaria','boost':'Transferencia auxiliar','main_exhaust':'Escape principal'}
+                label=names.get(p.get('feature'),p.get('name') or p['id'])
+                vals=[label,p['role'],p["top_mm"],p["height_mm"],p["width_mm"],p["discharge_coefficient"],p["roof_travel_mm"],*timing_by_id.get(p["id"],(None,None,None))]
                 reed_intake=(p["role"]=="intake" and n["geometry_identity"].get("gas_exchange_model",{}).get("intake_control")=="reed")
                 if reed_intake:vals[7:]=[None,None,None]
                 for j,value in enumerate(vals):
                     display="—" if value is None else (f"{value:.12g}" if isinstance(value,(int,float)) else str(value))
                     item=QTableWidgetItem(display);item.setData(Qt.ItemDataRole.UserRole,p["id"])
+                    item.setToolTip(f"ID: {p['id']}\nValor completo: {display}")
                     if j<2 or j>=7 or p["family"]=="effective_profile" or value is None:item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                     if j>=7 and value is None:item.setToolTip('No hay un intervalo único identificado; consultar Distribución. La admisión por láminas depende de Δp.')
                     if j==7 and value is not None and can_edit_opening(port_set.ports[i]):
@@ -419,8 +426,8 @@ class EnginePage(QWidget):
         self.advanced_operation.setVisible(visible);self.advanced_operation_toggle.setText("Avanzado ▾" if visible else "Avanzado ▸")
 
     def _toggle_advanced_ports(self):
-        visible=self.ports.isColumnHidden(4)
-        for column in (4,5,6):self.ports.setColumnHidden(column,not visible)
+        visible=self.ports.isColumnHidden(6)
+        for column in (6,):self.ports.setColumnHidden(column,not visible)
         self.port_advanced_toggle.setText("Más dimensiones ▾" if visible else "Más dimensiones ▸")
 
     def _refresh_provenance(self,doc):

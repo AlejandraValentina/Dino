@@ -63,6 +63,12 @@ class CurvePlot(QWidget):
             painter.end(); return
         xlabel=self.series[0].get("x_label","RPM") if self.series else "RPM"
         xmin,xmax,ymin,ymax=self._axis_ranges(allp)
+        painter.setPen(QPen(QColor('#34475c'),1))
+        for i in range(5):
+            value=xmin+(xmax-xmin)*i/4;x=rect.left()+rect.width()*i/4
+            painter.drawLine(round(x),rect.top(),round(x),rect.bottom())
+            painter.setPen(QColor('#cad8e7'));painter.drawText(round(x)-32,rect.bottom()+3,64,14,Qt.AlignmentFlag.AlignCenter,f'{value:.4g}')
+            painter.setPen(QPen(QColor('#34475c'),1))
         def pos(series,point): return QPointF(rect.left()+(float(point[series.get("x_key","rpm")])-xmin)/(xmax-xmin)*rect.width(),rect.bottom()-(float(point["value"])-ymin)/(ymax-ymin)*rect.height())
         painter.setFont(QFont("Segoe UI",8));painter.setPen(QColor("#9fb3c8"))
         for tick in self.y_ticks:
@@ -78,7 +84,8 @@ class CurvePlot(QWidget):
                 if point.get("value") is None: previous=None; continue
                 current=pos(series,point)
                 if previous is not None:painter.drawLine(previous,current)
-                painter.setBrush(QColor(self.COLORS[si%len(self.COLORS)]));painter.drawEllipse(current,3.5,3.5)
+                if index % max(1,len(series.get('points',[]))//35)==0:
+                    painter.setBrush(QColor(self.COLORS[si%len(self.COLORS)]));painter.drawEllipse(current,2.5,2.5)
                 if self.selected==(series.get("name"),index):painter.drawEllipse(current,7,7)
                 previous=current
         painter.setFont(QFont("Segoe UI",9));painter.setPen(QColor("#cad8e7"))

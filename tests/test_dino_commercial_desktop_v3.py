@@ -89,8 +89,9 @@ class CommercialDesktopV3P0Tests(unittest.TestCase):
         tables=window.results.findChildren(__import__("PySide6.QtWidgets",fromlist=["QTableWidget"]).QTableWidget)
         self.assertTrue(tables)
         self.assertTrue(all(table.alternatingRowColors() for table in tables))
-        scroll=window.analysis_splitter.widget(0)
-        self.assertEqual(scroll.horizontalScrollBarPolicy().name,"ScrollBarAlwaysOff")
+        # rc11 removes the redundant outer scrolling page entirely.
+        self.assertIs(window.analysis_splitter.widget(0),window.results)
+        self.assertNotIsInstance(window.analysis_splitter.widget(0),__import__('PySide6.QtWidgets',fromlist=['QScrollArea']).QScrollArea)
         self.assertTrue("alternate-background-color" in window.styleSheet())
         window.close()
 

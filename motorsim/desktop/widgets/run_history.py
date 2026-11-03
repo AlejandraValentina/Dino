@@ -8,6 +8,7 @@ from ..run_history import list_project_runs
 from ..preferences import settings
 from ..services import run_background
 from copy import deepcopy
+from ..presentation import state_label
 
 
 class RunHistoryWidget(QWidget):
@@ -28,6 +29,7 @@ class RunHistoryWidget(QWidget):
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QTableWidget.SelectionMode.ExtendedSelection)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.table.setMinimumHeight(130);self.table.verticalHeader().setDefaultSectionSize(28)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.table,1)
         actions=QHBoxLayout();layout.addLayout(actions)
@@ -87,14 +89,16 @@ class RunHistoryWidget(QWidget):
                     (entry.get("audit","NOT_REPORTED")+ (" · recomputada" if entry.get("audit_recomputed") else "")),
                     entry.get("conservation")]
             for col,value in enumerate(values):
-                item=QTableWidgetItem("—" if value is None else str(value));item.setData(Qt.ItemDataRole.UserRole,row)
+                display=state_label(value) if col>=3 else str(value or '—')
+                if col==2:display=str(value or '—').replace('T',' ')[:16]
+                item=QTableWidgetItem(display);item.setData(Qt.ItemDataRole.UserRole,row)
                 item.setToolTip("\n".join((f"Ruta: {entry.get('run_directory')}",
                     f"Artifact root: {entry.get('artifact_root')}",
                     f"Identidad: {entry.get('identity_sha256')}",
                     f"Configuración: {entry.get('configuration_sha256')}",
                     f"Resultado SHA-256: {entry.get('result_sha256')}",
                     f"Checkpoint SHA-256: {entry.get('checkpoint_sha256')}",
-                    f"Estado: {entry.get('status')}")))
+                    f"Estado: {entry.get('status')}",f"Clasificación: {entry.get('classification')}",f"Periodicidad: {entry.get('periodicity')}")))
                 self.table.setItem(row,col,item)
         active=self.context.selected_variant or "base"
         label=(f"variante activa {active} + baseline" if self.variant_filter.currentData()=="__active_baseline__" else

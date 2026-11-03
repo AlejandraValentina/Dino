@@ -1,0 +1,26 @@
+{
+  "name": "rc11-focused",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_desktop_rc11_corrections.py",
+    "tests/test_desktop_rc10_integration.py",
+    "tests/test_desktop_model_editor_v2.py",
+    "tests/test_desktop_rpm_curves.py"
+  ],
+  "started_at": "2026-11-03T13:58:19+00:00",
+  "finished_at": "2026-11-03T13:59:11+00:00",
+  "duration_s": 51.579,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-rc11-corrections\\source-tests\\rc11-focused.log",
+  "log_lines": 2,
+  "log_bytes": 100,
+  "error_lines": [],
+  "tail": [
+    "......................                                                   [100%]",
+    "22 passed in 50.87s"
+  ]
+}

@@ -103,6 +103,8 @@ def test_existing_plot_renders_exploratory_points_and_csv_preserves_state(tmp_pa
         periodicity='NOT_CONVERGED',brake_power_status='UNDEFINED',brake_torque_status='UNDEFINED',
         transient_estimates=dict(brake_power=3,brake_torque=4))
     panel=PowerCurvePanel();panel.resize(1100,800);panel.set_dataset(dict(points=[row],requested_rpms=[8000,9000,10000]),{'A'})
+    assert not panel.exploratory_toggle.isChecked()
+    panel.exploratory_toggle.setChecked(True)  # Explicit opt-in after rc11 safety correction.
     panel.show();app.processEvents();assert not panel.plot.grab().isNull()
     assert panel.rows[0]['power_status']=='TRANSIENT_ESTIMATE'
     target=tmp_path/'curve.csv';panel.export_csv(target)

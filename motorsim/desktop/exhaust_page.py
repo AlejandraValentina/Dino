@@ -12,6 +12,7 @@ from ..engine_configuration import identity,validate
 from ..engine_variants import (escape_sections,replace_escape_sections,compare_configurations,
     partitioned_escape_counts,stretch_partitioned_escape)
 from ..exhaust_mesh_v1 import refine_exhaust_configuration
+from .presentation import EngineeringNumberDelegate
 
 
 def _number(text: str, label: str) -> float:
@@ -123,10 +124,12 @@ class ExhaustPage(QWidget):
         self.overlay_selector.currentIndexChanged.connect(self.refresh_overlay)
         self.station_toggle=QPushButton("Estaciones avanzadas ▸");self.station_toggle.clicked.connect(self._toggle_stations)
         overlay_row=QHBoxLayout();overlay_row.addWidget(QLabel("Baseline"));overlay_row.addWidget(self.overlay_selector);overlay_row.addWidget(self.station_toggle);overlay_row.addStretch();root.addLayout(overlay_row)
+        self.availability=QLabel();self.availability.setWordWrap(True);self.availability.hide();root.addWidget(self.availability)
 
         self.stations=QTableWidget(0,3);self.stations.setObjectName("exhaustStations")
         self.stations.setHorizontalHeaderLabels(["Estación compartida","Posición (mm)","Ø (mm)"])
         self.stations.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.stations.setItemDelegateForColumn(2,EngineeringNumberDelegate(self.stations))
         self.stations.setMaximumHeight(150);self.stations.cellChanged.connect(self._cell_changed)
         station_group=QGroupBox("Avanzado · estaciones compartidas");station_group.setObjectName("stationsAdvanced");self.station_group=station_group
         station_layout=QVBoxLayout(station_group);station_layout.addWidget(self.stations)
@@ -134,6 +137,7 @@ class ExhaustPage(QWidget):
         self.table=QTableWidget(0,7);self.table.setObjectName("exhaustSegments");self.segments=self.table
         self.table.setHorizontalHeaderLabels(["Tramo","Largo (mm)","Ø entrada (mm)","Ø salida (mm)","Semiángulo (°)","Volumen (cm³)","Δ baseline"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        for col in range(1,6):self.table.setItemDelegateForColumn(col,EngineeringNumberDelegate(self.table))
         self.table.setMaximumHeight(260);self.table.cellChanged.connect(self._cell_changed)
         self.table.currentCellChanged.connect(lambda row,*_:self._select_section(row))
         self.profile.section_selected.connect(lambda row:self.table.setCurrentCell(row,1))
@@ -195,13 +199,15 @@ class ExhaustPage(QWidget):
             self.edit_state="complete"
             self._refresh_overlay_options()
             engine=self.context.engine();sections=escape_sections(engine);counts=self._counts(engine)
+            self.availability.hide()
+            self.apply_button.setEnabled(True)
             self.loading=True;self._clear_widgets();self.table.blockSignals(True);self.stations.blockSignals(True);self.mesh_table.blockSignals(True)
             self.table.setRowCount(len(sections));self.stations.setRowCount(len(sections)+1)
             changed_sections=self._changed_sections()
             diameters=[sections[0]["inlet_diameter_mm"]]+[s["outlet_diameter_mm"] for s in sections]
             for i,diameter in enumerate(diameters):
                 label="Entrada" if i==0 else ("Salida" if i==len(sections) else f"Unión {i}")
-                for col,value in enumerate((label,"0.00",f"{diameter:.3f}")):
+                for col,value in enumerate((label,"0.00",repr(float(diameter)))):
                     item=QTableWidgetItem(value)
                     if col<2 or i==0:item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                     self.stations.setItem(i,col,item)
@@ -212,10 +218,11 @@ class ExhaustPage(QWidget):
                 volume=math.pi*s["length_mm"]*(r0*r0+r0*r1+r1*r1)/3/1000
                 for col in range(self.table.columnCount()):
                     item=QTableWidgetItem("");item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable);self.table.setItem(i,col,item)
-                values=((0,s["name"]),(1,f"{s['length_mm']:.1f}"),(2,f"{s['inlet_diameter_mm']:.1f}"),
-                        (3,f"{s['outlet_diameter_mm']:.1f}"),(4,f"{angle:.2f}"),(5,f"{volume:.1f}"),(6,self._section_delta(i,s)))
+                values=((0,s["name"]),(1,repr(float(s['length_mm']))),(2,repr(float(s['inlet_diameter_mm']))),
+                        (3,repr(float(s['outlet_diameter_mm']))),(4,f"{angle:.2f}"),(5,f"{volume:.1f}"),(6,self._section_delta(i,s)))
                 for col,value in values:
                     item=QTableWidgetItem(str(value))
+                    item.setToolTip(str(value))
                     if col not in (1,3):item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                     self.table.setItem(i,col,item)
                 item=QTableWidgetItem(s["name"]);item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable);self.mesh_table.setItem(i,0,item)
@@ -228,8 +235,15 @@ class ExhaustPage(QWidget):
             self.profile.set_sections(self._rows(),self._resolutions(),self._overlay_sections(),self._changed_sections())
             self._select_section(max(0,self.table.currentRow()))
             self.diff.setText(self._engineering_diff(engine));self.save_current_button.setEnabled(self.context.selected_variant is not None)
-        except Exception as exc:self.diff.setText(f"Escape no disponible: {type(exc).__name__}: {exc}")
-        finally:self.loading=False
+        except Exception as exc:
+            self.edit_state='unavailable'
+            message=f"Geometría de escape no disponible: {type(exc).__name__}: {exc}. El proyecto no se modifica."
+            self.diff.setText(message);self.availability.setText(message);self.availability.show()
+            self.table.setRowCount(0);self.stations.setRowCount(0);self.profile.set_sections([])
+            self.save_current_button.setEnabled(False);self.apply_button.setEnabled(False)
+        finally:
+            self.table.blockSignals(False);self.stations.blockSignals(False);self.mesh_table.blockSignals(False)
+            self.loading=False
 
     def _update_station_positions(self):
         self.stations.blockSignals(True)
@@ -347,6 +361,7 @@ class ExhaustPage(QWidget):
     def _draft(self):
         base=self.context.engine();sections=self._rows();counts=self._resolutions()
         current=self._counts(base)
+        if sections==escape_sections(base) and counts==current:return deepcopy(base)
         if "exhaust_mesh_discretization" not in base['native_configuration']['geometry_identity'] and current!=[1]*len(current):
             if counts!=current:raise ValueError("Conservar la discretización existente")
             return stretch_partitioned_escape(base,sections)

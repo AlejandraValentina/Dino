@@ -21,6 +21,7 @@ from .execution_page import ExecutionPage
 from .widgets.context_bar import ContextBar
 from .preferences import settings, repository_root_containing
 from .theme import stylesheet
+from .presentation import state_label
 
 PAGES=(('Motor',EnginePage),('Escape',ExhaustPage),('Proyecto',ProjectPage),('Simulación',ExecutionPage),('Resultados',ResultsPage))
 
@@ -104,8 +105,7 @@ class DinoDesktopWindow(QMainWindow):
         self.mode_stack.addWidget(self.design_workspace)
         self.analysis_workspace=QWidget();analysis_layout=QVBoxLayout(self.analysis_workspace);analysis_layout.setContentsMargins(6,4,6,4)
         self.analysis_splitter=QSplitter(Qt.Orientation.Vertical);self.analysis_splitter.setChildrenCollapsible(False)
-        results_scroll=QScrollArea();results_scroll.setWidgetResizable(True);results_scroll.setFrameShape(QScrollArea.Shape.NoFrame);results_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff);results_scroll.setWidget(self.results)
-        self.analysis_splitter.addWidget(results_scroll)
+        self.analysis_splitter.addWidget(self.results)
         from .widgets.run_history import RunHistoryWidget
         self.analysis_history=RunHistoryWidget(self.context,self.pages[3].artifact_root,async_load=True,auto_refresh=False);self.analysis_history.setMinimumHeight(110);self.analysis_history.setMaximumHeight(190)
         self.analysis_history.open_runs.connect(self._open_indexed_runs)
@@ -165,6 +165,13 @@ class DinoDesktopWindow(QMainWindow):
         self.prepare_button=QPushButton("Preparar…");self.prepare_button.setObjectName("prepareRunPanel");self.prepare_button.clicked.connect(self._show_execution_panel);strip.addWidget(self.prepare_button)
         self.strip_run=execution.start;self.strip_run.setText("Iniciar corrida…");self.strip_run.setMinimumWidth(150);strip.addWidget(self.strip_run)
         self.strip_cancel=QPushButton("Cancelar");self.strip_cancel.setEnabled(False);self.strip_cancel.clicked.connect(execution.cancel_run);strip.addWidget(self.strip_cancel)
+        self.strip_more=QPushButton('Más ▾');self.strip_more.setToolTip('Barrido RPM y recuperación')
+        from PySide6.QtWidgets import QMenu
+        menu=QMenu(self.strip_more)
+        for label,callback in (('Barrido RPM / A/B…',execution.start_power_curve),('Reanudar checkpoint seleccionado…',lambda:execution.start_run(resume=True)),('Reanudar barrido…',execution.resume_power_curve)):
+            action=menu.addAction(label);action.triggered.connect(callback)
+        self.resume_action=menu.actions()[1]
+        self.strip_more.setMenu(menu);strip.addWidget(self.strip_more)
         execution.state_changed.connect(self._update_strip);execution.progress_signal.connect(self._update_progress)
         execution.progress_signal.connect(lambda *_: self._update_strip())
         execution.rpm.valueChanged.connect(self._update_strip);execution.cycles.valueChanged.connect(self._update_strip);execution.budget.valueChanged.connect(self._update_strip)
@@ -189,7 +196,10 @@ class DinoDesktopWindow(QMainWindow):
         active=execution.task is not None
         self.run_config_summary.setText(f"{execution.rpm.value():g} rpm · {execution.cycles.value()} ciclos · {execution.budget.value():g} s")
         self.strip_cancel.setEnabled(active)
-        self.run_state.setText(execution.status_text if not active else ("CANCELACIÓN SOLICITADA" if execution.cancel_event and execution.cancel_event.is_set() else "CORRIENDO"))
+        self.run_state.setText(state_label(execution.status_text) if not active else ("CANCELACIÓN SOLICITADA" if execution.cancel_event and execution.cancel_event.is_set() else "CORRIENDO"))
+        self.run_state.setToolTip(execution.status_text)
+        if hasattr(self,'resume_action'):self.resume_action.setEnabled(execution.resume.isEnabled() and not active)
+        if hasattr(self,'strip_more'):self.strip_more.setEnabled(not active)
         self.run_progress.setVisible(active or execution.progress_latest is not None)
         if active and execution.progress_latest:
             outer=execution.progress_latest;row=outer.get('solver_progress',outer)
@@ -230,7 +240,12 @@ class DinoDesktopWindow(QMainWindow):
         visible=not self.explorer_dock.isVisible()
         if visible:self.analysis_history.activate();self.analysis_history.refresh()
         self.explorer_dock.setVisible(visible)
-        if visible:self.resizeDocks([self.explorer_dock],[260],Qt.Orientation.Vertical)
+        if visible:
+            self.explorer_dock.setFloating(self.height()<850)
+            if self.explorer_dock.isFloating():
+                self.explorer_dock.resize(min(self.width()-30,1100),360)
+                self.explorer_dock.move(self.x()+15,self.y()+180)
+            else:self.resizeDocks([self.explorer_dock],[350],Qt.Orientation.Vertical)
 
     def _toggle_traceability(self):
         self._update_evidence()
@@ -368,10 +383,13 @@ class DinoDesktopWindow(QMainWindow):
             self.menuBar().setVisible(True)
             if hasattr(self,"pages"):
                 self.pages[1].set_compact_layout(compact, self.width()<=1000)
+                self.results.set_compact_layout(compact)
             if compact:
-                self.checkpoint_state.hide();self.run_progress.setMaximumWidth(145);self.run_clock.setMinimumWidth(48)
+                self.checkpoint_state.hide();self.run_progress.setMaximumWidth(110);self.run_clock.setMinimumWidth(48)
+                self.run_config_summary.hide();self.prepare_button.hide();self.strip_run.setMinimumWidth(120)
             else:
                 self.checkpoint_state.show();self.run_progress.setMaximumWidth(220)
+                self.run_config_summary.show();self.prepare_button.show();self.strip_run.setMinimumWidth(150)
             if hasattr(self,"history_toggle"):self.history_toggle.hide()
             self._refresh_component_states()
     def _restore_settings(self):

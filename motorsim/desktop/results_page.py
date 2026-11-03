@@ -16,19 +16,9 @@ from .preferences import artifact_root,impl2_historical_report_candidate,setting
 from ..exploratory_workflow import import_exploratory_runs
 from .. import measurement_data
 from ..engine_project import validate_project
+from .presentation import state_label as _state_label
 
 METRICS={"Potencia de freno (kW)":"brake_power","Torque (N·m)":"brake_torque","IMEP (kPa)":"IMEP","FMEP (kPa)":"FMEP","BMEP (kPa)":"BMEP","BSFC (g/kWh)":"BSFC"}
-
-def _state_label(value):
-    return {"EXPLORATORY_COMPLETE_PERIODICITY_NOT_IDENTIFIED":"Terminada · sin periodicidad identificada",
-        "NOT_CONVERGED":"No convergida","MAX_CYCLES_NONCONVERGED":"Límite de ciclos · no convergida",
-        "INSUFFICIENT_CYCLES":"Ciclos insuficientes","NOT_PERFORMED":"No realizada",
-        "INTERRUPTED_CHECKPOINTED":"Interrumpida; checkpoint disponible",
-        "PERIOD_1":"Periódica observada · orden 1","PERIOD_2":"Periódica observada · orden 2",
-        "NOT_EVALUATED":"No evaluada","NOT_IDENTIFIABLE":"No identificable",
-        "UNDEFINED":"No definido","NUMERICAL_INVALID":"Inválido numéricamente",
-        "EXPLORATORY":"Exploratoria · no validada"}.get(value,value)
-
 
 def _nonconverged(point):
     """Treat both explicit non-convergence and too-short horizons as transient."""
@@ -125,7 +115,7 @@ class ResultsPage(QWidget):
         bar=QHBoxLayout();root.addLayout(bar);self.metric_selector=QComboBox();self.metric_selector.addItems(METRICS);bar.addWidget(self.metric_selector)
         self.path_label=QLabel("Sin fuente seleccionada");self.path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse);self.path_label.setWordWrap(True);bar.addWidget(self.path_label,1)
         actions=QHBoxLayout();root.addLayout(actions)
-        browse=QPushButton("Abrir datos…");browse.clicked.connect(self.choose);actions.addWidget(browse)
+        browse=QPushButton("Importar resultados…");browse.setToolTip('Histórico/tabla: CSV + JSON compañero en la misma carpeta; también admite reporte JSON. Corridas: result.json y sus artefactos originales.');browse.clicked.connect(self.choose);actions.addWidget(browse)
         historical=QPushButton("Evidencia IMPL2 histórica…");historical.clicked.connect(self.choose_historical);actions.addWidget(historical)
         browse_runs=QPushButton("Abrir corridas EXPLORATORY…");browse_runs.clicked.connect(self.choose_exploratory);actions.addWidget(browse_runs);actions.addStretch()
         self.variants=QListWidget();self.variants.setMaximumHeight(80);self.variants.setFlow(QListWidget.Flow.LeftToRight);self.variants.setWrapping(True);root.addWidget(self.variants)
@@ -193,7 +183,8 @@ class ResultsPage(QWidget):
         bar.removeWidget(self.path_label)
         self.source_notice.setWordWrap(True)
         root.removeItem(cards)
-        self.view_layouts[5].addLayout(cards)
+        root.insertLayout(1,cards)
+        for card in self.metric_cards:card.setMinimumHeight(42)
         root.removeItem(bar)
         self.view_layouts[1].insertLayout(0,bar)
         root.removeItem(baseline_row)
@@ -204,10 +195,16 @@ class ResultsPage(QWidget):
         self.result_tabs.setMinimumHeight(240)
         root.removeItem(controls)
         root.addWidget(self.result_tabs,1);root.addLayout(controls)
-        self.power_curves.plot.setMinimumHeight(200)
+        self.power_curves.plot.setMinimumHeight(150)
         self.metric_selector.currentIndexChanged.connect(self.redraw);self.variants.itemChanged.connect(self.redraw);self.variants.itemChanged.connect(self._update_engineering_compare);self.plot.pointSelected.connect(self.show_point);self.power_curves.pointSelected.connect(self.show_point)
         self.baseline_selector.currentIndexChanged.connect(self._baseline_changed)
         self.context.changed.connect(self._project_context_changed);self._project_context_changed()
+
+    def set_compact_layout(self,compact):
+        self.power_curves.set_compact_layout(compact)
+        self.variants.setFixedHeight(26 if compact else 36)
+        for card in self.metric_cards:card.setMinimumHeight(34 if compact else 42)
+        self.setStyleSheet('QLabel#metricCard {padding:4px;font-size:9pt;} QLabel#notice {padding:4px;} QPushButton {padding:4px 8px;} QTabBar::tab {padding:4px 6px;min-height:16px;}' if compact else '')
 
     def _project_context_changed(self,*_):
         refs=self.context.project.get("result_references",[])
@@ -523,11 +520,12 @@ class ResultsPage(QWidget):
             self.condition_notice.setText("Condiciones entre corridas: sin datos cargados.");return
         selected={self.variants.item(i).text() for i in range(self.variants.count()) if self.variants.item(i).checkState()==Qt.CheckState.Checked}
         points=[row for row in self.dataset["points"] if row.get("variant_id") in selected]
-        fields=("rpm","fuel_id","afr_kg_air_per_kg_fuel","mesh_resolution","total_finite_volume_cells","cycles_requested","point_configuration_sha256")
-        differing=[]
-        for key in fields:
-            values={json.dumps(row.get(key),sort_keys=True) for row in points if row.get(key) is not None}
-            if len(values)>1:differing.append(key)
+        names=sorted({r.get('variant_id') for r in points})
+        pairs=[(a,b) for a in points for b in points if len(names)>=2 and a.get('variant_id')==names[0] and b.get('variant_id')==names[1] and a.get('rpm')==b.get('rpm')]
+        if not pairs:
+            self.condition_notice.setText('Sin pares A/B a la misma RPM; no se comparan condiciones entre RPM distintas.');return
+        fields=("fuel_id","afr_kg_air_per_kg_fuel","mesh_resolution","total_finite_volume_cells","cycles_requested","point_configuration_sha256")
+        differing=[key for key in fields if any(a.get(key) is not None and b.get(key) is not None and a[key]!=b[key] for a,b in pairs)]
         labels={"rpm":"RPM","fuel_id":"combustible","afr_kg_air_per_kg_fuel":"AFR","mesh_resolution":"resolución de malla","total_finite_volume_cells":"cantidad de celdas","cycles_requested":"horizonte","point_configuration_sha256":"identidad de configuración"}
         named=[labels.get(key,key) for key in differing]
         if differing==['point_configuration_sha256']:
@@ -535,7 +533,7 @@ class ResultsPage(QWidget):
         else:
             self.condition_notice.setText(("Advertencia: las corridas difieren en "+", ".join(named)+"; la comparación no aísla sólo el cambio de escape." ) if differing else "Condiciones comparables en los campos reportados; los campos ausentes no se asumen iguales." )
     def choose(self):
-        path,_=QFileDialog.getOpenFileName(self,"Abrir datos de resultados",str(artifact_root()),"Reportes y datos (*.json *.csv)")
+        path,_=QFileDialog.getOpenFileName(self,"Importar resultados · CSV con JSON compañero, o reporte JSON",str(artifact_root()),"Reportes y datos (*.json *.csv)")
         if path:self.load(Path(path))
     def choose_historical(self):
         candidate=impl2_historical_report_candidate()
@@ -610,7 +608,9 @@ class ResultsPage(QWidget):
             for name in variants:
                 item=QListWidgetItem(name);item.setFlags(item.flags()|Qt.ItemFlag.ItemIsUserCheckable);item.setCheckState(Qt.CheckState.Checked);self.variants.addItem(item)
             self.variants.blockSignals(False);self._project_context_changed();self.loading=False;self.redraw();self._baseline_changed();self._dataset_summary();self.evidence_updated.emit()
-        def fail(message):self.loading=False;self.path_label.setText("No se pudieron cargar los datos");QMessageBox.warning(self,"Reporte inválido",message)
+        def fail(message):
+            self.loading=False;self.path_label.setText("No se pudieron cargar los datos; selección anterior conservada")
+            QMessageBox.warning(self,"Reporte inválido",'El CSV histórico necesita su JSON compañero con el mismo nombre y hashes válidos. Conservá ambos archivos. Un CSV de curvas de consulta no reemplaza los artefactos originales.\n\nDetalle: '+message)
         run_background(load_results,path,on_done=done,on_error=fail)
 
     def _dataset_summary(self):
@@ -622,6 +622,7 @@ class ResultsPage(QWidget):
             table.setCurrentCell(-1,-1);table.clearSelection()
         self.details.setRowCount(0)
         for card,name in zip(self.metric_cards,('Potencia','Torque','BMEP','Auditoría')):card.setText(name+'\n—')
+        if rows:self.show_point(rows[0])
     def redraw(self,*_):
         if not self.dataset:return
         metric=METRICS[self.metric_selector.currentText()];unit=self.metric_selector.currentText().split('(')[-1].rstrip(')')
@@ -738,18 +739,20 @@ class ResultsPage(QWidget):
             if index>=0:self.trace_rpm.setCurrentIndex(index)
         def card(label,key,unit):
             status=row.get(key+"_status");value=row.get(key)
-            if status=="DEFINED" and value is not None:return f"{label}\n{float(value):.4g} {unit} · Δ vs baseline disponible si comparable"
+            if status=="DEFINED" and value is not None:return f"{label}\n{float(value):.4g} {unit}"
             transient=row.get("transient_estimates",{}).get(key)
             if transient is not None:return f"{label}\n{transient:.4g} {unit} · TRANSITORIO, NO CONVERGIDO"
             reason=row.get(key+"_reason") or row.get(key+"_status") or "No reportado"
-            return f"{label}\nNo definido · {reason}"
+            return f"{label}\nNo definido · {_state_label(reason)}"
         self.metric_cards[0].setText(card("Potencia","brake_power","kW"))
         self.metric_cards[1].setText(card("Torque","brake_torque","N·m"))
         self.metric_cards[2].setText(card("BMEP","BMEP","kPa"))
-        self.metric_cards[3].setText(f"Auditoría\n{_state_label(row.get('audit_status','NOT_REPORTED'))} · recomputada: {row.get('audit_recomputed','NOT_REPORTED')}")
+        self.metric_cards[3].setText(f"Auditoría\n{_state_label(row.get('audit_status','NOT_REPORTED'))}")
+        self.metric_cards[3].setToolTip(f"Código original: {row.get('audit_status','NOT_REPORTED')}\nRecomputada: {_state_label(row.get('audit_recomputed','NOT_REPORTED'))}. Detalle completo en Trazabilidad.")
         conservation=row.get('conservation')
         conservation_label=("balance interno · máx. residuo relativo "+format(max(conservation['relative'].values()),'.2g') if isinstance(conservation,dict) and conservation.get('relative') else 'reportada' if conservation else 'no reportada')
-        self.run_summary.setText(f"{row.get('variant_id','Variante no informada')} · {row.get('rpm','—')} RPM · {_state_label(row.get('classification'))} · periodicidad {_state_label(row.get('periodicity') or row.get('classification'))} · {conservation_label}")
+        kind='Histórico sintético · ' if getattr(self,'source_kind',None)=='HISTORICAL_IMPL2' else 'Resultado exploratorio / importado · '
+        self.run_summary.setText(kind+f"{row.get('variant_id','Variante no informada')} · {row.get('rpm','—')} RPM · {_state_label(row.get('classification'))} · periodicidad {_state_label(row.get('periodicity') or row.get('classification'))} · {conservation_label}")
         periodicity=row.get('periodicity')
         if periodicity is None:
             periodicity=row.get('classification') if row.get('classification') in {"PERIOD_1","PERIOD_2"} else "NOT_REPORTED"
@@ -772,7 +775,7 @@ class ResultsPage(QWidget):
             ("Conservación",json.dumps(row.get('conservation'),ensure_ascii=False,sort_keys=True)),
             ("Hard gates",json.dumps(row.get('hard_gates'),ensure_ascii=False,sort_keys=True)),
             ("Validación experimental",row.get('experimental_validation',self.dataset.get('experimental_validation','NOT_REPORTED'))),
-            ("Provenance",self.dataset['provenance'])]
+            ("Provenance",self.dataset.get('provenance','No informada'))]
         gates=row.get('hard_gates')
         items=list(row.get("engineering_diagnostics",{}).items())+items
         if isinstance(gates,dict) and "status" not in gates:
