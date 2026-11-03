@@ -1,0 +1,42 @@
+{
+  "schema": "DINO_DESKTOP_WINDOWS_ACCEPTANCE_V1",
+  "version": "0.1.0-rc12",
+  "classification": "READY_TRIAL",
+  "source_commit": "02f3ce8677cda592521fd554104a9ee9e04d4c10",
+  "source_dirty": false,
+  "trial": true,
+  "built_utc": "20261103T151816Z",
+  "build_duration_seconds": 63.219,
+  "build_exit_code": 0,
+  "package_zip": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\Windows\\MotorSim-0.1.0-rc12-windows-x64-02f3ce86-trial-20261103T151816Z.zip",
+  "package_sha256": "17c0ef36647ba91fc1a6c37b8719f792ef7ceac618d748ad632e2c2cdb498469",
+  "zip_testzip": null,
+  "zip_entries": 327,
+  "binary_tested": "Dino2T.exe",
+  "tests": {
+    "command": "python -m pytest -q tests/test_desktop_rc11_corrections.py tests/test_desktop_rpm_curves.py",
+    "passed": 18,
+    "failed": 0,
+    "duration_seconds": 62.60,
+    "preflight": "PASS",
+    "pinned_dependencies": "17/17 PASS"
+  },
+  "gui_checks": {
+    "startup_single_window": "PASS",
+    "project_open": "PASS",
+    "exhaust_editor_and_saved_ab_variants": "PASS",
+    "history_1360x900_five_rows_visible": "PASS",
+    "comparison_and_result_state_labels": "PASS",
+    "checkpoint_cancel_resume": "REUSED_PRIOR_RC11_PACKAGED_EVIDENCE"
+  },
+  "captures": [
+    "captures/01-startup.png",
+    "captures/08-history-all-1360.png",
+    "captures/11-comparison-tab.png",
+    "captures/13-history-tooltip.png",
+    "captures/14-exhaust-editor.png"
+  ],
+  "preserved_baselines": ["rc7", "rc9", "rc10", "rc11"],
+  "scientific_validation": "NOT_PERFORMED",
+  "predictive_claim": "NOT_CLAIMED"
+}

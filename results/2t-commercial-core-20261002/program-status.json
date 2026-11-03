@@ -10803,7 +10803,7 @@
     },
     {
       "id": "DESKTOP-RC11-CORRECTIONS",
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "description": "Verify rc10 review hypotheses; fix confirmed presentation defects and accept one integrated Windows candidate",
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_approved": true,
@@ -10827,14 +10827,21 @@
         "results/desktop-rc11-corrections/acceptance.md",
         "results/desktop-rc11-corrections/receipt.json",
         "results/desktop-rc11-corrections/final-residual-tests.txt",
-        "results/desktop-rc11-corrections/captures/source-post-history-1360.png"
+        "results/desktop-rc11-corrections/captures/source-post-history-1360.png",
+        "results/desktop-rc12-acceptance/acceptance.md",
+        "results/desktop-rc12-acceptance/receipt.json",
+        "results/desktop-rc12-acceptance/build/rc12-single-windows-candidate.summary.json",
+        "results/desktop-rc12-acceptance/captures/08-history-all-1360.png",
+        "results/desktop-rc12-acceptance/captures/11-comparison-tab.png",
+        "results/desktop-rc12-acceptance/captures/14-exhaust-editor.png"
       ],
       "blocker": null,
-      "next_action": "Run focal tests and one rc12 Windows candidate from the verified source commit; package and verify translated state labels and usable history at 1360x900.",
-      "resolution": null,
+      "next_action": "rc12 candidate accepted functionally as TRIAL. Do not build again or publish; scientific validation remains dependent on external experimental data.",
+      "resolution": "READY_TRIAL",
       "commits": [
         "bb6903cd3acf1067c83ca6dd1d692c9a4db6af05",
-        "5e0a07c"
+        "5e0a07c",
+        "02f3ce8677cda592521fd554104a9ee9e04d4c10"
       ],
       "unblock_tasks": []
     }
@@ -15229,6 +15236,12 @@
       "task": "DESKTOP-RC11-CORRECTIONS",
       "kind": "task",
       "summary": "Owner authorized one rc12 Windows candidate from 5e0a07c. Revalidated packaged deltas in source: 18 focused tests pass; 1360x900 history shows five rows and readable states. Storage and all 17 pinned build dependencies pass."
+    },
+    {
+      "at": "2026-11-03T18:40:00+00:00",
+      "task": "DESKTOP-RC11-CORRECTIONS",
+      "kind": "task",
+      "summary": "rc12 READY_TRIAL: one clean Windows x64 candidate from 02f3ce8, SHA-256 recorded. 18 focal tests pass; packaged Dino2T GUI verifies project open, five-row history at 1360x900, translated comparison/result states and exhaust editor. Existing rc11 packaged evidence reused for save/AB/cancel/checkpoint restore/CSV; no new solver run."
     }
   ],
   "legacy_gate_status": {
