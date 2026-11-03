@@ -473,7 +473,7 @@ class ResultsPage(QWidget):
         self.compare_table.setRowCount(len(rows))
         for i,row in enumerate(rows):
             for j,value in enumerate(row):
-                item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable);self.compare_table.setItem(i,j,item)
+                item=QTableWidgetItem(_state_label(value) if j==4 else str(value));item.setToolTip(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable);self.compare_table.setItem(i,j,item)
 
     def _project_variant_for_run(self,variant_id):
         """Resolve imported history labels to this project's immutable variants."""

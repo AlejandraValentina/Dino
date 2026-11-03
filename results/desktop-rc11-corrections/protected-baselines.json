@@ -1,0 +1,14 @@
+{
+  "rc10_project": {
+    "path": "results\\desktop-windows-rc10-integrated\\synthetic-case.dino2t.json",
+    "sha256": "8b6e72a402edcc03ac896ca536ab6fff17d58ba78c5bd83453f787408a5a679d"
+  },
+  "rc10_zip": {
+    "path": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\Windows\\MotorSim-0.1.0-rc10-windows-x64-3ad53eef-trial-20261103T123310Z.zip",
+    "sha256": "7f7466d63b754b24328eee6016bdbbcf04ef8b59e1e6808234f0f9fc1d0ecf3c"
+  },
+  "results\\dino-commercial-readiness-v1\\acceptance\\receipt.json": {
+    "path": "results\\dino-commercial-readiness-v1\\acceptance\\receipt.json",
+    "sha256": "c5244bbadf21df03168352269118d059ce21c00073389e43a3df360bf8dc1a86"
+  }
+}

@@ -10803,7 +10803,7 @@
     },
     {
       "id": "DESKTOP-RC11-CORRECTIONS",
-      "state": "IN_PROGRESS",
+      "state": "BLOCKED_LOCAL",
       "description": "Verify rc10 review hypotheses; fix confirmed presentation defects and accept one integrated Windows candidate",
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_approved": true,
@@ -10822,10 +10822,19 @@
       "evidence": [
         "results/desktop-rc11-corrections/captures/rc10-exhaust-reopen.png",
         "results/desktop-rc11-corrections/captures/rc10-exhaust-history-occlusion.png",
-        "results/desktop-rc11-corrections/captures/rc10-csv30.png"
+        "results/desktop-rc11-corrections/captures/rc10-csv30.png",
+        "results/desktop-rc11-corrections/findings.md",
+        "results/desktop-rc11-corrections/acceptance.md",
+        "results/desktop-rc11-corrections/receipt.json"
       ],
-      "blocker": null,
-      "next_action": "Source checks then exactly one rc11 TRIAL build and real packaged acceptance; preserve rc7/rc9/rc10."
+      "blocker": "The single rc11 candidate retains P1 raw comparison/checkpoint codes and compressed docked history. Final fixes pass 18+3 source checks and real source GUI, but are not in that ZIP.",
+      "next_action": "Owner review of the matrix, source fixes and BLOCKED candidate; authorize one additional candidate only if desired, then focused packaged checks for H1/H10. No physics or new investigation.",
+      "resolution": "SOURCE_FIXED_WINDOWS_ACCEPTANCE_BLOCKED",
+      "commits": [
+        "bb6903cd3acf1067c83ca6dd1d692c9a4db6af05"
+      ],
+      "unblock_tasks": [],
+      "no_local_unblock_reason": "The owner authorized one new Windows candidate and it has been built. Testing the final fixes in a distribution requires authorization for another candidate; no further build or artificial diagnostic is started."
     }
   ],
   "audit_remediation_mode": false,
@@ -15206,6 +15215,12 @@
       "task": "DESKTOP-RC11-CORRECTIONS",
       "kind": "task",
       "summary": "Corrections verified: rc10 empty exhaust is visual occlusion; CSV30 works. Fixed UI labels, exact-RPM warnings, visible metrics, transient opt-in, compact access/history/plots, geometry precision. Source 73 PASS/1 SKIP; final precision/editor16 PASS. Preflight PASS; next single clean rc11 build."
+    },
+    {
+      "at": "2026-11-03T15:02:06+00:00",
+      "task": "DESKTOP-RC11-CORRECTIONS",
+      "kind": "task",
+      "summary": "rc11 single candidate built and tested: exact geometry/save, serial cancel and restore2 cycles, parallel4 COMPLETE20.344s, CSV30 exact PASS. Candidate remains BLOCKED: H1 codes and H10 dock compression. Final source fixes:18+3 PASS and real GUI; not repackaged, one-candidate allowance exhausted."
     }
   ],
   "legacy_gate_status": {

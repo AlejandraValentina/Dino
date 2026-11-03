@@ -1,0 +1,24 @@
+{
+  "name": "rc11-post-candidate-final",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_desktop_rc11_corrections.py",
+    "tests/test_desktop_rpm_curves.py"
+  ],
+  "started_at": "2026-11-03T14:50:35+00:00",
+  "finished_at": "2026-11-03T14:51:39+00:00",
+  "duration_s": 63.922,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-rc11-corrections\\source-tests\\rc11-post-candidate-final.log",
+  "log_lines": 2,
+  "log_bytes": 110,
+  "error_lines": [],
+  "tail": [
+    "..................                                                       [100%]",
+    "18 passed in 63.17s (0:01:03)"
+  ]
+}

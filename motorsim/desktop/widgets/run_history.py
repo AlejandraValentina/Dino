@@ -29,7 +29,7 @@ class RunHistoryWidget(QWidget):
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QTableWidget.SelectionMode.ExtendedSelection)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.table.setMinimumHeight(130);self.table.verticalHeader().setDefaultSectionSize(28)
+        self.table.setMinimumHeight(180);self.table.verticalHeader().setDefaultSectionSize(28)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.table,1)
         actions=QHBoxLayout();layout.addLayout(actions)

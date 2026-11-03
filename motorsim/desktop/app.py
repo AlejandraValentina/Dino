@@ -221,7 +221,8 @@ class DinoDesktopWindow(QMainWindow):
         elif not active:
             self.run_progress.setValue(0);self.run_progress.setFormat("Sin actividad")
             self.run_clock.setText("—")
-            self.checkpoint_state.setText(f"Checkpoint: {execution.checkpoint_summary or '—'}")
+            self.checkpoint_state.setText(f"Checkpoint: {state_label(execution.checkpoint_summary or '—')}")
+            self.checkpoint_state.setToolTip(execution.checkpoint_summary or '—')
     def _update_progress(self,row):
         self._update_strip()
     def set_workspace_mode(self,index):
@@ -241,9 +242,12 @@ class DinoDesktopWindow(QMainWindow):
         if visible:self.analysis_history.activate();self.analysis_history.refresh()
         self.explorer_dock.setVisible(visible)
         if visible:
-            self.explorer_dock.setFloating(self.height()<850)
+            # Docking can violate child minimums when the central form owns
+            # most of the available height. Keep this temporary explorer out
+            # of the editor layout at every supported size.
+            self.explorer_dock.setFloating(True)
             if self.explorer_dock.isFloating():
-                self.explorer_dock.resize(min(self.width()-30,1100),360)
+                self.explorer_dock.resize(min(self.width()-30,1200),420)
                 self.explorer_dock.move(self.x()+15,self.y()+180)
             else:self.resizeDocks([self.explorer_dock],[350],Qt.Orientation.Vertical)
 

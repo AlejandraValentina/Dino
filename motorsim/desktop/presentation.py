@@ -6,6 +6,8 @@ STATES = {
     'INSUFFICIENT_CYCLES':'Ciclos insuficientes', 'NOT_CONVERGED':'No convergida',
     'EXPLORATORY_COMPLETE_PERIODICITY_NOT_IDENTIFIED':'Terminada · sin periodicidad identificada',
     'EXPLORATORY_PARALLEL_POINT_SWEEP':'A/B terminado · revisar resultados',
+    'EXPLORATORY_CURVE_PARTIAL':'Curva exploratoria · periodicidad no confirmada',
+    'EXPLORATORY_CURVE_COMPLETE':'Curva exploratoria terminada',
     'CANCELLED_CHECKPOINTED':'Cancelada · checkpoint disponible',
     'INTERRUPTED_CHECKPOINTED':'Interrumpida · checkpoint disponible',
     'NUMERICAL_INVALID':'Inválido numéricamente', 'PERIOD_1':'Periódica observada · orden 1',

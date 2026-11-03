@@ -76,6 +76,10 @@ def test_primary_metrics_visible_and_results_have_no_outer_scroll():
     assert w.strip_more.isVisible() and w.strip_cancel.isVisible()
     assert w.strip_more.mapTo(w,QPoint()).x()+w.strip_more.width()<=w.width()
     assert state_label('TERMINADA · MAX_CYCLES_NONCONVERGED')=='TERMINADA · Límite de ciclos · no convergida'
+    w.pages[3].checkpoint_summary='4 puntos · EXPLORATORY_CURVE_PARTIAL'
+    w._update_strip()
+    assert 'EXPLORATORY_CURVE_PARTIAL' not in w.checkpoint_state.text()
+    assert 'EXPLORATORY_CURVE_PARTIAL' in w.checkpoint_state.toolTip()
     close(w)
 
 def test_historical_csv_companion_preserves_exact_thirty_points():
@@ -111,4 +115,27 @@ def test_exhaust_save_without_edit_preserves_full_precision_and_identity(tmp_pat
     assert identity(w.context.engine())==before
     path=tmp_path/'precision.json';save_project(path,w.context.project)
     assert escape_sections(load_project(path)['variants']['precision-synthetic'])[0]['length_mm']==83.123456789
+    close(w)
+
+def test_history_has_real_viewport_space_at_every_supported_size():
+    from PySide6.QtTest import QTest
+    w=window()
+    for width,height in ((960,630),(1360,900),(1920,1080)):
+        w.resize(width,height);APP.processEvents();w._toggle_explorer();QTest.qWait(100)
+        assert w.explorer_dock.isFloating()
+        assert w.analysis_history.table.viewport().height()>=120
+        w.explorer_dock.hide()
+    close(w)
+
+def test_engineering_comparison_translates_reason_but_preserves_original_code():
+    w=window();w.context.duplicate_variant(None,'B');p=w.results
+    rows=[dict(variant_id=name,rpm=3000,classification='MAX_CYCLES_NONCONVERGED',periodicity='INSUFFICIENT_CYCLES',brake_power_status='UNDEFINED',brake_power_reason='NO_PERIODICITY_TRANSIENT_ONLY') for name in ('base','B')]
+    p.dataset={'points':rows};p.variants.blockSignals(True);p.variants.clear()
+    for name in ('base','B'):
+        item=QListWidgetItem(name);item.setCheckState(Qt.CheckState.Checked);p.variants.addItem(item)
+    p.variants.blockSignals(False);p._update_engineering_compare()
+    cells=[p.compare_table.item(i,4) for i in range(p.compare_table.rowCount())]
+    assert any(c.text()=='Sin periodicidad · sólo transitorio' for c in cells)
+    assert all('NO_PERIODICITY_TRANSIENT_ONLY' not in c.text() for c in cells)
+    assert rows[0]['brake_power_reason']=='NO_PERIODICITY_TRANSIENT_ONLY'
     close(w)

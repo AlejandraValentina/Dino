@@ -1,0 +1,71 @@
+diff --git a/motorsim/desktop/app.py b/motorsim/desktop/app.py
+index 5cfb962..b01b21f 100644
+--- a/motorsim/desktop/app.py
++++ b/motorsim/desktop/app.py
+@@ -224 +224,2 @@ class DinoDesktopWindow(QMainWindow):
+-            self.checkpoint_state.setText(f"Checkpoint: {execution.checkpoint_summary or '—'}")
++            self.checkpoint_state.setText(f"Checkpoint: {state_label(execution.checkpoint_summary or '—')}")
++            self.checkpoint_state.setToolTip(execution.checkpoint_summary or '—')
+@@ -244 +245,4 @@ class DinoDesktopWindow(QMainWindow):
+-            self.explorer_dock.setFloating(self.height()<850)
++            # Docking can violate child minimums when the central form owns
++            # most of the available height. Keep this temporary explorer out
++            # of the editor layout at every supported size.
++            self.explorer_dock.setFloating(True)
+@@ -246 +250 @@ class DinoDesktopWindow(QMainWindow):
+-                self.explorer_dock.resize(min(self.width()-30,1100),360)
++                self.explorer_dock.resize(min(self.width()-30,1200),420)
+diff --git a/motorsim/desktop/presentation.py b/motorsim/desktop/presentation.py
+index 8708864..73b6180 100644
+--- a/motorsim/desktop/presentation.py
++++ b/motorsim/desktop/presentation.py
+@@ -8,0 +9,2 @@ STATES = {
++    'EXPLORATORY_CURVE_PARTIAL':'Curva exploratoria · periodicidad no confirmada',
++    'EXPLORATORY_CURVE_COMPLETE':'Curva exploratoria terminada',
+diff --git a/motorsim/desktop/results_page.py b/motorsim/desktop/results_page.py
+index 24abca6..d279b9e 100644
+--- a/motorsim/desktop/results_page.py
++++ b/motorsim/desktop/results_page.py
+@@ -476 +476 @@ class ResultsPage(QWidget):
+-                item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable);self.compare_table.setItem(i,j,item)
++                item=QTableWidgetItem(_state_label(value) if j==4 else str(value));item.setToolTip(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable);self.compare_table.setItem(i,j,item)
+diff --git a/motorsim/desktop/widgets/run_history.py b/motorsim/desktop/widgets/run_history.py
+index 45152c3..e2583dc 100644
+--- a/motorsim/desktop/widgets/run_history.py
++++ b/motorsim/desktop/widgets/run_history.py
+@@ -32 +32 @@ class RunHistoryWidget(QWidget):
+-        self.table.setMinimumHeight(130);self.table.verticalHeader().setDefaultSectionSize(28)
++        self.table.setMinimumHeight(180);self.table.verticalHeader().setDefaultSectionSize(28)
+diff --git a/tests/test_desktop_rc11_corrections.py b/tests/test_desktop_rc11_corrections.py
+index e81ecbe..310e0ac 100644
+--- a/tests/test_desktop_rc11_corrections.py
++++ b/tests/test_desktop_rc11_corrections.py
+@@ -78,0 +79,4 @@ def test_primary_metrics_visible_and_results_have_no_outer_scroll():
++    w.pages[3].checkpoint_summary='4 puntos · EXPLORATORY_CURVE_PARTIAL'
++    w._update_strip()
++    assert 'EXPLORATORY_CURVE_PARTIAL' not in w.checkpoint_state.text()
++    assert 'EXPLORATORY_CURVE_PARTIAL' in w.checkpoint_state.toolTip()
+@@ -114,0 +119,23 @@ def test_exhaust_save_without_edit_preserves_full_precision_and_identity(tmp_pat
++
++def test_history_has_real_viewport_space_at_every_supported_size():
++    from PySide6.QtTest import QTest
++    w=window()
++    for width,height in ((960,630),(1360,900),(1920,1080)):
++        w.resize(width,height);APP.processEvents();w._toggle_explorer();QTest.qWait(100)
++        assert w.explorer_dock.isFloating()
++        assert w.analysis_history.table.viewport().height()>=120
++        w.explorer_dock.hide()
++    close(w)
++
++def test_engineering_comparison_translates_reason_but_preserves_original_code():
++    w=window();w.context.duplicate_variant(None,'B');p=w.results
++    rows=[dict(variant_id=name,rpm=3000,classification='MAX_CYCLES_NONCONVERGED',periodicity='INSUFFICIENT_CYCLES',brake_power_status='UNDEFINED',brake_power_reason='NO_PERIODICITY_TRANSIENT_ONLY') for name in ('base','B')]
++    p.dataset={'points':rows};p.variants.blockSignals(True);p.variants.clear()
++    for name in ('base','B'):
++        item=QListWidgetItem(name);item.setCheckState(Qt.CheckState.Checked);p.variants.addItem(item)
++    p.variants.blockSignals(False);p._update_engineering_compare()
++    cells=[p.compare_table.item(i,4) for i in range(p.compare_table.rowCount())]
++    assert any(c.text()=='Sin periodicidad · sólo transitorio' for c in cells)
++    assert all('NO_PERIODICITY_TRANSIENT_ONLY' not in c.text() for c in cells)
++    assert rows[0]['brake_power_reason']=='NO_PERIODICITY_TRANSIENT_ONLY'
++    close(w)
