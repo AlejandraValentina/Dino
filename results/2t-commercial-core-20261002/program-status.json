@@ -10778,7 +10778,9 @@
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "owner_approved": true,
-      "commits": [],
+      "commits": [
+        "3ad53eefbfe879322e2a9c3eefddf65e01b9a7bb"
+      ],
       "write_scope": [
         "motorsim/desktop/engine_page.py",
         "motorsim/desktop/exhaust_page.py",
@@ -10789,11 +10791,15 @@
       ],
       "evidence": [
         "results/desktop-windows-rc10-integrated/storage-preflight.json",
-        "results/desktop-windows-rc10-integrated/dependencies.txt"
+        "results/desktop-windows-rc10-integrated/dependencies.txt",
+        "results/desktop-windows-rc10-integrated/acceptance.md",
+        "results/desktop-windows-rc10-integrated/receipt.json",
+        "results/desktop-windows-rc10-integrated/packaged-verification.json"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "next_action": "Complete source checks, then one rc10 build and packaged GUI acceptance. Preserve rc7/rc9; no physical or experimental-default changes."
+      "next_action": "Integrated rc10 Windows acceptance complete: READY_TRIAL. Candidate remains local for owner review; no rebuild/publication or further packaging diagnostics.",
+      "resolution": "READY_TRIAL"
     }
   ],
   "audit_remediation_mode": false,
@@ -15156,6 +15162,12 @@
       "task": "DESKTOP-WINDOWS-INTEGRATED-RC10",
       "kind": "task",
       "summary": "Fuente RC10: 66 PASS/1 SKIP y 2 pruebas focales PASS; GUI compacta fuente comprobada. Preflight almacenamiento/dependencias PASS. Se fija commit y copia limpia para un unico candidato Windows integrado; aceptacion del EXE pendiente."
+    },
+    {
+      "at": "2026-11-03T12:57:16+00:00",
+      "task": "DESKTOP-WINDOWS-INTEGRATED-RC10",
+      "kind": "task",
+      "summary": "rc10 READY_TRIAL: one clean Windows build, 66 PASS/1 SKIP plus focused tests; packaged GUI creation/persistence, intake-transfer separation, compact exhaust, cancellation/exact checkpoint restore, four real parallel A/B points, CSV30 roundtrip and three resolutions PASS. No physical changes or publication."
     }
   ],
   "legacy_gate_status": {

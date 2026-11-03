@@ -1,0 +1,27 @@
+[
+  {
+    "ProcessId": 9428,
+    "ParentProcessId": 20048,
+    "CommandLine": "\"C:\\Users\\ageribon.MIDES\\Dino-artifacts\\Windows\\MotorSim-0.1.0-rc10-windows-x64-3ad53eef-trial-20261103T123310Z\\MotorSim\\Dino2T.exe\" "
+  },
+  {
+    "ProcessId": 21392,
+    "ParentProcessId": 9428,
+    "CommandLine": "\"C:\\Users\\ageribon.MIDES\\Dino-artifacts\\Windows\\MotorSim-0.1.0-rc10-windows-x64-3ad53eef-trial-20261103T123310Z\\MotorSim\\Dino2T.exe\" \"--multiprocessing-fork\" \"parent_pid=9428\" \"pipe_handle=7304\""
+  },
+  {
+    "ProcessId": 18284,
+    "ParentProcessId": 9428,
+    "CommandLine": "\"C:\\Users\\ageribon.MIDES\\Dino-artifacts\\Windows\\MotorSim-0.1.0-rc10-windows-x64-3ad53eef-trial-20261103T123310Z\\MotorSim\\Dino2T.exe\" \"--multiprocessing-fork\" \"parent_pid=9428\" \"pipe_handle=6844\""
+  },
+  {
+    "ProcessId": 1800,
+    "ParentProcessId": 9428,
+    "CommandLine": "\"C:\\Users\\ageribon.MIDES\\Dino-artifacts\\Windows\\MotorSim-0.1.0-rc10-windows-x64-3ad53eef-trial-20261103T123310Z\\MotorSim\\Dino2T.exe\" \"--multiprocessing-fork\" \"parent_pid=9428\" \"pipe_handle=7000\""
+  },
+  {
+    "ProcessId": 16704,
+    "ParentProcessId": 9428,
+    "CommandLine": "\"C:\\Users\\ageribon.MIDES\\Dino-artifacts\\Windows\\MotorSim-0.1.0-rc10-windows-x64-3ad53eef-trial-20261103T123310Z\\MotorSim\\Dino2T.exe\" \"--multiprocessing-fork\" \"parent_pid=9428\" \"pipe_handle=5368\""
+  }
+]
