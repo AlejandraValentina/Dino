@@ -6,7 +6,7 @@ import math
 from PySide6.QtCore import QPointF, Qt, Signal
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QLabel,QTableWidget,QTableWidgetItem,
-    QHeaderView,QPushButton,QMessageBox,QComboBox,QGroupBox,QInputDialog,QAbstractItemView,QSplitter)
+    QHeaderView,QPushButton,QMessageBox,QComboBox,QGroupBox,QInputDialog,QAbstractItemView,QSplitter,QTabWidget,QScrollArea,QFrame)
 
 from ..engine_configuration import identity,validate
 from ..engine_variants import (escape_sections,replace_escape_sections,compare_configurations,
@@ -154,6 +154,18 @@ class ExhaustPage(QWidget):
         actions=QHBoxLayout();root.addLayout(actions)
         self.save_current_button=QPushButton("Guardar en variante actual");self.save_current_button.clicked.connect(self.save_current);actions.addWidget(self.save_current_button)
         self.apply_button=QPushButton("Guardar como nueva variante…");self.apply_button.setObjectName("primaryAction");self.apply_button.clicked.connect(self.save_as_new);actions.addWidget(self.apply_button)
+        self.view_tabs=QTabWidget();self.view_tabs.setObjectName('exhaustViews')
+        profile_page=QWidget();profile_layout=QVBoxLayout(profile_page);profile_layout.setContentsMargins(0,0,0,0)
+        for widget in (self.profile_split,self.selection_notice):root.removeWidget(widget);profile_layout.addWidget(widget)
+        self.view_tabs.addTab(profile_page,'Perfil y cotas A/B')
+        root.removeWidget(segment_group);self.view_tabs.addTab(segment_group,'Tabla de tramos')
+        advanced=QWidget();advanced_layout=QVBoxLayout(advanced)
+        for widget in (station_group,self.mesh_group):root.removeWidget(widget);advanced_layout.addWidget(widget)
+        advanced_layout.addStretch()
+        advanced_scroll=QScrollArea();advanced_scroll.setWidgetResizable(True);advanced_scroll.setFrameShape(QFrame.Shape.NoFrame);advanced_scroll.setWidget(advanced)
+        self.view_tabs.addTab(advanced_scroll,'Avanzado')
+        root.removeItem(actions);root.addWidget(self.view_tabs,1);root.addLayout(actions)
+        self.table.setMinimumHeight(150)
         self.context.changed.connect(self.refresh);self.context.variant_changed.connect(self.refresh);self.refresh()
 
     def _refresh_overlay_options(self):
@@ -229,8 +241,9 @@ class ExhaustPage(QWidget):
         self.stations.blockSignals(False)
 
     def _toggle_stations(self):
+        self.view_tabs.setCurrentIndex(2)
         visible=not self.station_group.isVisible()
-        self.station_group.setVisible(visible);self.station_toggle.setText("Estaciones ▾" if visible else "Estaciones avanzadas ▸")
+        self.station_group.setVisible(visible);self.stations.setVisible(visible);self.station_toggle.setText("Estaciones ▾" if visible else "Estaciones avanzadas ▸")
 
     def _toggle_mesh(self,expanded):
         self.mesh_notice.setVisible(expanded);self.mesh_table.setVisible(expanded)

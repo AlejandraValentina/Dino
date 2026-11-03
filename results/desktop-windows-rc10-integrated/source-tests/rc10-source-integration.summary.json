@@ -1,0 +1,30 @@
+{
+  "name": "rc10-source-integration",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_dino_desktop.py",
+    "tests/test_dino_commercial_desktop_v3.py",
+    "tests/test_desktop_model_editor_v2.py",
+    "tests/test_desktop_rc10_integration.py",
+    "tests/test_distribution.py",
+    "tests/test_windows_integrated_delivery_v1.py",
+    "tests/test_desktop_rpm_curves.py",
+    "tests/test_engineering_desktop_result.py"
+  ],
+  "started_at": "2026-11-03T12:26:14+00:00",
+  "finished_at": "2026-11-03T12:30:58+00:00",
+  "duration_s": 284.063,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-windows-rc10-integrated\\source-tests\\rc10-source-integration.log",
+  "log_lines": 2,
+  "log_bytes": 122,
+  "error_lines": [],
+  "tail": [
+    "........................s..........................................      [100%]",
+    "66 passed, 1 skipped in 282.96s (0:04:42)"
+  ]
+}

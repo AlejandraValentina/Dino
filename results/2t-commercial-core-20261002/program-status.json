@@ -10768,6 +10768,32 @@
       ],
       "qualification": "SELF_REVIEW; real GUI at 980x680/1360x900/1920x1080; 42 PASS/1 SKIP regression plus 9 final UI and 6 final synchronization checks. Source acceptance only; no new physics, campaign, build or predictive claim.",
       "next_action": "Source vertical complete. Remaining product improvements: separate intake/transfer duct presentation and reduce compact exhaust scrolling. Unsupported geometric maps and physics stay out of scope; scientific/data/budget blockers unchanged."
+    },
+    {
+      "id": "DESKTOP-WINDOWS-INTEGRATED-RC10",
+      "description": "Owner-authorized closure of intake/transfer and compact exhaust; one integrated Windows TRIAL candidate and real packaged acceptance",
+      "dependencies": [
+        "DESKTOP-MODEL-EDITOR-V2"
+      ],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "owner_approved": true,
+      "commits": [],
+      "write_scope": [
+        "motorsim/desktop/engine_page.py",
+        "motorsim/desktop/exhaust_page.py",
+        "motorsim/desktop/app.py",
+        "motorsim/runtime.py",
+        "tests/test_desktop_rc10_integration.py",
+        "results/desktop-windows-rc10-integrated/"
+      ],
+      "evidence": [
+        "results/desktop-windows-rc10-integrated/storage-preflight.json",
+        "results/desktop-windows-rc10-integrated/dependencies.txt"
+      ],
+      "state": "IN_PROGRESS",
+      "blocker": null,
+      "next_action": "Complete source checks, then one rc10 build and packaged GUI acceptance. Preserve rc7/rc9; no physical or experimental-default changes."
     }
   ],
   "audit_remediation_mode": false,
@@ -15124,6 +15150,12 @@
       "task": "DESKTOP-MODEL-EDITOR-V2",
       "kind": "task",
       "summary": "Cierre documental de MODELO V2: evidencia GUI y proyecto preservados; sincronizacion final 6 PASS y regresion UI 9 PASS, ademas de 42 PASS/1 SKIP. Sin repetir pruebas, build ni campana. Commit local de componentes, grados y escape; cambios ajenos separados."
+    },
+    {
+      "at": "2026-11-03T12:32:03+00:00",
+      "task": "DESKTOP-WINDOWS-INTEGRATED-RC10",
+      "kind": "task",
+      "summary": "Fuente RC10: 66 PASS/1 SKIP y 2 pruebas focales PASS; GUI compacta fuente comprobada. Preflight almacenamiento/dependencias PASS. Se fija commit y copia limpia para un unico candidato Windows integrado; aceptacion del EXE pendiente."
     }
   ],
   "legacy_gate_status": {

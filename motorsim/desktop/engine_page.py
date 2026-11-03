@@ -106,7 +106,8 @@ class EnginePage(QWidget):
         self.ducts=QTableWidget(0,4);self.ducts.setObjectName("editableIntakeTransferDucts")
         self.ducts.setHorizontalHeaderLabels(["Conducto","Rol","Longitud (mm)","Diámetro (mm)"])
         self.ducts.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.ducts.cellChanged.connect(lambda *_:self._mark_component(4,"modificado"));intake_layout.addWidget(self.ducts)
+        self.intake_duct_slot=QWidget();self.intake_duct_layout=QVBoxLayout(self.intake_duct_slot);self.intake_duct_layout.setContentsMargins(0,0,0,0);self.intake_duct_layout.addWidget(self.ducts)
+        self.ducts.cellChanged.connect(self._duct_changed);intake_layout.addWidget(self.intake_duct_slot)
         self.reed_group=QGroupBox("Láminas · modelo cuasiestático activo");reed_layout=QVBoxLayout(self.reed_group)
         reed_layout.addWidget(QLabel("Masa, amortiguamiento y restitución no se editan: la configuración actual no usa el vínculo dinámico de láminas."))
         self.reeds=QTableWidget(0,6);self.reeds.setObjectName("effectiveStaticReedParameters")
@@ -183,7 +184,11 @@ class EnginePage(QWidget):
         self.timing.show();summary_layout.addWidget(self.timing)
         self.component_tabs.addTab(summary_page,'Resumen')
         self.component_tabs.addTab(advanced_page,'Datos y operación avanzados')
-        self.component_names=('Cilindro y culata','Lumbreras y transferencias','Pérdidas','Combustión','Admisión y conductos','Cárter','Resumen','Avanzado')
+        transfer_page=QWidget();transfer_layout=QVBoxLayout(transfer_page)
+        transfer_note=QLabel('Conductos de transferencia · sección circular constante. Longitud y diámetro se aplican al modelo existente; se conserva la malla.');transfer_note.setWordWrap(True);transfer_layout.addWidget(transfer_note)
+        self.transfer_duct_slot=QWidget();self.transfer_duct_layout=QVBoxLayout(self.transfer_duct_slot);self.transfer_duct_layout.setContentsMargins(0,0,0,0);transfer_layout.addWidget(self.transfer_duct_slot);transfer_layout.addStretch()
+        self.component_tabs.addTab(transfer_page,'Conductos de transferencia')
+        self.component_names=('Cilindro y culata','Lumbreras y transferencias','Pérdidas','Combustión','Admisión','Cárter','Resumen','Avanzado','Conductos de transferencia')
         self.geometry_group.setTitle('Cilindro y culata · compresión y volumen derivados')
         self.cylinder_diagram.setMinimumHeight(80);self.cylinder_diagram.setMaximumHeight(90)
         self.derived.setParent(cylinder_page);cylinder_layout.insertWidget(1,self.derived)
@@ -200,7 +205,20 @@ class EnginePage(QWidget):
         for control in self.controls.values():control.valueChanged.connect(self._preview_geometry)
         self.intake_control.currentIndexChanged.connect(self._preview_geometry)
         self._angle_error=None
+        self.component_tabs.currentChanged.connect(self._duct_section_changed)
         self.context.changed.connect(self.refresh);self.refresh()
+
+    def _duct_section_changed(self,index):
+        if index not in (4,8):return
+        target=self.intake_duct_layout if index==4 else self.transfer_duct_layout
+        target.addWidget(self.ducts)
+        role='intake' if index==4 else 'transfer'
+        for row in range(self.ducts.rowCount()):self.ducts.setRowHidden(row,self.ducts.item(row,1).text()!=role)
+        self.ducts.setMaximumHeight(135 if index==4 else 240)
+
+    def _duct_changed(self,row,_column):
+        item=self.ducts.item(row,1)
+        self._mark_component(8 if item and item.text()=='transfer' else 4,'modificado')
 
     def refresh(self):
         self.loading=True
@@ -238,6 +256,7 @@ class EnginePage(QWidget):
                         item.setToolTip("La malla representa una sección variable; esta pantalla sólo edita conductos de sección circular constante.")
                     self.ducts.setItem(row,col,item)
             self.ducts.blockSignals(False)
+            self._duct_section_changed(self.component_tabs.currentIndex())
             petals=n.get("reed_petals",[]);self.reeds.blockSignals(True);self.reeds.setRowCount(len(petals))
             for row,petal in enumerate(petals):
                 values=(petal["id"],petal["pressure_area_m2"]*1e4,petal["effective_width_m"]*1000,petal["stiffness_n_m"],petal["lift_stop_m"]*1000,petal["discharge_coefficient"])

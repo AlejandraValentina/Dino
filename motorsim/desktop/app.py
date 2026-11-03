@@ -82,13 +82,13 @@ class DinoDesktopWindow(QMainWindow):
         self.project_tree=QTreeWidget();self.project_tree.setHeaderHidden(True);self.project_tree.setMaximumHeight(120);self.project_tree.itemClicked.connect(self._project_tree_clicked)
         for index in range(4):
             title=PAGES[index][0];page=self.pages[index]
-            if index==0:
+            if index in (0,1):
                 self.component_stack.addWidget(page)
                 continue
             scroll=QScrollArea();scroll.setWidgetResizable(True);scroll.setFrameShape(QScrollArea.Shape.NoFrame);scroll.setWidget(page)
             self.component_stack.addWidget(scroll)
             if index==3:self.execution_scroll=scroll
-        for label in ("Cilindro y culata","Lumbreras y transferencias","Escape","Pérdidas","Combustión","Proyecto","Admisión y conductos","Cárter","Resumen","Avanzado"):
+        for label in ("Cilindro y culata","Lumbreras y transferencias","Escape","Pérdidas","Combustión","Proyecto","Admisión","Cárter","Resumen","Avanzado","Conductos de transferencia"):
             self.component_nav.addTab(label)
         # The section bar is the only visible navigation inside Design. The
         # EnginePage keeps its stack as an implementation detail, but its
@@ -97,7 +97,7 @@ class DinoDesktopWindow(QMainWindow):
         self.design_layout=QVBoxLayout();self.design_layout.setContentsMargins(14,0,14,8);self.design_layout.setSpacing(7)
         chooser=QHBoxLayout();chooser.addWidget(QLabel('Componente del motor'))
         self.model_selector=QComboBox();self.model_selector.setObjectName('modelComponentSelector');self.model_selector.setMinimumWidth(270)
-        for index in (8,0,7,6,1,2,4,3,5,9):self.model_selector.addItem(self.component_nav.tabText(index),index)
+        for index in (8,0,7,6,10,1,2,4,3,5,9):self.model_selector.addItem(self.component_nav.tabText(index),index)
         self.model_selector.currentIndexChanged.connect(lambda i:self.component_nav.setCurrentIndex(self.model_selector.itemData(i)))
         chooser.addWidget(self.model_selector);chooser.addStretch()
         self.design_workspace.setLayout(self.design_layout);self.design_layout.addLayout(chooser);self.component_nav.hide();self.design_layout.addWidget(self.component_stack,1)
@@ -238,9 +238,9 @@ class DinoDesktopWindow(QMainWindow):
     def _component_selected(self,index):
         selector_index=self.model_selector.findData(index)
         self.model_selector.blockSignals(True);self.model_selector.setCurrentIndex(selector_index);self.model_selector.blockSignals(False)
-        if index in (0,1,3,4,6,7,8,9):
+        if index in (0,1,3,4,6,7,8,9,10):
             self.component_stack.setCurrentIndex(0)
-            self.pages[0].component_tabs.setCurrentIndex({0:0,1:1,3:2,4:3,6:4,7:5,8:6,9:7}[index])
+            self.pages[0].component_tabs.setCurrentIndex({0:0,1:1,3:2,4:3,6:4,7:5,8:6,9:7,10:8}[index])
         elif index==2:self.component_stack.setCurrentIndex(1)
         elif index==5:self.component_stack.setCurrentIndex(2)
 
@@ -261,11 +261,11 @@ class DinoDesktopWindow(QMainWindow):
     def _run_started(self):
         self.pages[3].status_text="CORRIENDO";self._update_strip()
     def _refresh_component_states(self):
-        labels=("Cilindro y culata","Lumbreras y transferencias","Escape","Pérdidas","Combustión","Proyecto","Admisión y conductos","Cárter","Resumen","Avanzado")
+        labels=("Cilindro y culata","Lumbreras y transferencias","Escape","Pérdidas","Combustión","Proyecto","Admisión","Cárter","Resumen","Avanzado","Conductos de transferencia")
         validation=self.pages[0].validation.text().lower()
         valid="no se pudo presentar" not in validation and "rechazada" not in validation
-        engine_status=[self.pages[0].component_tabs.tabText(i).lower() for i in range(8)]
-        status_by_tab=(engine_status[0],engine_status[1],self.pages[1].edit_state,engine_status[2],engine_status[3],"complete",engine_status[4],engine_status[5],engine_status[6],engine_status[7])
+        engine_status=[self.pages[0].component_tabs.tabText(i).lower() for i in range(9)]
+        status_by_tab=(engine_status[0],engine_status[1],self.pages[1].edit_state,engine_status[2],engine_status[3],"complete",engine_status[4],engine_status[5],engine_status[6],engine_status[7],engine_status[8])
         for i in range(self.component_nav.count()):
             title=labels[i] if i<len(labels) else PAGES[i][0]
             state=status_by_tab[i] if i<len(status_by_tab) else "complete"
