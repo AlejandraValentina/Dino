@@ -45,3 +45,10 @@ integración funcional TRIAL, no autoriza su publicación ni implica validación
 experimental o predictiva. Las capturas incluyen una inspección de tooltip para
 confirmar que el dato técnico original sigue accesible; la clasificación visible
 en la tabla permanece traducida.
+
+## Cierre del dueño
+
+El dueño aceptó rc12 como **READY_TRIAL para pruebas internas** el 2026-11-03.
+La etapa Desktop queda cerrada. El ZIP, hash, capturas, pruebas y metadatos de
+construcción quedan preservados; no se generará rc13 ni se iniciará otro
+rediseño sin un defecto concreto que lo justifique.

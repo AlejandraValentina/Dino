@@ -1,7 +1,7 @@
 {
   "schema": "MOTORSIM_PROGRAM_STATUS_V2",
   "program": "MOTORSIM_2T_COMMERCIAL_CORE",
-  "recorded_at": "2026-10-26T12:02:37+00:00",
+  "recorded_at": "2026-11-03T16:05:35+00:00",
   "continuation_baseline": "401d8d70a3c06a85c75328ed3e83af3d39c7c88c",
   "status_capture_head": "f2c6926",
   "overall": "MOTORSIM_2T_COMMERCIAL_CORE_PARTIAL",
@@ -8496,7 +8496,7 @@
         "results/predictive-reliability-v1/cahoon-mk1-dataset-v1/performance.csv",
         "results/experimental-data-readiness-v1/cahoon-archive-request-ready-to-send.eml"
       ],
-      "next_action": "Do not configure/run MK.1 with conflicting geometry. The authorized archival email is prepared at results/experimental-data-readiness-v1/cahoon-archive-request-ready-to-send.eml, but no email connector is installed in this session and nothing was sent. Validation remains blocked pending coherent input data and numerical uncertainty.",
+      "next_action": "Prioridad: adquisición experimental. La solicitud archivística autorizada a McClay Library está lista en results/experimental-data-readiness-v1/cahoon-archive-request-ready-to-send.eml; no hay conector de correo configurado y no se envió. Siguiente paso efectivo: enviar por un cliente autorizado y evaluar los registros recibidos; hasta entonces, no configurar ni ejecutar MK.1.",
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "orchestrator/physics/verification",
       "write_scope": [
@@ -10108,7 +10108,7 @@
         "results/predictive-reliability-v1/e2b-brent-176-v1/preflight-attempt-03.json",
         "DINO_ARTIFACT_ROOT/predictive-reliability-v1/e2b-brent-176-v1/attempt-03/comparison.json"
       ],
-      "next_action": "Remain BLOCKED_LOCAL; do not resume E1.3. Keep Brent opt-in. No further 176 computation is authorized or recommended against the observed <2x wall-time benefit. Any renewed E2 scaling work requires new budget authorization. The pending independent unblock is experimental-data acquisition; QUB request is prepared but no email connector is installed.",
+      "next_action": "Mantener BLOCKED_LOCAL: el dueño eligió B (mantener E1.3 bloqueado). Sin nuevo presupuesto ni reanudación. Brent continúa opt-in; GCI no admisible.",
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "physics/verification",
       "write_scope": [
@@ -10826,22 +10826,21 @@
         "results/desktop-rc11-corrections/findings.md",
         "results/desktop-rc11-corrections/acceptance.md",
         "results/desktop-rc11-corrections/receipt.json",
-        "results/desktop-rc11-corrections/final-residual-tests.txt",
-        "results/desktop-rc11-corrections/captures/source-post-history-1360.png",
         "results/desktop-rc12-acceptance/acceptance.md",
         "results/desktop-rc12-acceptance/receipt.json",
         "results/desktop-rc12-acceptance/build/rc12-single-windows-candidate.summary.json",
         "results/desktop-rc12-acceptance/captures/08-history-all-1360.png",
         "results/desktop-rc12-acceptance/captures/11-comparison-tab.png",
-        "results/desktop-rc12-acceptance/captures/14-exhaust-editor.png"
+        "results/desktop-rc12-acceptance/captures/14-exhaust-editor.png",
+        "docs/guides/dino2t-prueba-practica-motor-real-rc12.md"
       ],
       "blocker": null,
-      "next_action": "rc12 candidate accepted functionally as TRIAL. Do not build again or publish; scientific validation remains dependent on external experimental data.",
+      "next_action": "Desktop rc12 cerrado y aceptado por el dueño para pruebas internas; no generar rc13 ni rediseñar sin defecto concreto.",
       "resolution": "READY_TRIAL",
       "commits": [
         "bb6903cd3acf1067c83ca6dd1d692c9a4db6af05",
-        "5e0a07c",
-        "02f3ce8677cda592521fd554104a9ee9e04d4c10"
+        "02f3ce8677cda592521fd554104a9ee9e04d4c10",
+        "4813bad"
       ],
       "unblock_tasks": []
     }
@@ -12492,6 +12491,37 @@
         "v2_artifacts_unchanged": true,
         "execution_authorized_for_further_runs": false
       }
+    },
+    {
+      "id": "PRED-E1.3-176-COMPUTE-DECISION",
+      "status": "RESOLVED",
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "decision_id": "PRED-E1.3-176-COMPUTE-DECISION",
+      "question": "E1.3 remains blocked: the authorized 176 Brent comparison measured 1.317x wall speedup on the only clean paired cycle (114.785 s bisection vs 87.168 s Brent), and the solver timer omitted rejected proposals, so three cycles cannot be shown to fit the remaining 230.1685 s. Should a new bounded 176 compute budget be authorized, or should E1.3 stay blocked while local work shifts to validation readiness/product?",
+      "options": [
+        {
+          "id": "A",
+          "label": "AUTHORIZE_NEW_176_BUDGET",
+          "consequence": "New versioned compute authorization; complete a paired three-cycle comparison and re-cost E1.3. The only clean paired cycle is 1.317x; at the observed ~87 s Brent wall cycle, three cycles need at least ~261.3 s wall before setup/rejected-proposal overhead, while only 230.1685 s of E1.3 solver budget remains. Because the solver timer omitted rejected proposals, no fit is demonstrated. No guarantee of a 2x result, periodic state, or GCI."
+        },
+        {
+          "id": "B",
+          "label": "KEEP_E1.3_BLOCKED",
+          "consequence": "No further 176 compute. Preserve the transient 88/176 evidence, Brent opt-in and the 1.317x result. Shift local effort to validation data readiness/product and keep periodicity, GCI and predictive claims unclaimed."
+        }
+      ],
+      "evidence": [
+        "results/predictive-reliability-v1/e2b-brent-176-v1/decision.md",
+        "results/predictive-reliability-v1/e2b-brent-176-v1/preflight.json",
+        "results/predictive-reliability-v1/e2b-brent-176-v1/preflight-attempt-03.json",
+        "DINO_ARTIFACT_ROOT/predictive-reliability-v1/e2b-brent-176-v1/attempt-03/comparison.json",
+        "results/predictive-reliability-v1/e2b-local-candidate-v1/delivery-receipt.md"
+      ],
+      "recommendation": "B: do not spend new compute on the observed 1.317x path. Reopen only with a new bounded budget and a specific reason to expect >2x including rejected proposals.",
+      "selected_option": "B",
+      "resolved_at": "2026-11-03T16:05:35+00:00",
+      "owner_instruction": "2026-11-03: no reabrir E1.3 ni ampliar presupuestos numéricos sin autorización.",
+      "resolution": "KEEP_E1_3_BLOCKED_NO_ADDITIONAL_COMPUTE"
     }
   ],
   "hard_stop": null,
@@ -15202,6 +15232,12 @@
       "summary": "Cierre documental de MODELO V2: evidencia GUI y proyecto preservados; sincronizacion final 6 PASS y regresion UI 9 PASS, ademas de 42 PASS/1 SKIP. Sin repetir pruebas, build ni campana. Commit local de componentes, grados y escape; cambios ajenos separados."
     },
     {
+      "at": "2026-11-03T12:27:29+00:00",
+      "task": "DESKTOP-WINDOWS-INTEGRATED-RC10",
+      "kind": "task",
+      "summary": "RC10 autorizado: separar admision/transferencia con un editor compartido y escape compacto con acciones fijas. Preflight almacenamiento y dependencias PASS; pruebas focales 2 PASS. Regresion integrada en curso. Un unico build pendiente; rc7/rc9 y fisica protegidas."
+    },
+    {
       "at": "2026-11-03T12:32:03+00:00",
       "task": "DESKTOP-WINDOWS-INTEGRATED-RC10",
       "kind": "task",
@@ -15232,16 +15268,22 @@
       "summary": "rc11 single candidate built and tested: exact geometry/save, serial cancel and restore2 cycles, parallel4 COMPLETE20.344s, CSV30 exact PASS. Candidate remains BLOCKED: H1 codes and H10 dock compression. Final source fixes:18+3 PASS and real GUI; not repackaged, one-candidate allowance exhausted."
     },
     {
-      "at": "2026-11-03T18:00:00+00:00",
+      "at": "2026-11-03T16:05:35+00:00",
       "task": "DESKTOP-RC11-CORRECTIONS",
       "kind": "task",
-      "summary": "Owner authorized one rc12 Windows candidate from 5e0a07c. Revalidated packaged deltas in source: 18 focused tests pass; 1360x900 history shows five rows and readable states. Storage and all 17 pinned build dependencies pass."
+      "summary": "Dueño acepta rc12 READY_TRIAL para pruebas internas y cierra Desktop. Hash, paquete, pruebas, capturas y build limpio preservados; no rc13. Guía práctica separa verificación funcional de validación física."
     },
     {
-      "at": "2026-11-03T18:40:00+00:00",
-      "task": "DESKTOP-RC11-CORRECTIONS",
-      "kind": "task",
-      "summary": "rc12 READY_TRIAL: one clean Windows x64 candidate from 02f3ce8, SHA-256 recorded. 18 focal tests pass; packaged Dino2T GUI verifies project open, five-row history at 1360x900, translated comparison/result states and exhaust editor. Existing rc11 packaged evidence reused for save/AB/cancel/checkpoint restore/CSV; no new solver run."
+      "at": "2026-11-03T16:05:35+00:00",
+      "task": "PRED-E1.3-176-COMPUTE-DECISION",
+      "kind": "owner_decision",
+      "summary": "Dueño decide mantener E1.3 bloqueado; sin nuevo presupuesto, corridas ni GCI. Prioridad científica: adquisición experimental; solicitud QUB lista, pero no hay conector de correo configurado y no se envió."
+    },
+    {
+      "at": "2026-11-03T16:06:28+00:00",
+      "task": "PRED-VALIDATION",
+      "kind": "unblock_review",
+      "summary": "Revisadas candidatas tras cerrar Desktop: no hay trabajo científico local desbloqueado dentro de las restricciones. Adquisición documental MK.1 es el siguiente paso, vía solicitud QUB autorizada ya preparada; no existe conector de correo, no se envió. Sin nuevas tareas exploratorias; datos recibidos habilitarán intake y reevaluación de geometría/condiciones."
     }
   ],
   "legacy_gate_status": {
@@ -15336,7 +15378,7 @@
   },
   "campaigns_started": 1,
   "campaign_runtime_status": "IMPL2_EXTENSION_COMPLETE_WITH_NUMERICAL_INVALID_POINTS",
-  "updated_at": "2026-10-29T14:24:30Z",
+  "updated_at": "2026-10-30T00:54:16+00:00",
   "full_rpm_sweep_impl2_campaign_readiness": {
     "state": "READY_FOR_CAMPAIGN_DECISION",
     "classification": "FULL_RPM_SWEEP_IMPL2_READY_FOR_CAMPAIGN_DECISION",

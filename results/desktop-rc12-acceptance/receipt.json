@@ -2,6 +2,8 @@
   "schema": "DINO_DESKTOP_WINDOWS_ACCEPTANCE_V1",
   "version": "0.1.0-rc12",
   "classification": "READY_TRIAL",
+  "owner_acceptance": "Accepted for internal testing; Desktop stage closed on 2026-11-03",
+  "no_rc13_authorized": true,
   "source_commit": "02f3ce8677cda592521fd554104a9ee9e04d4c10",
   "source_dirty": false,
   "trial": true,
