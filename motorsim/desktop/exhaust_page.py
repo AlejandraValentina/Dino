@@ -28,18 +28,31 @@ def _number(text: str, label: str) -> float:
 
 class ExhaustProfile(QWidget):
     """Dimensionally scaled (equal mm/px on both axes) conical profile."""
+    section_selected=Signal(int)
     def __init__(self,parent=None):
-        super().__init__(parent);self.sections=[];self.overlay=[];self.refinements=[];self.changed_sections=set();self.compact=False;self.setMinimumHeight(340)
+        super().__init__(parent);self.sections=[];self.overlay=[];self.refinements=[];self.changed_sections=set();self.selected_section=0;self.compact=False;self.setMinimumHeight(190)
 
     def set_sections(self,sections,refinements=None,overlay=None,changed_sections=None):
         self.sections=deepcopy(sections);self.overlay=deepcopy(overlay or [])
         self.refinements=list(refinements or [1]*len(sections));self.changed_sections=set(changed_sections or ());self.update()
 
+    def frame(self,rect):
+        groups=[g for g in (self.sections,self.overlay) if g]
+        total=max((sum(s['length_mm'] for s in g) for g in groups),default=1)
+        maxd=max((max(s['inlet_diameter_mm'],s['outlet_diameter_mm']) for g in groups for s in g),default=1)
+        scale=min(rect.width()/max(total,1e-9),rect.height()*.74/max(maxd,1e-9))
+        return rect.left()+(rect.width()-total*scale)/2,scale
+
+    def mousePressEvent(self,event):
+        rect=self.rect().adjusted(42,14,-18,-54);x,scale=self.frame(rect);cursor=x
+        for i,section in enumerate(self.sections):
+            end=cursor+section['length_mm']*scale
+            if cursor<=event.position().x()<=end:self.section_selected.emit(i);return
+            cursor=end
+
     def _draw_profile(self,painter,sections,rect,color,width=2,style=Qt.PenStyle.SolidLine):
         if not sections:return
-        total=sum(s["length_mm"] for s in sections);maxd=max(max(s["inlet_diameter_mm"],s["outlet_diameter_mm"]) for s in sections)
-        scale=min(rect.width()/max(total,1e-9),rect.height()*.74/max(maxd,1e-9))
-        used=total*scale;x=rect.left()+(rect.width()-used)/2;center=rect.center().y()
+        x,scale=self.frame(rect);center=rect.center().y()
         upper=[];lower=[];cursor=0
         painter.setPen(QPen(QColor(color),width,style))
         for i,s in enumerate(sections):
@@ -55,6 +68,7 @@ class ExhaustProfile(QWidget):
                         painter.drawLine(xx,round(center-d*scale/2),xx,round(center+d*scale/2))
                 if i in self.changed_sections:
                     painter.fillRect(round(x0),rect.top(),max(2,round(x1-x0)),rect.height(),QColor(245,158,11,24))
+                if i==self.selected_section:painter.fillRect(round(x0),rect.top(),max(2,round(x1-x0)),rect.height(),QColor(67,197,245,22))
                 painter.setPen(QColor("#cad8e7"))
                 if self.compact:
                     # In compact mode the segment table below carries the exact
@@ -66,18 +80,20 @@ class ExhaustProfile(QWidget):
                     painter.drawLine(round(x0),rect.bottom()+4,round(x0),rect.bottom()+12);painter.drawLine(round(x1),rect.bottom()+4,round(x1),rect.bottom()+12)
                     painter.setPen(QColor("#cad8e7"))
                     label_width=max(1,round(x1-x0));label_x=round(x0)
-                    painter.drawText(label_x,rect.bottom()+26,label_width,16,Qt.AlignmentFlag.AlignCenter,s["name"])
+                    label=f'#{i+1}'
+                    if painter.fontMetrics().horizontalAdvance(label)<=label_width:painter.drawText(label_x,rect.bottom()+26,label_width,16,Qt.AlignmentFlag.AlignCenter,label)
                 else:
-                    label_width=140;label_x=round((x0+x1)/2)-70
-                    painter.drawText(label_x,rect.top()+13,label_width,16,Qt.AlignmentFlag.AlignCenter,
-                                     f"Ø {s['inlet_diameter_mm']:.1f} → {s['outlet_diameter_mm']:.1f} mm")
+                    label_width=max(1,round(x1-x0)-6);label_x=round(x0)+3
+                    label=f"Ø {s['inlet_diameter_mm']:g} → {s['outlet_diameter_mm']:g}"
+                    if painter.fontMetrics().horizontalAdvance(label)<=label_width:painter.drawText(label_x,rect.top()+13,label_width,16,Qt.AlignmentFlag.AlignCenter,label)
                 painter.setPen(QPen(QColor("#91a8bf"),1));painter.drawLine(round(x0),rect.bottom()+8,round(x1),rect.bottom()+8)
                 painter.drawLine(round(x0),rect.bottom()+4,round(x0),rect.bottom()+12);painter.drawLine(round(x1),rect.bottom()+4,round(x1),rect.bottom()+12)
                 painter.setPen(QColor("#cad8e7"))
                 if not self.compact:
-                    label_width=152;label_x=round((x0+x1)/2)-76
-                    painter.drawText(label_x,rect.bottom()+26,label_width,16,Qt.AlignmentFlag.AlignCenter,
-                                     f"{s['name']} · {s['length_mm']:.1f} mm")
+                    label_width=max(1,round(x1-x0)-4);label_x=round(x0)+2
+                    label=f'#{i+1} · {s["length_mm"]:g} mm'
+                    if painter.fontMetrics().horizontalAdvance(label)>label_width:label=f'#{i+1}'
+                    if painter.fontMetrics().horizontalAdvance(label)<=label_width:painter.drawText(label_x,rect.bottom()+26,label_width,16,Qt.AlignmentFlag.AlignCenter,label)
             cursor+=s["length_mm"]
         painter.setPen(QPen(QColor(color),width,style));painter.drawPolyline(upper);painter.drawPolyline(list(reversed(lower)))
 
@@ -98,6 +114,7 @@ class ExhaustPage(QWidget):
         self.title=QLabel("Escape");self.title.setObjectName("title");root.addWidget(self.title)
         self.intro=QLabel("Perfil y tabla por tramo. Los deltas geométricos no estiman prestaciones.");root.addWidget(self.intro)
         self.profile=ExhaustProfile()
+        self.selection_notice=QLabel();self.selection_notice.setWordWrap(True)
         self.diff=QLabel("Elegí una baseline para ver diferencias de ingeniería.");self.diff.setWordWrap(True)
         self.diff_panel=QGroupBox("Cambios vs baseline");diff_layout=QVBoxLayout(self.diff_panel);diff_layout.addWidget(self.diff)
         self.profile_split=QSplitter(Qt.Orientation.Horizontal);self.profile_split.setChildrenCollapsible(False);self.profile_split.addWidget(self.profile);self.profile_split.addWidget(self.diff_panel);self.profile_split.setStretchFactor(0,4);self.profile_split.setStretchFactor(1,1);root.addWidget(self.profile_split)
@@ -118,9 +135,11 @@ class ExhaustPage(QWidget):
         self.table.setHorizontalHeaderLabels(["Tramo","Largo (mm)","Ø entrada (mm)","Ø salida (mm)","Semiángulo (°)","Volumen (cm³)","Δ baseline"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.setMaximumHeight(260);self.table.cellChanged.connect(self._cell_changed)
+        self.table.currentCellChanged.connect(lambda row,*_:self._select_section(row))
+        self.profile.section_selected.connect(lambda row:self.table.setCurrentCell(row,1))
         segment_group=QGroupBox("Tramos · editá largo y Ø de salida; la estación compartida actualiza el tramo siguiente")
         self.segment_group=segment_group
-        segment_layout=QVBoxLayout(segment_group);segment_layout.addWidget(self.table);root.addWidget(segment_group);root.addWidget(station_group)
+        segment_layout=QVBoxLayout(segment_group);segment_layout.addWidget(self.table);root.addWidget(self.selection_notice);root.addWidget(segment_group);root.addWidget(station_group)
 
         self.mesh_group=QGroupBox("Opciones avanzadas · malla numérica");self.mesh_group.setCheckable(True);self.mesh_group.setChecked(False)
         mesh_layout=QVBoxLayout(self.mesh_group)
@@ -195,6 +214,7 @@ class ExhaustPage(QWidget):
             self.table.blockSignals(False);self.stations.blockSignals(False);self.mesh_table.blockSignals(False)
             self._update_station_positions()
             self.profile.set_sections(self._rows(),self._resolutions(),self._overlay_sections(),self._changed_sections())
+            self._select_section(max(0,self.table.currentRow()))
             self.diff.setText(self._engineering_diff(engine));self.save_current_button.setEnabled(self.context.selected_variant is not None)
         except Exception as exc:self.diff.setText(f"Escape no disponible: {type(exc).__name__}: {exc}")
         finally:self.loading=False
@@ -228,8 +248,8 @@ class ExhaustPage(QWidget):
     def set_compact_layout(self,compact,very_compact=False):
         self.title.setVisible(not compact);self.intro.setVisible(not compact)
         self.profile.compact=compact;self.profile.update()
-        self.profile.setMinimumHeight(90 if very_compact else 150 if compact else 300)
-        self.profile.setMaximumHeight(110 if very_compact else 175 if compact else 16777215)
+        self.profile.setMinimumHeight(150 if compact else 190)
+        self.profile.setMaximumHeight(165 if compact else 240)
         # At compact widths the delta column already carries the per-section
         # differences. Hide the redundant summary panel and reserve enough
         # vertical space for the complete editable segment table.
@@ -245,6 +265,11 @@ class ExhaustPage(QWidget):
         else:
             self.table.setMaximumHeight(260)
             self.segment_group.setMaximumHeight(16777215)
+
+    def _select_section(self,row):
+        if row<0 or row>=len(self.profile.sections):return
+        self.profile.selected_section=row;self.profile.update();s=self.profile.sections[row]
+        self.selection_notice.setText(f'#{row+1} {s["name"]} · L {s["length_mm"]:g} mm · Ø {s["inlet_diameter_mm"]:g} → {s["outlet_diameter_mm"]:g} mm · '+self._section_delta(row,s)+' · escala común A/B; clic en perfil o tabla')
 
     def _rows(self):
         rows=[];source_sections=escape_sections(self.context.engine())
@@ -371,6 +396,7 @@ class ExhaustPage(QWidget):
             self.table.blockSignals(False)
             self.edit_state="modified"
             self.profile.set_sections(rows,self._resolutions(),self._overlay_sections(),self._changed_sections())
+            self._select_section(max(0,self.table.currentRow()))
             self.diff.setText("Geometría continua · validación correcta sin pasos del solver\n"+self._engineering_diff(self._draft()))
         except Exception as exc:self.edit_state="invalid";self.diff.setText(f"Geometría rechazada: {type(exc).__name__}: {exc}")
         self.component_state_changed.emit()

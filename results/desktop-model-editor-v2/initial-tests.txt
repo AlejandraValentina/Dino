@@ -1,0 +1,230 @@
+..FF.F                                                                   [100%]
+================================== FAILURES ===================================
+_ DinoDesktopTests.test_main_navigation_reaches_existing_intake_transfer_and_reed_editor _
+
+self = <tests.test_dino_desktop.DinoDesktopTests testMethod=test_main_navigation_reaches_existing_intake_transfer_and_reed_editor>
+
+    def test_main_navigation_reaches_existing_intake_transfer_and_reed_editor(self):
+>       window=DinoDesktopWindow(self.context.project);window.show();APP.processEvents()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_dino_desktop.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+motorsim\desktop\app.py:40: in __init__
+    self._build_ui();self._build_actions();self.toolbar.hide();self.context.changed.connect(self._state_changed)
+    ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <motorsim.desktop.app.DinoDesktopWindow(0x17fc08d1340) at 0x0000017FC0C5E9C0>
+
+    def _build_ui(self):
+        shell=QWidget();layout=QVBoxLayout(shell);layout.setContentsMargins(0,0,0,0);layout.setSpacing(0)
+        self.context_bar=ContextBar();self.context_bar.setObjectName("contextBar")
+        self.context_bar.variant_selected.connect(self.context.select_variant);layout.addWidget(self.context_bar)
+        mode_row=QHBoxLayout();mode_row.setContentsMargins(18,9,18,10);mode_row.setSpacing(12)
+        mode_label=QLabel("MODO DE TRABAJO");mode_label.setObjectName("workspaceModeLabel");mode_row.addWidget(mode_label)
+        self.design_mode=QPushButton("MODELO");self.design_mode.setCheckable(True);self.design_mode.setChecked(True);self.design_mode.setObjectName("modeDesign")
+        self.simulate_mode=QPushButton("SIMULAR");self.simulate_mode.setCheckable(True);self.simulate_mode.setObjectName("modeSimulate")
+        self.analysis_mode=QPushButton("RESULTADOS");self.analysis_mode.setCheckable(True);self.analysis_mode.setObjectName("modeAnalysis")
+        for button in (self.design_mode,self.simulate_mode,self.analysis_mode):
+            button.setProperty("class","workspaceModeButton");button.setMinimumSize(112,36)
+        self.mode_group=QButtonGroup(self);self.mode_group.setExclusive(True);self.mode_group.addButton(self.design_mode,0);self.mode_group.addButton(self.analysis_mode,1)
+        self.mode_group.addButton(self.simulate_mode,2)
+        mode_row.addWidget(self.design_mode);mode_row.addWidget(self.simulate_mode);mode_row.addWidget(self.analysis_mode);mode_row.addStretch(1);layout.addLayout(mode_row)
+        project_actions=QHBoxLayout();project_actions.setContentsMargins(14,2,14,5)
+        for text,callback in (("Nuevo motor�",self.new_file),("Abrir proyecto�",self.open_file),("Guardar",self.save_file)):
+            button=QPushButton(text);button.clicked.connect(callback);project_actions.addWidget(button)
+        self.explorer_button=QPushButton("Variantes y corridas�");self.explorer_button.clicked.connect(self._toggle_explorer);project_actions.addWidget(self.explorer_button)
+        self.traceability_button=QPushButton("Trazabilidad�");self.traceability_button.clicked.connect(self._toggle_traceability);project_actions.addWidget(self.traceability_button)
+        project_actions.addStretch();layout.addLayout(project_actions)
+        self.mode_stack=QStackedWidget();layout.addWidget(self.mode_stack,1)
+        self.pages=[page_type(self.context) for _,page_type in PAGES]
+        self.pages[0].component_state_changed.connect(self._refresh_component_states)
+        self.pages[1].component_state_changed.connect(self._refresh_component_states)
+        self.results=self.pages[4]
+        for page in self.pages:
+            for table in page.findChildren(QTableWidget):
+                table.setAlternatingRowColors(True)
+                table.horizontalHeader().setMinimumSectionSize(48)
+                for column in range(table.columnCount()):
+                    item=table.horizontalHeaderItem(column)
+                    if item:item.setToolTip(item.text())
+        self.context_bar.baseline_selected.connect(self._select_baseline)
+        self.results.baseline_selector.currentIndexChanged.connect(lambda *_: self._sync_baseline_bar())
+        self.design_workspace=QWidget()
+        self.component_nav=QTabBar();self.component_nav.setObjectName("designSectionNav");self.component_nav.setShape(QTabBar.Shape.RoundedNorth);self.component_nav.setExpanding(False);self.component_nav.setUsesScrollButtons(True);self.component_nav.setMovable(False)
+        self.component_nav.setDocumentMode(True);self.component_nav.setElideMode(Qt.TextElideMode.ElideNone)
+        self.component_stack=QStackedWidget();self.component_stack.setObjectName("designComponentStack")
+        self.project_tree=QTreeWidget();self.project_tree.setHeaderHidden(True);self.project_tree.setMaximumHeight(120);self.project_tree.itemClicked.connect(self._project_tree_clicked)
+        for index in range(4):
+            title=PAGES[index][0];page=self.pages[index]
+            scroll=QScrollArea();scroll.setWidgetResizable(True);scroll.setFrameShape(QScrollArea.Shape.NoFrame);scroll.setWidget(page)
+            self.component_stack.addWidget(scroll)
+            if index==3:self.execution_scroll=scroll
+        for label in ("Cilindro y culata","Lumbreras y transferencias","Escape","P�rdidas","Combusti�n","Proyecto","Admisi�n y conductos","C�rter","Resumen","Avanzado"):
+            self.component_nav.addTab(label)
+        # The section bar is the only visible navigation inside Design. The
+        # EnginePage keeps its stack as an implementation detail, but its
+        # second visible tab bar is hidden to avoid duplicate section systems.
+        self.pages[0].component_tabs.tabBar().hide()
+        self.design_layout=QVBoxLayout();self.design_layout.setContentsMargins(14,0,14,8);self.design_layout.setSpacing(7)
+        chooser=QHBoxLayout();chooser.addWidget(QLabel('Componente del motor'))
+>       self.model_selector=QComboBox();self.model_selector.setObjectName('modelComponentSelector');self.model_selector.setMinimumWidth(270)
+                            ^^^^^^^^^
+E       NameError: name 'QComboBox' is not defined
+
+motorsim\desktop\app.py:96: NameError
+_ DinoDesktopTests.test_startup_has_real_pages_and_explicitly_confirmed_exploratory_mode _
+
+self = <tests.test_dino_desktop.DinoDesktopTests testMethod=test_startup_has_real_pages_and_explicitly_confirmed_exploratory_mode>
+
+    def test_startup_has_real_pages_and_explicitly_confirmed_exploratory_mode(self):
+>       window = DinoDesktopWindow(new_project("startup-test"))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_dino_desktop.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+motorsim\desktop\app.py:40: in __init__
+    self._build_ui();self._build_actions();self.toolbar.hide();self.context.changed.connect(self._state_changed)
+    ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <motorsim.desktop.app.DinoDesktopWindow(0x17fc1e225d0) at 0x0000017FC2DCF300>
+
+    def _build_ui(self):
+        shell=QWidget();layout=QVBoxLayout(shell);layout.setContentsMargins(0,0,0,0);layout.setSpacing(0)
+        self.context_bar=ContextBar();self.context_bar.setObjectName("contextBar")
+        self.context_bar.variant_selected.connect(self.context.select_variant);layout.addWidget(self.context_bar)
+        mode_row=QHBoxLayout();mode_row.setContentsMargins(18,9,18,10);mode_row.setSpacing(12)
+        mode_label=QLabel("MODO DE TRABAJO");mode_label.setObjectName("workspaceModeLabel");mode_row.addWidget(mode_label)
+        self.design_mode=QPushButton("MODELO");self.design_mode.setCheckable(True);self.design_mode.setChecked(True);self.design_mode.setObjectName("modeDesign")
+        self.simulate_mode=QPushButton("SIMULAR");self.simulate_mode.setCheckable(True);self.simulate_mode.setObjectName("modeSimulate")
+        self.analysis_mode=QPushButton("RESULTADOS");self.analysis_mode.setCheckable(True);self.analysis_mode.setObjectName("modeAnalysis")
+        for button in (self.design_mode,self.simulate_mode,self.analysis_mode):
+            button.setProperty("class","workspaceModeButton");button.setMinimumSize(112,36)
+        self.mode_group=QButtonGroup(self);self.mode_group.setExclusive(True);self.mode_group.addButton(self.design_mode,0);self.mode_group.addButton(self.analysis_mode,1)
+        self.mode_group.addButton(self.simulate_mode,2)
+        mode_row.addWidget(self.design_mode);mode_row.addWidget(self.simulate_mode);mode_row.addWidget(self.analysis_mode);mode_row.addStretch(1);layout.addLayout(mode_row)
+        project_actions=QHBoxLayout();project_actions.setContentsMargins(14,2,14,5)
+        for text,callback in (("Nuevo motor�",self.new_file),("Abrir proyecto�",self.open_file),("Guardar",self.save_file)):
+            button=QPushButton(text);button.clicked.connect(callback);project_actions.addWidget(button)
+        self.explorer_button=QPushButton("Variantes y corridas�");self.explorer_button.clicked.connect(self._toggle_explorer);project_actions.addWidget(self.explorer_button)
+        self.traceability_button=QPushButton("Trazabilidad�");self.traceability_button.clicked.connect(self._toggle_traceability);project_actions.addWidget(self.traceability_button)
+        project_actions.addStretch();layout.addLayout(project_actions)
+        self.mode_stack=QStackedWidget();layout.addWidget(self.mode_stack,1)
+        self.pages=[page_type(self.context) for _,page_type in PAGES]
+        self.pages[0].component_state_changed.connect(self._refresh_component_states)
+        self.pages[1].component_state_changed.connect(self._refresh_component_states)
+        self.results=self.pages[4]
+        for page in self.pages:
+            for table in page.findChildren(QTableWidget):
+                table.setAlternatingRowColors(True)
+                table.horizontalHeader().setMinimumSectionSize(48)
+                for column in range(table.columnCount()):
+                    item=table.horizontalHeaderItem(column)
+                    if item:item.setToolTip(item.text())
+        self.context_bar.baseline_selected.connect(self._select_baseline)
+        self.results.baseline_selector.currentIndexChanged.connect(lambda *_: self._sync_baseline_bar())
+        self.design_workspace=QWidget()
+        self.component_nav=QTabBar();self.component_nav.setObjectName("designSectionNav");self.component_nav.setShape(QTabBar.Shape.RoundedNorth);self.component_nav.setExpanding(False);self.component_nav.setUsesScrollButtons(True);self.component_nav.setMovable(False)
+        self.component_nav.setDocumentMode(True);self.component_nav.setElideMode(Qt.TextElideMode.ElideNone)
+        self.component_stack=QStackedWidget();self.component_stack.setObjectName("designComponentStack")
+        self.project_tree=QTreeWidget();self.project_tree.setHeaderHidden(True);self.project_tree.setMaximumHeight(120);self.project_tree.itemClicked.connect(self._project_tree_clicked)
+        for index in range(4):
+            title=PAGES[index][0];page=self.pages[index]
+            scroll=QScrollArea();scroll.setWidgetResizable(True);scroll.setFrameShape(QScrollArea.Shape.NoFrame);scroll.setWidget(page)
+            self.component_stack.addWidget(scroll)
+            if index==3:self.execution_scroll=scroll
+        for label in ("Cilindro y culata","Lumbreras y transferencias","Escape","P�rdidas","Combusti�n","Proyecto","Admisi�n y conductos","C�rter","Resumen","Avanzado"):
+            self.component_nav.addTab(label)
+        # The section bar is the only visible navigation inside Design. The
+        # EnginePage keeps its stack as an implementation detail, but its
+        # second visible tab bar is hidden to avoid duplicate section systems.
+        self.pages[0].component_tabs.tabBar().hide()
+        self.design_layout=QVBoxLayout();self.design_layout.setContentsMargins(14,0,14,8);self.design_layout.setSpacing(7)
+        chooser=QHBoxLayout();chooser.addWidget(QLabel('Componente del motor'))
+>       self.model_selector=QComboBox();self.model_selector.setObjectName('modelComponentSelector');self.model_selector.setMinimumWidth(270)
+                            ^^^^^^^^^
+E       NameError: name 'QComboBox' is not defined
+
+motorsim\desktop\app.py:96: NameError
+_ CommercialDesktopV3P0Tests.test_startup_forces_design_even_when_old_setting_points_to_results _
+
+self = <tests.test_dino_commercial_desktop_v3.CommercialDesktopV3P0Tests testMethod=test_startup_forces_design_even_when_old_setting_points_to_results>
+
+    def test_startup_forces_design_even_when_old_setting_points_to_results(self):
+        settings().setValue("last_page", 4)
+>       window = DinoDesktopWindow(new_project("v3-startup"))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_dino_commercial_desktop_v3.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+motorsim\desktop\app.py:40: in __init__
+    self._build_ui();self._build_actions();self.toolbar.hide();self.context.changed.connect(self._state_changed)
+    ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <motorsim.desktop.app.DinoDesktopWindow(0x17fc2804670) at 0x0000017FC2F2BA80>
+
+    def _build_ui(self):
+        shell=QWidget();layout=QVBoxLayout(shell);layout.setContentsMargins(0,0,0,0);layout.setSpacing(0)
+        self.context_bar=ContextBar();self.context_bar.setObjectName("contextBar")
+        self.context_bar.variant_selected.connect(self.context.select_variant);layout.addWidget(self.context_bar)
+        mode_row=QHBoxLayout();mode_row.setContentsMargins(18,9,18,10);mode_row.setSpacing(12)
+        mode_label=QLabel("MODO DE TRABAJO");mode_label.setObjectName("workspaceModeLabel");mode_row.addWidget(mode_label)
+        self.design_mode=QPushButton("MODELO");self.design_mode.setCheckable(True);self.design_mode.setChecked(True);self.design_mode.setObjectName("modeDesign")
+        self.simulate_mode=QPushButton("SIMULAR");self.simulate_mode.setCheckable(True);self.simulate_mode.setObjectName("modeSimulate")
+        self.analysis_mode=QPushButton("RESULTADOS");self.analysis_mode.setCheckable(True);self.analysis_mode.setObjectName("modeAnalysis")
+        for button in (self.design_mode,self.simulate_mode,self.analysis_mode):
+            button.setProperty("class","workspaceModeButton");button.setMinimumSize(112,36)
+        self.mode_group=QButtonGroup(self);self.mode_group.setExclusive(True);self.mode_group.addButton(self.design_mode,0);self.mode_group.addButton(self.analysis_mode,1)
+        self.mode_group.addButton(self.simulate_mode,2)
+        mode_row.addWidget(self.design_mode);mode_row.addWidget(self.simulate_mode);mode_row.addWidget(self.analysis_mode);mode_row.addStretch(1);layout.addLayout(mode_row)
+        project_actions=QHBoxLayout();project_actions.setContentsMargins(14,2,14,5)
+        for text,callback in (("Nuevo motor�",self.new_file),("Abrir proyecto�",self.open_file),("Guardar",self.save_file)):
+            button=QPushButton(text);button.clicked.connect(callback);project_actions.addWidget(button)
+        self.explorer_button=QPushButton("Variantes y corridas�");self.explorer_button.clicked.connect(self._toggle_explorer);project_actions.addWidget(self.explorer_button)
+        self.traceability_button=QPushButton("Trazabilidad�");self.traceability_button.clicked.connect(self._toggle_traceability);project_actions.addWidget(self.traceability_button)
+        project_actions.addStretch();layout.addLayout(project_actions)
+        self.mode_stack=QStackedWidget();layout.addWidget(self.mode_stack,1)
+        self.pages=[page_type(self.context) for _,page_type in PAGES]
+        self.pages[0].component_state_changed.connect(self._refresh_component_states)
+        self.pages[1].component_state_changed.connect(self._refresh_component_states)
+        self.results=self.pages[4]
+        for page in self.pages:
+            for table in page.findChildren(QTableWidget):
+                table.setAlternatingRowColors(True)
+                table.horizontalHeader().setMinimumSectionSize(48)
+                for column in range(table.columnCount()):
+                    item=table.horizontalHeaderItem(column)
+                    if item:item.setToolTip(item.text())
+        self.context_bar.baseline_selected.connect(self._select_baseline)
+        self.results.baseline_selector.currentIndexChanged.connect(lambda *_: self._sync_baseline_bar())
+        self.design_workspace=QWidget()
+        self.component_nav=QTabBar();self.component_nav.setObjectName("designSectionNav");self.component_nav.setShape(QTabBar.Shape.RoundedNorth);self.component_nav.setExpanding(False);self.component_nav.setUsesScrollButtons(True);self.component_nav.setMovable(False)
+        self.component_nav.setDocumentMode(True);self.component_nav.setElideMode(Qt.TextElideMode.ElideNone)
+        self.component_stack=QStackedWidget();self.component_stack.setObjectName("designComponentStack")
+        self.project_tree=QTreeWidget();self.project_tree.setHeaderHidden(True);self.project_tree.setMaximumHeight(120);self.project_tree.itemClicked.connect(self._project_tree_clicked)
+        for index in range(4):
+            title=PAGES[index][0];page=self.pages[index]
+            scroll=QScrollArea();scroll.setWidgetResizable(True);scroll.setFrameShape(QScrollArea.Shape.NoFrame);scroll.setWidget(page)
+            self.component_stack.addWidget(scroll)
+            if index==3:self.execution_scroll=scroll
+        for label in ("Cilindro y culata","Lumbreras y transferencias","Escape","P�rdidas","Combusti�n","Proyecto","Admisi�n y conductos","C�rter","Resumen","Avanzado"):
+            self.component_nav.addTab(label)
+        # The section bar is the only visible navigation inside Design. The
+        # EnginePage keeps its stack as an implementation detail, but its
+        # second visible tab bar is hidden to avoid duplicate section systems.
+        self.pages[0].component_tabs.tabBar().hide()
+        self.design_layout=QVBoxLayout();self.design_layout.setContentsMargins(14,0,14,8);self.design_layout.setSpacing(7)
+        chooser=QHBoxLayout();chooser.addWidget(QLabel('Componente del motor'))
+>       self.model_selector=QComboBox();self.model_selector.setObjectName('modelComponentSelector');self.model_selector.setMinimumWidth(270)
+                            ^^^^^^^^^
+E       NameError: name 'QComboBox' is not defined
+
+motorsim\desktop\app.py:96: NameError
+=========================== short test summary info ===========================
+FAILED tests/test_dino_desktop.py::DinoDesktopTests::test_main_navigation_reaches_existing_intake_transfer_and_reed_editor
+FAILED tests/test_dino_desktop.py::DinoDesktopTests::test_startup_has_real_pages_and_explicitly_confirmed_exploratory_mode
+FAILED tests/test_dino_commercial_desktop_v3.py::CommercialDesktopV3P0Tests::test_startup_forces_design_even_when_old_setting_points_to_results
+3 failed, 3 passed, 32 deselected in 34.21s

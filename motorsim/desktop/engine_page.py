@@ -4,12 +4,13 @@ import math
 from PySide6.QtCore import Qt,QPointF,Signal
 from PySide6.QtGui import QColor,QPainter,QPen,QFont
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QGroupBox,QLabel,QTabWidget,
-    QDoubleSpinBox,QPushButton,QComboBox,QTableWidget,QTableWidgetItem,QHeaderView,QMessageBox,QDialog,QDialogButtonBox,QSplitter)
+    QDoubleSpinBox,QPushButton,QComboBox,QTableWidget,QTableWidgetItem,QHeaderView,QMessageBox,QDialog,QDialogButtonBox,QSplitter,QScrollArea,QFrame)
 from ..engine_configuration import validate,identity,sha256
 from ..two_stroke_ports import TwoStrokePortSet,DuctBinding,PortDefinition
 from ..crankcase import CrankcaseGeometry
 from ..integrated_2t import SliderCrankChambers2T
 from ..gas1d.mesh import Mesh
+from .model_diagrams import PortGeometryView,PortTimingView,can_edit_opening,top_from_opening
 
 
 class CylinderSketch(QWidget):
@@ -18,11 +19,14 @@ class CylinderSketch(QWidget):
     def set_geometry(self,bore,stroke,rod):self.bore=float(bore);self.stroke=float(stroke);self.rod=float(rod);self.update()
     def paintEvent(self,event):
         p=QPainter(self);p.setRenderHint(QPainter.RenderHint.Antialiasing);p.fillRect(self.rect(),QColor("#101a28"))
-        mid=self.width()*.42;top=18;bottom=self.height()-24;w=min(self.width()*.22,100);p.setPen(QPen(QColor("#91a8bf"),2));p.drawLine(round(mid-w/2),top,round(mid-w/2),bottom-18);p.drawLine(round(mid+w/2),top,round(mid+w/2),bottom-18)
-        piston_y=top+(bottom-top)*.52;p.setBrush(QColor("#287ca4"));p.setPen(QPen(QColor("#7dd3fc"),2));p.drawRect(round(mid-w/2+2),round(piston_y-10),round(w-4),20)
-        crank=QPointF(mid+w*.55,bottom-18);p.setPen(QPen(QColor("#f6bd60"),4));p.drawLine(QPointF(mid,piston_y+10),crank);p.setBrush(QColor("#f6bd60"));p.drawEllipse(crank,5,5)
+        scale=min(100/self.bore,(self.height()-35)/self.stroke);w=self.bore*scale;h=self.stroke*scale
+        x=self.width()*.58-w/2;top=10;bottom=top+h
+        p.setPen(QPen(QColor('#91a8bf'),2));p.drawLine(round(x),top,round(x),round(bottom));p.drawLine(round(x+w),top,round(x+w),round(bottom))
+        p.setPen(QPen(QColor('#547088'),1,Qt.PenStyle.DashLine));p.drawLine(round(x),top,round(x+w),top)
+        p.setPen(QPen(QColor('#7dd3fc'),3));p.drawLine(round(x),round(bottom),round(x+w),round(bottom))
+        p.setPen(QColor('#cad8e7'));p.drawText(round(x+w)+8,top+10,'PMS');p.drawText(round(x+w)+8,round(bottom),'PMI')
         p.setPen(QColor("#e5edf6"));p.setFont(QFont("Segoe UI",9));p.drawText(8,16,f"Ø {self.bore:g} mm");p.drawText(8,self.height()-5,f"Carrera {self.stroke:g} mm · biela {self.rod:g} mm")
-        p.setPen(QPen(QColor("#547088"),1,Qt.PenStyle.DashLine));p.drawLine(round(mid+w/2+10),round(top+(bottom-top)*.24),round(mid+w/2+28),round(top+(bottom-top)*.24));p.drawLine(round(mid+w/2+10),round(top+(bottom-top)*.76),round(mid+w/2+28),round(top+(bottom-top)*.76));p.drawLine(round(mid+w/2+24),round(top+(bottom-top)*.24),round(mid+w/2+24),round(top+(bottom-top)*.76));p.end()
+        p.end()
 
 
 class PortAreaPlot(QWidget):
@@ -143,10 +147,64 @@ class EnginePage(QWidget):
         buttons=QHBoxLayout();root.addLayout(buttons)
         self.apply_button=QPushButton("Validar y aplicar cambios");self.apply_button.setObjectName("primaryAction");self.apply_button.clicked.connect(self.apply);buttons.addWidget(self.apply_button)
         self.revert_button=QPushButton("Descartar edición");self.revert_button.clicked.connect(self.refresh);buttons.addWidget(self.revert_button);buttons.addStretch(1)
+        # Separate the existing editors without introducing project fields.
+        title.hide()
+        def move_field(widget,target):
+            taken=form.takeRow(widget)
+            label=taken.labelItem.widget() if taken.labelItem else None
+            if label:target.addRow(label,widget)
+            else:target.addRow(widget)
+        crank_page=QWidget();crank_form=QFormLayout(crank_page)
+        move_field(self.controls['volume_bdc_cm3'],crank_form)
+        crank_note=QLabel('Se representa el volumen libre en PMI y su variación cinemática. La forma del cárter no está identificada.');crank_note.setWordWrap(True);crank_form.addRow(crank_note)
+        self.crank_derived=QLabel();self.crank_derived.setWordWrap(True);crank_form.addRow(self.crank_derived)
+        intake_form=QFormLayout();move_field(self.intake_control,intake_form);intake_layout.insertLayout(0,intake_form)
+        advanced_page=QWidget();advanced_layout=QVBoxLayout(advanced_page)
+        advanced_form_display=QFormLayout();advanced_layout.addLayout(advanced_form_display)
+        move_field(self.provenance_label,advanced_form_display);move_field(self.provenance_button,advanced_form_display)
+        form.removeWidget(self.advanced_operation_toggle);self.advanced_operation_toggle.hide()
+        form.removeWidget(self.advanced_operation);advanced_layout.addWidget(self.advanced_operation);self.advanced_operation.show();advanced_layout.addStretch()
+        # Reparent the geometry and port widgets from the old combined page.
+        integrated_layout.removeWidget(self.area_plot)
+        cylinder_page=QWidget();cylinder_layout=QVBoxLayout(cylinder_page);cylinder_layout.addWidget(self.geometry_group);cylinder_layout.addStretch()
+        self.component_tabs.removeTab(0);self.component_tabs.insertTab(0,cylinder_page,'Cilindro y culata')
+        self.port_views=QTabWidget()
+        dimension_page=QWidget();dimension_layout=QVBoxLayout(dimension_page);dimension_layout.setContentsMargins(0,0,0,0);dimension_layout.addWidget(self.ports)
+        self.port_views.addTab(dimension_page,'Dimensiones');self.port_views.setCornerWidget(self.port_advanced_toggle)
+        self.port_geometry=PortGeometryView();self.port_views.addTab(self.port_geometry,'Cotas desde PMS')
+        self.port_timeline=PortTimingView();self.port_views.addTab(self.port_timeline,'Distribución')
+        areas_page=QWidget();areas_layout=QVBoxLayout(areas_page);areas_layout.addWidget(self.area_plot);areas_layout.addWidget(self.port_areas)
+        areas_scroll=QScrollArea();areas_scroll.setWidgetResizable(True);areas_scroll.setFrameShape(QFrame.Shape.NoFrame);areas_scroll.setWidget(areas_page)
+        self.port_views.addTab(areas_scroll,'Áreas efectivas')
+        self.component_tabs.removeTab(1);self.component_tabs.insertTab(1,self.port_views,'Lumbreras y transferencias')
+        self.component_tabs.addTab(crank_page,'Cárter')
+        summary_page=QWidget();summary_layout=QVBoxLayout(summary_page)
+        self.summary=QLabel();self.summary.setWordWrap(True);summary_layout.addWidget(self.summary)
+        self.timing.show();summary_layout.addWidget(self.timing)
+        self.component_tabs.addTab(summary_page,'Resumen')
+        self.component_tabs.addTab(advanced_page,'Datos y operación avanzados')
+        self.component_names=('Cilindro y culata','Lumbreras y transferencias','Pérdidas','Combustión','Admisión y conductos','Cárter','Resumen','Avanzado')
+        self.geometry_group.setTitle('Cilindro y culata · compresión y volumen derivados')
+        self.cylinder_diagram.setMinimumHeight(80);self.cylinder_diagram.setMaximumHeight(90)
+        self.derived.setParent(cylinder_page);cylinder_layout.insertWidget(1,self.derived)
+        self.ducts.setMaximumHeight(135);self.reeds.setMaximumHeight(170)
+        self.ports.setMinimumHeight(140);self.ports.setMaximumHeight(210);self.ports.verticalHeader().setDefaultSectionSize(24)
+        self.ports.horizontalHeaderItem(2).setText('Cota PMS (mm)');self.ports.setColumnWidth(2,110)
+        # A long inactive section must not force every section to scroll along
+        # with the Apply/Discard actions. Each component owns its scroll area.
+        for index in range(self.component_tabs.count()):
+            pane=self.component_tabs.widget(index);label=self.component_tabs.tabText(index)
+            self.component_tabs.removeTab(index)
+            scroll=QScrollArea();scroll.setWidgetResizable(True);scroll.setFrameShape(QFrame.Shape.NoFrame);scroll.setWidget(pane)
+            self.component_tabs.insertTab(index,scroll,label)
+        for control in self.controls.values():control.valueChanged.connect(self._preview_geometry)
+        self.intake_control.currentIndexChanged.connect(self._preview_geometry)
+        self._angle_error=None
         self.context.changed.connect(self.refresh);self.refresh()
 
     def refresh(self):
         self.loading=True
+        self._angle_error=None
         try:
             doc=self.context.engine();n=doc["native_configuration"];slider=n["slider_crank"];cc=slider["crankcase"];cond=doc["operating_conditions"]
             values={"bore_mm":cc["bore_mm"],"stroke_mm":cc["stroke_mm"],"rod_length_mm":cc["rod_length_mm"],"volume_bdc_cm3":cc["volume_bdc_cm3"],"cylinder_compression_ratio":slider["cylinder_compression_ratio"],"reference_rpm":cond["reference_rpm"],"load":cond["load"],"afr":cond["afr"]}
@@ -210,9 +268,13 @@ class EnginePage(QWidget):
                 reed_intake=(p["role"]=="intake" and n["geometry_identity"].get("gas_exchange_model",{}).get("intake_control")=="reed")
                 if reed_intake:vals[7:]=[None,None,None]
                 for j,value in enumerate(vals):
-                    display="—" if value is None else (f"{value:.1f}" if isinstance(value,(int,float)) else str(value))
+                    display="—" if value is None else (f"{value:.12g}" if isinstance(value,(int,float)) else str(value))
                     item=QTableWidgetItem(display);item.setData(Qt.ItemDataRole.UserRole,p["id"])
                     if j<2 or j>=7 or p["family"]=="effective_profile" or value is None:item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                    if j>=7 and value is None:item.setToolTip('No hay un intervalo único identificado; consultar Distribución. La admisión por láminas depende de Δp.')
+                    if j==7 and value is not None and can_edit_opening(port_set.ports[i]):
+                        item.setFlags(item.flags()|Qt.ItemFlag.ItemIsEditable)
+                        item.setToolTip('Abrir en grados modifica sólo la cota superior. Cierre y duración son derivados; techo fijo, altura y ancho conservados.')
                     if reed_intake:
                         item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                         item.setToolTip("Admisión por láminas: conexión sin distribución de pistón. El área efectiva depende de Δp y de las láminas, no de esta ventana histórica.")
@@ -246,6 +308,9 @@ class EnginePage(QWidget):
                 for j,value in enumerate(values):
                     item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable);self.timing.setItem(i,j,item)
             self.area_plot.set_series(area_series)
+            reed=self.intake_control.currentData()=='reed'
+            self.port_geometry.set_geometry(port_set,reed);self.port_timeline.set_events(port_set,reed)
+            self._set_summary(port_set,values=None)
             self.port_areas.setRowCount(len(area_rows))
             for i,(port_id,angle,area) in enumerate(area_rows):
                 for j,value in enumerate((port_id,f"{angle:g}",f"{area:.2f}")):
@@ -260,7 +325,7 @@ class EnginePage(QWidget):
                     if j!=2 or term["mep_pa"] is None:item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                     self.losses.setItem(i,j,item)
             self.losses.blockSignals(False)
-            self.validation.setText(f"{doc['validation_state']} · Configuración de ingeniería; validación física experimental no realizada.")
+            self.validation.setText('Configuración cargada · sin validación experimental');self.validation.setToolTip(doc['validation_state'])
             self.apply_button.setEnabled(True)
             for i,name in enumerate(self.component_names):self.component_tabs.setTabText(i,f"{name} · válido")
         except Exception as exc:
@@ -269,10 +334,61 @@ class EnginePage(QWidget):
             self.loading=False
             self.component_state_changed.emit()
 
-    def _port_changed(self,*_):
+    def _port_changed(self,row,column):
         if not self.loading:
+            if column==7:
+                try:
+                    native=deepcopy(self.context.engine()['native_configuration']);self._edited_ports(native)
+                    raw=native['port_binding']['port_set']
+                    port=PortDefinition.from_dict(raw['ports'][row])
+                    top=top_from_opening(port,self.controls['stroke_mm'].value(),self.controls['rod_length_mm'].value(),self._decimal(self.ports.item(row,7).text()))
+                    self.ports.blockSignals(True);self.ports.item(row,2).setText(f'{top:.12g}');self.ports.blockSignals(False);self._angle_error=None
+                except Exception as exc:
+                    self._angle_error=str(exc);self.validation.setText('Apertura rechazada: '+str(exc)+' · diagramas: última geometría válida.');self._mark_component(1,'rechazada');return
             self._mark_component(1,"modificado")
             self.validation.setText("Edición pendiente. Aplicá para ejecutar la validación completa del backend.")
+            self._preview_geometry()
+
+    def _set_summary(self,port_set,values=None):
+        v={key:widget.value() for key,widget in self.controls.items()}
+        bore=v['bore_mm'];stroke=v['stroke_mm'];rod=v['rod_length_mm']
+        if rod<=stroke/2:raise ValueError('Biela incompatible: debe superar la mitad de la carrera.')
+        swept=math.pi*bore*bore/4*stroke/1000;clearance=swept/(v['cylinder_compression_ratio']-1)
+        primary=1+swept/v['volume_bdc_cm3']
+        self.cylinder_diagram.set_geometry(bore,stroke,rod)
+        description=f'Ø {bore:g} × {stroke:g} mm · biela {rod:g} mm · {swept:.2f} cm³\nCompresión {v["cylinder_compression_ratio"]:g}:1 · cámara derivada {clearance:.2f} cm³\nCárter PMI {v["volume_bdc_cm3"]:g} cm³ · compresión primaria {primary:.3f}:1'
+        self.derived.setText(description)
+        self.crank_derived.setText(f'Cilindrada {swept:.2f} cm³ · V(PMS) {v["volume_bdc_cm3"]+swept:.2f} cm³ · compresión primaria {primary:.3f}:1')
+        state='Configuración cargada' if self.loading else 'BORRADOR SIN APLICAR'
+        self.summary.setText(self.context.engine().get('display_name','Motor')+'\n'+description+'\nAdmisión: '+self.intake_control.currentText()+'\n'+state+' · sin validación experimental. Fuentes desconocidas conservadas en Avanzado.')
+
+    def _preview_geometry(self,*_):
+        if self.loading:return
+        try:
+            if self._angle_error:raise ValueError(self._angle_error)
+            native=deepcopy(self.context.engine()['native_configuration']);self._edited_ports(native)
+            port_set=TwoStrokePortSet.from_dict(native['port_binding']['port_set'])
+            reed=self.intake_control.currentData()=='reed'
+            self._set_summary(port_set)
+            self.port_geometry.set_geometry(port_set,reed);self.port_timeline.set_events(port_set,reed)
+            self.area_plot.set_series([{'name':p.name,'points':[(a,port_set.area_at(p,a)) for a in (*range(0,360,2),360)]} for p in port_set.ports if not (reed and p.role=='intake')])
+            self.ports.blockSignals(True)
+            for i,port in enumerate(port_set.ports):
+                events=(None,None,None) if reed and port.role=='intake' else self._area_timing(port_set,port)
+                item=self.ports.item(i,7);flags=item.flags() & ~Qt.ItemFlag.ItemIsEditable
+                if events[0] is not None and can_edit_opening(port):flags|=Qt.ItemFlag.ItemIsEditable
+                item.setFlags(flags)
+                for j,value in enumerate(events,7):self.ports.item(i,j).setText('—' if value is None else f'{value:.8g}')
+                for j,value in enumerate((port.id,*events)):
+                    cell=QTableWidgetItem('—' if value is None else str(value));cell.setFlags(cell.flags() & ~Qt.ItemFlag.ItemIsEditable);self.timing.setItem(i,j,cell)
+            self.ports.blockSignals(False)
+            areas=[(port.id,angle,port_set.area_at(port,angle)) for port in port_set.ports if not (reed and port.role=='intake') for angle in port_set.event_angles(port)]
+            self.port_areas.setRowCount(len(areas))
+            for i,(port_id,angle,area) in enumerate(areas):
+                for j,value in enumerate((port_id,f'{angle:g}',f'{area:.2f}')):
+                    cell=QTableWidgetItem(value);cell.setFlags(cell.flags() & ~Qt.ItemFlag.ItemIsEditable);self.port_areas.setItem(i,j,cell)
+        except Exception as exc:
+            self.ports.blockSignals(False);self.validation.setText('Borrador inválido: '+str(exc)+' · diagramas: última geometría válida.');self._mark_component(1,'rechazada')
 
     def _mark_component(self,index,status):
         if self.loading:return
@@ -352,6 +468,9 @@ class EnginePage(QWidget):
                     try:value=self._decimal(text)
                     except ValueError as exc:raise ValueError(f"Lumbrera {p['name']}: {key} debe ser numérico") from exc
                     if not math.isfinite(value):raise ValueError(f"Lumbrera {p['name']}: valor no finito")
+                    # Keep the source precision when a displayed value was not
+                    # edited; formatting a table must not rewrite geometry.
+                    if p.get(key) is not None and value==float(f'{p[key]:.12g}'):continue
                     p[key]=value
         stroke=self.controls["stroke_mm"].value();rod=self.controls["rod_length_mm"].value()
         profile=TwoStrokePortSet(stroke,rod,tuple(DuctBinding.from_dict(x) for x in raw["ducts"]),tuple(PortDefinition.from_dict(x) for x in ports)).to_dict()
@@ -360,6 +479,7 @@ class EnginePage(QWidget):
 
     def apply(self):
         try:
+            if self._angle_error:raise ValueError(self._angle_error)
             doc=deepcopy(self.context.engine());native=doc["native_configuration"];slider=native["slider_crank"];cc=slider["crankcase"]
             design_inputs=doc.setdefault("provenance",{}).setdefault("design_inputs",{})
             source_fields=("bore_mm","stroke_mm","rod_length_mm","volume_bdc_cm3","cylinder_compression_ratio","reference_rpm")
@@ -469,8 +589,8 @@ class EnginePage(QWidget):
             if left<=1e-9<right:transitions.append((event,True))
             elif left>1e-9>=right:transitions.append((event,False))
         opens=[angle for angle,is_open in transitions if is_open];closes=[angle for angle,is_open in transitions if not is_open]
-        if not opens or not closes:return None,None,None
-        # A single connected open interval is represented by the opening whose next close is nearest in crank order.
+        if len(opens)!=1 or len(closes)!=1:return None,None,None
+        # Only one connected periodic interval has a single opening/closing pair.
         opening=min(opens);later=[angle for angle in closes if angle>=opening]
         closing=min(later) if later else min(closes)
         duration=(closing-opening)%360.0

@@ -52,7 +52,7 @@ class DinoDesktopTests(unittest.TestCase):
         self.assertEqual(window.mode_stack.count(), 3)
         self.assertEqual(window.component_stack.count(), 3)
         self.assertEqual(window.mode_stack.currentIndex(),0)
-        self.assertEqual(window.component_nav.tabText(0),"✓ Cilindro y distribución")
+        self.assertEqual(window.component_nav.tabText(0),"✓ Cilindro y culata")
         self.assertTrue(window.pages[3].start.isEnabled())
         self.assertIn("Preflight PASS", window.pages[3].preflight_label.text())
         self.assertIn("EXPLORATORY", window.pages[3].mode.text())
@@ -65,7 +65,7 @@ class DinoDesktopTests(unittest.TestCase):
     def test_main_navigation_reaches_existing_intake_transfer_and_reed_editor(self):
         window=DinoDesktopWindow(self.context.project);window.show();APP.processEvents()
         nav=window.component_nav
-        QTest.mouseClick(nav,Qt.MouseButton.LeftButton,pos=nav.tabRect(6).center())
+        window.model_selector.setCurrentIndex(window.model_selector.findData(6))
         APP.processEvents()
         self.assertEqual(window.pages[0].component_tabs.currentIndex(),4)
         self.assertTrue(window.pages[0].ducts.isVisible())

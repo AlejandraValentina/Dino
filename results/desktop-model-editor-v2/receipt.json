@@ -1,0 +1,69 @@
+{
+  "recorded_at": "2026-10-30T12:42:38.836049+00:00",
+  "decision": "PASS_SOURCE_MODEL_EDITOR_V2",
+  "review": "SELF_REVIEW",
+  "base_commit": "a663b9f",
+  "method": "Real Windows mouse/keyboard, native window sizes, synthetic save/reopen plus automated tests",
+  "native_windows": [
+    [
+      980,
+      680
+    ],
+    [
+      1360,
+      900
+    ],
+    [
+      1920,
+      1080
+    ]
+  ],
+  "test_display_scale": "Windows 125%; process QT_SCALE_FACTOR 0.8 for native dimensions; product default unchanged",
+  "full_screen_capture": "Taskbar hidden temporarily and restored for 1920x1080 captures",
+  "geometry": {
+    "bore_mm": 57.0,
+    "stroke_mm": 50.6,
+    "rod_length_mm": 110.0,
+    "crankcase_bdc_cm3": 365.0,
+    "displacement_cm3": 129.11898682364247,
+    "transfer_opening_deg": 104.99999999989518,
+    "transfer_closing_deg": 255.00000000010482,
+    "transfer_duration_deg": 150.00000000020964,
+    "transfer_top_mm": 34.597071032
+  },
+  "exhaust": {
+    "base_first_length_mm": 83,
+    "variant_first_length_mm": 103,
+    "other_sections_exact": true
+  },
+  "project_sha256": "73627b7ccc4d661861cbe83e8687074da1e1731b61b497f7614d6ab344b1d787",
+  "regression": "42 PASS / 1 SKIP; final focused model contracts recorded separately",
+  "new_periodic_campaigns": 0,
+  "new_builds": 0,
+  "physical_solver_changes": false,
+  "experimental_promotion": false,
+  "predictive_validation": "NOT_PERFORMED",
+  "protected_baselines": [
+    "rc7",
+    "rc9"
+  ],
+  "evidence": {
+    "01-summary-980x680.png": "8dbe8a2ed52a35d6d51a64eff1434814ac923ae5ee06c922d4722cd16c7023a8",
+    "02-cylinder-edited-980x680.png": "14e37fa77619df5bdf4652b1d6c6112c90904b0e9f32062f1df68cc1f151a4f5",
+    "03-opening-preview-980x680.png": "a1cb840c98ef11b81e678109a3b690ba350613f44e594ade24421abb8e9851ca",
+    "04-invalid-opening.png": "bd424e75bdfb52c0ef474fafaad9e42fda82dc00120f44148d0a482ddff1bdcc",
+    "05-timing-1360x900.png": "620121236faca81c29807c3aec28ca8a6071022fbffb5a6110728e16a63773b4",
+    "06-port-depths-1360x900.png": "ef79bfa56b9af8733a7529ddb52f3bb6e24bd03f737f73ac0690aab8c64ef9aa",
+    "07-ports-980x680.png": "9370a4dbc5ffa6b939d62de67770c98489653095f6f902e158cf1e5835d15be1",
+    "08-exhaust-edit-1360x900.png": "52d8e5a18e9313c4c4befbcb26688511cffe0b0b35dd05562b96cc8b2a97245b",
+    "09-summary-reopened-980x680.png": "88e36b9a6588668f3536c1a0af08d7a298f514564902ad48a120d3d32c09f52e",
+    "10-exhaust-980x680.png": "9fee2f91de2c71a0b8434e562e97005a11d6ed529bcc7777292479d28e40a38e",
+    "11-exhaust-1920x1080.png": "fa27199c66c9a47d1bed91a1588b875c4ac768941db6f3f0cc4f999a04a6af61",
+    "12-port-depths-1920x1080.png": "09250219007521910781c5be8e363cbbd5a2de3617cd37b8d384cd7b1d17a67a"
+  },
+  "finalized_on": "2026-11-03",
+  "final_source_checks": {
+    "synchronization-final.txt": "6 PASS",
+    "final-ui-regression.txt": "9 PASS"
+  }
+}

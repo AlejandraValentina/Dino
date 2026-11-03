@@ -7,7 +7,7 @@ from PySide6.QtCore import QSettings,Qt,QThreadPool,QTimer,QElapsedTimer
 from PySide6.QtGui import QAction,QKeySequence,QGuiApplication
 from PySide6.QtWidgets import (QMainWindow,QWidget,QHBoxLayout,QVBoxLayout,QListWidget,QListWidgetItem,
     QStackedWidget,QLabel,QToolBar,QFileDialog,QMessageBox,QApplication,QSplitter,QScrollArea,
-    QGroupBox,QFormLayout,QTreeWidget,QTreeWidgetItem,QDockWidget,QDoubleSpinBox,QSpinBox,QPushButton,QPlainTextEdit,QTabBar,QProgressBar,QTableWidget,QDialog,QTabWidget,QButtonGroup)
+    QGroupBox,QFormLayout,QTreeWidget,QTreeWidgetItem,QDockWidget,QDoubleSpinBox,QSpinBox,QPushButton,QPlainTextEdit,QTabBar,QProgressBar,QTableWidget,QDialog,QTabWidget,QButtonGroup,QComboBox)
 from ..engine_configuration import validate
 from ..engine_project import load_project,save_project
 from .services import new_design_project
@@ -33,7 +33,7 @@ class DinoDesktopWindow(QMainWindow):
         height=min(900,available.height()) if available else 900
         # Keep a 980×680 outer window usable on Windows, where Qt's requested
         # size excludes the native frame (about 16×39 px on the supported style).
-        self.setMinimumSize(min(964,width),min(641,height));self.resize(width,height)
+        self.setMinimumSize(min(960,width),min(630,height));self.resize(width,height)
         self.setStyleSheet(stylesheet())
         saved_variant=self.settings.value(f"active_variant/{self.context.project['project_id']}")
         if saved_variant in self.context.project["variants"]: self.context.select_variant(saved_variant)
@@ -82,17 +82,25 @@ class DinoDesktopWindow(QMainWindow):
         self.project_tree=QTreeWidget();self.project_tree.setHeaderHidden(True);self.project_tree.setMaximumHeight(120);self.project_tree.itemClicked.connect(self._project_tree_clicked)
         for index in range(4):
             title=PAGES[index][0];page=self.pages[index]
+            if index==0:
+                self.component_stack.addWidget(page)
+                continue
             scroll=QScrollArea();scroll.setWidgetResizable(True);scroll.setFrameShape(QScrollArea.Shape.NoFrame);scroll.setWidget(page)
             self.component_stack.addWidget(scroll)
             if index==3:self.execution_scroll=scroll
-        for label in ("Cilindro y distribución","Eventos de área","Escape","Pérdidas","Combustión","Proyecto","Admisión y conductos"):
+        for label in ("Cilindro y culata","Lumbreras y transferencias","Escape","Pérdidas","Combustión","Proyecto","Admisión y conductos","Cárter","Resumen","Avanzado"):
             self.component_nav.addTab(label)
         # The section bar is the only visible navigation inside Design. The
         # EnginePage keeps its stack as an implementation detail, but its
         # second visible tab bar is hidden to avoid duplicate section systems.
         self.pages[0].component_tabs.tabBar().hide()
         self.design_layout=QVBoxLayout();self.design_layout.setContentsMargins(14,0,14,8);self.design_layout.setSpacing(7)
-        self.design_workspace.setLayout(self.design_layout);self.design_layout.addWidget(self.component_nav);self.design_layout.addWidget(self.component_stack,1)
+        chooser=QHBoxLayout();chooser.addWidget(QLabel('Componente del motor'))
+        self.model_selector=QComboBox();self.model_selector.setObjectName('modelComponentSelector');self.model_selector.setMinimumWidth(270)
+        for index in (8,0,7,6,1,2,4,3,5,9):self.model_selector.addItem(self.component_nav.tabText(index),index)
+        self.model_selector.currentIndexChanged.connect(lambda i:self.component_nav.setCurrentIndex(self.model_selector.itemData(i)))
+        chooser.addWidget(self.model_selector);chooser.addStretch()
+        self.design_workspace.setLayout(self.design_layout);self.design_layout.addLayout(chooser);self.component_nav.hide();self.design_layout.addWidget(self.component_stack,1)
         self.mode_stack.addWidget(self.design_workspace)
         self.analysis_workspace=QWidget();analysis_layout=QVBoxLayout(self.analysis_workspace);analysis_layout.setContentsMargins(6,4,6,4)
         self.analysis_splitter=QSplitter(Qt.Orientation.Vertical);self.analysis_splitter.setChildrenCollapsible(False)
@@ -172,7 +180,7 @@ class DinoDesktopWindow(QMainWindow):
         self._refresh_component_states();layout.addWidget(self.simulation_strip);self.setCentralWidget(shell)
         self.stack=self.component_stack
         self.nav=self.component_nav
-        self.nav.setCurrentIndex(0)
+        self.nav.setCurrentIndex(8)
         self.statusBar().showMessage('Listo')
         self.toolbar=QToolBar('Proyecto',self);self.toolbar.setMovable(False);self.addToolBar(self.toolbar)
     def _update_strip(self,*_):
@@ -228,9 +236,11 @@ class DinoDesktopWindow(QMainWindow):
         self._update_evidence()
         self.evidence_dock.setVisible(not self.evidence_dock.isVisible())
     def _component_selected(self,index):
-        if index in (0,1,3,4,6):
+        selector_index=self.model_selector.findData(index)
+        self.model_selector.blockSignals(True);self.model_selector.setCurrentIndex(selector_index);self.model_selector.blockSignals(False)
+        if index in (0,1,3,4,6,7,8,9):
             self.component_stack.setCurrentIndex(0)
-            self.pages[0].component_tabs.setCurrentIndex({0:0,1:1,3:2,4:3,6:4}[index])
+            self.pages[0].component_tabs.setCurrentIndex({0:0,1:1,3:2,4:3,6:4,7:5,8:6,9:7}[index])
         elif index==2:self.component_stack.setCurrentIndex(1)
         elif index==5:self.component_stack.setCurrentIndex(2)
 
@@ -251,11 +261,11 @@ class DinoDesktopWindow(QMainWindow):
     def _run_started(self):
         self.pages[3].status_text="CORRIENDO";self._update_strip()
     def _refresh_component_states(self):
-        labels=("Cilindro y distribución","Eventos de área","Escape","Pérdidas","Combustión","Proyecto","Admisión y conductos")
+        labels=("Cilindro y culata","Lumbreras y transferencias","Escape","Pérdidas","Combustión","Proyecto","Admisión y conductos","Cárter","Resumen","Avanzado")
         validation=self.pages[0].validation.text().lower()
         valid="no se pudo presentar" not in validation and "rechazada" not in validation
-        engine_status=[self.pages[0].component_tabs.tabText(i).lower() for i in range(5)]
-        status_by_tab=(engine_status[0],engine_status[1],self.pages[1].edit_state,engine_status[2],engine_status[3],"complete",engine_status[4])
+        engine_status=[self.pages[0].component_tabs.tabText(i).lower() for i in range(8)]
+        status_by_tab=(engine_status[0],engine_status[1],self.pages[1].edit_state,engine_status[2],engine_status[3],"complete",engine_status[4],engine_status[5],engine_status[6],engine_status[7])
         for i in range(self.component_nav.count()):
             title=labels[i] if i<len(labels) else PAGES[i][0]
             state=status_by_tab[i] if i<len(status_by_tab) else "complete"
@@ -263,6 +273,7 @@ class DinoDesktopWindow(QMainWindow):
             modified=("modificado" in state) or state=="modified" or (self.context.dirty and i==self.component_nav.currentIndex())
             icon="✕" if invalid else ("●" if modified else "✓")
             self.component_nav.setTabText(i,f"{icon} {title}")
+            self.model_selector.setItemText(self.model_selector.findData(i),f'{icon} {title}')
             self.component_nav.setTabToolTip(i,"Error o configuración no válida" if invalid else ("Cambios pendientes de aplicar" if modified else "Configuración disponible"))
     def _update_evidence(self,*_):
         if not hasattr(self,"evidence_text"):return

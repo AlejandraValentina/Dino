@@ -1,0 +1,40 @@
+.F....                                                                   [100%]
+================================== FAILURES ===================================
+_ ModelEditorTests.test_degrees_table_geometry_timeline_apply_and_persistence_agree _
+
+self = <tests.test_desktop_model_editor_v2.ModelEditorTests testMethod=test_degrees_table_geometry_timeline_apply_and_persistence_agree>
+
+    def test_degrees_table_geometry_timeline_apply_and_persistence_agree(self):
+        page=EnginePage(self.context);ports=self.port_set();row=next(i for i,p in enumerate(ports.ports) if can_edit_opening(p))
+        before=identity(self.context.engine())
+        page.ports.item(row,7).setText('105')
+        expected=piston_position(ports.stroke_mm,ports.rod_length_mm,105)
+        self.assertAlmostEqual(float(page.ports.item(row,2).text()),expected,places=9)
+        self.assertAlmostEqual(float(page.ports.item(row,8).text()),255,places=5)
+        self.assertAlmostEqual(float(page.ports.item(row,9).text()),150,places=5)
+        self.assertAlmostEqual(page.port_geometry.rows[row]['effective_top'],expected,places=9)
+        intervals=next(p['intervals'] for p in page.port_timeline.rows if p['id']==ports.ports[row].id)
+        self.assertAlmostEqual(min(a for a,b in intervals),105,places=7)
+        self.assertAlmostEqual(max(b for a,b in intervals),255,places=7)
+        self.assertEqual(identity(self.context.engine()),before)
+        page.apply();self.assertNotEqual(identity(self.context.engine()),before)
+        self.assertAlmostEqual(self.port_set().ports[row].top_mm,expected,places=9)
+        after=self.port_set()
+        self.assertEqual(after.ports[row].height_mm,ports.ports[row].height_mm)
+        self.assertEqual(after.ports[row].width_mm,ports.ports[row].width_mm)
+        for index,port in enumerate(ports.ports):
+            if index!=row:self.assertEqual(after.ports[index].to_dict(),port.to_dict())
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'synthetic.dino2t.json';save_project(path,self.context.project)
+            self.assertEqual(load_project(path),self.context.project)
+        committed=identity(self.context.engine());page.ports.item(row,7).setText('200');page.apply()
+        self.assertIn('rechazada',page.validation.text().lower());self.assertEqual(identity(self.context.engine()),committed)
+        page.refresh();self.assertIsNone(page._angle_error)
+        page.ports.item(row,6).setText('1')
+>       self.assertFalse(page.ports.item(row,7).flags() & Qt.ItemFlag.ItemIsEditable)
+E       AssertionError: <ItemFlag.ItemIsEditable: 2> is not false
+
+tests\test_desktop_model_editor_v2.py:82: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_desktop_model_editor_v2.py::ModelEditorTests::test_degrees_table_geometry_timeline_apply_and_persistence_agree
+1 failed, 5 passed in 17.26s

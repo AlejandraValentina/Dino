@@ -10738,6 +10738,36 @@
       ],
       "qualification": "SELF_REVIEW; source vertical GUI acceptance, no packaged release or predictive claim. Existing core/data/experimental defaults preserved.",
       "next_action": "Further product improvement: clarify grouped model sections and reduce simulation copy; any integrated Windows candidate remains separate from this source acceptance. No new campaigns or historical diagnostics."
+    },
+    {
+      "id": "DESKTOP-MODEL-EDITOR-V2",
+      "description": "Owner-approved second Desktop vertical: separate model components, engineering summary, represented cylinder/port geometry, event distribution and guarded degree editing; then shared-scale exhaust clarity",
+      "state": "DONE",
+      "dependencies": [
+        "DESKTOP-DESIGN-WORKBENCH-V1"
+      ],
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "write_scope": [
+        "motorsim/desktop/app.py",
+        "motorsim/desktop/engine_page.py",
+        "motorsim/desktop/exhaust_page.py",
+        "motorsim/desktop/model_diagrams.py",
+        "tests/test_desktop_model_editor_v2.py",
+        "tests/test_dino_desktop.py",
+        "tests/test_dino_commercial_desktop_v3.py"
+      ],
+      "evidence": [
+        "results/desktop-model-editor-v2/acceptance.md",
+        "results/desktop-model-editor-v2/receipt.json",
+        "results/desktop-model-editor-v2/regression/desktop-model-editor-v2-regression.summary.json",
+        "results/desktop-model-editor-v2/final-model-contracts.txt",
+        "results/desktop-model-editor-v2/synchronization-final.txt",
+        "results/desktop-model-editor-v2/final-ui-regression.txt"
+      ],
+      "qualification": "SELF_REVIEW; real GUI at 980x680/1360x900/1920x1080; 42 PASS/1 SKIP regression plus 9 final UI and 6 final synchronization checks. Source acceptance only; no new physics, campaign, build or predictive claim.",
+      "next_action": "Source vertical complete. Remaining product improvements: separate intake/transfer duct presentation and reduce compact exhaust scrolling. Unsupported geometric maps and physics stay out of scope; scientific/data/budget blockers unchanged."
     }
   ],
   "audit_remediation_mode": false,
@@ -15082,6 +15112,18 @@
       "task": "DESKTOP-DESIGN-WORKBENCH-V1",
       "kind": "task",
       "summary": "Implemented three Desktop modes, persistent project actions, integrated variant/run/comparison explorer, curve-first result views and accessible traceability. Real GUI create/edit/save/reopen/exhaust variant, bounded one-cycle run, A/B parallel preflight canceled, historical 30-point export/reopen; 37 PASS/1 SKIP plus final focused checks. Existing science/data/budget blockers reviewed and unchanged; no builds, physics changes or campaigns."
+    },
+    {
+      "at": "2026-10-30T12:42:39+00:00",
+      "task": "DESKTOP-MODEL-EDITOR-V2",
+      "kind": "task",
+      "summary": "MODELO V2: separated components, summary, event diagrams and guarded degree editing; then common-scale A/B exhaust. Real GUI 980x680/1360x900/1920x1080: 57mm/365cm3/105deg, reject 200deg, save/reopen, duplicate escape 83->103mm. 42 PASS/1 SKIP plus 6 final tests. No solver/default/build/campaign change."
+    },
+    {
+      "at": "2026-11-03T12:12:28+00:00",
+      "task": "DESKTOP-MODEL-EDITOR-V2",
+      "kind": "task",
+      "summary": "Cierre documental de MODELO V2: evidencia GUI y proyecto preservados; sincronizacion final 6 PASS y regresion UI 9 PASS, ademas de 42 PASS/1 SKIP. Sin repetir pruebas, build ni campana. Commit local de componentes, grados y escape; cambios ajenos separados."
     }
   ],
   "legacy_gate_status": {

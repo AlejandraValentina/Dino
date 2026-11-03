@@ -26,7 +26,7 @@ class CommercialDesktopV3P0Tests(unittest.TestCase):
         window = DinoDesktopWindow(new_project("v3-startup"))
         window.show(); APP.processEvents()
         self.assertEqual(window.mode_stack.currentIndex(), 0)
-        self.assertEqual(window.component_nav.currentIndex(), 0)
+        self.assertEqual(window.component_nav.currentIndex(), 8)
         self.assertFalse(window.results.isVisible())
         self.assertTrue(window.strip_run.isEnabled())
         self.assertEqual(window.design_mode.text(), "MODELO")
