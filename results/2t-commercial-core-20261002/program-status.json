@@ -11871,9 +11871,11 @@
       "id": "DESKTOP-PARAMETRIC-REPORT-DUPLICATE-STATE-SUMMARY-V1",
       "description": "Remove duplicate visible classification/periodicity wording from cross-study point summaries when both source fields carry the same state; retain both exact fields in the source JSON and preserve distinct labels when they differ.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "931a941"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11884,9 +11886,14 @@
       ],
       "evidence_level": "L0",
       "evidence": [
-        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-report-v1.png"
+        "results/desktop-parametric-design-study-v2/report-duplicate-state-summary/acceptance.md",
+        "results/desktop-parametric-design-study-v2/report-duplicate-state-summary/acceptance-receipt.json",
+        "results/desktop-parametric-design-study-v2/report-duplicate-state-summary/tests-final/duplicate-state-final-v1.summary.json",
+        "results/desktop-parametric-design-study-v2/report-duplicate-state-summary/cross-study-report-v1.html",
+        "results/desktop-parametric-design-study-v2/report-duplicate-state-summary/before-v1.png",
+        "results/desktop-parametric-design-study-v2/report-duplicate-state-summary/chrome-report-v1.png"
       ],
-      "next_action": "In the visible point summary, collapse classification and periodicity only when the original state codes are equal; preserve both labels when distinct and keep all source JSON untouched.",
+      "next_action": "DONE: identical classification/periodicity states render once; different nonconverged states remain separate; raw source JSON unchanged; Desktop/Chrome export and 46 tests verified.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11909,6 +11916,28 @@
         "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-report-v1.png"
       ],
       "next_action": "Localize the PERIOD_1-only chart exclusion phrase without altering the eligibility rule or raw report JSON.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-REPORT-BASELINE-HASH-DISCLOSURE-V1",
+      "description": "Keep the common baseline engine SHA-256 discoverable without letting its unbroken 64-character value dominate the report header; provide a concise visible indicator and an accessible exact digest, preserving the full JSON and provenance.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/report-baseline-hash-disclosure/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/report-duplicate-state-summary/chrome-report-v1.png"
+      ],
+      "next_action": "Make the common baseline digest a readable technical disclosure; keep all 64 hex characters available and preserve exact source JSON.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16764,6 +16793,13 @@
       "task": "DESKTOP-PARAMETRIC-REPORT-DUPLICATE-STATE-SUMMARY-V1",
       "kind": "task",
       "summary": "Started screenshot-confirmed table cleanup: identical classification and periodicity labels are duplicated; distinct state combinations must remain explicit."
+    },
+    {
+      "at": "2026-11-04T23:08:45+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-DUPLICATE-STATE-SUMMARY-V1",
+      "kind": "task",
+      "summary": "Identical classification/periodicity pairs now render once in the summary; distinct nonconverged states remain visible. Same synthetic comparison captured before/after; 46 regressions passed.",
+      "commit": "931a941"
     }
   ],
   "legacy_gate_status": {

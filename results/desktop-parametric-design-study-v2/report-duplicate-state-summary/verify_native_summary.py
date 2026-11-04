@@ -175,4 +175,3 @@ if not all((receipt["summary_header_count"]==9,receipt["expandable_point_count"]
     receipt["not_claimed_preserved"],receipt["synthetic_notice_preserved"],app_capture_ok,capture_ok)):
     raise SystemExit("Native Desktop/HTML report acceptance failed")
 APP.quit()
-
