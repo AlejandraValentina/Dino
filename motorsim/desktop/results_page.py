@@ -379,9 +379,11 @@ def _build_factorial_effects_csv(manifest_path,manifest_sha256,manifest,imported
             row[qualification_field]="PERIOD_1_DEFINED" if defined else (
                 "WITHHELD_NONPERIODIC" if not is_periodic else "UNDEFINED_OR_INVALID")
         rows.append(row)
-    all_source_ids=json.dumps([row.get("source_run_id") for row in verified],ensure_ascii=False,
+    # Bind each descriptive contrast to the exact four POINT rows written above.
+    # ``verified`` contains nested {manifest, imported} outcomes, not flat CSV rows.
+    all_source_ids=json.dumps([row.get("source_run_id") for row in rows],ensure_ascii=False,
         separators=(",",":"))
-    all_source_hashes=json.dumps([row.get("result_sha256") for row in verified],ensure_ascii=False,
+    all_source_hashes=json.dumps([row.get("result_sha256") for row in rows],ensure_ascii=False,
         separators=(",",":"))
     metric_by_id={metric["metric"]:metric for metric in effects["metrics"]}
     for metric_id,metric in metric_by_id.items():

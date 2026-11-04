@@ -12,6 +12,7 @@ from motorsim.desktop.results_page import (ResultsPage,_build_cross_study_compar
     _build_factorial_effects_csv,_build_parametric_study_export,_factorial_effects_from_study,
     _load_verified_study_comparison,_write_factorial_effects_csv)
 from motorsim.desktop.services import load_results,new_design_project
+from motorsim.desktop.parametric_factorial_snapshot import import_parametric_factorial_csv_snapshot
 
 APP=QApplication.instance() or QApplication([])
 
@@ -743,6 +744,11 @@ def test_factorial_csv_binds_four_exact_points_and_nine_qualified_contrasts(tmp_
     assert all(row["scientific_validation"]=="NOT_CLAIMED" for row in rows)
     assert {row["contrast_term"] for row in contrasts}=={
         "Efecto principal · Factor A","Efecto principal · Factor B","Interacción A×B"}
+    expected_source_ids=[row["source_run_id"] for row in points]
+    expected_source_hashes=[row["result_sha256"] for row in points]
+    assert all(json.loads(row["contrast_source_run_ids_json"])==expected_source_ids for row in contrasts)
+    assert all(json.loads(row["contrast_source_result_sha256s_json"])==expected_source_hashes
+        for row in contrasts)
     output=tmp_path/"factorial.csv"
     _write_factorial_effects_csv(output,rows)
     with output.open(encoding="utf-8-sig",newline="") as stream:
@@ -756,6 +762,36 @@ def test_factorial_csv_binds_four_exact_points_and_nine_qualified_contrasts(tmp_
     manifest_path.write_text("{}",encoding="utf-8")
     with pytest.raises(ValueError,match="manifiesto factorial cambió"):
         _build_factorial_effects_csv(manifest_path,digest,manifest,imported)
+
+
+def test_factorial_contrast_source_bindings_survive_read_only_csv_reimport(tmp_path):
+    manifest,imported=_factorial_effect_fixture(tmp_path)
+    manifest_path=tmp_path/"factorial-roundtrip.study.json"
+    raw=json.dumps(manifest,sort_keys=True,separators=(",",":")).encode()
+    manifest_path.write_bytes(raw);digest=hashlib.sha256(raw).hexdigest()
+    rows=_build_factorial_effects_csv(manifest_path,digest,manifest,imported)
+    csv_path=tmp_path/"factorial-roundtrip.csv"
+    _write_factorial_effects_csv(csv_path,rows)
+    snapshot=import_parametric_factorial_csv_snapshot(csv_path)
+    assert snapshot["snapshot"]["contrast_source_bindings"]=="MATCH_POINT_ROWS"
+    points=snapshot["snapshot_points"]
+    point_ids=[row["source_run_id"] for row in points]
+    point_hashes=[row["result_sha256"] for row in points]
+    contrasts=snapshot["snapshot_contrasts"]
+    assert len(points)==4 and len(contrasts)==9
+    assert all(row["contrast_source_binding_status"]=="MATCHES_POINT_ROWS" for row in contrasts)
+    assert all(json.loads(row["contrast_source_run_ids_json"])==point_ids for row in contrasts)
+    assert all(json.loads(row["contrast_source_result_sha256s_json"])==point_hashes
+        for row in contrasts)
+    assert snapshot["snapshot"]["read_only"] is True
+    assert snapshot["experimental_validation"]=="NOT_CLAIMED"
+    page=ResultsPage(DesktopContext(new_design_project("factorial-source-binding-reimport-view")))
+    page._show_parametric_factorial_csv_snapshot(snapshot,csv_path)
+    assert page.factorial_csv_snapshot_points.rowCount()==4
+    assert page.factorial_csv_snapshot_contrasts.rowCount()==9
+    assert "Las filas CONTRAST enlazan las cuatro fuentes POINT" in page.factorial_csv_snapshot_notice.text()
+    assert "NOT_CLAIMED" in page.factorial_csv_snapshot_notice.text()
+    page.close();APP.processEvents()
 
 
 def test_factorial_csv_keeps_nonperiodic_points_and_withholds_all_contrasts(tmp_path):
