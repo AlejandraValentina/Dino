@@ -11673,7 +11673,7 @@
         "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1",
         "DESKTOP-PARAMETRIC-STUDY-TRACEABILITY-DETAILS-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11687,7 +11687,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Reuse the verified design response data already shown in Desktop; add an exact-point report graphic and an explicit exclusion/provenance section, keeping values unavailable unless PERIOD_1 and the metric is defined.",
+      "next_action": "Reuse exact source-bound study point data to add a technical-report response plot with per-parameter series, PERIOD_1/defined-metric gates, and an explicit exclusion/provenance table; do not interpolate or recalculate.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11711,6 +11711,28 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Reproduce the existing V1 null bindings without changing the archived CSV; fix the export rows for subsequent files and verify their run-ID/hash arrays match the four source point rows exactly.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-REPORT-PROVENANCE-TABLE-READABILITY-V1",
+      "description": "Make the exported technical report provenance table readable at a standard browser width without dropping fields or changing provenance values; the current screenshot demonstrates severe header/column wrapping in the wide 17-column comparison table.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-RESPONSE-PLOT-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/report-provenance-table-readability/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Use the saved native/Chrome report screenshot as the baseline. Reflow or group provenance columns responsively while preserving all original values; verify rendered HTML at 1360px and test complete provenance retention.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16482,6 +16504,12 @@
       "kind": "task",
       "summary": "The HTML comparison report now plots only finite PERIOD_1 endpoints from exact RPM/context pairs, retains all exclusions/unpaired rows and source manifests; native Desktop export and browser rendering verified with synthetic data; 44 focused tests passed.",
       "commit": "3e82d6e"
+    },
+    {
+      "at": "2026-11-04T22:11:16+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-REPORT-RESPONSE-PLOT-V1",
+      "kind": "start",
+      "summary": "Starting single-study technical-report response plots from already source-bound observed design points; exact values only, PERIOD_1/defined metrics, no interpolation or solver execution."
     }
   ],
   "legacy_gate_status": {
