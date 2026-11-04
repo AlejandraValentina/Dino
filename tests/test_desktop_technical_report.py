@@ -286,6 +286,42 @@ def test_report_shows_factorial_values_without_derived_effects():
     assert "no recalculan el solver" in report
 
 
+def test_factorial_report_renders_only_qualified_direct_contrasts():
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","design_method":"FACTORIAL_2X2_V1",
+        "study_id":"factorial-report-synthetic","status":"COMPLETE","rpm":3000,
+        "scientific_validation":"NOT_CLAIMED","parameter":{"label":"2×2 Factor A × Factor B",
+            "axes":[{"id":"A","label":"Factor A"},{"id":"B","label":"Factor B"}]},
+        "factors":[{"parameter":{"id":"A","label":"Factor A"},"values":[0,1]},
+            {"parameter":{"id":"B","label":"Factor B"},"values":[10,20]}],
+        "points":[{"index":i,"status":"COMPLETE","factor_values":[
+            {"parameter_id":"A","label":"Factor A","value":i//2,"unit":"mm"},
+            {"parameter_id":"B","label":"Factor B","value":10+10*(i%2),"unit":"mm"}],
+            "classification":"PERIOD_1","periodicity":"PERIOD_1"} for i in range(4)]}
+    effects={"schema":"DINO_PARAMETRIC_FACTORIAL_EFFECTS_V1","study_id":manifest["study_id"],
+        "status":"AVAILABLE","reason":None,"rpm":3000,
+        "metrics":[{"metric":"brake_power","label":"Potencia de freno","unit":"kW",
+            "status":"DEFINED","reason":None,"effects":[
+                {"term":"Efecto principal · Factor A","value":12.0,"unit":"kW","formula":"ΔA exacto = 12"},
+                {"term":"Efecto principal · Factor B","value":6.0,"unit":"kW","formula":"ΔB exacto = 6"},
+                {"term":"Interacción A×B","value":4.0,"unit":"kW","formula":"ΔAB exacto = 4"}]}]}
+    report=render_technical_report({"points":[_row("synthetic",3000,None,
+        classification="MAX_CYCLES_NONCONVERGED",periodicity="INSUFFICIENT_CYCLES")],
+        "experimental_validation":"NOT_PERFORMED"},source_kind="EXPLORATORY",generated_at="fixed",
+        design_study_manifest=manifest,factorial_effects=effects)
+    assert "Contrastes factoriales 2×2" in report and "Efecto principal · Factor A" in report
+    assert "+12 kW" in report and "+4 kW" in report
+    assert "no implican causalidad ni validación predictiva" in report.lower()
+
+    effects.update(status="UNAVAILABLE",reason="Punto no convergido",metrics=[{
+        "metric":"brake_power","label":"Potencia de freno","unit":"kW","status":"UNAVAILABLE",
+        "reason":"Punto no periódico","effects":[{"term":"Efecto principal · Factor A","value":None,
+            "unit":"kW","formula":"Solo cuatro puntos PERIOD_1"}]}])
+    unavailable=render_technical_report({"points":[_row("synthetic",3000,None)]},source_kind="EXPLORATORY",
+        generated_at="fixed",design_study_manifest=manifest,factorial_effects=effects)
+    assert "No disponibles" in unavailable and "Punto no periódico" in unavailable
+    assert "Solo cuatro puntos PERIOD_1" in unavailable and "—" in unavailable
+
+
 def test_results_page_exports_report_using_current_variant_selection(tmp_path):
     context = DesktopContext(new_design_project("report-ui"))
     page = ResultsPage(context)

@@ -180,6 +180,126 @@ def _build_cross_study_comparison_csv(comparison):
     return rows
 
 
+def _factorial_effects_from_study(manifest,imported_points):
+    """Return descriptive 2×2 contrasts only from four exact, verified PERIOD_1 points."""
+    if not isinstance(manifest,dict) or manifest.get("design_method")!="FACTORIAL_2X2_V1":
+        return None
+    factors=manifest.get("factors")
+    axes=[]
+    if isinstance(factors,list) and len(factors)==2:
+        for factor in factors:
+            parameter=factor.get("parameter") or {}
+            values=factor.get("values")
+            if (not isinstance(values,list) or len(values)!=2 or
+                    any(type(value) not in (int,float) or not math.isfinite(float(value)) for value in values) or
+                    values[0]==values[1] or not parameter.get("id")):
+                axes=[];break
+            axes.append({"id":parameter["id"],"label":parameter.get("label") or parameter["id"],
+                "unit":parameter.get("unit") or "","values":list(values)})
+    if len(axes)!=2:
+        return {"status":"UNAVAILABLE","reason":"El manifiesto no contiene dos factores con dos niveles exactos.",
+            "factors":axes,"metrics":[]}
+    combos=[(axes[0]["values"][i],axes[1]["values"][j]) for i in range(2) for j in range(2)]
+    imported_by_run={}
+    for row in imported_points or []:
+        if row.get("run_id") is not None:imported_by_run.setdefault(str(row["run_id"]),[]).append(row)
+    outcomes={};failure=None
+    for point in manifest.get("points",[]):
+        values=point.get("factor_values") or []
+        by_id={item.get("parameter_id"):item.get("value") for item in values if isinstance(item,dict)}
+        if any(axis["id"] not in by_id for axis in axes):
+            failure="Uno o más diseños no identifican ambos factores.";break
+        combo=(by_id[axes[0]["id"]],by_id[axes[1]["id"]])
+        if combo not in combos or combo in outcomes:
+            failure="La matriz factorial tiene una combinación duplicada o fuera de sus niveles declarados.";break
+        if point.get("status") not in {"COMPLETE","CACHED"}:
+            failure=f"Punto factorial {point.get('index')} no terminal: {point.get('status') or 'estado ausente'}.";break
+        run_id=point.get("source_run_id") or point.get("historical_source_run_id") or point.get("run_id")
+        candidates=imported_by_run.get(str(run_id),[]);imported=None
+        expected_dir=point.get("run_directory")
+        expected_hash=point.get("result_sha256") or point.get("result_artifact_sha256")
+        for candidate in candidates:
+            if expected_dir and candidate.get("artifact_directory"):
+                if Path(expected_dir).resolve()!=Path(candidate["artifact_directory"]).resolve():continue
+            if expected_hash and candidate.get("result_sha256")!=expected_hash:continue
+            if candidate.get("rpm")!=manifest.get("rpm"):continue
+            imported=candidate;break
+        if imported is None:
+            failure=f"Falta el artifact importado exacto del punto factorial {point.get('index')} ({run_id or 'run no informado'}).";break
+        if not expected_dir or not expected_hash:
+            failure=f"Falta ruta/hash fuente en el punto factorial {point.get('index')}.";break
+        try:
+            source=Path(expected_dir).resolve();raw=(source/"result.json").read_bytes()
+            result=json.loads(raw);run_meta=json.loads((source/"run.json").read_text(encoding="utf-8"))
+            digest=hashlib.sha256(raw).hexdigest()
+            identity=point.get("identity_sha256") or point.get("engine_identity_sha256")
+            if (digest!=expected_hash or digest!=run_meta.get("result_sha256") or
+                    digest!=imported.get("result_sha256") or result.get("schema")!="DINO_ENGINEERING_RUN_V1" or
+                    result.get("status")!="COMPLETE" or result.get("bindings",{}).get("run_id")!=run_id or
+                    result.get("bindings",{}).get("identity_sha256")!=identity):
+                failure=f"Hash o identidad de fuente no verificado en el punto factorial {point.get('index')}.";break
+        except (OSError,ValueError,TypeError,KeyError,json.JSONDecodeError):
+            failure=f"No se pudo verificar la fuente del punto factorial {point.get('index')}.";break
+        if imported.get("periodicity")!="PERIOD_1":
+            failure=(f"Punto factorial {point.get('index')} no periódico PERIOD_1: "
+                f"{imported.get('periodicity') or 'periodicidad no informada'}. No se calculan efectos.");break
+        outcomes[combo]={"manifest":point,"imported":imported}
+    if failure is None and (len(outcomes)!=4 or set(outcomes)!=set(combos)):
+        failure="Falta al menos uno de los cuatro diseños factoriales exactos."
+    ordered=[outcomes.get(combo) for combo in combos]
+    if failure is None:
+        contexts=[row["imported"] for row in ordered]
+        for key in _STUDY_COMPARE_CONTEXT:
+            values=[row.get(key) for row in contexts]
+            if any(value is None for value in values) or len(set(map(str,values)))!=1:
+                failure=f"Condiciones incompatibles o ausentes entre los cuatro puntos: {key}.";break
+        rpms=[row.get("rpm") for row in contexts]
+        if failure is None and (any(value is None for value in rpms) or len(set(rpms))!=1):
+            failure="Los cuatro puntos no comparten una RPM exacta."
+    metric_rows=[]
+    definitions=(
+        ("brake_power","Potencia de freno","kW"),
+        ("brake_torque","Torque de freno","N·m"),
+        ("BMEP","BMEP","kPa"),
+    )
+    for metric,label,unit in definitions:
+        formula_a=f"((y(A₂,B₁)+y(A₂,B₂))−(y(A₁,B₁)+y(A₁,B₂)))/2 · niveles A: {axes[0]['values']}"
+        formula_b=f"((y(A₁,B₂)+y(A₂,B₂))−(y(A₁,B₁)+y(A₂,B₁)))/2 · niveles B: {axes[1]['values']}"
+        formula_interaction="(y(A₂,B₂)−y(A₂,B₁))−(y(A₁,B₂)−y(A₁,B₁))"
+        row={"metric":metric,"label":label,"unit":unit,"status":"UNAVAILABLE",
+            "reason":failure,"effects":[]}
+        if failure is None:
+            values=[];reason=None
+            for outcome in ordered:
+                sample=outcome["imported"];value=sample.get(metric);status=sample.get(metric+"_status")
+                if (status!="DEFINED" or type(value) not in (int,float) or not math.isfinite(float(value))):
+                    reason=f"La métrica {label} no está definida en los cuatro resultados periódicos.";break
+                values.append(float(value))
+            if reason is None:
+                y11,y12,y21,y22=values
+                row.update(status="DEFINED",reason=None,effects=[
+                    {"term":f"Efecto principal · {axes[0]['label']}","value":((y21+y22)-(y11+y12))/2,
+                     "unit":unit,"formula":formula_a},
+                    {"term":f"Efecto principal · {axes[1]['label']}","value":((y12+y22)-(y11+y21))/2,
+                     "unit":unit,"formula":formula_b},
+                    {"term":"Interacción A×B","value":(y22-y21)-(y12-y11),
+                     "unit":unit,"formula":formula_interaction},
+                ])
+            else:row["reason"]=reason
+        if row["status"]!="DEFINED":
+            row["effects"]=[{"term":f"Efecto principal · {axes[0]['label']}","value":None,"unit":unit,"formula":formula_a},
+                {"term":f"Efecto principal · {axes[1]['label']}","value":None,"unit":unit,"formula":formula_b},
+                {"term":"Interacción A×B","value":None,"unit":unit,"formula":formula_interaction}]
+        metric_rows.append(row)
+    has_defined=any(row["status"]=="DEFINED" for row in metric_rows)
+    overall_reason=failure or (None if has_defined else "Ninguna de las tres métricas está definida en los cuatro resultados.")
+    return {"schema":"DINO_PARAMETRIC_FACTORIAL_EFFECTS_V1","study_id":manifest.get("study_id"),
+        "status":"AVAILABLE" if failure is None and has_defined else "UNAVAILABLE","reason":overall_reason,
+        "rpm":manifest.get("rpm"),"factors":axes,"metrics":metric_rows,
+        "point_ids":[(row or {}).get("manifest",{}).get("source_run_id") or
+            (row or {}).get("manifest",{}).get("run_id") for row in ordered]}
+
+
 def _build_parametric_study_export(manifest,manifest_path,manifest_sha256,selected_indexes,imported_points=()):
     """Build exact, provenance-bound CSV rows from a verified study snapshot."""
     if not isinstance(manifest,dict) or manifest.get("schema")!="DINO_PARAMETRIC_DESIGN_STUDY_V1":
@@ -533,6 +653,16 @@ class ResultsPage(QWidget):
         self.design_study_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.design_study_table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         study_layout.addWidget(self.design_study_table)
+        self.factor_effects_group=QGroupBox("Contrastes factoriales 2×2 · descriptivos")
+        factor_effects_layout=QVBoxLayout(self.factor_effects_group)
+        self.factor_effects_notice=QLabel("Los contrastes requieren los cuatro resultados exactos, periódicos y compatibles.")
+        self.factor_effects_notice.setWordWrap(True);factor_effects_layout.addWidget(self.factor_effects_notice)
+        self.factor_effects_table=QTableWidget(0,5);self.factor_effects_table.setObjectName("factorialEffects")
+        self.factor_effects_table.setHorizontalHeaderLabels(["Métrica","Contraste","Valor","Estado","Definición"])
+        self.factor_effects_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.factor_effects_table.horizontalHeader().setStretchLastSection(True);self.factor_effects_table.setMaximumHeight(280)
+        factor_effects_layout.addWidget(self.factor_effects_table);study_layout.addWidget(self.factor_effects_group)
+        self.factor_effects_group.hide()
         self.export_design_study_button=QPushButton("Exportar puntos seleccionados CSV…")
         self.export_design_study_button.setToolTip("CSV sin redondeo, con estados, identidades y SHA-256 del manifiesto ligado al proyecto.")
         self.export_design_study_button.clicked.connect(self.export_design_study_csv)
@@ -1266,7 +1396,13 @@ class ResultsPage(QWidget):
             if row.get("status")=="CACHED" and row.get("reused_verified"):
                 design_label += " · histórico verificado"
             factor_values=row.get("factor_values") or []
-            value_text=(" · ".join(f"{item.get('label')}={format_number(item.get('value'))} {item.get('unit','')}" for item in factor_values)
+            factor_labels={factor.get("parameter",{}).get("id"):factor.get("parameter",{}).get("label") or
+                factor.get("parameter",{}).get("id") for factor in manifest.get("factors",[])
+                if isinstance(factor,dict) and isinstance(factor.get("parameter"),dict)}
+            value_text=(" · ".join(
+                f"{item.get('label') or factor_labels.get(item.get('parameter_id')) or item.get('parameter_id') or 'Factor'}="
+                f"{format_number(item.get('value'))} {item.get('unit') or ''}".rstrip()
+                for item in factor_values if isinstance(item,dict))
                         if factor_values else f"{format_number(row.get('value'))} {row.get('unit','')}")
             if is_envelope:value_text+=f" · {format_number(row.get('rpm'))} RPM"
             cells=[design_label,value_text,
@@ -1289,7 +1425,44 @@ class ResultsPage(QWidget):
                 elif column in (2,3,8):item.setToolTip(str(value))
                 self.design_study_table.setItem(index,column,item)
         self._refresh_design_response_plot()
+        self._update_factorial_effects()
         self.design_study_group.show()
+
+    def _update_factorial_effects(self):
+        manifest=getattr(self,"design_study_manifest",None)
+        available=bool(manifest and manifest.get("design_method")=="FACTORIAL_2X2_V1")
+        self.factor_effects_group.setVisible(available)
+        if not available:
+            self.factor_effects_table.setRowCount(0);return
+        effects=_factorial_effects_from_study(manifest,(self.dataset or {}).get("points",[]))
+        self.factor_effects_table.setRowCount(0)
+        if not effects:
+            self.factor_effects_notice.setText("El estudio factorial no contiene una matriz compatible.");return
+        if effects["status"]=="AVAILABLE":
+            factor_summary="; ".join(f"{factor['label']}: {factor['values']} {factor['unit']}".strip()
+                for factor in effects["factors"])
+            self.factor_effects_notice.setText(
+                f"Contrastes descriptivos calculados para cuatro fuentes verificadas PERIOD_1 a {format_number(effects['rpm'])} RPM · "
+                f"{factor_summary}. No son atribución causal ni validación predictiva.")
+        else:
+            self.factor_effects_notice.setText(
+                f"Efectos no disponibles · {effects['reason']} Se conservan los cuatro puntos y sus estados; no se imputan ni interpolan resultados.")
+        rows=[]
+        for metric in effects["metrics"]:
+            for effect in metric["effects"]:
+                value=effect.get("value")
+                status=("Descriptivo · no validado" if metric["status"]=="DEFINED" else
+                    f"No disponible · {metric.get('reason') or effects.get('reason') or 'métrica no definida'}")
+                rows.append((metric["label"],effect["term"],
+                    f"{format_number(value,signed=True)} {effect['unit']}" if isinstance(value,(int,float)) else "—",
+                    status,effect["formula"]))
+        self.factor_effects_table.setRowCount(len(rows))
+        for row_index,cells in enumerate(rows):
+            for column,value in enumerate(cells):
+                item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                if column==4:item.setToolTip(str(value))
+                if column==3:item.setToolTip(str(value))
+                self.factor_effects_table.setItem(row_index,column,item)
 
     def export_design_study_csv(self):
         manifest=getattr(self,"design_study_manifest",None)
@@ -1614,7 +1787,9 @@ class ResultsPage(QWidget):
                 selected_variants=selected,source_path=self.source,
                 active_project_id=self.context.project.get('project_id'),
                 design_study_manifest=getattr(self,'design_study_manifest',None),
-                design_study_manifest_path=getattr(self,'design_study_manifest_path',None))
+                design_study_manifest_path=getattr(self,'design_study_manifest_path',None),
+                factorial_effects=_factorial_effects_from_study(
+                    getattr(self,'design_study_manifest',None),(self.dataset or {}).get('points',[])))
             self.path_label.setText(f"Informe técnico autosuficiente exportado: {Path(path).name}")
             return True
         except (OSError,TypeError,ValueError) as exc:

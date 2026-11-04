@@ -1,0 +1,60 @@
+{
+  "evidence_type": "NATIVE_WINDOWS_QT_PRESENTATION_SYNTHETIC",
+  "evidence_qualification": "No solver execution or scientific validation; source artifacts are test fixtures.",
+  "captures": [
+    {
+      "platform": "windows",
+      "window_size": [
+        1480,
+        881
+      ],
+      "visible": true,
+      "capture_saved": true,
+      "capture": "results\\desktop-parametric-design-study-v2\\factor-effects\\factor-effects-native-available-synthetic.png",
+      "capture_sha256": "6fb2b0782e2748a74c26b90677468190983da7ddf80b4e5ded079ba0df68c667",
+      "matrix_rows": 4,
+      "effect_rows": 9,
+      "effect_values": [
+        "+12 kW",
+        "+6 kW",
+        "+4 kW",
+        "+24 N·m",
+        "+12 N·m",
+        "+8 N·m",
+        "+36 kPa",
+        "+18 kPa",
+        "+12 kPa"
+      ],
+      "notice": "Contrastes descriptivos calculados para cuatro fuentes verificadas PERIOD_1 a 3000 RPM · Factor A: [0.0, 1.0] mm; Factor B: [10.0, 20.0] cm3. No son atribución causal ni validación predictiva.",
+      "state": "four PERIOD_1 points",
+      "synthetic": true
+    },
+    {
+      "platform": "windows",
+      "window_size": [
+        1480,
+        881
+      ],
+      "visible": true,
+      "capture_saved": true,
+      "capture": "results\\desktop-parametric-design-study-v2\\factor-effects\\factor-effects-native-nonperiodic-synthetic.png",
+      "capture_sha256": "6d37dfb5a4c11ebb13e381cc2e50520e6cddd07361349d12e159d31c21e3e1c8",
+      "matrix_rows": 4,
+      "effect_rows": 9,
+      "effect_values": [
+        "—",
+        "—",
+        "—",
+        "—",
+        "—",
+        "—",
+        "—",
+        "—",
+        "—"
+      ],
+      "notice": "Efectos no disponibles · Punto factorial 3 no periódico PERIOD_1: INSUFFICIENT_CYCLES. No se calculan efectos. Se conservan los cuatro puntos y sus estados; no se imputan ni interpolan resultados.",
+      "state": "one nonperiodic point",
+      "synthetic": true
+    }
+  ]
+}

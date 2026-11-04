@@ -3,12 +3,13 @@ import csv,hashlib,json,os
 from pathlib import Path
 import pytest
 os.environ.setdefault("QT_QPA_PLATFORM","offscreen")
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication,QComboBox,QDialog,QFileDialog,QLineEdit,QMessageBox
 from motorsim.desktop.app import DinoDesktopWindow
 from motorsim.desktop.context import DesktopContext
 from motorsim.desktop.execution_page import ExecutionPage
 from motorsim.desktop.results_page import (ResultsPage,_build_cross_study_comparison_csv,
-    _build_parametric_study_export,_load_verified_study_comparison)
+    _build_parametric_study_export,_factorial_effects_from_study,_load_verified_study_comparison)
 from motorsim.desktop.services import new_design_project
 
 APP=QApplication.instance() or QApplication([])
@@ -458,6 +459,103 @@ def test_cross_study_csv_export_keeps_exact_sources_pair_decisions_and_blank_non
     page.context.changed.emit();APP.processEvents()
     assert page.study_comparison is None
     assert not page.export_study_comparison_csv_button.isEnabled()
+    page.close();APP.processEvents()
+
+
+def _factorial_effect_fixture(tmp_path):
+    axes=[{"parameter":{"id":"A","label":"Factor A","unit":"mm"},"values":[0.0,1.0]},
+        {"parameter":{"id":"B","label":"Factor B","unit":"cm3"},"values":[10.0,20.0]}]
+    context={"fuel_id":"fuel","afr_kg_air_per_kg_fuel":12.5,"total_finite_volume_cells":128,
+        "cycles_requested":5,"solver_identity_sha256":"solver","implementation_identity_sha256":"impl"}
+    samples=[(0.0,10.0,10.0),(0.0,20.0,14.0),(1.0,10.0,20.0),(1.0,20.0,28.0)]
+    points=[];imported=[]
+    for index,(a,b,power) in enumerate(samples):
+        run_id=f"factorial-source-{index}";identity=hashlib.sha256(f"identity-{index}".encode()).hexdigest()
+        result_dir=tmp_path/f"factorial-run-{index}";result_dir.mkdir()
+        result={"schema":"DINO_ENGINEERING_RUN_V1","status":"COMPLETE",
+            "bindings":{"run_id":run_id,"identity_sha256":identity}}
+        raw=json.dumps(result,sort_keys=True,separators=(",",":")).encode();digest=hashlib.sha256(raw).hexdigest()
+        (result_dir/"result.json").write_bytes(raw)
+        (result_dir/"run.json").write_text(json.dumps({"result_sha256":digest}),encoding="utf-8")
+        points.append({"index":index,"status":"COMPLETE","run_id":run_id,"source_run_id":run_id,
+            "rpm":3000,"periodicity":"PERIOD_1","classification":"PERIOD_1","cycles_completed":5,
+            "factor_values":[{"parameter_id":"A","value":a},{"parameter_id":"B","value":b}],
+            "identity_sha256":identity,"engine_identity_sha256":identity,"result_sha256":digest,
+            "result_artifact_sha256":digest,"run_directory":str(result_dir)})
+        imported.append({"artifact_directory":str(result_dir),"run_id":run_id,"rpm":3000,
+            "result_sha256":digest,"identity_sha256":identity,"periodicity":"PERIOD_1",
+            "classification":"PERIOD_1","cycles_completed":5,**context,
+            "brake_power":power,"brake_power_status":"DEFINED",
+            "brake_torque":power*2,"brake_torque_status":"DEFINED",
+            "BMEP":power*3,"BMEP_status":"DEFINED"})
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","design_method":"FACTORIAL_2X2_V1",
+        "study_id":"factorial-effect-synthetic","project_id":"synthetic-factorial","rpm":3000,
+        "baseline_engine_identity_sha256":"b"*64,"factors":axes,
+        "parameter":{"id":"factorial-2x2","label":"2×2 · Factor A × Factor B","axes":[a["parameter"] for a in axes]},
+        "points":points,"scientific_validation":"NOT_CLAIMED"}
+    return manifest,imported
+
+
+def test_factorial_contrasts_require_four_verified_periodic_exact_context_points(tmp_path):
+    manifest,imported=_factorial_effect_fixture(tmp_path)
+    effects=_factorial_effects_from_study(manifest,imported)
+    assert effects["status"]=="AVAILABLE"
+    power={row["term"]:row["value"] for row in effects["metrics"][0]["effects"]}
+    assert power["Efecto principal · Factor A"]==12.0
+    assert power["Efecto principal · Factor B"]==6.0
+    assert power["Interacción A×B"]==4.0
+    assert all(row["status"]=="DEFINED" for row in effects["metrics"])
+    assert all(len(point["run_id"])>0 for point in manifest["points"])
+
+    transient=[dict(row) for row in imported];transient[-1]["periodicity"]="INSUFFICIENT_CYCLES"
+    unavailable=_factorial_effects_from_study(manifest,transient)
+    assert unavailable["status"]=="UNAVAILABLE"
+    assert "no periódico" in unavailable["reason"].lower()
+    assert all(effect["value"] is None for metric in unavailable["metrics"] for effect in metric["effects"])
+    missing_point=_factorial_effects_from_study({**manifest,"points":manifest["points"][:-1]},imported[:-1])
+    assert missing_point["status"]=="UNAVAILABLE" and "cuatro" in missing_point["reason"].lower()
+
+    (Path(manifest["points"][0]["run_directory"])/"result.json").write_text("{}",encoding="utf-8")
+    stale=_factorial_effects_from_study(manifest,imported)
+    assert stale["status"]=="UNAVAILABLE" and "hash" in stale["reason"].lower()
+
+
+def test_factorial_ui_keeps_four_rows_and_shows_unavailable_effects_for_transient_points(tmp_path):
+    manifest,imported=_factorial_effect_fixture(tmp_path)
+    imported[-1]["periodicity"]="INSUFFICIENT_CYCLES"
+    imported[-1]["classification"]="MAX_CYCLES_NONCONVERGED"
+    manifest["points"][-1]["periodicity"]="INSUFFICIENT_CYCLES"
+    manifest["points"][-1]["classification"]="MAX_CYCLES_NONCONVERGED"
+    page=ResultsPage(DesktopContext(new_design_project("factorial-effect-ui-synthetic")))
+    page.design_study_manifest=manifest;page.design_study_manifest_path=tmp_path/"manifest.json"
+    page.dataset={"points":imported}
+    page._update_design_study_summary()
+    assert page.design_study_table.rowCount()==4
+    assert "Factor A=0" in page.design_study_table.item(0,1).text()
+    assert "Factor B=10" in page.design_study_table.item(0,1).text()
+    assert "None=" not in page.design_study_table.item(0,1).text()
+    assert not page.factor_effects_group.isHidden()
+    assert page.factor_effects_table.rowCount()==9
+    assert all(page.factor_effects_table.item(index,2).text()=="—" for index in range(9))
+    assert "no periódico" in page.factor_effects_notice.text().lower()
+    page.close();APP.processEvents()
+
+
+def test_factorial_effects_flow_into_desktop_technical_report(tmp_path,monkeypatch):
+    manifest,imported=_factorial_effect_fixture(tmp_path)
+    manifest_path=tmp_path/"verified-factorial.study.json"
+    manifest_path.write_text(json.dumps(manifest,sort_keys=True),encoding="utf-8")
+    page=ResultsPage(DesktopContext(new_design_project("factorial-report-export-synthetic")))
+    page.dataset={"schema":"DINO_EXPLORATORY_COMPARISON_V1","experimental_validation":"NOT_PERFORMED",
+        "points":[{**row,"variant_id":"synthetic factorial"} for row in imported]}
+    page.source_kind="EXPLORATORY";page.design_study_manifest=manifest;page.design_study_manifest_path=manifest_path
+    page.variants.addItem("synthetic factorial");page.variants.item(0).setCheckState(Qt.CheckState.Checked)
+    output=tmp_path/"factorial-report.html"
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *args:(str(output),"HTML (*.html)"))
+    assert page.export_technical_report() is True
+    report=output.read_text(encoding="utf-8")
+    assert "Efecto principal · Factor A" in report and "+12 kW" in report and "+4 kW" in report
+    assert "Contrastes factoriales 2×2 · descriptivos" in report
     page.close();APP.processEvents()
 
 

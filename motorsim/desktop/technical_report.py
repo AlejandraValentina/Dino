@@ -118,7 +118,8 @@ def render_technical_report(dataset: dict, *, source_kind: str,
                             selected_variants=None, source_path=None,
                             active_project_id=None, generated_at=None,
                             design_study_manifest=None,
-                            design_study_manifest_path=None) -> str:
+                            design_study_manifest_path=None,
+                            factorial_effects=None) -> str:
     """Render exact selected result records and an explicit evidence boundary."""
     points = dataset.get("points") if isinstance(dataset, dict) else None
     if not isinstance(points, list) or not points:
@@ -234,12 +235,41 @@ def render_technical_report(dataset: dict, *, source_kind: str,
                 f"puntos guardados: {_esc(len(manifest.get('points',[])))}. "
                 "Cada fila es una observación del manifiesto. No se interpolan puntos ni se calculan resúmenes de rendimiento desde el manifiesto; las métricas sólo aparecen en resultados importados individualmente y periódicos. "
                 f"Validación científica: <strong>{_esc(state_label(manifest.get('scientific_validation','NOT_CLAIMED')))}</strong>.</p>")
+        factorial_html=""
+        if manifest.get("design_method")=="FACTORIAL_2X2_V1":
+            if (not isinstance(factorial_effects,dict) or
+                    factorial_effects.get("schema")!="DINO_PARAMETRIC_FACTORIAL_EFFECTS_V1" or
+                    factorial_effects.get("study_id")!=manifest.get("study_id")):
+                factorial_effects={"status":"UNAVAILABLE","reason":"No se proporcionó un contraste con fuentes verificadas.","metrics":[]}
+            effect_rows=[]
+            for metric in factorial_effects.get("metrics",[]):
+                for effect in metric.get("effects",[]):
+                    value=effect.get("value")
+                    shown=(f"{format_number(value,signed=True)} {_esc(effect.get('unit') or metric.get('unit') or '')}"
+                        if _safe_number(value) else "—")
+                    effect_rows.append("<tr>"+"".join((f"<td>{_esc(metric.get('label'))}</td>",
+                        f"<td>{_esc(effect.get('term'))}</td>",f"<td>{shown}</td>",
+                        f"<td>{_esc(metric.get('reason') or factorial_effects.get('reason') or 'Descriptivo · no validado')}</td>",
+                        f"<td><code>{_esc(effect.get('formula'))}</code></td>"))+"</tr>")
+            if not effect_rows:
+                effect_rows.append(f"<tr><td colspan=\"5\">{_esc(factorial_effects.get('reason') or 'Contrastes no disponibles.')}</td></tr>")
+            factor_names=" × ".join(str(axis.get("label") or axis.get("id")) for axis in manifest.get("parameter",{}).get("axes",[]))
+            effect_state=("Descriptivos disponibles · no validados" if factorial_effects.get("status")=="AVAILABLE"
+                else "No disponibles")
+            factorial_html=("<h3>Contrastes factoriales 2×2 · descriptivos</h3>"
+                f"<p>Diseño { _esc(factor_names or 'dos factores') }. Los efectos principales usan la media de cada nivel frente al otro; "
+                "la interacción es la diferencia de diferencias indicada en la fórmula. Sólo se calculan con cuatro artifacts verificados, "
+                "condiciones compatibles, métricas definidas y periodicidad PERIOD_1. No implican causalidad ni validación predictiva. "
+                f"Estado: <strong>{_esc(effect_state)}</strong> · "
+                f"{_esc(factorial_effects.get('reason') or '')}</p>"
+                "<table><thead><tr><th>Métrica</th><th>Contraste</th><th>Valor</th><th>Estado</th><th>Definición exacta</th></tr></thead>"
+                f"<tbody>{''.join(effect_rows)}</tbody></table>")
         study_html = ("<h2>Estudio paramétrico asociado</h2>"
             f"<p>Estudio <code>{_esc(manifest.get('study_id'))}</code>; parámetro "
             f"<strong>{_esc(parameter.get('label') or parameter.get('id') or 'No informado')}</strong>; "
             f"estado {_esc(state_label(manifest.get('status')))}. Los puntos conservan su clasificación de ejecución; "
             "la finalización del estudio no implica periodicidad ni validación científica.</p>"
-            f"{manifest_origin}{envelope_summary}<table><thead><tr><th>Punto</th><th>Estado de ejecución</th>"
+            f"{manifest_origin}{envelope_summary}{factorial_html}<table><thead><tr><th>Punto</th><th>Estado de ejecución</th>"
             "<th>RPM</th><th>Clasificación</th><th>Periodicidad</th><th>Ciclos</th><th>Valor(es)</th>"
             f"<th>Run de origen</th><th>Proyecto de origen</th><th>Ruta de resultado</th>"
             f"<th>Resultado SHA-256</th><th>Artefacto SHA-256</th><th>Manifiesto sweep</th>"
