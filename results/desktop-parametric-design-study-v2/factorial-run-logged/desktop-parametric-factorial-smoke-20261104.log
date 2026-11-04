@@ -1,0 +1,117 @@
+{"cycle": 1, "work_J": -43.6056052842375, "heat_J": 22.47642363631749, "pmax_Pa": 4304413.67015572, "wall_s": 8.251446300011594, "streak": 0}
+{"status": "MAX_CYCLES_NONCONVERGED", "cycles_completed": 1, "wall_s": 8.692187200009357, "solver_step_wall_s": 7.794135800970253, "processing_wall_s": 0.5008647998911329, "peak_rss_mib": 178.734375, "failure": null}
+{"cycle": 1, "work_J": -43.58943039355694, "heat_J": 22.39210129750176, "pmax_Pa": 4298766.348475994, "wall_s": 8.232642900024075, "streak": 0}
+{"status": "MAX_CYCLES_NONCONVERGED", "cycles_completed": 1, "wall_s": 8.667973999981768, "solver_step_wall_s": 7.831408099271357, "processing_wall_s": 0.5045056994422339, "peak_rss_mib": 182.6015625, "failure": null}
+{"cycle": 1, "work_J": -43.619375712034135, "heat_J": 22.216610569095923, "pmax_Pa": 4290241.658284008, "wall_s": 8.283312100043986, "streak": 0}
+{"status": "MAX_CYCLES_NONCONVERGED", "cycles_completed": 1, "wall_s": 8.65131319995271, "solver_step_wall_s": 7.819459499500226, "processing_wall_s": 0.4398923007538542, "peak_rss_mib": 182.6328125, "failure": null}
+{"cycle": 1, "work_J": -43.60193231362233, "heat_J": 22.13050322587325, "pmax_Pa": 4284419.287362352, "wall_s": 8.150405700027477, "streak": 0}
+{"status": "MAX_CYCLES_NONCONVERGED", "cycles_completed": 1, "wall_s": 8.519873699988239, "solver_step_wall_s": 7.761180599569343, "processing_wall_s": 0.4407157999230549, "peak_rss_mib": 182.921875, "failure": null}
+{
+  "status": "COMPLETE",
+  "study_id": "synthetic-factorial-smoke-20261104",
+  "manifest": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\desktop-parametric-factorial-v1\\design-studies-v1\\synthetic-factorial-integration\\synthetic-factorial-smoke-20261104\\study.json",
+  "elapsed_seconds": 38.625,
+  "scientific_validation": "NOT_CLAIMED",
+  "points": [
+    {
+      "status": "COMPLETE",
+      "label": "Lumbrera · Primary transfer · altura desde PMS=38.4086 mm · Cárter · volumen en PMI=356.081 cm³",
+      "identity_sha256": "2bd17d1d7cef3ce8380a7c697b8121def8f4e15b2b54a2a4cad8298cd040d71a",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "cycles_completed": 1,
+      "result_artifact_sha256": "472d82f2bce9282d83cda5d081b046be660589435f0a904120b46677eb914d52",
+      "factor_values": [
+        {
+          "parameter_id": "port:primary-window:top_mm",
+          "label": "Lumbrera · Primary transfer · altura desde PMS",
+          "value": 38.40862784470379,
+          "unit": "mm",
+          "baseline": true
+        },
+        {
+          "parameter_id": "crankcase.volume_bdc_cm3",
+          "label": "Cárter · volumen en PMI",
+          "value": 356.0806777284814,
+          "unit": "cm³",
+          "baseline": true
+        }
+      ]
+    },
+    {
+      "status": "COMPLETE",
+      "label": "Lumbrera · Primary transfer · altura desde PMS=38.4086 mm · Cárter · volumen en PMI=361.081 cm³",
+      "identity_sha256": "2f7d868bdf28f0bd29b1784b3c47504871f35d19a8f908457348a61483b0ff19",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "cycles_completed": 1,
+      "result_artifact_sha256": "248c661a7deb032300b6b566f9f4e6ba544b3c92e514dbea9754cac5a80b7c02",
+      "factor_values": [
+        {
+          "parameter_id": "port:primary-window:top_mm",
+          "label": "Lumbrera · Primary transfer · altura desde PMS",
+          "value": 38.40862784470379,
+          "unit": "mm",
+          "baseline": true
+        },
+        {
+          "parameter_id": "crankcase.volume_bdc_cm3",
+          "label": "Cárter · volumen en PMI",
+          "value": 361.0806777284814,
+          "unit": "cm³",
+          "baseline": false
+        }
+      ]
+    },
+    {
+      "status": "COMPLETE",
+      "label": "Lumbrera · Primary transfer · altura desde PMS=39.4086 mm · Cárter · volumen en PMI=356.081 cm³",
+      "identity_sha256": "5036efd88fa584fb2987c7fe3ef0708475f1ce3e4123e3859389e89f84e36f0c",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "cycles_completed": 1,
+      "result_artifact_sha256": "ab591058619aa6380f651d6ce7f6d6e135c37f6c8625e931ed6d1bf0c3669bdc",
+      "factor_values": [
+        {
+          "parameter_id": "port:primary-window:top_mm",
+          "label": "Lumbrera · Primary transfer · altura desde PMS",
+          "value": 39.40862784470379,
+          "unit": "mm",
+          "baseline": false
+        },
+        {
+          "parameter_id": "crankcase.volume_bdc_cm3",
+          "label": "Cárter · volumen en PMI",
+          "value": 356.0806777284814,
+          "unit": "cm³",
+          "baseline": true
+        }
+      ]
+    },
+    {
+      "status": "COMPLETE",
+      "label": "Lumbrera · Primary transfer · altura desde PMS=39.4086 mm · Cárter · volumen en PMI=361.081 cm³",
+      "identity_sha256": "98da5af43301a64bf6edce9d121f73d53cec73bab616db4f4661c2d5325b4d94",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "cycles_completed": 1,
+      "result_artifact_sha256": "a934a713eb65f6aaf812cb5568ca4fc669fae132d752e3dcfbfc3bdb2ab50878",
+      "factor_values": [
+        {
+          "parameter_id": "port:primary-window:top_mm",
+          "label": "Lumbrera · Primary transfer · altura desde PMS",
+          "value": 39.40862784470379,
+          "unit": "mm",
+          "baseline": false
+        },
+        {
+          "parameter_id": "crankcase.volume_bdc_cm3",
+          "label": "Cárter · volumen en PMI",
+          "value": 361.0806777284814,
+          "unit": "cm³",
+          "baseline": false
+        }
+      ]
+    }
+  ]
+}

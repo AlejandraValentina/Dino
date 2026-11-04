@@ -1,6 +1,6 @@
 {
   "schema": "DINO_PARAMETRIC_FACTORIAL_2X2_ACCEPTANCE_V1",
-  "source_commit": "pending-local-commit",
+  "source_commit": "5660328",
   "study_id": "synthetic-factorial-smoke-20261104",
   "status": "COMPLETE",
   "elapsed_seconds": 38.625,
