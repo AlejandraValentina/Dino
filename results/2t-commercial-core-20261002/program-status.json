@@ -11900,9 +11900,11 @@
       "id": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-REASON-LABEL-V1",
       "description": "Replace the raw PERIOD_1 token in the descriptive response-chart exclusion sentence with a clear, precise label while retaining source period codes in the original JSON; do not change which endpoints qualify.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "a5ab260"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11913,9 +11915,13 @@
       ],
       "evidence_level": "L0",
       "evidence": [
-        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-report-v1.png"
+        "results/desktop-parametric-design-study-v2/report-period-1-reason-label/acceptance.md",
+        "results/desktop-parametric-design-study-v2/report-period-1-reason-label/acceptance-receipt.json",
+        "results/desktop-parametric-design-study-v2/report-period-1-reason-label/tests-final/period-reason-final-v1.summary.json",
+        "results/desktop-parametric-design-study-v2/report-period-1-reason-label/cross-study-report-v2.html",
+        "results/desktop-parametric-design-study-v2/report-period-1-reason-label/chrome-report-v2.png"
       ],
-      "next_action": "Replace the display-only PERIOD_1 token in the plot exclusion explanation with a precise Spanish order-1 periodicity phrase; do not change plot eligibility or source values.",
+      "next_action": "DONE: cross-study chart exclusion explanations describe observed order-1 periodicity without exposing the enum; source codes and exact PERIOD_1 eligibility retained; native Desktop, Chrome and 46 tests verified.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11938,6 +11944,28 @@
         "results/desktop-parametric-design-study-v2/report-duplicate-state-summary/chrome-report-v1.png"
       ],
       "next_action": "Make the common baseline digest a readable technical disclosure; keep all 64 hex characters available and preserve exact source JSON.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-CRITERION-PARAGRAPH-V1",
+      "description": "Replace PERIOD_1 in the explanatory paragraph above cross-study response charts with an accurate user-facing periodicity phrase, while preserving the exact eligibility rule and original state codes in source JSON.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/report-period-1-criterion-paragraph/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/report-period-1-reason-label/chrome-report-v2.png"
+      ],
+      "next_action": "Translate the chart introduction criterion PERIOD_1 phrase while retaining the requirement for exact context and a finite defined metric.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16806,6 +16834,13 @@
       "task": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-REASON-LABEL-V1",
       "kind": "task",
       "summary": "Started screenshot-confirmed wording fix: graph exclusion prose displays PERIOD_1 as an internal code; source states and eligibility logic remain protected."
+    },
+    {
+      "at": "2026-11-04T23:12:01+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-REASON-LABEL-V1",
+      "kind": "task",
+      "summary": "Translated the visible cross-study exclusion reasons to order-1 periodicity wording without changing PERIOD_1 eligibility; source codes retained; 46 tests and current Desktop export passed.",
+      "commit": "a5ab260"
     }
   ],
   "legacy_gate_status": {
