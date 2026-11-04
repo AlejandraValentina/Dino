@@ -11441,20 +11441,27 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "e85df58"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
         "motorsim/desktop/results_page.py",
         "tests/test_desktop_design_study.py",
         "results/desktop-parametric-design-study-v2/cross-study-response-plot/",
-        "results/2t-commercial-core-20261002/program-status.json"
+        "results/2t-commercial-core-20261002/program-status.json",
+        "motorsim/desktop/plot.py"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Render only exact compatible PERIOD_1 response pairs from the already saved cross-study comparison, show unmatched/transient/undefined points and gaps without interpolation, fitting or source-data changes; verify with existing synthetic comparison artifacts.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-response-plot/acceptance.md",
+        "results/desktop-parametric-design-study-v2/cross-study-response-plot/tests-final-v2/cross-study-response-plot-final-regressions.summary.json",
+        "results/desktop-parametric-design-study-v2/cross-study-response-plot/native-window-receipt.json"
+      ],
+      "next_action": "DONE: chart exact compatible PERIOD_1 study pairs with a series legend; leave unpaired and nonperiodic rows in the comparison table.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11492,7 +11499,7 @@
         "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1",
         "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11552,6 +11559,29 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Implement a read-only view for the existing DINO cross-study CSV export; preserve exact pairs, unpaired reasons and source bindings, and reject changed or unsupported inputs.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-POINT-INSPECTION-V1",
+      "description": "Selecting an exact periodic cross-study response marker should identify its comparison row and expose the paired source run/artifact hashes and source-verification state without changing comparison data.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-CROSS-STUDY-RESPONSE-PLOT-V1",
+        "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/cross-study-point-inspection/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Connect exact plotted source points to their comparison-table rows; expose already verified source identities and provenance on selection, preserving unmatched/transient rows and existing contracts.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16269,6 +16299,13 @@
       "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESPONSE-PLOT-V1",
       "kind": "implementation",
       "summary": "Started response visualization from the previously saved verified cross-study comparison; retain exact pair qualification and exclude gaps from connected curves."
+    },
+    {
+      "at": "2026-11-04T20:45:29+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESPONSE-PLOT-V1",
+      "kind": "PRODUCT_DELIVERY",
+      "summary": "Native Qt cross-study response chart now plots only exact compatible PERIOD_1 metric pairs, adds color legend, preserves all excluded rows; 66/68 integrated tests pass with two unrelated stale UI assertions documented. Started study provenance details.",
+      "commit": "e85df58"
     }
   ],
   "legacy_gate_status": {
@@ -16363,7 +16400,7 @@
   },
   "campaigns_started": 1,
   "campaign_runtime_status": "IMPL2_EXTENSION_COMPLETE_WITH_NUMERICAL_INVALID_POINTS",
-  "updated_at": "2026-11-04T15:00:00-03:00",
+  "updated_at": "2026-11-04T20:45:29+00:00",
   "full_rpm_sweep_impl2_campaign_readiness": {
     "state": "READY_FOR_CAMPAIGN_DECISION",
     "classification": "FULL_RPM_SWEEP_IMPL2_READY_FOR_CAMPAIGN_DECISION",
