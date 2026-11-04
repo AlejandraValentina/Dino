@@ -1,6 +1,6 @@
 {
   "schema": "DINO_PARAMETRIC_HISTORY_REUSE_V1_ACCEPTANCE",
-  "source_commit": "pending-local-commit",
+  "source_commit": "e755197",
   "real_historical_reuse": {
     "study_id": "history-reuse-verified-20261104",
     "status": "COMPLETE",
