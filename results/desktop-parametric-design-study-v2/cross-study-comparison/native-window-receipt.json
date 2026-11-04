@@ -1,0 +1,35 @@
+{
+  "window": "Dino Desktop source · native Windows platform",
+  "size": [
+    1440,
+    837
+  ],
+  "project_studies": 2,
+  "study_ids": [
+    "synthetic-rpm-envelope-smoke-20261104",
+    "synthetic-factorial-smoke-20261104"
+  ],
+  "source_manifest_sha256": [
+    "dee8469aa9ed77e51ff4e52e03311120fc4fecbee62efa7646d724a121579c23",
+    "b40b461ea52298d741d14488372898e8a9c72da9be302ae4b543bc7df72f530a"
+  ],
+  "common_baseline_sha256": "16105c8a738a8cd6ed848d621d8608d5bc7f0baa4e921ad958439ef0bf5ab40f",
+  "source_points": [
+    4,
+    4
+  ],
+  "exact_pairs": 8,
+  "unpaired_points": 2,
+  "exact_pair_rpms": [
+    3000.0
+  ],
+  "periodicity_states": [
+    "INSUFFICIENT_CYCLES"
+  ],
+  "defined_metric_deltas": 0,
+  "table_rows": 10,
+  "report_sha256": "12d12e45352281198b88e518df8a301d1969c6c56f6c88241f99c5a2edb2cce3",
+  "capture": "results\\desktop-parametric-design-study-v2\\cross-study-comparison\\cross-study-comparison-desktop-real-window.png",
+  "capture_sha256": "04665801021dc5a62d5736606252a45943488118b2cc2315eff7d0c8c88c6965",
+  "scientific_validation": "NOT_CLAIMED"
+}

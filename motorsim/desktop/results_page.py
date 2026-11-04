@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt,Signal,QRect
 from PySide6.QtGui import QPixmap,QColor,QPainter,QPen,QImage
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QLabel,QComboBox,QPushButton,
     QFileDialog,QCheckBox,QGroupBox,QListWidget,QListWidgetItem,QTableWidget,QTableWidgetItem,QHeaderView,QMessageBox,
-    QDialog,QDialogButtonBox,QFormLayout,QLineEdit,QTabWidget,QScrollArea,QFrame)
+    QDialog,QDialogButtonBox,QFormLayout,QLineEdit,QTabWidget,QScrollArea,QFrame,QAbstractItemView)
 from .plot import CurvePlot
 from .performance_curves import PowerCurvePanel
 from .services import load_results,run_background
@@ -44,6 +44,144 @@ def _referenced_curve_rpms(project,data):
               if isinstance(row,dict)}
     if not imported or None in imported or not imported.issubset(referenced):return None
     return list(rpms)
+
+
+_STUDY_COMPARE_CONTEXT=("fuel_id","afr_kg_air_per_kg_fuel","total_finite_volume_cells",
+    "cycles_requested","solver_identity_sha256","implementation_identity_sha256")
+_STUDY_COMPARE_METRICS={"brake_power":("Potencia de freno","kW"),
+    "brake_torque":("Torque de freno","N·m"),"BMEP":("BMEP","kPa")}
+
+
+def _load_verified_study_comparison(references):
+    """Verify project-bound manifests and sources, then compare exact operating pairs."""
+    if not isinstance(references,list) or not 2<=len(references)<=4:
+        raise ValueError("seleccioná entre dos y cuatro estudios guardados")
+    studies=[];source_dirs=[]
+    for reference in references:
+        path=Path(reference["path"]).resolve();raw=path.read_bytes()
+        digest=hashlib.sha256(raw).hexdigest()
+        if digest!=reference.get("manifest_sha256"):
+            raise ValueError(f"el SHA-256 del manifiesto {reference.get('study_id')} no coincide")
+        manifest=json.loads(raw.decode("utf-8"))
+        if (manifest.get("schema")!="DINO_PARAMETRIC_DESIGN_STUDY_V1" or
+                manifest.get("study_id")!=reference.get("study_id") or
+                manifest.get("project_id")!=reference.get("source_project_id")):
+            raise ValueError("identidad o schema de un estudio no coincide con su referencia del proyecto")
+        baseline=manifest.get("baseline_engine_identity_sha256")
+        if not isinstance(baseline,str) or len(baseline)!=64 or any(c not in "0123456789abcdef" for c in baseline.lower()):
+            raise ValueError(f"el estudio {manifest.get('study_id')} no conserva una identidad de baseline verificable")
+        study_points=manifest.get("points")
+        if not isinstance(study_points,list) or len(study_points)>30:
+            raise ValueError("cada comparación admite como máximo 30 puntos por estudio")
+        rows=[]
+        for point_index,point in enumerate(study_points):
+            rpm=point.get("rpm",manifest.get("rpm"))
+            if type(rpm) not in (int,float) or not math.isfinite(float(rpm)) or rpm<=0:
+                raise ValueError(f"RPM no verificable en {manifest.get('study_id')} punto {point.get('index')}")
+            engine_id=point.get("engine_identity_sha256")
+            if not isinstance(engine_id,str) or len(engine_id)!=64 or any(c not in "0123456789abcdef" for c in engine_id.lower()):
+                raise ValueError(f"identidad de motor no verificable en {manifest.get('study_id')} punto {point.get('index')}")
+            row={"index":point.get("index",point_index),"value":point.get("value"),"unit":point.get("unit"),
+                "source_manifest_point":dict(point),
+                "label":point.get("label"),"factor_values":point.get("factor_values"),"rpm":float(rpm),
+                "status":point.get("status","NOT_STARTED"),"classification":point.get("classification"),
+                "periodicity":point.get("periodicity","NOT_EVALUATED"),"cycles_completed":point.get("cycles_completed"),
+                "run_id":point.get("run_id"),"source_run_id":point.get("source_run_id") or point.get("historical_source_run_id") or point.get("run_id"),
+                "engine_identity_sha256":engine_id,"identity_sha256":point.get("identity_sha256") or engine_id,
+                "result_sha256":point.get("result_sha256"),"result_artifact_sha256":point.get("result_artifact_sha256"),
+                "run_directory":point.get("run_directory"),"metrics":{},"context":{},"source_verified":False}
+            if point.get("status") in {"COMPLETE","CACHED"}:
+                if not row["run_directory"]:raise ValueError("punto terminal sin ruta de artifact")
+                run_dir=Path(row["run_directory"]).resolve();result_path=run_dir/"result.json";run_path=run_dir/"run.json"
+                result_raw=result_path.read_bytes();run_meta=json.loads(run_path.read_text(encoding="utf-8"));result=json.loads(result_raw)
+                artifact_hash=hashlib.sha256(result_raw).hexdigest()
+                expected_result_sha=point.get("result_sha256") or run_meta.get("result_sha256")
+                if (artifact_hash!=point.get("result_artifact_sha256") or
+                        (point.get("result_sha256") is not None and run_meta.get("result_sha256")!=point.get("result_sha256")) or
+                        artifact_hash!=run_meta.get("result_sha256") or
+                        result.get("schema")!="DINO_ENGINEERING_RUN_V1" or result.get("status")!="COMPLETE" or
+                        result.get("bindings",{}).get("identity_sha256")!=row["identity_sha256"] or
+                        result.get("bindings",{}).get("run_id")!=row["source_run_id"]):
+                    raise ValueError(f"source/hash/identidad no coincide en {manifest.get('study_id')} · {row['run_id']}")
+                row["source_verified"]=True;row["run_directory"]=str(run_dir)
+                row["result_sha256"]=expected_result_sha
+                source_dirs.append(run_dir)
+            rows.append(row)
+        studies.append({"study_id":manifest["study_id"],"manifest_path":str(path),
+            "manifest_sha256":digest,"source_project_id":manifest["project_id"],
+            "baseline_engine_identity_sha256":baseline,"parameter":manifest.get("parameter",{}),
+            "design_method":manifest.get("design_method","GEOMETRY_V1"),"manifest":manifest,"points":rows})
+    baseline_ids={study["baseline_engine_identity_sha256"] for study in studies}
+    if len(baseline_ids)!=1:
+        raise ValueError("los estudios parten de baselines distintos; no se comparan como un mismo experimento")
+    imported_by_path={}
+    if source_dirs:
+        from ..power_curve import import_curve_runs
+        imported=import_curve_runs([str(path) for path in dict.fromkeys(source_dirs)])
+        imported_by_path={str(Path(row.get("artifact_directory","")).resolve()).casefold():row
+            for row in imported.get("points",[]) if row.get("artifact_directory")}
+    for study in studies:
+        for point in study["points"]:
+            if not point["source_verified"]:continue
+            imported=imported_by_path.get(str(Path(point["run_directory"]).resolve()).casefold())
+            if imported is None or imported.get("run_id")!=point["source_run_id"]:
+                raise ValueError(f"el importador no pudo re-verificar la fuente de {study['study_id']} · {point['run_id']}")
+            if float(imported.get("rpm"))!=point["rpm"]:
+                raise ValueError("RPM importada no coincide con la del manifiesto")
+            point["classification"]=imported.get("classification") or point["classification"]
+            point["periodicity"]=imported.get("periodicity") or point["periodicity"]
+            point["cycles_completed"]=imported.get("cycles_completed",point["cycles_completed"])
+            point["context"]={key:imported.get(key) for key in _STUDY_COMPARE_CONTEXT}
+            point["result_sha256"]=imported.get("result_sha256") or point["result_sha256"]
+            for metric in _STUDY_COMPARE_METRICS:
+                value=imported.get(metric);status=imported.get(metric+"_status")
+                periodic=str(point.get("periodicity","")).startswith("PERIOD_1")
+                point["metrics"][metric]=value if periodic and status=="DEFINED" and isinstance(value,(int,float)) and math.isfinite(float(value)) else None
+    pairs=[];matched=set();unpaired=[]
+    for left_index,left_study in enumerate(studies):
+        for right_study in studies[left_index+1:]:
+            for left in left_study["points"]:
+                for right in right_study["points"]:
+                    if left["rpm"]!=right["rpm"]:continue
+                    mismatches=[key for key in _STUDY_COMPARE_CONTEXT
+                        if left["context"].get(key) is None or right["context"].get(key) is None or
+                           left["context"].get(key)!=right["context"].get(key)]
+                    if mismatches:continue
+                    pair_metrics={}
+                    for metric in _STUDY_COMPARE_METRICS:
+                        a=left["metrics"].get(metric);b=right["metrics"].get(metric)
+                        periodic_a=str(left.get("periodicity","")).startswith("PERIOD_1")
+                        periodic_b=str(right.get("periodicity","")).startswith("PERIOD_1")
+                        pair_metrics[metric]={"a":a,"b":b,"delta":(b-a if periodic_a and periodic_b and isinstance(a,(int,float)) and isinstance(b,(int,float)) else None)}
+                    pairs.append({"study_a":left_study["study_id"],"point_a":left,
+                        "study_b":right_study["study_id"],"point_b":right,"rpm":left["rpm"],
+                        "metrics":pair_metrics,"pairing":"EXACT_RPM_AND_OPERATING_CONTEXT"})
+                    matched.add((left_study["study_id"],left["index"]));matched.add((right_study["study_id"],right["index"]))
+    for study in studies:
+        for point in study["points"]:
+            if (study["study_id"],point["index"]) not in matched:
+                point["comparison_status"]="NO_EXACT_COMPATIBLE_PAIR"
+                others=[other for other in studies if other is not study]
+                same_rpm=[candidate for other in others for candidate in other["points"]
+                    if candidate["rpm"]==point["rpm"]]
+                if not same_rpm:
+                    reason="No existe un punto de otro estudio en la misma RPM exacta."
+                elif not point["source_verified"]:
+                    reason=f"Punto {point.get('status')}: no hay artifact terminal verificado."
+                else:
+                    differences=set()
+                    for candidate in same_rpm:
+                        differences.update(key for key in _STUDY_COMPARE_CONTEXT
+                            if point["context"].get(key) is None or candidate["context"].get(key) is None or
+                               point["context"].get(key)!=candidate["context"].get(key))
+                    reason=("Condiciones informadas incompatibles: "+", ".join(sorted(differences))+"."
+                        if differences else "No existe fuente de resultados compatible.")
+                unpaired.append({"study_id":study["study_id"],"point":point,"reason":reason})
+    return {"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
+        "baseline_engine_identity_sha256":next(iter(baseline_ids)),"studies":studies,
+        "pairs":pairs,"unpaired":unpaired,
+        "scientific_validation":"NOT_CLAIMED",
+        "notice":"Emparejamiento exacto por RPM y condiciones de cálculo informadas. No hay interpolación ni efectos agregados; diferencias sólo para métricas definidas en puntos periódicos."}
 
 
 class DiscreteAngleCellMap(QWidget):
@@ -104,6 +242,7 @@ class ResultsPage(QWidget):
     def __init__(self,context):
         super().__init__();self.context=context;self.dataset=None;self.source=None;self.loading=False;self._selected_point_id=None
         self._project_reference_signature=None
+        self._study_reference_signature=None
         root=QVBoxLayout(self);root.setContentsMargins(12,10,12,10);root.setSpacing(6)
         title=QLabel("Resultados");title.setObjectName('title');root.addWidget(title)
         self.source_notice=QLabel("No hay una corrida seleccionada. Elegila desde el historial o abrí datos importados; todavía no se cargó evidencia histórica.")
@@ -184,7 +323,32 @@ class ResultsPage(QWidget):
         self.design_study_table.setHorizontalHeaderLabels(["Diseño","Valor","Estado","Periodicidad","Ciclos","Potencia","Torque","BMEP","Δ potencia vs base"])
         self.design_study_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.design_study_table.horizontalHeader().setStretchLastSection(True);self.design_study_table.setMaximumHeight(230)
-        study_layout.addWidget(self.design_study_table);root.addWidget(self.design_study_group);self.design_study_group.hide()
+        study_layout.addWidget(self.design_study_table)
+        self.study_comparison_group=QGroupBox("Comparar estudios guardados")
+        comparison_layout=QVBoxLayout(self.study_comparison_group)
+        comparison_bar=QHBoxLayout();comparison_layout.addLayout(comparison_bar)
+        self.compare_studies_button=QPushButton("Seleccionar estudios…")
+        self.compare_studies_button.clicked.connect(self.compare_project_studies);comparison_bar.addWidget(self.compare_studies_button)
+        self.study_comparison_metric=QComboBox();self.study_comparison_metric.setObjectName("studyComparisonMetric")
+        for label,key in (("Potencia (kW)","brake_power"),("Torque (N·m)","brake_torque"),("BMEP (kPa)","BMEP")):
+            self.study_comparison_metric.addItem(label,key)
+        self.study_comparison_metric.currentIndexChanged.connect(self._render_study_comparison)
+        comparison_bar.addWidget(self.study_comparison_metric)
+        self.export_study_comparison_button=QPushButton("Exportar comparación HTML…")
+        self.export_study_comparison_button.clicked.connect(self.export_study_comparison)
+        comparison_bar.addWidget(self.export_study_comparison_button);comparison_bar.addStretch(1)
+        self.study_comparison_notice=QLabel("Elegí entre dos y cuatro estudios guardados en este proyecto. Se verifica cada manifiesto y artifact antes de comparar.")
+        self.study_comparison_notice.setWordWrap(True);comparison_layout.addWidget(self.study_comparison_notice)
+        self.study_comparison_table=QTableWidget(0,11);self.study_comparison_table.setObjectName("crossStudyComparison")
+        self.study_comparison_table.setHorizontalHeaderLabels(["RPM","Diseño A","ID A","Estado A","Métrica A","Diseño B","ID B","Estado B","Métrica B","Δ B−A","Pareo"])
+        self.study_comparison_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        for column,width in enumerate((60,170,75,150,70,170,75,150,70,75,150)):
+            self.study_comparison_table.setColumnWidth(column,width)
+        self.study_comparison_table.horizontalHeader().setStretchLastSection(True);self.study_comparison_table.setMaximumHeight(300)
+        self.study_comparison_table.setSortingEnabled(True);comparison_layout.addWidget(self.study_comparison_table)
+        study_layout.addWidget(self.study_comparison_group)
+        root.addWidget(self.design_study_group);self.design_study_group.hide()
+        self.study_comparison=None
         self.details=QTableWidget(0,2);self.details.setHorizontalHeaderLabels(["Detalle del punto","Valor"]);self.details.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch);self.details.setMaximumHeight(190);root.addWidget(self.details)
         # Preserve all existing controls and contracts; organize presentation
         # around the designer's question rather than one long audit document.
@@ -265,6 +429,13 @@ class ResultsPage(QWidget):
 
     def _refresh_project_studies(self):
         refs=self.context.project.get("study_references",[])
+        signature=(self.context.project.get("project_id"),tuple(
+            (str(ref.get("path","")),ref.get("study_id"),ref.get("manifest_sha256"))
+            for ref in refs if isinstance(ref,dict)))
+        if signature!=self._study_reference_signature:
+            self._study_reference_signature=signature
+            self.study_comparison=None;self.study_comparison_table.setRowCount(0)
+            self.study_comparison_notice.setText("Elegí entre dos y cuatro estudios guardados en este proyecto. Se verifica cada manifiesto y artifact antes de comparar.")
         previous=self.project_study_selector.currentData()
         self.project_study_selector.blockSignals(True);self.project_study_selector.clear()
         for ref in refs:
@@ -278,6 +449,129 @@ class ResultsPage(QWidget):
         available=bool(refs)
         self.open_project_study_button.setEnabled(available)
         self.design_study_group.setVisible(available or getattr(self,"design_study_manifest",None) is not None)
+        self.compare_studies_button.setEnabled(len(refs)>=2)
+        self.study_comparison_group.setVisible(len(refs)>=2 or self.study_comparison is not None)
+
+    def compare_project_studies(self):
+        references=self.context.project.get("study_references",[])
+        if len(references)<2:
+            self.study_comparison_notice.setText("Este proyecto necesita al menos dos estudios guardados para compararlos.")
+            return False
+        dialog=QDialog(self);dialog.setWindowTitle("Seleccionar estudios paramétricos")
+        layout=QVBoxLayout(dialog);layout.addWidget(QLabel("Seleccioná de dos a cuatro manifiestos ligados al proyecto. El primero se toma como referencia visual."))
+        listing=QListWidget();listing.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
+        for index,reference in enumerate(references):
+            item=QListWidgetItem(f"{reference.get('study_id','Estudio')} · {Path(reference.get('path','')).name}")
+            item.setData(Qt.ItemDataRole.UserRole,dict(reference));listing.addItem(item)
+            if index<2:item.setSelected(True)
+        layout.addWidget(listing)
+        buttons=QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
+        buttons.accepted.connect(dialog.accept);buttons.rejected.connect(dialog.reject);layout.addWidget(buttons)
+        if dialog.exec()!=QDialog.DialogCode.Accepted:return False
+        selected=[item.data(Qt.ItemDataRole.UserRole) for item in listing.selectedItems()]
+        if not 2<=len(selected)<=4:
+            self.study_comparison_notice.setText("La comparación admite de dos a cuatro estudios por consulta.")
+            return False
+        self.compare_studies_button.setEnabled(False)
+        self.study_comparison_notice.setText("Verificando manifiestos y artifacts con el importador de corridas…")
+        run_background(_load_verified_study_comparison,selected,on_done=self._study_comparison_loaded,
+            on_error=self._study_comparison_failed)
+        return True
+
+    def _study_comparison_loaded(self,comparison):
+        self.study_comparison=comparison
+        self.compare_studies_button.setEnabled(len(self.context.project.get("study_references",[]))>=2)
+        self.study_comparison_group.show();self._render_study_comparison()
+
+    def _study_comparison_failed(self,error):
+        self.compare_studies_button.setEnabled(len(self.context.project.get("study_references",[]))>=2)
+        self.study_comparison_notice.setText(f"Comparación rechazada: {error}")
+        self.study_comparison_table.setRowCount(0)
+
+    @staticmethod
+    def _study_point_label(study,point):
+        factors=point.get("factor_values") or []
+        if factors:
+            tags=[]
+            for index,item in enumerate(factors):
+                label=(item.get("parameter_id") or item.get("label") or "Factor").lower()
+                short=("Transferencia" if "port:" in label or "transfer" in label else
+                       "Cárter" if "crankcase" in label or "cárter" in label else f"F{index+1}")
+                tags.append(f"{short} {format_number(item.get('value'))} {item.get('unit','')}".strip())
+            return " · ".join(tags)
+        if point.get("value") is not None:
+            return f"{format_number(point['value'])} {point.get('unit') or ''}".strip()
+        return str(point.get("label") or f"Punto {point.get('index')}")
+
+    def _render_study_comparison(self,*_):
+        comparison=self.study_comparison
+        if not comparison:return
+        metric=self.study_comparison_metric.currentData() or "brake_power"
+        self.study_comparison_table.setSortingEnabled(False);self.study_comparison_table.setRowCount(0)
+        studies={study["study_id"]:study for study in comparison["studies"]}
+        rows=[]
+        for pair in comparison["pairs"]:
+            a=pair["point_a"];b=pair["point_b"]
+            rows.append((pair["rpm"],pair["study_a"],a,pair["study_b"],b,
+                pair["metrics"].get(metric,{}).get("delta"),"RPM y condiciones exactas"))
+        for item in comparison["unpaired"]:
+            if item["study_id"]==comparison["studies"][0]["study_id"]:
+                rows.append((item["point"]["rpm"],item["study_id"],item["point"],"",None,None,
+                    item.get("reason","Sin par exacto compatible")))
+            else:
+                rows.append((item["point"]["rpm"],"",None,item["study_id"],item["point"],None,
+                    item.get("reason","Sin par exacto compatible")))
+        self.study_comparison_table.setRowCount(len(rows))
+        for index,(rpm,a_id,a,b_id,b,delta,pairing) in enumerate(rows):
+            def fmt_metric(point):
+                value=(point or {}).get("metrics",{}).get(metric)
+                periodic=str((point or {}).get("periodicity","" )).startswith("PERIOD_1")
+                return format_number(value) if periodic and isinstance(value,(int,float)) and math.isfinite(float(value)) else "—"
+            def state(point):
+                if not point:return "—"
+                return f"{_state_label(point.get('classification') or point.get('status'))} / {_state_label(point.get('periodicity') or 'NOT_EVALUATED')}"
+            a_identity=(a or {}).get("engine_identity_sha256") or ""
+            b_identity=(b or {}).get("engine_identity_sha256") or ""
+            a_design=self._study_point_label(studies[a_id],a) if a else "—"
+            b_design=self._study_point_label(studies[b_id],b) if b else "—"
+            cells=[format_number(rpm),a_design,a_identity[:8] if a_identity else "—",state(a),fmt_metric(a),
+                b_design,b_identity[:8] if b_identity else "—",state(b),fmt_metric(b),
+                format_number(delta,signed=True) if isinstance(delta,(int,float)) else "—",pairing]
+            for column,value in enumerate(cells):
+                item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                point=a if column in (1,2,3,4) else b
+                if point is not None and column in (1,2,3,5,6,7):
+                    study=studies[a_id if column in (1,2,3) else b_id]
+                    tooltip=(f"Estudio: {study['study_id']}\nParámetro: {(study.get('parameter') or {}).get('label') or study.get('design_method')}\n"
+                        f"Diseño: {self._study_point_label(study,point)}\nManifiesto: {study['manifest_path']}\n"
+                        f"SHA-256 manifiesto: {study['manifest_sha256']}\nRPM exacta: {format_number(point['rpm'])}\n"
+                        f"Run fuente: {point.get('source_run_id') or 'No informado'}\n"
+                        f"Motor SHA-256: {point.get('engine_identity_sha256')}\n"
+                        f"Identidad de corrida SHA-256: {point.get('identity_sha256') or 'No disponible'}\n"
+                        f"Resultado SHA-256: {point.get('result_sha256') or 'No disponible'}\n"
+                        f"Artifact SHA-256: {point.get('result_artifact_sha256') or 'No disponible'}\n"
+                        f"Ruta: {point.get('run_directory') or 'No informada'}")
+                    item.setToolTip(tooltip)
+                elif column==10:
+                    item.setToolTip(str(value))
+                self.study_comparison_table.setItem(index,column,item)
+        self.study_comparison_table.setSortingEnabled(True)
+        self.study_comparison_notice.setText(
+            f"Baseline común {comparison['baseline_engine_identity_sha256']} · {len(comparison['pairs'])} pares exactos · "
+            f"{len(comparison['unpaired'])} puntos sin par · {comparison['notice']} Métrica seleccionada: {_STUDY_COMPARE_METRICS[metric][0]}.")
+
+    def export_study_comparison(self):
+        if not self.study_comparison:return False
+        default=Path(self.context.path).with_suffix(".comparacion-estudios.html") if self.context.path else Path.cwd()/"dino-comparacion-estudios.html"
+        path,_=QFileDialog.getSaveFileName(self,"Exportar comparación paramétrica",str(default),"Informe HTML (*.html)")
+        if not path:return False
+        try:
+            from .technical_report import write_study_comparison_report
+            write_study_comparison_report(path,self.study_comparison)
+            self.study_comparison_notice.setText(f"Comparación HTML exportada: {Path(path).name} · conserva procedencia y estados por punto.")
+            return True
+        except (OSError,TypeError,ValueError) as exc:
+            QMessageBox.warning(self,"No se pudo exportar la comparación",str(exc));return False
 
     def open_selected_project_study(self):
         reference=self.project_study_selector.currentData()

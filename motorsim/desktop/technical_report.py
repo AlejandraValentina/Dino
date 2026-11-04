@@ -289,3 +289,81 @@ def write_technical_report(path, dataset: dict, **kwargs) -> Path:
     document = render_technical_report(dataset, **kwargs)
     path.write_text(document, encoding="utf-8")
     return path
+
+
+def render_study_comparison_report(comparison: dict) -> str:
+    """Render a hash-bound comparison of verified saved-study observations."""
+    if (not isinstance(comparison,dict) or
+            comparison.get("schema")!="DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1" or
+            not isinstance(comparison.get("studies"),list) or len(comparison["studies"])<2):
+        raise ValueError("La comparación de estudios no tiene un esquema verificable.")
+    studies=[]
+    point_rows=[]
+    for study in comparison["studies"]:
+        if study.get("baseline_engine_identity_sha256")!=comparison.get("baseline_engine_identity_sha256"):
+            raise ValueError("La comparación contiene baselines incompatibles.")
+        studies.append("<tr>"+"".join((f"<td>{_esc(study.get('study_id'))}</td>",
+            f"<td>{_esc(study.get('source_project_id'))}</td>",
+            f"<td><code>{_esc(study.get('manifest_path'))}</code></td>",
+            f"<td><code>{_esc(study.get('manifest_sha256'))}</code></td>"))+"</tr>")
+        for point in study.get("points",[]):
+            metrics=point.get("metrics",{})
+            factor=point.get("factor_values") or []
+            design=(" · ".join(f"{_esc(row.get('label') or row.get('parameter_id'))}="
+                f"{_esc(format_number(row.get('value')) if _safe_number(row.get('value')) else 'No informado')} "
+                f"{_esc(row.get('unit') or '')}" for row in factor if isinstance(row,dict))
+                if factor else f"{_esc((study.get('parameter') or {}).get('label') or 'Diseño')}="
+                f"{_esc(format_number(point.get('value')) if _safe_number(point.get('value')) else 'No informado')} "
+                f"{_esc(point.get('unit') or (study.get('parameter') or {}).get('unit') or '')}")
+            cells=[study.get("study_id"),design,point.get("rpm"),point.get("status"),
+                point.get("classification"),point.get("periodicity"),point.get("cycles_completed"),
+                point.get("source_run_id"),point.get("engine_identity_sha256"),point.get("identity_sha256"),
+                point.get("result_sha256"),point.get("result_artifact_sha256"),point.get("run_directory"),
+                "Sí" if point.get("source_verified") else "No"]
+            metric_cells=[]
+            for metric,(_,unit) in _STUDY_REPORT_METRICS.items():
+                value=metrics.get(metric)
+                metric_cells.append(f"<td>{_esc(format_number(value) if _safe_number(value) else '—')}{(' '+_esc(unit)) if _safe_number(value) else ''}</td>")
+            point_rows.append("<tr>"+"".join(f"<td>{_esc(value if value is not None else 'No informado')}</td>" for value in cells)+"".join(metric_cells)+"</tr>")
+    pair_rows=[]
+    for pair in comparison.get("pairs",[]):
+        for metric,(label,unit) in _STUDY_REPORT_METRICS.items():
+            detail=pair.get("metrics",{}).get(metric,{})
+            delta=detail.get("delta")
+            pair_rows.append("<tr>"+"".join((f"<td>{_esc(pair.get('study_a'))}</td>",
+                f"<td>{_esc(pair.get('point_a',{}).get('run_id'))}</td>",
+                f"<td>{_esc(pair.get('study_b'))}</td>",
+                f"<td>{_esc(pair.get('point_b',{}).get('run_id'))}</td>",
+                f"<td>{_esc(format_number(pair.get('rpm')))} RPM</td>",f"<td>{_esc(label)}</td>",
+                f"<td>{_esc(format_number(delta,signed=True) if _safe_number(delta) else '—')}{(' '+_esc(unit)) if _safe_number(delta) else ''}</td>",
+                f"<td>{_esc(pair.get('pairing'))}</td>"))+"</tr>")
+    unpaired_rows=[]
+    for item in comparison.get("unpaired",[]):
+        point=item.get("point",{})
+        unpaired_rows.append("<tr>"+"".join((f"<td>{_esc(item.get('study_id'))}</td>",
+            f"<td>{_esc(point.get('run_id'))}</td>",f"<td>{_esc(format_number(point.get('rpm')))} RPM</td>",
+            f"<td>{_esc(state_label(point.get('classification') or point.get('status')))}</td>",
+            f"<td>{_esc(state_label(point.get('periodicity') or 'NOT_EVALUATED'))}</td>",
+            f"<td>{_esc(point.get('engine_identity_sha256'))}</td>",f"<td>{_esc(item.get('reason'))}</td>"))+"</tr>")
+    payload=html.escape(json.dumps(comparison,ensure_ascii=False,sort_keys=True,indent=2,allow_nan=False),quote=False)
+    return f'''<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Comparación paramétrica · Dino 2T</title>
+<style>body{{font:15px Segoe UI,Arial,sans-serif;color:#172536;margin:28px;max-width:1500px}}h1,h2{{color:#173852}}.notice{{padding:14px;background:#fff3dc;border-left:5px solid #cc7b18}}table{{border-collapse:collapse;width:100%;margin:12px 0 24px;font-size:12px}}th,td{{border:1px solid #becbd7;padding:6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}}th{{background:#e9f0f5}}code{{font-size:11px}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6f8;padding:16px}}footer{{color:#526477}}</style></head><body>
+<h1>Comparación de estudios paramétricos · Dino 2T</h1>
+<p class="notice"><strong>Límite de evidencia.</strong> { _esc(comparison.get('notice')) } La validación científica no está reclamada. Las diferencias son contrastes descriptivos entre puntos observados; no se interpolan, ajustan ni agregan.</p>
+<p>Baseline común: <code>{_esc(comparison.get('baseline_engine_identity_sha256'))}</code> · generación UTC: {_esc(datetime.now(timezone.utc).isoformat(timespec='seconds'))}</p>
+<h2>Manifiestos seleccionados</h2><table><thead><tr><th>Estudio</th><th>Proyecto fuente</th><th>Ruta del manifiesto</th><th>SHA-256 del manifiesto</th></tr></thead><tbody>{''.join(studies)}</tbody></table>
+<h2>Puntos y procedencia</h2><table><thead><tr><th>Estudio</th><th>Diseño</th><th>RPM</th><th>Estado ejecución</th><th>Clasificación</th><th>Periodicidad</th><th>Ciclos</th><th>Run fuente</th><th>Motor SHA-256</th><th>Corrida SHA-256</th><th>Resultado SHA-256</th><th>Artifact SHA-256</th><th>Ruta</th><th>Fuente verificada</th><th>Potencia</th><th>Torque</th><th>BMEP</th></tr></thead><tbody>{''.join(point_rows)}</tbody></table>
+<h2>Contrastes exactos</h2><p>Los pares requieren RPM y todos los campos operativos informados compatibles. Δ = estudio B menos A. Un resultado queda vacío si falta o si no es periódico y definido.</p><table><thead><tr><th>Estudio A</th><th>Run A</th><th>Estudio B</th><th>Run B</th><th>RPM</th><th>Métrica</th><th>Δ</th><th>Regla de pareo</th></tr></thead><tbody>{''.join(pair_rows) or '<tr><td colspan="8">No hay pares compatibles exactos.</td></tr>'}</tbody></table>
+<h2>Puntos sin contraparte</h2><table><thead><tr><th>Estudio</th><th>Run ID</th><th>RPM</th><th>Clasificación</th><th>Periodicidad</th><th>Motor SHA-256</th><th>Motivo</th></tr></thead><tbody>{''.join(unpaired_rows) or '<tr><td colspan="7">Todos los puntos aparecen en al menos un pareo.</td></tr>'}</tbody></table>
+<h2>Datos reproducibles</h2><details><summary>Objeto completo de comparación, puntos y source manifests</summary><pre>{payload}</pre></details>
+<footer>Dino Desktop · exportación descriptiva. Los resultados transitorios no representan prestaciones periódicas; la periodicidad tampoco constituye validación experimental.</footer></body></html>'''
+
+
+_STUDY_REPORT_METRICS={"brake_power":("Potencia de freno","kW"),
+    "brake_torque":("Torque de freno","N·m"),"BMEP":("BMEP","kPa")}
+
+
+def write_study_comparison_report(path, comparison: dict) -> Path:
+    path=Path(path)
+    path.write_text(render_study_comparison_report(comparison),encoding="utf-8")
+    return path

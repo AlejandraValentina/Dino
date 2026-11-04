@@ -1,12 +1,13 @@
 from __future__ import annotations
 import hashlib,json,os
 from pathlib import Path
+import pytest
 os.environ.setdefault("QT_QPA_PLATFORM","offscreen")
 from PySide6.QtWidgets import QApplication,QComboBox,QDialog,QLineEdit,QMessageBox
 from motorsim.desktop.app import DinoDesktopWindow
 from motorsim.desktop.context import DesktopContext
 from motorsim.desktop.execution_page import ExecutionPage
-from motorsim.desktop.results_page import ResultsPage
+from motorsim.desktop.results_page import ResultsPage,_load_verified_study_comparison
 from motorsim.desktop.services import new_design_project
 
 APP=QApplication.instance() or QApplication([])
@@ -220,6 +221,156 @@ def test_rpm_envelope_keeps_observed_rpm_rows_and_suppresses_mixed_rpm_response(
     assert page.design_response_plot.series==[]
     assert "No se mezclan RPM" in page.design_response_notice.text()
     assert page.design_study_table.item(2,5).text()=="—"
+    page.close();APP.processEvents()
+
+
+def _comparison_fixture(tmp_path,study_id,project_id,baseline,*,rpm=3000,engine_hash=None,
+                        identity_hash=None,power=None,periodicity="PERIOD_1",status="COMPLETE",
+                        context_overrides=None):
+    result_dir=tmp_path/f"{study_id}-run";result_dir.mkdir()
+    source_run=f"{study_id}-run"
+    identity_hash=identity_hash or hashlib.sha256((study_id+"-identity").encode()).hexdigest()
+    result={"schema":"DINO_ENGINEERING_RUN_V1","status":"COMPLETE",
+        "classification":"PERIOD_1" if periodicity=="PERIOD_1" else "MAX_CYCLES_NONCONVERGED",
+        "periodicity":periodicity,"cycles_completed":3,
+        "bindings":{"identity_sha256":identity_hash,"run_id":source_run,"project_id":project_id}}
+    result_raw=json.dumps(result,sort_keys=True).encode();result_hash=hashlib.sha256(result_raw).hexdigest()
+    (result_dir/"result.json").write_bytes(result_raw)
+    (result_dir/"run.json").write_text(json.dumps({"result_sha256":result_hash}),encoding="utf-8")
+    engine_hash=engine_hash or hashlib.sha256((study_id+"-engine").encode()).hexdigest()
+    context={"fuel_id":"fuel-sha","afr_kg_air_per_kg_fuel":12.5,
+        "total_finite_volume_cells":128,"cycles_requested":3,
+        "solver_identity_sha256":"solver-sha","implementation_identity_sha256":"implementation-sha"}
+    context.update(context_overrides or {})
+    point={"index":0,"value":83.0,"unit":"mm","rpm":rpm,"status":status,
+        "classification":result["classification"],"periodicity":periodicity,"cycles_completed":3,
+        "run_id":source_run,"source_run_id":source_run,"engine_identity_sha256":engine_hash,
+        "identity_sha256":identity_hash,"result_sha256":result_hash,"result_artifact_sha256":result_hash,
+        "run_directory":str(result_dir)}
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":study_id,
+        "project_id":project_id,"baseline_engine_identity_sha256":baseline,"rpm":rpm,
+        "parameter":{"id":"exhaust:length","label":"Escape","unit":"mm"},
+        "status":"COMPLETE","points":[point]}
+    manifest_path=tmp_path/f"{study_id}.study.json"
+    raw=json.dumps(manifest,sort_keys=True).encode();manifest_path.write_bytes(raw)
+    reference={"path":str(manifest_path),"study_id":study_id,
+        "source_project_id":project_id,"schema":manifest["schema"],
+        "manifest_sha256":hashlib.sha256(raw).hexdigest()}
+    imported={"artifact_directory":str(result_dir),"run_id":source_run,"rpm":rpm,
+        "classification":result["classification"],"periodicity":periodicity,
+        "cycles_completed":3,**context,
+        "brake_power":power,"brake_power_status":"DEFINED" if power is not None else "UNDEFINED",
+        "brake_torque":(power or 0)*2 if power is not None else None,
+        "brake_torque_status":"DEFINED" if power is not None else "UNDEFINED",
+        "BMEP":(power or 0)*10 if power is not None else None,
+        "BMEP_status":"DEFINED" if power is not None else "UNDEFINED"}
+    return reference,manifest,point,imported,result_dir
+
+
+def test_cross_study_comparison_verifies_sources_and_pairs_only_exact_periodic_conditions(tmp_path,monkeypatch):
+    from motorsim import power_curve
+    base="a"*64;project="comparison-source-project"
+    ref_a,manifest_a,point_a,row_a,dir_a=_comparison_fixture(tmp_path,"study-a",project,base,power=10.0)
+    ref_b,manifest_b,point_b,row_b,dir_b=_comparison_fixture(tmp_path,"study-b",project,base,power=12.0)
+    ref_b2,manifest_b2,point_b2,row_b2,dir_b2=_comparison_fixture(
+        tmp_path,"study-b2",project,base,rpm=4000,power=None,
+        periodicity="INSUFFICIENT_CYCLES",status="COMPLETE")
+    ref_b3,manifest_b3,point_b3,row_b3,dir_b3=_comparison_fixture(
+        tmp_path,"study-b3",project,base,rpm=3000,power=15.0,
+        context_overrides={"total_finite_volume_cells":256})
+    mesh_mismatch=dict(manifest_b3["points"][0],index=1)
+    different_rpm=dict(manifest_b2["points"][0],index=2)
+    manifest_b["points"].extend((mesh_mismatch,different_rpm))
+    # Keep both source rows under the same registered study manifest and bind it anew.
+    raw=json.dumps(manifest_b,sort_keys=True).encode();Path(ref_b["path"]).write_bytes(raw)
+    ref_b={**ref_b,"manifest_sha256":hashlib.sha256(raw).hexdigest()}
+    imported_rows={str(path.resolve()).casefold():row for path,row in
+        ((dir_a,row_a),(dir_b,row_b),(dir_b2,row_b2),(dir_b3,row_b3))}
+    calls=[]
+    def importer(paths):
+        calls.extend(paths)
+        return {"points":[imported_rows[str(Path(path).resolve()).casefold()] for path in paths]}
+    monkeypatch.setattr(power_curve,"import_curve_runs",importer)
+
+    comparison=_load_verified_study_comparison([ref_a,ref_b])
+
+    assert comparison["baseline_engine_identity_sha256"]==base
+    assert len(comparison["pairs"])==1
+    pair=comparison["pairs"][0]
+    assert (pair["rpm"],pair["pairing"])==(3000.0,"EXACT_RPM_AND_OPERATING_CONTEXT")
+    assert pair["metrics"]["brake_power"]=={"a":10.0,"b":12.0,"delta":2.0}
+    assert len(comparison["unpaired"])==2
+    transient=next(item["point"] for item in comparison["unpaired"] if item["point"]["rpm"]==4000)
+    context_mismatch=next(item["point"] for item in comparison["unpaired"] if item["point"]["rpm"]==3000)
+    assert transient["periodicity"]=="INSUFFICIENT_CYCLES"
+    assert transient["metrics"]=={"brake_power":None,"brake_torque":None,"BMEP":None}
+    assert context_mismatch["context"]["total_finite_volume_cells"]==256
+    assert any("RPM exacta" in item["reason"] for item in comparison["unpaired"])
+    assert any("total_finite_volume_cells" in item["reason"] for item in comparison["unpaired"])
+    assert len(calls)==4
+
+
+def test_cross_study_comparison_fails_closed_on_baseline_and_source_tampering(tmp_path,monkeypatch):
+    from motorsim import power_curve
+    project="comparison-integrity-project"
+    ref_a,*_,dir_a=_comparison_fixture(tmp_path,"integrity-a",project,"a"*64,power=1.0)
+    ref_b,*_,dir_b=_comparison_fixture(tmp_path,"integrity-b",project,"b"*64,power=2.0)
+    calls=[];monkeypatch.setattr(power_curve,"import_curve_runs",lambda paths:(calls.append(paths) or {"points":[]}))
+    with pytest.raises(ValueError,match="baselines distintos"):
+        _load_verified_study_comparison([ref_a,ref_b])
+    assert calls==[]
+
+    ref_b,*_,dir_b=_comparison_fixture(tmp_path,"integrity-b2",project,"a"*64,power=2.0)
+    (dir_b/"result.json").write_text('{"changed":true}',encoding="utf-8")
+    with pytest.raises(ValueError,match="source/hash/identidad"):
+        _load_verified_study_comparison([ref_a,ref_b])
+    assert calls==[]
+
+    manifest=json.loads(Path(ref_a["path"]).read_text(encoding="utf-8"))
+    manifest["points"]=[dict(manifest["points"][0],index=index) for index in range(31)]
+    raw=json.dumps(manifest,sort_keys=True).encode()
+    oversized=tmp_path/"oversized-study.json";oversized.write_bytes(raw)
+    ref_over={**ref_a,"path":str(oversized),"study_id":manifest["study_id"],
+        "manifest_sha256":hashlib.sha256(raw).hexdigest()}
+    with pytest.raises(ValueError,match="30 puntos"):
+        _load_verified_study_comparison([ref_a,ref_over])
+    assert calls==[]
+
+
+def test_cross_study_comparison_page_keeps_full_identity_and_metric_states():
+    page=ResultsPage(DesktopContext(new_design_project("cross-study-results-page")))
+    point_a={"index":0,"value":83.0,"unit":"mm","rpm":3000.0,"status":"COMPLETE",
+        "classification":"MAX_CYCLES_NONCONVERGED","periodicity":"INSUFFICIENT_CYCLES",
+        "engine_identity_sha256":"a"*64,"identity_sha256":"c"*64,
+        "result_sha256":"d"*64,"result_artifact_sha256":"e"*64,"metrics":{"brake_power":None}}
+    point_b={**point_a,"engine_identity_sha256":"b"*64,"identity_sha256":"f"*64}
+    page._study_comparison_loaded({"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
+        "baseline_engine_identity_sha256":"9"*64,"studies":[
+            {"study_id":"Study-A","manifest_path":"a.study.json","manifest_sha256":"1"*64,"parameter":{"label":"Escape"}},
+            {"study_id":"Study-B","manifest_path":"b.study.json","manifest_sha256":"2"*64,"parameter":{"label":"Escape"}}],
+        "pairs":[{"study_a":"Study-A","point_a":point_a,"study_b":"Study-B","point_b":point_b,
+            "rpm":3000.0,"pairing":"EXACT_RPM_AND_OPERATING_CONTEXT",
+            "metrics":{"brake_power":{"a":None,"b":None,"delta":None},
+                "brake_torque":{"a":None,"b":None,"delta":None},"BMEP":{"a":None,"b":None,"delta":None}}}],
+        "unpaired":[],"notice":"sin interpolación"})
+    assert page.study_comparison_table.rowCount()==1
+    assert "insuficientes" in page.study_comparison_table.item(0,3).text().lower()
+    assert page.study_comparison_table.item(0,4).text()=="—"
+    assert "a"*64 in page.study_comparison_table.item(0,2).toolTip()
+    assert "RPM exacta:" in page.study_comparison_table.item(0,2).toolTip()
+    page.close();APP.processEvents()
+
+
+def test_cross_study_comparison_control_requires_multiple_project_references():
+    context=DesktopContext(new_design_project("cross-study-selection-state"))
+    page=ResultsPage(context)
+    assert not page.compare_studies_button.isEnabled()
+    references=[{"path":f"{name}.study.json","study_id":name,"manifest_sha256":digest,
+        "schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","source_project_id":context.project["project_id"]}
+        for name,digest in (("Study A","a"*64),("Study B","b"*64))]
+    context.project["study_references"]=references;context.changed.emit();APP.processEvents()
+    assert page.compare_studies_button.isEnabled()
+    assert not page.study_comparison_group.isHidden()
     page.close();APP.processEvents()
 
 

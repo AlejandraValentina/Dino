@@ -1,0 +1,5 @@
+44 passed in 198.53 s: tests/test_design_study.py tests/test_desktop_design_study.py tests/test_desktop_technical_report.py -q (final run_logged; no timeout or error lines)
+6 passed in 3.55 s: tests/test_desktop_design_study.py tests/test_desktop_technical_report.py -q -k cross_study (focused after final compatibility and budget guards)
+compileall: passed
+Native Windows source Desktop: passed; 8 exact pairs at 3000 RPM, 2 unpaired at 4000 RPM, all insufficient cycles, no defined deltas; Desktop HTML export action passed.
+COM/UIA cause verified from the existing acceptance evidence and current verifier: stale UIA provider after native close; harness closes using WM_CLOSE then Win32 IsWindowVisible. pywinauto is absent in active source env.

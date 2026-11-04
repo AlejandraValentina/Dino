@@ -1,0 +1,25 @@
+{
+  "name": "desktop-parametric-cross-study-final-regressions",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "tests/test_design_study.py",
+    "tests/test_desktop_design_study.py",
+    "tests/test_desktop_technical_report.py",
+    "-q"
+  ],
+  "started_at": "2026-11-04T18:43:28+00:00",
+  "finished_at": "2026-11-04T18:46:47+00:00",
+  "duration_s": 199.093,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\cross-study-comparison\\tests-final\\desktop-parametric-cross-study-final-regressions.log",
+  "log_lines": 2,
+  "log_bytes": 111,
+  "error_lines": [],
+  "tail": [
+    "............................................                             [100%]",
+    "44 passed in 198.53s (0:03:18)"
+  ]
+}

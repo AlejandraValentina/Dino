@@ -10,10 +10,69 @@ from unittest.mock import patch
 from motorsim.desktop.context import DesktopContext
 from motorsim.desktop.results_page import ResultsPage
 from motorsim.desktop.services import new_design_project
-from motorsim.desktop.technical_report import render_technical_report
+from motorsim.desktop.technical_report import render_technical_report,render_study_comparison_report
 
 
 APP = QApplication.instance() or QApplication([])
+
+
+def test_cross_study_report_preserves_exact_provenance_and_evidence_boundaries():
+    comparison={"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
+        "baseline_engine_identity_sha256":"a"*64,"scientific_validation":"NOT_CLAIMED",
+        "notice":"No interpolation; no aggregate effect.","studies":[
+            {"study_id":"study <A>","source_project_id":"project-a","manifest_path":"a.study.json",
+             "manifest_sha256":"b"*64,"baseline_engine_identity_sha256":"a"*64,
+             "parameter":{"label":"Escape"},"manifest":{"study_id":"study <A>"},"points":[
+                {"index":0,"value":83.123456789,"unit":"mm","rpm":3000,"status":"COMPLETE",
+                 "classification":"PERIOD_1","periodicity":"PERIOD_1","cycles_completed":20,
+                 "source_run_id":"run-a","engine_identity_sha256":"c"*64,"identity_sha256":"d"*64,
+                 "result_sha256":"e"*64,"result_artifact_sha256":"f"*64,
+                 "run_directory":"C:/artifacts/run-a","source_verified":True,
+                 "metrics":{"brake_power":10.0,"brake_torque":None,"BMEP":None}}]},
+            {"study_id":"study B","source_project_id":"project-b","manifest_path":"b.study.json",
+             "manifest_sha256":"1"*64,"baseline_engine_identity_sha256":"a"*64,
+             "parameter":{"label":"Escape"},"manifest":{"study_id":"study B"},"points":[
+                {"index":0,"value":85.987654321,"unit":"mm","rpm":3000,"status":"COMPLETE",
+                 "classification":"PERIOD_1","periodicity":"PERIOD_1","cycles_completed":20,
+                 "source_run_id":"run-b","engine_identity_sha256":"2"*64,"identity_sha256":"3"*64,
+                 "result_sha256":"4"*64,"result_artifact_sha256":"5"*64,
+                 "run_directory":"C:/artifacts/run-b","source_verified":True,
+                 "metrics":{"brake_power":12.5,"brake_torque":None,"BMEP":None}}]}],
+        "pairs":[{"study_a":"study <A>","point_a":{"run_id":"run-a"},"study_b":"study B",
+            "point_b":{"run_id":"run-b"},"rpm":3000,
+            "pairing":"EXACT_RPM_AND_OPERATING_CONTEXT",
+            "metrics":{"brake_power":{"a":10.0,"b":12.5,"delta":2.5},
+                "brake_torque":{"a":None,"b":None,"delta":None},"BMEP":{"a":None,"b":None,"delta":None}}}],
+        "unpaired":[{"study_id":"study B","reason":"Condiciones informadas incompatibles: total_finite_volume_cells.",
+            "point":{"run_id":"run-other","rpm":4000,"classification":"MAX_CYCLES_NONCONVERGED",
+                "periodicity":"INSUFFICIENT_CYCLES","engine_identity_sha256":"7"*64}}]}
+    html=render_study_comparison_report(comparison)
+    assert "study &lt;A&gt;" in html and "2.5 kW" in html
+    assert "C:/artifacts/run-a" in html and "a"*64 in html and "f"*64 in html
+    assert "Puntos sin contraparte" in html and "total_finite_volume_cells" in html
+    assert "no se interpolan, ajustan ni agregan" in html
+    assert "NOT_CLAIMED" in html
+
+
+def test_results_page_exports_selected_cross_study_comparison(tmp_path):
+    context=DesktopContext(new_design_project("cross-study-report-export"))
+    page=ResultsPage(context)
+    page.study_comparison={"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
+        "baseline_engine_identity_sha256":"a"*64,"scientific_validation":"NOT_CLAIMED",
+        "notice":"Exact comparisons only.","studies":[
+            {"study_id":"A","source_project_id":"p","manifest_path":"a.study.json",
+             "manifest_sha256":"b"*64,"baseline_engine_identity_sha256":"a"*64,
+             "parameter":{"label":"Escape"},"manifest":{"study_id":"A"},"points":[]},
+            {"study_id":"B","source_project_id":"p","manifest_path":"b.study.json",
+             "manifest_sha256":"c"*64,"baseline_engine_identity_sha256":"a"*64,
+             "parameter":{"label":"Escape"},"manifest":{"study_id":"B"},"points":[]}],
+        "pairs":[],"unpaired":[]}
+    output=tmp_path/"cross-study-report.html"
+    with patch("motorsim.desktop.results_page.QFileDialog.getSaveFileName",return_value=(str(output),"HTML")):
+        assert page.export_study_comparison() is True
+    html=output.read_text(encoding="utf-8")
+    assert "Comparación de estudios paramétricos" in html and "A" in html and "B" in html
+    page.close();APP.processEvents()
 
 
 def _row(variant, rpm, power, *, classification="PERIOD_1", periodicity=None):
