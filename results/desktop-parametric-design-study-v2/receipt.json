@@ -1,7 +1,7 @@
 {
   "schema": "DINO_DESKTOP_PARAMETRIC_STUDY_V2_ACCEPTANCE_V1",
   "status": "SYNTHETIC_FUNCTIONAL_INTEGRATION_PASS_WITH_LIMITATIONS",
-  "source_commit": "filled after local implementation commit",
+  "source_commit": "dcd9b33",
   "study": {
     "schema": "DINO_PARAMETRIC_DESIGN_STUDY_V1",
     "project_id": "synthetic-transfer-study",
@@ -65,7 +65,10 @@
     "undefined_metrics_render_as_dash": true,
     "screenshot": "captures/parametric-transfer-port-real-window.png",
     "screenshot_sha256": "830a0a167645a7c6423f607eb7b003d3b0a5d9af8b265bd855f909d3c9128fb4",
-    "outer_window_px": [1440, 837]
+    "outer_window_px": [
+      1440,
+      837
+    ]
   },
   "tests": {
     "compileall": "PASS",
