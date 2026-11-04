@@ -835,6 +835,9 @@ class ResultsPage(QWidget):
         self.factorial_csv_snapshot_contrasts.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.factorial_csv_snapshot_contrasts.horizontalHeader().setStretchLastSection(True)
         self.factorial_csv_snapshot_contrasts.setMaximumHeight(330)
+        self.factorial_csv_snapshot_contrasts.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.factorial_csv_snapshot_contrasts.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.factorial_csv_snapshot_contrasts.currentCellChanged.connect(self._factorial_csv_snapshot_contrast_selected)
         factorial_snapshot_layout.addWidget(self.factorial_csv_snapshot_contrasts)
         self.factorial_csv_snapshot_group.hide()
         self.cross_study_csv_snapshot_group=QGroupBox("Comparación entre estudios · snapshot CSV de sólo lectura")
@@ -2116,6 +2119,8 @@ class ResultsPage(QWidget):
             for column,value in enumerate(cells):
                 item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                 if column in (4,5):item.setToolTip(str(value))
+                if column==0:
+                    item.setData(Qt.ItemDataRole.UserRole,self._factorial_contrast_traceability_detail(row))
                 self.factorial_csv_snapshot_contrasts.setItem(index,column,item)
         if points:self.factorial_csv_snapshot_points.setCurrentCell(0,0)
         self.plot.set_series([]);self.power_curves.set_dataset(None,set());self.trace_plot.set_series([])
@@ -2125,6 +2130,32 @@ class ResultsPage(QWidget):
 
     def _factorial_csv_snapshot_point_selected(self,row,column,previous_row,previous_column):
         item=self.factorial_csv_snapshot_points.item(row,0) if row>=0 else None
+        self.factorial_csv_snapshot_detail.setPlainText(item.data(Qt.ItemDataRole.UserRole) if item else "")
+
+    @staticmethod
+    def _factorial_contrast_traceability_detail(row):
+        binding=row.get("contrast_source_binding_status")
+        binding_label={"MATCHES_POINT_ROWS":"Los cuatro IDs y hashes coinciden con las filas POINT del mismo CSV.",
+            "NOT_PRESENT_IN_EXPORTED_CONTRAST_ROW":"El CSV no registró bindings para este contraste; no se reconstruyen."}.get(
+                binding,"Estado de binding no disponible.")
+        try:
+            source_ids=json.loads(row.get("contrast_source_run_ids_json") or "[]")
+        except (TypeError,json.JSONDecodeError):
+            source_ids=[]
+        try:
+            result_hashes=json.loads(row.get("contrast_source_result_sha256s_json") or "[]")
+        except (TypeError,json.JSONDecodeError):
+            result_hashes=[]
+        detail={"metric_id":row.get("metric_id"),"contrast_term":row.get("contrast_term"),
+            "contrast_status":row.get("contrast_status"),"contrast_formula":row.get("contrast_formula"),
+            "contrast_source_binding_status":binding,
+            "binding_interpretation":binding_label,
+            "contrast_source_run_ids":source_ids,
+            "contrast_source_result_sha256s":result_hashes}
+        return json.dumps(detail,ensure_ascii=False,indent=2,sort_keys=True)
+
+    def _factorial_csv_snapshot_contrast_selected(self,row,column,previous_row,previous_column):
+        item=self.factorial_csv_snapshot_contrasts.item(row,0) if row>=0 else None
         self.factorial_csv_snapshot_detail.setPlainText(item.data(Qt.ItemDataRole.UserRole) if item else "")
 
     def _show_cross_study_csv_snapshot(self,data,path):

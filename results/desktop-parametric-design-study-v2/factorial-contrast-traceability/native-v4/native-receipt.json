@@ -1,0 +1,11 @@
+{
+  "fixture_origin": "synthetic; no solver execution",
+  "visible_desktop": true,
+  "selected_row": 0,
+  "four_source_ids_visible": true,
+  "four_result_hashes_visible": true,
+  "binding_status_visible": true,
+  "read_only_snapshot": true,
+  "capture_sha256": "780cb974a34b70a24ef231c13a38d9bcd055483cb191c0bef6607db1a489c4f5",
+  "source_csv_sha256": "b746f0eb2f5c590ca76ecd60bb5f80fee57e79e02a1b081fc18ceb761897eb77"
+}

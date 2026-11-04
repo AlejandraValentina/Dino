@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 os.environ.setdefault("QT_QPA_PLATFORM","offscreen")
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication,QComboBox,QDialog,QFileDialog,QLineEdit,QMessageBox
+from PySide6.QtWidgets import QApplication,QAbstractItemView,QComboBox,QDialog,QFileDialog,QLineEdit,QMessageBox
 from motorsim.desktop.app import DinoDesktopWindow
 from motorsim.desktop.context import DesktopContext
 from motorsim.desktop.execution_page import ExecutionPage
@@ -529,6 +529,11 @@ def test_factorial_csv_reimport_is_read_only_and_keeps_point_and_contrast_qualif
     assert page.factorial_csv_snapshot_detail.toPlainText().find("result_artifact_sha256")>=0
     page.factorial_csv_snapshot_points.setCurrentCell(1,0);APP.processEvents()
     assert "factorial-source-1" in page.factorial_csv_snapshot_detail.toPlainText()
+    page.factorial_csv_snapshot_contrasts.setCurrentCell(0,0);APP.processEvents()
+    missing_binding=page.factorial_csv_snapshot_detail.toPlainText()
+    assert '"contrast_source_binding_status": "NOT_PRESENT_IN_EXPORTED_CONTRAST_ROW"' in missing_binding
+    assert "no registró bindings para este contraste; no se reconstruyen" in missing_binding
+    assert json.loads(missing_binding)["contrast_source_run_ids"]==[None,None,None,None]
     page.close();APP.processEvents()
 
 
@@ -791,6 +796,16 @@ def test_factorial_contrast_source_bindings_survive_read_only_csv_reimport(tmp_p
     assert page.factorial_csv_snapshot_contrasts.rowCount()==9
     assert "Las filas CONTRAST enlazan las cuatro fuentes POINT" in page.factorial_csv_snapshot_notice.text()
     assert "NOT_CLAIMED" in page.factorial_csv_snapshot_notice.text()
+    source_detail=page._factorial_contrast_traceability_detail(contrasts[0])
+    page.factorial_csv_snapshot_contrasts.setCurrentCell(0,0);APP.processEvents()
+    selected_detail=page.factorial_csv_snapshot_detail.toPlainText()
+    assert page.factorial_csv_snapshot_contrasts.selectionBehavior()==QAbstractItemView.SelectionBehavior.SelectRows
+    assert all(run_id in selected_detail for run_id in point_ids)
+    assert all(digest in selected_detail for digest in point_hashes)
+    assert "MATCHES_POINT_ROWS" in selected_detail and "coinciden con las filas POINT" in selected_detail
+    assert source_detail==page.factorial_csv_snapshot_contrasts.item(0,0).data(Qt.ItemDataRole.UserRole)
+    assert json.loads(selected_detail)["contrast_source_run_ids"]==point_ids
+    assert json.loads(selected_detail)["contrast_source_result_sha256s"]==point_hashes
     page.close();APP.processEvents()
 
 
