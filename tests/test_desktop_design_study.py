@@ -411,6 +411,47 @@ def test_cross_study_response_plot_uses_only_exact_period_one_metric_pairs():
     page.close();APP.processEvents()
 
 
+def test_cross_study_response_marker_selects_exact_rows_and_source_traceability():
+    page=ResultsPage(DesktopContext(new_design_project("cross-study-marker-inspection")))
+    studies=[{"study_id":name,"manifest_path":f"synthetic/{name}.study.json",
+        "manifest_sha256":chr(ord("a")+index)*64,"parameter":{"label":"Escape"}}
+        for index,name in enumerate(("A","B","C"))]
+    def point(index,run,rpm,identity):
+        return {"index":index,"run_id":run,"source_run_id":run+"-source","rpm":float(rpm),
+            "value":83.123456789,"unit":"mm","status":"COMPLETE","classification":"PERIOD_1",
+            "periodicity":"PERIOD_1","cycles_completed":7,"source_verified":True,
+            "engine_identity_sha256":identity*64,"identity_sha256":identity.upper()*64,
+            "result_sha256":("d" if identity!="b" else "e")*64,
+            "result_artifact_sha256":("f" if identity!="b" else "1")*64,
+            "run_directory":f"SYNTHETIC/{run}","context":{"afr":12.5},
+            "metrics":{"brake_power":{"a":10.25,"b":11.5,"delta":1.25}.get(identity,14.0),
+                "brake_torque":None,"BMEP":None}}
+    a=point(0,"run-A",3000,"a");b=point(2,"run-B",3000,"b");c=point(1,"run-C",3000,"c")
+    def pair(study_a,point_a,study_b,point_b):
+        return {"study_a":study_a,"point_a":point_a,"study_b":study_b,"point_b":point_b,
+            "rpm":3000.0,"pairing":"EXACT_RPM_AND_OPERATING_CONTEXT","metrics":{
+                "brake_power":{"a":10.25,"b":11.5,"delta":1.25},
+                "brake_torque":{"a":None,"b":None,"delta":None},
+                "BMEP":{"a":None,"b":None,"delta":None}}}
+    comparison={"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
+        "baseline_engine_identity_sha256":"9"*64,"studies":studies,
+        "pairs":[pair("A",a,"B",b),pair("B",b,"C",c)],
+        "unpaired":[],"notice":"Fixture de presentación sintético; sin cálculo ni validación."}
+    page._study_comparison_loaded(comparison)
+    marker=next(p for s in page.study_comparison_response_plot.series if s["name"]=="B" for p in s["points"])
+    assert marker["comparison_rows"]==[0,1]
+    page.study_comparison_response_plot.pointSelected.emit(marker);APP.processEvents()
+    assert "run-B" in page.study_comparison_point_details.toPlainText()
+    assert "b"*64 in page.study_comparison_point_details.toPlainText()
+    assert "Verificada al cargar" in page.study_comparison_point_details.toPlainText()
+    assert "Fila 1: A · run run-A-source" in page.study_comparison_point_details.toPlainText()
+    assert "Fila 2: C · run run-C-source" in page.study_comparison_point_details.toPlainText()
+    selected=page.study_comparison_table.currentItem()
+    assert selected is not None and selected.data(Qt.ItemDataRole.UserRole)==0
+    assert page.study_comparison_table.selectionModel().isRowSelected(selected.row(),page.study_comparison_table.rootIndex())
+    page.close();APP.processEvents()
+
+
 def test_parametric_point_details_bind_manifest_nested_sweep_and_source_status(tmp_path):
     from motorsim.desktop.context import DesktopContext
     page=ResultsPage(DesktopContext(new_design_project("study-traceability-details")))

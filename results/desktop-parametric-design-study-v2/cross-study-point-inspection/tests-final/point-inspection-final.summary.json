@@ -1,0 +1,11 @@
+{
+  "schema": "DINO_PARAMETRIC_CROSS_STUDY_POINT_INSPECTION_TEST_SUMMARY_V1",
+  "synthetic_fixtures_only": true,
+  "command": "python -m pytest -q tests/test_desktop_design_study.py tests/test_desktop_comparison_snapshot.py tests/test_parametric_study_snapshot.py tests/test_parametric_factorial_snapshot.py",
+  "result": "PASS",
+  "passed": 46,
+  "failed": 0,
+  "duration_seconds": 42.30,
+  "solver_executed": false,
+  "native_interaction": "results/desktop-parametric-design-study-v2/cross-study-point-inspection/native-marker-selection-receipt.json"
+}

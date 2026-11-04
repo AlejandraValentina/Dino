@@ -1,0 +1,27 @@
+{
+  "schema": "DINO_NATIVE_CROSS_STUDY_POINT_SELECTION_V1",
+  "synthetic": true,
+  "visible_native_window": true,
+  "window_size": [
+    1440,
+    837
+  ],
+  "clicked_series": "synthetic-B",
+  "clicked_run_id": "synthetic-B0",
+  "exact_comparison_rows": [
+    0
+  ],
+  "selected_pair_index": 0,
+  "click_target_visible_before_click": true,
+  "plot_capture_saved": true,
+  "source_status_shown_unverified": true,
+  "selected_source_run_shown": true,
+  "manifest_hash_shown": true,
+  "artifact_hash_shown": true,
+  "unpaired_row_still_present": true,
+  "comparison_group_visible": true,
+  "normal_curves_not_used": true,
+  "capture_saved": true,
+  "capture_sha256": "3997c4982d9a4fd2b29489a71b01be6a4047bc08c1634f468271f40a6bc7ec0f",
+  "plot_capture_sha256": "038951b0bab5b678ff5436f9134b04a909ec38d1e21e8573298765d2212889a2"
+}

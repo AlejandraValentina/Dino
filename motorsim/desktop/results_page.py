@@ -880,6 +880,7 @@ class ResultsPage(QWidget):
         self.study_comparison_response_legend.setTextFormat(Qt.TextFormat.RichText)
         self.study_comparison_response_legend.setWordWrap(True);comparison_layout.addWidget(self.study_comparison_response_legend)
         self.study_comparison_response_plot=CurvePlot();self.study_comparison_response_plot.setObjectName("crossStudyResponsePlot")
+        self.study_comparison_response_plot.pointSelected.connect(self._cross_study_response_point_selected)
         self.study_comparison_response_plot.setMinimumHeight(210);comparison_layout.addWidget(self.study_comparison_response_plot)
         self.study_comparison_table=QTableWidget(0,11);self.study_comparison_table.setObjectName("crossStudyComparison")
         self.study_comparison_table.setHorizontalHeaderLabels(["RPM","Diseño A","ID A","Estado A","Métrica A","Diseño B","ID B","Estado B","Métrica B","Δ B−A","Pareo"])
@@ -888,6 +889,10 @@ class ResultsPage(QWidget):
             self.study_comparison_table.setColumnWidth(column,width)
         self.study_comparison_table.horizontalHeader().setStretchLastSection(True);self.study_comparison_table.setMaximumHeight(300)
         self.study_comparison_table.setSortingEnabled(True);comparison_layout.addWidget(self.study_comparison_table)
+        self.study_comparison_point_details=QPlainTextEdit();self.study_comparison_point_details.setObjectName("crossStudyResponsePointDetails")
+        self.study_comparison_point_details.setReadOnly(True);self.study_comparison_point_details.setMaximumHeight(170)
+        self.study_comparison_point_details.setPlaceholderText("Seleccioná un marcador de la gráfica para inspeccionar su fila y procedencia exactas.")
+        comparison_layout.addWidget(self.study_comparison_point_details)
         study_layout.addWidget(self.study_comparison_group)
         root.addWidget(self.design_study_group);self.design_study_group.hide()
         self.study_comparison=None
@@ -1042,6 +1047,7 @@ class ResultsPage(QWidget):
         self.study_comparison_notice.setText(f"Comparación rechazada: {error}")
         self.study_comparison_table.setRowCount(0)
         self.study_comparison_response_plot.set_series([])
+        self.study_comparison_point_details.clear()
         self.study_comparison_response_notice.setText("No hay una comparación verificada para graficar.")
         self.study_comparison_response_legend.setText("Sin series disponibles.")
 
@@ -1069,7 +1075,7 @@ class ResultsPage(QWidget):
         metric_label,metric_unit=metric_labels.get(metric,(metric,""))
         response_points={study["study_id"]:{} for study in comparison.get("studies",[])}
         eligible_pairs=0
-        for pair in comparison.get("pairs",[]):
+        for pair_index,pair in enumerate(comparison.get("pairs",[])):
             point_a=pair.get("point_a") or {};point_b=pair.get("point_b") or {}
             value_a=point_a.get("metrics",{}).get(metric);value_b=point_b.get("metrics",{}).get(metric)
             if (point_a.get("periodicity")!="PERIOD_1" or point_b.get("periodicity")!="PERIOD_1" or
@@ -1081,8 +1087,12 @@ class ResultsPage(QWidget):
             for study_id,point,value in ((pair.get("study_a"),point_a,value_a),
                                          (pair.get("study_b"),point_b,value_b)):
                 if study_id not in response_points:continue
-                identity=(point.get("run_id") or point.get("source_run_id") or point.get("index"),float(pair["rpm"]))
-                response_points[study_id][identity]={"rpm":float(pair["rpm"]),"value":float(value)}
+                identity=(point.get("index"),float(pair["rpm"]))
+                plotted=response_points[study_id].setdefault(identity,{
+                    "rpm":float(pair["rpm"]),"value":float(value),"comparison_study_id":study_id,
+                    "comparison_point_index":point.get("index"),"comparison_run_id":point.get("run_id"),
+                    "comparison_source_run_id":point.get("source_run_id"),"comparison_rows":[]})
+                if pair_index not in plotted["comparison_rows"]:plotted["comparison_rows"].append(pair_index)
         series=[{"name":str(study_id),"unit":metric_unit,"x_key":"rpm","x_label":"RPM",
                  "connect":False,"points":sorted(points.values(),key=lambda point:point["rpm"])}
                 for study_id,points in response_points.items() if points]
@@ -1094,19 +1104,20 @@ class ResultsPage(QWidget):
         self.study_comparison_table.setSortingEnabled(False);self.study_comparison_table.setRowCount(0)
         studies={study["study_id"]:study for study in comparison["studies"]}
         rows=[]
-        for pair in comparison["pairs"]:
+        for pair_index,pair in enumerate(comparison["pairs"]):
             a=pair["point_a"];b=pair["point_b"]
             rows.append((pair["rpm"],pair["study_a"],a,pair["study_b"],b,
-                pair["metrics"].get(metric,{}).get("delta"),"RPM y condiciones exactas"))
+                pair["metrics"].get(metric,{}).get("delta"),"RPM y condiciones exactas",pair_index))
         for item in comparison["unpaired"]:
             if item["study_id"]==comparison["studies"][0]["study_id"]:
                 rows.append((item["point"]["rpm"],item["study_id"],item["point"],"",None,None,
-                    item.get("reason","Sin par exacto compatible")))
+                    item.get("reason","Sin par exacto compatible"),None))
             else:
                 rows.append((item["point"]["rpm"],"",None,item["study_id"],item["point"],None,
-                    item.get("reason","Sin par exacto compatible")))
+                    item.get("reason","Sin par exacto compatible"),None))
         self.study_comparison_table.setRowCount(len(rows))
-        for index,(rpm,a_id,a,b_id,b,delta,pairing) in enumerate(rows):
+        self.study_comparison_point_details.clear()
+        for index,(rpm,a_id,a,b_id,b,delta,pairing,comparison_row) in enumerate(rows):
             def fmt_metric(point):
                 value=(point or {}).get("metrics",{}).get(metric)
                 periodic=str((point or {}).get("periodicity","" )).startswith("PERIOD_1")
@@ -1123,6 +1134,7 @@ class ResultsPage(QWidget):
                 format_number(delta,signed=True) if isinstance(delta,(int,float)) else "—",pairing]
             for column,value in enumerate(cells):
                 item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                if column==0:item.setData(Qt.ItemDataRole.UserRole,comparison_row)
                 point=a if column in (1,2,3,4) else b
                 if point is not None and column in (1,2,3,5,6,7):
                     study=studies[a_id if column in (1,2,3) else b_id]
@@ -1148,6 +1160,63 @@ class ResultsPage(QWidget):
             f"{metric_label} ({metric_unit}) · {eligible_pairs} par(es) exacto(s) con ambos puntos PERIOD_1 y métrica definida; "
             f"{excluded} par(es) exacto(s) excluido(s) por estado no periódico o valor indefinido. "
             "Sólo marcadores observados, sin interpolación ni ajuste. Los puntos sin pareja y estados completos permanecen en la tabla.")
+
+    def _cross_study_response_point_selected(self,plotted_point):
+        """Select the exact comparison row(s) represented by an observed plot marker."""
+        comparison=self.study_comparison
+        if not comparison or not isinstance(plotted_point,dict):return
+        study_id=plotted_point.get("comparison_study_id")
+        row_indices=plotted_point.get("comparison_rows") or []
+        studies={study.get("study_id"):study for study in comparison.get("studies",[])}
+        if study_id not in studies or not row_indices:return
+        row_index=row_indices[0];pairs=comparison.get("pairs",[])
+        if not isinstance(row_index,int) or not 0<=row_index<len(pairs):return
+        pair=pairs[row_index]
+        endpoint="point_a" if pair.get("study_a")==study_id else "point_b" if pair.get("study_b")==study_id else None
+        if endpoint is None:return
+        point=pair.get(endpoint) or {}
+        if (point.get("index")!=plotted_point.get("comparison_point_index") or
+                point.get("run_id")!=plotted_point.get("comparison_run_id") or
+                point.get("source_run_id")!=plotted_point.get("comparison_source_run_id")):return
+        study=studies[study_id]
+        verification=("Verificada al cargar la comparación (hash e identidad)" if point.get("source_verified")
+            else "No verificada al cargar la comparación")
+        metric_value=plotted_point.get("value")
+        linked=[]
+        for candidate_index in row_indices:
+            if not isinstance(candidate_index,int) or not 0<=candidate_index<len(pairs):continue
+            candidate=pairs[candidate_index]
+            other_side="point_b" if candidate.get("study_a")==study_id else "point_a"
+            other_id=candidate.get("study_b") if candidate.get("study_a")==study_id else candidate.get("study_a")
+            other=candidate.get(other_side) or {}
+            linked.append(f"Fila {candidate_index+1}: {other_id} · run {other.get('source_run_id') or other.get('run_id') or 'No informado'}")
+        metric_text=str(metric_value) if metric_value is not None else "No definida"
+        details=["Marcador exacto seleccionado · respuesta observada, sin ajuste ni interpolación.",
+            f"Estudio: {study_id}",f"Diseño: {self._study_point_label(study,point)}",
+            f"RPM exacta: {point.get('rpm')}",
+            f"Clasificación: {_state_label(point.get('classification') or point.get('status') or 'NOT_REPORTED')}",
+            f"Periodicidad: {_state_label(point.get('periodicity') or 'NOT_EVALUATED')}",
+            f"Ciclos completados: {point.get('cycles_completed') if point.get('cycles_completed') is not None else 'No informado'}",
+            f"Métrica seleccionada · {self.study_comparison_metric.currentText()}: {metric_text}",
+            f"Run: {point.get('run_id') or 'No informado'} · run fuente: {point.get('source_run_id') or 'No informado'}",
+            f"Fuente: {verification}",f"Manifiesto: {study.get('manifest_path') or 'No informado'}",
+            f"SHA-256 manifiesto: {study.get('manifest_sha256') or 'No disponible'}",
+            f"Motor SHA-256: {point.get('engine_identity_sha256') or 'No disponible'}",
+            f"Identidad corrida SHA-256: {point.get('identity_sha256') or 'No disponible'}",
+            f"Resultado SHA-256: {point.get('result_sha256') or 'No disponible'}",
+            f"Artifact SHA-256: {point.get('result_artifact_sha256') or 'No disponible'}",
+            f"Ruta artifact: {point.get('run_directory') or 'No informada'}"]
+        if point.get("context"):
+            details.append("Contexto de operación: "+json.dumps(point["context"],ensure_ascii=False,sort_keys=True))
+        if linked:details.append("Filas de comparación asociadas:\n"+"\n".join(linked))
+        self.study_comparison_point_details.setPlainText("\n".join(details))
+        for table_row in range(self.study_comparison_table.rowCount()):
+            item=self.study_comparison_table.item(table_row,0)
+            if item and item.data(Qt.ItemDataRole.UserRole)==row_index:
+                self.study_comparison_table.setCurrentCell(table_row,0)
+                self.study_comparison_table.selectRow(table_row)
+                self.study_comparison_table.scrollToItem(item)
+                break
 
     def export_study_comparison(self):
         if not self.study_comparison:return False
