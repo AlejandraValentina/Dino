@@ -64,6 +64,8 @@ def test_cross_study_report_preserves_exact_provenance_and_evidence_boundaries()
     assert "Motor SHA-256" not in summary_headers and "Artifact SHA-256" not in summary_headers
     assert points_table.count('class="point-provenance"')==2
     assert points_table.count("Ver fuente y hashes")==2
+    assert points_table.count("Periódica · ciclo 1")==2
+    assert "Periódica · ciclo 1<br>Periódica · ciclo 1" not in points_table
     assert ".point-provenance{position:relative}" in html
     assert ".provenance-grid{position:absolute" in html
     assert "max-width:calc(100vw - 48px)" in html
@@ -106,6 +108,9 @@ def test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_ex
             "point":{"run_id":"b-5000","rpm":5000,"classification":"NOT_STARTED",
                 "periodicity":"NOT_EVALUATED","engine_identity_sha256":"7"*64}}]}
     report=render_study_comparison_report(comparison)
+    point_summary=report.split('<table class="points-table">',1)[1].split("</table>",1)[0]
+    assert point_summary.count("Periódica · ciclo 1")==3
+    assert "Límite de ciclos · no convergida<br>Ciclos insuficientes" in point_summary
     assert "Respuesta observada por RPM" in report
     assert 'aria-label="Potencia de freno por RPM exacta"' in report
     assert "A · 1 punto(s)" in report and "B · 1 punto(s)" in report

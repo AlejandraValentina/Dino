@@ -1,0 +1,19 @@
+{
+  "name": "duplicate-state-native-v1",
+  "command": [
+    "python",
+    "results/desktop-parametric-design-study-v2/report-duplicate-state-summary/verify_native_summary.py"
+  ],
+  "started_at": "2026-11-04T23:06:17+00:00",
+  "finished_at": "2026-11-04T23:06:23+00:00",
+  "duration_s": 5.984,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\report-duplicate-state-summary\\native-run\\duplicate-state-native-v1.log",
+  "log_lines": 1,
+  "log_bytes": 1150,
+  "error_lines": [],
+  "tail": [
+    "{\"schema\": \"DINO_NATIVE_CROSS_STUDY_REPORT_PLOT_V1\", \"synthetic\": true, \"desktop_window_visible\": true, \"desktop_size\": [1440, 837], \"project_study_references\": 2, \"html_report_path\": \"results\\\\desktop-parametric-design-study-v2\\\\report-duplicate-state-summary\\\\cross-study-report-v1.html\", \"html_sha"
+  ]
+}

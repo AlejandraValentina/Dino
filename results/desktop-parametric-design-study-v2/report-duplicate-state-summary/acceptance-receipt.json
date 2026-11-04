@@ -1,0 +1,48 @@
+{
+  "schema": "DINO_REPORT_DUPLICATE_STATE_SUMMARY_ACCEPTANCE_V1",
+  "fixture_origin": "same synthetic comparison fixture before and after; no solver execution",
+  "before_summary_repeat_count": 8,
+  "after_summary_period_one_count": 4,
+  "after_has_no_adjacent_duplicate_label": true,
+  "distinct_nonconverged_states_retained": true,
+  "both_source_state_fields_retained_in_json": true,
+  "evidence": {
+    "before_sha256": "0d93a6a64c65f0f607be64ea68045890179896ed469f8f1c4a86ffe317790fdf",
+    "after_sha256": "688e793ec687ad11081a848efee031aa963129ddf5dfdf7a0fee9299381a1cd7",
+    "native_desktop_capture_sha256": "2a2a31373616faae191322805e8710290e706e8b51c078e10ed8686b936ba8fb",
+    "html_sha256": "613fc0aeb2e300b4d2a615e3ea846eafd044673a7d70b1423550d1eae78abd35",
+    "dimensions_px": {
+      "before-v1.png": [
+        1360,
+        3000
+      ],
+      "chrome-report-v1.png": [
+        1360,
+        3000
+      ],
+      "desktop-export-v1.png": [
+        1440,
+        837
+      ]
+    },
+    "desktop_window_visible": true,
+    "synthetic_notice": true
+  },
+  "tests": {
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_desktop_technical_report.py",
+      "tests/test_desktop_design_study.py"
+    ],
+    "exit_code": 0,
+    "tail": [
+      "..............................................                           [100%]",
+      "46 passed in 43.96s"
+    ],
+    "summary_sha256": "d5481a1ae43ad62ef233a76e0b5a7d33ac8d605b5f3ed327bb9f12d90f1028a9"
+  },
+  "native_runner_exit_code": 0
+}

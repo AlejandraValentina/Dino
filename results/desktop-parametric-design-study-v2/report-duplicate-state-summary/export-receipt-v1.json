@@ -1,0 +1,33 @@
+{
+  "schema": "DINO_NATIVE_CROSS_STUDY_REPORT_PLOT_V1",
+  "synthetic": true,
+  "desktop_window_visible": true,
+  "desktop_size": [
+    1440,
+    837
+  ],
+  "project_study_references": 2,
+  "html_report_path": "results\\desktop-parametric-design-study-v2\\report-duplicate-state-summary\\cross-study-report-v1.html",
+  "html_sha256": "613fc0aeb2e300b4d2a615e3ea846eafd044673a7d70b1423550d1eae78abd35",
+  "html_svg_count": 1,
+  "html_marker_count": 2,
+  "no_interpolated_lines": true,
+  "excluded_nonperiodic_pair_listed": true,
+  "unpaired_point_preserved": true,
+  "manifest_hashes_preserved": true,
+  "duplicate_period_one_labels_removed": true,
+  "distinct_nonconverged_labels_preserved": true,
+  "source_states_retained_in_json": true,
+  "pair_rule_label_translated": true,
+  "unpaired_context_field_label_translated": true,
+  "raw_pair_and_context_codes_preserved_in_source_json": true,
+  "not_claimed_preserved": true,
+  "synthetic_notice_preserved": true,
+  "desktop_capture_saved": true,
+  "browser_capture_saved": true,
+  "browser_capture_sha256": "688e793ec687ad11081a848efee031aa963129ddf5dfdf7a0fee9299381a1cd7",
+  "browser": "Chrome headless; renderer only; Desktop export action generated the HTML",
+  "summary_header_count": 9,
+  "expandable_point_count": 6,
+  "full_provenance_fields_preserved": true
+}

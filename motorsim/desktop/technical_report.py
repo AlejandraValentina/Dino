@@ -594,6 +594,12 @@ def render_study_comparison_report(comparison: dict) -> str:
             f"<td><code>{_esc(study.get('manifest_sha256'))}</code></td>"))+"</tr>")
         for point in study.get("points",[]):
             metrics=point.get("metrics",{})
+            classification=point.get("classification") or "NOT_REPORTED"
+            periodicity=point.get("periodicity") or "NOT_EVALUATED"
+            classification_label=_esc(state_label(classification))
+            periodicity_label=_esc(state_label(periodicity))
+            state_summary=(classification_label if classification==periodicity else
+                f"{classification_label}<br>{periodicity_label}")
             factor=point.get("factor_values") or []
             design=(" · ".join(f"{_esc(row.get('label') or row.get('parameter_id'))}="
                 f"{_esc(format_number(row.get('value')) if _safe_number(row.get('value')) else 'No informado')} "
@@ -621,8 +627,7 @@ def render_study_comparison_report(comparison: dict) -> str:
                 f"<td>{_esc(study.get('study_id'))}</td>",f"<td>{design}</td>",
                 f"<td>{_esc(format_number(point.get('rpm')) if _safe_number(point.get('rpm')) else 'No informada')}</td>",
                 f"<td>{_esc(state_label(point.get('status') or 'NOT_REPORTED'))}</td>",
-                f"<td>{_esc(state_label(point.get('classification') or 'NOT_REPORTED'))}<br>"
-                f"{_esc(state_label(point.get('periodicity') or 'NOT_EVALUATED'))}</td>",
+                f"<td>{state_summary}</td>",
                 f"<td>{_esc(point.get('cycles_completed') if point.get('cycles_completed') is not None else 'No informado')}</td>",
                 f"<td class=\"run-id\">{_esc(point.get('source_run_id') or 'No informado')}</td>",
                 f"<td class=\"metric-summary\">{'<br>'.join(metrics_summary)}</td>",
