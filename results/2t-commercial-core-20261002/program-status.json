@@ -11188,9 +11188,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "671542a"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11202,8 +11204,16 @@
         "tests/test_desktop_design_study.py"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Bound design×RPM point count and aggregate budget; delegate each point to existing engineering/sweep execution and plot only observed defined periodic metrics with no interpolation.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/rpm-envelope-acceptance/acceptance.md",
+        "results/desktop-parametric-design-study-v2/rpm-envelope-acceptance/test-summary.txt",
+        "results/desktop-parametric-design-study-v2/rpm-envelope-acceptance/desktop-window-receipt.json",
+        "results/desktop-parametric-design-study-v2/rpm-envelope-smoke-run-v2/desktop-parametric-rpm-envelope-smoke-20261104.summary.json",
+        "results/desktop-parametric-design-study-v2/rpm-envelope-smoke-desktop-real-window.png",
+        "tests/test_design_study.py",
+        "tests/test_desktop_design_study.py"
+      ],
+      "next_action": "Continue with DESKTOP-PARAMETRIC-FACTORIAL-INTERRUPTION-V1; preserve exact point identities and terminal evidence across explicit resume.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11212,7 +11222,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-MULTIFACTOR-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -15858,6 +15868,25 @@
       "task": "DESKTOP-PARAMETRIC-RPM-ENVELOPE-V1",
       "kind": "task",
       "summary": "Started bounded RPM envelope product work using existing power-curve preflight/runner; no solver or scientific contract changes planned."
+    },
+    {
+      "at": "2026-11-04T18:05:23+00:00",
+      "task": "DESKTOP-PARAMETRIC-RPM-ENVELOPE-V1",
+      "kind": "implementation",
+      "summary": "Implementó estudio paramétrico geometría×RPM limitado con preflight, ejecución y reanudación por adaptadores existentes; siete pruebas focalizadas finales pasan; smoke sintético nativo importó cuatro puntos no convergidos y se conservó captura/hash."
+    },
+    {
+      "at": "2026-11-04T18:07:55+00:00",
+      "task": "DESKTOP-PARAMETRIC-RPM-ENVELOPE-V1",
+      "kind": "completion",
+      "commit": "671542af7659f7146fb5a689056b5c9d29d682cb",
+      "summary": "Bounded geometry×RPM envelope shipped; final 7 focused tests pass, four-point synthetic smoke and native Desktop reopen verified. All results nonconverged and scientific claims absent."
+    },
+    {
+      "at": "2026-11-04T18:07:55+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTORIAL-INTERRUPTION-V1",
+      "kind": "start",
+      "summary": "Started interruption/resume integrity verification for existing factorial studies; mock runner only, no new physical campaign."
     }
   ],
   "legacy_gate_status": {
