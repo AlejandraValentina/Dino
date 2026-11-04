@@ -11350,9 +11350,11 @@
         "DESKTOP-PARAMETRIC-MULTIFACTOR-V1",
         "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "157aafe"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11364,8 +11366,12 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Expose transparent 2x2 main/interaction contrasts in Results and the technical report only when all four exact points are verified, periodic, defined and context-compatible; otherwise retain every point and show why effects are unavailable.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/factor-effects/acceptance.md",
+        "results/desktop-parametric-design-study-v2/factor-effects/tests-final-v2/parametric-factor-effects-final-v2.summary.json",
+        "results/desktop-parametric-design-study-v2/factor-effects/native-window-receipt.json"
+      ],
+      "next_action": "DONE: exact four-point verified PERIOD_1 contrasts and interaction appear in Desktop and technical reports; nonperiodic/missing/incompatible points fail closed.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11449,7 +11455,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-V1"
       ],
-      "state": "WAITING",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11462,7 +11468,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Wait until DESKTOP-PARAMETRIC-FACTOR-EFFECTS-V1 is DONE, then export its exact four source rows and eligible contrast definitions without relabeling evidence.",
+      "next_action": "Export exact factorial point rows and direct contrast definitions to CSV, preserving manifest/source hashes and scientific qualification; add round-trip/rejection regressions and verify native Desktop action without solver execution.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16158,6 +16164,19 @@
       "task": "DESKTOP-PARAMETRIC-RPM-ENVELOPE-REPORT-V1",
       "kind": "queue-replan",
       "summary": "Prioritized directly observed 2×2 effects; its CSV export now waits on the contrast implementation. Added a separate read-only study-point traceability detail task for manifest/sweep hashes and source state, with no model or project-contract changes."
+    },
+    {
+      "at": "2026-11-04T19:56:16+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-V1",
+      "kind": "implementation",
+      "summary": "Added provenance-verified descriptive 2×2 contrasts in Desktop and technical reports; 54 regressions passed and native Windows synthetic available/nonperiodic states captured. Implementation 157aafe.",
+      "commit": "157aafe"
+    },
+    {
+      "at": "2026-11-04T19:56:16+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-CSV-EXPORT-V1",
+      "kind": "implementation",
+      "summary": "Started the now-unblocked CSV export for qualified factorial point rows and descriptive contrast terms; keep source and validation status bound."
     }
   ],
   "legacy_gate_status": {
@@ -16189,7 +16208,7 @@
     "remaining": [
       "PRED-VALIDATION"
     ],
-    "updated_at": "2026-10-26T17:00:23.639612+00:00"
+    "updated_at": "2026-11-04T19:56:04+00:00"
   },
   "r2_gate_status": {
     "objective": "MOTORSIM_2T_V1_CLOSURE_R2",
