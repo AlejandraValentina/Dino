@@ -11928,7 +11928,7 @@
       "id": "DESKTOP-PARAMETRIC-REPORT-BASELINE-HASH-DISCLOSURE-V1",
       "description": "Keep the common baseline engine SHA-256 discoverable without letting its unbroken 64-character value dominate the report header; provide a concise visible indicator and an accessible exact digest, preserving the full JSON and provenance.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11943,7 +11943,7 @@
       "evidence": [
         "results/desktop-parametric-design-study-v2/report-duplicate-state-summary/chrome-report-v1.png"
       ],
-      "next_action": "Make the common baseline digest a readable technical disclosure; keep all 64 hex characters available and preserve exact source JSON.",
+      "next_action": "Show a compact baseline digest in the report header with an expandable full SHA-256; preserve the full baseline in the report JSON and every source manifest.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16882,6 +16882,12 @@
       "kind": "task",
       "summary": "Chart introductions now state exact RPM/context, observed order-1 periodicity, and defined finite metrics without the enum; source JSON and selection unchanged. Native Desktop, Chrome and 46 tests pass.",
       "commit": "ea82d18"
+    },
+    {
+      "at": "2026-11-04T23:15:53+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-BASELINE-HASH-DISCLOSURE-V1",
+      "kind": "task",
+      "summary": "Started screenshot-confirmed header density task; reveal full exact SHA-256 on demand without removing it from the self-contained report."
     }
   ],
   "legacy_gate_status": {
