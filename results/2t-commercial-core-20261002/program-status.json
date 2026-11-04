@@ -11101,20 +11101,27 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-REFERENCED-HISTORY-V1"
       ],
-      "state": "READY",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "pending-commit"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
         "motorsim/desktop/results_page.py",
         "motorsim/desktop/technical_report.py",
         "tests/test_desktop_design_study.py",
-        "tests/test_desktop_technical_report.py"
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/",
+        "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Make the original source run and verified artifact evidence directly inspectable from each cached comparison row without editing the source record.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cache-trace-acceptance.md",
+        "results/desktop-parametric-design-study-v2/cache-trace-tests.txt"
+      ],
+      "next_action": "Continue with DESKTOP-PARAMETRIC-REFERENCE-TAMPER-V1 to verify referenced-history tampering always rejects before reuse.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11157,6 +11164,30 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Define a versioned Desktop project reference to study manifest + SHA, retain existing project compatibility, and verify missing/changed studies fail closed without embedding bulk artifacts.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-RPM-ENVELOPE-V1",
+      "description": "Evaluate bounded parametric designs over a small explicit RPM grid by composing the existing RPM sweep runner and exact study identities.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/design_study.py",
+        "motorsim/power_curve_sweep.py",
+        "motorsim/desktop/execution_page.py",
+        "motorsim/desktop/results_page.py",
+        "tests/test_design_study.py",
+        "tests/test_desktop_design_study.py"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Bound design×RPM point count and aggregate budget; delegate each point to existing engineering/sweep execution and plot only observed defined periodic metrics with no interpolation.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -15700,6 +15731,18 @@
       "task": "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1",
       "kind": "task",
       "summary": "Added marker-only parameter response plots for defined periodic metrics, retained missing/nonconverged states in the table, and suppressed 1D plots for factorial studies; 58 focused regressions pass."
+    },
+    {
+      "at": "2026-11-04T17:10:12+00:00",
+      "task": "DESKTOP-PARAMETRIC-CACHE-TRACE-V1",
+      "kind": "task",
+      "summary": "Started exposing original cached-run identity, project, path and result hashes directly from study comparison rows and technical reports; source manifests remain immutable."
+    },
+    {
+      "at": "2026-11-04T17:14:56+00:00",
+      "task": "DESKTOP-PARAMETRIC-CACHE-TRACE-V1",
+      "kind": "task",
+      "summary": "Exposed exact source run/project/path, engine identity and result hashes in study-row traceability and report tables; 58 regressions pass, source manifest JSON preserved."
     }
   ],
   "legacy_gate_status": {

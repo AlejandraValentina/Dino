@@ -173,10 +173,17 @@ def render_technical_report(dataset: dict, *, source_kind: str,
                     f"{_esc(format_number(item.get('value')) if _safe_number(item.get('value')) else 'No informado')} "
                     f"{_esc(item.get('unit') or '')}" for item in factors if isinstance(item,dict))
             identity_sha = point.get("engine_identity_sha256") or "No disponible"
+            source_run = point.get("source_run_id") or point.get("historical_source_run_id") or point.get("run_id")
             study_rows.append("<tr>" + "".join((
                 f"<td>{_esc(point.get('index'))}</td>",
                 f"<td>{_esc(point.get('status') or 'No ejecutado')}</td>",
                 f"<td>{shown_value if isinstance(factors,list) and factors else _esc(shown_value)+' '+_esc(point.get('unit') or parameter.get('unit') or '')}</td>",
+                f"<td>{_esc(source_run or 'No informado')}</td>",
+                f"<td>{_esc(point.get('historical_source_project_id') or 'No informado')}</td>",
+                f"<td><code>{_esc(point.get('run_directory') or 'No informada')}</code></td>",
+                f"<td><code>{_esc(point.get('result_sha256') or 'No disponible')}</code></td>",
+                f"<td><code>{_esc(point.get('result_artifact_sha256') or 'No disponible')}</code></td>",
+                f"<td>{'Sí' if point.get('reused_verified') else 'No'}</td>",
                 f"<td><code>{_esc(identity_sha)}</code></td>")) + "</tr>")
         manifest_path = Path(design_study_manifest_path) if design_study_manifest_path else None
         manifest_digest = None
@@ -195,7 +202,9 @@ def render_technical_report(dataset: dict, *, source_kind: str,
             f"<strong>{_esc(parameter.get('label') or parameter.get('id') or 'No informado')}</strong>; "
             f"estado {_esc(state_label(manifest.get('status')))}. Los puntos conservan su clasificación de ejecución; "
             "la finalización del estudio no implica periodicidad ni validación científica.</p>"
-            f"{manifest_origin}<table><thead><tr><th>Punto</th><th>Estado de ejecución</th><th>Valor</th>"
+            f"{manifest_origin}<table><thead><tr><th>Punto</th><th>Estado de ejecución</th><th>Valor(es)</th>"
+            f"<th>Run de origen</th><th>Proyecto de origen</th><th>Ruta de resultado</th>"
+            f"<th>Resultado SHA-256</th><th>Artefacto SHA-256</th><th>Reuso verificado</th>"
             f"<th>Identidad de motor SHA-256</th></tr></thead><tbody>{''.join(study_rows)}</tbody></table>"
             f"<details><summary>Manifiesto paramétrico original adjunto (JSON)</summary><pre>{study_raw}</pre></details>")
     source_sha = dataset.get("source_sha256")

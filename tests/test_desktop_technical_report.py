@@ -94,6 +94,11 @@ def test_report_embeds_parametric_manifest_and_preserves_study_provenance(tmp_pa
         "parameter": {"id": "port:primary-window:top_mm", "label": "Transfer top", "unit": "mm"},
         "points": [{"index": 0, "status": "COMPLETE", "value": 38.4086, "unit": "mm",
                     "engine_identity_sha256": "b" * 64,
+                    "run_id":"study-p00","source_run_id":"historical-run-00",
+                    "historical_source_project_id":"source-project",
+                    "run_directory":"C:/artifacts/historical-run-00",
+                    "result_sha256":"e"*64,"result_artifact_sha256":"f"*64,
+                    "reused_verified":True,
                     "classification": "MAX_CYCLES_NONCONVERGED",
                     "periodicity": "INSUFFICIENT_CYCLES"}],
     }
@@ -106,6 +111,9 @@ def test_report_embeds_parametric_manifest_and_preserves_study_provenance(tmp_pa
     assert "synthetic-study" in html and "Transfer top" in html and "38.4086 mm" in html
     assert "MAX_CYCLES_NONCONVERGED" in html and "INSUFFICIENT_CYCLES" in html
     assert digest in html and "b" * 64 in html
+    assert "historical-run-00" in html and "source-project" in html
+    assert "C:/artifacts/historical-run-00" in html and "e"*64 in html and "f"*64 in html
+    assert "Artefacto SHA-256" in html and "Reuso verificado" in html
     assert "no implica periodicidad ni validación científica" in html
     assert "Manifiesto paramétrico original adjunto (JSON)" in html
 

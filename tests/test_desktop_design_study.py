@@ -34,6 +34,8 @@ def test_parametric_actions_are_available_and_study_comparison_is_explicit(tmp_p
             {"run_id":"run-base","baseline":True,"value":180.,"unit":"mm","status":"COMPLETE","cycles_completed":1},
             {"run_id":"run-var","source_run_id":"historical-run","reused_verified":True,
              "status":"CACHED","baseline":False,"value":182.,"unit":"mm","cycles_completed":1,
+             "run_directory":"C:/artifacts/historical-run","historical_source_project_id":"old-project",
+             "identity_sha256":"a"*64,"result_sha256":"b"*64,"result_artifact_sha256":"c"*64,
              "factor_values":[{"label":"Transfer top","value":40.12345,"unit":"mm"},
                               {"label":"Cárter","value":355.2,"unit":"cm³"}] }]}
     page.design_study_manifest_path=tmp_path/"study.json"
@@ -42,7 +44,9 @@ def test_parametric_actions_are_available_and_study_comparison_is_explicit(tmp_p
     assert page.design_study_table.rowCount()==2
     assert page.design_study_table.item(0,5).text()=="—"
     assert "histórico verificado" in page.design_study_table.item(1,0).text()
-    assert "Corrida histórica reutilizada" in page.design_study_table.item(1,0).toolTip()
+    assert "corrida histórica reutilizada" in page.design_study_table.item(1,0).toolTip()
+    assert "C:/artifacts/historical-run" in page.design_study_table.item(1,0).toolTip()
+    assert "b"*64 in page.design_study_table.item(1,0).toolTip()
     assert "Transfer top=40.123" in page.design_study_table.item(1,1).text()
     assert "Cárter=355.2 cm³" in page.design_study_table.item(1,1).text()
     assert "NO RECLAMADA" in page.design_study_notice.text()

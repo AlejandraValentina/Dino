@@ -1,0 +1,5 @@
+python -m pytest -q tests/test_design_study.py tests/test_desktop_design_study.py tests/test_desktop_technical_report.py tests/test_crankcase_v2.py tests/test_two_stroke_ports.py tests/test_engine_configuration_v1.py tests/test_functional_exhaust_comparison.py
+58 passed in 141.82s
+Desktop tooltip and technical HTML report expose original source run/project, path, engine identity and both result hashes.
+python -m compileall -q motorsim/desktop/results_page.py motorsim/desktop/technical_report.py
+PASS

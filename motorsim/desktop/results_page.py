@@ -676,8 +676,18 @@ class ResultsPage(QWidget):
                 str(point.get("cycles_completed",row.get("cycles_completed",0))),*metrics,delta]
             for column,value in enumerate(cells):
                 item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-                if column in (2,3,8) or row.get("status")=="CACHED":
-                    item.setToolTip(str(value)+("\nCorrida histórica reutilizada tras verificar identidad y artefactos." if row.get("status")=="CACHED" else ""))
+                if column==0:
+                    trace=(f"Run de origen: {row.get('source_run_id') or row.get('run_id') or 'No informado'}\n"
+                        f"Proyecto de origen: {row.get('historical_source_project_id') or 'No informado'}\n"
+                        f"Ruta del resultado: {row.get('run_directory') or 'No informada'}\n"
+                        f"Identidad de motor SHA-256: {row.get('identity_sha256') or row.get('engine_identity_sha256') or 'No disponible'}\n"
+                        f"SHA-256 de result.json: {row.get('result_artifact_sha256') or 'No disponible'}\n"
+                        f"SHA-256 de resultado: {row.get('result_sha256') or 'No disponible'}\n"
+                        f"Reuso verificado: {'Sí · corrida histórica reutilizada tras verificar identidad y artefactos' if row.get('reused_verified') else 'No'}")
+                    if row.get("history_reuse_policy"):
+                        trace+=f"\nPolítica de reuso: {row['history_reuse_policy']}"
+                    item.setToolTip(str(value)+"\n\n"+trace)
+                elif column in (2,3,8):item.setToolTip(str(value))
                 self.design_study_table.setItem(index,column,item)
         self._refresh_design_response_plot()
         self.design_study_group.show()
