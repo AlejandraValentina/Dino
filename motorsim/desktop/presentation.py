@@ -54,6 +54,31 @@ STATES = {
 }
 
 _INTERNAL_CODE=re.compile(r"\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b")
+_SNAKE_KEY=re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$")
+FIELD_LABELS={
+    'classification':'Clasificación','hard_failures':'Fallos críticos',
+    'schema':'Formato de datos','warning_policy':'Política de advertencias',
+    'warnings':'Advertencias','status':'Estado','periodicity':'Periodicidad',
+    'conservation':'Conservación','relative':'Relativo','absolute':'Absoluto',
+    'producer_sha256':'Hash SHA-256 del productor','solver_sha256':'Hash SHA-256 del solver',
+    'configuration_sha256':'Hash SHA-256 de configuración','experimental_validation':'Validación experimental',
+    'audit_status':'Estado de auditoría','cycles_completed':'Ciclos completados',
+    'audit':'Auditoría','cycle':'Ciclo','point':'Punto','result':'Resultado',
+}
+_KEY_WORDS={
+    'hard':'críticos','failures':'fallos','failure':'fallo','warning':'advertencia',
+    'warnings':'advertencias','policy':'política','schema':'formato','classification':'clasificación',
+    'status':'estado','relative':'relativo','absolute':'absoluto','cycle':'ciclo','cycles':'ciclos',
+    'completed':'completados','producer':'productor','solver':'solver','configuration':'configuración',
+    'experimental':'experimental','validation':'validación','audit':'auditoría','periodicity':'periodicidad',
+    'conservation':'conservación','hash':'hash','sha256':'SHA-256','point':'punto','result':'resultado',
+    'error':'error','errors':'errores','gate':'puerta','gates':'puertas','limit':'límite','budget':'presupuesto',
+    'rpm':'RPM','engine':'motor','measurement':'medición','identity':'identidad','reason':'motivo',
+}
+_TEXT_LABELS={
+    'warnings require explanation and do not override physical validity':
+        'Las advertencias requieren explicación y no prevalecen sobre la validez física',
+}
 
 
 def format_number(value, significant=6, *, signed=False):
@@ -77,7 +102,7 @@ def display_value(value, significant=6):
         def render(item):
             if item is None:return None
             if isinstance(item,(int,float)) and not isinstance(item,bool):return format_number(item,significant)
-            if isinstance(item,dict):return {str(key):render(child) for key,child in item.items()}
+            if isinstance(item,dict):return {field_label(key):render(child) for key,child in item.items()}
             if isinstance(item,(list,tuple)):return [render(child) for child in item]
             if isinstance(item,str):return state_label(item)
             return item
@@ -89,10 +114,26 @@ def state_label(value):
     if value is None:return 'No informado'
     text=str(value)
     for code in sorted(STATES,key=len,reverse=True):text=text.replace(code,STATES[code])
+    for phrase,label in _TEXT_LABELS.items():text=text.replace(phrase,label)
     # Artifacts keep unknown enum values exactly. On ordinary UI surfaces show
     # a neutral localized label instead of leaking an untranslated token.
     text=_INTERNAL_CODE.sub('Estado técnico no clasificado',text)
+    if _SNAKE_KEY.fullmatch(text):return field_label(text)
     return text
+
+
+def field_label(value):
+    """Localize technical metadata keys while retaining originals in tooltips."""
+    text=str(value)
+    prefix,separator,suffix=text.rpartition(' · ')
+    if separator and (_SNAKE_KEY.fullmatch(suffix) or suffix in FIELD_LABELS):
+        return f"{prefix} · {field_label(suffix)}"
+    if text in FIELD_LABELS:return FIELD_LABELS[text]
+    if _SNAKE_KEY.fullmatch(text):
+        words=[_KEY_WORDS.get(part) for part in text.split('_')]
+        if all(words):return ' '.join(words).capitalize()
+        return 'Dato técnico sin traducción'
+    return state_label(text)
 
 class EngineeringNumberDelegate(QStyledItemDelegate):
     """Round paint text only; EditRole/source precision stays untouched."""

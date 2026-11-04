@@ -48,6 +48,9 @@ def main():
     window.results._dataset_summary();window.results.redraw();app.processEvents()
     for size in ((980,680),(1360,900)):
         capture("resultados-historico-real",*size,1)
+    window.results.result_tabs.setCurrentIndex(5);app.processEvents()
+    for size in ((980,680),(1360,900)):
+        capture("trazabilidad-historico-real",*size,1)
 
     synthetic=ROOT/"results/desktop-windows-rc10-integrated/packaged-historical.json"
     fixture=load_results(synthetic)
@@ -58,7 +61,7 @@ def main():
     window.results.path_label.setText(f"{synthetic} · origen sintético · {len(fixture['points'])} puntos")
     window.results.variants.clear()
     for variant in sorted({row["variant_id"] for row in fixture["points"]}):window.results.variants.addItem(variant)
-    window.results._dataset_summary();window.results.redraw();app.processEvents()
+    window.results._dataset_summary();window.results.result_tabs.setCurrentIndex(0);window.results.redraw();app.processEvents()
     for size in ((980,680),(1360,900)):
         capture("resultados-curvas-sinteticas-presentacion",*size,1)
     record={"application":"DinoDesktopWindow; source build",

@@ -8,7 +8,7 @@ from PySide6.QtCore import QLocale
 
 from motorsim.desktop.context import DesktopContext
 from motorsim.desktop.services import new_design_project
-from motorsim.desktop.presentation import EngineeringNumberDelegate, format_number, state_label
+from motorsim.desktop.presentation import EngineeringNumberDelegate, display_value, format_number, state_label
 from motorsim.desktop.results_page import ResultsPage
 from motorsim.desktop.services import load_results
 from motorsim.desktop.widgets.run_history import RunHistoryWidget
@@ -39,6 +39,16 @@ def test_status_chrome_uses_words_and_rpm_axis_keeps_clear_endpoints():
     assert ticks[0][0]==1000 and ticks[-1][0]==5000
     assert all(b[1]-a[1]>=58 for a,b in zip(ticks,ticks[1:]))
     context_bar.close()
+
+
+def test_nested_traceability_metadata_localizes_keys_and_preserves_original_value():
+    text=display_value({"schema":"LEGACY_RESULT_V1","hard_failures":[],"warning_policy":
+        "warnings require explanation and do not override physical validity"})
+    assert 'Formato de datos' in text
+    assert 'Fallos críticos' in text
+    assert 'Política de advertencias' in text
+    assert 'Las advertencias requieren explicación' in text
+    assert 'warning_policy' not in text and 'hard_failures' not in text
 
 
 def test_historical_result_origin_stays_distinct_when_open_project_changes():
@@ -108,3 +118,13 @@ def test_real_legacy_historical_result_opens_as_read_only_without_fabricated_met
     assert point["brake_power"] is None and point["brake_torque"] is None
     assert point["result_sha256"] == data["source_sha256"]
     assert len(point["legacy_cycle_summary"]) == point["cycles_completed"]
+    context=DesktopContext(new_design_project("traceability-open-project"))
+    page=ResultsPage(context);page.dataset=data;page.source_kind="LEGACY_HISTORICAL"
+    page.show_point(point)
+    labels=[page.details.item(i,0).text() for i in range(page.details.rowCount())]
+    visible=" ".join(labels+[page.details.item(i,1).text() for i in range(page.details.rowCount())])
+    assert "hard_failures" not in visible and "warning_policy" not in visible and "schema" not in visible
+    assert "Formato de datos" in visible and "Fallos críticos" in visible
+    assert "Las advertencias requieren explicación" in visible
+    assert data["source_sha256"] in visible
+    page.close()

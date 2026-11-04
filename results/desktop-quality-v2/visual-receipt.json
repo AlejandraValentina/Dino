@@ -73,6 +73,24 @@
       "bytes": 75533
     },
     {
+      "path": "results\\desktop-quality-v2\\captures\\trazabilidad-historico-real-980x680.png",
+      "size": [
+        980,
+        680
+      ],
+      "sha256": "a9ae3700dc9e017dd6f01f85a05c1c1bf28e738884bdfd58dc11382809c02315",
+      "bytes": 67771
+    },
+    {
+      "path": "results\\desktop-quality-v2\\captures\\trazabilidad-historico-real-1360x900.png",
+      "size": [
+        1360,
+        900
+      ],
+      "sha256": "e8318163e0019e4b33bf7a41abce0ea61ecf5e1ac45e35e5d0f76fe09c0ca138",
+      "bytes": 80283
+    },
+    {
       "path": "results\\desktop-quality-v2\\captures\\resultados-curvas-sinteticas-presentacion-980x680.png",
       "size": [
         980,

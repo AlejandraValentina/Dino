@@ -16,7 +16,7 @@ from .preferences import artifact_root,impl2_historical_report_candidate,setting
 from ..exploratory_workflow import import_exploratory_runs
 from .. import measurement_data
 from ..engine_project import validate_project
-from .presentation import display_value,format_number,state_label as _state_label
+from .presentation import display_value,field_label,format_number,state_label as _state_label
 
 METRICS={"Potencia de freno (kW)":"brake_power","Torque (N·m)":"brake_torque","IMEP (kPa)":"IMEP","FMEP (kPa)":"FMEP","BMEP (kPa)":"BMEP","BSFC (g/kWh)":"BSFC"}
 
@@ -806,7 +806,8 @@ class ResultsPage(QWidget):
                          for name,value in sorted(gates.items()))
         self.details.setRowCount(len(items))
         for i,(a,b) in enumerate(items):
-            left=QTableWidgetItem(_state_label(a));right=QTableWidgetItem(display_value(b))
+            left=QTableWidgetItem(field_label(a));right=QTableWidgetItem(display_value(b))
+            if str(a)!=left.text():left.setToolTip(f"Clave original: {a}")
             raw=(str(b) if b is not None else 'No informado')
             if raw!=right.text():right.setToolTip(f"Dato original: {raw}")
             self.details.setItem(i,0,left);self.details.setItem(i,1,right)
