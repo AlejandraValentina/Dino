@@ -11815,7 +11815,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-RESPONSE-PLOT-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11828,7 +11828,29 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Use the current native/Chrome comparison report capture to identify raw state codes in visible tables; apply shared state labels without altering source payloads or pair qualification.",
+      "next_action": "Translate execution/classification/periodicity codes in cross-study point summaries and excluded-pair tables; retain raw source JSON and verify exact scientific meaning.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-REPORT-PAIRING-CONTEXT-LABELS-V1",
+      "description": "Present cross-study pairing codes and internal operating-context field IDs as readable engineering labels in exact-pair and unpaired explanations; retain original values in the embedded source JSON and do not alter pairing rules.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/report-pairing-context-labels/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/report-provenance-table-readability/chrome-rendered-provenance-table-v2.png"
+      ],
+      "next_action": "Add readable display labels for pairing and operating-context identifiers that remain visible in cross-study report contrast/unpaired tables; preserve exact internal IDs in original JSON.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16652,6 +16674,12 @@
       "kind": "task",
       "summary": "Reduced comparison report to 9 readable columns; expandable source provenance and full JSON preserved. Native Desktop export, 1360px report and expanded detail preview verified; 46 tests passed.",
       "commit": "7ebc5c6"
+    },
+    {
+      "at": "2026-11-04T22:53:49+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-STATE-LABELS-V1",
+      "kind": "task",
+      "summary": "Started next visible report defect: raw execution and periodicity codes remain in cross-study summaries/exclusion tables; source JSON remains unchanged."
     }
   ],
   "legacy_gate_status": {
