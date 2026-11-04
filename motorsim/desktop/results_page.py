@@ -912,7 +912,9 @@ class ResultsPage(QWidget):
         try:
             write_technical_report(path,self.dataset,source_kind=getattr(self,'source_kind','UNKNOWN'),
                 selected_variants=selected,source_path=self.source,
-                active_project_id=self.context.project.get('project_id'))
+                active_project_id=self.context.project.get('project_id'),
+                design_study_manifest=getattr(self,'design_study_manifest',None),
+                design_study_manifest_path=getattr(self,'design_study_manifest_path',None))
             self.path_label.setText(f"Informe técnico autosuficiente exportado: {Path(path).name}")
             return True
         except (OSError,TypeError,ValueError) as exc:

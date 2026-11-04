@@ -85,12 +85,48 @@ def test_report_uses_declared_periodic_class_when_legacy_field_is_absent():
     assert "120.000000000001" in report
 
 
+def test_report_embeds_parametric_manifest_and_preserves_study_provenance(tmp_path):
+    manifest_path = tmp_path / "study.json"
+    manifest_path.write_text('{"source":"synthetic fixture"}', encoding="utf-8")
+    manifest = {
+        "schema": "DINO_PARAMETRIC_DESIGN_STUDY_V1", "study_id": "synthetic-study",
+        "status": "PARTIAL", "rpm": 3000,
+        "parameter": {"id": "port:primary-window:top_mm", "label": "Transfer top", "unit": "mm"},
+        "points": [{"index": 0, "status": "COMPLETE", "value": 38.4086, "unit": "mm",
+                    "engine_identity_sha256": "b" * 64,
+                    "classification": "MAX_CYCLES_NONCONVERGED",
+                    "periodicity": "INSUFFICIENT_CYCLES"}],
+    }
+    digest = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    html = render_technical_report({"points": [_row("Synthetic A", 3000, None,
+        classification="MAX_CYCLES_NONCONVERGED")], "experimental_validation": "NOT_PERFORMED"},
+        source_kind="EXPLORATORY", design_study_manifest=manifest,
+        design_study_manifest_path=manifest_path, generated_at="fixed")
+    assert "Estudio paramétrico asociado" in html
+    assert "synthetic-study" in html and "Transfer top" in html and "38.4086 mm" in html
+    assert "MAX_CYCLES_NONCONVERGED" in html and "INSUFFICIENT_CYCLES" in html
+    assert digest in html and "b" * 64 in html
+    assert "no implica periodicidad ni validación científica" in html
+    assert "Manifiesto paramétrico original adjunto (JSON)" in html
+
+
+def test_report_rejects_unknown_parametric_manifest_schema():
+    import pytest
+    with pytest.raises(ValueError, match="esquema.*reconocido"):
+        render_technical_report({"points": [_row("A", 3000, 1.0)]},
+            source_kind="EXPLORATORY", design_study_manifest={"schema": "unknown"})
+
+
 def test_results_page_exports_report_using_current_variant_selection(tmp_path):
     context = DesktopContext(new_design_project("report-ui"))
     page = ResultsPage(context)
     page.dataset = {"schema": "DINO_EXPLORATORY_COMPARISON_V1", "provenance": "synthetic",
         "experimental_validation": "NOT_PERFORMED", "points": [_row("A", 6000, 2.0)]}
     page.source_kind = "EXPLORATORY"
+    page.design_study_manifest = {"schema": "DINO_PARAMETRIC_DESIGN_STUDY_V1",
+        "study_id": "ui-study", "status": "COMPLETE", "parameter": {"label": "Largo escape"},
+        "points": [{"index": 0, "status": "COMPLETE", "value": 83.0, "unit": "mm",
+                    "engine_identity_sha256": "c" * 64}]}
     page.variants.addItem("A")
     page.variants.item(0).setCheckState(Qt.CheckState.Checked)
     destination = tmp_path / "report.html"

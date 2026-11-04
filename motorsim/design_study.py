@@ -57,26 +57,128 @@ def study_directory(artifact_root: str | Path, project_id: str, study_id: str) -
 
 
 def available_parameters(engine: dict) -> list[dict]:
-    """List geometry axes with a backend adapter that preserves solver topology."""
+    """List only explicit native fields with a consistency-preserving adapter."""
     validate(engine)
-    sections = escape_sections(engine)
-    partitioned_escape_counts(engine)  # fail closed for unrecognized mappings
-    return [{"id": f"exhaust.section.{index}.length_mm",
+    options=[]
+    try:
+        sections = escape_sections(engine)
+        partitioned_escape_counts(engine)  # recognize existing faces; never refine
+        options.extend({"id": f"exhaust.section.{index}.length_mm",
              "label": f"Escape · {row['name']} · longitud",
              "unit": "mm", "baseline": float(row["length_mm"]),
              "section_index": index, "adapter": "PARTITIONED_LENGTH_EDIT_V1"}
-            for index, row in enumerate(sections)]
+            for index, row in enumerate(sections))
+    except (KeyError, StopIteration, ValueError):
+        # A different supported axis may still be available on this engine.
+        pass
+    native=engine["native_configuration"]
+    binding=native.get("port_binding",{}).get("port_set")
+    if isinstance(binding,dict):
+        for port in binding.get("ports",[]):
+            if port.get("role")=="transfer":
+                fields=(("top_mm","mm","altura desde PMS"),
+                    ("height_mm","mm","altura"),("width_mm","mm","ancho"),
+                    ("discharge_coefficient","adimensional","coeficiente de descarga"))
+            elif port.get("role")=="intake":
+                # Intake opening timing/full-area summaries remain unchanged;
+                # only its existing discharge coefficient is an exposed axis.
+                fields=(("discharge_coefficient","adimensional","coeficiente de descarga"),)
+            else:
+                # Exhaust summaries also bind power-valve positions; keep those
+                # axes out until every displayed state can be regenerated.
+                fields=()
+            for field,unit,label in fields:
+                value=port.get(field)
+                if type(value) in (int,float) and math.isfinite(float(value)):
+                    options.append({"id":f"port:{port['id']}:{field}",
+                        "label":f"Lumbrera · {port.get('name',port['id'])} · {label}",
+                        "unit":unit,"baseline":float(value),"port_id":port["id"],
+                        "field":field,"adapter":"PORT_FIELD_EDIT_V1"})
+    crankcase=native.get("slider_crank",{}).get("crankcase",{})
+    volume=crankcase.get("volume_bdc_cm3")
+    if type(volume) in (int,float) and math.isfinite(float(volume)):
+        options.append({"id":"crankcase.volume_bdc_cm3",
+            "label":"Cárter · volumen en PMI","unit":"cm³","baseline":float(volume),
+            "adapter":"CRANKCASE_BDC_VOLUME_EDIT_V1"})
+    return options
 
 
 def _apply_parameter(engine: dict, parameter: dict, value: float) -> dict:
     if type(value) not in (int, float) or not math.isfinite(float(value)) or value <= 0:
-        raise ValueError("el parámetro debe ser un valor finito positivo en mm")
-    sections = escape_sections(engine)
-    index = parameter["section_index"]
-    if type(index) is not int or not 0 <= index < len(sections):
-        raise ValueError("índice de sección fuera de la geometría de escape")
-    sections[index]["length_mm"] = float(value)
-    result = stretch_partitioned_escape(engine, sections)
+        raise ValueError("el parámetro debe ser un valor finito positivo en su unidad declarada")
+    adapter=parameter.get("adapter")
+    if adapter=="PARTITIONED_LENGTH_EDIT_V1":
+        sections = escape_sections(engine)
+        index = parameter["section_index"]
+        if type(index) is not int or not 0 <= index < len(sections):
+            raise ValueError("índice de sección fuera de la geometría de escape")
+        sections[index]["length_mm"] = float(value)
+        result = stretch_partitioned_escape(engine, sections)
+    elif adapter=="PORT_FIELD_EDIT_V1":
+        from .two_stroke_ports import DuctBinding,PortDefinition,TwoStrokePortSet
+        result=deepcopy(engine);native=result["native_configuration"]
+        binding=native["port_binding"]["port_set"]
+        ports=deepcopy(binding["ports"])
+        matches=[port for port in ports if port.get("id")==parameter["port_id"]]
+        if len(matches)!=1 or parameter["field"] not in {"top_mm","height_mm","width_mm","discharge_coefficient"}:
+            raise ValueError("la definición de lumbrera no coincide con el adaptador guardado")
+        if matches[0].get(parameter["field"]) is None:
+            raise ValueError("el campo de lumbrera no está declarado explícitamente")
+        matches[0][parameter["field"]]=float(value)
+        rebuilt=TwoStrokePortSet(binding["stroke_mm"],binding["rod_length_mm"],
+            tuple(DuctBinding.from_dict(row) for row in binding["ducts"]),
+            tuple(PortDefinition.from_dict(row) for row in ports)).to_dict()
+        native["port_binding"]["port_set"]=rebuilt
+        native["geometry_identity"]["ports"]=deepcopy(rebuilt)
+        transfers=[port for port in rebuilt["ports"] if port["role"]=="transfer"]
+        if transfers:
+            native["geometry_identity"]["transfer_effective_width_mm"]=math.fsum(
+                port["width_mm"] for port in transfers)
+            if parameter["field"]=="top_mm":
+                port_set=TwoStrokePortSet.from_dict(rebuilt)
+                openings=[]
+                for port in port_set.ports:
+                    if port.role!="transfer":continue
+                    transitions=[]
+                    for event in sorted({float(angle)%360.0 for angle in port_set.event_angles(port)}):
+                        left=port_set.area_at(port,(event-1e-4)%360.0)
+                        right=port_set.area_at(port,(event+1e-4)%360.0)
+                        if left<=1e-9<right:transitions.append(event)
+                    if len(transitions)!=1:
+                        raise ValueError("no se pudo identificar una apertura de transferencia unívoca")
+                    openings.extend(transitions)
+                if openings:native["geometry_identity"]["transfer_opens_atdc_deg"]=min(openings)
+        if parameter["field"]=="discharge_coefficient" and matches[0]["role"]=="intake":
+            port_set=TwoStrokePortSet.from_dict(rebuilt)
+            intake=next(port for port in port_set.ports if port.id==parameter["port_id"])
+            native["geometry_identity"]["inlet_window_effective_area_mm2"] = max(
+                port_set.area_at(intake,angle) for angle in range(361))
+        from .engine_configuration import sha256
+        result["native_configuration_sha256"]=sha256(native)
+        result["provenance"]={**result["provenance"],"parametric_port_adapter":"PORT_FIELD_EDIT_V1"}
+    elif adapter=="CRANKCASE_BDC_VOLUME_EDIT_V1":
+        from .crankcase import CrankcaseGeometry
+        from .integrated_2t import SliderCrankChambers2T
+        result=deepcopy(engine);native=result["native_configuration"]
+        cc=native["slider_crank"]["crankcase"];cc["volume_bdc_cm3"]=float(value)
+        crank=CrankcaseGeometry.from_dict(cc)
+        geometry=native["geometry_identity"]
+        geometry["crankcase_volume_bdc_cc"]=float(value)
+        geometry["crankcase_compression_ratio"]=crank.compression_ratio
+        volumes=SliderCrankChambers2T(crank,native["slider_crank"]["cylinder_compression_ratio"]).resolve(
+            0.0,native["reference_rpm"])
+        for name,volume in (("crankcase",volumes[0]),("cylinder",volumes[1])):
+            masses=native["initial_chambers"]["species"][name]
+            total=math.fsum(masses)
+            target=native["initial_chambers"][name][0]*volume
+            if total<=0 or target<=0:
+                raise ValueError(f"el inventario inicial de {name} no es positivo")
+            native["initial_chambers"]["species"][name]=[mass*target/total for mass in masses]
+        from .engine_configuration import sha256
+        result["native_configuration_sha256"]=sha256(native)
+        result["provenance"]={**result["provenance"],"parametric_crankcase_adapter":"CRANKCASE_BDC_VOLUME_EDIT_V1"}
+    else:
+        raise ValueError("adaptador paramétrico no compatible")
     validate(result)
     return result
 
@@ -115,6 +217,11 @@ def prepare_design_study(engine: dict, *, parameter_id: str, values: list[float]
     points=[]
     for index,value in enumerate(numeric):
         document=_apply_parameter(engine,parameter,value)
+        document["provenance"]={**document["provenance"],"parametric_study":{
+            "schema":"DINO_PARAMETRIC_POINT_PROVENANCE_V1",
+            "parent_engine_identity_sha256":identity(engine),
+            "parameter_id":parameter_id,"value":value,"unit":parameter["unit"],
+            "classification":"SYNTHETIC_ASSUMPTION"}}
         displacement=document.get("native_configuration",{}).get("geometry_identity",{}).get("displacement_cc")
         if (type(displacement) not in (int,float) or not math.isfinite(float(displacement))
                 or displacement <= 0):

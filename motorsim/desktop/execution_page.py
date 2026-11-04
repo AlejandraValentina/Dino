@@ -417,11 +417,11 @@ class ExecutionPage(QWidget):
         from ..design_study import available_parameters,prepare_design_study,run_design_study
         if repository_root_containing(self.artifact_root) is not None:
             QMessageBox.warning(self,"Artifact root bloqueado","Elegí una carpeta externa al repositorio antes de crear el estudio.");return
-        dialog=QDialog(self);dialog.setWindowTitle("Estudio paramétrico geométrico · EXPLORATORY")
+        dialog=QDialog(self);dialog.setWindowTitle("Exploración paramétrica de diseño · EXPLORATORY")
         form=QFormLayout(dialog)
         try:parameters=available_parameters(self._engine())
         except Exception as exc:
-            QMessageBox.warning(self,"Estudio geométrico no disponible",
+            QMessageBox.warning(self,"Exploración paramétrica no disponible",
                 f"La geometría activa no tiene un adaptador paramétrico seguro: {type(exc).__name__}: {exc}\n\nNo se modificó la configuración ni se inició el solver.")
             return
         if not parameters:
@@ -431,9 +431,9 @@ class ExecutionPage(QWidget):
         form.addRow("Parámetro compatible",parameter)
         baseline=QLabel();baseline.setObjectName("designStudyBaseline");baseline.setWordWrap(True);form.addRow("Valor baseline",baseline)
         alternatives=QLineEdit();alternatives.setObjectName("designStudyValues")
-        alternatives.setPlaceholderText("Valores alternativos explícitos en mm, separados por coma")
+        alternatives.setPlaceholderText(f"Valores alternativos en {parameters[0]['unit']}, separados por coma")
         form.addRow("Valores a probar",alternatives)
-        notice=QLabel("El baseline se agrega automáticamente. Máximo 5 puntos. Sólo se modifican longitudes de secciones de escape representables; no cambia topología, malla ni física. Los resultados son EXPLORATORY y no equivalen a predicciones validadas.")
+        notice=QLabel("El baseline se agrega automáticamente. Máximo 5 puntos. Sólo se ofrecen parámetros con adaptadores compatibles; las lumbreras se regeneran con TwoStrokePortSet y el cárter actualiza geometría e inventarios iniciales. No se cambia la topología del solver. Resultados EXPLORATORY; no son predicciones validadas.")
         notice.setWordWrap(True);form.addRow(notice)
         cycles=QSpinBox();cycles.setRange(1,111);cycles.setValue(1);cycles.setObjectName("designStudyCycles")
         point_budget=QSpinBox();point_budget.setRange(1,600);point_budget.setValue(min(60,int(self.budget.value())))
@@ -442,8 +442,12 @@ class ExecutionPage(QWidget):
         total_budget.setObjectName("designStudyTotalBudget")
         form.addRow("Horizonte máximo por diseño",cycles);form.addRow("Presupuesto máximo por diseño (s)",point_budget)
         form.addRow("Presupuesto agregado del estudio (s)",total_budget)
-        parameter.currentIndexChanged.connect(lambda i:baseline.setText(f"{parameters[i]['baseline']:g} mm · valor actual del proyecto"))
-        baseline.setText(f"{parameters[0]['baseline']:g} mm · valor actual del proyecto")
+        def update_parameter_info(index):
+            selected=parameters[index]
+            baseline.setText(f"{selected['baseline']:g} {selected['unit']} · valor actual del proyecto")
+            alternatives.setPlaceholderText(f"Valores alternativos explícitos en {selected['unit']}, separados por coma")
+        parameter.currentIndexChanged.connect(update_parameter_info)
+        update_parameter_info(0)
         buttons=QDialogButtonBox(QDialogButtonBox.StandardButton.Ok|QDialogButtonBox.StandardButton.Cancel)
         buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Preflight y ejecutar…")
         buttons.accepted.connect(dialog.accept);buttons.rejected.connect(dialog.reject);form.addRow(buttons)

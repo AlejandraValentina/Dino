@@ -116,7 +116,9 @@ def _chart_svg(rows, variants, label, metric, unit):
 
 def render_technical_report(dataset: dict, *, source_kind: str,
                             selected_variants=None, source_path=None,
-                            active_project_id=None, generated_at=None) -> str:
+                            active_project_id=None, generated_at=None,
+                            design_study_manifest=None,
+                            design_study_manifest_path=None) -> str:
     """Render exact selected result records and an explicit evidence boundary."""
     points = dataset.get("points") if isinstance(dataset, dict) else None
     if not isinstance(points, list) or not points:
@@ -154,6 +156,42 @@ def render_technical_report(dataset: dict, *, source_kind: str,
         source_rows.append(f"<tr><td>{_esc(path)}</td><td>{digest or 'No disponible'}</td></tr>")
     if not source_rows:
         source_rows.append("<tr><td>Ruta de origen no conservada por el importador</td><td>No disponible</td></tr>")
+    study_html = ""
+    if design_study_manifest is not None:
+        manifest = design_study_manifest
+        if not isinstance(manifest, dict) or manifest.get("schema") != "DINO_PARAMETRIC_DESIGN_STUDY_V1":
+            raise ValueError("El manifiesto de estudio no tiene un esquema reconocido.")
+        parameter = manifest.get("parameter") or {}
+        study_rows = []
+        for point in manifest.get("points", []):
+            value = point.get("value")
+            shown_value = format_number(value) if _safe_number(value) else "No informado"
+            identity_sha = point.get("engine_identity_sha256") or "No disponible"
+            study_rows.append("<tr>" + "".join((
+                f"<td>{_esc(point.get('index'))}</td>",
+                f"<td>{_esc(point.get('status') or 'No ejecutado')}</td>",
+                f"<td>{_esc(shown_value)} {_esc(point.get('unit') or parameter.get('unit') or '')}</td>",
+                f"<td><code>{_esc(identity_sha)}</code></td>")) + "</tr>")
+        manifest_path = Path(design_study_manifest_path) if design_study_manifest_path else None
+        manifest_digest = None
+        if manifest_path:
+            try:
+                manifest_digest = __import__("hashlib").sha256(manifest_path.read_bytes()).hexdigest()
+            except OSError:
+                pass
+        manifest_origin = (f"<p>Manifiesto: <code>{_esc(manifest_path)}</code> · SHA-256 actual: "
+                           f"<code>{_esc(manifest_digest or 'No disponible')}</code></p>" if manifest_path else
+                           "<p>Manifiesto adjuntado como objeto por la interfaz; ruta original no informada.</p>")
+        study_raw = html.escape(json.dumps(manifest, ensure_ascii=False, allow_nan=False,
+                                           sort_keys=True, indent=2), quote=False)
+        study_html = ("<h2>Estudio paramétrico asociado</h2>"
+            f"<p>Estudio <code>{_esc(manifest.get('study_id'))}</code>; parámetro "
+            f"<strong>{_esc(parameter.get('label') or parameter.get('id') or 'No informado')}</strong>; "
+            f"estado {_esc(state_label(manifest.get('status')))}. Los puntos conservan su clasificación de ejecución; "
+            "la finalización del estudio no implica periodicidad ni validación científica.</p>"
+            f"{manifest_origin}<table><thead><tr><th>Punto</th><th>Estado de ejecución</th><th>Valor</th>"
+            f"<th>Identidad de motor SHA-256</th></tr></thead><tbody>{''.join(study_rows)}</tbody></table>"
+            f"<details><summary>Manifiesto paramétrico original adjunto (JSON)</summary><pre>{study_raw}</pre></details>")
     source_sha = dataset.get("source_sha256")
     source_hash_html = f"<p>Hash de origen registrado: <code>{_esc(source_sha)}</code></p>" if source_sha else ""
 
@@ -220,6 +258,7 @@ svg{{width:100%;height:auto;border:1px solid #d4dbe1}}svg text{{font:12px Arial;
 <p>Generado UTC: {_esc(generated_at)} · Formato de datos: <code>{_esc(schema)}</code> · Procedencia declarada: {_esc(provenance)}</p>
 {active_project}{source_hash_html}<h2>Origen y reproducibilidad</h2><table><thead><tr><th>Archivo fuente</th><th>SHA-256 actual</th></tr></thead><tbody>{''.join(source_rows)}</tbody></table>
 <p>Las filas completas seleccionadas se incluyen al final sin redondear. Las tablas y gráficos de este informe son una vista legible de esos datos; no recalculan el solver.</p>
+{study_html}
 <h2>Resultados por variante y RPM</h2><table><thead><tr><th>Variante</th><th>Condición</th><th>Estado</th><th>Periodicidad</th><th>Auditoría</th><th>Ciclos</th><th>Potencia</th><th>Torque</th><th>BMEP</th></tr></thead><tbody>{''.join(body_rows)}</tbody></table>
 <h2>Identidad y procedencia por punto</h2><table><thead><tr><th>Variante</th><th>RPM</th><th>Run ID</th><th>Point ID</th><th>Carpeta de artifacts</th><th>Resultado SHA-256</th><th>Primario SHA-256</th><th>Configuración SHA-256</th></tr></thead><tbody>{''.join(identity_rows)}</tbody></table>
 <h2>Comparación entre variantes</h2><p class="muted">Sólo RPM exactas comunes. Δ = segunda variante menos primera; es un contraste descriptivo, no una atribución causal. No se interpolan puntos. Las diferencias y ausencias en los campos de operación se indican por fila. Se incluyen métricas definidas únicamente en resultados periódicos observados.</p>

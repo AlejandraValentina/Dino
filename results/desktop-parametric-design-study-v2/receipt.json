@@ -1,0 +1,88 @@
+{
+  "schema": "DINO_DESKTOP_PARAMETRIC_STUDY_V2_ACCEPTANCE_V1",
+  "status": "SYNTHETIC_FUNCTIONAL_INTEGRATION_PASS_WITH_LIMITATIONS",
+  "source_commit": "filled after local implementation commit",
+  "study": {
+    "schema": "DINO_PARAMETRIC_DESIGN_STUDY_V1",
+    "project_id": "synthetic-transfer-study",
+    "study_id": "transfer-port-top-smoke-20261104",
+    "parameter": "port:primary-window:top_mm",
+    "baseline_mm": 38.40862784470379,
+    "candidate_mm": 39.40862784470379,
+    "rpm": 3000,
+    "max_cycles_per_point": 1,
+    "elapsed_seconds": 20.453,
+    "status": "COMPLETE",
+    "mode": "EXPLORATORY",
+    "scientific_validation": "NOT_CLAIMED",
+    "manifest_path": "C:/Users/ageribon.MIDES/Dino-artifacts/desktop-parametric-design-study-v1/engine-study-20261104T/design-studies-v1/synthetic-transfer-study/transfer-port-top-smoke-20261104/study.json",
+    "manifest_sha256": "6417973a0125342d80bde9bb9c048c16d4b83878d3590e558d0ff934d725be6d",
+    "points": [
+      {
+        "run_id": "transfer-port-top-smoke-20261104-p00",
+        "identity_sha256": "360f51fb8b1eb120d923a0c8a1a44eb0c6a5f8b4f1f0f1635beb6e5171545102",
+        "result_artifact_sha256": "5a6fa5b4235f56c2b931d2558cfebb1620721894744fd0aab271a59f14cc1f1a",
+        "value_mm": 38.40862784470379,
+        "classification": "MAX_CYCLES_NONCONVERGED",
+        "periodicity": "INSUFFICIENT_CYCLES",
+        "cycles_completed": 1,
+        "relative_conservation_residuals": {
+          "energy": 1.015603532952196e-15,
+          "mass": 6.810187672284862e-17,
+          "species": 5.076427394049007e-16
+        },
+        "audit_status": "NOT_PERFORMED",
+        "power_status": "UNDEFINED",
+        "torque_status": "UNDEFINED",
+        "bmep_status": "UNDEFINED"
+      },
+      {
+        "run_id": "transfer-port-top-smoke-20261104-p01",
+        "identity_sha256": "432cb3fcb8d15e46e5f3744e67446da0bab5c14c2403cdaad0e0c9ab3137fc7d",
+        "result_artifact_sha256": "990388326dc8d3b2b0bf591a834db4177271ac770b5059aead0df6652516f738",
+        "value_mm": 39.40862784470379,
+        "classification": "MAX_CYCLES_NONCONVERGED",
+        "periodicity": "INSUFFICIENT_CYCLES",
+        "cycles_completed": 1,
+        "relative_conservation_residuals": {
+          "energy": 1.3652220892093895e-16,
+          "mass": 7.809142138426029e-16,
+          "species": 2.0062003967540707e-16
+        },
+        "audit_status": "NOT_PERFORMED",
+        "power_status": "UNDEFINED",
+        "torque_status": "UNDEFINED",
+        "bmep_status": "UNDEFINED"
+      }
+    ]
+  },
+  "desktop_window": {
+    "status": "PASS",
+    "source_application_visible": true,
+    "menu_action_present": true,
+    "loaded_points": 2,
+    "comparison_rows": 2,
+    "undefined_metrics_render_as_dash": true,
+    "screenshot": "captures/parametric-transfer-port-real-window.png",
+    "screenshot_sha256": "830a0a167645a7c6423f607eb7b003d3b0a5d9af8b265bd855f909d3c9128fb4",
+    "outer_window_px": [1440, 837]
+  },
+  "tests": {
+    "compileall": "PASS",
+    "regression_command": "python -m pytest -q tests/test_design_study.py tests/test_desktop_design_study.py tests/test_desktop_technical_report.py tests/test_packaging_build_provenance.py tests/test_engine_configuration_v1.py tests/test_two_stroke_ports.py tests/test_two_stroke_ports_p5c.py tests/test_crankcase_v2.py tests/test_functional_exhaust_comparison.py tests/test_desktop_rpm_curves.py tests/test_dino_desktop_ux_v2.py",
+    "regression_result": "77 passed in 182.17s",
+    "post_assertion_relocation": "3 focused tests passed"
+  },
+  "com_automation": {
+    "diagnosis": "Windows UIA harness teardown stale provider after native-window close, documented in results/desktop-parametric-design-study-v1/acceptance.md.",
+    "current_source_gui": "verified visible and closed normally",
+    "pywinauto_rerun": "not performed; package absent from active source Python environment",
+    "packaged_build": "not rebuilt"
+  },
+  "limits": [
+    "Only transfer-port dimensions/discharge coefficient, intake discharge coefficient, crankcase BDC volume and partitioned exhaust section lengths are available.",
+    "Exhaust port windows are excluded because multiple power-valve-position summaries are not all regenerable by this adapter.",
+    "Cylinder bore/stroke/rod length, compression ratio, intake dimensions and multi-factor designs are not exposed.",
+    "One-cycle results are nonconverged, not periodic or predictive; no independent audit or experimental validation was performed."
+  ]
+}

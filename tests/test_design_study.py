@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import threading
 from pathlib import Path
@@ -11,7 +12,7 @@ import pytest
 
 from motorsim.design_study import (available_parameters, load_prepared_study,
     prepare_design_study, run_design_study)
-from motorsim.engine_configuration import identity
+from motorsim.engine_configuration import identity,validate
 from motorsim.desktop.services import new_design_project
 
 
@@ -22,7 +23,7 @@ def starter():
 
 def prepared(starter, *, study_id="test-design-study"):
     engine=starter["base_engine"]
-    parameter=available_parameters(engine)[1]
+    parameter=available_parameters(engine)[0]
     return prepare_design_study(engine,parameter_id=parameter["id"],
         values=[parameter["baseline"],parameter["baseline"]+2.0],rpm=3000,
         max_cycles=1,point_budget_seconds=30,total_budget_seconds=60,
@@ -45,6 +46,9 @@ def test_preparation_requires_baseline_unique_values_and_preserved_topology(star
     with pytest.raises(ValueError,match="baseline"):
         prepare_design_study(engine,parameter_id=parameter["id"],values=[81.,82.],rpm=3000,
             max_cycles=1,point_budget_seconds=20,total_budget_seconds=40,project_id=starter["project_id"])
+    with pytest.raises(ValueError,match="únicos"):
+        prepare_design_study(engine,parameter_id=parameter["id"],values=[80.,80.],rpm=3000,
+            max_cycles=1,point_budget_seconds=20,total_budget_seconds=40,project_id=starter["project_id"])
 
 
 def test_preparation_rejects_missing_engineering_displacement_without_inference(starter):
@@ -59,9 +63,59 @@ def test_preparation_rejects_missing_engineering_displacement_without_inference(
             values=[parameter["baseline"],parameter["baseline"]+1],rpm=3000,
             max_cycles=1,point_budget_seconds=20,total_budget_seconds=40,
             project_id=starter["project_id"])
-    with pytest.raises(ValueError,match="únicos"):
-        prepare_design_study(engine,parameter_id=parameter["id"],values=[80.,80.],rpm=3000,
-            max_cycles=1,point_budget_seconds=20,total_budget_seconds=40,project_id=starter["project_id"])
+
+
+def test_port_dimension_adapter_rebuilds_solver_event_and_area_profiles(starter):
+    engine=starter["base_engine"]
+    parameter=next(p for p in available_parameters(engine)
+        if p["id"]=="port:primary-window:top_mm")
+    plan=prepare_design_study(engine,parameter_id=parameter["id"],
+        values=[parameter["baseline"],parameter["baseline"]+1.0],rpm=3000,
+        max_cycles=1,point_budget_seconds=20,total_budget_seconds=40,
+        project_id=starter["project_id"])
+    base,changed=(validate(point["engine_document"]) for point in plan["points"])
+    port_a=next(port for port in base.port_binding.port_set.ports if port.id==parameter["port_id"])
+    port_b=next(port for port in changed.port_binding.port_set.ports if port.id==parameter["port_id"])
+    assert base.port_binding.port_set.event_angles(port_a) != changed.port_binding.port_set.event_angles(port_b)
+    assert base.port_binding.port_set.area_at(port_a,180) != changed.port_binding.port_set.area_at(port_b,180)
+    after_geometry=plan["points"][1]["engine_document"]["native_configuration"]["geometry_identity"]
+    transfer_openings=[]
+    for port in changed.port_binding.port_set.ports:
+        if port.role!="transfer":continue
+        for event in changed.port_binding.port_set.event_angles(port):
+            if changed.port_binding.port_set.area_at(port,(event+1e-4)%360)>1e-9 and \
+                    changed.port_binding.port_set.area_at(port,(event-1e-4)%360)<=1e-9:
+                transfer_openings.append(event)
+    assert after_geometry["transfer_opens_atdc_deg"]==pytest.approx(min(transfer_openings))
+    assert after_geometry["transfer_effective_width_mm"]==pytest.approx(
+        sum(port.width_mm for port in changed.port_binding.port_set.ports if port.role=="transfer"))
+    for point in plan["points"]:
+        native=point["engine_document"]["native_configuration"]
+        assert native["geometry_identity"]["ports"]==native["port_binding"]["port_set"]
+        assert point["engine_document"]["provenance"]["parametric_study"]["classification"]=="SYNTHETIC_ASSUMPTION"
+
+
+def test_crankcase_volume_adapter_updates_solver_geometry_and_initial_species(starter):
+    engine=starter["base_engine"]
+    parameter=next(p for p in available_parameters(engine)
+        if p["id"]=="crankcase.volume_bdc_cm3")
+    plan=prepare_design_study(engine,parameter_id=parameter["id"],
+        values=[parameter["baseline"],parameter["baseline"]+10.0],rpm=3000,
+        max_cycles=1,point_budget_seconds=20,total_budget_seconds=40,
+        project_id=starter["project_id"])
+    base,changed=(point["engine_document"] for point in plan["points"])
+    base_solver,changed_solver=(validate(document) for document in (base,changed))
+    base_volume=base_solver._geometry(0.0,3000).crankcase_volume_m3
+    changed_volume=changed_solver._geometry(0.0,3000).crankcase_volume_m3
+    assert changed_volume-base_volume==pytest.approx(10e-6)
+    for name in ("crankcase","cylinder"):
+        before=base["native_configuration"]["initial_chambers"]["species"][name]
+        after=changed["native_configuration"]["initial_chambers"]["species"][name]
+        assert [mass/math.fsum(before) for mass in before]==pytest.approx(
+            [mass/math.fsum(after) for mass in after])
+    geometry=changed["native_configuration"]["geometry_identity"]
+    assert geometry["crankcase_volume_bdc_cc"]==pytest.approx(parameter["baseline"]+10)
+    assert geometry["crankcase_compression_ratio"]==pytest.approx(changed_solver.slider_crank.crankcase.compression_ratio)
 
 
 def test_study_interrupt_persists_manifest_and_resume_uses_same_run_checkpoint(monkeypatch,tmp_path,starter):

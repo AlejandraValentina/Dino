@@ -2,7 +2,7 @@ from __future__ import annotations
 import hashlib,json,os
 from pathlib import Path
 os.environ.setdefault("QT_QPA_PLATFORM","offscreen")
-from PySide6.QtWidgets import QApplication,QDialog,QLineEdit
+from PySide6.QtWidgets import QApplication,QComboBox,QDialog,QLineEdit
 from motorsim.desktop.app import DinoDesktopWindow
 from motorsim.desktop.context import DesktopContext
 from motorsim.desktop.execution_page import ExecutionPage
@@ -56,6 +56,26 @@ def test_parametric_preflight_runs_in_background_not_the_ui_thread(monkeypatch):
     assert queued["kwargs"]["on_done"]==page._design_study_preflight_done
     assert page.cancel_event is None
     assert "VALIDANDO" in page.status_text
+    page.task=None;page.close();APP.processEvents()
+
+
+def test_parametric_dialog_uses_selected_axis_units(monkeypatch):
+    context=DesktopContext(new_design_project("design-study-units-test"));page=ExecutionPage(context)
+    queued={}
+    def accept_with_crankcase(dialog):
+        parameter=dialog.findChild(QComboBox,"designStudyParameter")
+        index=parameter.findData("crankcase.volume_bdc_cm3");parameter.setCurrentIndex(index)
+        values=dialog.findChild(QLineEdit,"designStudyValues")
+        assert "cm³" in values.placeholderText()
+        values.setText("366")
+        return QDialog.DialogCode.Accepted
+    def record(function,*args,**kwargs):
+        queued.update(function=function,args=args,kwargs=kwargs);return object()
+    monkeypatch.setattr(QDialog,"exec",accept_with_crankcase)
+    monkeypatch.setattr("motorsim.desktop.execution_page.run_background",record)
+    page.start_design_study()
+    assert queued["kwargs"]["parameter_id"]=="crankcase.volume_bdc_cm3"
+    assert queued["kwargs"]["values"]==[context.engine()["native_configuration"]["slider_crank"]["crankcase"]["volume_bdc_cm3"],366.0]
     page.task=None;page.close();APP.processEvents()
 
 
