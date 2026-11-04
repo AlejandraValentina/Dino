@@ -11815,9 +11815,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-RESPONSE-PLOT-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "286a7ff"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11827,8 +11829,14 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Translate execution/classification/periodicity codes in cross-study point summaries and excluded-pair tables; retain raw source JSON and verify exact scientific meaning.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/acceptance.md",
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/acceptance-receipt.json",
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/tests-final/report-state-labels-final-v1.summary.json",
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/cross-study-comparison-synthetic-v1.html",
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-report-v1.png"
+      ],
+      "next_action": "DONE: excluded cross-study pair endpoints show translated classification/periodicity labels; source enum codes remain in the unchanged JSON appendix; native Desktop export and 46 regressions verified.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11851,6 +11859,28 @@
         "results/desktop-parametric-design-study-v2/report-provenance-table-readability/chrome-rendered-provenance-table-v2.png"
       ],
       "next_action": "Add readable display labels for pairing and operating-context identifiers that remain visible in cross-study report contrast/unpaired tables; preserve exact internal IDs in original JSON.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-REPORT-DUPLICATE-STATE-SUMMARY-V1",
+      "description": "Remove duplicate visible classification/periodicity wording from cross-study point summaries when both source fields carry the same state; retain both exact fields in the source JSON and preserve distinct labels when they differ.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/report-duplicate-state-summary/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-report-v1.png"
+      ],
+      "next_action": "Avoid repeating identical classification and periodicity labels in each point summary; keep both original fields in report JSON and show both labels if the values differ.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16680,6 +16710,13 @@
       "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-STATE-LABELS-V1",
       "kind": "task",
       "summary": "Started next visible report defect: raw execution and periodicity codes remain in cross-study summaries/exclusion tables; source JSON remains unchanged."
+    },
+    {
+      "at": "2026-11-04T22:58:10+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-STATE-LABELS-V1",
+      "kind": "task",
+      "summary": "Cross-study excluded-pair rows now translate classification and periodicity; raw enums remain intact in source JSON. Desktop and Chrome verification plus 46 regressions passed.",
+      "commit": "286a7ff"
     }
   ],
   "legacy_gate_status": {
