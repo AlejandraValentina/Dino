@@ -11793,7 +11793,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-SOURCE-BINDINGS-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11806,7 +11806,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Add selection details for CONTRAST rows that display their stored source ID/hash arrays and bind status; verify with the source-bound CSV roundtrip fixture and keep the snapshot read-only.",
+      "next_action": "Display the exact four source run IDs, result digests, and binding status when selecting a CONTRAST row; retain read-only snapshot semantics and raw source values.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16898,6 +16898,12 @@
       "task": "DESKTOP-PARAMETRIC-REPORT-BASELINE-HASH-DISCLOSURE-V1",
       "kind": "task",
       "summary": "Informe de comparación: resumen visual SHA-256 compactado y digest íntegro desplegable; JSON fuente preservado. 46 pruebas pasan; Desktop exportó fixture sintético y Chrome verificó la captura a 1360 px. Commit d371380."
+    },
+    {
+      "at": "2026-11-04T23:23:51+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-TRACEABILITY-DETAILS-V1",
+      "kind": "task",
+      "summary": "Iniciada inspección focalizada: los CSV factoriales importados ya conservan arrays de IDs/hashes por contraste, pero la selección actual sólo muestra detalles de puntos; se implementará inspección de fuente por fila CONTRAST sin mutar snapshot."
     }
   ],
   "legacy_gate_status": {
