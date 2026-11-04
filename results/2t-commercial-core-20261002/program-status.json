@@ -11705,9 +11705,11 @@
         "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-CSV-EXPORT-V1",
         "DESKTOP-PARAMETRIC-FACTORIAL-CSV-REIMPORT-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "e496f45"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11717,8 +11719,11 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Add an exact regression that all nine CONTRAST rows carry the same four source_run_id and result SHA-256 arrays as the verified POINT rows, then round-trip the exported CSV through the read-only factorial snapshot importer and confirm the binding status.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/factorial-contrast-source-bindings/acceptance-v1.md",
+        "results/desktop-parametric-design-study-v2/factorial-contrast-source-bindings/tests-final/factorial-contrast-source-bindings-final.summary.json"
+      ],
+      "next_action": "DONE: every future contrast CSV row is bound to the exact four source IDs/hashes in its POINT rows; verified by exact-array regression and read-only Desktop snapshot roundtrip.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16553,6 +16558,13 @@
       "task": "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-SOURCE-BINDINGS-V1",
       "kind": "start",
       "summary": "Verifying the already-implemented exact factorial CONTRAST source arrays and closing the missing export-to-read-only-snapshot regression; no solver execution."
+    },
+    {
+      "at": "2026-11-04T22:34:11+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-SOURCE-BINDINGS-V1",
+      "kind": "task",
+      "summary": "Fixed the nested-outcome lookup that emitted null contrast bindings; 9 CONTRAST rows now carry exactly the 4 POINT source IDs and SHA-256s, retained by read-only snapshot reimport and Desktop view; 37 focused tests passed.",
+      "commit": "e496f45"
     }
   ],
   "legacy_gate_status": {
