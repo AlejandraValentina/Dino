@@ -11618,7 +11618,7 @@
       "id": "DESKTOP-WORKBENCH-F0-NAV-TEST-ALIGNMENT-V1",
       "description": "Align the two stale workbench navigation assertions with the accepted three-mode Desktop labels; keep this test-only and verify the previously failing integrated checks.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11630,7 +11630,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Confirm the current visible three-mode labels, update only the obsolete assertions, and run the focused workbench module plus the previously failing integrated checks.",
+      "next_action": "Confirm labels in the current visible three-mode workbench, update only obsolete assertions, then run tests/test_dino_workbench_f0.py and its previously failing integrated checks.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -17031,6 +17031,12 @@
       "task": "DESKTOP-UIA-COM-SESSION-LIFECYCLE-REPRO-V1",
       "kind": "task",
       "summary": "Causa histórica confirmada como consulta del wrapper UIA retenido después de destruir la ventana; el recibo antiguo no conserva HRESULT. Repro acotado Python 3.10 queda detenido en la consulta inicial UIA; Win32 abre una ventana y WM_CLOSE/IsWindowVisible cierran con exit 0 y sin proceso sobrante. Sin cambio de producto. Commit f36eebb."
+    },
+    {
+      "at": "2026-11-04T23:52:54+00:00",
+      "task": "DESKTOP-WORKBENCH-F0-NAV-TEST-ALIGNMENT-V1",
+      "kind": "task",
+      "summary": "Iniciada corrección de regresión test-only: la implementación aceptada usa MODELO/SIMULAR/RESULTADOS, mientras dos aserciones F0 todavía esperan la navegación anterior."
     }
   ],
   "legacy_gate_status": {
