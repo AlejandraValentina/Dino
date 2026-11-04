@@ -809,6 +809,41 @@ def test_factorial_contrast_source_bindings_survive_read_only_csv_reimport(tmp_p
     page.close();APP.processEvents()
 
 
+def test_parametric_study_summary_shows_manifest_budget_and_interruption_without_runtime_estimate():
+    page=ResultsPage(DesktopContext(new_design_project("study-lifecycle-summary")))
+    page.design_study_manifest={
+        "schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":"synthetic-cancelled-study",
+        "design_method":"FACTORIAL_2X2_V1","parameter":{"label":"Factor A × Factor B"},
+        "rpm":3000,"status":"CANCELLED","stop_reason":"CANCELLED",
+        "total_budget_seconds":240.0,"elapsed_seconds":75.5,
+        "scientific_validation":"NOT_CLAIMED","points":[
+            {"index":0,"value":0.0,"unit":"mm","baseline":True,"status":"COMPLETE",
+             "periodicity":"PERIOD_1","classification":"PERIOD_1","cycles_completed":5},
+            {"index":1,"value":1.0,"unit":"mm","status":"MAX_CYCLES_NONCONVERGED",
+             "periodicity":"INSUFFICIENT_CYCLES","classification":"MAX_CYCLES_NONCONVERGED",
+             "cycles_completed":5},
+            {"index":2,"value":2.0,"unit":"mm","status":"NOT_STARTED"},
+        ]}
+    page.design_study_manifest_path=None
+    page.dataset={"points":[]}
+    page._update_design_study_summary()
+    summary=page.design_study_lifecycle_notice.text()
+    assert "Presupuesto asignado: 240 s" in summary
+    assert "tiempo consumido registrado: 75.5 s" in summary
+    assert "Estado: Cancelado · puntos completos: 1/3 · incompletos/no iniciados: 2 · motivo: cancelación solicitada" in summary
+    assert "No se estima el tiempo restante" in summary
+    assert "validación científica NO RECLAMADA" in page.design_study_notice.text()
+
+    page.design_study_manifest={"study_id":"legacy-no-budget","status":"PREPARED",
+        "parameter":{"label":"Legacy parameter"},"rpm":3000,"points":[]}
+    page._update_design_study_summary()
+    summary=page.design_study_lifecycle_notice.text()
+    assert "Presupuesto asignado: no registrado" in summary
+    assert "tiempo consumido: no registrado" in summary
+    assert "0 s" not in summary
+    page.close();APP.processEvents()
+
+
 def test_factorial_csv_keeps_nonperiodic_points_and_withholds_all_contrasts(tmp_path):
     manifest,imported=_factorial_effect_fixture(tmp_path)
     imported[-1]["periodicity"]="INSUFFICIENT_CYCLES"

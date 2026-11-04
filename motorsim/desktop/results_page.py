@@ -744,6 +744,9 @@ class ResultsPage(QWidget):
         study_layout=QVBoxLayout(self.design_study_group)
         self.design_study_notice=QLabel("Los estudios se conservan con su manifiesto, configuración e identidad por punto.")
         self.design_study_notice.setWordWrap(True);study_layout.addWidget(self.design_study_notice)
+        self.design_study_lifecycle_notice=QLabel("Presupuesto y ciclo de vida disponibles desde el manifiesto del estudio.")
+        self.design_study_lifecycle_notice.setObjectName("designStudyLifecycleSummary")
+        self.design_study_lifecycle_notice.setWordWrap(True);study_layout.addWidget(self.design_study_lifecycle_notice)
         study_open_row=QHBoxLayout();study_open_row.addWidget(QLabel("Estudios de este proyecto"))
         self.project_study_selector=QComboBox();self.project_study_selector.setObjectName("projectStudySelector");study_open_row.addWidget(self.project_study_selector,1)
         self.open_project_study_button=QPushButton("Abrir estudio")
@@ -1759,6 +1762,28 @@ class ResultsPage(QWidget):
             f"{manifest.get('study_id')} · {point_name} · {rpm_summary} · "
             f"EXPLORATORY · periodicidad evaluada por punto · validación científica NO RECLAMADA · "
             f"manifiesto: {getattr(self,'design_study_manifest_path','—')}")
+        total_budget=manifest.get("total_budget_seconds")
+        elapsed=manifest.get("elapsed_seconds")
+        budget_text=(f"Presupuesto asignado: {format_number(total_budget)} s"
+                     if isinstance(total_budget,(int,float)) and not isinstance(total_budget,bool)
+                     else "Presupuesto asignado: no registrado")
+        elapsed_text=(f"tiempo consumido registrado: {format_number(elapsed)} s"
+                      if isinstance(elapsed,(int,float)) and not isinstance(elapsed,bool)
+                      else "tiempo consumido: no registrado")
+        rows=manifest.get("points",[])
+        completed=sum(row.get("status") in {"COMPLETE","CACHED"} for row in rows)
+        lifecycle_status={"PREPARED":"Preparado","RUNNING":"En ejecución","COMPLETE":"Completo",
+            "PARTIAL":"Parcial","CANCELLED":"Cancelado"}.get(manifest.get("status"),"Estado no informado")
+        stop_reason={"CANCELLED":"cancelación solicitada","BUDGET_EXHAUSTED":"presupuesto total agotado",
+            "POINT_BUDGET_EXHAUSTED":"presupuesto del punto agotado","POINT_INCOMPLETE":"punto incompleto",
+            "FAILED_CLOSED":"fallo cerrado","ALL_POINTS_FINISHED":"todos los puntos procesados",
+            "ALL_DESIGNS_FINISHED":"todos los diseños procesados"}.get(manifest.get("stop_reason"))
+        point_text=(f"puntos completos: {completed}/{len(rows)} · incompletos/no iniciados: {len(rows)-completed}"
+                    if rows else "puntos: no registrados")
+        lifecycle_text=f"Estado: {lifecycle_status} · {point_text}"
+        if stop_reason:lifecycle_text+=f" · motivo: {stop_reason}"
+        self.design_study_lifecycle_notice.setText(" · ".join((budget_text,elapsed_text,lifecycle_text)) +
+            ". No se estima el tiempo restante de cálculo.")
         self.design_study_table.setRowCount(len(manifest.get("points",[])))
         for index,row in enumerate(manifest.get("points",[])):
             point=dataset_points.get(str(row.get("source_run_id") or row.get("run_id")),{})
