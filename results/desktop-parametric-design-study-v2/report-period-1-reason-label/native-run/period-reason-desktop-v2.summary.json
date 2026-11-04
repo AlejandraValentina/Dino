@@ -1,0 +1,19 @@
+{
+  "name": "period-reason-desktop-v2",
+  "command": [
+    "python",
+    "results/desktop-parametric-design-study-v2/report-period-1-reason-label/verify_native_report_v2.py"
+  ],
+  "started_at": "2026-11-04T23:09:53+00:00",
+  "finished_at": "2026-11-04T23:09:59+00:00",
+  "duration_s": 6.016,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\report-period-1-reason-label\\native-run\\period-reason-desktop-v2.log",
+  "log_lines": 1,
+  "log_bytes": 1148,
+  "error_lines": [],
+  "tail": [
+    "{\"schema\": \"DINO_NATIVE_CROSS_STUDY_REPORT_PLOT_V1\", \"synthetic\": true, \"desktop_window_visible\": true, \"desktop_size\": [1440, 837], \"project_study_references\": 2, \"html_report_path\": \"results\\\\desktop-parametric-design-study-v2\\\\report-period-1-reason-label\\\\cross-study-report-v2.html\", \"html_sha25"
+  ]
+}

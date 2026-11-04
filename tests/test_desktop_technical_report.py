@@ -116,7 +116,11 @@ def test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_ex
     assert "A · 1 punto(s)" in report and "B · 1 punto(s)" in report
     assert report.count('class="observed-point"')==2
     assert "Pares excluidos de esta gráfica · Potencia de freno" in report
-    assert "Uno o ambos endpoints no están clasificados PERIOD_1." in report
+    assert "Uno o ambos extremos no tienen periodicidad observada de orden 1." in report
+    assert "La métrica no está definida y finita en ambos resultados periódicos de orden 1." in report
+    assert "Uno o ambos endpoints no están clasificados PERIOD_1." not in report
+    assert '"classification": "PERIOD_1"' in report
+    assert '"periodicity": "PERIOD_1"' in report
     assert "Periódica · ciclo 1 / Periódica · ciclo 1" in report
     assert "Límite de ciclos · no convergida / Ciclos insuficientes" in report
     assert "MAX_CYCLES_NONCONVERGED / INSUFFICIENT_CYCLES" not in report

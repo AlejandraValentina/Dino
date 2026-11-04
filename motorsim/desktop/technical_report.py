@@ -702,14 +702,14 @@ def _cross_study_response_plots(comparison):
             if pair.get("pairing")!="EXACT_RPM_AND_OPERATING_CONTEXT":
                 reason="El pareo no conserva RPM y contexto exactos."
             elif point_a.get("periodicity")!="PERIOD_1" or point_b.get("periodicity")!="PERIOD_1":
-                reason="Uno o ambos endpoints no están clasificados PERIOD_1."
+                reason="Uno o ambos extremos no tienen periodicidad observada de orden 1."
             elif study_a not in observed or study_b not in observed:
                 reason="La identidad de un estudio no pertenece a los manifiestos seleccionados."
             else:
                 value_a=(point_a.get("metrics") or {}).get(metric)
                 value_b=(point_b.get("metrics") or {}).get(metric)
                 if not _safe_number(value_a) or not _safe_number(value_b):
-                    reason="La métrica no está definida y finita en ambos endpoints PERIOD_1."
+                    reason="La métrica no está definida y finita en ambos resultados periódicos de orden 1."
             if reason:
                 excluded.append((pair_index,pair,point_a,point_b,reason));continue
             rpm=pair.get("rpm")
