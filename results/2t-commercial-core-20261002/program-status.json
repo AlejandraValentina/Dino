@@ -11072,19 +11072,26 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-REPORT-V1"
       ],
-      "state": "READY",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "pending-commit"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
         "motorsim/desktop/results_page.py",
-        "motorsim/desktop/performance_curves.py",
+        "motorsim/desktop/plot.py",
         "tests/test_desktop_design_study.py",
-        "docs/desktop/parametric-design-studies.md"
+        "docs/desktop/parametric-design-studies.md",
+        "results/desktop-parametric-design-study-v2/",
+        "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/response-view-acceptance.md",
+        "results/desktop-parametric-design-study-v2/response-view-tests.txt"
+      ],
       "next_action": "Plot only observed defined periodic study metrics against parameter values; show nonconverged/absent points explicitly and avoid fitting or interpolation.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
@@ -11127,6 +11134,29 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Add tampering and missing-source regressions for external project-referenced history; assert rejected artifacts never reach the engineering importer or solver reuse path.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1",
+      "description": "Make study manifests discoverable from their owning project and preserve safe project-to-study provenance through save, reopen and duplication.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "architecture",
+      "write_scope": [
+        "motorsim/engine_project.py",
+        "motorsim/desktop/context.py",
+        "motorsim/desktop/results_page.py",
+        "motorsim/desktop/execution_page.py",
+        "tests/test_desktop_design_study.py"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Define a versioned Desktop project reference to study manifest + SHA, retain existing project compatibility, and verify missing/changed studies fail closed without embedding bulk artifacts.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -15658,6 +15688,18 @@
       "task": "DESKTOP-PARAMETRIC-MULTIFACTOR-V1",
       "kind": "task",
       "summary": "Implemented Desktop bounded 2x2 factorial studies composing two existing adapters; verified four distinct configurations, interruption/reopen, unit-labelled UI/report, and a 50.2s synthetic one-cycle integration with four nonconverged results and all performance metrics undefined."
+    },
+    {
+      "at": "2026-11-04T17:04:17+00:00",
+      "task": "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1",
+      "kind": "task",
+      "summary": "Started product view for observed parametric responses; plot only defined metrics on periodic points with no interpolation or fitted response, preserve missing points and factorial dimensionality."
+    },
+    {
+      "at": "2026-11-04T17:09:39+00:00",
+      "task": "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1",
+      "kind": "task",
+      "summary": "Added marker-only parameter response plots for defined periodic metrics, retained missing/nonconverged states in the table, and suppressed 1D plots for factorial studies; 58 focused regressions pass."
     }
   ],
   "legacy_gate_status": {

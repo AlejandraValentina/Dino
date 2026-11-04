@@ -84,7 +84,7 @@ class CurvePlot(QWidget):
             for index,point in enumerate(series.get("points",[])):
                 if point.get("value") is None: previous=None; continue
                 current=pos(series,point)
-                if previous is not None:painter.drawLine(previous,current)
+                if previous is not None and series.get("connect",True):painter.drawLine(previous,current)
                 if index % max(1,len(series.get('points',[]))//35)==0:
                     painter.setBrush(QColor(self.COLORS[si%len(self.COLORS)]));painter.drawEllipse(current,2.5,2.5)
                 if self.selected==(series.get("name"),index):painter.drawEllipse(current,7,7)

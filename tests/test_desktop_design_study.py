@@ -131,6 +131,46 @@ def test_project_historical_references_are_forwarded_to_study_runner(tmp_path,mo
     page.task=None;page.close();APP.processEvents()
 
 
+def test_parametric_response_plots_only_defined_periodic_markers():
+    context=DesktopContext(new_design_project("design-study-response-view-test"));page=ResultsPage(context)
+    def point(run_id,value,periodicity,classification,power):
+        return {"run_id":run_id,"variant_id":run_id,"rpm":3000,
+            "classification":classification,"periodicity":periodicity,"cycles_completed":1,
+            "brake_power":power,"brake_power_status":"DEFINED" if power is not None else "UNDEFINED",
+            "brake_torque":power*2 if power is not None else None,
+            "brake_torque_status":"DEFINED" if power is not None else "UNDEFINED",
+            "BMEP":power*3 if power is not None else None,
+            "BMEP_status":"DEFINED" if power is not None else "UNDEFINED"}
+    page.dataset={"points":[point("base",80,"PERIOD_1","PERIOD_1",8.0),
+        point("alt",82,"PERIOD_1","PERIOD_1",9.0),
+        point("transient",84,"INSUFFICIENT_CYCLES","MAX_CYCLES_NONCONVERGED",None)]}
+    page.design_study_manifest={"study_id":"response-synthetic","rpm":3000,
+        "parameter":{"label":"Escape cone length","unit":"mm"},"points":[
+            {"run_id":"base","baseline":True,"value":80.0,"unit":"mm","status":"COMPLETE"},
+            {"run_id":"alt","baseline":False,"value":82.0,"unit":"mm","status":"COMPLETE"},
+            {"run_id":"transient","baseline":False,"value":84.0,"unit":"mm","status":"COMPLETE"}]}
+    page._update_design_study_summary()
+    assert page.design_response_plot.series[0]["points"][0]["value"]==8.0
+    assert page.design_response_plot.series[0]["connect"] is False
+    assert [row["value"] for row in page.design_response_plot.series[1]["points"]]==[9.0,None]
+    assert "2 punto(s) periódico(s)" in page.design_response_notice.text()
+    assert page.design_study_table.item(2,2).text()!="PERIOD_1"
+    page.design_response_metric.setCurrentIndex(1)
+    assert page.design_response_plot.series[0]["points"][0]["value"]==16.0
+    page.close();APP.processEvents()
+
+
+def test_factorial_study_is_not_collapsed_into_one_dimensional_response():
+    page=ResultsPage(DesktopContext(new_design_project("factorial-response-view-test")))
+    page.dataset={"points":[]}
+    page.design_study_manifest={"study_id":"factorial-response-test","rpm":3000,
+        "parameter":{"label":"factor A × factor B","axes":[{"id":"a"},{"id":"b"}]},"points":[]}
+    page._update_design_study_summary()
+    assert page.design_response_plot.series==[]
+    assert "No se reduce una matriz factorial" in page.design_response_notice.text()
+    page.close();APP.processEvents()
+
+
 def test_completed_study_adds_schema_valid_result_references(tmp_path):
     from motorsim.engine_project import validate_project
     context=DesktopContext(new_design_project("design-study-result-ref-test"));page=ExecutionPage(context)

@@ -44,6 +44,11 @@ completed cycles, and only those power/torque/BMEP metrics whose source marks
 them `DEFINED`. It reports a delta only when both a baseline and a candidate
 have defined power. Transient estimates remain absent from that definitive
 delta; nonconverged and incomplete points remain visible with their own state.
+For a single-factor study, the response panel can display observed periodic
+power, torque or BMEP against the parameter value. It uses markers without
+connecting, fitting or interpolating points; missing/nonperiodic results remain
+in the table. Factorial studies keep the four designs in the matrix and are not
+collapsed into a one-dimensional response.
 
 ## Scientific and computational boundaries
 

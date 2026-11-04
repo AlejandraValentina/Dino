@@ -165,6 +165,16 @@ class ResultsPage(QWidget):
         study_layout=QVBoxLayout(self.design_study_group)
         self.design_study_notice=QLabel("Los estudios se conservan con su manifiesto, configuración e identidad por punto.")
         self.design_study_notice.setWordWrap(True);study_layout.addWidget(self.design_study_notice)
+        response_bar=QHBoxLayout();response_bar.addWidget(QLabel("Respuesta paramétrica"))
+        self.design_response_metric=QComboBox();self.design_response_metric.setObjectName("designResponseMetric")
+        for label,key in (("Potencia de freno (kW)","brake_power"),("Torque de freno (N·m)","brake_torque"),("BMEP (kPa)","BMEP")):
+            self.design_response_metric.addItem(label,key)
+        self.design_response_metric.currentIndexChanged.connect(self._refresh_design_response_plot)
+        response_bar.addWidget(self.design_response_metric);response_bar.addStretch(1);study_layout.addLayout(response_bar)
+        self.design_response_notice=QLabel("La respuesta sólo incluye métricas definidas en puntos periódicos observados; no se interpola ni se ajusta una curva.")
+        self.design_response_notice.setWordWrap(True);study_layout.addWidget(self.design_response_notice)
+        self.design_response_plot=CurvePlot();self.design_response_plot.setObjectName("designResponsePlot")
+        self.design_response_plot.setMinimumHeight(210);study_layout.addWidget(self.design_response_plot)
         self.design_study_table=QTableWidget(0,9);self.design_study_table.setObjectName("designStudyResults")
         self.design_study_table.setHorizontalHeaderLabels(["Diseño","Valor","Estado","Periodicidad","Ciclos","Potencia","Torque","BMEP","Δ potencia vs base"])
         self.design_study_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
@@ -637,7 +647,7 @@ class ResultsPage(QWidget):
         dataset_points={str(row.get("run_id")):row for row in (self.dataset or {}).get("points",[])
                         if row.get("run_id") is not None}
         baseline_row=next((row for row in manifest.get("points",[]) if row.get("baseline")),None)
-        baseline_point=dataset_points.get(str(baseline_row.get("run_id"))) if baseline_row else None
+        baseline_point=dataset_points.get(str(baseline_row.get("source_run_id") or baseline_row.get("run_id"))) if baseline_row else None
         values={key:(baseline_point.get(key) if baseline_point and baseline_point.get(key+"_status")=="DEFINED" else None)
                 for key in ("brake_power","brake_torque","BMEP")}
         point_name=manifest.get("parameter",{}).get("label","Parámetro")
@@ -669,7 +679,46 @@ class ResultsPage(QWidget):
                 if column in (2,3,8) or row.get("status")=="CACHED":
                     item.setToolTip(str(value)+("\nCorrida histórica reutilizada tras verificar identidad y artefactos." if row.get("status")=="CACHED" else ""))
                 self.design_study_table.setItem(index,column,item)
+        self._refresh_design_response_plot()
         self.design_study_group.show()
+
+    def _refresh_design_response_plot(self,*_):
+        manifest=getattr(self,"design_study_manifest",None)
+        if not manifest:return
+        parameter=manifest.get("parameter",{})
+        if parameter.get("axes"):
+            self.design_response_plot.set_series([])
+            self.design_response_notice.setText(
+                "Estudio de dos factores: los cuatro diseños se conservan en la tabla. "
+                "No se reduce una matriz factorial a una respuesta unidimensional ni se infieren efectos.")
+            return
+        points_by_run={str(row.get("run_id")):row for row in (self.dataset or {}).get("points",[])}
+        metric=self.design_response_metric.currentData() or "brake_power"
+        metric_labels={"brake_power":("Potencia de freno","kW"),
+            "brake_torque":("Torque de freno","N·m"),"BMEP":("BMEP","kPa")}
+        label,unit=metric_labels[metric]
+        baseline_points=[];alternate_points=[];valid_count=0
+        for study_point in manifest.get("points",[]):
+            source_id=study_point.get("source_run_id") or study_point.get("run_id")
+            result=points_by_run.get(str(source_id),{})
+            periodicity=result.get("periodicity") or result.get("classification")
+            value=result.get(metric)
+            valid=(periodicity in {"PERIOD_1","PERIOD_2"} and
+                result.get(metric+"_status")=="DEFINED" and type(value) in (int,float) and math.isfinite(float(value)))
+            point={"parameter_value":study_point.get("value"),"value":float(value) if valid else None,
+                "reason":None if valid else (result.get("classification") or study_point.get("status") or "Métrica no definida")}
+            if valid:valid_count+=1
+            (baseline_points if study_point.get("baseline") else alternate_points).append(point)
+        series=[{"name":"Baseline","role":"baseline","x_key":"parameter_value",
+                 "x_label":f"{parameter.get('label','Parámetro')} ({parameter.get('unit','')})",
+                 "unit":unit,"connect":False,"points":baseline_points},
+                {"name":"Diseños alternativos","x_key":"parameter_value",
+                 "x_label":f"{parameter.get('label','Parámetro')} ({parameter.get('unit','')})",
+                 "unit":unit,"connect":False,"points":alternate_points}]
+        self.design_response_plot.set_series(series,y_scale_mode="data_margin")
+        self.design_response_notice.setText(
+            f"{label} · {valid_count} punto(s) periódico(s) con métrica definida. "
+            "Sólo marcadores observados; los puntos ausentes y no convergidos siguen visibles en la tabla. Sin interpolación ni ajuste.")
     def _exploratory_failed(self,message):
         self.path_label.setText("Ejecución EXPLORATORY inválida");self.trace_group.hide();QMessageBox.warning(self,"Artifact exploratorio inválido",message)
     def load(self,path,*,historical=False):
