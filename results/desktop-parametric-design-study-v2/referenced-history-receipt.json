@@ -1,6 +1,6 @@
 {
   "schema": "DINO_PARAMETRIC_REFERENCED_HISTORY_V1_ACCEPTANCE",
-  "source_commit": "pending-local-commit",
+  "source_commit": "85b1a12",
   "study_id": "project-reference-reuse-20261104",
   "status": "COMPLETE",
   "elapsed_seconds": 0.07800000003771856,
