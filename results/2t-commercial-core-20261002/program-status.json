@@ -11590,9 +11590,11 @@
         "DESKTOP-PARAMETRIC-CROSS-STUDY-RESPONSE-PLOT-V1",
         "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "df5997d"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11602,8 +11604,14 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Inspect the existing plot point payload and comparison-row identity; add selection details for exact PERIOD_1 points without changing comparison rows or response qualification.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-point-inspection/acceptance.md",
+        "results/desktop-parametric-design-study-v2/cross-study-point-inspection/tests-final/point-inspection-final.summary.json",
+        "results/desktop-parametric-design-study-v2/cross-study-point-inspection/native-marker-selection-receipt.json",
+        "results/desktop-parametric-design-study-v2/cross-study-point-inspection/native-response-plot-synthetic.png",
+        "results/desktop-parametric-design-study-v2/cross-study-point-inspection/native-marker-selection-synthetic.png"
+      ],
+      "next_action": "DONE: visible exact response markers select all associated comparison rows and expose the preserved source identities and verification state.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11632,7 +11640,7 @@
         "DESKTOP-PARAMETRIC-CROSS-STUDY-RESPONSE-PLOT-V1",
         "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11647,7 +11655,31 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Reuse the verified comparison data and metric qualification already used by Desktop; render a labeled gap-free plot in the HTML report and list all excluded or unpaired points with status and source provenance.",
+      "next_action": "Render the exact eligible PERIOD_1 response points in the existing HTML cross-study report, with the same metric gates and per-study legend as Desktop; list all excluded and unpaired observations and retain all manifest bindings.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-STUDY-REPORT-RESPONSE-PLOT-V1",
+      "description": "Include the single-study parametric response visualization in the existing technical report from exact source-bound PERIOD_1 observations; preserve excluded points and provenance without interpolation or recalculation.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1",
+        "DESKTOP-PARAMETRIC-STUDY-TRACEABILITY-DETAILS-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/study-report-response-plot/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Reuse the verified design response data already shown in Desktop; add an exact-point report graphic and an explicit exclusion/provenance section, keeping values unavailable unless PERIOD_1 and the metric is defined.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16422,6 +16454,19 @@
       "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-POINT-INSPECTION-V1",
       "kind": "task-started",
       "summary": "Started exact marker-to-comparison-row provenance inspection after completing native cross-study CSV reimport; added one focused test-alignment READY item to preserve the three-ready queue minimum."
+    },
+    {
+      "at": "2026-11-04T21:53:13+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-POINT-INSPECTION-V1",
+      "kind": "task",
+      "summary": "Visible chart-marker selection now selects the exact comparison row and shows source IDs/hashes/status; native Qt click acceptance and 46 regressions passed.",
+      "commit": "df5997d"
+    },
+    {
+      "at": "2026-11-04T21:53:13+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-RESPONSE-PLOT-V1",
+      "kind": "task-started",
+      "summary": "Started exact evidence plot integration into existing cross-study HTML report; preserve metric qualification and all exclusions."
     }
   ],
   "legacy_gate_status": {
