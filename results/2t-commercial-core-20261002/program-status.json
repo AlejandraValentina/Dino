@@ -11843,7 +11843,7 @@
       "id": "DESKTOP-PARAMETRIC-REPORT-PAIRING-CONTEXT-LABELS-V1",
       "description": "Present cross-study pairing codes and internal operating-context field IDs as readable engineering labels in exact-pair and unpaired explanations; retain original values in the embedded source JSON and do not alter pairing rules.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11858,7 +11858,7 @@
       "evidence": [
         "results/desktop-parametric-design-study-v2/report-provenance-table-readability/chrome-rendered-provenance-table-v2.png"
       ],
-      "next_action": "Add readable display labels for pairing and operating-context identifiers that remain visible in cross-study report contrast/unpaired tables; preserve exact internal IDs in original JSON.",
+      "next_action": "Translate the exact-pair rule name and condition-field IDs in cross-study contrast and unpaired explanations; keep original codes in source JSON and exact pair semantics unchanged.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16717,6 +16717,12 @@
       "kind": "task",
       "summary": "Cross-study excluded-pair rows now translate classification and periodicity; raw enums remain intact in source JSON. Desktop and Chrome verification plus 46 regressions passed.",
       "commit": "286a7ff"
+    },
+    {
+      "at": "2026-11-04T22:58:35+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-PAIRING-CONTEXT-LABELS-V1",
+      "kind": "task",
+      "summary": "Started the confirmed report-presentation task: code-like pairing name and operating-context field IDs remain visible; translation must not change pair rules or source JSON."
     }
   ],
   "legacy_gate_status": {
