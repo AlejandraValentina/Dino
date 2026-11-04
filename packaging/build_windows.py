@@ -27,6 +27,9 @@ from motorsim.reference_results import MODEL_VERSION,FOUR_MODEL_VERSION
 from scripts.agents.storage_preflight import (
     GIB, check_storage_requirements, default_artifact_root,
 )
+from build_provenance import (
+    ensure_packaged_inputs_clean, input_manifest, unrelated_dirty_fingerprint,
+)
 
 
 def main():
@@ -49,6 +52,11 @@ def main():
     def git(*args):return subprocess.check_output(['git',*args],cwd=ROOT,text=True).strip()
     commit=git('rev-parse','HEAD');dirty=bool(git('status','--porcelain'))
     if dirty and not args.trial:raise RuntimeError('El paquete final requiere Git limpio; registrá primero código y receta.')
+    # A trial may coexist with unrelated local work, but every byte consumed by
+    # PyInstaller or copied into the product must match the named commit.
+    ensure_packaged_inputs_clean(ROOT)
+    manifest=input_manifest(ROOT)
+    dirty_summary=unrelated_dirty_fingerprint(ROOT)
     stamp=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     name=f'MotorSim-{APP_VERSION}-windows-x64-{commit[:8]}'+('-trial-'+stamp if args.trial else '')
     output_root = args.output_root or (default_artifact_root()/'Windows')
@@ -66,7 +74,10 @@ def main():
         built_utc=stamp,python=sys.version,platform=platform.platform(),architecture=platform.machine(),
         project_format=6,result_formats=dict(two_stroke=[1,2,3],four_stroke=4),
         models=dict(two_stroke=MODEL_VERSION,four_stroke=FOUR_MODEL_VERSION),dependencies=versions,
-        workflow_source_hashes=implementation_source_hashes())
+        workflow_source_hashes=implementation_source_hashes(),
+        packaged_inputs_clean=True,packaged_input_count=len(manifest['files']),
+        packaged_input_manifest_sha256=manifest['sha256'],
+        packaged_inputs=manifest['files'],**dirty_summary)
     (generated/'build.json').write_text(json.dumps(info,ensure_ascii=False,indent=2),encoding='utf-8')
     env=os.environ.copy();env['MOTORSIM_BUILD_INPUTS']=str(generated)
     subprocess.run([sys.executable,'-m','PyInstaller','--noconfirm','--distpath',str(destination),
@@ -116,6 +127,8 @@ def main():
                 source=Path(dist.locate_file(file))
                 if source.is_file():shutil.copy2(source,out/source.name)
     (bundle/'BUILD-DEPENDENCIES.txt').write_text('\n'.join(f'{k}=={v}' for k,v in versions.items())+'\n',encoding='utf-8')
+    if input_manifest(ROOT)['sha256']!=manifest['sha256']:
+        raise RuntimeError('Cambió una entrada del paquete durante la construcción; el candidato no es reproducible.')
     archive=Path(str(destination)+'.zip')
     if any('dev_orchestrator' in part.lower() for file in bundle.rglob('*') for part in file.relative_to(bundle).parts):
         raise RuntimeError('Infraestructura de desarrollo detectada en el paquete; no se genera ZIP.')

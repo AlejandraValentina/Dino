@@ -10843,6 +10843,31 @@
         "4813bad"
       ],
       "unblock_tasks": []
+    },
+    {
+      "id": "DESKTOP-TECHNICAL-REPORT-BUILD-PROVENANCE-V1",
+      "description": "Add self-contained, provenance-bound technical result reports and require clean, hash-manifested Windows package inputs while preserving unrelated local work.",
+      "dependencies": [],
+      "state": "IN_PROGRESS",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "motorsim/desktop/technical_report.py",
+        "packaging/build_windows.py",
+        "packaging/build_provenance.py",
+        "tests/test_desktop_technical_report.py",
+        "tests/test_packaging_build_provenance.py",
+        "tests/verify_technical_report_windows.py",
+        "results/2t-commercial-core-20261002/program-status.json",
+        "results/desktop-technical-report-v1/"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Run focused Desktop regressions, verify exact packaged-input provenance, then perform one packaged Windows report-export smoke test if storage preflight passes.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
   "audit_remediation_mode": false,
@@ -15284,6 +15309,12 @@
       "task": "PRED-VALIDATION",
       "kind": "unblock_review",
       "summary": "Revisadas candidatas tras cerrar Desktop: no hay trabajo científico local desbloqueado dentro de las restricciones. Adquisición documental MK.1 es el siguiente paso, vía solicitud QUB autorizada ya preparada; no existe conector de correo, no se envió. Sin nuevas tareas exploratorias; datos recibidos habilitarán intake y reevaluación de geometría/condiciones."
+    },
+    {
+      "at": "2026-11-04T13:46:45+00:00",
+      "task": "DESKTOP-TECHNICAL-REPORT-BUILD-PROVENANCE-V1",
+      "kind": "implementation",
+      "summary": "Implementación vertical iniciada: inventario de capacidades existente, exportador técnico autocontenido con datos exactos y endurecimiento de procedencia del paquete; regresión Desktop focalizada en curso."
     }
   ],
   "legacy_gate_status": {
@@ -15378,7 +15409,7 @@
   },
   "campaigns_started": 1,
   "campaign_runtime_status": "IMPL2_EXTENSION_COMPLETE_WITH_NUMERICAL_INVALID_POINTS",
-  "updated_at": "2026-10-30T00:54:16+00:00",
+  "updated_at": "2026-11-04T13:46:45+00:00",
   "full_rpm_sweep_impl2_campaign_readiness": {
     "state": "READY_FOR_CAMPAIGN_DECISION",
     "classification": "FULL_RPM_SWEEP_IMPL2_READY_FOR_CAMPAIGN_DECISION",

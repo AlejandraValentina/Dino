@@ -13,6 +13,7 @@ from .plot import CurvePlot
 from .performance_curves import PowerCurvePanel
 from .services import load_results,run_background
 from .preferences import artifact_root,impl2_historical_report_candidate,settings
+from .technical_report import write_technical_report
 from ..exploratory_workflow import import_exploratory_runs
 from .. import measurement_data
 from ..engine_project import validate_project
@@ -139,6 +140,9 @@ class ResultsPage(QWidget):
         self.power_curves=PowerCurvePanel();root.addWidget(self.power_curves)
         controls=QHBoxLayout();root.addLayout(controls)
         self.unit=QLabel();controls.addWidget(self.unit);controls.addStretch()
+        export_report=QPushButton("Exportar informe técnico HTML…");export_report.setObjectName("exportTechnicalReport")
+        export_report.setToolTip("Informe local autosuficiente con origen, estados, pares exactos, gráficos y registros originales seleccionados.")
+        export_report.clicked.connect(self.export_technical_report);controls.addWidget(export_report)
         export_table=QPushButton("Exportar tabla CSV");export_table.setToolTip("Reportes históricos: CSV + JSON compañero para reabrir. Corridas exploratorias: tabla de consulta; conservar los artifacts originales.");export_table.clicked.connect(self.export_csv);controls.addWidget(export_table)
         export_plot=QPushButton("Exportar gráfico PNG");export_plot.clicked.connect(self.export_png);controls.addWidget(export_plot)
         self.point_table=QTableWidget(0,8);self.point_table.setHorizontalHeaderLabels(["Variante","RPM","Estado","Período","Auditoría","Ciclos","Balance","BMEP"]);self.point_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch);self.point_table.horizontalHeader().setMinimumSectionSize(48);self.point_table.setMinimumHeight(125);self.point_table.setMaximumHeight(190);self.point_table.currentCellChanged.connect(self._point_row_selected);root.addWidget(self.point_table)
@@ -838,6 +842,21 @@ class ResultsPage(QWidget):
             else:
                 self.path_label.setText("Tabla CSV exportada para consulta. Para reabrir corridas exploratorias, conservá result.json y sus artifacts originales.")
         except (OSError,ValueError) as exc:QMessageBox.warning(self,"Error de escritura",str(exc))
+    def export_technical_report(self):
+        if not self.dataset:return False
+        default=Path(self.source).with_suffix('.informe.html') if self.source else Path.cwd()/'dino-informe-tecnico.html'
+        path,_=QFileDialog.getSaveFileName(self,"Exportar informe técnico autosuficiente",str(default),"Informe HTML (*.html)")
+        if not path:return False
+        selected=[self.variants.item(i).text() for i in range(self.variants.count())
+                  if self.variants.item(i).checkState()==Qt.CheckState.Checked]
+        try:
+            write_technical_report(path,self.dataset,source_kind=getattr(self,'source_kind','UNKNOWN'),
+                selected_variants=selected,source_path=self.source,
+                active_project_id=self.context.project.get('project_id'))
+            self.path_label.setText(f"Informe técnico autosuficiente exportado: {Path(path).name}")
+            return True
+        except (OSError,TypeError,ValueError) as exc:
+            QMessageBox.warning(self,"No se pudo exportar el informe técnico",str(exc));return False
     def export_png(self):
         path,_=QFileDialog.getSaveFileName(self,"Exportar gráfico","dino-curva.png","PNG (*.png)")
         if path:
