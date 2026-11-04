@@ -12010,7 +12010,7 @@
       "id": "DESKTOP-PARAMETRIC-STUDY-BUDGET-LIFECYCLE-SUMMARY-V1",
       "description": "Show an exact manifest-derived study budget/lifecycle summary in Results: allocated and consumed seconds when recorded, completed/incomplete points, and cancellation/interruption state. Avoid runtime predictions or recomputing scientific data.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -12023,7 +12023,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Use fields already persisted in a design study manifest to present budget allocated/elapsed and per-point terminal/interrupted state; add focused Results tests and synthetic presentation evidence. Do not infer remaining wall time or modify runner semantics.",
+      "next_action": "Implement a Results summary computed only from manifest totals, elapsed seconds, point statuses and stop_reason; cover standard study and RPM envelope, missing fields, cancellation and PARTIAL states in synthetic tests.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16942,6 +16942,12 @@
       "task": "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-TRACEABILITY-DETAILS-V1",
       "kind": "task",
       "summary": "Detalle seleccionable por fila CONTRAST muestra los cuatro run IDs, hashes, binding y fórmula fuente; datos omitidos siguen explícitamente ausentes. 46 tests pasan y Desktop visible verifica el CSV factorial sintético de sólo lectura. Commit e8ef5c5."
+    },
+    {
+      "at": "2026-11-04T23:31:03+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-BUDGET-LIFECYCLE-SUMMARY-V1",
+      "kind": "task",
+      "summary": "Iniciada mejora concreta de gestión de estudios: el manifiesto ya persiste presupuesto, elapsed_seconds, estado por punto y stop_reason, pero el resumen visible sólo muestra método, RPM, validación y ruta."
     }
   ],
   "legacy_gate_status": {
