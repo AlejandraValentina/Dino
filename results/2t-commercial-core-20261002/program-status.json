@@ -11900,7 +11900,7 @@
       "id": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-REASON-LABEL-V1",
       "description": "Replace the raw PERIOD_1 token in the descriptive response-chart exclusion sentence with a clear, precise label while retaining source period codes in the original JSON; do not change which endpoints qualify.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11915,7 +11915,7 @@
       "evidence": [
         "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-report-v1.png"
       ],
-      "next_action": "Localize the PERIOD_1-only chart exclusion phrase without altering the eligibility rule or raw report JSON.",
+      "next_action": "Replace the display-only PERIOD_1 token in the plot exclusion explanation with a precise Spanish order-1 periodicity phrase; do not change plot eligibility or source values.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16800,6 +16800,12 @@
       "kind": "task",
       "summary": "Identical classification/periodicity pairs now render once in the summary; distinct nonconverged states remain visible. Same synthetic comparison captured before/after; 46 regressions passed.",
       "commit": "931a941"
+    },
+    {
+      "at": "2026-11-04T23:09:04+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-REASON-LABEL-V1",
+      "kind": "task",
+      "summary": "Started screenshot-confirmed wording fix: graph exclusion prose displays PERIOD_1 as an internal code; source states and eligibility logic remain protected."
     }
   ],
   "legacy_gate_status": {
