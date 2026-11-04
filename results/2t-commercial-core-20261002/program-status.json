@@ -11284,9 +11284,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "fb7dbd9"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11298,8 +11300,15 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Add a user-facing export for selected saved study rows, preserving exact manifest values, classification/periodicity, source run IDs and SHA-bound manifest reference; verify round-trip values and label synthetic/nonconverged rows without altering source artifacts.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/study-data-export/acceptance.md",
+        "results/desktop-parametric-design-study-v2/study-data-export/tests-final/parametric-study-csv-final.summary.json",
+        "results/desktop-parametric-design-study-v2/study-data-export/native-window-receipt.json",
+        "results/desktop-parametric-design-study-v2/study-data-export/native-window-study-csv-export.png",
+        "results/desktop-parametric-design-study-v2/study-data-export/synthetic-native-selected.csv",
+        "tests/test_desktop_design_study.py"
+      ],
+      "next_action": "Continue with DESKTOP-PARAMETRIC-CROSS-STUDY-CSV-EXPORT-V1; export the currently verified comparison with exact source identities, pair decisions and nonperiodic rows.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11356,7 +11365,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11369,7 +11378,29 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Provide a user-facing CSV export for the currently verified comparison; preserve raw numeric precision, source manifest/artifact hashes, exact RPM and unpaired reasons, with all unobserved/nonperiodic metrics blank and explicitly classified.",
+      "next_action": "Add a user-facing export for the active verified cross-study comparison; retain exact observed values, source hashes, pair decisions and unpaired reasons, with nonperiodic/undefined metrics blank.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-STUDY-CSV-REIMPORT-V1",
+      "description": "Open a previously exported parametric-study CSV in Desktop as a read-only snapshot so engineers can inspect/share exact design points while retaining source and scientific state labels without recomputation.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-STUDY-DATA-EXPORT-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/study-csv-reimport/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Inspect whether exported study CSV can be reopened through existing Desktop import paths; implement a read-only snapshot importer only if a concrete gap is confirmed, preserving source-manifest hashes, original point states and explicit NOT_RECLAIMED qualification.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16018,6 +16049,12 @@
       "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-CSV-EXPORT-V1",
       "kind": "queue-replan",
       "summary": "Queued CSV export of the newly verified cross-study comparison as a separate reproducibility deliverable from single-study matrix export and HTML documentation."
+    },
+    {
+      "at": "2026-11-04T19:06:46+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-DATA-EXPORT-V1",
+      "kind": "completion-and-replan",
+      "summary": "Added selected-row exact-precision study CSV export, verified manifest/source bindings and nonperiodic blank metrics; 46 targeted regression tests and native Desktop synthetic export passed. Started cross-study CSV export and queued explicit CSV reopenability as a user-facing interoperability gap."
     }
   ],
   "legacy_gate_status": {
