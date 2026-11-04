@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Informe técnico Dino 2T</title><style>
+body{font:15px/1.5 "Segoe UI",Arial,sans-serif;color:#202b36;max-width:1180px;margin:24px auto;padding:0 20px}
+h1,h2,h3{color:#173d57}.boundary{border-left:5px solid #c18420;background:#fff6df;padding:12px 16px}
+table{border-collapse:collapse;width:100%;margin:14px 0 24px;font-size:13px}th,td{border:1px solid #ccd5dc;padding:7px;text-align:left;vertical-align:top}
+th{background:#edf2f6}code,pre{font-family:Consolas,monospace}pre{overflow:auto;background:#f3f5f7;padding:12px;white-space:pre-wrap;word-break:break-word}
+svg{width:100%;height:auto;border:1px solid #d4dbe1}svg text{font:12px Arial;fill:#273746}.note,.muted{color:#536273;font-size:13px}.empty{padding:24px;background:#f3f5f7}
+@media print{body{max-width:none;margin:0}details{break-before:page}}
+</style></head><body>
+<h1>Informe técnico de resultados · Dino 2T</h1>
+<div class="boundary"><strong>Límite de evidencia.</strong> Corridas exploratorias; los transitorios no se presentan como prestaciones definitivas. Validación experimental: <strong>No declarada</strong>. La observación de periodicidad no valida predicción física. Los marcadores de desempeño incluyen sólo filas PERIOD_1/PERIOD_2 con métrica definida; los transitorios permanecen identificados y fuera de esos gráficos.</div>
+<p>Generado UTC: 2026-11-04T19:29:39+00:00 · Formato de datos: <code>DINO_DESKTOP_ENGINEERING_DATA_V1</code> · Procedencia declarada: ENGINEERING · internal conservation · independent audit NOT_PERFORMED</p>
+<p>Proyecto abierto al exportar: <code>synthetic-rpm-envelope-smoke-20261104</code>. Este contexto no reasigna la procedencia de las corridas.</p><h2>Origen y reproducibilidad</h2><table><thead><tr><th>Archivo fuente</th><th>SHA-256 actual</th></tr></thead><tbody><tr><td>Ruta de origen no conservada por el importador</td><td>No disponible</td></tr></tbody></table>
+<p>Las filas completas seleccionadas se incluyen al final sin redondear. Las tablas y gráficos de este informe son una vista legible de esos datos; no recalculan el solver.</p>
+<h2>Estudio paramétrico asociado</h2><p>Estudio <code>synthetic-rpm-envelope-smoke-20261104</code>; parámetro <strong>Escape · Tramo 1 · longitud</strong>; estado Terminada. Los puntos conservan su clasificación de ejecución; la finalización del estudio no implica periodicidad ni validación científica.</p><p>Manifiesto: <code>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\design-studies-v1\synthetic-rpm-envelope-smoke-20261104\synthetic-rpm-envelope-smoke-20261104\rpm-envelope\study.json</code> · SHA-256 actual: <code>dee8469aa9ed77e51ff4e52e03311120fc4fecbee62efa7646d724a121579c23</code></p><h3>Envolvente geometría × RPM · observaciones exactas</h3><p>Método <code>RPM_ENVELOPE_V1</code> · diseños guardados: 2 · RPM exactas: 3000, 4000 · puntos guardados: 4. Cada fila es una observación del manifiesto. No se interpolan puntos ni se calculan resúmenes de rendimiento desde el manifiesto; las métricas sólo aparecen en resultados importados individualmente y periódicos. Validación científica: <strong>No declarada</strong>.</p><table><thead><tr><th>Punto</th><th>Estado de ejecución</th><th>RPM</th><th>Clasificación</th><th>Periodicidad</th><th>Ciclos</th><th>Valor(es)</th><th>Run de origen</th><th>Proyecto de origen</th><th>Ruta de resultado</th><th>Resultado SHA-256</th><th>Artefacto SHA-256</th><th>Manifiesto sweep</th><th>Manifiesto sweep SHA-256</th><th>Reuso verificado</th><th>Identidad de motor SHA-256</th></tr></thead><tbody><tr><td>0</td><td>COMPLETE</td><td>3000</td><td>Límite de ciclos · no convergida</td><td>Ciclos insuficientes</td><td>1</td><td>83 mm</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d00-3000</td><td>No informado</td><td><code>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\exploratory-workflow-v1\synthetic-rpm-envelope-smoke-20261104\pc-synthetic-rpm-envelope-smoke-20261104-d00-3000</code></td><td><code>No disponible</code></td><td><code>cc27eaadb88ea1477c25f40a180a767b13f09029a9eb6c29d275514147b30b58</code></td><td><code>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\dino-power-curve-v1\synthetic-rpm-envelope-smoke-20261104\synthetic-rpm-envelope-smoke-20261104-d00\series.json</code></td><td><code>fa49c8ad519aca444acd7434ae5d6c653cced8979d5bc3197bb6a37d6964a3ca</code></td><td>No</td><td><code>39ed80e1381c40fcf0c205fe40b55cf02caaa6b92ea6223cb7e3bef11c880449</code></td></tr><tr><td>0</td><td>COMPLETE</td><td>4000</td><td>Límite de ciclos · no convergida</td><td>Ciclos insuficientes</td><td>1</td><td>83 mm</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d00-4000</td><td>No informado</td><td><code>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\exploratory-workflow-v1\synthetic-rpm-envelope-smoke-20261104\pc-synthetic-rpm-envelope-smoke-20261104-d00-4000</code></td><td><code>No disponible</code></td><td><code>b397658d99fea116fc4a9ee900815e2dbe0c2f993740e16f2c7efa885364841b</code></td><td><code>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\dino-power-curve-v1\synthetic-rpm-envelope-smoke-20261104\synthetic-rpm-envelope-smoke-20261104-d00\series.json</code></td><td><code>fa49c8ad519aca444acd7434ae5d6c653cced8979d5bc3197bb6a37d6964a3ca</code></td><td>No</td><td><code>44ac63fbaa63aa8edfbd42069ec9e59f2ae09eddd2bfe6c9619a4ac17bacfa82</code></td></tr><tr><td>1</td><td>COMPLETE</td><td>3000</td><td>Límite de ciclos · no convergida</td><td>Ciclos insuficientes</td><td>1</td><td>88 mm</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d01-3000</td><td>No informado</td><td><code>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\exploratory-workflow-v1\synthetic-rpm-envelope-smoke-20261104\pc-synthetic-rpm-envelope-smoke-20261104-d01-3000</code></td><td><code>No disponible</code></td><td><code>7ac5d1287e1bd850de7688aea72212e436f355cf42b54e55826c00ce3989752a</code></td><td><code>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\dino-power-curve-v1\synthetic-rpm-envelope-smoke-20261104\synthetic-rpm-envelope-smoke-20261104-d01\series.json</code></td><td><code>8bb128d91606c3ea768275bf1c3b808f6c286082f0c89b3fe66bb260701af4ea</code></td><td>No</td><td><code>d8b34dea6fe9dca0d2605434ca313b629c3e6fb3347fc5fc38ccf58c73fda4ee</code></td></tr><tr><td>1</td><td>COMPLETE</td><td>4000</td><td>Límite de ciclos · no convergida</td><td>Ciclos insuficientes</td><td>1</td><td>88 mm</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d01-4000</td><td>No informado</td><td><code>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\exploratory-workflow-v1\synthetic-rpm-envelope-smoke-20261104\pc-synthetic-rpm-envelope-smoke-20261104-d01-4000</code></td><td><code>No disponible</code></td><td><code>3f43404a0ab15d1977e63b666587d71abc1ca75d705313ccebe0009670c58a37</code></td><td><code>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\dino-power-curve-v1\synthetic-rpm-envelope-smoke-20261104\synthetic-rpm-envelope-smoke-20261104-d01\series.json</code></td><td><code>8bb128d91606c3ea768275bf1c3b808f6c286082f0c89b3fe66bb260701af4ea</code></td><td>No</td><td><code>0513121bdc6dbc2cc4d7a2656ba4fc28c52ce4d664c85bd3bf030c381a12cd1f</code></td></tr></tbody></table><details><summary>Manifiesto paramétrico original adjunto (JSON)</summary><pre>{
+  "baseline_engine_identity_sha256": "16105c8a738a8cd6ed848d621d8608d5bc7f0baa4e921ad958439ef0bf5ab40f",
+  "design_method": "RPM_ENVELOPE_V1",
+  "elapsed_seconds": 40.96900000004098,
+  "groups": [
+    {
+      "baseline": true,
+      "classification": "EXPLORATORY_SWEEP_EXECUTION_COMPLETE",
+      "curve_availability": "EXPLORATORY_CURVE_PARTIAL",
+      "elapsed_seconds": 20.31300000002375,
+      "engine_identity_sha256": "28c8aad0d9236bf5b928499c212dca5ce7c7e9f95def0fc89c8b5159c0925aa7",
+      "index": 0,
+      "points": [
+        {
+          "baseline": true,
+          "classification": "MAX_CYCLES_NONCONVERGED",
+          "cycles_completed": 1,
+          "design_index": 0,
+          "engine_identity_sha256": "39ed80e1381c40fcf0c205fe40b55cf02caaa6b92ea6223cb7e3bef11c880449",
+          "periodicity": "INSUFFICIENT_CYCLES",
+          "result_artifact_sha256": "cc27eaadb88ea1477c25f40a180a767b13f09029a9eb6c29d275514147b30b58",
+          "rpm": 3000,
+          "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d00-3000",
+          "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d00-3000",
+          "status": "COMPLETE",
+          "sweep_manifest": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\dino-power-curve-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104-d00\\series.json",
+          "unit": "mm",
+          "value": 83.0
+        },
+        {
+          "baseline": true,
+          "classification": "MAX_CYCLES_NONCONVERGED",
+          "cycles_completed": 1,
+          "design_index": 0,
+          "engine_identity_sha256": "44ac63fbaa63aa8edfbd42069ec9e59f2ae09eddd2bfe6c9619a4ac17bacfa82",
+          "periodicity": "INSUFFICIENT_CYCLES",
+          "result_artifact_sha256": "b397658d99fea116fc4a9ee900815e2dbe0c2f993740e16f2c7efa885364841b",
+          "rpm": 4000,
+          "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d00-4000",
+          "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d00-4000",
+          "status": "COMPLETE",
+          "sweep_manifest": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\dino-power-curve-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104-d00\\series.json",
+          "unit": "mm",
+          "value": 83.0
+        }
+      ],
+      "status": "COMPLETE",
+      "sweep_id": "synthetic-rpm-envelope-smoke-20261104-d00",
+      "sweep_manifest": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\dino-power-curve-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104-d00\\series.json",
+      "sweep_manifest_sha256": "fa49c8ad519aca444acd7434ae5d6c653cced8979d5bc3197bb6a37d6964a3ca",
+      "unit": "mm",
+      "value": 83.0
+    },
+    {
+      "baseline": false,
+      "classification": "EXPLORATORY_SWEEP_EXECUTION_COMPLETE",
+      "curve_availability": "EXPLORATORY_CURVE_PARTIAL",
+      "elapsed_seconds": 20.65600000001723,
+      "engine_identity_sha256": "f393f30ec66608e3f6c0be587df2567647b661f9fbc6d4f4d0b0583253513602",
+      "index": 1,
+      "points": [
+        {
+          "baseline": false,
+          "classification": "MAX_CYCLES_NONCONVERGED",
+          "cycles_completed": 1,
+          "design_index": 1,
+          "engine_identity_sha256": "d8b34dea6fe9dca0d2605434ca313b629c3e6fb3347fc5fc38ccf58c73fda4ee",
+          "periodicity": "INSUFFICIENT_CYCLES",
+          "result_artifact_sha256": "7ac5d1287e1bd850de7688aea72212e436f355cf42b54e55826c00ce3989752a",
+          "rpm": 3000,
+          "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d01-3000",
+          "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d01-3000",
+          "status": "COMPLETE",
+          "sweep_manifest": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\dino-power-curve-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104-d01\\series.json",
+          "unit": "mm",
+          "value": 88.0
+        },
+        {
+          "baseline": false,
+          "classification": "MAX_CYCLES_NONCONVERGED",
+          "cycles_completed": 1,
+          "design_index": 1,
+          "engine_identity_sha256": "0513121bdc6dbc2cc4d7a2656ba4fc28c52ce4d664c85bd3bf030c381a12cd1f",
+          "periodicity": "INSUFFICIENT_CYCLES",
+          "result_artifact_sha256": "3f43404a0ab15d1977e63b666587d71abc1ca75d705313ccebe0009670c58a37",
+          "rpm": 4000,
+          "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d01-4000",
+          "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d01-4000",
+          "status": "COMPLETE",
+          "sweep_manifest": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\dino-power-curve-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104-d01\\series.json",
+          "unit": "mm",
+          "value": 88.0
+        }
+      ],
+      "status": "COMPLETE",
+      "sweep_id": "synthetic-rpm-envelope-smoke-20261104-d01",
+      "sweep_manifest": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\dino-power-curve-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104-d01\\series.json",
+      "sweep_manifest_sha256": "8bb128d91606c3ea768275bf1c3b808f6c286082f0c89b3fe66bb260701af4ea",
+      "unit": "mm",
+      "value": 88.0
+    }
+  ],
+  "immutable_spec_sha256": "349be5ba72f27ce1c2bc707a2141949a4cb93037fb3a88006acddbff9225494f",
+  "max_cycles": 1,
+  "memory_limit_mib": 512,
+  "mode": "EXPLORATORY",
+  "parameter": {
+    "adapter": "PARTITIONED_LENGTH_EDIT_V1",
+    "baseline": 83.0,
+    "id": "exhaust.section.0.length_mm",
+    "label": "Escape · Tramo 1 · longitud",
+    "section_index": 0,
+    "unit": "mm"
+  },
+  "periodicity": "EVALUATED_PER_POINT_BY_EXISTING_DETECTOR",
+  "point_budget_seconds": 45.0,
+  "points": [
+    {
+      "baseline": true,
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "cycles_completed": 1,
+      "design_index": 0,
+      "engine_identity_sha256": "39ed80e1381c40fcf0c205fe40b55cf02caaa6b92ea6223cb7e3bef11c880449",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "result_artifact_sha256": "cc27eaadb88ea1477c25f40a180a767b13f09029a9eb6c29d275514147b30b58",
+      "rpm": 3000,
+      "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d00-3000",
+      "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d00-3000",
+      "status": "COMPLETE",
+      "sweep_manifest": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\dino-power-curve-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104-d00\\series.json",
+      "unit": "mm",
+      "value": 83.0
+    },
+    {
+      "baseline": true,
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "cycles_completed": 1,
+      "design_index": 0,
+      "engine_identity_sha256": "44ac63fbaa63aa8edfbd42069ec9e59f2ae09eddd2bfe6c9619a4ac17bacfa82",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "result_artifact_sha256": "b397658d99fea116fc4a9ee900815e2dbe0c2f993740e16f2c7efa885364841b",
+      "rpm": 4000,
+      "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d00-4000",
+      "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d00-4000",
+      "status": "COMPLETE",
+      "sweep_manifest": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\dino-power-curve-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104-d00\\series.json",
+      "unit": "mm",
+      "value": 83.0
+    },
+    {
+      "baseline": false,
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "cycles_completed": 1,
+      "design_index": 1,
+      "engine_identity_sha256": "d8b34dea6fe9dca0d2605434ca313b629c3e6fb3347fc5fc38ccf58c73fda4ee",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "result_artifact_sha256": "7ac5d1287e1bd850de7688aea72212e436f355cf42b54e55826c00ce3989752a",
+      "rpm": 3000,
+      "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d01-3000",
+      "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d01-3000",
+      "status": "COMPLETE",
+      "sweep_manifest": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\dino-power-curve-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104-d01\\series.json",
+      "unit": "mm",
+      "value": 88.0
+    },
+    {
+      "baseline": false,
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "cycles_completed": 1,
+      "design_index": 1,
+      "engine_identity_sha256": "0513121bdc6dbc2cc4d7a2656ba4fc28c52ce4d664c85bd3bf030c381a12cd1f",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "result_artifact_sha256": "3f43404a0ab15d1977e63b666587d71abc1ca75d705313ccebe0009670c58a37",
+      "rpm": 4000,
+      "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d01-4000",
+      "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d01-4000",
+      "status": "COMPLETE",
+      "sweep_manifest": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\dino-power-curve-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104-d01\\series.json",
+      "unit": "mm",
+      "value": 88.0
+    }
+  ],
+  "prepared_spec_sha256": "80a8ec9d4ee2cbcb4aa67bd53d3c5e05d2ce79efcbe7791f346b0e98235ad64f",
+  "project_id": "synthetic-rpm-envelope-smoke-20261104",
+  "rpms": [
+    3000,
+    4000
+  ],
+  "schema": "DINO_PARAMETRIC_DESIGN_STUDY_V1",
+  "scientific_validation": "NOT_CLAIMED",
+  "status": "COMPLETE",
+  "stop_reason": "ALL_DESIGNS_FINISHED",
+  "study_id": "synthetic-rpm-envelope-smoke-20261104",
+  "total_budget_seconds": 180.0,
+  "updated_unix": 1793814452.351204,
+  "values": [
+    83.0,
+    88.0
+  ],
+  "variant_label": "synthetic-test"
+}</pre></details>
+<h2>Resultados por variante y RPM</h2><table><thead><tr><th>Variante</th><th>Condición</th><th>Estado</th><th>Periodicidad</th><th>Auditoría</th><th>Ciclos</th><th>Potencia</th><th>Torque</th><th>BMEP</th></tr></thead><tbody><tr><td>synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=83 mm</td><td>3000 RPM</td><td>Límite de ciclos · no convergida</td><td>Ciclos insuficientes · estimación transitoria disponible</td><td>No realizada</td><td>1</td><td>No definida</td><td>No definida</td><td>No definida</td></tr><tr><td>synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=83 mm</td><td>4000 RPM</td><td>Límite de ciclos · no convergida</td><td>Ciclos insuficientes · estimación transitoria disponible</td><td>No realizada</td><td>1</td><td>No definida</td><td>No definida</td><td>No definida</td></tr><tr><td>synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=88 mm</td><td>3000 RPM</td><td>Límite de ciclos · no convergida</td><td>Ciclos insuficientes · estimación transitoria disponible</td><td>No realizada</td><td>1</td><td>No definida</td><td>No definida</td><td>No definida</td></tr><tr><td>synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=88 mm</td><td>4000 RPM</td><td>Límite de ciclos · no convergida</td><td>Ciclos insuficientes · estimación transitoria disponible</td><td>No realizada</td><td>1</td><td>No definida</td><td>No definida</td><td>No definida</td></tr></tbody></table>
+<h2>Identidad y procedencia por punto</h2><table><thead><tr><th>Variante</th><th>RPM</th><th>Run ID</th><th>Point ID</th><th>Carpeta de artifacts</th><th>Resultado SHA-256</th><th>Primario SHA-256</th><th>Configuración SHA-256</th></tr></thead><tbody><tr><td>synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=83 mm</td><td>3000.0</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d00-3000</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d00-3000</td><td>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\exploratory-workflow-v1\synthetic-rpm-envelope-smoke-20261104\pc-synthetic-rpm-envelope-smoke-20261104-d00-3000</td><td>cc27eaadb88ea1477c25f40a180a767b13f09029a9eb6c29d275514147b30b58</td><td>No informado</td><td>d76a2ca4edb77bb630c53a0c39a66246e84301cbc6ae4129ff095c4d31a92632</td></tr><tr><td>synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=83 mm</td><td>4000.0</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d00-4000</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d00-4000</td><td>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\exploratory-workflow-v1\synthetic-rpm-envelope-smoke-20261104\pc-synthetic-rpm-envelope-smoke-20261104-d00-4000</td><td>b397658d99fea116fc4a9ee900815e2dbe0c2f993740e16f2c7efa885364841b</td><td>No informado</td><td>79e35e94755d8bd7fc548b005144cc9c17c32b6b52c92cf6dfcdab1489ee6b12</td></tr><tr><td>synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=88 mm</td><td>3000.0</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d01-3000</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d01-3000</td><td>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\exploratory-workflow-v1\synthetic-rpm-envelope-smoke-20261104\pc-synthetic-rpm-envelope-smoke-20261104-d01-3000</td><td>7ac5d1287e1bd850de7688aea72212e436f355cf42b54e55826c00ce3989752a</td><td>No informado</td><td>c89039af8a45256b0f8535f4f94fd7522bd437b997e51e2f1e5bfbcdecfe48d1</td></tr><tr><td>synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=88 mm</td><td>4000.0</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d01-4000</td><td>pc-synthetic-rpm-envelope-smoke-20261104-d01-4000</td><td>C:\Users\ageribon.MIDES\AppData\Local\MotorSim\Artifacts\exploratory-workflow-v1\synthetic-rpm-envelope-smoke-20261104\pc-synthetic-rpm-envelope-smoke-20261104-d01-4000</td><td>3f43404a0ab15d1977e63b666587d71abc1ca75d705313ccebe0009670c58a37</td><td>No informado</td><td>d21fa3e85eec626b256d4889bb7dbf7440aecf6fea473a093aa4d3eafd4a4c54</td></tr></tbody></table>
+<h2>Comparación entre variantes</h2><p class="muted">Sólo RPM exactas comunes. Δ = segunda variante menos primera; es un contraste descriptivo, no una atribución causal. No se interpolan puntos. Las diferencias y ausencias en los campos de operación se indican por fila. Se incluyen métricas definidas únicamente en resultados periódicos observados.</p>
+<table><thead><tr><th>Par</th><th>RPM</th><th>Métrica</th><th>Δ descriptivo</th><th>Consistencia de condiciones informadas</th></tr></thead><tbody><tr><td colspan="5">No hay pares A/B con RPM exacta común y métricas definidas en puntos periódicos observados.</td></tr></tbody></table>
+<h2>Visualización de puntos periódicos observados</h2><section><h3>Potencia de freno</h3><p class="empty">No hay puntos clasificados PERIOD_1/PERIOD_2 con la métrica definida.</p></section><section><h3>Torque de freno</h3><p class="empty">No hay puntos clasificados PERIOD_1/PERIOD_2 con la métrica definida.</p></section>
+<details><summary>Registros originales exactos seleccionados (JSON)</summary><pre>[
+  {
+    "BMEP": null,
+    "BMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "BMEP_status": "UNDEFINED",
+    "FMEP": null,
+    "FMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "FMEP_status": "UNDEFINED",
+    "IMEP": null,
+    "IMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "IMEP_status": "UNDEFINED",
+    "afr_kg_air_per_kg_fuel": 11.5,
+    "artifact_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d00-3000",
+    "audit_recomputed": false,
+    "audit_status": "NOT_PERFORMED",
+    "brake_power": null,
+    "brake_power_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "brake_power_status": "UNDEFINED",
+    "brake_torque": null,
+    "brake_torque_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "brake_torque_status": "UNDEFINED",
+    "checkpoint_sha256": "242466b74e263a34016060318bab41817b70bd1e6bd654e4e7b6e16b045db899",
+    "classification": "MAX_CYCLES_NONCONVERGED",
+    "conservation": {
+      "cumulative": {
+        "energy": {
+          "external": 22.033868316162604,
+          "final": 1341.5740345278498,
+          "fuel_combustion_heat_added": 22.47642363631749,
+          "initial": 1250.8761899716535,
+          "residual": -1.3625073291834155e-12,
+          "work": 46.12192246501861
+        },
+        "mass": {
+          "external": 7.315692876682841e-05,
+          "final": 0.0029850558769231052,
+          "initial": 0.002911898948156277,
+          "residual": -2.0328790734103208e-19
+        },
+        "species": {
+          "burned": {
+            "external": 0.0,
+            "final": 9.662490718381687e-06,
+            "fuel_combustion_source": 9.662490718381687e-06,
+            "initial": 0.0,
+            "residual": 0.0,
+            "source": 0.0
+          },
+          "fresh_air": {
+            "external": 7.3412060609938e-05,
+            "final": 0.0007401486922444912,
+            "fuel_combustion_source": -9.047540687292288e-06,
+            "initial": 0.0006757841723218447,
+            "residual": 6.945670167485263e-19,
+            "source": 0.0
+          },
+          "fuel": {
+            "external": 5.652485993846463e-06,
+            "final": 6.380137703422176e-05,
+            "fuel_combustion_source": -6.14950031089398e-07,
+            "initial": 5.876384107146472e-05,
+            "residual": -2.0434669852509996e-20,
+            "source": 0.0
+          },
+          "residual": {
+            "external": -5.907617836956164e-06,
+            "final": 0.0021714433169260127,
+            "fuel_combustion_source": 0.0,
+            "initial": 0.0021773509347629673,
+            "residual": 1.5153419426379433e-18,
+            "source": 0.0
+          }
+        }
+      },
+      "independent_audit": "NOT_PERFORMED",
+      "relative": {
+        "energy": 1.015603532952196e-15,
+        "mass": 6.810187672284862e-17,
+        "species": 5.076427394049007e-16
+      }
+    },
+    "cycle": 1,
+    "cycles_completed": 1,
+    "cycles_requested": 1,
+    "elapsed_seconds": 8.074262199981604,
+    "engineering_diagnostics": {
+      "AFR atrapado": 11.500000000000009,
+      "Aire atrapado al cierre (mg)": 72.33950420744537,
+      "Calor de combustión (J/ciclo)": 22.47642363631749,
+      "Combustible quemado (mg/ciclo)": 0.614950031089398,
+      "Fricción": "Modelo explícito del proyecto; no es una medición de banco",
+      "Potencia indicada transitoria (kW)": -2.180280264211875,
+      "Trabajo del cárter (J/ciclo)": -2.5163171807811158,
+      "Trabajo indicado (J/ciclo)": -43.6056052842375
+    },
+    "experimental_validation": "NOT_PERFORMED",
+    "fuel_id": "23dbb59e043824251805e1d3fadd2ee6375e9c508fc20b73873ac147d18be451",
+    "implementation_identity_sha256": "c2b87574bcb46a221941f98f7ae5dc8bf16c77bd372f68bad68c21b6cc97c290",
+    "indicated_power": null,
+    "indicated_power_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "indicated_power_status": "UNDEFINED",
+    "indicated_torque": null,
+    "indicated_torque_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "indicated_torque_status": "UNDEFINED",
+    "mechanical_loss_model_sha256": "e68395f263ac7a32df9fa725456bc066308315000a8a3bf60781030f34e22364",
+    "mode": "ENGINEERING_EXPLORATORY",
+    "periodicity": "INSUFFICIENT_CYCLES",
+    "periodicity_contract": "REFERENCE_PERIODIC_CONVERGENCE_V2",
+    "point_configuration_sha256": "d76a2ca4edb77bb630c53a0c39a66246e84301cbc6ae4129ff095c4d31a92632",
+    "point_id": "pc-synthetic-rpm-envelope-smoke-20261104-d00-3000",
+    "project_id": "synthetic-rpm-envelope-smoke-20261104",
+    "result_sha256": "cc27eaadb88ea1477c25f40a180a767b13f09029a9eb6c29d275514147b30b58",
+    "rpm": 3000.0,
+    "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d00-3000",
+    "solver_identity_sha256": "940a01563da60682493440cc8ade9bc9df8ffec4f7d6132ff66e1d2551f95566",
+    "stability_observed": {
+      "brake_power_range_kW": 0.0,
+      "regions": {
+        "crankcase": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "cylinder": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "exhaust": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "global_species": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        }
+      },
+      "stationary_uncertainty": "NOT_QUANTIFIED; last-cycle variation is not a stationary error bound",
+      "trapped_air_range_mg": 0.0,
+      "window_cycles": [
+        1
+      ],
+      "work_range_J": 0.0
+    },
+    "total_finite_volume_cells": 44,
+    "transient_estimates": {
+      "BMEP": -455.07602369569486,
+      "FMEP": 85.0,
+      "IMEP": -349.88543737902665,
+      "brake_power": -2.835766131372047,
+      "brake_torque": -9.026523945208847,
+      "indicated_power": -2.180280264211875,
+      "indicated_torque": -6.94004762750047
+    },
+    "variant_id": "synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=83 mm"
+  },
+  {
+    "BMEP": null,
+    "BMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "BMEP_status": "UNDEFINED",
+    "FMEP": null,
+    "FMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "FMEP_status": "UNDEFINED",
+    "IMEP": null,
+    "IMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "IMEP_status": "UNDEFINED",
+    "afr_kg_air_per_kg_fuel": 11.5,
+    "artifact_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d00-4000",
+    "audit_recomputed": false,
+    "audit_status": "NOT_PERFORMED",
+    "brake_power": null,
+    "brake_power_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "brake_power_status": "UNDEFINED",
+    "brake_torque": null,
+    "brake_torque_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "brake_torque_status": "UNDEFINED",
+    "checkpoint_sha256": "e2c53a183d6d070dc4ec11e9da996097dabb0ac3330723e6c05d91aafe463bfb",
+    "classification": "MAX_CYCLES_NONCONVERGED",
+    "conservation": {
+      "cumulative": {
+        "energy": {
+          "external": 21.57825155365564,
+          "final": 1341.4781330547426,
+          "fuel_combustion_heat_added": 21.14266133913047,
+          "initial": 1250.8761899716535,
+          "residual": 1.7918999617450027e-13,
+          "work": 48.43385926411453
+        },
+        "mass": {
+          "external": 6.745905072219767e-05,
+          "final": 0.002979357998878476,
+          "initial": 0.002911898948156277,
+          "residual": 1.5178830414797062e-18
+        },
+        "species": {
+          "burned": {
+            "external": 0.0,
+            "final": 9.08911365334571e-06,
+            "fuel_combustion_source": 9.08911365334571e-06,
+            "initial": 0.0,
+            "residual": 0.0,
+            "source": 0.0
+          },
+          "fresh_air": {
+            "external": 6.506955644438998e-05,
+            "final": 0.0007323430736994592,
+            "fuel_combustion_source": -8.510655066775791e-06,
+            "initial": 0.0006757841723218447,
+            "residual": 2.439454888092385e-19,
+            "source": 0.0
+          },
+          "fuel": {
+            "external": 4.57260026461267e-06,
+            "final": 6.275798274950747e-05,
+            "fuel_combustion_source": -5.784585865699172e-07,
+            "initial": 5.876384107146472e-05,
+            "residual": 1.2705494208814505e-21,
+            "source": 0.0
+          },
+          "residual": {
+            "external": -2.1831059868049488e-06,
+            "final": 0.0021751678287761623,
+            "fuel_combustion_source": 0.0,
+            "initial": 0.0021773509347629673,
+            "residual": -1.0672615135404184e-19,
+            "source": 0.0
+          }
+        }
+      },
+      "independent_audit": "NOT_PERFORMED",
+      "relative": {
+        "energy": 1.3357653155810923e-16,
+        "mass": 5.094664830648365e-16,
+        "species": 8.187854192113442e-17
+      }
+    },
+    "cycle": 1,
+    "cycles_completed": 1,
+    "cycles_requested": 1,
+    "elapsed_seconds": 7.983835100021679,
+    "engineering_diagnostics": {
+      "AFR atrapado": 11.500000000000004,
+      "Aire atrapado al cierre (mg)": 68.04684159927163,
+      "Calor de combustión (J/ciclo)": 21.14266133913047,
+      "Combustible quemado (mg/ciclo)": 0.5784585865699172,
+      "Fricción": "Modelo explícito del proyecto; no es una medición de banco",
+      "Potencia indicada transitoria (kW)": -3.0700785712372696,
+      "Trabajo del cárter (J/ciclo)": -2.3826806955554876,
+      "Trabajo indicado (J/ciclo)": -46.051178568559045
+    },
+    "experimental_validation": "NOT_PERFORMED",
+    "fuel_id": "23dbb59e043824251805e1d3fadd2ee6375e9c508fc20b73873ac147d18be451",
+    "implementation_identity_sha256": "c2b87574bcb46a221941f98f7ae5dc8bf16c77bd372f68bad68c21b6cc97c290",
+    "indicated_power": null,
+    "indicated_power_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "indicated_power_status": "UNDEFINED",
+    "indicated_torque": null,
+    "indicated_torque_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "indicated_torque_status": "UNDEFINED",
+    "mechanical_loss_model_sha256": "e68395f263ac7a32df9fa725456bc066308315000a8a3bf60781030f34e22364",
+    "mode": "ENGINEERING_EXPLORATORY",
+    "periodicity": "INSUFFICIENT_CYCLES",
+    "periodicity_contract": "REFERENCE_PERIODIC_CONVERGENCE_V2",
+    "point_configuration_sha256": "79e35e94755d8bd7fc548b005144cc9c17c32b6b52c92cf6dfcdab1489ee6b12",
+    "point_id": "pc-synthetic-rpm-envelope-smoke-20261104-d00-4000",
+    "project_id": "synthetic-rpm-envelope-smoke-20261104",
+    "result_sha256": "b397658d99fea116fc4a9ee900815e2dbe0c2f993740e16f2c7efa885364841b",
+    "rpm": 4000.0,
+    "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d00-4000",
+    "solver_identity_sha256": "940a01563da60682493440cc8ade9bc9df8ffec4f7d6132ff66e1d2551f95566",
+    "stability_observed": {
+      "brake_power_range_kW": 0.0,
+      "regions": {
+        "crankcase": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "cylinder": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "exhaust": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "global_species": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        }
+      },
+      "stationary_uncertainty": "NOT_QUANTIFIED; last-cycle variation is not a stationary error bound",
+      "trapped_air_range_mg": 0.0,
+      "window_cycles": [
+        1
+      ],
+      "work_range_J": 0.0
+    },
+    "total_finite_volume_cells": 44,
+    "transient_estimates": {
+      "BMEP": -473.62668966791443,
+      "FMEP": 85.0,
+      "IMEP": -369.5083843063708,
+      "brake_power": -3.9351506284357907,
+      "brake_torque": -9.394480114901016,
+      "indicated_power": -3.0700785712372696,
+      "indicated_torque": -7.329272704393725
+    },
+    "variant_id": "synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=83 mm"
+  },
+  {
+    "BMEP": null,
+    "BMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "BMEP_status": "UNDEFINED",
+    "FMEP": null,
+    "FMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "FMEP_status": "UNDEFINED",
+    "IMEP": null,
+    "IMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "IMEP_status": "UNDEFINED",
+    "afr_kg_air_per_kg_fuel": 11.5,
+    "artifact_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d01-3000",
+    "audit_recomputed": false,
+    "audit_status": "NOT_PERFORMED",
+    "brake_power": null,
+    "brake_power_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "brake_power_status": "UNDEFINED",
+    "brake_torque": null,
+    "brake_torque_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "brake_torque_status": "UNDEFINED",
+    "checkpoint_sha256": "89abd5d27fee9bfd8f399ccdcad5fe32918de0cf8a28a2589ee1dff8664ee2eb",
+    "classification": "MAX_CYCLES_NONCONVERGED",
+    "conservation": {
+      "cumulative": {
+        "energy": {
+          "external": 22.032607842141203,
+          "final": 1343.1240498682002,
+          "fuel_combustion_heat_added": 22.458991778380486,
+          "initial": 1252.4749047487878,
+          "residual": -1.214445211061843e-13,
+          "work": 46.10957086499708
+        },
+        "mass": {
+          "external": 7.31347923545148e-05,
+          "final": 0.0029882831607895215,
+          "initial": 0.0029151483684350054,
+          "residual": 1.2739375526704677e-18
+        },
+        "species": {
+          "burned": {
+            "external": 0.0,
+            "final": 9.65499685867136e-06,
+            "fuel_combustion_source": 9.65499685867136e-06,
+            "initial": 0.0,
+            "residual": 0.0,
+            "source": 0.0
+          },
+          "fresh_air": {
+            "external": 7.337821385224619e-05,
+            "final": 0.0007401218624146915,
+            "fuel_combustion_source": -9.040523759399664e-06,
+            "initial": 0.0006757841723218447,
+            "residual": 1.9820570965750628e-19,
+            "source": 0.0
+          },
+          "fuel": {
+            "external": 5.64725202645462e-06,
+            "final": 6.379661999864765e-05,
+            "fuel_combustion_source": -6.144730992716961e-07,
+            "initial": 5.876384107146472e-05,
+            "residual": 4.658681209898652e-21,
+            "source": 0.0
+          },
+          "residual": {
+            "external": -5.8906735241858546e-06,
+            "final": 0.00217470968151751,
+            "fuel_combustion_source": 0.0,
+            "initial": 0.0021806003550416957,
+            "residual": 6.352747104407253e-20,
+            "source": 0.0
+          }
+        }
+      },
+      "independent_audit": "NOT_PERFORMED",
+      "relative": {
+        "energy": 9.041943751815148e-17,
+        "mass": 4.2631085614185443e-16,
+        "species": 6.632761990504916e-17
+      }
+    },
+    "cycle": 1,
+    "cycles_completed": 1,
+    "cycles_requested": 1,
+    "elapsed_seconds": 8.11647870001616,
+    "engineering_diagnostics": {
+      "AFR atrapado": 11.500000000000053,
+      "Aire atrapado al cierre (mg)": 72.28340044374251,
+      "Calor de combustión (J/ciclo)": 22.458991778380486,
+      "Combustible quemado (mg/ciclo)": 0.6144730992716961,
+      "Fricción": "Modelo explícito del proyecto; no es una medición de banco",
+      "Potencia indicada transitoria (kW)": -2.1797207054837977,
+      "Trabajo del cárter (J/ciclo)": -2.5151567553211294,
+      "Trabajo indicado (J/ciclo)": -43.59441410967595
+    },
+    "experimental_validation": "NOT_PERFORMED",
+    "fuel_id": "23dbb59e043824251805e1d3fadd2ee6375e9c508fc20b73873ac147d18be451",
+    "implementation_identity_sha256": "c2b87574bcb46a221941f98f7ae5dc8bf16c77bd372f68bad68c21b6cc97c290",
+    "indicated_power": null,
+    "indicated_power_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "indicated_power_status": "UNDEFINED",
+    "indicated_torque": null,
+    "indicated_torque_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "indicated_torque_status": "UNDEFINED",
+    "mechanical_loss_model_sha256": "e68395f263ac7a32df9fa725456bc066308315000a8a3bf60781030f34e22364",
+    "mode": "ENGINEERING_EXPLORATORY",
+    "periodicity": "INSUFFICIENT_CYCLES",
+    "periodicity_contract": "REFERENCE_PERIODIC_CONVERGENCE_V2",
+    "point_configuration_sha256": "c89039af8a45256b0f8535f4f94fd7522bd437b997e51e2f1e5bfbcdecfe48d1",
+    "point_id": "pc-synthetic-rpm-envelope-smoke-20261104-d01-3000",
+    "project_id": "synthetic-rpm-envelope-smoke-20261104",
+    "result_sha256": "7ac5d1287e1bd850de7688aea72212e436f355cf42b54e55826c00ce3989752a",
+    "rpm": 3000.0,
+    "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d01-3000",
+    "solver_identity_sha256": "940a01563da60682493440cc8ade9bc9df8ffec4f7d6132ff66e1d2551f95566",
+    "stability_observed": {
+      "brake_power_range_kW": 0.0,
+      "regions": {
+        "crankcase": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "cylinder": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "exhaust": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "global_species": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        }
+      },
+      "stationary_uncertainty": "NOT_QUANTIFIED; last-cycle variation is not a stationary error bound",
+      "trapped_air_range_mg": 0.0,
+      "window_cycles": [
+        1
+      ],
+      "work_range_J": 0.0
+    },
+    "total_finite_volume_cells": 44,
+    "transient_estimates": {
+      "BMEP": -454.9769161395059,
+      "FMEP": 85.0,
+      "IMEP": -349.79564091866956,
+      "brake_power": -2.8351485513709704,
+      "brake_torque": -9.024558127010327,
+      "indicated_power": -2.1797207054837977,
+      "indicated_torque": -6.938266496749995
+    },
+    "variant_id": "synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=88 mm"
+  },
+  {
+    "BMEP": null,
+    "BMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "BMEP_status": "UNDEFINED",
+    "FMEP": null,
+    "FMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "FMEP_status": "UNDEFINED",
+    "IMEP": null,
+    "IMEP_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "IMEP_status": "UNDEFINED",
+    "afr_kg_air_per_kg_fuel": 11.5,
+    "artifact_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d01-4000",
+    "audit_recomputed": false,
+    "audit_status": "NOT_PERFORMED",
+    "brake_power": null,
+    "brake_power_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "brake_power_status": "UNDEFINED",
+    "brake_torque": null,
+    "brake_torque_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "brake_torque_status": "UNDEFINED",
+    "checkpoint_sha256": "dd801247de70a87030c4f6f8eed791f7d610c229b106103f8b96e8a114752e4f",
+    "classification": "MAX_CYCLES_NONCONVERGED",
+    "conservation": {
+      "cumulative": {
+        "energy": {
+          "external": 21.581041046995672,
+          "final": 1343.0888031588486,
+          "fuel_combustion_heat_added": 21.13658932060837,
+          "initial": 1252.4749047487878,
+          "residual": -4.0878411766698264e-13,
+          "work": 48.45878435655764
+        },
+        "mass": {
+          "external": 6.745783304849652e-05,
+          "final": 0.002982606201483503,
+          "initial": 0.0029151483684350054,
+          "residual": 1.2197274440461925e-18
+        },
+        "species": {
+          "burned": {
+            "external": 0.0,
+            "final": 9.086503326028474e-06,
+            "fuel_combustion_source": 9.086503326028474e-06,
+            "initial": 0.0,
+            "residual": 0.0,
+            "source": 0.0
+          },
+          "fresh_air": {
+            "external": 6.506279380602362e-05,
+            "final": 0.0007323387552593116,
+            "fuel_combustion_source": -8.508210868556285e-06,
+            "initial": 0.0006757841723218447,
+            "residual": -4.828087799349512e-19,
+            "source": 0.0
+          },
+          "fuel": {
+            "external": 4.5694419837887064e-06,
+            "final": 6.275499059778124e-05,
+            "fuel_combustion_source": -5.782924574721852e-07,
+            "initial": 5.876384107146472e-05,
+            "residual": 1.4823076576950256e-21,
+            "source": 0.0
+          },
+          "residual": {
+            "external": -2.1744027413157667e-06,
+            "final": 0.0021784259523003817,
+            "fuel_combustion_source": 0.0,
+            "initial": 0.0021806003550416957,
+            "residual": 1.7575933655526732e-18,
+            "source": 0.0
+          }
+        }
+      },
+      "independent_audit": "NOT_PERFORMED",
+      "relative": {
+        "energy": 3.0436119838505964e-16,
+        "mass": 4.0894686111747456e-16,
+        "species": 5.892810672352498e-16
+      }
+    },
+    "cycle": 1,
+    "cycles_completed": 1,
+    "cycles_requested": 1,
+    "elapsed_seconds": 8.224160999991,
+    "engineering_diagnostics": {
+      "AFR atrapado": 11.50000000000003,
+      "Aire atrapado al cierre (mg)": 68.02729904141034,
+      "Calor de combustión (J/ciclo)": 21.13658932060837,
+      "Combustible quemado (mg/ciclo)": 0.5782924574721852,
+      "Fricción": "Modelo explícito del proyecto; no es una medición de banco",
+      "Potencia indicada transitoria (kW)": -3.0718364941057175,
+      "Trabajo del cárter (J/ciclo)": -2.3812369449718798,
+      "Trabajo indicado (J/ciclo)": -46.07754741158576
+    },
+    "experimental_validation": "NOT_PERFORMED",
+    "fuel_id": "23dbb59e043824251805e1d3fadd2ee6375e9c508fc20b73873ac147d18be451",
+    "implementation_identity_sha256": "c2b87574bcb46a221941f98f7ae5dc8bf16c77bd372f68bad68c21b6cc97c290",
+    "indicated_power": null,
+    "indicated_power_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "indicated_power_status": "UNDEFINED",
+    "indicated_torque": null,
+    "indicated_torque_reason": "NO_PERIODICITY_TRANSIENT_ONLY",
+    "indicated_torque_status": "UNDEFINED",
+    "mechanical_loss_model_sha256": "e68395f263ac7a32df9fa725456bc066308315000a8a3bf60781030f34e22364",
+    "mode": "ENGINEERING_EXPLORATORY",
+    "periodicity": "INSUFFICIENT_CYCLES",
+    "periodicity_contract": "REFERENCE_PERIODIC_CONVERGENCE_V2",
+    "point_configuration_sha256": "d21fa3e85eec626b256d4889bb7dbf7440aecf6fea473a093aa4d3eafd4a4c54",
+    "point_id": "pc-synthetic-rpm-envelope-smoke-20261104-d01-4000",
+    "project_id": "synthetic-rpm-envelope-smoke-20261104",
+    "result_sha256": "3f43404a0ab15d1977e63b666587d71abc1ca75d705313ccebe0009670c58a37",
+    "rpm": 4000.0,
+    "run_id": "pc-synthetic-rpm-envelope-smoke-20261104-d01-4000",
+    "solver_identity_sha256": "940a01563da60682493440cc8ade9bc9df8ffec4f7d6132ff66e1d2551f95566",
+    "stability_observed": {
+      "brake_power_range_kW": 0.0,
+      "regions": {
+        "crankcase": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "cylinder": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "exhaust": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        },
+        "global_species": {
+          "evaluated": 0,
+          "failed": 0,
+          "worst_threshold_ratio": null
+        }
+      },
+      "stationary_uncertainty": "NOT_QUANTIFIED; last-cycle variation is not a stationary error bound",
+      "trapped_air_range_mg": 0.0,
+      "window_cycles": [
+        1
+      ],
+      "work_range_J": 0.0
+    },
+    "total_finite_volume_cells": 44,
+    "transient_estimates": {
+      "BMEP": -473.826685214687,
+      "FMEP": 85.0,
+      "IMEP": -369.71996431117617,
+      "brake_power": -3.936812301265332,
+      "brake_torque": -9.39844706657036,
+      "indicated_power": -3.0718364941057175,
+      "indicated_torque": -7.333469436105042
+    },
+    "variant_id": "synthetic-rpm-envelope-smoke-20261104 · Escape · Tramo 1 · longitud=88 mm"
+  }
+]</pre></details>
+<footer class="muted">Dino 2T Desktop · documento local autosuficiente · no implica validación experimental ni recomendación comercial.</footer>
+</body></html>

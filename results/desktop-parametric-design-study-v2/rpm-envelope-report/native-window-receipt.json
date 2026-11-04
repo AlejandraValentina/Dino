@@ -1,0 +1,20 @@
+{
+  "schema": "DINO_NATIVE_RPM_ENVELOPE_REPORT_CHECK_V1",
+  "source_kind": "SYNTHETIC",
+  "solver_invocations": 0,
+  "manifest_path": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\design-studies-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104\\rpm-envelope\\study.json",
+  "manifest_sha256": "dee8469aa9ed77e51ff4e52e03311120fc4fecbee62efa7646d724a121579c23",
+  "native_window_visible": true,
+  "outer_size": [
+    1440,
+    837
+  ],
+  "study_opened_from_project_reference": true,
+  "loaded_points": 4,
+  "all_points_nonconverged": true,
+  "report_export_action_succeeded": true,
+  "report_sha256": "c58be643562e82cf0814a458e6589cc3faebbc92f375ba5106ee37c0dcea2d82",
+  "report_has_exact_grid_and_states": true,
+  "screenshot": "native-rpm-envelope-report.png",
+  "screenshot_sha256": "8228f180e45bbe556cf523e222fc9115f3b7783e1cb956056236854f1cd4f630"
+}

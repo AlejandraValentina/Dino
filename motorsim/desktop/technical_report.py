@@ -161,6 +161,8 @@ def render_technical_report(dataset: dict, *, source_kind: str,
         manifest = design_study_manifest
         if not isinstance(manifest, dict) or manifest.get("schema") != "DINO_PARAMETRIC_DESIGN_STUDY_V1":
             raise ValueError("El manifiesto de estudio no tiene un esquema reconocido.")
+        is_rpm_envelope=manifest.get("design_method")=="RPM_ENVELOPE_V1"
+        rpm_groups={group.get("index"):group for group in manifest.get("groups",[]) if isinstance(group,dict)}
         parameter = manifest.get("parameter") or {}
         study_rows = []
         for point in manifest.get("points", []):
@@ -174,37 +176,74 @@ def render_technical_report(dataset: dict, *, source_kind: str,
                     f"{_esc(item.get('unit') or '')}" for item in factors if isinstance(item,dict))
             identity_sha = point.get("engine_identity_sha256") or "No disponible"
             source_run = point.get("source_run_id") or point.get("historical_source_run_id") or point.get("run_id")
+            design_index=point.get("design_index")
+            rpm_group=rpm_groups.get(design_index,{}) if is_rpm_envelope else {}
+            sweep_path=point.get("sweep_manifest") or rpm_group.get("sweep_manifest")
+            sweep_digest=point.get("sweep_manifest_sha256") or rpm_group.get("sweep_manifest_sha256")
             study_rows.append("<tr>" + "".join((
-                f"<td>{_esc(point.get('index'))}</td>",
+                f"<td>{_esc(point.get('index',design_index))}</td>",
                 f"<td>{_esc(point.get('status') or 'No ejecutado')}</td>",
+                f"<td>{_esc(format_number(point.get('rpm',manifest.get('rpm'))) if _safe_number(point.get('rpm',manifest.get('rpm'))) else 'No informada')}</td>",
+                f"<td>{_esc(state_label(point.get('classification') or point.get('status') or 'NOT_REPORTED'))}</td>",
+                f"<td>{_esc(state_label(point.get('periodicity') or 'NOT_EVALUATED'))}</td>",
+                f"<td>{_esc(point.get('cycles_completed') if point.get('cycles_completed') is not None else '—')}</td>",
                 f"<td>{shown_value if isinstance(factors,list) and factors else _esc(shown_value)+' '+_esc(point.get('unit') or parameter.get('unit') or '')}</td>",
                 f"<td>{_esc(source_run or 'No informado')}</td>",
                 f"<td>{_esc(point.get('historical_source_project_id') or 'No informado')}</td>",
                 f"<td><code>{_esc(point.get('run_directory') or 'No informada')}</code></td>",
                 f"<td><code>{_esc(point.get('result_sha256') or 'No disponible')}</code></td>",
                 f"<td><code>{_esc(point.get('result_artifact_sha256') or 'No disponible')}</code></td>",
+                f"<td><code>{_esc(sweep_path or 'No informada')}</code></td>",
+                f"<td><code>{_esc(sweep_digest or 'No disponible')}</code></td>",
                 f"<td>{'Sí' if point.get('reused_verified') else 'No'}</td>",
                 f"<td><code>{_esc(identity_sha)}</code></td>")) + "</tr>")
         manifest_path = Path(design_study_manifest_path) if design_study_manifest_path else None
         manifest_digest = None
         if manifest_path:
             try:
-                manifest_digest = __import__("hashlib").sha256(manifest_path.read_bytes()).hexdigest()
-            except OSError:
-                pass
+                manifest_raw=manifest_path.read_bytes()
+                manifest_digest=__import__("hashlib").sha256(manifest_raw).hexdigest()
+                if is_rpm_envelope and json.loads(manifest_raw.decode("utf-8"))!=manifest:
+                    raise ValueError("El manifiesto RPM cambió desde que se abrió; vuelva a cargar el estudio antes de exportar.")
+                if is_rpm_envelope:
+                    for group in manifest.get("groups",[]):
+                        sweep_path=group.get("sweep_manifest")
+                        sweep_digest=group.get("sweep_manifest_sha256")
+                        if group.get("status")=="COMPLETE" and (not sweep_path or not sweep_digest):
+                            raise ValueError("Un diseño RPM terminado carece de ruta/hash de manifiesto de barrido.")
+                        if sweep_path and sweep_digest:
+                            sweep_raw=Path(sweep_path).read_bytes()
+                            actual=__import__("hashlib").sha256(sweep_raw).hexdigest()
+                            if actual!=sweep_digest:
+                                raise ValueError("Cambió el hash del manifiesto de barrido; vuelva a cargar el estudio antes de exportar.")
+            except OSError as exc:
+                if is_rpm_envelope:raise ValueError(f"No se pudo verificar el manifiesto RPM: {exc}") from exc
+        elif is_rpm_envelope:
+            raise ValueError("El informe de envolvente RPM necesita la ruta del manifiesto de origen.")
         manifest_origin = (f"<p>Manifiesto: <code>{_esc(manifest_path)}</code> · SHA-256 actual: "
                            f"<code>{_esc(manifest_digest or 'No disponible')}</code></p>" if manifest_path else
                            "<p>Manifiesto adjuntado como objeto por la interfaz; ruta original no informada.</p>")
         study_raw = html.escape(json.dumps(manifest, ensure_ascii=False, allow_nan=False,
                                            sort_keys=True, indent=2), quote=False)
+        envelope_summary=""
+        if is_rpm_envelope:
+            values=manifest.get("values",[]);rpms=manifest.get("rpms",[])
+            envelope_summary=("<h3>Envolvente geometría × RPM · observaciones exactas</h3>"
+                f"<p>Método <code>RPM_ENVELOPE_V1</code> · diseños guardados: {_esc(len(values))} · "
+                f"RPM exactas: {_esc(', '.join(format_number(value) for value in rpms))} · "
+                f"puntos guardados: {_esc(len(manifest.get('points',[])))}. "
+                "Cada fila es una observación del manifiesto. No se interpolan puntos ni se calculan resúmenes de rendimiento desde el manifiesto; las métricas sólo aparecen en resultados importados individualmente y periódicos. "
+                f"Validación científica: <strong>{_esc(state_label(manifest.get('scientific_validation','NOT_CLAIMED')))}</strong>.</p>")
         study_html = ("<h2>Estudio paramétrico asociado</h2>"
             f"<p>Estudio <code>{_esc(manifest.get('study_id'))}</code>; parámetro "
             f"<strong>{_esc(parameter.get('label') or parameter.get('id') or 'No informado')}</strong>; "
             f"estado {_esc(state_label(manifest.get('status')))}. Los puntos conservan su clasificación de ejecución; "
             "la finalización del estudio no implica periodicidad ni validación científica.</p>"
-            f"{manifest_origin}<table><thead><tr><th>Punto</th><th>Estado de ejecución</th><th>Valor(es)</th>"
+            f"{manifest_origin}{envelope_summary}<table><thead><tr><th>Punto</th><th>Estado de ejecución</th>"
+            "<th>RPM</th><th>Clasificación</th><th>Periodicidad</th><th>Ciclos</th><th>Valor(es)</th>"
             f"<th>Run de origen</th><th>Proyecto de origen</th><th>Ruta de resultado</th>"
-            f"<th>Resultado SHA-256</th><th>Artefacto SHA-256</th><th>Reuso verificado</th>"
+            f"<th>Resultado SHA-256</th><th>Artefacto SHA-256</th><th>Manifiesto sweep</th>"
+            f"<th>Manifiesto sweep SHA-256</th><th>Reuso verificado</th>"
             f"<th>Identidad de motor SHA-256</th></tr></thead><tbody>{''.join(study_rows)}</tbody></table>"
             f"<details><summary>Manifiesto paramétrico original adjunto (JSON)</summary><pre>{study_raw}</pre></details>")
     source_sha = dataset.get("source_sha256")

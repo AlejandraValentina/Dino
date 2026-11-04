@@ -1,4 +1,4 @@
-import hashlib
+import hashlib,json
 import os
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -175,6 +175,93 @@ def test_report_embeds_parametric_manifest_and_preserves_study_provenance(tmp_pa
     assert "Artefacto SHA-256" in html and "Reuso verificado" in html
     assert "no implica periodicidad ni validación científica" in html
     assert "Manifiesto paramétrico original adjunto (JSON)" in html
+
+
+def test_rpm_envelope_report_retains_exact_grid_states_and_hash_bound_sources(tmp_path):
+    sweep_path=tmp_path/"series.json"
+    sweep_raw=json.dumps({"schema":"DINO_POWER_CURVE_V1","synthetic":True},
+        sort_keys=True,separators=(",",":")).encode()
+    sweep_path.write_bytes(sweep_raw);sweep_hash=hashlib.sha256(sweep_raw).hexdigest()
+    points=[]
+    for index,(design_index,value,rpm,state,periodicity) in enumerate((
+        (0,83.1234567890123,3000,"MAX_CYCLES_NONCONVERGED","INSUFFICIENT_CYCLES"),
+        (0,83.1234567890123,4000,"MAX_CYCLES_NONCONVERGED","INSUFFICIENT_CYCLES"),
+        (1,88.9876543210987,3000,"NOT_STARTED","NOT_EVALUATED"),
+        (1,88.9876543210987,4000,"CANCELLED_CHECKPOINTED","NOT_EVALUATED"),
+    )):
+        points.append({"index":index,"design_index":design_index,"value":value,"unit":"mm","rpm":rpm,
+            "status":"COMPLETE" if state.startswith("MAX_") else state,"classification":state,
+            "periodicity":periodicity,"cycles_completed":1 if state.startswith("MAX_") else 0,
+            "run_id":f"synthetic-envelope-p{index:02d}","engine_identity_sha256":str(design_index+1)*64,
+            "result_artifact_sha256":hashlib.sha256(f"result-{index}".encode()).hexdigest(),
+            "run_directory":str(tmp_path/f"run-{index}"),"sweep_manifest":str(sweep_path),
+            "sweep_manifest_sha256":sweep_hash})
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","design_method":"RPM_ENVELOPE_V1",
+        "study_id":"synthetic-rpm-envelope-report","project_id":"synthetic-report-project",
+        "parameter":{"id":"exhaust:length","label":"Longitud del escape","unit":"mm"},
+        "values":[83.1234567890123,88.9876543210987],"rpms":[3000,4000],
+        "max_cycles":1,"point_budget_seconds":45,"total_budget_seconds":180,
+        "memory_limit_mib":512,"status":"COMPLETE","scientific_validation":"NOT_CLAIMED",
+        "groups":[{"index":0,"status":"COMPLETE","sweep_manifest":str(sweep_path),
+                    "sweep_manifest_sha256":sweep_hash},
+                   {"index":1,"status":"PARTIAL","sweep_manifest":str(sweep_path),
+                    "sweep_manifest_sha256":sweep_hash}],"points":points}
+    manifest_path=tmp_path/"envelope.study.json"
+    manifest_path.write_text(json.dumps(manifest,sort_keys=True),encoding="utf-8")
+    html=render_technical_report({"points":[_row("synthetic",3000,None,
+        classification="MAX_CYCLES_NONCONVERGED",periodicity="INSUFFICIENT_CYCLES")],
+        "experimental_validation":"NOT_PERFORMED"},source_kind="EXPLORATORY",
+        design_study_manifest=manifest,design_study_manifest_path=manifest_path,generated_at="fixed")
+    assert "Envolvente geometría × RPM" in html and "RPM_ENVELOPE_V1" in html
+    assert "RPM exactas: 3000, 4000" in html and "83.1235 mm" in html and "88.9877 mm" in html
+    assert "Límite de ciclos · no convergida" in html and "Ciclos insuficientes" in html
+    assert "synthetic-envelope-p00" in html and str(sweep_path) in html and sweep_hash in html
+    assert "sin validación científica" in html.lower() or "no declarada" in html.lower()
+    assert "No se interpolan puntos" in html
+    sweep_path.write_text("{changed:true}",encoding="utf-8")
+    import pytest
+    with pytest.raises(ValueError,match="hash del manifiesto de barrido"):
+        render_technical_report({"points":[_row("synthetic",3000,None)]},source_kind="EXPLORATORY",
+            design_study_manifest=manifest,design_study_manifest_path=manifest_path,generated_at="fixed")
+
+
+def test_rpm_envelope_report_rejects_stale_or_unlinked_manifest(tmp_path):
+    import pytest
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","design_method":"RPM_ENVELOPE_V1",
+        "study_id":"stale-envelope","values":[],"rpms":[],"groups":[],"points":[]}
+    path=tmp_path/"stale.study.json";path.write_text(json.dumps({**manifest,"study_id":"changed"}),encoding="utf-8")
+    with pytest.raises(ValueError,match="manifiesto RPM cambió"):
+        render_technical_report({"points":[_row("synthetic",3000,None)]},source_kind="EXPLORATORY",
+            design_study_manifest=manifest,design_study_manifest_path=path)
+    with pytest.raises(ValueError,match="necesita la ruta del manifiesto"):
+        render_technical_report({"points":[_row("synthetic",3000,None)]},source_kind="EXPLORATORY",
+            design_study_manifest=manifest)
+
+
+def test_results_page_exports_hash_bound_rpm_envelope_report(tmp_path):
+    context=DesktopContext(new_design_project("rpm-envelope-report-ui"))
+    page=ResultsPage(context)
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","design_method":"RPM_ENVELOPE_V1",
+        "study_id":"synthetic-rpm-envelope-ui","project_id":context.project["project_id"],
+        "baseline_engine_identity_sha256":"a"*64,"parameter":{"label":"Largo de escape","unit":"mm"},
+        "values":[83.123456789],"rpms":[3000],"status":"PARTIAL","scientific_validation":"NOT_CLAIMED",
+        "groups":[],"points":[{"index":0,"design_index":0,"value":83.123456789,"unit":"mm","rpm":3000,
+            "status":"COMPLETE","classification":"MAX_CYCLES_NONCONVERGED",
+            "periodicity":"INSUFFICIENT_CYCLES","cycles_completed":1,"run_id":"synthetic-envelope-run",
+            "engine_identity_sha256":"b"*64,"result_artifact_sha256":"c"*64}]}
+    manifest_path=tmp_path/"envelope.study.json";manifest_path.write_text(json.dumps(manifest),encoding="utf-8")
+    page.dataset={"schema":"DINO_EXPLORATORY_COMPARISON_V1","points":[_row("synthetic",3000,None,
+        classification="MAX_CYCLES_NONCONVERGED",periodicity="INSUFFICIENT_CYCLES")],
+        "experimental_validation":"NOT_PERFORMED"}
+    page.source_kind="EXPLORATORY";page.design_study_manifest=manifest;page.design_study_manifest_path=manifest_path
+    page.variants.addItem("synthetic");page.variants.item(0).setCheckState(Qt.CheckState.Checked)
+    destination=tmp_path/"envelope-report.html"
+    with patch.object(QFileDialog,"getSaveFileName",return_value=(str(destination),"HTML")):
+        assert page.export_technical_report()
+    report=destination.read_text(encoding="utf-8")
+    assert "RPM_ENVELOPE_V1" in report and "synthetic-envelope-run" in report
+    assert "Límite de ciclos" in report and "Ciclos insuficientes" in report
+    page.close();APP.processEvents()
 
 
 def test_report_rejects_unknown_parametric_manifest_schema():
