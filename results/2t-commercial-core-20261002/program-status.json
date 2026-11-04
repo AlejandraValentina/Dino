@@ -11950,7 +11950,7 @@
       "id": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-CRITERION-PARAGRAPH-V1",
       "description": "Replace PERIOD_1 in the explanatory paragraph above cross-study response charts with an accurate user-facing periodicity phrase, while preserving the exact eligibility rule and original state codes in source JSON.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11965,7 +11965,7 @@
       "evidence": [
         "results/desktop-parametric-design-study-v2/report-period-1-reason-label/chrome-report-v2.png"
       ],
-      "next_action": "Translate the chart introduction criterion PERIOD_1 phrase while retaining the requirement for exact context and a finite defined metric.",
+      "next_action": "Rewrite the descriptive intro to cross-study response charts in user-facing terms for exact RPM/context, order-1 periodicity and finite defined metrics; preserve all selection predicates and source codes.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16841,6 +16841,12 @@
       "kind": "task",
       "summary": "Translated the visible cross-study exclusion reasons to order-1 periodicity wording without changing PERIOD_1 eligibility; source codes retained; 46 tests and current Desktop export passed.",
       "commit": "a5ab260"
+    },
+    {
+      "at": "2026-11-04T23:12:18+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-CRITERION-PARAGRAPH-V1",
+      "kind": "task",
+      "summary": "Started the visible chart-method text correction; replace PERIOD_1 token with exact Spanish meaning only, preserving filter logic."
     }
   ],
   "legacy_gate_status": {
