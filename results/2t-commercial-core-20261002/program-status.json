@@ -11420,7 +11420,9 @@
         "motorsim/desktop/results_page.py",
         "tests/test_desktop_design_study.py",
         "results/desktop-parametric-design-study-v2/study-csv-reimport/",
-        "results/2t-commercial-core-20261002/program-status.json"
+        "results/2t-commercial-core-20261002/program-status.json",
+        "motorsim/desktop/parametric_study_snapshot.py",
+        "tests/test_parametric_study_snapshot.py"
       ],
       "evidence_level": "L0",
       "evidence": [],
