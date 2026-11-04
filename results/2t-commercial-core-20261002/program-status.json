@@ -11250,9 +11250,11 @@
         "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1",
         "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "c7606df"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "architecture",
       "write_scope": [
@@ -11264,8 +11266,16 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Verify study manifests and artifacts; align rows only on exact engine identity, RPM and operating contract; present observed point differences without interpolation, fitting or merging incompatible evidence.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-comparison/acceptance.md",
+        "results/desktop-parametric-design-study-v2/cross-study-comparison/test-summary.txt",
+        "results/desktop-parametric-design-study-v2/cross-study-comparison/native-window-receipt.json",
+        "results/desktop-parametric-design-study-v2/cross-study-comparison/cross-study-comparison-desktop-real-window.png",
+        "results/desktop-parametric-design-study-v2/cross-study-comparison/tests-final/desktop-parametric-cross-study-final-regressions.summary.json",
+        "tests/test_desktop_design_study.py",
+        "tests/test_desktop_technical_report.py"
+      ],
+      "next_action": "Continue with DESKTOP-PARAMETRIC-STUDY-DATA-EXPORT-V1 to export exact stored rows with source identities and no presentation rounding.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11274,7 +11284,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11338,6 +11348,28 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Calculate transparent 2×2 main/interaction contrasts only by exact factorial pairing for an observed scalar metric; suppress the contrast if a required point is absent, nonperiodic, undefined or incompatible, and preserve all four rows and scientific qualification.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-CSV-EXPORT-V1",
+      "description": "Export the selected cross-study comparison as a data-bearing CSV with exact source point values, classifications, identities, pair decisions and manifest hashes.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/cross-study-csv-export/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Provide a user-facing CSV export for the currently verified comparison; preserve raw numeric precision, source manifest/artifact hashes, exact RPM and unpaired reasons, with all unobserved/nonperiodic metrics blank and explicitly classified.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -15967,6 +15999,25 @@
       "task": "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-V1",
       "kind": "queue-replan",
       "summary": "Added exact 2×2 contrast reporting as a concrete next parametric-design capability; only defined compatible point data qualify and no-response cases remain explicitly unavailable."
+    },
+    {
+      "at": "2026-11-04T18:48:21+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1",
+      "kind": "completion",
+      "commit": "c7606df5b5a6ea1385412d4c81dbb6ea45acc9b2",
+      "summary": "Cross-study view verifies project manifests and source hashes, reimports exact artifacts, pairs only identical RPM/operating context, retains unmatched/transient points, and exports a provenance-bound HTML report. 44 full regressions pass; native Windows integration verified."
+    },
+    {
+      "at": "2026-11-04T18:48:21+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-DATA-EXPORT-V1",
+      "kind": "start",
+      "summary": "Started exact study-matrix CSV export; preserve full numeric values, point source identities and nonperiodic/missing states without altering artifacts."
+    },
+    {
+      "at": "2026-11-04T18:48:21+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-CSV-EXPORT-V1",
+      "kind": "queue-replan",
+      "summary": "Queued CSV export of the newly verified cross-study comparison as a separate reproducibility deliverable from single-study matrix export and HTML documentation."
     }
   ],
   "legacy_gate_status": {
