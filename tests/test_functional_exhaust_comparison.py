@@ -56,8 +56,8 @@ def test_desktop_edit_and_save_recover_comparison(tmp_path,monkeypatch):
     assert len(next(d for d in context.engine()['native_configuration']['ducts'] if d['id']=='exhaust')['mesh']['volumes'])==31
     widget=RunHistoryWidget(context,tmp_path)
     paths=[]
-    for name in ['a','b']:
-        path=tmp_path/(name+'.json');path.write_text(json.dumps(dict(bindings=dict(project_id=context.project['project_id']))));paths.append(str(path))
+    for name,variant in [('a','base'),('b','B_header_plus20')]:
+        path=tmp_path/(name+'.json');path.write_text(json.dumps(dict(bindings=dict(project_id=context.project['project_id'],variant_label=variant),preflight=dict(rpm=5000))));paths.append(str(path))
     widget.entries=[dict(result_path=p) for p in paths]
     monkeypatch.setattr(widget,'_selected',lambda:[0,1])
     assert widget.save_comparison()

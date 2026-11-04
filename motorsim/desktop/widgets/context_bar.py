@@ -39,7 +39,7 @@ class ContextBar(QWidget):
         for name in sorted(project["variants"]):self.baseline.addItem(name,name)
         baseline_index=self.baseline.findData(preferred)
         self.baseline.setCurrentIndex(baseline_index if baseline_index>=0 else 0);self.baseline.blockSignals(False)
-        self.saved.setText("● Cambios sin guardar" if dirty else "✓ Guardado")
+        self.saved.setText("Cambios sin guardar" if dirty else "Guardado")
 
     def _selected(self,index):
         if index>=0:self.variant_selected.emit(self.variant.itemData(index))

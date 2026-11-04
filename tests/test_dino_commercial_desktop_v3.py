@@ -7,6 +7,7 @@ import unittest
 from unittest.mock import patch
 import desktop_qsettings_isolation  # noqa: F401
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import Qt
 
 from motorsim.desktop.app import DinoDesktopWindow
 from motorsim.desktop.context import DesktopContext
@@ -134,7 +135,7 @@ class CommercialDesktopV3P0Tests(unittest.TestCase):
 
     def test_cylinder_timing_uses_area_transitions_and_exposes_existing_area_curve(self):
         page=EnginePage(DesktopContext(new_project("v3-port-timing")))
-        rows={page.timing.item(i,0).text():tuple(float(page.timing.item(i,j).text()) for j in range(1,4)) for i in range(page.timing.rowCount())}
+        rows={page.timing.item(i,0).data(Qt.ItemDataRole.UserRole):tuple(float(page.timing.item(i,j).text()) for j in range(1,4)) for i in range(page.timing.rowCount())}
         self.assertAlmostEqual(rows["main-exhaust"][0],94.2,delta=.1)
         self.assertAlmostEqual(rows["main-exhaust"][1],265.8,delta=.1)
         self.assertAlmostEqual(rows["primary-window"][0],99.0,delta=.1)

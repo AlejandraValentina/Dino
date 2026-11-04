@@ -112,6 +112,7 @@ def import_desktop_runs(paths):
             FMEP=None if loss is None else loss["friction_mep_pa"]/1000,
             indicated_power=c["indicated_power_W"]/1000,indicated_torque=c["indicated_torque_Nm"])
         row=dict(point_id=result["bindings"]["run_id"],variant_id=result["bindings"]["variant_label"],
+            project_id=result.get("bindings",{}).get("project_id"),
             run_id=result["bindings"]["run_id"],rpm=diag["bindings"]["rpm"],cycle=c["cycle"],
             cycles_completed=result["cycles_completed"],classification=result["classification"],
             periodicity=(diag["periodicity"] if periodic else "NOT_CONVERGED" if c["cycle"]>=2 else "INSUFFICIENT_CYCLES"),mode="ENGINEERING_EXPLORATORY",audit_status="NOT_PERFORMED",

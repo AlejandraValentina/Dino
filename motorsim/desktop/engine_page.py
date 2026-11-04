@@ -1,5 +1,5 @@
 from __future__ import annotations
-from .presentation import EngineeringNumberDelegate,PortRoleDelegate
+from .presentation import EngineeringNumberDelegate,PortRoleDelegate,format_number,state_label
 from copy import deepcopy
 import math
 from PySide6.QtCore import Qt,QPointF,Signal
@@ -12,6 +12,17 @@ from ..crankcase import CrankcaseGeometry
 from ..integrated_2t import SliderCrankChambers2T
 from ..gas1d.mesh import Mesh
 from .model_diagrams import PortGeometryView,PortTimingView,can_edit_opening,top_from_opening
+
+_PORT_LABELS={"inlet-window":"Admisión","primary-window":"Transferencia primaria",
+    "secondary-window":"Transferencia secundaria","boost-window":"Transferencia auxiliar",
+    "main-exhaust":"Escape principal","aux-exhaust":"Escape auxiliar"}
+_DUCT_LABELS={"intake":"Conducto de admisión","primary":"Transferencia primaria",
+    "secondary":"Transferencia secundaria","boost":"Transferencia auxiliar","exhaust":"Escape"}
+_LOSS_LABELS={"synthetic-piston-ring":"Pérdida de pistón y segmentos (sintética)",
+    "synthetic-bearing-accessory":"Pérdidas de cojinetes y accesorios (sintéticas)"}
+
+def _port_label(port_id,index=None):
+    return _PORT_LABELS.get(str(port_id),f"Lumbrera {index+1}" if index is not None else "Lumbrera")
 
 
 class CylinderSketch(QWidget):
@@ -26,7 +37,7 @@ class CylinderSketch(QWidget):
         p.setPen(QPen(QColor('#547088'),1,Qt.PenStyle.DashLine));p.drawLine(round(x),top,round(x+w),top)
         p.setPen(QPen(QColor('#7dd3fc'),3));p.drawLine(round(x),round(bottom),round(x+w),round(bottom))
         p.setPen(QColor('#cad8e7'));p.drawText(round(x+w)+8,top+10,'PMS');p.drawText(round(x+w)+8,round(bottom),'PMI')
-        p.setPen(QColor("#e5edf6"));p.setFont(QFont("Segoe UI",9));p.drawText(8,16,f"Ø {self.bore:g} mm");p.drawText(8,self.height()-5,f"Carrera {self.stroke:g} mm · biela {self.rod:g} mm")
+        p.setPen(QColor("#e5edf6"));p.setFont(QFont("Segoe UI",9));p.drawText(8,16,f"Ø {format_number(self.bore)} mm");p.drawText(8,self.height()-5,f"Carrera {format_number(self.stroke)} mm · biela {format_number(self.rod)} mm")
         p.end()
 
 
@@ -50,7 +61,7 @@ class PortAreaPlot(QWidget):
 class EnginePage(QWidget):
     component_state_changed=Signal()
     def __init__(self,context):
-        super().__init__();self.context=context;self.loading=False
+        super().__init__();self.context=context;self.loading=False;self._last_edited_component=None
         root=QVBoxLayout(self);root.setContentsMargins(12,10,12,10);root.setSpacing(7)
         title=QLabel("Motor");title.setObjectName("title");root.addWidget(title)
         title.setToolTip("Geometría y distribución derivada del modelo actual.")
@@ -109,13 +120,14 @@ class EnginePage(QWidget):
         intake_layout.addWidget(QLabel("Conductos rectos de sección circular constante. Se conserva la cantidad de volúmenes de la malla existente; el escape se edita en su pantalla."))
         self.ducts=QTableWidget(0,4);self.ducts.setObjectName("editableIntakeTransferDucts")
         self.ducts.setHorizontalHeaderLabels(["Conducto","Rol","Longitud (mm)","Diámetro (mm)"])
+        self.ducts.setItemDelegateForColumn(1,PortRoleDelegate(self.ducts))
         self.ducts.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.intake_duct_slot=QWidget();self.intake_duct_layout=QVBoxLayout(self.intake_duct_slot);self.intake_duct_layout.setContentsMargins(0,0,0,0);self.intake_duct_layout.addWidget(self.ducts)
         self.ducts.cellChanged.connect(self._duct_changed);intake_layout.addWidget(self.intake_duct_slot)
         self.reed_group=QGroupBox("Láminas · modelo cuasiestático activo");reed_layout=QVBoxLayout(self.reed_group)
         reed_layout.addWidget(QLabel("Masa, amortiguamiento y restitución no se editan: la configuración actual no usa el vínculo dinámico de láminas."))
         self.reeds=QTableWidget(0,6);self.reeds.setObjectName("effectiveStaticReedParameters")
-        self.reeds.setHorizontalHeaderLabels(["ID","Área presión (cm²)","Ancho (mm)","Rigidez (N/m)","Tope (mm)","Cd"])
+        self.reeds.setHorizontalHeaderLabels(["Lámina","Área presión (cm²)","Ancho (mm)","Rigidez (N/m)","Tope (mm)","Cd"])
         self.reeds.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.reeds.cellChanged.connect(lambda *_:self._mark_component(4,"modificado"));reed_layout.addWidget(self.reeds)
         intake_layout.addWidget(self.reed_group)
@@ -252,8 +264,9 @@ class EnginePage(QWidget):
                 diameter=math.sqrt(4*area/math.pi)
                 shown_length=f"{length*1000:.6g}" if constant_area else "Sección variable · no editable"
                 shown_diameter=f"{diameter*1000:.6g}" if constant_area else "—"
-                for col,value in enumerate((entry["id"],entry["role"],shown_length,shown_diameter)):
+                for col,value in enumerate((_DUCT_LABELS.get(entry["id"],"Conducto configurado"),entry["role"],shown_length,shown_diameter)):
                     item=QTableWidgetItem(str(value));item.setData(Qt.ItemDataRole.UserRole,entry["id"])
+                    if col==0:item.setToolTip(f"ID original: {entry['id']}")
                     if col<2:item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                     if col>=2 and not constant_area:
                         item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
@@ -263,9 +276,10 @@ class EnginePage(QWidget):
             self._duct_section_changed(self.component_tabs.currentIndex())
             petals=n.get("reed_petals",[]);self.reeds.blockSignals(True);self.reeds.setRowCount(len(petals))
             for row,petal in enumerate(petals):
-                values=(petal["id"],petal["pressure_area_m2"]*1e4,petal["effective_width_m"]*1000,petal["stiffness_n_m"],petal["lift_stop_m"]*1000,petal["discharge_coefficient"])
+                values=(f"Lámina {row+1}",petal["pressure_area_m2"]*1e4,petal["effective_width_m"]*1000,petal["stiffness_n_m"],petal["lift_stop_m"]*1000,petal["discharge_coefficient"])
                 for col,value in enumerate(values):
                     item=QTableWidgetItem(str(value));item.setData(Qt.ItemDataRole.UserRole,petal["id"])
+                    if col==0:item.setToolTip(f"ID original: {petal['id']}")
                     if col==0:item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                     self.reeds.setItem(row,col,item)
             self.reeds.blockSignals(False);self.reed_group.setEnabled(control=="reed" and n.get("dynamic_reed_binding") is None)
@@ -287,7 +301,7 @@ class EnginePage(QWidget):
             timing_by_id={port.id:self._area_timing(port_set,port) for port in port_set.ports}
             self.ports.blockSignals(True);self.ports.setRowCount(len(ports))
             for i,p in enumerate(ports):
-                names={'primary':'Transferencia primaria','secondary':'Transferencia secundaria','boost':'Transferencia auxiliar','main_exhaust':'Escape principal'}
+                names={'primary':'Transferencia primaria','secondary':'Transferencia secundaria','boost':'Transferencia auxiliar','main_exhaust':'Escape principal','main':'Escape principal','auxiliary':'Escape auxiliar','piston_port':'Admisión'}
                 label=names.get(p.get('feature'),p.get('name') or p['id'])
                 vals=[label,p['role'],p["top_mm"],p["height_mm"],p["width_mm"],p["discharge_coefficient"],p["roof_travel_mm"],*timing_by_id.get(p["id"],(None,None,None))]
                 reed_intake=(p["role"]=="intake" and n["geometry_identity"].get("gas_exchange_model",{}).get("intake_control")=="reed")
@@ -310,12 +324,12 @@ class EnginePage(QWidget):
             profile_rows=[]
             for profile in port_set.compile_profiles():
                 if profile.event_angles_deg:
-                    profile_rows.append(f"{profile.port_id}: " + ", ".join(f"{angle:g}°" for angle in profile.event_angles_deg))
+                    profile_rows.append(f"{_port_label(profile.port_id)}: " + ", ".join(f"{format_number(angle)}°" for angle in profile.event_angles_deg))
             ratio=stroke/bore;rod_ratio=cc["rod_length_mm"]/stroke;mean_speed=2*stroke/1000*cond["reference_rpm"]/60
             compression=float(slider["cylinder_compression_ratio"])
             clearance=swept/(compression-1.0)
             primary=1.0+swept/float(cc["volume_bdc_cm3"])
-            self.derived.setText(f"Cilindrada {swept:.1f} cm³ · cámara derivada {clearance:.2f} cm³ · compresión primaria {primary:.2f}:1 · S/D {ratio:.2f} · biela/carrera {rod_ratio:.2f} · Vm pistón {mean_speed:.2f} m/s")
+            self.derived.setText(f"Cilindrada {format_number(swept)} cm³ · cámara derivada {format_number(clearance)} cm³ · compresión primaria {format_number(primary)}:1 · S/D {format_number(ratio)} · biela/carrera {format_number(rod_ratio)} · Vm pistón {format_number(mean_speed)} m/s")
             self.derived.setToolTip("Distribución calculada por transiciones de área efectiva del backend; no son controles inversos.")
             timing_rows=[];area_series=[];area_rows=[]
             for port in port_set.ports:
@@ -323,31 +337,36 @@ class EnginePage(QWidget):
                     timing_rows.append(("Admisión por láminas · Δp",None,None,None))
                     continue
                 opening,closing,duration=self._area_timing(port_set,port)
-                timing_rows.append((port.id,opening,closing,duration))
-                area_series.append({"name":port.name,"points":[(angle,port_set.area_at(port,angle)) for angle in (*range(0,360,2),360)]})
+                timing_rows.append((_port_label(port.id,len(timing_rows)),opening,closing,duration))
+                area_series.append({"name":_port_label(port.id,len(area_series)),"points":[(angle,port_set.area_at(port,angle)) for angle in (*range(0,360,2),360)]})
                 events=port_set.event_angles(port)
                 for angle in events:
-                    area_rows.append((port.id,angle,port_set.area_at(port,angle)))
+                    area_rows.append((_port_label(port.id,len(area_rows)),angle,port_set.area_at(port,angle),port.id))
             self.timing.setRowCount(len(timing_rows))
             for i,row in enumerate(timing_rows):
-                values=(row[0],*("—" if value is None else f"{value:.1f}" for value in row[1:]))
+                values=(row[0],*("—" if value is None else format_number(value) for value in row[1:]))
                 for j,value in enumerate(values):
-                    item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable);self.timing.setItem(i,j,item)
+                    item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                    if j==0:item.setData(Qt.ItemDataRole.UserRole,port_set.ports[i].id);item.setToolTip(f"ID original: {port_set.ports[i].id}")
+                    self.timing.setItem(i,j,item)
             self.area_plot.set_series(area_series)
             reed=self.intake_control.currentData()=='reed'
             self.port_geometry.set_geometry(port_set,reed);self.port_timeline.set_events(port_set,reed)
             self._set_summary(port_set,values=None)
             self.port_areas.setRowCount(len(area_rows))
-            for i,(port_id,angle,area) in enumerate(area_rows):
-                for j,value in enumerate((port_id,f"{angle:g}",f"{area:.2f}")):
-                    item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable);self.port_areas.setItem(i,j,item)
+            for i,(port_id,angle,area,original_id) in enumerate(area_rows):
+                for j,value in enumerate((port_id,format_number(angle),format_number(area))):
+                    item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                    if j==0:item.setData(Qt.ItemDataRole.UserRole,original_id);item.setToolTip(f"ID original: {original_id}")
+                    self.port_areas.setItem(i,j,item)
             terms=doc["mechanical_loss_model"]["terms"];self.loss_model_draft=deepcopy(doc["mechanical_loss_model"])
             self.controls["load"].setEnabled(any(term["operating_map"] is not None for term in terms))
             self.losses.blockSignals(True);self.losses.setRowCount(len(terms))
             for i,term in enumerate(terms):
                 model="Fixed MEP" if term["mep_pa"] is not None else f"Mapa {len(term['operating_map']['rpm'])}×{len(term['operating_map']['load'])} (doble clic)"
-                for j,value in enumerate((term["id"],term["source"],term["mep_pa"] if term["mep_pa"] is not None else model,term["provenance"])):
+                for j,value in enumerate((_LOSS_LABELS.get(term["id"],"Término de pérdida"),state_label(term["source"]),term["mep_pa"] if term["mep_pa"] is not None else model,state_label(term["provenance"]))):
                     item=QTableWidgetItem(str(value))
+                    if j==0:item.setData(Qt.ItemDataRole.UserRole,term["id"]);item.setToolTip(f"ID original: {term['id']}")
                     if j!=2 or term["mep_pa"] is None:item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                     self.losses.setItem(i,j,item)
             self.losses.blockSignals(False)
@@ -358,6 +377,7 @@ class EnginePage(QWidget):
             self.validation.setText(f"No se pudo presentar la configuración: {exc}");self.apply_button.setEnabled(False)
         finally:
             self.loading=False
+            self._last_edited_component=None
             self.component_state_changed.emit()
 
     def _port_changed(self,row,column):
@@ -382,9 +402,9 @@ class EnginePage(QWidget):
         swept=math.pi*bore*bore/4*stroke/1000;clearance=swept/(v['cylinder_compression_ratio']-1)
         primary=1+swept/v['volume_bdc_cm3']
         self.cylinder_diagram.set_geometry(bore,stroke,rod)
-        description=f'Ø {bore:g} × {stroke:g} mm · biela {rod:g} mm · {swept:.2f} cm³\nCompresión {v["cylinder_compression_ratio"]:g}:1 · cámara derivada {clearance:.2f} cm³\nCárter PMI {v["volume_bdc_cm3"]:g} cm³ · compresión primaria {primary:.3f}:1'
+        description=f'Ø {format_number(bore)} × {format_number(stroke)} mm · biela {format_number(rod)} mm · {format_number(swept)} cm³\nCompresión {format_number(v["cylinder_compression_ratio"])}:1 · cámara derivada {format_number(clearance)} cm³\nCárter PMI {format_number(v["volume_bdc_cm3"])} cm³ · compresión primaria {format_number(primary)}:1'
         self.derived.setText(description)
-        self.crank_derived.setText(f'Cilindrada {swept:.2f} cm³ · V(PMS) {v["volume_bdc_cm3"]+swept:.2f} cm³ · compresión primaria {primary:.3f}:1')
+        self.crank_derived.setText(f'Cilindrada {format_number(swept)} cm³ · V(PMS) {format_number(v["volume_bdc_cm3"]+swept)} cm³ · compresión primaria {format_number(primary)}:1')
         state='Configuración cargada' if self.loading else 'BORRADOR SIN APLICAR'
         self.summary.setText(self.context.engine().get('display_name','Motor')+'\n'+description+'\nAdmisión: '+self.intake_control.currentText()+'\n'+state+' · sin validación experimental. Fuentes desconocidas conservadas en Avanzado.')
 
@@ -405,19 +425,24 @@ class EnginePage(QWidget):
                 if events[0] is not None and can_edit_opening(port):flags|=Qt.ItemFlag.ItemIsEditable
                 item.setFlags(flags)
                 for j,value in enumerate(events,7):self.ports.item(i,j).setText('—' if value is None else f'{value:.8g}')
-                for j,value in enumerate((port.id,*events)):
-                    cell=QTableWidgetItem('—' if value is None else str(value));cell.setFlags(cell.flags() & ~Qt.ItemFlag.ItemIsEditable);self.timing.setItem(i,j,cell)
+                for j,value in enumerate((_port_label(port.id,i),*events)):
+                    cell=QTableWidgetItem('—' if value is None else format_number(value) if isinstance(value,(int,float)) else str(value));cell.setFlags(cell.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                    if j==0:cell.setData(Qt.ItemDataRole.UserRole,port.id);cell.setToolTip(f"ID original: {port.id}")
+                    self.timing.setItem(i,j,cell)
             self.ports.blockSignals(False)
-            areas=[(port.id,angle,port_set.area_at(port,angle)) for port in port_set.ports if not (reed and port.role=='intake') for angle in port_set.event_angles(port)]
+            areas=[(_port_label(port.id,index),angle,port_set.area_at(port,angle),port.id) for index,port in enumerate(port_set.ports) if not (reed and port.role=='intake') for angle in port_set.event_angles(port)]
             self.port_areas.setRowCount(len(areas))
-            for i,(port_id,angle,area) in enumerate(areas):
-                for j,value in enumerate((port_id,f'{angle:g}',f'{area:.2f}')):
-                    cell=QTableWidgetItem(value);cell.setFlags(cell.flags() & ~Qt.ItemFlag.ItemIsEditable);self.port_areas.setItem(i,j,cell)
+            for i,(port_id,angle,area,original_id) in enumerate(areas):
+                for j,value in enumerate((port_id,format_number(angle),format_number(area))):
+                    cell=QTableWidgetItem(value);cell.setFlags(cell.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                    if j==0:cell.setData(Qt.ItemDataRole.UserRole,original_id);cell.setToolTip(f"ID original: {original_id}")
+                    self.port_areas.setItem(i,j,cell)
         except Exception as exc:
             self.ports.blockSignals(False);self.validation.setText('Borrador inválido: '+str(exc)+' · diagramas: última geometría válida.');self._mark_component(1,'rechazada')
 
     def _mark_component(self,index,status):
         if self.loading:return
+        self._last_edited_component=index
         self.component_tabs.setTabText(index,f"{self.component_names[index]} · {status}")
         self.component_state_changed.emit()
 
@@ -557,7 +582,8 @@ class EnginePage(QWidget):
                 if mix!=exchange.get("mixed_outflow_fraction"):
                     exchange["mixed_outflow_fraction"]=mix;design_inputs["mixed_outflow_fraction"]={"classification":"UNKNOWN","rationale":"Parámetro editado en Desktop; clasificá la fuente."}
             for row in range(self.reeds.rowCount()):
-                petal=next((p for p in native.get("reed_petals",[]) if p["id"]==self.reeds.item(row,0).text()),None)
+                original_id=self.reeds.item(row,0).data(Qt.ItemDataRole.UserRole)
+                petal=next((p for p in native.get("reed_petals",[]) if p["id"]==original_id),None)
                 if petal is None:continue
                 fields=((1,"pressure_area_m2",1e-4),(2,"effective_width_m",1e-3),(3,"stiffness_n_m",1.0),(4,"lift_stop_m",1e-3),(5,"discharge_coefficient",1.0))
                 changed=False
@@ -593,9 +619,13 @@ class EnginePage(QWidget):
             doc["provenance"]={**doc["provenance"],"desktop_initial_state_policy":"PRESERVE_PRIMITIVE_STATE_AND_SPECIES_FRACTIONS_ON_GEOMETRY_EDIT; SYNTHETIC_ASSUMPTION"}
             validate(doc);self.context.replace_engine(doc);self.validation.setText("Validación correcta sin pasos de solver.\nCambios aplicados como borrador sintético; provenance disponible en Evidencia.")
             for i,name in enumerate(self.component_names):self.component_tabs.setTabText(i,f"{name} · válido")
+            self._last_edited_component=None
             self.component_state_changed.emit()
         except Exception as exc:
             self.validation.setText(f"Edición rechazada; no se guardó como válida. {type(exc).__name__}: {exc}")
+            index=self._last_edited_component
+            if index is None:index=self.component_tabs.currentIndex()
+            self.component_tabs.setTabText(index,f"{self.component_names[index]} · rechazada")
             self.component_state_changed.emit()
 
     @staticmethod

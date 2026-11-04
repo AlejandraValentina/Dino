@@ -165,7 +165,7 @@ class DinoDesktopWindow(QMainWindow):
         self.prepare_button=QPushButton("Preparar…");self.prepare_button.setObjectName("prepareRunPanel");self.prepare_button.clicked.connect(self._show_execution_panel);strip.addWidget(self.prepare_button)
         self.strip_run=execution.start;self.strip_run.setText("Iniciar corrida…");self.strip_run.setMinimumWidth(150);strip.addWidget(self.strip_run)
         self.strip_cancel=QPushButton("Cancelar");self.strip_cancel.setEnabled(False);self.strip_cancel.clicked.connect(execution.cancel_run);strip.addWidget(self.strip_cancel)
-        self.strip_more=QPushButton('Más ▾');self.strip_more.setToolTip('Barrido RPM y recuperación')
+        self.strip_more=QPushButton('Más opciones');self.strip_more.setToolTip('Barrido RPM y recuperación')
         from PySide6.QtWidgets import QMenu
         menu=QMenu(self.strip_more)
         for label,callback in (('Barrido RPM / A/B…',execution.start_power_curve),('Reanudar checkpoint seleccionado…',lambda:execution.start_run(resume=True)),('Reanudar barrido…',execution.resume_power_curve)):
@@ -290,15 +290,16 @@ class DinoDesktopWindow(QMainWindow):
             state=status_by_tab[i] if i<len(status_by_tab) else "complete"
             invalid=(not valid) or "rechazada" in state or state=="invalid"
             modified=("modificado" in state) or state=="modified" or (self.context.dirty and i==self.component_nav.currentIndex())
-            icon="✕" if invalid else ("●" if modified else "✓")
-            self.component_nav.setTabText(i,f"{icon} {title}")
-            self.model_selector.setItemText(self.model_selector.findData(i),f'{icon} {title}')
+            state="Revisar" if invalid else ("Editado" if modified else "Listo")
+            self.component_nav.setTabText(i,f"{state} · {title}")
+            self.model_selector.setItemText(self.model_selector.findData(i),f'{state} · {title}')
             self.component_nav.setTabToolTip(i,"Error o configuración no válida" if invalid else ("Cambios pendientes de aplicar" if modified else "Configuración disponible"))
     def _update_evidence(self,*_):
         if not hasattr(self,"evidence_text"):return
         kind=getattr(self.results,"source_kind",None)
         source_labels={"EXPLORATORY":"Corridas EXPLORATORY importadas",
             "HISTORICAL_IMPL2":"Evidencia histórica IMPL2 sintética",
+            "LEGACY_HISTORICAL":"Resumen de corrida histórica heredada",
             "IMPORTED_EXTERNAL":"Datos importados externamente"}
         lines=["Proyecto abierto: "+self.context.project["project_id"],
             "Origen del conjunto: "+source_labels.get(kind,"No informado por la fuente"),

@@ -16,7 +16,7 @@ from .preferences import artifact_root,impl2_historical_report_candidate,setting
 from ..exploratory_workflow import import_exploratory_runs
 from .. import measurement_data
 from ..engine_project import validate_project
-from .presentation import state_label as _state_label
+from .presentation import display_value,format_number,state_label as _state_label
 
 METRICS={"Potencia de freno (kW)":"brake_power","Torque (N·m)":"brake_torque","IMEP (kPa)":"IMEP","FMEP (kPa)":"FMEP","BMEP (kPa)":"BMEP","BSFC (g/kWh)":"BSFC"}
 
@@ -91,17 +91,17 @@ class DiscreteAngleCellMap(QWidget):
         p.setPen(QColor("#cad8e7"));p.drawText(6,r.center().y(),90,18,Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter,"Celdas reales")
         low_angle=self.angles[0] if self.angles else 0.;high_angle=self.angles[-1] if self.angles else 0.
         for i in range(5):
-            angle=low_angle+(high_angle-low_angle)*i/4;x=r.left()+i/4*r.width();p.drawText(round(x)-28,r.bottom()+18,56,16,Qt.AlignmentFlag.AlignCenter,f"{angle:g}°")
+            angle=low_angle+(high_angle-low_angle)*i/4;x=r.left()+i/4*r.width();p.drawText(round(x)-28,r.bottom()+18,56,16,Qt.AlignmentFlag.AlignCenter,f"{format_number(angle)}°")
         p.drawText(r.left(),self.height()-5,"Ángulo muestreado · bandas discretas, sin interpolación")
         low,high=self.value_range or (0,1);bar=r.adjusted(r.width()+22,0,r.width()+52,0)
         for y in range(max(0,bar.top()),min(self.height(),bar.bottom()+1)):
             f=1-(y-bar.top())/max(bar.height(),1);p.setPen(self._color(f));p.drawLine(bar.left(),y,bar.right(),y)
-        p.setPen(QColor("#cad8e7"));p.drawText(bar.left()-70,bar.top(),64,15,Qt.AlignmentFlag.AlignRight,f"{high:.4g}");p.drawText(bar.left()-70,bar.bottom(),64,15,Qt.AlignmentFlag.AlignRight,f"{low:.4g}");p.end()
+        p.setPen(QColor("#cad8e7"));p.drawText(bar.left()-70,bar.top(),64,15,Qt.AlignmentFlag.AlignRight,format_number(high,5));p.drawText(bar.left()-70,bar.bottom(),64,15,Qt.AlignmentFlag.AlignRight,format_number(low,5));p.end()
 
 class ResultsPage(QWidget):
     evidence_updated=Signal()
     def __init__(self,context):
-        super().__init__();self.context=context;self.dataset=None;self.source=None;self.loading=False
+        super().__init__();self.context=context;self.dataset=None;self.source=None;self.loading=False;self._selected_point_id=None
         self._project_reference_signature=None
         root=QVBoxLayout(self);root.setContentsMargins(12,10,12,10);root.setSpacing(6)
         title=QLabel("Resultados");title.setObjectName('title');root.addWidget(title)
@@ -229,6 +229,10 @@ class ResultsPage(QWidget):
         if index<0:index=self.baseline_selector.findData(self.context.selected_variant or "base")
         self.baseline_selector.setCurrentIndex(index if index>=0 else 0);self.baseline_selector.blockSignals(False)
         self._reload_measurement_references()
+        if self.dataset and self.dataset.get("points"):
+            selected=next((row for row in self.dataset["points"]
+                           if row.get("point_id")==self._selected_point_id),self.dataset["points"][0])
+            self.show_point(selected)
 
     def _reload_measurement_references(self):
         loaded=[];errors=[]
@@ -339,7 +343,8 @@ class ResultsPage(QWidget):
         for row,data in enumerate(comparison["rows"]):
             values=(data["key"],data["measured"],data["uncertainty"],data["simulated"],data["difference"])
             for column,value in enumerate(values):
-                shown="—" if value is None else (str(value) if isinstance(value,tuple) else f"{value:g}")
+                shown=("—" if value is None else " / ".join(format_number(part) for part in value)
+                       if isinstance(value,tuple) else format_number(value))
                 item=QTableWidgetItem(shown);item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable);self.measurement_table.setItem(row,column,item)
         self.measurement_notice.setText(f"{meta['kind']} · {meta['canonical_value_unit']} · {meta['provenance']} · {meta['engine']} · {meta['configuration']} · {meta['conditions']} · {comparison['metrics']['matched_count']} coincidencias exactas · sin interpolación. {comparison['notice']}")
         run_ids=sorted({str(row.get("run_id")) for row in self.dataset.get("points",[]) if row.get("variant_id")==variant and row.get("run_id")})
@@ -434,8 +439,8 @@ class ResultsPage(QWidget):
                         label=f"{escape_sections(candidate)[section_index]['name']} · {label}"
                     except (ValueError,IndexError,KeyError):pass
                 before=change.get("before");after=change.get("after");unit=change.get("unit","")
-                fmt=lambda x: f"{x:g}" if isinstance(x,(int,float)) else str(x)
-                delta=f"{after-before:+g} {unit}".strip() if isinstance(before,(int,float)) and isinstance(after,(int,float)) else "—"
+                fmt=lambda x: format_number(x) if isinstance(x,(int,float)) else str(x)
+                delta=f"{format_number(after-before,signed=True)} {unit}".strip() if isinstance(before,(int,float)) and isinstance(after,(int,float)) else "—"
                 state="Geometría del proyecto" if any(k in path for k in ("geometry_identity","slider_crank","port_binding")) else "Configuración declarada"
                 rows.append((label,f"{fmt(before)} {unit}".strip(),f"{fmt(after)} {unit}".strip(),delta,state))
                 if len(rows)>=12:break
@@ -459,16 +464,16 @@ class ResultsPage(QWidget):
                 defined=bs=="DEFINED" and cs=="DEFINED" and isinstance(bval,(int,float)) and isinstance(cval,(int,float))
                 unit={"Potencia de freno":"kW","Torque":"N·m","BMEP":"kPa","IMEP":"kPa","FMEP":"kPa"}[label]
                 reason="Definido" if defined else str(c.get(key+"_reason") or b.get(key+"_reason") or "No definido por el artifact")
-                rows.append((label,f"{bval:g} {unit}" if defined else "—",f"{cval:g} {unit}" if defined else "—",f"{cval-bval:+g} {unit}" if defined else "—",reason))
+                rows.append((label,f"{format_number(bval)} {unit}" if defined else "—",f"{format_number(cval)} {unit}" if defined else "—",f"{format_number(cval-bval,signed=True)} {unit}" if defined else "—",reason))
             if b.get('transient_estimates') is not None and c.get('transient_estimates') is not None:
                 for label,key,unit in (("Potencia transitoria","brake_power","kW"),("Torque transitorio","brake_torque","N·m")):
                     x=b['transient_estimates'].get(key);y=c['transient_estimates'].get(key)
                     if isinstance(x,(int,float)) and isinstance(y,(int,float)):
-                        rows.append((label,f"{x:.4g} {unit}",f"{y:.4g} {unit}",f"{y-x:+.4g} {unit}","NO CONVERGIDO; diferencia transitoria, no ganancia confirmada" if _nonconverged(b) or _nonconverged(c) else "Estimación de ingeniería"))
+                        rows.append((label,f"{format_number(x,5)} {unit}",f"{format_number(y,5)} {unit}",f"{format_number(y-x,5,signed=True)} {unit}","NO CONVERGIDO; diferencia transitoria, no ganancia confirmada" if _nonconverged(b) or _nonconverged(c) else "Estimación de ingeniería"))
                 for label in ("Trabajo indicado (J/ciclo)","Aire atrapado al cierre (mg)","Calor de combustión (J/ciclo)"):
                     x=b.get('engineering_diagnostics',{}).get(label);y=c.get('engineering_diagnostics',{}).get(label)
                     if isinstance(x,(int,float)) and isinstance(y,(int,float)):
-                        rows.append((label,f"{x:.4g}",f"{y:.4g}",f"{y-x:+.4g}","Último ciclo; no atribución estacionaria"))
+                        rows.append((label,format_number(x,5),format_number(y,5),format_number(y-x,5,signed=True),"Último ciclo; no atribución estacionaria"))
             identity_fields=("solver_identity_sha256","implementation_identity_sha256")
             identity_known=any(b.get(key) is not None and c.get(key) is not None for key in identity_fields)
             identity_matches=identity_known and all(b.get(key)==c.get(key) for key in identity_fields if b.get(key) is not None and c.get(key) is not None)
@@ -476,7 +481,7 @@ class ResultsPage(QWidget):
             if not identity_known:condition+="; identidad del solver por punto no informada"
             elif not identity_matches:condition+="; identidad del solver distinta"
             if _nonconverged(b) or _nonconverged(c):condition+="; TRANSITORIOS: no demuestra ganancia de potencia del escape"
-            self.compare_notice.setText(f"{baseline_name} vs {candidate_name} · {b.get('rpm'):g} RPM · {condition}. La identidad de configuración conserva las diferencias geométricas mostradas.")
+            self.compare_notice.setText(f"{baseline_name} vs {candidate_name} · {format_number(b.get('rpm'))} RPM · {condition}. La identidad de configuración conserva las diferencias geométricas mostradas.")
         else:
             self.compare_notice.setText(f"{baseline_name} vs {candidate_name}: sin par de corridas a la misma RPM. Se muestra sólo el diff geométrico del proyecto; no se comparan métricas entre condiciones distintas.")
         self.compare_table.setRowCount(len(rows))
@@ -521,7 +526,7 @@ class ResultsPage(QWidget):
         elif parts[-1]=="bore_mm":label="Diámetro de cilindro"
         elif parts[-1]=="stroke_mm":label="Carrera"
         elif parts[-1]=="rod_length_mm":label="Longitud de biela"
-        def fmt(value):return f"{value:g}" if isinstance(value,(int,float)) else str(value)
+        def fmt(value):return format_number(value) if isinstance(value,(int,float)) else str(value)
         return f"{label}: {fmt(before)} → {fmt(after)} {unit}".strip()
 
     def _update_condition_notice(self):
@@ -573,7 +578,7 @@ class ResultsPage(QWidget):
         self.trace_metric.blockSignals(True);self.trace_metric.clear()
         traces=data.get("traces",[])
         self.trace_rpm.blockSignals(True);self.trace_rpm.clear();self.trace_rpm.addItem('Todas las RPM',None)
-        for rpm in sorted({t['rpm'] for t in traces}):self.trace_rpm.addItem(f'{rpm:g} RPM',rpm)
+        for rpm in sorted({t['rpm'] for t in traces}):self.trace_rpm.addItem(f'{format_number(rpm)} RPM',rpm)
         self.trace_rpm.blockSignals(False)
         common=(set.intersection(*(set(row.get("channels",{})) for row in traces)
                                  if traces else [set()]))
@@ -607,8 +612,12 @@ class ResultsPage(QWidget):
             except (OSError,ValueError):pass
         self.loading=True;self.trace_group.hide();self.path_label.setText(f"Cargando {path}…")
         def done(data):
-            self.dataset=data;self.source=path;self.source_kind="HISTORICAL_IMPL2" if historical else "IMPORTED_EXTERNAL"
-            if historical:
+            self.dataset=data;self.source=path
+            legacy=data.get("schema")=="DINO_DESKTOP_LEGACY_HISTORICAL_SUMMARY_V1"
+            self.source_kind="LEGACY_HISTORICAL" if legacy else "HISTORICAL_IMPL2" if historical else "IMPORTED_EXTERNAL"
+            if legacy:
+                self.source_notice.setText("Resultado heredado · sólo resumen almacenado · sin curva de potencia/torque ni validación experimental. El estado científico original se conserva.")
+            elif historical:
                 self.source_notice.setText("EVIDENCIA HISTÓRICA IMPL2 · sintética · importada explícitamente · no pertenece a la corrida actual de este proyecto · validación experimental no realizada.")
             else:
                 self.source_notice.setText(f"Datos importados desde fuera del proyecto {self.context.project['project_id']}. Se conservan su provenance, identidades, huecos y clasificaciones originales.")
@@ -625,7 +634,7 @@ class ResultsPage(QWidget):
     def _dataset_summary(self):
         rows=self.dataset.get('points',[]) if self.dataset else []
         states=sorted({_state_label(row.get('classification')) or 'Sin clasificación' for row in rows})
-        kind='Histórico sintético' if getattr(self,'source_kind',None)=='HISTORICAL_IMPL2' else 'Resultados exploratorios / importados'
+        kind={'HISTORICAL_IMPL2':'Histórico sintético','LEGACY_HISTORICAL':'Histórico heredado · sin métricas de prestaciones'}.get(getattr(self,'source_kind',None),'Resultados exploratorios / importados')
         self.run_summary.setText(f"{kind} · {len(rows)} puntos · {'; '.join(states)}")
         for table in (self.point_table,self.power_curves.points):
             table.setCurrentCell(-1,-1);table.clearSelection()
@@ -657,9 +666,9 @@ class ResultsPage(QWidget):
             if isinstance(cons,dict) and cons and all(value in ("PASS",True) for value in cons.values()):cons_state="PASS"
             elif isinstance(cons,dict) and any(value=="FAIL" or (isinstance(value,dict) and value.get("status")=="FAIL") for value in cons.values()):cons_state="FAIL"
             else:cons_state="REPORTADA" if cons else "NO REPORTADA"
-            values=[row['variant_id'],row['rpm'],_state_label(row['classification']),_state_label(periodicity),
+            values=[row['variant_id'],format_number(row['rpm']),_state_label(row['classification']),_state_label(periodicity),
                     _state_label(row.get('audit_status','NOT_REPORTED')),row.get('cycles_completed'),cons_state,
-                    row.get('BMEP') if row.get('BMEP_status')=='DEFINED' else None]
+                    format_number(row.get('BMEP')) if row.get('BMEP_status')=='DEFINED' and row.get('BMEP') is not None else None]
             for j,value in enumerate(values):
                 item=QTableWidgetItem('—' if value is None else str(value));item.setData(Qt.ItemDataRole.UserRole,row);self.point_table.setItem(i,j,item)
         self.point_table.blockSignals(False)
@@ -681,7 +690,7 @@ class ResultsPage(QWidget):
             if self.trace_rpm.currentData() is not None and trace.get('rpm')!=self.trace_rpm.currentData():continue
             channel=trace.get("channels",{}).get(key)
             if not isinstance(channel,dict):continue
-            name=f"{trace['variant_id']} · {trace['rpm']:g} RPM · ciclo {trace['cycle']}"
+            name=f"{trace['variant_id']} · {format_number(trace['rpm'])} RPM · ciclo {trace['cycle']}"
             labels.append(name)
             pressure=key.endswith("pressure_pa")
             unit="bar abs" if pressure else channel.get("unit","")
@@ -725,7 +734,7 @@ class ResultsPage(QWidget):
             rows.append({"label":entry["label"],"group":f"{entry['trace'].get('variant_id')} · {entry['trace'].get('run_id')} · {entry['trace'].get('cycle')}","length_mm":entry["length_mm"],"position_m":entry["position_m"],"values":[entry["values_by_angle"].get(angle) for angle in ordered]})
         self.trace_map.set_grid(ordered,rows)
         value_range=self.trace_map.value_range
-        self.trace_map_legend.setText((f"Mapa discreto posición × ángulo · escala {value_range[0]:.6g}–{value_range[1]:.6g} · celdas reales en bandas proporcionales · muestras exactas, sin interpolar." if value_range else "Mapa discreto posición × ángulo · no hay muestras numéricas disponibles; no se interpolan ni se sustituyen datos ausentes."))
+        self.trace_map_legend.setText((f"Mapa discreto posición × ángulo · escala {format_number(value_range[0],5)}–{format_number(value_range[1],5)} · celdas reales en bandas proporcionales · muestras exactas, sin interpolar." if value_range else "Mapa discreto posición × ángulo · no hay muestras numéricas disponibles; no se interpolan ni se sustituyen datos ausentes."))
         self.trace_map.setToolTip("QImage construido con muestras originales. Cada banda representa una celda espacial y cada bloque coloreado conserva un valor muestreado; las ausencias quedan vacías.")
 
     def _trace_positions(self,trace,family):
@@ -743,14 +752,15 @@ class ResultsPage(QWidget):
         if data:self.show_point({"point":data,"rpm":data['rpm'],"value":None})
     def show_point(self,point):
         row=point.get('point',point)
+        self._selected_point_id=row.get("point_id")
         if row.get('rpm') is not None:
             index=self.trace_rpm.findData(row['rpm'])
             if index>=0:self.trace_rpm.setCurrentIndex(index)
         def card(label,key,unit):
             status=row.get(key+"_status");value=row.get(key)
-            if status=="DEFINED" and value is not None:return f"{label}\n{float(value):.4g} {unit}"
+            if status=="DEFINED" and value is not None:return f"{label}\n{format_number(value,5)} {unit}"
             transient=row.get("transient_estimates",{}).get(key)
-            if transient is not None:return f"{label}\n{transient:.4g} {unit} · TRANSITORIO, NO CONVERGIDO"
+            if transient is not None:return f"{label}\n{format_number(transient,5)} {unit} · TRANSITORIO, NO CONVERGIDO"
             reason=row.get(key+"_reason") or row.get(key+"_status") or "No reportado"
             return f"{label}\nNo definido · {_state_label(reason)}"
         self.metric_cards[0].setText(card("Potencia","brake_power","kW"))
@@ -759,39 +769,47 @@ class ResultsPage(QWidget):
         self.metric_cards[3].setText(f"Auditoría\n{_state_label(row.get('audit_status','NOT_REPORTED'))}")
         self.metric_cards[3].setToolTip(f"Código original: {row.get('audit_status','NOT_REPORTED')}\nRecomputada: {_state_label(row.get('audit_recomputed','NOT_REPORTED'))}. Detalle completo en Trazabilidad.")
         conservation=row.get('conservation')
-        conservation_label=("balance interno · máx. residuo relativo "+format(max(conservation['relative'].values()),'.2g') if isinstance(conservation,dict) and conservation.get('relative') else 'reportada' if conservation else 'no reportada')
-        kind='Histórico sintético · ' if getattr(self,'source_kind',None)=='HISTORICAL_IMPL2' else 'Resultado exploratorio / importado · '
-        self.run_summary.setText(kind+f"{row.get('variant_id','Variante no informada')} · {row.get('rpm','—')} RPM · {_state_label(row.get('classification'))} · periodicidad {_state_label(row.get('periodicity') or row.get('classification'))} · {conservation_label}")
+        conservation_label=("balance interno · máx. residuo relativo "+format_number(max(conservation['relative'].values()),3) if isinstance(conservation,dict) and conservation.get('relative') else 'reportada' if conservation else 'no reportada')
+        kind={'HISTORICAL_IMPL2':'Histórico sintético · ','LEGACY_HISTORICAL':'Histórico heredado · '}.get(getattr(self,'source_kind',None),'Resultado exploratorio / importado · ')
+        self.run_summary.setText(kind+f"{row.get('variant_id','Variante no informada')} · {format_number(row.get('rpm'))} RPM · {_state_label(row.get('classification'))} · periodicidad {_state_label(row.get('periodicity') or row.get('classification'))} · {conservation_label}")
         periodicity=row.get('periodicity')
         if periodicity is None:
             periodicity=row.get('classification') if row.get('classification') in {"PERIOD_1","PERIOD_2"} else "NOT_REPORTED"
-        items=[("Proyecto abierto",self.context.project["project_id"]), ("RPM",row.get('rpm')), ("Variante",row.get('variant_id')),
+        items=[("Proyecto del resultado",row.get('project_id') or 'No informado en el artefacto'),
+            ("Proyecto abierto",self.context.project["project_id"]), ("RPM",row.get('rpm')), ("Variante",row.get('variant_id')),
             ("Modo",row.get('mode','NOT_REPORTED · historical aggregate')),
             ("Clasificación",row.get('classification')), ("Periodicidad",periodicity),
             ("Auditoría primaria",row.get('audit_status','NOT_REPORTED')),
             ("Auditoría recomputada",row.get('audit_recomputed','NOT_REPORTED')),
+            ("Auditoría registrada en el artifact heredado",row.get('historical_audit_status')),
+            ("Gate registrado en el artifact heredado",row.get('historical_hard_gate')),
+            ("Ciclos registrados",row.get('legacy_cycle_summary')),
             ("Resultado SHA-256",row.get('result_sha256')), ("Primario SHA-256",row.get('primary_sha256')),
             ("Configuración SHA-256",row.get('point_configuration_sha256')),
             ("Checkpoint SHA-256",row.get('checkpoint_sha256')),
-            ("Artifact directory",row.get('artifact_directory')),
-            ("Condiciones de operación",json.dumps(row.get('operating_conditions'),ensure_ascii=False,sort_keys=True)),
+            ("Carpeta de artifacts",row.get('artifact_directory')),
+            ("Condiciones de operación",row.get('operating_conditions')),
             ("Ciclos completados",row.get('cycles_completed')),
             ("Tiempo acumulado (s)",row.get('elapsed_seconds')),
-            ("Estabilidad observada; no sustituye periodicidad global",json.dumps(row.get('stability_observed'),ensure_ascii=False)),
+            ("Estabilidad observada; no sustituye periodicidad global",row.get('stability_observed')),
             ("Métrica",row.get(METRICS[self.metric_selector.currentText()])),
             ("Estado métrica",row.get(METRICS[self.metric_selector.currentText()]+'_status')),
             ("Motivo",row.get(METRICS[self.metric_selector.currentText()]+'_reason')),
-            ("Conservación",json.dumps(row.get('conservation'),ensure_ascii=False,sort_keys=True)),
-            ("Hard gates",json.dumps(row.get('hard_gates'),ensure_ascii=False,sort_keys=True)),
+            ("Conservación",row.get('conservation')),
+            ("Puertas de plausibilidad",row.get('hard_gates')),
             ("Validación experimental",row.get('experimental_validation',self.dataset.get('experimental_validation','NOT_REPORTED'))),
-            ("Provenance",self.dataset.get('provenance','No informada'))]
+            ("Procedencia",self.dataset.get('provenance','No informada'))]
         gates=row.get('hard_gates')
         items=list(row.get("engineering_diagnostics",{}).items())+items
         if isinstance(gates,dict) and "status" not in gates:
-            items.extend((f"Hard gate · {name}",json.dumps(value,ensure_ascii=False,sort_keys=True))
+            items.extend((f"Puerta de plausibilidad · {name}",value)
                          for name,value in sorted(gates.items()))
         self.details.setRowCount(len(items))
-        for i,(a,b) in enumerate(items):self.details.setItem(i,0,QTableWidgetItem(str(a)));self.details.setItem(i,1,QTableWidgetItem("—" if b is None else str(b)))
+        for i,(a,b) in enumerate(items):
+            left=QTableWidgetItem(_state_label(a));right=QTableWidgetItem(display_value(b))
+            raw=(str(b) if b is not None else 'No informado')
+            if raw!=right.text():right.setToolTip(f"Dato original: {raw}")
+            self.details.setItem(i,0,left);self.details.setItem(i,1,right)
         self.evidence_updated.emit()
     def export_csv(self):
         if not self.dataset:return

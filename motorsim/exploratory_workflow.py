@@ -722,6 +722,7 @@ def import_exploratory_runs(paths: list[str | Path]) -> dict:
             raise ValueError("exploratory periodicity diagnostic contract/threshold mismatch")
         periodicity_detector = PeriodicDetectorV2()
         variant_id=f"{binding.get('project_id')} / {binding.get('variant_label')}"
+        project_id=binding.get('project_id')
         rpm=result.get("preflight",{}).get("rpm")
         verified_cycles=[]
         for index,(cycle,manifest_cycle) in enumerate(zip(cycles,manifest_cycles),1):
@@ -814,7 +815,7 @@ def import_exploratory_runs(paths: list[str | Path]) -> dict:
                 raise ValueError("exploratory periodicity diagnostics differ from canonical replay")
 
         if count==0:
-            gap={"point_id":binding.get("run_id"),"variant_id":variant_id,"rpm":rpm,
+            gap={"point_id":binding.get("run_id"),"project_id":project_id,"variant_id":variant_id,"rpm":rpm,
                  "classification":result.get("classification"),"cycles_completed":0,
                  "result_sha256":result.get("result_sha256"),
                  "point_configuration_sha256":binding.get("configuration_sha256"),
@@ -838,7 +839,7 @@ def import_exploratory_runs(paths: list[str | Path]) -> dict:
         for cycle,audit,primary,output in verified_cycles:
             metrics=output.get("cycle_metrics",{})
             row={"point_id":f"{binding.get('run_id')}@cycle-{cycle.get('cycle')}",
-                 "variant_id":variant_id,"rpm":rpm,
+                 "project_id":project_id,"variant_id":variant_id,"rpm":rpm,
                  "classification":result.get("classification"),
                  "cycles_completed":result.get("cycles_completed"),
                  "result_sha256":result.get("result_sha256"),

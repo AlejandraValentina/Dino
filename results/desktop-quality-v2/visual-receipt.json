@@ -1,0 +1,109 @@
+{
+  "application": "DinoDesktopWindow; source build",
+  "project": {
+    "path": "examples/projects/dino-2t-starter.dino2t.json",
+    "project_id": "dino-2t-starter"
+  },
+  "real_historical_artifact": {
+    "path": "results\\engine-physics-v1\\campaign-evidence-r3\\engine_a_3000\\result.json",
+    "sha256": "6ebdcdb4ea1fbda4d689758d771068fd2f813ec13f6f2d0ee352b52d93e4a0a4",
+    "classification": "NO_CONVERGENCE_WITHIN_HORIZON",
+    "periodicity": "NOT_CONVERGED",
+    "performance_metrics": "absent in legacy artifact; displayed as undefined"
+  },
+  "synthetic_curve_fixture": {
+    "path": "results\\desktop-windows-rc10-integrated\\packaged-historical.json",
+    "sha256": "c35d56091c0a4f1045c5863e5733aeca747047045a8f58f516acbd3f87e7513d",
+    "points": 30,
+    "purpose": "presentation only; not scientific evidence"
+  },
+  "captures": [
+    {
+      "path": "results\\desktop-quality-v2\\captures\\modelo-proyecto-real-980x680.png",
+      "size": [
+        980,
+        680
+      ],
+      "sha256": "77aa863e7af9e8fd44525897cb89857d23b15bc8ce9fc343deb658746dce5ec1",
+      "bytes": 66752
+    },
+    {
+      "path": "results\\desktop-quality-v2\\captures\\simular-configuracion-real-980x680.png",
+      "size": [
+        980,
+        680
+      ],
+      "sha256": "0550333faf089a1cc356fc6dcd576cc67ebc9c901dad6d2017949e86e1bd9685",
+      "bytes": 65444
+    },
+    {
+      "path": "results\\desktop-quality-v2\\captures\\modelo-proyecto-real-1360x900.png",
+      "size": [
+        1360,
+        900
+      ],
+      "sha256": "63957e53e5578509a4122faf8e9f169b4ae2a57419ea3e29476a21184fe5ea47",
+      "bytes": 75846
+    },
+    {
+      "path": "results\\desktop-quality-v2\\captures\\simular-configuracion-real-1360x900.png",
+      "size": [
+        1360,
+        900
+      ],
+      "sha256": "5e8df4f53819656a17f780390f4008de3a5a5d09e603aebfd7d84436f1cc1a2a",
+      "bytes": 86802
+    },
+    {
+      "path": "results\\desktop-quality-v2\\captures\\resultados-historico-real-980x680.png",
+      "size": [
+        980,
+        680
+      ],
+      "sha256": "bb94ecb0bd9308a68c76939ab0171f47d22a8656b8534cedf02db2768c929753",
+      "bytes": 59325
+    },
+    {
+      "path": "results\\desktop-quality-v2\\captures\\resultados-historico-real-1360x900.png",
+      "size": [
+        1360,
+        900
+      ],
+      "sha256": "05ba1e7ebfca11fc66b8b034d9d339254c95bf43031d039d90abedc70552701d",
+      "bytes": 75533
+    },
+    {
+      "path": "results\\desktop-quality-v2\\captures\\resultados-curvas-sinteticas-presentacion-980x680.png",
+      "size": [
+        980,
+        680
+      ],
+      "sha256": "039329376d299fee39a089cf6536f753ccda16cf9409ff9ac8017d06eebca453",
+      "bytes": 87075
+    },
+    {
+      "path": "results\\desktop-quality-v2\\captures\\resultados-curvas-sinteticas-presentacion-1360x900.png",
+      "size": [
+        1360,
+        900
+      ],
+      "sha256": "f0a5fadbe54d5d2bf62f8aee0183cceb7a45913b5a0c46ba4c6c8df56f19e007",
+      "bytes": 106612
+    }
+  ],
+  "checks": {
+    "sizes": [
+      [
+        980,
+        680
+      ],
+      [
+        1360,
+        900
+      ]
+    ],
+    "legacy_has_no_fabricated_power": true,
+    "legacy_is_nonconverged": true,
+    "synthetic_fixture_marked": true
+  }
+}

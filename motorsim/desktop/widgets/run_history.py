@@ -8,7 +8,7 @@ from ..run_history import list_project_runs
 from ..preferences import settings
 from ..services import run_background
 from copy import deepcopy
-from ..presentation import state_label
+from ..presentation import display_value,format_number,state_label
 
 
 class RunHistoryWidget(QWidget):
@@ -34,7 +34,7 @@ class RunHistoryWidget(QWidget):
         layout.addWidget(self.table,1)
         actions=QHBoxLayout();layout.addLayout(actions)
         self.open_button=QPushButton("Ver selección");self.open_button.clicked.connect(self.open_selected);actions.addWidget(self.open_button)
-        self.compare_button=QPushButton("Comparar 2 corridas");self.compare_button.clicked.connect(self.compare_selected);actions.addWidget(self.compare_button)
+        self.compare_button=QPushButton("Ver dos corridas");self.compare_button.clicked.connect(self.compare_selected);actions.addWidget(self.compare_button)
         self.resume_button=QPushButton("Reanudar checkpoint…");self.resume_button.clicked.connect(self.resume_selected);actions.addWidget(self.resume_button)
         self.status=QLabel("El índice lee manifests; ‘Ver’ vuelve a auditar primarias.");self.status.setWordWrap(True);actions.addWidget(self.status,1)
         self.table.itemSelectionChanged.connect(self._selection_changed)
@@ -89,7 +89,7 @@ class RunHistoryWidget(QWidget):
                     (entry.get("audit","NOT_REPORTED")+ (" · recomputada" if entry.get("audit_recomputed") else "")),
                     entry.get("conservation")]
             for col,value in enumerate(values):
-                display=state_label(value) if col>=3 else str(value or '—')
+                display=state_label(value) if col>=3 else display_value(value)
                 if col==2:display=str(value or '—').replace('T',' ')[:16]
                 item=QTableWidgetItem(display);item.setData(Qt.ItemDataRole.UserRole,row)
                 item.setToolTip("\n".join((f"Ruta: {entry.get('run_directory')}",
@@ -112,7 +112,24 @@ class RunHistoryWidget(QWidget):
     def _selection_changed(self):
         selected=self._selected()
         self.open_button.setEnabled(bool(selected) and all(self.entries[i].get("result_path") for i in selected))
-        self.compare_button.setEnabled(len(selected)==2 and all(self.entries[i].get("result_path") for i in selected))
+        available=len(selected)==2 and all(self.entries[i].get("result_path") for i in selected)
+        self.compare_button.setEnabled(available)
+        self.compare_button.setText("Ver dos corridas")
+        if available:
+            first,second=(self.entries[i] for i in selected)
+            exact_pair=(first.get("rpm") is not None and first.get("rpm")==second.get("rpm")
+                        and first.get("variant") not in (None,"No informado")
+                        and second.get("variant") not in (None,"No informado")
+                        and first.get("variant")!=second.get("variant"))
+            if exact_pair:
+                self.compare_button.setText(f"Comparar A/B · {format_number(first['rpm'])} RPM")
+                self.status.setText("Par A/B exacto disponible: dos variantes del mismo proyecto a las mismas RPM; sin interpolación.")
+            elif first.get("rpm")!=second.get("rpm"):
+                self.compare_button.setText("Ver dos RPM")
+                self.status.setText("Se verán dos RPM distintas; no forman un par A/B exacto ni se interpolan.")
+            else:
+                self.compare_button.setText("Ver dos corridas")
+                self.status.setText("Se verán dos corridas; para guardar A/B se requieren variantes distintas a la misma RPM.")
         self.resume_button.setEnabled(len(selected)==1 and self.entries[selected[0]].get("resumable",False))
     def open_selected(self):
         selected=self._selected()
@@ -137,13 +154,21 @@ class RunHistoryWidget(QWidget):
         if len(selected)!=2:
             self.status.setText("Seleccioná exactamente dos corridas para guardar la comparación.");return False
         records=[]
+        loaded=[]
         for index in selected:
             path=Path(self.entries[index]['result_path'])
             if path.is_dir():path=path/'result.json'
             raw=path.read_bytes();result=json.loads(raw)
             if result.get('bindings',{}).get('project_id')!=self.context.project['project_id']:
                 raise ValueError('comparison run belongs to another project')
+            rpm=result.get('preflight',{}).get('rpm')
+            variant=result.get('bindings',{}).get('variant_label')
+            if rpm is None or not variant:
+                raise ValueError('comparison artifacts must declare their RPM and variant')
+            loaded.append((rpm,variant))
             records.append(dict(path=str(path.resolve()),sha256=hashlib.sha256(raw).hexdigest()))
+        if loaded[0][0]!=loaded[1][0] or loaded[0][1]==loaded[1][1]:
+            raise ValueError('saved A/B comparison requires two distinct variants at the exact same RPM')
         self.context.project['simulation_recipes']['saved_exhaust_comparison_v1']=records
         self.context.dirty=True;self.context.changed.emit()
         self.status.setText("Comparación vinculada por hash; guardá el proyecto para conservarla.")

@@ -61,7 +61,7 @@ class ModelEditorTests(unittest.TestCase):
         self.assertAlmostEqual(float(page.ports.item(row,8).text()),255,places=5)
         self.assertAlmostEqual(float(page.ports.item(row,9).text()),150,places=5)
         self.assertFalse(page.timing.item(row,1).flags() & Qt.ItemFlag.ItemIsEditable)
-        self.assertTrue(any(page.port_areas.item(i,0).text()==ports.ports[row].id and page.port_areas.item(i,1).text()=='105' for i in range(page.port_areas.rowCount())))
+        self.assertTrue(any(page.port_areas.item(i,0).data(Qt.ItemDataRole.UserRole)==ports.ports[row].id and page.port_areas.item(i,0).text()=="Transferencia primaria" and page.port_areas.item(i,1).text()=='105' for i in range(page.port_areas.rowCount())))
         self.assertAlmostEqual(page.port_geometry.rows[row]['effective_top'],expected,places=9)
         intervals=next(p['intervals'] for p in page.port_timeline.rows if p['id']==ports.ports[row].id)
         self.assertAlmostEqual(min(a for a,b in intervals),105,places=7)

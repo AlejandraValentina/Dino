@@ -126,7 +126,55 @@ def load_results(path: str | Path):
     path = Path(path)
     if path.suffix.lower() == ".csv":
         return import_report(path, metadata_path=path.with_suffix(".json"))
+    if path.suffix.lower() == ".json":
+        raw=path.read_bytes()
+        try:document=json.loads(raw)
+        except (UnicodeDecodeError,json.JSONDecodeError):document=None
+        if isinstance(document,dict) and document.get("schema")=="ENGINE_PHYSICS_V1_POINT_RESULT":
+            return _import_legacy_engine_physics_summary(path,raw,document)
     return import_report(path)
+
+
+def _import_legacy_engine_physics_summary(path,raw,document):
+    """Expose stored legacy run status only; old point summaries contain no curves."""
+    import hashlib
+    if not isinstance(document.get("cycles"),list) or not document["cycles"]:
+        raise ValueError("El resumen histórico no contiene ciclos registrados.")
+    detector=document.get("detector") if isinstance(document.get("detector"),dict) else {}
+    status=document.get("status") or "STATUS_NOT_REPORTED"
+    detected_period=detector.get("detected_period")
+    periodicity={1:"PERIOD_1",2:"PERIOD_2"}.get(detected_period,"NOT_CONVERGED" if detector.get("converged_cycle") is None else "NOT_REPORTED")
+    cycles=document["cycles"]
+    row={"point_id":document.get("point_id") or path.stem,"variant_id":"No informada",
+         "run_id":document.get("point_id") or path.stem,
+         "rpm":document.get("rpm"),"classification":status,
+         "periodicity":periodicity,
+         "cycles_completed":document.get("cycles_completed",len(cycles)),
+         "cycles_requested":document.get("horizon_cycles"),
+         "audit_status":"NOT_REPORTED","audit_recomputed":False,
+         "historical_audit_status":cycles[-1].get("audit","NOT_REPORTED"),
+         "historical_hard_gate":cycles[-1].get("hard_gate","NOT_REPORTED"),
+         "hard_gates":document.get("final_hard_gate"),
+         "result_sha256":hashlib.sha256(raw).hexdigest(),
+         "point_configuration_sha256":document.get("config_sha256"),
+         "checkpoint_sha256":None,"checkpoint_cycle":document.get("checkpoint_cycle"),
+         "artifact_directory":str(path.resolve().parent),
+         "legacy_artifact_path":str(path.resolve()),
+         "legacy_schema":document["schema"],"periodicity_contract":document.get("periodicity_contract"),
+         "experimental_validation":"NOT_REPORTED","mode":"HISTORICAL_LEGACY_SUMMARY",
+         "conservation":None}
+    for metric in ("brake_power","brake_torque","BMEP"):
+        row[metric]=None;row[metric+"_status"]="UNDEFINED"
+        row[metric+"_reason"]="El resumen histórico no contiene esta métrica."
+    row["legacy_cycle_summary"] = [
+        {"cycle":item.get("cycle"),"accepted_steps":item.get("accepted_steps"),
+         "audit":item.get("audit"),"hard_gate":item.get("hard_gate"),
+         "terminal_snapshot_sha256":item.get("terminal_snapshot_sha256")}
+        for item in cycles]
+    return {"schema":"DINO_DESKTOP_LEGACY_HISTORICAL_SUMMARY_V1",
+            "provenance":"Artifact de corrida histórica heredada · sólo resumen almacenado; no es curva ni validación experimental",
+            "experimental_validation":"NOT_REPORTED","points":[row],"traces":[],
+            "source_path":str(path.resolve()),"source_sha256":row["result_sha256"]}
 
 
 class _Signals(QObject):

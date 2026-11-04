@@ -4,6 +4,7 @@ import math
 from PySide6.QtCore import QPointF, Signal, Qt
 from PySide6.QtGui import QColor, QPainter, QPen, QFont
 from PySide6.QtWidgets import QWidget
+from .presentation import format_number
 
 
 class CurvePlot(QWidget):
@@ -58,7 +59,7 @@ class CurvePlot(QWidget):
                 if xmin==xmax:xmax=xmin+1
                 reasons=sorted({str(p.get("reason")) for _,_,p in missing if p.get("reason")})
                 painter.setPen(QColor("#cad8e7"));painter.drawText(rect.adjusted(12,12,-12,-24),Qt.AlignmentFlag.AlignCenter,"Sin valores numéricos definidos\n"+(reasons[0] if reasons else "La métrica requiere un estado de corrida que aún no está disponible."))
-                painter.drawText(rect.left(),rect.bottom()+26,f"RPM  {xmin:g} — {xmax:g}")
+                painter.drawText(rect.left(),rect.bottom()+26,f"RPM  {format_number(xmin)} — {format_number(xmax)}")
             else:painter.drawText(rect,Qt.AlignmentFlag.AlignCenter,"Sin valores válidos para graficar")
             painter.end(); return
         xlabel=self.series[0].get("x_label","RPM") if self.series else "RPM"
@@ -67,13 +68,13 @@ class CurvePlot(QWidget):
         for i in range(5):
             value=xmin+(xmax-xmin)*i/4;x=rect.left()+rect.width()*i/4
             painter.drawLine(round(x),rect.top(),round(x),rect.bottom())
-            painter.setPen(QColor('#cad8e7'));painter.drawText(round(x)-32,rect.bottom()+3,64,14,Qt.AlignmentFlag.AlignCenter,f'{value:.4g}')
+            painter.setPen(QColor('#cad8e7'));painter.drawText(round(x)-32,rect.bottom()+3,64,14,Qt.AlignmentFlag.AlignCenter,format_number(value,5))
             painter.setPen(QPen(QColor('#34475c'),1))
         def pos(series,point): return QPointF(rect.left()+(float(point[series.get("x_key","rpm")])-xmin)/(xmax-xmin)*rect.width(),rect.bottom()-(float(point["value"])-ymin)/(ymax-ymin)*rect.height())
         painter.setFont(QFont("Segoe UI",8));painter.setPen(QColor("#9fb3c8"))
         for tick in self.y_ticks:
             y=rect.bottom()-(tick-ymin)/(ymax-ymin)*rect.height()
-            label=f"{tick:.2f}" if self.series and self.series[0].get("unit")=="bar abs" else f"{tick:g}"
+            label=format_number(tick,5)
             painter.drawText(2,round(y)-7,68,14,Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter,label)
         for si,series in enumerate(self.series):
             baseline=series.get("role")=="baseline"
@@ -89,7 +90,7 @@ class CurvePlot(QWidget):
                 if self.selected==(series.get("name"),index):painter.drawEllipse(current,7,7)
                 previous=current
         painter.setFont(QFont("Segoe UI",9));painter.setPen(QColor("#cad8e7"))
-        painter.drawText(rect.left(),rect.bottom()+26,f"{xlabel}  {xmin:g} — {xmax:g}")
+        painter.drawText(rect.left(),rect.bottom()+26,f"{xlabel}  {format_number(xmin)} — {format_number(xmax)}")
         if missing:painter.drawText(rect.left(),rect.bottom()+38,"Los puntos sin valor se omiten; la curva no se conecta ni se interpola.")
         painter.drawText(6,rect.top()+12,self.series[0].get("unit","") if self.series else "")
         painter.end()

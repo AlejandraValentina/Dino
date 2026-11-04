@@ -18,6 +18,7 @@ from ..engine_configuration import identity, resolve_for_operating_point
 from ..exploratory_workflow import preflight, run_exploratory
 from .services import run_background,run_parallel_curve_points
 from .preferences import artifact_root, set_artifact_root, repository_root_containing, default_artifact_root
+from .presentation import format_number,state_label
 
 
 class ExecutionPage(QWidget):
@@ -461,19 +462,19 @@ class ExecutionPage(QWidget):
         self.state_changed.emit()
 
     def _progress(self,row):
-        self.progress_latest=dict(row);self.status_text="CORRIENDO"
+        self.progress_latest=dict(row);self.status_text="En ejecución"
         if "point_index" in row:
             if "point" in row:
-                self.output.appendPlainText(f"Punto {row['point_index']}/{row['point_count']} · {row['rpm']} RPM · {row['point'].get('classification')}")
+                self.output.appendPlainText(f"Punto {row['point_index']}/{row['point_count']} · {format_number(row['rpm'])} RPM · {state_label(row['point'].get('classification'))}")
             elif "solver_progress" in row:
                 p=row["solver_progress"]
-                self.output.appendPlainText(f"{row['rpm']} RPM · ciclo {p['cycle']} · {p['angle_deg']:.1f}° · RSS {p['rss_bytes']/1048576:.0f} MiB")
+                self.output.appendPlainText(f"{format_number(row['rpm'])} RPM · ciclo {p['cycle']} · {format_number(p['angle_deg'])}° · memoria {format_number(p['rss_bytes']/1048576)} MiB")
         else:
-            self.output.appendPlainText(f"Ciclo {row['cycle']} · {row['angle_deg']:.1f}° · RSS {row['rss_bytes']/1048576:.0f} MiB")
+            self.output.appendPlainText(f"Ciclo {row['cycle']} · {format_number(row['angle_deg'])}° · memoria {format_number(row['rss_bytes']/1048576)} MiB")
         self.state_changed.emit()
 
     def _done(self,result):
-        self.status_text=f"TERMINADA · {result.get('classification','clasificación no informada')}"
+        self.status_text=f"Terminada · {state_label(result.get('classification','clasificación no informada'))}"
         if isinstance(result.get("points"),list):
             if result.get('bindings',{}).get('project_id')==self.context.project['project_id']:
                 import hashlib
@@ -483,7 +484,7 @@ class ExecutionPage(QWidget):
                     path=Path(point['run_directory'])/'result.json'
                     if str(path) in known:continue
                     if hashlib.sha256(path.read_bytes()).hexdigest()!=point['result_artifact_sha256']:
-                        self.output.appendPlainText('Referencia rechazada: hash del resultado cambió.');continue
+                        self.output.appendPlainText('Referencia rechazada: cambió la identidad del resultado.');continue
                     refs.append(dict(path=str(path),identity_sha256=point['identity_sha256'],
                         artifact_sha256=point['result_artifact_sha256'],classification=point['classification']))
                     known.add(str(path));self.context.dirty=True
@@ -491,17 +492,19 @@ class ExecutionPage(QWidget):
             interrupted=sum(row.get("status")=="INTERRUPTED_CHECKPOINTED" for row in result["points"])
             not_started=sum(row.get("status")=="NOT_STARTED" for row in result["points"])
             self.checkpoint_summary=(f"{complete} puntos ejecutados · {interrupted} interrumpidos con checkpoint · "
-                f"{not_started} sin iniciar · {result.get('curve_availability','curva parcial')}")
+                f"{not_started} sin iniciar · {state_label(result.get('curve_availability','curva parcial'))}")
+            self.output.appendPlainText(f"Barrido finalizado · {complete} puntos completados · {interrupted} con checkpoint · {not_started} sin iniciar · {state_label(result.get('curve_availability','curva parcial'))}. Evidencia íntegra disponible en Resultados y Trazabilidad.")
         else:
-            self.checkpoint_summary=f"{result.get('cycles_completed',0)} ciclos guardados · {result.get('periodicity','periodicidad no evaluada')}"
-        summary={k:result.get(k) for k in ("status","classification","mode","scientific_validation","cycles_completed","periodicity","failure","elapsed_seconds","artifact_directory","result_sha256","bindings","points")}
-        summary["cycles"]=[{"cycle":r["cycle"],"primary_sha256":r.get("primary_sha256"),"audit_recomputed":r.get("audit",{}).get("recomputed",False),"conservation":r["conservation"],"metric_statuses":{k:v.get("status") for k,v in r.get("engineering_output",{}).get("cycle_metrics",{}).items() if isinstance(v,dict)}} for r in result.get("cycles",[])]
-        self.output.appendPlainText(json.dumps(summary,indent=2,ensure_ascii=False))
+            cycles=result.get('cycles_completed',0)
+            periodicity=state_label(result.get('periodicity','periodicidad no evaluada'))
+            classification=state_label(result.get('classification','clasificación no informada'))
+            self.checkpoint_summary=f"{cycles} ciclos guardados · {periodicity}"
+            self.output.appendPlainText(f"Corrida terminada · {classification} · {cycles} ciclos guardados · {periodicity}. Evidencia íntegra disponible en Resultados y Trazabilidad.")
         self._release_task()
 
     def _failed(self,message):
-        self.status_text="BLOQUEADA · error FAIL-CLOSED";self.checkpoint_summary="evidencia previa conservada"
-        self.output.appendPlainText("FAIL-CLOSED: "+message); self._release_task()
+        self.status_text="Bloqueada · ejecución detenida por error";self.checkpoint_summary="evidencia previa conservada"
+        self.output.appendPlainText("Ejecución detenida por error: "+state_label(message)); self._release_task()
 
     def _release_task(self):
         self.task=None; self.cancel_event=None; self.cancel.setEnabled(False); self.refresh();self.refresh_history_requested.emit();self.state_changed.emit()

@@ -12,7 +12,45 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QFileDialog, QGroupBox,
     QHeaderView, QVBoxLayout, QWidget, QTabWidget)
 
 from ..power_curve import build_curve_series, exact_rpm_differences, peak_points
-from .presentation import state_label
+from .presentation import format_number,state_label
+
+_WARNING_LABELS={
+    "implementation_identity_sha256":"identidad de implementación distinta",
+    "solver_identity_sha256":"identidad del solver distinta",
+    "producer_sha256":"identidad del productor distinta",
+    "preregistration_sha256":"prerregistro distinto",
+    "shared implementation identity not reported":"identidad de implementación compartida no informada",
+    "fuel_id":"combustible distinto",
+    "fuel_id unknown":"combustible no informado",
+    "mechanical_loss_model_sha256":"modelo de pérdidas distinto",
+    "mechanical_loss_model_sha256 unknown":"modelo de pérdidas no informado",
+    "periodicity_contract":"contrato de periodicidad distinto",
+    "periodicity_contract unknown":"contrato de periodicidad no informado",
+    "total_finite_volume_cells":"número de celdas distinto",
+    "mesh_resolution":"resolución de malla distinta",
+    "mesh identity unknown":"identidad de malla no informada",
+    "TRANSITORIO: diferencia de estimaciones, no ganancia estacionaria":"Transitorio: diferencia de estimaciones, no ganancia estacionaria",
+}
+
+def _warning_label(value):
+    return _WARNING_LABELS.get(value,state_label(value))
+
+
+def _visible_rpm_ticks(rpms, left, width, minimum_spacing=58):
+    """Keep endpoint labels while preventing dense RPM marks from colliding."""
+    ordered=sorted(set(rpms))
+    if not ordered:return []
+    xmin,xmax=ordered[0],ordered[-1]
+    if xmin==xmax:return [(ordered[0],left+width/2)]
+    positioned=[(rpm,left+(rpm-xmin)/(xmax-xmin)*width) for rpm in ordered]
+    visible=[]
+    for index,(rpm,x) in enumerate(positioned):
+        is_last=index==len(positioned)-1
+        if not visible or x-visible[-1][1]>=minimum_spacing or is_last:
+            if is_last and visible and x-visible[-1][1]<minimum_spacing and len(visible)>1:
+                visible.pop()
+            visible.append((rpm,x))
+    return visible
 
 
 class PowerTorquePlot(QWidget):
@@ -80,7 +118,7 @@ class PowerTorquePlot(QWidget):
             for index in range(5):
                 value = high - index * (high - low) / 4
                 y = rect.top() + index * rect.height() / 4
-                text = f"{value:.4g}"
+                text = format_number(value,5)
                 if side == "left":
                     painter.drawText(QRectF(0, y - 9, rect.left() - 9, 18), Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, text)
                 else:
@@ -117,7 +155,7 @@ class PowerTorquePlot(QWidget):
                     previous = (current,exploratory)
 
         painter.setPen(QColor("#cad8e7"))
-        painter.drawText(QRectF(0, 2, self.width(), 20), Qt.AlignmentFlag.AlignCenter, "○ Potencia · □ Torque · punteado/hueco: EXPLORATORIO no periódico · lleno: valor periódico declarado")
+        painter.drawText(QRectF(0, 2, self.width(), 20), Qt.AlignmentFlag.AlignCenter, "Potencia: círculos · torque: cuadrados · línea punteada y marcador vacío: exploratorio no periódico; línea continua y marcador lleno: periodicidad declarada")
         legend_x = rect.left()
         for index, curve in enumerate(self.series):
             color = QColor(self.COLORS[index % len(self.COLORS)])
@@ -128,12 +166,11 @@ class PowerTorquePlot(QWidget):
                              Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
                              curve["name"][:22])
             legend_x += min(170, max(75, 24 + len(curve["name"]) * 7))
-        for rpm in sorted(set(rpms)):
-            x=rect.left()+(rpm-xmin)/(xmax-xmin)*rect.width()
+        for rpm,x in _visible_rpm_ticks(rpms,rect.left(),rect.width()):
             painter.drawLine(round(x),round(rect.bottom()),round(x),round(rect.bottom()+4))
-            painter.drawText(QRectF(x-35,rect.bottom()+3,70,16),Qt.AlignmentFlag.AlignCenter,f'{rpm:g}')
+            painter.drawText(QRectF(x-35,rect.bottom()+3,70,16),Qt.AlignmentFlag.AlignCenter,format_number(rpm))
         painter.drawText(QRectF(0, rect.bottom() + 23, self.width(), 18), Qt.AlignmentFlag.AlignCenter,
-                         f"RPM  {xmin:g} — {max(rpms):g}  ·  potencia: {self.power_unit}  ·  torque: N·m")
+                         f"RPM  {format_number(xmin)} — {format_number(max(rpms))}  ·  potencia: {self.power_unit}  ·  torque: N·m")
         if power_bounds:
             painter.drawText(QRectF(2, rect.top() - 19, rect.left() - 4, 18), Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, self.power_unit)
         if torque_bounds:
@@ -276,7 +313,7 @@ class PowerCurvePanel(QGroupBox):
         def describe(label, values, unit):
             if not values:
                 return f"{label}: sin valores definidos"
-            return " · ".join(f"{row['series']} {row['value']:.4g} {unit} @ {row['rpm']:g} RPM" for row in values)
+            return " · ".join(f"{row['series']} {format_number(row['value'],5)} {unit} @ {format_number(row['rpm'])} RPM" for row in values)
         self.peaks.setText(describe("Potencia máxima", power, self.unit_selector.currentData()) +
                            "    " + describe("Torque máximo", torque, "N·m")+
                            (" · Transitorios excluidos de máximos de prestaciones" if any(p.get('exploratory') for c in self.curves for p in c['points']) else ""))
@@ -293,19 +330,19 @@ class PowerCurvePanel(QGroupBox):
             self.compare_label.setText("Seleccioná dos series para comparar; sólo se usan RPM comunes exactos y no se interpola.")
         power_unit = self.unit_selector.currentData()
         for index, row in enumerate(deltas):
-            power = "—" if row["power_delta"] is None else f"{row['power_delta']:+.4g} {power_unit}"
-            torque = "—" if row["torque_delta"] is None else f"{row['torque_delta']:+.4g} N·m"
-            state = "EXPLORATORIO" if row.get('exploratory') else "COMPARABLE" if row["compatible"] else "INCOMPATIBLE"
-            warning = ", ".join(row["warnings"]) or ("Valores indefinidos en uno o ambos puntos" if row["power_delta"] is None and row["torque_delta"] is None else "")
-            for column, value in enumerate((f"{row['rpm']:g}", power, torque, state, warning)):
+            power = "—" if row["power_delta"] is None else f"{format_number(row['power_delta'],5,signed=True)} {power_unit}"
+            torque = "—" if row["torque_delta"] is None else f"{format_number(row['torque_delta'],5,signed=True)} N·m"
+            state = "Exploratorio" if row.get('exploratory') else "Comparable" if row["compatible"] else "Incompatible"
+            warning = ", ".join(_warning_label(field) for field in row["warnings"]) or ("Valores indefinidos en uno o ambos puntos" if row["power_delta"] is None and row["torque_delta"] is None else "")
+            for column, value in enumerate((format_number(row['rpm']), power, torque, state, warning)):
                 self.comparison.setItem(index, column, QTableWidgetItem(value))
 
     def _refresh_table(self, unit):
         self.points.setRowCount(len(self.rows))
         for index, point in enumerate(self.rows):
             row = point["row"]
-            power = "—" if point["power"] is None else f"{point['power']:.5g} {unit}"
-            torque = "—" if point["torque"] is None else f"{point['torque']:.5g} N·m"
+            power = "—" if point["power"] is None else f"{format_number(point['power'],5)} {unit}"
+            torque = "—" if point["torque"] is None else f"{format_number(point['torque'],5)} N·m"
             statuses = []
             if point["power"] is None:
                 statuses.append(str(point["power_reason"] or point["power_status"]))
@@ -313,11 +350,11 @@ class PowerCurvePanel(QGroupBox):
                 statuses.append(str(point["torque_reason"] or point["torque_status"]))
             status = "EXPLORATORIO · no periódico" if point.get('exploratory') else "DEFINIDO" if not statuses else " · ".join(statuses)
             observed=row.get('stability_observed',{})
-            stability=(f"ΔW {observed['work_range_J']:.3g} J; Δaire {observed['trapped_air_range_mg']:.3g} mg; no cota de error" if observed else 'No informada')
-            values = (row.get("variant_id", "—"), f"{point['rpm']:g}",
+            stability=(f"ΔW {format_number(observed['work_range_J'],4)} J; Δaire {format_number(observed['trapped_air_range_mg'],4)} mg; no cota de error" if observed else 'No informada')
+            values = (row.get("variant_id", "—"), format_number(point['rpm']),
                       state_label(point.get("classification") or "—"),
                       state_label(point.get("periodicity") or "NOT_REPORTED"), power, torque, state_label(status),
-                      f"{row['elapsed_seconds']:.2f}" if row.get('elapsed_seconds') is not None else '—',stability)
+                      format_number(row['elapsed_seconds'],4) if row.get('elapsed_seconds') is not None else '—',stability)
             for column, value in enumerate(values):
                 item = QTableWidgetItem(value)
                 item.setData(Qt.ItemDataRole.UserRole, row)
@@ -345,8 +382,8 @@ class PowerCurvePanel(QGroupBox):
                 if observed:
                     regions=observed['regions']
                     self.stability_notice.setText(f"Periodicidad global: {value.get('periodicity')}. "
-                        f"Ciclos {observed['window_cycles']}: rango W {observed['work_range_J']:.4g} J; "
-                        f"rango aire atrapado {observed['trapped_air_range_mg']:.4g} mg. "
+                        f"Ciclos {observed['window_cycles']}: rango W {format_number(observed['work_range_J'],5)} J; "
+                        f"rango aire atrapado {format_number(observed['trapped_air_range_mg'],5)} mg. "
                         f"Indicadores pendientes: cilindro {regions['cylinder']['failed']}, escape {regions['exhaust']['failed']}, "
                         f"inventario de especies {regions['global_species']['failed']}. "
                         "La variación observada NO es una cota de incertidumbre estacionaria.")

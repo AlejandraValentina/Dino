@@ -60,7 +60,7 @@ class VisualParityV31Tests(unittest.TestCase):
 
     def test_cylinder_and_distribution_are_in_one_engine_view(self):
         page = EnginePage(DesktopContext(new_project("v31-engine")))
-        combined = page.component_tabs.widget(0)
+        combined = page.component_tabs.widget(1)
         self.assertIsNotNone(combined.findChild(QTableWidget, "integratedPortTiming"))
         self.assertEqual(page.ports.horizontalHeaderItem(3).text(),"Alt. (mm)")
         self.assertEqual(page.ports.horizontalHeaderItem(9).text(),"Dur. (°)")
@@ -72,34 +72,31 @@ class VisualParityV31Tests(unittest.TestCase):
     def test_compact_navigation_and_prepare_panel_share_execution_state(self):
         window = DinoDesktopWindow(new_project("v31-compact"));window.resize(980,680);window.show();APP.processEvents()
         self.assertEqual(window.component_nav.shape().name, "RoundedNorth")
-        self.assertEqual(window.component_nav.count(), 6)
+        self.assertEqual(window.component_nav.count(), 11)
         escape=window.pages[1]
         self.assertTrue(escape.title.isHidden())
         self.assertTrue(escape.intro.isHidden())
-        self.assertEqual(escape.profile.minimumHeight(),90)
+        self.assertEqual(escape.profile.minimumHeight(),150)
         self.assertGreaterEqual(escape.mesh_group.maximumHeight(),50)
-        self.assertFalse(window.menuBar().isVisible())
+        self.assertTrue(window.menuBar().isVisible())
         window.component_nav.setCurrentIndex(2);APP.processEvents()
         self.assertFalse(escape.diff_panel.isVisible())
         self.assertTrue(all(escape.table.rowHeight(row) == 20 for row in range(escape.table.rowCount())))
         self.assertGreaterEqual(escape.table.viewport().height(),sum(escape.table.rowHeight(row) for row in range(escape.table.rowCount())))
         rpm = window.pages[3].rpm.value()
-        window.prepare_button.click();APP.processEvents()
-        self.assertTrue(window.execution_dialog.isVisible())
-        self.assertIs(window.pages[3].parentWidget(), window.execution_dialog_scroll.viewport())
-        self.assertEqual(window.execution_dialog_tabs.count(), 2)
-        self.assertIs(window.execution_dialog_tabs.widget(1), window.analysis_history)
-        self.assertEqual(window.pages[3].rpm.value(), rpm)
-        self.assertFalse(window.pages[3].cancel.isVisible())
-        window.execution_dialog.reject();APP.processEvents()
+        self.assertTrue(window.simulate_mode.isVisible())
+        window.simulate_mode.click();APP.processEvents()
+        self.assertEqual(window.mode_stack.currentIndex(),2)
         self.assertIs(window.pages[3].parentWidget(), window.execution_scroll.viewport())
-        self.assertIs(window.analysis_history.parentWidget(), window.analysis_splitter)
+        self.assertEqual(window.pages[3].rpm.value(), rpm)
+        self.assertTrue(window.pages[3].start.isVisible())
+        self.assertIs(window.analysis_history.context, window.context)
         window.close()
 
     def test_design_has_one_horizontal_section_navigation_without_duplicate_engine_tabs(self):
         window=DinoDesktopWindow(new_project("v31-navigation"));window.resize(1360,900);window.show();APP.processEvents()
-        labels=[window.component_nav.tabText(i).split(" ",1)[-1] for i in range(window.component_nav.count())]
-        self.assertEqual(labels,["Cilindro y distribución","Eventos de área","Escape","Pérdidas","Combustión","Proyecto"])
+        labels=[window.component_nav.tabText(i).split(" · ",1)[-1] for i in range(window.component_nav.count())]
+        self.assertEqual(labels,["Cilindro y culata","Lumbreras y transferencias","Escape","Pérdidas","Combustión","Proyecto","Admisión","Cárter","Resumen","Avanzado","Conductos de transferencia"])
         self.assertEqual(window.component_nav.shape().name,"RoundedNorth")
         self.assertTrue(window.pages[0].component_tabs.tabBar().isHidden())
         self.assertGreater(window.design_mode.width(),100)
@@ -124,7 +121,8 @@ class VisualParityV31Tests(unittest.TestCase):
         self.assertTrue(window.design_mode.isChecked());self.assertEqual(window.component_nav.currentIndex(),5)
         window.resize(980,680);APP.processEvents()
         self.assertEqual(window.component_nav.shape().name,"RoundedNorth")
-        self.assertTrue(window.component_nav.isVisible())
+        self.assertFalse(window.component_nav.isVisible())
+        self.assertTrue(window.model_selector.isVisible())
         window.close()
 
     def test_repository_artifact_roots_are_rejected_even_for_resume_compatibility(self):
@@ -164,8 +162,10 @@ class VisualParityV31Tests(unittest.TestCase):
 
     def test_trace_view_precedes_sweep_table_and_missing_metrics_have_reason_text(self):
         page=ResultsPage(DesktopContext(new_project("v31-analysis")))
-        layout=page.layout()
-        self.assertLess(layout.indexOf(page.trace_group),layout.indexOf(page.plot))
+        self.assertEqual([page.result_tabs.tabText(i) for i in range(page.result_tabs.count())],
+                         ["Curvas","Variables","Presiones y ondas","Comparar","Mediciones","Trazabilidad"])
+        self.assertIsNotNone(page.result_tabs.widget(2).findChild(type(page.trace_group),""))
+        self.assertIsNotNone(page.result_tabs.widget(1).findChild(type(page.plot),""))
         page.plot.set_series([{"name":"Power","unit":"kW","points":[{"rpm":3000,"value":None,"reason":"periodic cycle required"}]}])
         self.assertEqual(page.plot._points(),[])
 
