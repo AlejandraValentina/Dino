@@ -12025,6 +12025,24 @@
       "evidence": [],
       "next_action": "Implement a Results summary computed only from manifest totals, elapsed seconds, point statuses and stop_reason; cover standard study and RPM envelope, missing fields, cancellation and PARTIAL states in synthetic tests.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-UIA-COM-SESSION-LIFECYCLE-REPRO-V1",
+      "description": "Reproduce the prior Windows UI Automation COM error against the visible Desktop, separate application defects from stale UIA provider lifetime/cleanup, and preserve a minimal reproducible result. Apply only a harness lifecycle fix if the application is unaffected.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "verification",
+      "write_scope": [
+        "results/desktop-ui-automation-com-repro/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "With Windows session unlocked, launch one native Dino Desktop window, run the existing UIA/COM interaction and teardown path, capture the HRESULT/stack and process/window lifetime, and report whether it is a product or harness defect. Do not repeat unrelated UI acceptance.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
   "audit_remediation_mode": false,
@@ -16948,6 +16966,12 @@
       "task": "DESKTOP-PARAMETRIC-STUDY-BUDGET-LIFECYCLE-SUMMARY-V1",
       "kind": "task",
       "summary": "Iniciada mejora concreta de gestión de estudios: el manifiesto ya persiste presupuesto, elapsed_seconds, estado por punto y stop_reason, pero el resumen visible sólo muestra método, RPM, validación y ruta."
+    },
+    {
+      "at": "2026-11-04T23:31:18+00:00",
+      "task": "DESKTOP-UIA-COM-SESSION-LIFECYCLE-REPRO-V1",
+      "kind": "task",
+      "summary": "Replanificación focalizada para la regresión COM/UIA pendiente solicitada por el usuario: verificar ciclo de vida del proveedor en una ventana Desktop real, sin auditoría visual general."
     }
   ],
   "legacy_gate_status": {
