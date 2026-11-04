@@ -11222,9 +11222,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-MULTIFACTOR-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "9d9fb78"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "verification",
       "write_scope": [
@@ -11233,8 +11235,12 @@
         "results/desktop-parametric-design-study-v2/factorial-interruption/"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Interrupt after a completed factorial point, reload the prepared study, resume through the existing workflow, and verify completed points remain exact and are not recalculated.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/factorial-interruption/verification.md",
+        "results/desktop-parametric-design-study-v2/factorial-interruption/test-summary.txt",
+        "tests/test_design_study.py"
+      ],
+      "next_action": "Continue with DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1 using exact verified source identities and observed values only.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11244,7 +11250,7 @@
         "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1",
         "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11259,7 +11265,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Compare two or more project-linked manifests only after SHA/schema/source verification; expose exact RPM, source engine identity and per-point periodicity, preserve nonconverged/missing metrics, and reject unsupported aggregate effects or incompatible baselines.",
+      "next_action": "Verify study manifests and artifacts; align rows only on exact engine identity, RPM and operating contract; present observed point differences without interpolation, fitting or merging incompatible evidence.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11307,6 +11313,31 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Render a saved RPM-envelope study in the existing report; retain exact RPM/geometry/source identities and mark transient or missing metrics without summaries that imply periodic performance.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-V1",
+      "description": "Expose direct 2×2 factorial contrasts from exact observed points only when all four outcomes are defined and compatible; keep effects unavailable for transient, missing or nonconverged points.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-MULTIFACTOR-V1",
+        "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_design_study.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/factor-effects/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Calculate transparent 2×2 main/interaction contrasts only by exact factorial pairing for an observed scalar metric; suppress the contrast if a required point is absent, nonperiodic, undefined or incompatible, and preserve all four rows and scientific qualification.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -15917,6 +15948,25 @@
       "task": "DESKTOP-PARAMETRIC-RPM-ENVELOPE-REPORT-V1",
       "kind": "queue-replan",
       "summary": "Añadida una integración de informe técnico para la nueva matriz geometría×RPM, reutilizando manifiestos y conservando estados punto por punto; tercer entregable READY concreto sin tocar física."
+    },
+    {
+      "at": "2026-11-04T18:13:09+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTORIAL-INTERRUPTION-V1",
+      "kind": "completion",
+      "commit": "9d9fb78d083a044e3b8fc095db0eccd43e443197",
+      "summary": "Regression proves 2×2 matrix survives cancel/reopen; completed point artifact is verified without rerun; interrupted point resumes same run/checkpoint; remaining subset executes once. Four factorial tests pass; no physics run."
+    },
+    {
+      "at": "2026-11-04T18:13:09+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1",
+      "kind": "start",
+      "summary": "Started exact-identity comparison for saved parametric studies; maintain RPM/operating compatibility and expose observed rows without interpolation or fitting."
+    },
+    {
+      "at": "2026-11-04T18:13:09+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-V1",
+      "kind": "queue-replan",
+      "summary": "Added exact 2×2 contrast reporting as a concrete next parametric-design capability; only defined compatible point data qualify and no-response cases remain explicitly unavailable."
     }
   ],
   "legacy_gate_status": {
