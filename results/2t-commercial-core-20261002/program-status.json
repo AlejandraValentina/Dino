@@ -10876,6 +10876,98 @@
       ],
       "next_action": "Siguiente mejora de producto: exploración paramétrica de variantes de motor, claramente separada del barrido de RPM y sin campañas físicas demostrativas.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-DESIGN-STUDY-V1",
+      "description": "Implement a bounded, resumable, provenance-bound parametric geometry study in Desktop, using only existing solver configuration adapters and EXPLORATORY runs.",
+      "dependencies": [],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/design_study.py",
+        "motorsim/desktop/app.py",
+        "motorsim/desktop/execution_page.py",
+        "motorsim/desktop/results_page.py",
+        "tests/test_design_study.py",
+        "tests/test_desktop_design_study.py",
+        "docs/desktop/parametric-design-studies.md",
+        "results/desktop-parametric-design-study-v1/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [
+        "results/desktop-parametric-design-study-v1/acceptance.md",
+        "results/desktop-parametric-design-study-v1/receipt.json",
+        "results/desktop-parametric-design-study-v1/focused-tests.txt",
+        "results/desktop-parametric-design-study-v1/captures/parametric-comparison-real-window-1360x900.png"
+      ],
+      "next_action": "Continue with DESKTOP-PARAMETRIC-ADAPTERS-V2 using only existing engine fields with consistency-preserving adapters; do not add unsupported or inferred physics inputs.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-ADAPTERS-V2",
+      "description": "Extend parametric axes to additional existing cylinder/port/crankcase model fields only through consistency-preserving backend adapters.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-DESIGN-STUDY-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/design_study.py",
+        "motorsim/desktop/engine_page.py",
+        "tests/test_design_study.py"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Inspect current edit adapters for cylinder and port fields; add only fields with unique, validated solver mappings.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-REPORT-V1",
+      "description": "Carry verified design-study manifests and parameter deltas into technical HTML reports without recalculating or changing source evidence.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-DESIGN-STUDY-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Add report integration only after the study manifest format and point identities are accepted.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-HISTORY-REUSE-V1",
+      "description": "Evaluate exact-identity reuse of completed historical runs across design studies with full artifact verification and no silent interpolation.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-DESIGN-STUDY-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/design_study.py",
+        "motorsim/desktop/run_history.py",
+        "tests/test_design_study.py"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Reuse only results whose configuration, operating point, solver sources and verified primary artifacts match exactly.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
   "audit_remediation_mode": false,
@@ -15340,6 +15432,18 @@
       "task": "DESKTOP-TECHNICAL-REPORT-BUILD-PROVENANCE-V1",
       "summary": "Informe técnico HTML y manifiesto reproducible integrados; smoke del EXE Windows produjo informe desde CSV/JSON sintético de 30 puntos. Artefactos y hashes registrados; el automatismo tuvo fallo COM únicamente en cierre, no se declara ejecución gráfica totalmente verde.",
       "commit": "7a084cf"
+    },
+    {
+      "at": "2026-11-04T15:19:33+00:00",
+      "task": "DESKTOP-PARAMETRIC-DESIGN-STUDY-V1",
+      "kind": "implementation",
+      "summary": "Estudio V1 en implementación: adaptador geométrico de longitudes del escape, configuraciones inmutables por punto, manifiesto/checkpoint reanudable, vista de comparación; regresiones enfocadas en ejecución."
+    },
+    {
+      "at": "2026-11-04T16:00:12+00:00",
+      "task": "DESKTOP-PARAMETRIC-DESIGN-STUDY-V1",
+      "kind": "task",
+      "summary": "Bounded parametric study integrated through Desktop engineering execution/import, synthetic two-design run and zero-cycle verified reuse; 16 focused and 33 Desktop regression tests pass; no scientific claim."
     }
   ],
   "legacy_gate_status": {

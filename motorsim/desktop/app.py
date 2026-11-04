@@ -140,6 +140,7 @@ class DinoDesktopWindow(QMainWindow):
         self.history_toggle.hide()
         execution=self.pages[3];results=self.pages[4]
         execution.open_runs_requested.connect(self._open_indexed_runs)
+        execution.design_study_completed.connect(self.results.open_design_study)
         results.evidence_updated.connect(self._update_evidence)
         self.inspector=QGroupBox("Motor y evidencia");self.inspector.setObjectName("inspector");self.inspector.setMinimumWidth(145);self.inspector.setMaximumWidth(320)
         inspector_layout=QVBoxLayout(self.inspector);inspector_layout.setContentsMargins(12,12,10,12)
@@ -168,7 +169,7 @@ class DinoDesktopWindow(QMainWindow):
         self.strip_more=QPushButton('Más opciones');self.strip_more.setToolTip('Barrido RPM y recuperación')
         from PySide6.QtWidgets import QMenu
         menu=QMenu(self.strip_more)
-        for label,callback in (('Barrido RPM / A/B…',execution.start_power_curve),('Reanudar checkpoint seleccionado…',lambda:execution.start_run(resume=True)),('Reanudar barrido…',execution.resume_power_curve)):
+        for label,callback in (('Barrido RPM / A/B…',execution.start_power_curve),('Estudio paramétrico geométrico…',execution.start_design_study),('Reanudar estudio paramétrico…',execution.resume_design_study),('Reanudar checkpoint seleccionado…',lambda:execution.start_run(resume=True)),('Reanudar barrido…',execution.resume_power_curve)):
             action=menu.addAction(label);action.triggered.connect(callback)
         self.resume_action=menu.actions()[1]
         self.strip_more.setMenu(menu);strip.addWidget(self.strip_more)
@@ -195,7 +196,7 @@ class DinoDesktopWindow(QMainWindow):
         execution=self.pages[3]
         active=execution.task is not None
         self.run_config_summary.setText(f"{execution.rpm.value():g} rpm · {execution.cycles.value()} ciclos · {execution.budget.value():g} s")
-        self.strip_cancel.setEnabled(active)
+        self.strip_cancel.setEnabled(active and execution.cancel_event is not None)
         self.run_state.setText(state_label(execution.status_text) if not active else ("CANCELACIÓN SOLICITADA" if execution.cancel_event and execution.cancel_event.is_set() else "CORRIENDO"))
         self.run_state.setToolTip(execution.status_text)
         if hasattr(self,'resume_action'):self.resume_action.setEnabled(execution.resume.isEnabled() and not active)

@@ -1,0 +1,95 @@
+{
+  "schema": "DINO_DESKTOP_PARAMETRIC_STUDY_ACCEPTANCE_V1",
+  "status": "SYNTHETIC_FUNCTIONAL_INTEGRATION_PASS_WITH_LIMITATIONS",
+  "source_commit": "recorded in local Git history for this receipt commit",
+  "study": {
+    "schema": "DINO_PARAMETRIC_DESIGN_STUDY_V1",
+    "project_id": "synthetic-parametric-integrated",
+    "study_id": "integrated-desktop-study-v2-20261104",
+    "parameter": "exhaust.section.0.length_mm",
+    "values_mm": [83.0, 85.0],
+    "rpm": 3000,
+    "max_cycles_per_point": 1,
+    "wall_seconds": 19.015,
+    "status": "COMPLETE",
+    "mode": "EXPLORATORY",
+    "scientific_validation": "NOT_CLAIMED",
+    "manifest_path": "C:/Users/ageribon.MIDES/Dino-artifacts/desktop-parametric-design-study-v1/engine-study-20261104T/design-studies-v1/synthetic-parametric-integrated/integrated-desktop-study-v2-20261104/study.json",
+    "manifest_sha256": "424f2e79526a9aeb154ae4832cdb54ffbd666a68b9863cc7a13b43e96a332bc7",
+    "points": [
+      {
+        "run_id": "integrated-desktop-study-v2-20261104-p00",
+        "identity_sha256": "2aaff713b52814046b3320c9fec3fc198ad9d289d3ded2bdb794bbd90f0e4732",
+        "result_sha256": "d237bffd53346efb1d0f99a62aa0c7776399784b3d15fd397fdc95a8cace0620",
+        "value_mm": 83.0,
+        "classification": "MAX_CYCLES_NONCONVERGED",
+        "periodicity": "INSUFFICIENT_CYCLES",
+        "cycles_completed": 1,
+        "internal_conservation_relative_residuals": {
+          "energy": 1.015603532952196e-15,
+          "mass": 6.810187672284862e-17,
+          "species": 5.076427394049007e-16
+        },
+        "independent_audit": "NOT_PERFORMED",
+        "brake_power_status": "UNDEFINED",
+        "brake_torque_status": "UNDEFINED",
+        "bmep_status": "UNDEFINED"
+      },
+      {
+        "run_id": "integrated-desktop-study-v2-20261104-p01",
+        "identity_sha256": "2c540f6d34efb27315d18333663966b46f96adc7c2efe1f83d78021158cb9920",
+        "result_sha256": "da76352b9d77aa67203b13b426dd0ffc9bfa868cdb5c605d1ef5469eca5a2165",
+        "value_mm": 85.0,
+        "classification": "MAX_CYCLES_NONCONVERGED",
+        "periodicity": "INSUFFICIENT_CYCLES",
+        "cycles_completed": 1,
+        "internal_conservation_relative_residuals": {
+          "energy": 3.3411472602477953e-16,
+          "mass": 1.4522118028104423e-16,
+          "species": 4.600561609684643e-16
+        },
+        "independent_audit": "NOT_PERFORMED",
+        "brake_power_status": "UNDEFINED",
+        "brake_torque_status": "UNDEFINED",
+        "bmep_status": "UNDEFINED"
+      }
+    ]
+  },
+  "resume_reuse": {
+    "status": "PASS",
+    "solver_cycles_launched": 0,
+    "elapsed_seconds": 2.047,
+    "all_points_reused_verified": true,
+    "log_path": "C:/Users/ageribon.MIDES/Dino-artifacts/desktop-parametric-design-study-v1/engine-study-20261104T/resume-verified/desktop-parametric-design-study-artifact-reuse.log"
+  },
+  "desktop_window": {
+    "status": "PASS",
+    "source_application_visible": true,
+    "loaded_points": 2,
+    "comparison_rows": 2,
+    "undefined_metrics_render_as_dash": true,
+    "screenshot": "captures/parametric-comparison-real-window-1360x900.png",
+    "screenshot_sha256": "88e95efedaeebf1d0059eb156634fddc78c67e4438476db521549c67b1d5051d",
+    "actual_outer_window_px": [1440, 837],
+    "menu_action_present": true
+  },
+  "tests": {
+    "compileall": "PASS",
+    "focused_command": "python -m pytest -q tests/test_design_study.py tests/test_desktop_design_study.py tests/test_desktop_technical_report.py tests/test_packaging_build_provenance.py",
+    "focused_result": "16 passed",
+    "desktop_regression_command": "python -m pytest -q tests/test_desktop_rpm_curves.py tests/test_dino_desktop_ux_v2.py tests/test_engine_configuration_v1.py",
+    "desktop_regression_result": "33 passed"
+  },
+  "com_automation": {
+    "classification": "WINDOWS_UIA_HARNESS_TEARDOWN_NOT_DINO_COM_FAILURE",
+    "evidence": "results/desktop-technical-report-v1/acceptance.md and receipt.json record successful interaction followed by a post-close UIA COM visibility wait failure; retry failed on stale provider before interaction.",
+    "current_verifier_uses": "Win32 WM_CLOSE and IsWindowVisible after close",
+    "limitation": "pywinauto is not installed in the active source Python environment; packaged verifier not rebuilt or rerun."
+  },
+  "limits": [
+    "Only existing partitioned exhaust section length is an exposed parametric axis.",
+    "Study results are ENGINEERING_EXPLORATORY and not independently audited or experimentally validated.",
+    "No cylinder, port, crankcase or multi-factor parametric adapters yet.",
+    "The legacy starter fixture missing explicit geometry_identity.displacement_cc is rejected; no inferred value is supplied."
+  ]
+}

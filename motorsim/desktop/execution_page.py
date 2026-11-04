@@ -12,7 +12,7 @@ from datetime import datetime,timezone
 from PySide6.QtCore import Qt, Signal, QElapsedTimer
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QPlainTextEdit, QFileDialog, QMessageBox, QDoubleSpinBox, QSpinBox, QLineEdit,
-    QFormLayout, QGroupBox, QComboBox, QDialog, QDialogButtonBox,QCheckBox)
+    QFormLayout, QGroupBox, QComboBox, QDialog, QDialogButtonBox,QCheckBox,QInputDialog)
 
 from ..engine_configuration import identity, resolve_for_operating_point
 from ..exploratory_workflow import preflight, run_exploratory
@@ -29,6 +29,7 @@ class ExecutionPage(QWidget):
     state_changed=Signal()
     artifact_root_changed=Signal(object)
     refresh_history_requested=Signal()
+    design_study_completed=Signal(object)
     def __init__(self, context):
         super().__init__(); self.context=context; self.task=None; self.cancel_event=None
         self.elapsed_timer=QElapsedTimer();self.progress_latest=None;self.status_text="LISTO · preparado";self.checkpoint_summary=None
@@ -410,6 +411,135 @@ class ExecutionPage(QWidget):
         self.resume_sweep.setEnabled(False)
         self.state_changed.emit()
 
+    def start_design_study(self):
+        """Prepare one bounded geometry factor study through the existing solver workflow."""
+        if self.task is not None:return
+        from ..design_study import available_parameters,prepare_design_study,run_design_study
+        if repository_root_containing(self.artifact_root) is not None:
+            QMessageBox.warning(self,"Artifact root bloqueado","Elegí una carpeta externa al repositorio antes de crear el estudio.");return
+        dialog=QDialog(self);dialog.setWindowTitle("Estudio paramétrico geométrico · EXPLORATORY")
+        form=QFormLayout(dialog)
+        try:parameters=available_parameters(self._engine())
+        except Exception as exc:
+            QMessageBox.warning(self,"Estudio geométrico no disponible",
+                f"La geometría activa no tiene un adaptador paramétrico seguro: {type(exc).__name__}: {exc}\n\nNo se modificó la configuración ni se inició el solver.")
+            return
+        if not parameters:
+            QMessageBox.information(self,"Sin parámetros compatibles","Esta geometría todavía no ofrece ejes paramétricos seguros.");return
+        parameter=QComboBox();parameter.setObjectName("designStudyParameter")
+        for item in parameters:parameter.addItem(item["label"],item["id"])
+        form.addRow("Parámetro compatible",parameter)
+        baseline=QLabel();baseline.setObjectName("designStudyBaseline");baseline.setWordWrap(True);form.addRow("Valor baseline",baseline)
+        alternatives=QLineEdit();alternatives.setObjectName("designStudyValues")
+        alternatives.setPlaceholderText("Valores alternativos explícitos en mm, separados por coma")
+        form.addRow("Valores a probar",alternatives)
+        notice=QLabel("El baseline se agrega automáticamente. Máximo 5 puntos. Sólo se modifican longitudes de secciones de escape representables; no cambia topología, malla ni física. Los resultados son EXPLORATORY y no equivalen a predicciones validadas.")
+        notice.setWordWrap(True);form.addRow(notice)
+        cycles=QSpinBox();cycles.setRange(1,111);cycles.setValue(1);cycles.setObjectName("designStudyCycles")
+        point_budget=QSpinBox();point_budget.setRange(1,600);point_budget.setValue(min(60,int(self.budget.value())))
+        point_budget.setObjectName("designStudyPointBudget")
+        total_budget=QSpinBox();total_budget.setRange(2,600);total_budget.setValue(min(600,max(2,3*point_budget.value())))
+        total_budget.setObjectName("designStudyTotalBudget")
+        form.addRow("Horizonte máximo por diseño",cycles);form.addRow("Presupuesto máximo por diseño (s)",point_budget)
+        form.addRow("Presupuesto agregado del estudio (s)",total_budget)
+        parameter.currentIndexChanged.connect(lambda i:baseline.setText(f"{parameters[i]['baseline']:g} mm · valor actual del proyecto"))
+        baseline.setText(f"{parameters[0]['baseline']:g} mm · valor actual del proyecto")
+        buttons=QDialogButtonBox(QDialogButtonBox.StandardButton.Ok|QDialogButtonBox.StandardButton.Cancel)
+        buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Preflight y ejecutar…")
+        buttons.accepted.connect(dialog.accept);buttons.rejected.connect(dialog.reject);form.addRow(buttons)
+        if dialog.exec()!=QDialog.DialogCode.Accepted:return
+        try:
+            raw=alternatives.text().replace(";",",").replace("\n",",")
+            entered=[float(part.strip()) for part in raw.split(",") if part.strip()]
+            selected=parameters[parameter.currentIndex()]
+            values=[selected["baseline"],*entered]
+            if len(values)>5:raise ValueError("el estudio admite hasta 5 puntos, incluyendo el baseline")
+            document=json.loads(json.dumps(self._engine(),allow_nan=False))
+        except Exception as exc:
+            QMessageBox.warning(self,"Estudio bloqueado",f"FAIL-CLOSED: {type(exc).__name__}: {exc}");return
+        arguments={"parameter_id":selected["id"],"values":values,"rpm":self.rpm.value(),
+            "max_cycles":cycles.value(),"point_budget_seconds":point_budget.value(),
+            "total_budget_seconds":total_budget.value(),"memory_limit_mib":self.memory.value(),
+            "project_id":self.context.project["project_id"],"variant_label":self.context.selected_variant or "base"}
+        self.cancel_event=None;self.progress_latest=None
+        self.active_sweep_settings={"rpms":[self.rpm.value()],"max_cycles":cycles.value(),
+            "total_budget_seconds":total_budget.value()}
+        self.output.appendPlainText(f"Preflight paramétrico en segundo plano · {len(values)} configuraciones · 0 pasos del solver.")
+        self.task=run_background(prepare_design_study,document,on_done=self._design_study_preflight_done,
+            on_error=self._failed,**arguments)
+        self.elapsed_timer.start();self.status_text="VALIDANDO DISEÑOS · SIN PASOS DEL SOLVER";self.checkpoint_summary="preflight geométrico en segundo plano"
+        self.cancel.setEnabled(False);self.start.setEnabled(False);self.resume.setEnabled(False)
+        self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()
+
+    def _design_study_preflight_done(self,prepared):
+        from ..design_study import run_design_study
+        try:
+            from ..storage_preflight import check_storage_requirements
+            check_storage_requirements([(self.artifact_root,512*1024**2*len(prepared["points"]))])
+            unit=prepared["parameter"]["unit"]
+            values_text=", ".join(f"{value:g} {unit}" for value in prepared["values"])
+            summary=(f"Proyecto: {prepared['project_id']} · variante: {prepared['variant_label']}\n"
+                f"Parámetro: {prepared['parameter']['label']}\nValores: {values_text}\n"
+                f"RPM: {prepared['rpm']:g} · hasta {prepared['max_cycles']} ciclos/punto · {prepared['total_budget_seconds']:g} s agregados\n"
+                f"Preflight: {len(prepared['points'])} configuraciones válidas · 0 pasos del solver\n"
+                f"Salida durable: {self.artifact_root / 'design-studies-v1' / prepared['project_id']}\n\n"
+                "Cada punto usará el EXPLORATORY integrado con identidad y checkpoint propios. Los resultados periódicos se clasifican por punto; la corrida terminada o el estado COMPLETE del estudio no garantiza periodicidad ni validación.")
+            if QMessageBox.question(self,"Confirmar estudio paramétrico",summary,
+                QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No,QMessageBox.StandardButton.No)!=QMessageBox.StandardButton.Yes:
+                self.status_text="ESTUDIO NO INICIADO · PREFLIGHT COMPLETO";self.checkpoint_summary="0 pasos del solver; no se creó estudio"
+                self._release_task();return
+        except Exception as exc:
+            self._failed(f"{type(exc).__name__}: {exc}");return
+        self.cancel_event=threading.Event();self.progress_latest=None
+        self.output.appendPlainText(f"Estudio paramétrico EXPLORATORY iniciado · {prepared['study_id']} · {len(prepared['points'])} diseños.")
+        self.task=run_background(run_design_study,prepared,artifact_root=self.artifact_root,
+            cancel_event=self.cancel_event,progress=self.progress_signal.emit,
+            on_done=self._done,on_error=self._failed)
+        self.status_text="CORRIENDO ESTUDIO DE DISEÑO";self.checkpoint_summary="manifiesto y checkpoint independientes por diseño"
+        self.cancel.setEnabled(True);self.start.setEnabled(False);self.resume.setEnabled(False)
+        self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()
+
+    def resume_design_study(self):
+        if self.task is not None:return
+        from ..design_study import load_prepared_study,run_design_study
+        selected,_=QFileDialog.getOpenFileName(self,"Reanudar estudio paramétrico",str(self.artifact_root),"Estudio Dino (study.json)")
+        if not selected:return
+        try:
+            manifest_path=Path(selected).resolve();prepared=load_prepared_study(manifest_path)
+            if prepared["project_id"]!=self.context.project["project_id"]:
+                raise ValueError("el estudio pertenece a otro proyecto")
+            if prepared["variant_label"]!=(self.context.selected_variant or "base"):
+                raise ValueError("seleccioná la variante baseline con la que se creó el estudio")
+            if identity(self._engine())!=prepared["baseline_engine_identity_sha256"]:
+                raise ValueError("la configuración actual no coincide con el baseline guardado")
+            extension,ok=QInputDialog.getInt(self,"Presupuesto de reanudación",
+                "Segundos adicionales para el estudio (se suman al límite total y por punto):",60,0,600)
+            if not ok:return
+            answer=QMessageBox.question(self,"Confirmar reanudación",
+                f"Estudio {prepared['study_id']} · {len(prepared['points'])} diseños\n"
+                f"Presupuesto adicional: {extension} s\nLos puntos completos se reutilizan sólo tras verificar sus artifacts; los interrumpidos continúan desde checkpoints válidos.",
+                QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No,QMessageBox.StandardButton.No)
+            if answer!=QMessageBox.StandardButton.Yes:return
+            # The study file is its durable index; continuation always writes beside it.
+            self.artifact_root=manifest_path.parents[3]
+            from .preferences import set_artifact_root,repository_root_containing
+            if repository_root_containing(self.artifact_root) is not None:
+                raise ValueError("el artifact root del estudio está dentro del repositorio")
+            expected=(self.artifact_root/"design-studies-v1"/prepared["project_id"]/prepared["study_id"])/"study.json"
+            if manifest_path!=expected.resolve():raise ValueError("ruta del manifiesto no coincide con su raíz durable")
+            set_artifact_root(self.artifact_root);self.root_label.setText(str(self.artifact_root))
+            self.history.artifact_root=self.artifact_root;self.artifact_root_changed.emit(self.artifact_root)
+        except Exception as exc:
+            QMessageBox.warning(self,"Reanudación bloqueada",f"FAIL-CLOSED: {type(exc).__name__}: {exc}");return
+        self.cancel_event=threading.Event();self.active_sweep_settings={"rpms":[prepared["rpm"]],
+            "max_cycles":prepared["max_cycles"],"total_budget_seconds":max(1,extension)}
+        self.task=run_background(run_design_study,prepared,artifact_root=self.artifact_root,
+            cancel_event=self.cancel_event,progress=self.progress_signal.emit,resume=True,
+            additional_budget_seconds=extension,on_done=self._done,on_error=self._failed)
+        self.elapsed_timer.start();self.status_text="REANUDANDO ESTUDIO";self.checkpoint_summary="checkpoints por diseño"
+        self.cancel.setEnabled(True);self.start.setEnabled(False);self.resume.setEnabled(False)
+        self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()
+
     def resume_power_curve(self):
         """Resume only an explicitly selected, binding-compatible sweep manifest."""
         if self.task is not None:return
@@ -493,7 +623,11 @@ class ExecutionPage(QWidget):
             not_started=sum(row.get("status")=="NOT_STARTED" for row in result["points"])
             self.checkpoint_summary=(f"{complete} puntos ejecutados · {interrupted} interrumpidos con checkpoint · "
                 f"{not_started} sin iniciar · {state_label(result.get('curve_availability','curva parcial'))}")
-            self.output.appendPlainText(f"Barrido finalizado · {complete} puntos completados · {interrupted} con checkpoint · {not_started} sin iniciar · {state_label(result.get('curve_availability','curva parcial'))}. Evidencia íntegra disponible en Resultados y Trazabilidad.")
+            if result.get("schema")=="DINO_PARAMETRIC_DESIGN_STUDY_RESULT_V1":
+                self.output.appendPlainText(f"Estudio paramétrico {result.get('study_id')} · {result.get('status')} · {complete} diseños con corrida terminada · {interrupted} interrumpidos con checkpoint · {not_started} no iniciados. Los estados periódicos se muestran por separado; EXPLORATORY, sin validación predictiva.")
+                if result.get("design_study_manifest"):self.design_study_completed.emit(result["design_study_manifest"])
+            else:
+                self.output.appendPlainText(f"Barrido finalizado · {complete} puntos completados · {interrupted} con checkpoint · {not_started} sin iniciar · {state_label(result.get('curve_availability','curva parcial'))}. Evidencia íntegra disponible en Resultados y Trazabilidad.")
         else:
             cycles=result.get('cycles_completed',0)
             periodicity=state_label(result.get('periodicity','periodicidad no evaluada'))

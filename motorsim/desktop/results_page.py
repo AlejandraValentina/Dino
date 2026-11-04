@@ -161,6 +161,15 @@ class ResultsPage(QWidget):
         self.compare_group=QGroupBox("Comparación de ingeniería")
         compare_layout=QVBoxLayout(self.compare_group);self.compare_notice=QLabel("Seleccioná dos variantes con corridas para comparar.");self.compare_notice.setWordWrap(True);compare_layout.addWidget(self.compare_notice)
         self.compare_table=QTableWidget(0,5);self.compare_table.setObjectName("engineeringComparisonTable");self.compare_table.setHorizontalHeaderLabels(["Elemento","Baseline","Variante","Δ","Estado"]);self.compare_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch);self.compare_table.setMaximumHeight(220);compare_layout.addWidget(self.compare_table);root.addWidget(self.compare_group)
+        self.design_study_group=QGroupBox("Exploración paramétrica · comparación de diseños")
+        study_layout=QVBoxLayout(self.design_study_group)
+        self.design_study_notice=QLabel("Los estudios se conservan con su manifiesto, configuración e identidad por punto.")
+        self.design_study_notice.setWordWrap(True);study_layout.addWidget(self.design_study_notice)
+        self.design_study_table=QTableWidget(0,9);self.design_study_table.setObjectName("designStudyResults")
+        self.design_study_table.setHorizontalHeaderLabels(["Diseño","Valor","Estado","Periodicidad","Ciclos","Potencia","Torque","BMEP","Δ potencia vs base"])
+        self.design_study_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.design_study_table.horizontalHeader().setStretchLastSection(True);self.design_study_table.setMaximumHeight(230)
+        study_layout.addWidget(self.design_study_table);root.addWidget(self.design_study_group);self.design_study_group.hide()
         self.details=QTableWidget(0,2);self.details.setHorizontalHeaderLabels(["Detalle del punto","Valor"]);self.details.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch);self.details.setMaximumHeight(190);root.addWidget(self.details)
         # Preserve all existing controls and contracts; organize presentation
         # around the designer's question rather than one long audit document.
@@ -179,7 +188,7 @@ class ResultsPage(QWidget):
         view('Variables',[self.plot,self.point_table])
         waves=view('Presiones y ondas',[self.trace_group])
         wave_help=QLabel('Las señales se muestran cuando las corridas contienen primarios compatibles. Un reporte agregado de curvas no contiene trazas ni geometría adicional.');wave_help.setWordWrap(True);waves.insertWidget(0,wave_help)
-        view('Comparar',[self.compare_group])
+        view('Comparar',[self.compare_group,self.design_study_group])
         view('Mediciones',[measured])
         view('Trazabilidad',[self.source_notice,self.path_label,self.details])
         # Source paths and identifiers stay available in Trazabilidad. Keep
@@ -567,6 +576,22 @@ class ResultsPage(QWidget):
             self.path_label.setText("Verificando artifacts EXPLORATORY…")
             from ..power_curve import import_curve_runs
             run_background(import_curve_runs,paths,on_done=self._loaded_exploratory,on_error=self._exploratory_failed)
+
+    def open_design_study(self,manifest_path):
+        """Open only the study's saved points and join metrics by their run IDs."""
+        try:
+            path=Path(manifest_path).resolve()
+            manifest=json.loads(path.read_text(encoding="utf-8"))
+            if manifest.get("schema")!="DINO_PARAMETRIC_DESIGN_STUDY_V1":
+                raise ValueError("manifiesto paramétrico no compatible")
+            self.design_study_manifest=manifest;self.design_study_manifest_path=path
+            run_paths=[row["run_directory"] for row in manifest.get("points",[])
+                       if row.get("run_directory") and Path(row["run_directory"]).joinpath("result.json").is_file()]
+            self._update_design_study_summary()
+            if run_paths:self.open_runs(run_paths)
+        except Exception as exc:
+            self.design_study_group.show()
+            self.design_study_notice.setText(f"Estudio paramétrico no disponible: {type(exc).__name__}: {exc}")
     def _loaded_exploratory(self,data):
         requested_rpms=_referenced_curve_rpms(self.context.project,data)
         if requested_rpms:data['requested_rpms']=requested_rpms
@@ -604,6 +629,41 @@ class ResultsPage(QWidget):
             reason="No hay trazas auditadas de presión/flujo disponibles." if not traces else "No hay canales de presión/flujo comunes para superponer."
             self.source_notice.setText(self.source_notice.text()+" "+reason)
         self.redraw();self.redraw_trace();self._redraw_trace_map();self._update_condition_notice();self._update_engineering_compare();self._dataset_summary();self.evidence_updated.emit()
+        self._update_design_study_summary()
+
+    def _update_design_study_summary(self):
+        manifest=getattr(self,"design_study_manifest",None)
+        if not manifest:return
+        dataset_points={str(row.get("run_id")):row for row in (self.dataset or {}).get("points",[])
+                        if row.get("run_id") is not None}
+        baseline_row=next((row for row in manifest.get("points",[]) if row.get("baseline")),None)
+        baseline_point=dataset_points.get(str(baseline_row.get("run_id"))) if baseline_row else None
+        values={key:(baseline_point.get(key) if baseline_point and baseline_point.get(key+"_status")=="DEFINED" else None)
+                for key in ("brake_power","brake_torque","BMEP")}
+        point_name=manifest.get("parameter",{}).get("label","Parámetro")
+        self.design_study_notice.setText(
+            f"{manifest.get('study_id')} · {point_name} · {manifest.get('rpm'):g} RPM · "
+            f"EXPLORATORY · periodicidad evaluada por punto · validación científica NO RECLAMADA · "
+            f"manifiesto: {getattr(self,'design_study_manifest_path','—')}")
+        self.design_study_table.setRowCount(len(manifest.get("points",[])))
+        for index,row in enumerate(manifest.get("points",[])):
+            point=dataset_points.get(str(row.get("run_id")),{})
+            metrics=[]
+            for key in ("brake_power","brake_torque","BMEP"):
+                value=point.get(key) if point.get(key+"_status")=="DEFINED" else None
+                metrics.append(format_number(value) if isinstance(value,(int,float)) else "—")
+            power=point.get("brake_power") if point.get("brake_power_status")=="DEFINED" else None
+            delta=(format_number(power-values["brake_power"],signed=True) if isinstance(power,(int,float)) and isinstance(values["brake_power"],(int,float)) else "—")
+            design_label="Baseline" if row.get("baseline") else f"Diseño {index+1}"
+            cells=[design_label,f"{format_number(row.get('value'))} {row.get('unit','')}",
+                _state_label(point.get("classification") or row.get("status")),
+                _state_label(point.get("periodicity") or "NOT_EVALUATED"),
+                str(point.get("cycles_completed",row.get("cycles_completed",0))),*metrics,delta]
+            for column,value in enumerate(cells):
+                item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                if column in (2,3,8):item.setToolTip(str(value))
+                self.design_study_table.setItem(index,column,item)
+        self.design_study_group.show()
     def _exploratory_failed(self,message):
         self.path_label.setText("Ejecución EXPLORATORY inválida");self.trace_group.hide();QMessageBox.warning(self,"Artifact exploratorio inválido",message)
     def load(self,path,*,historical=False):
