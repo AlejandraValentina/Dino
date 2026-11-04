@@ -1,0 +1,30 @@
+{
+  "schema": "DINO_NATIVE_CROSS_STUDY_REPORT_PLOT_V1",
+  "synthetic": true,
+  "desktop_window_visible": true,
+  "desktop_size": [
+    1440,
+    837
+  ],
+  "project_study_references": 2,
+  "html_report_path": "results\\desktop-parametric-design-study-v2\\cross-study-report-state-labels\\native-pairing-context-v1.html",
+  "html_sha256": "c099bcab6bb98b37e7aa9d88c250a129cf543c68d2caed6be9cc2e1d0b3c74d8",
+  "html_svg_count": 1,
+  "html_marker_count": 2,
+  "no_interpolated_lines": true,
+  "excluded_nonperiodic_pair_listed": true,
+  "unpaired_point_preserved": true,
+  "manifest_hashes_preserved": true,
+  "pair_rule_label_translated": true,
+  "unpaired_context_field_label_translated": true,
+  "raw_pair_and_context_codes_preserved_in_source_json": true,
+  "not_claimed_preserved": true,
+  "synthetic_notice_preserved": true,
+  "desktop_capture_saved": true,
+  "browser_capture_saved": true,
+  "browser_capture_sha256": "0d93a6a64c65f0f607be64ea68045890179896ed469f8f1c4a86ffe317790fdf",
+  "browser": "Chrome headless; renderer only; Desktop export action generated the HTML",
+  "summary_header_count": 9,
+  "expandable_point_count": 6,
+  "full_provenance_fields_preserved": true
+}

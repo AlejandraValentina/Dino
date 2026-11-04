@@ -26,6 +26,17 @@ CONDITION_FIELDS = (
     "total_finite_volume_cells", "cycles_requested", "solver_identity_sha256",
     "implementation_identity_sha256", "periodicity_contract",
 )
+_PAIRING_LABELS = {
+    "EXACT_RPM_AND_OPERATING_CONTEXT": "RPM exacta y contexto operativo coincidente",
+}
+_PAIRING_CONTEXT_LABELS = {
+    "fuel_id": "identificador de combustible",
+    "afr_kg_air_per_kg_fuel": "relación aire/combustible por masa",
+    "total_finite_volume_cells": "cantidad de celdas de volumen finito",
+    "cycles_requested": "ciclos solicitados",
+    "solver_identity_sha256": "identidad SHA-256 del solver",
+    "implementation_identity_sha256": "identidad SHA-256 de la implementación",
+}
 
 
 def _safe_number(value):
@@ -63,6 +74,21 @@ def _esc(value):
     if value is None:
         return "No informado"
     return html.escape(str(value), quote=True)
+
+
+def _pairing_label(value):
+    if isinstance(value, str) and value in _PAIRING_LABELS:
+        return _PAIRING_LABELS[value]
+    return state_label(value or "NOT_REPORTED")
+
+
+def _pairing_reason_label(value):
+    if value is None:
+        return "Motivo no informado"
+    text = str(value)
+    for field, label in _PAIRING_CONTEXT_LABELS.items():
+        text = text.replace(field, label)
+    return text
 
 
 def _chart_svg(rows, variants, label, metric, unit):
@@ -612,7 +638,7 @@ def render_study_comparison_report(comparison: dict) -> str:
                 f"<td>{_esc(pair.get('point_b',{}).get('run_id'))}</td>",
                 f"<td>{_esc(format_number(pair.get('rpm')))} RPM</td>",f"<td>{_esc(label)}</td>",
                 f"<td>{_esc(format_number(delta,signed=True) if _safe_number(delta) else '—')}{(' '+_esc(unit)) if _safe_number(delta) else ''}</td>",
-                f"<td>{_esc(pair.get('pairing'))}</td>"))+"</tr>")
+                f"<td>{_esc(_pairing_label(pair.get('pairing')))}</td>"))+"</tr>")
     unpaired_rows=[]
     for item in comparison.get("unpaired",[]):
         point=item.get("point",{})
@@ -620,7 +646,8 @@ def render_study_comparison_report(comparison: dict) -> str:
             f"<td>{_esc(point.get('run_id'))}</td>",f"<td>{_esc(format_number(point.get('rpm')))} RPM</td>",
             f"<td>{_esc(state_label(point.get('classification') or point.get('status')))}</td>",
             f"<td>{_esc(state_label(point.get('periodicity') or 'NOT_EVALUATED'))}</td>",
-            f"<td>{_esc(point.get('engine_identity_sha256'))}</td>",f"<td>{_esc(item.get('reason'))}</td>"))+"</tr>")
+            f"<td>{_esc(point.get('engine_identity_sha256'))}</td>",
+            f"<td>{_esc(_pairing_reason_label(item.get('reason')))}</td>"))+"</tr>")
     payload=html.escape(json.dumps(comparison,ensure_ascii=False,sort_keys=True,indent=2,allow_nan=False),quote=False)
     return f'''<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Comparación paramétrica · Dino 2T</title>
 <style>body{{font:15px Segoe UI,Arial,sans-serif;color:#172536;margin:28px;max-width:1500px}}h1,h2{{color:#173852}}.notice{{padding:14px;background:#fff3dc;border-left:5px solid #cc7b18}}table{{border-collapse:collapse;width:100%;margin:12px 0 24px;font-size:12px}}th,td{{border:1px solid #becbd7;padding:6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}}th{{background:#e9f0f5}}code{{font-size:11px}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6f8;padding:16px}}.legend span{{margin-right:12px}}.legend i{{font-style:normal;font-size:18px}}.empty{{padding:12px;background:#f3f6f8}}.run-id{{min-width:9em}}.metric-summary span{{display:inline-block;margin:0 8px 3px 0;white-space:nowrap}}.point-provenance{{position:relative}}.point-provenance summary{{cursor:pointer;min-width:9em;color:#155b78}}.provenance-grid{{position:absolute;z-index:5;right:0;top:1.5em;display:grid;grid-template-columns:repeat(auto-fit,minmax(17em,1fr));gap:6px 14px;margin:0;padding:12px;width:min(780px,70vw);max-width:calc(100vw - 48px);background:#fff;border:1px solid #91a8ba;box-shadow:0 4px 16px #17253640}}.provenance-grid div{{min-width:0}}.provenance-grid dt{{font-weight:600;color:#40556a}}.provenance-grid dd{{margin:2px 0 0;overflow-wrap:anywhere}}@media(max-width:900px){{body{{margin:16px}}table{{font-size:11px}}.metric-summary span{{white-space:normal}}.provenance-grid{{grid-template-columns:1fr;width:min(780px,70vw)}}}}footer{{color:#526477}}</style></head><body>

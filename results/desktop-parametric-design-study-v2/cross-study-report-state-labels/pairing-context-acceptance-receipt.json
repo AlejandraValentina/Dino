@@ -1,0 +1,45 @@
+{
+  "schema": "DINO_REPORT_PAIRING_CONTEXT_LABELS_ACCEPTANCE_V1",
+  "fixture_origin": "synthetic presentation fixture; no solver execution",
+  "pair_rule_label_translated": true,
+  "context_reason_field_translated": true,
+  "exact_internal_values_preserved_in_report_json": true,
+  "native_export": {
+    "html_path": "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/native-pairing-context-v1.html",
+    "html_sha256": "c099bcab6bb98b37e7aa9d88c250a129cf543c68d2caed6be9cc2e1d0b3c74d8",
+    "desktop_capture_path": "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/native-desktop-export-v1.png",
+    "desktop_capture_sha256": "2a2a31373616faae191322805e8710290e706e8b51c078e10ed8686b936ba8fb",
+    "browser_capture_path": "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-pairing-context-v1.png",
+    "browser_capture_sha256": "0d93a6a64c65f0f607be64ea68045890179896ed469f8f1c4a86ffe317790fdf",
+    "capture_dimensions_px": {
+      "native-desktop-export-v1.png": [
+        1440,
+        837
+      ],
+      "chrome-pairing-context-v1.png": [
+        1360,
+        3000
+      ]
+    },
+    "source_fixture_notice": true,
+    "no_interpolated_lines": true,
+    "desktop_window_visible": true,
+    "native_runner_exit_code": 0
+  },
+  "tests": {
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_desktop_technical_report.py",
+      "tests/test_desktop_design_study.py"
+    ],
+    "exit_code": 0,
+    "tail": [
+      "..............................................                           [100%]",
+      "46 passed in 43.85s"
+    ],
+    "summary_sha256": "266d5d16294676c2f05b1417f86ba34fb6af63befbd412a448c80f76d57e2b46"
+  }
+}

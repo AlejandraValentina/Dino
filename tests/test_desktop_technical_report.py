@@ -50,6 +50,10 @@ def test_cross_study_report_preserves_exact_provenance_and_evidence_boundaries()
     assert "study &lt;A&gt;" in html and "2.5 kW" in html
     assert "C:/artifacts/run-a" in html and "a"*64 in html and "f"*64 in html
     assert "Puntos sin contraparte" in html and "total_finite_volume_cells" in html
+    unpaired_table=html.split("<h2>Puntos sin contraparte</h2>",1)[1].split("</table>",1)[0]
+    assert "Condiciones informadas incompatibles: cantidad de celdas de volumen finito." in unpaired_table
+    assert "total_finite_volume_cells" not in unpaired_table
+    assert '"reason": "Condiciones informadas incompatibles: total_finite_volume_cells."' in html
     assert "no se interpolan, ajustan ni agregan" in html
     assert "NOT_CLAIMED" in html
     # The visible point summary stays compact while expandable provenance retains
@@ -117,6 +121,10 @@ def test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_ex
     assert "5000 RPM" in report or "5000" in report
     assert "SYNTHETIC/A.study.json" in report and "1"*64 in report
     assert "no se interpolan, ajustan ni agregan" in report
+    contrast_table=report.split("<h2>Contrastes exactos</h2>",1)[1].split("</table>",1)[0]
+    assert "RPM exacta y contexto operativo coincidente" in contrast_table
+    assert "EXACT_RPM_AND_OPERATING_CONTEXT" not in contrast_table
+    assert '"pairing": "EXACT_RPM_AND_OPERATING_CONTEXT"' in report
     assert "<polyline" not in report and "NOT_CLAIMED" in report
 
 
