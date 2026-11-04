@@ -11411,7 +11411,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-STUDY-DATA-EXPORT-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11424,7 +11424,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Inspect whether exported study CSV can be reopened through existing Desktop import paths; implement a read-only snapshot importer only if a concrete gap is confirmed, preserving source-manifest hashes, original point states and explicit NOT_RECLAIMED qualification.",
+      "next_action": "Implement read-only Desktop import of previously exported DINO_PARAMETRIC_STUDY_EXPORT_V1 CSV snapshots; preserve exact values, point/source qualifications, manifest provenance and nonperiodic blanks without reconstructing or executing source studies.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11455,9 +11455,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "06f3c6e"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11467,8 +11469,12 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Export exact factorial point rows and direct contrast definitions to CSV, preserving manifest/source hashes and scientific qualification; add round-trip/rejection regressions and verify native Desktop action without solver execution.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/factor-effects-csv/acceptance.md",
+        "results/desktop-parametric-design-study-v2/factor-effects-csv/tests-final/parametric-factor-effects-csv-final.summary.json",
+        "results/desktop-parametric-design-study-v2/factor-effects-csv/native-smoke-20261104T200320Z/native-window-receipt.json"
+      ],
+      "next_action": "DONE: native Desktop exports four source-bound factorial points and nine qualified direct contrasts; stale/tampered inputs and overwrite are rejected.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11492,6 +11498,52 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Inspect the selected study point detail/tooltip path; add exact source manifest and nested sweep hashes plus current source verification status where available, preserve raw IDs and distinguish unavailable metadata from failed verification.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-FACTORIAL-CSV-REIMPORT-V1",
+      "description": "Open the existing DINO_PARAMETRIC_FACTORIAL_EXPORT_V1 CSV as a read-only Desktop snapshot; verify its exact schema, manifest and source hashes, retain point qualifications and unavailable contrasts, and never rerun or mutate the study.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-CSV-EXPORT-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "motorsim/desktop/factorial_snapshot.py",
+        "tests/test_desktop_factorial_snapshot.py",
+        "results/desktop-parametric-design-study-v2/factor-effects-csv-import/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Implement read-only import of the exported factorial CSV as a review snapshot; fail closed on schema/hash/source mismatches and preserve unavailable/nonperiodic states without converting it to a saved runnable study.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-CSV-REIMPORT-V1",
+      "description": "Open the existing cross-study comparison CSV as a read-only Desktop snapshot; retain exact paired/unpaired decisions, source study hashes and scientific status without recomputation, interpolation or evidence promotion.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-CROSS-STUDY-CSV-EXPORT-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "motorsim/desktop/comparison_snapshot.py",
+        "tests/test_desktop_comparison_snapshot.py",
+        "results/desktop-parametric-design-study-v2/cross-study-csv-reimport/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Implement a read-only view for the existing DINO cross-study CSV export; preserve exact pairs, unpaired reasons and source bindings, and reject changed or unsupported inputs.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16177,6 +16229,25 @@
       "task": "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-CSV-EXPORT-V1",
       "kind": "implementation",
       "summary": "Started the now-unblocked CSV export for qualified factorial point rows and descriptive contrast terms; keep source and validation status bound."
+    },
+    {
+      "at": "2026-11-04T20:08:25+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-CSV-EXPORT-V1",
+      "kind": "implementation",
+      "summary": "Added 13-row provenance-bound factorial CSV from native Desktop; 57 regressions passed, manifest/artifact tamper and overwrite rejection verified. Implementation 06f3c6e.",
+      "commit": "06f3c6e"
+    },
+    {
+      "at": "2026-11-04T20:08:25+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-CSV-REIMPORT-V1",
+      "kind": "implementation",
+      "summary": "Started the top queued product item: read-only Desktop reimport of exact parametric study CSV snapshots, preserving scientific status and provenance."
+    },
+    {
+      "at": "2026-11-04T20:10:48+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-CSV-REIMPORT-V1",
+      "kind": "queue-replan",
+      "summary": "Replenished actionable product queue after it fell below three READY: added read-only round-trip review of the already implemented factorial and cross-study CSV exports, both provenance-preserving and independent of solver execution."
     }
   ],
   "legacy_gate_status": {
