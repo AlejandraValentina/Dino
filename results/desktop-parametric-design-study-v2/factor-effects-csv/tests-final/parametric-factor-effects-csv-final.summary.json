@@ -1,0 +1,25 @@
+{
+  "name": "parametric-factor-effects-csv-final",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_design_study.py",
+    "tests/test_desktop_design_study.py",
+    "tests/test_desktop_technical_report.py"
+  ],
+  "started_at": "2026-11-04T20:03:55+00:00",
+  "finished_at": "2026-11-04T20:07:24+00:00",
+  "duration_s": 209.125,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\factor-effects-csv\\tests-final\\parametric-factor-effects-csv-final.log",
+  "log_lines": 2,
+  "log_bytes": 111,
+  "error_lines": [],
+  "tail": [
+    ".........................................................                [100%]",
+    "57 passed in 208.57s (0:03:28)"
+  ]
+}

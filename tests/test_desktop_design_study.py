@@ -9,7 +9,8 @@ from motorsim.desktop.app import DinoDesktopWindow
 from motorsim.desktop.context import DesktopContext
 from motorsim.desktop.execution_page import ExecutionPage
 from motorsim.desktop.results_page import (ResultsPage,_build_cross_study_comparison_csv,
-    _build_parametric_study_export,_factorial_effects_from_study,_load_verified_study_comparison)
+    _build_factorial_effects_csv,_build_parametric_study_export,_factorial_effects_from_study,
+    _load_verified_study_comparison,_write_factorial_effects_csv)
 from motorsim.desktop.services import new_design_project
 
 APP=QApplication.instance() or QApplication([])
@@ -556,6 +557,84 @@ def test_factorial_effects_flow_into_desktop_technical_report(tmp_path,monkeypat
     report=output.read_text(encoding="utf-8")
     assert "Efecto principal · Factor A" in report and "+12 kW" in report and "+4 kW" in report
     assert "Contrastes factoriales 2×2 · descriptivos" in report
+    page.close();APP.processEvents()
+
+
+def test_factorial_csv_binds_four_exact_points_and_nine_qualified_contrasts(tmp_path):
+    manifest,imported=_factorial_effect_fixture(tmp_path)
+    imported[0]["brake_power"]=10.123456789012345
+    manifest_path=tmp_path/"factorial.study.json"
+    raw=json.dumps(manifest,sort_keys=True,separators=(",",":")).encode()
+    manifest_path.write_bytes(raw);digest=hashlib.sha256(raw).hexdigest()
+    rows=_build_factorial_effects_csv(manifest_path,digest,manifest,imported)
+    points=[row for row in rows if row["record_type"]=="POINT"]
+    contrasts=[row for row in rows if row["record_type"]=="CONTRAST"]
+    assert len(points)==4 and len(contrasts)==9
+    assert all(row["source_verified"] is True and row["manifest_sha256"]==digest for row in points)
+    assert points[0]["factor_a_label"]=="Factor A" and points[0]["factor_b_value"]==10.0
+    assert points[0]["brake_power_kw"]==10.123456789012345
+    assert all(row["scientific_validation"]=="NOT_CLAIMED" for row in rows)
+    assert {row["contrast_term"] for row in contrasts}=={
+        "Efecto principal · Factor A","Efecto principal · Factor B","Interacción A×B"}
+    output=tmp_path/"factorial.csv"
+    _write_factorial_effects_csv(output,rows)
+    with output.open(encoding="utf-8-sig",newline="") as stream:
+        reopened=list(csv.DictReader(stream))
+    assert len(reopened)==13
+    assert reopened[0]["brake_power_kw"]==repr(imported[0]["brake_power"])
+    assert reopened[-1]["contrast_source_result_sha256s_json"]
+    original=output.read_bytes()
+    with pytest.raises(FileExistsError):_write_factorial_effects_csv(output,rows)
+    assert output.read_bytes()==original
+    manifest_path.write_text("{}",encoding="utf-8")
+    with pytest.raises(ValueError,match="manifiesto factorial cambió"):
+        _build_factorial_effects_csv(manifest_path,digest,manifest,imported)
+
+
+def test_factorial_csv_keeps_nonperiodic_points_and_withholds_all_contrasts(tmp_path):
+    manifest,imported=_factorial_effect_fixture(tmp_path)
+    imported[-1]["periodicity"]="INSUFFICIENT_CYCLES"
+    imported[-1]["classification"]="MAX_CYCLES_NONCONVERGED"
+    manifest["points"][-1]["periodicity"]="INSUFFICIENT_CYCLES"
+    manifest["points"][-1]["classification"]="MAX_CYCLES_NONCONVERGED"
+    manifest_path=tmp_path/"factorial-nonperiodic.study.json"
+    raw=json.dumps(manifest,sort_keys=True,separators=(",",":")).encode()
+    manifest_path.write_bytes(raw);digest=hashlib.sha256(raw).hexdigest()
+    rows=_build_factorial_effects_csv(manifest_path,digest,manifest,imported)
+    points=[row for row in rows if row["record_type"]=="POINT"]
+    contrasts=[row for row in rows if row["record_type"]=="CONTRAST"]
+    assert len(points)==4 and len(contrasts)==9
+    assert points[-1]["classification"]=="MAX_CYCLES_NONCONVERGED"
+    assert points[-1]["brake_power_kw"]==""
+    assert points[-1]["brake_power_qualification"]=="WITHHELD_NONPERIODIC"
+    assert all(row["contrast_value"]=="" and row["contrast_status"]=="UNAVAILABLE" for row in contrasts)
+    assert all("no periódico" in row["contrast_reason"].lower() for row in contrasts)
+
+
+def test_factorial_csv_export_button_uses_project_bound_manifest_and_no_overwrite(tmp_path,monkeypatch):
+    manifest,imported=_factorial_effect_fixture(tmp_path)
+    manifest_path=tmp_path/"factorial-ui.study.json"
+    raw=json.dumps(manifest,sort_keys=True,separators=(",",":")).encode()
+    manifest_path.write_bytes(raw);digest=hashlib.sha256(raw).hexdigest()
+    context=DesktopContext(new_design_project("factorial-csv-export-synthetic"))
+    context.project["study_references"]=[{"path":str(manifest_path),"study_id":manifest["study_id"],
+        "manifest_sha256":digest}]
+    page=ResultsPage(context);page.dataset={"points":imported}
+    page.design_study_manifest=manifest;page.design_study_manifest_path=manifest_path
+    page._update_design_study_summary()
+    assert not page.export_factorial_effects_button.isHidden()
+    assert page.export_factorial_effects_button.isEnabled()
+    output=tmp_path/"factorial-button.csv";warnings=[]
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *args:(str(output),"CSV (*.csv)"))
+    monkeypatch.setattr(QMessageBox,"warning",lambda *args:warnings.append(args[2]))
+    page.export_factorial_effects_button.click()
+    assert output.is_file() and "4 puntos y 9 contrastes exportados" in page.design_study_notice.text()
+    original=output.read_bytes();page.export_factorial_effects_button.click()
+    assert output.read_bytes()==original and warnings
+    manifest_path.write_text("{}",encoding="utf-8")
+    tampered=tmp_path/"factorial-tampered.csv"
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *args:(str(tampered),"CSV (*.csv)"))
+    assert page.export_factorial_effects_csv() is False and not tampered.exists()
     page.close();APP.processEvents()
 
 

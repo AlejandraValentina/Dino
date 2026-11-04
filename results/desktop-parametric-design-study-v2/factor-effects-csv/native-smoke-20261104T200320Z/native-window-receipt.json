@@ -1,0 +1,28 @@
+{
+  "evidence_type": "NATIVE_WINDOWS_QT_FACTORIAL_EXPORT_SYNTHETIC",
+  "platform": "windows",
+  "window_size": [
+    1480,
+    881
+  ],
+  "window_visible": true,
+  "synthetic_only": true,
+  "solver_invoked": false,
+  "manifest": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\factor-effects-csv\\native-smoke-20261104T200320Z\\synthetic-factorial.study.json",
+  "manifest_sha256": "79eb2cff8b3253842e84d7e891a1f5f5de0687cfafad45ac7d411db311cd49cd",
+  "csv": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\factor-effects-csv\\native-smoke-20261104T200320Z\\factorial-export.csv",
+  "csv_sha256": "753e67bf1aaef28effdada5cf455c744310161300ae0c9ddf67821e9a356b834",
+  "csv_schema": "DINO_PARAMETRIC_FACTORIAL_EXPORT_V1",
+  "point_rows": 4,
+  "contrast_rows": 9,
+  "point_source_verification": [
+    "True",
+    "True",
+    "True",
+    "True"
+  ],
+  "nonperiodic_records": 0,
+  "capture": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\factor-effects-csv\\native-smoke-20261104T200320Z\\factorial-csv-native-window.png",
+  "capture_sha256": "930c866fd200d6b2b930f03bfacf89e24801558431b763c6a7a60a302ef56ac6",
+  "notice": "4 puntos y 9 contrastes exportados · 0 contraste(s) no disponibles conservados sin valor · SHA-256 manifiesto 79eb2cff8b3253842e84d7e891a1f5f5de0687cfafad45ac7d411db311cd49cd · la exportación no implica validación predictiva."
+}

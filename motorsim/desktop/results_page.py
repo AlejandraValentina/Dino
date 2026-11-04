@@ -57,6 +57,18 @@ _STUDY_EXPORT_FIELDS=("study_schema","study_id","project_id","design_method","ma
     "engine_identity_sha256","identity_sha256","result_sha256","result_artifact_sha256",
     "run_directory","reused_verified","source_verified","source_verification","brake_power_kw","brake_torque_nm","BMEP_kpa",
     "scientific_validation")
+_FACTORIAL_EFFECTS_CSV_FIELDS=("csv_schema","record_type","study_schema","study_id","project_id",
+    "design_method","manifest_path","manifest_sha256","baseline_engine_identity_sha256",
+    "scientific_validation","rpm","point_index","design_label","parameter_id","parameter_label",
+    "parameter_unit","factor_values_json","factor_a_id","factor_a_label","factor_a_value","factor_a_unit",
+    "factor_b_id","factor_b_label","factor_b_value","factor_b_unit","run_id","source_run_id",
+    "source_project_id","execution_status","classification","periodicity","cycles_completed","source_path",
+    "engine_identity_sha256","identity_sha256","result_sha256","result_artifact_sha256","source_verified",
+    "brake_power_kw","brake_power_status","brake_power_qualification","brake_torque_nm",
+    "brake_torque_status","brake_torque_qualification","BMEP_kpa","BMEP_status","BMEP_qualification",
+    "metric_id","metric_label","metric_unit","contrast_term","contrast_value","contrast_unit",
+    "contrast_status","contrast_formula","contrast_reason","contrast_source_run_ids_json",
+    "contrast_source_result_sha256s_json")
 _CROSS_STUDY_CSV_FIELDS=("comparison_schema","baseline_engine_identity_sha256","row_type",
     "study_a_id","study_a_manifest_path","study_a_manifest_sha256","point_a_index","point_a_run_id",
     "point_a_source_run_id","point_a_design_value","point_a_design_unit","point_a_factor_values_json",
@@ -209,11 +221,16 @@ def _factorial_effects_from_study(manifest,imported_points):
         by_id={item.get("parameter_id"):item.get("value") for item in values if isinstance(item,dict)}
         if any(axis["id"] not in by_id for axis in axes):
             failure="Uno o más diseños no identifican ambos factores.";break
+        if any(type(by_id[axis["id"]]) not in (int,float) or not math.isfinite(float(by_id[axis["id"]]))
+                for axis in axes):
+            failure="Uno o más diseños contienen niveles factoriales no numéricos o no finitos.";break
         combo=(by_id[axes[0]["id"]],by_id[axes[1]["id"]])
         if combo not in combos or combo in outcomes:
             failure="La matriz factorial tiene una combinación duplicada o fuera de sus niveles declarados.";break
         if point.get("status") not in {"COMPLETE","CACHED"}:
             failure=f"Punto factorial {point.get('index')} no terminal: {point.get('status') or 'estado ausente'}.";break
+        if point.get("status")=="CACHED" and not point.get("reused_verified"):
+            failure=f"Punto factorial {point.get('index')} usa un resultado histórico no verificado.";break
         run_id=point.get("source_run_id") or point.get("historical_source_run_id") or point.get("run_id")
         candidates=imported_by_run.get(str(run_id),[]);imported=None
         expected_dir=point.get("run_directory")
@@ -236,16 +253,17 @@ def _factorial_effects_from_study(manifest,imported_points):
             if (digest!=expected_hash or digest!=run_meta.get("result_sha256") or
                     digest!=imported.get("result_sha256") or result.get("schema")!="DINO_ENGINEERING_RUN_V1" or
                     result.get("status")!="COMPLETE" or result.get("bindings",{}).get("run_id")!=run_id or
-                    result.get("bindings",{}).get("identity_sha256")!=identity):
+                    result.get("bindings",{}).get("identity_sha256")!=identity or
+                    imported.get("identity_sha256")!=identity):
                 failure=f"Hash o identidad de fuente no verificado en el punto factorial {point.get('index')}.";break
         except (OSError,ValueError,TypeError,KeyError,json.JSONDecodeError):
             failure=f"No se pudo verificar la fuente del punto factorial {point.get('index')}.";break
         if imported.get("periodicity")!="PERIOD_1":
-            failure=(f"Punto factorial {point.get('index')} no periódico PERIOD_1: "
-                f"{imported.get('periodicity') or 'periodicidad no informada'}. No se calculan efectos.");break
+            failure=failure or (f"Punto factorial {point.get('index')} no periódico PERIOD_1: "
+                f"{imported.get('periodicity') or 'periodicidad no informada'}. No se calculan efectos.")
         outcomes[combo]={"manifest":point,"imported":imported}
-    if failure is None and (len(outcomes)!=4 or set(outcomes)!=set(combos)):
-        failure="Falta al menos uno de los cuatro diseños factoriales exactos."
+    if len(outcomes)!=4 or set(outcomes)!=set(combos):
+        failure=failure or "Falta al menos uno de los cuatro diseños factoriales exactos."
     ordered=[outcomes.get(combo) for combo in combos]
     if failure is None:
         contexts=[row["imported"] for row in ordered]
@@ -296,8 +314,97 @@ def _factorial_effects_from_study(manifest,imported_points):
     return {"schema":"DINO_PARAMETRIC_FACTORIAL_EFFECTS_V1","study_id":manifest.get("study_id"),
         "status":"AVAILABLE" if failure is None and has_defined else "UNAVAILABLE","reason":overall_reason,
         "rpm":manifest.get("rpm"),"factors":axes,"metrics":metric_rows,
+        "point_sources_verified":len(outcomes)==4 and set(outcomes)==set(combos),
+        "verified_points":[outcomes[combo] for combo in combos if combo in outcomes],
         "point_ids":[(row or {}).get("manifest",{}).get("source_run_id") or
             (row or {}).get("manifest",{}).get("run_id") for row in ordered]}
+
+
+def _build_factorial_effects_csv(manifest_path,manifest_sha256,manifest,imported_points=()):
+    """Build four exact source rows and qualified descriptive contrast rows."""
+    if not isinstance(manifest,dict) or manifest.get("design_method")!="FACTORIAL_2X2_V1":
+        raise ValueError("el manifiesto no es un estudio factorial 2×2")
+    try:
+        source=Path(manifest_path).resolve();raw=source.read_bytes()
+        digest=hashlib.sha256(raw).hexdigest();live=json.loads(raw.decode("utf-8"))
+    except (OSError,TypeError,ValueError,json.JSONDecodeError) as exc:
+        raise ValueError(f"no se pudo verificar el manifiesto factorial: {exc}") from exc
+    if digest!=manifest_sha256 or live!=manifest:
+        raise ValueError("el manifiesto factorial cambió desde que se abrió el estudio")
+    effects=_factorial_effects_from_study(live,imported_points)
+    if not effects or not effects.get("point_sources_verified") or len(effects.get("verified_points",[]))!=4:
+        raise ValueError((effects or {}).get("reason") or "no se verificaron los cuatro artifacts factoriales exactos")
+    axes=effects["factors"];parameter=live.get("parameter") or {}
+    base={"csv_schema":"DINO_PARAMETRIC_FACTORIAL_EXPORT_V1","study_schema":live.get("schema"),
+        "study_id":live.get("study_id"),"project_id":live.get("project_id"),
+        "design_method":live.get("design_method"),"manifest_path":str(source),
+        "manifest_sha256":digest,"baseline_engine_identity_sha256":live.get("baseline_engine_identity_sha256"),
+        "scientific_validation":live.get("scientific_validation","NOT_CLAIMED"),"rpm":live.get("rpm"),
+        "parameter_id":parameter.get("id"),"parameter_label":parameter.get("label"),
+        "parameter_unit":parameter.get("unit"),"source_verified":True}
+    rows=[];verified=effects["verified_points"]
+    metric_fields={"brake_power":("brake_power_kw","brake_power_status","brake_power_qualification"),
+        "brake_torque":("brake_torque_nm","brake_torque_status","brake_torque_qualification"),
+        "BMEP":("BMEP_kpa","BMEP_status","BMEP_qualification")}
+    for outcome in verified:
+        point=outcome["manifest"];sample=outcome["imported"]
+        factor_values={item.get("parameter_id"):item for item in point.get("factor_values",[]) if isinstance(item,dict)}
+        a=factor_values[axes[0]["id"]];b=factor_values[axes[1]["id"]]
+        is_periodic=sample.get("periodicity")=="PERIOD_1"
+        row={**base,"record_type":"POINT","point_index":point.get("index"),
+            "design_label":f"Diseño {int(point.get('index',0))+1}",
+            "factor_values_json":json.dumps(point.get("factor_values") or [],ensure_ascii=False,
+                allow_nan=False,separators=(",",":")),
+            "factor_a_id":axes[0]["id"],"factor_a_label":axes[0]["label"],"factor_a_value":a.get("value"),
+            "factor_a_unit":a.get("unit") or axes[0]["unit"],"factor_b_id":axes[1]["id"],
+            "factor_b_label":axes[1]["label"],"factor_b_value":b.get("value"),
+            "factor_b_unit":b.get("unit") or axes[1]["unit"],"run_id":point.get("run_id"),
+            "source_run_id":point.get("source_run_id") or point.get("historical_source_run_id") or point.get("run_id"),
+            "source_project_id":point.get("historical_source_project_id") or live.get("project_id"),
+            "execution_status":point.get("status"),"classification":sample.get("classification"),
+            "periodicity":sample.get("periodicity"),"cycles_completed":sample.get("cycles_completed"),
+            "source_path":point.get("run_directory"),"engine_identity_sha256":point.get("engine_identity_sha256"),
+            "identity_sha256":point.get("identity_sha256") or point.get("engine_identity_sha256"),
+            "result_sha256":point.get("result_sha256"),
+            "result_artifact_sha256":point.get("result_artifact_sha256") or point.get("result_sha256")}
+        for metric,(value_field,status_field,qualification_field) in metric_fields.items():
+            value=sample.get(metric);metric_status=sample.get(metric+"_status") or "UNDEFINED"
+            defined=is_periodic and metric_status=="DEFINED" and type(value) in (int,float) and math.isfinite(float(value))
+            row[value_field]=value if defined else ""
+            row[status_field]=metric_status
+            row[qualification_field]="PERIOD_1_DEFINED" if defined else (
+                "WITHHELD_NONPERIODIC" if not is_periodic else "UNDEFINED_OR_INVALID")
+        rows.append(row)
+    all_source_ids=json.dumps([row.get("source_run_id") for row in verified],ensure_ascii=False,
+        separators=(",",":"))
+    all_source_hashes=json.dumps([row.get("result_sha256") for row in verified],ensure_ascii=False,
+        separators=(",",":"))
+    metric_by_id={metric["metric"]:metric for metric in effects["metrics"]}
+    for metric_id,metric in metric_by_id.items():
+        for effect in metric["effects"]:
+            value=effect.get("value")
+            rows.append({**base,"record_type":"CONTRAST","metric_id":metric_id,
+                "metric_label":metric.get("label"),"metric_unit":metric.get("unit"),
+                "contrast_term":effect.get("term"),
+                "contrast_value":value if metric.get("status")=="DEFINED" and type(value) in (int,float) and math.isfinite(float(value)) else "",
+                "contrast_unit":effect.get("unit"),
+                "contrast_status":"DESCRIPTIVE_DEFINED" if metric.get("status")=="DEFINED" else "UNAVAILABLE",
+                "contrast_formula":effect.get("formula"),
+                "contrast_reason":metric.get("reason") or effects.get("reason") or "",
+                "contrast_source_run_ids_json":all_source_ids,
+                "contrast_source_result_sha256s_json":all_source_hashes})
+    return rows
+
+
+def _write_factorial_effects_csv(path,rows):
+    """Write a new factorial export without replacing an existing evidence file."""
+    if len(rows)!=13 or sum(row.get("record_type")=="POINT" for row in rows)!=4 or \
+            sum(row.get("record_type")=="CONTRAST" for row in rows)!=9:
+        raise ValueError("la exportación factorial requiere exactamente cuatro puntos y nueve contrastes")
+    with Path(path).open("x",encoding="utf-8-sig",newline="") as stream:
+        writer=csv.DictWriter(stream,fieldnames=_FACTORIAL_EFFECTS_CSV_FIELDS,extrasaction="raise")
+        writer.writeheader();writer.writerows(rows)
+    return Path(path)
 
 
 def _build_parametric_study_export(manifest,manifest_path,manifest_sha256,selected_indexes,imported_points=()):
@@ -667,6 +774,12 @@ class ResultsPage(QWidget):
         self.export_design_study_button.setToolTip("CSV sin redondeo, con estados, identidades y SHA-256 del manifiesto ligado al proyecto.")
         self.export_design_study_button.clicked.connect(self.export_design_study_csv)
         self.export_design_study_button.setEnabled(False);study_layout.addWidget(self.export_design_study_button)
+        self.export_factorial_effects_button=QPushButton("Exportar matriz y contrastes factoriales CSV…")
+        self.export_factorial_effects_button.setToolTip(
+            "Exporta los cuatro puntos y sus contrastes descriptivos con procedencia exacta; los efectos no elegibles quedan vacíos.")
+        self.export_factorial_effects_button.clicked.connect(self.export_factorial_effects_csv)
+        self.export_factorial_effects_button.setEnabled(False);self.export_factorial_effects_button.hide()
+        study_layout.addWidget(self.export_factorial_effects_button)
         self.study_comparison_group=QGroupBox("Comparar estudios guardados")
         comparison_layout=QVBoxLayout(self.study_comparison_group)
         comparison_bar=QHBoxLayout();comparison_layout.addLayout(comparison_bar)
@@ -1363,6 +1476,9 @@ class ResultsPage(QWidget):
         if not manifest:return
         self.export_design_study_button.setEnabled(bool(getattr(self,"design_study_manifest_path",None)))
         is_envelope=manifest.get("design_method")=="RPM_ENVELOPE_V1"
+        is_factorial=manifest.get("design_method")=="FACTORIAL_2X2_V1"
+        self.export_factorial_effects_button.setVisible(is_factorial)
+        self.export_factorial_effects_button.setEnabled(is_factorial and bool(getattr(self,"design_study_manifest_path",None)))
         dataset_points={str(row.get("run_id")):row for row in (self.dataset or {}).get("points",[])
                         if row.get("run_id") is not None}
         baseline_rows=[row for row in manifest.get("points",[]) if row.get("baseline")]
@@ -1495,6 +1611,32 @@ class ResultsPage(QWidget):
             return True
         except (OSError,ValueError,TypeError) as exc:
             QMessageBox.warning(self,"No se pudo exportar la matriz paramétrica",str(exc));return False
+
+    def export_factorial_effects_csv(self):
+        manifest=getattr(self,"design_study_manifest",None)
+        manifest_path=getattr(self,"design_study_manifest_path",None)
+        if not manifest or not manifest_path or manifest.get("design_method")!="FACTORIAL_2X2_V1":return False
+        suggested=Path(self.context.path).parent if self.context.path else Path.cwd()
+        suggested=suggested/f"{manifest.get('study_id') or 'factorial-study'}-contrasts.csv"
+        path,_=QFileDialog.getSaveFileName(self,"Exportar matriz y contrastes factoriales",str(suggested),"CSV (*.csv)")
+        if not path:return False
+        try:
+            source=Path(manifest_path).resolve();raw=source.read_bytes();digest=hashlib.sha256(raw).hexdigest()
+            live=json.loads(raw.decode("utf-8"))
+            reference=next((ref for ref in self.context.project.get("study_references",[])
+                if Path(ref.get("path","")).resolve()==source),None)
+            if (live!=manifest or not reference or reference.get("manifest_sha256")!=digest or
+                    reference.get("study_id")!=manifest.get("study_id")):
+                raise ValueError("el manifiesto cambió o no coincide con la referencia SHA guardada en el proyecto")
+            rows=_build_factorial_effects_csv(source,digest,live,(self.dataset or {}).get("points",[]))
+            _write_factorial_effects_csv(path,rows)
+            unavailable=sum(row["record_type"]=="CONTRAST" and row["contrast_status"]!="DESCRIPTIVE_DEFINED" for row in rows)
+            self.design_study_notice.setText(
+                f"4 puntos y 9 contrastes exportados · {unavailable} contraste(s) no disponibles conservados sin valor · "
+                f"SHA-256 manifiesto {digest} · la exportación no implica validación predictiva.")
+            return True
+        except (OSError,ValueError,TypeError,csv.Error) as exc:
+            QMessageBox.warning(self,"No se pudo exportar el estudio factorial",str(exc));return False
 
     def _refresh_design_response_plot(self,*_):
         manifest=getattr(self,"design_study_manifest",None)
