@@ -761,7 +761,16 @@ class ResultsPage(QWidget):
         self.design_study_table.horizontalHeader().setStretchLastSection(True);self.design_study_table.setMaximumHeight(230)
         self.design_study_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.design_study_table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.design_study_table.currentCellChanged.connect(self._design_study_point_selected)
         study_layout.addWidget(self.design_study_table)
+        self.design_study_traceability_group=QGroupBox("Procedencia del punto seleccionado")
+        traceability_layout=QVBoxLayout(self.design_study_traceability_group)
+        self.design_study_traceability=QPlainTextEdit();self.design_study_traceability.setObjectName("designStudyPointTraceability")
+        self.design_study_traceability.setReadOnly(True);self.design_study_traceability.setMaximumHeight(260)
+        self.design_study_traceability.setPlaceholderText("Seleccioná un punto para consultar manifiestos, fuentes y hashes.")
+        traceability_layout.addWidget(self.design_study_traceability);study_layout.addWidget(self.design_study_traceability_group)
+        self.design_study_manifest=None;self.design_study_manifest_path=None;self.design_study_manifest_sha256=None
+        self.design_study_reference=None;self._design_study_active_project_id=None
         self.factor_effects_group=QGroupBox("Contrastes factoriales 2×2 · descriptivos")
         factor_effects_layout=QVBoxLayout(self.factor_effects_group)
         self.factor_effects_notice=QLabel("Los contrastes requieren los cuatro resultados exactos, periódicos y compatibles.")
@@ -887,6 +896,14 @@ class ResultsPage(QWidget):
         self.setStyleSheet('QLabel#metricCard {padding:4px;font-size:9pt;} QLabel#notice {padding:4px;} QPushButton {padding:4px 8px;} QTabBar::tab {padding:4px 6px;min-height:16px;}' if compact else '')
 
     def _project_context_changed(self,*_):
+        active_project_id=self.context.project.get("project_id")
+        if (getattr(self,"design_study_manifest",None) is not None and
+                self._design_study_active_project_id is not None and
+                active_project_id!=self._design_study_active_project_id):
+            self.design_study_manifest=None;self.design_study_manifest_path=None
+            self.design_study_manifest_sha256=None;self.design_study_reference=None
+            self._design_study_active_project_id=None;self.design_study_table.setRowCount(0)
+            self.design_study_traceability.clear();self.design_study_group.hide()
         refs=self.context.project.get("result_references",[])
         signature=(self.context.project.get("project_id"),tuple(
             (str(ref.get("path","")),ref.get("artifact_sha256"),ref.get("identity_sha256"))
@@ -1487,6 +1504,9 @@ class ResultsPage(QWidget):
                     manifest.get("project_id")!=verified_reference.get("source_project_id")):
                 raise ValueError("identidad del manifiesto incompatible con referencia del proyecto")
             self.design_study_manifest=manifest;self.design_study_manifest_path=path
+            self.design_study_manifest_sha256=hashlib.sha256(raw).hexdigest()
+            self.design_study_reference=dict(verified_reference) if verified_reference else None
+            self._design_study_active_project_id=self.context.project.get("project_id")
             run_paths=[row["run_directory"] for row in manifest.get("points",[])
                        if row.get("run_directory") and Path(row["run_directory"]).joinpath("result.json").is_file()]
             self._update_design_study_summary()
@@ -1494,6 +1514,68 @@ class ResultsPage(QWidget):
         except Exception as exc:
             self.design_study_group.show()
             self.design_study_notice.setText(f"Estudio paramétrico no disponible: {type(exc).__name__}: {exc}")
+
+    def _design_study_point_selected(self,row,*_):
+        manifest=getattr(self,"design_study_manifest",None)
+        if not manifest or row<0 or row>=len(manifest.get("points",[])):
+            self.design_study_traceability.clear();return
+        point=manifest["points"][row]
+        manifest_path=getattr(self,"design_study_manifest_path",None)
+        expected_manifest_hash=getattr(self,"design_study_manifest_sha256",None)
+        actual_manifest_hash=None
+        try:
+            if manifest_path:actual_manifest_hash=hashlib.sha256(Path(manifest_path).read_bytes()).hexdigest()
+        except OSError:pass
+        manifest_state=("Coincide con el snapshot cargado" if actual_manifest_hash and actual_manifest_hash==expected_manifest_hash
+            else "El archivo no está disponible" if actual_manifest_hash is None
+            else "CAMBIÓ desde la carga; se conserva el snapshot en memoria")
+        reference=self.design_study_reference or {}
+        project_hash=reference.get("manifest_sha256")
+        if project_hash is None:reference_state="Estudio abierto sin referencia SHA registrada en el proyecto"
+        elif expected_manifest_hash==project_hash:reference_state="Coincide con el SHA registrado por el proyecto"
+        else:reference_state="No coincide con el SHA registrado por el proyecto"
+        exported=None;source_error=None
+        if manifest.get("schema")=="DINO_PARAMETRIC_DESIGN_STUDY_V1":
+            try:
+                exported=_build_parametric_study_export(manifest,manifest_path or "",expected_manifest_hash or "",
+                    [row],(self.dataset or {}).get("points",[]))[0]
+            except (OSError,KeyError,TypeError,ValueError) as exc:source_error=str(exc)
+        source_state={
+            "VERIFIED_HASH_AND_IDENTITY":"Verificada: hash e identidad de la corrida coinciden",
+            "NOT_LOADED":"Fuente no cargada en esta sesión; no se verificó",
+            "NO_EXACT_ARTIFACT_MATCH":"Falló la búsqueda: no coincide un artifact exacto",
+            "SOURCE_ARTIFACT_CHANGED":"Falló la verificación: el artifact cambió o su identidad no coincide",
+        }.get((exported or {}).get("source_verification"),
+            f"No se pudo verificar esta fuente · {source_error or 'el snapshot no declara un schema compatible'}")
+        rpm_envelope=manifest.get("design_method")=="RPM_ENVELOPE_V1"
+        group=next((item for item in manifest.get("groups",[])
+            if item.get("index")==point.get("design_index")),{}) if rpm_envelope else {}
+        sweep_path=point.get("sweep_manifest") or group.get("sweep_manifest")
+        sweep_hash=point.get("sweep_manifest_sha256") or group.get("sweep_manifest_sha256")
+        actual_sweep_hash=None
+        if rpm_envelope and sweep_path:
+            try:actual_sweep_hash=hashlib.sha256(Path(sweep_path).read_bytes()).hexdigest()
+            except OSError:pass
+        if not rpm_envelope:sweep_state="No aplica a este método de estudio"
+        elif not sweep_path or not sweep_hash:sweep_state="No informado en el manifiesto"
+        elif actual_sweep_hash is None:sweep_state="No disponible; no se pudo leer el manifiesto del barrido"
+        elif actual_sweep_hash==sweep_hash:sweep_state="Verificado: hash coincide"
+        else:sweep_state="FALLÓ: el hash del manifiesto del barrido cambió"
+        lines=[f"Estudio: {manifest.get('study_id') or 'No informado'} · {manifest.get('design_method') or 'método no informado'}",
+            f"Manifiesto: {manifest_path or 'Ruta no informada'}",
+            f"SHA-256 guardado: {expected_manifest_hash or 'No disponible'}",
+            f"SHA-256 actual: {actual_manifest_hash or 'No disponible'} · {manifest_state}",
+            f"Referencia del proyecto: {reference_state}",
+            f"Punto {point.get('index',row)} · RPM {format_number(point.get('rpm',manifest.get('rpm'))) if point.get('rpm',manifest.get('rpm')) is not None else 'No informada'} · estado {_state_label(point.get('classification') or point.get('status') or 'NOT_REPORTED')} · periodicidad {_state_label(point.get('periodicity') or 'NOT_EVALUATED')}",
+            f"Run: {point.get('source_run_id') or point.get('historical_source_run_id') or point.get('run_id') or 'No informado'}",
+            f"Ruta del resultado: {point.get('run_directory') or 'No informada'}",
+            f"Motor SHA-256: {point.get('engine_identity_sha256') or point.get('identity_sha256') or 'No informado'}",
+            f"SHA-256 de resultado guardado: {point.get('result_sha256') or 'No informado'} · verificado: {(exported or {}).get('result_sha256') or 'No disponible'} · artifact guardado: {point.get('result_artifact_sha256') or 'No informado'}",
+            f"Verificación de fuente: {source_state}",
+            f"Manifiesto RPM anidado: {sweep_path or ('No informado' if rpm_envelope else 'No aplica')}",
+            f"SHA-256 RPM guardado: {sweep_hash or ('No informado' if rpm_envelope else 'No aplica')} · actual: {actual_sweep_hash or 'No disponible' if rpm_envelope else 'No aplica'} · {sweep_state}",
+            f"Validación científica: {manifest.get('scientific_validation','NOT_CLAIMED')} (no se infiere del estado de ejecución)"]
+        self.design_study_traceability.setPlainText("\n".join(lines))
     def _loaded_exploratory(self,data):
         requested_rpms=_referenced_curve_rpms(self.context.project,data)
         if requested_rpms:data['requested_rpms']=requested_rpms
@@ -1589,6 +1671,7 @@ class ResultsPage(QWidget):
                 str(point.get("cycles_completed",row.get("cycles_completed",0))),*metrics,delta]
             for column,value in enumerate(cells):
                 item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                if column==0:item.setData(Qt.ItemDataRole.UserRole,{"point_index":index,"manifest_point":row})
                 if column==0:
                     trace=(f"Run de origen: {row.get('source_run_id') or row.get('run_id') or 'No informado'}\n"
                         f"Proyecto de origen: {row.get('historical_source_project_id') or 'No informado'}\n"
@@ -1602,6 +1685,9 @@ class ResultsPage(QWidget):
                     item.setToolTip(str(value)+"\n\n"+trace)
                 elif column in (2,3,8):item.setToolTip(str(value))
                 self.design_study_table.setItem(index,column,item)
+        if self.design_study_table.rowCount():
+            self.design_study_table.setCurrentCell(0,0);self._design_study_point_selected(0)
+        else:self.design_study_traceability.clear()
         self._refresh_design_response_plot()
         self._update_factorial_effects()
         self.design_study_group.show()

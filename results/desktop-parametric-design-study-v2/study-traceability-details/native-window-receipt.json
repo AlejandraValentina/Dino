@@ -1,0 +1,17 @@
+{
+  "window": "Dino Desktop source · native Windows Qt window",
+  "window_size": [
+    1440,
+    837
+  ],
+  "fixture_origin": "Previously saved synthetic RPM-envelope artifacts; opened read-only; no solver run",
+  "study_id": "synthetic-rpm-envelope-smoke-20261104",
+  "manifest_sha256": "dee8469aa9ed77e51ff4e52e03311120fc4fecbee62efa7646d724a121579c23",
+  "points_loaded": 4,
+  "selected_point_details": "Estudio: synthetic-rpm-envelope-smoke-20261104 · RPM_ENVELOPE_V1\nManifiesto: C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\design-studies-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104\\rpm-envelope\\study.json\nSHA-256 guardado: dee8469aa9ed77e51ff4e52e03311120fc4fecbee62efa7646d724a121579c23\nSHA-256 actual: dee8469aa9ed77e51ff4e52e03311120fc4fecbee62efa7646d724a121579c23 · Coincide con el snapshot cargado\nReferencia del proyecto: Coincide con el SHA registrado por el proyecto\nPunto 0 · RPM 3000 · estado Límite de ciclos · no convergida · periodicidad Ciclos insuficientes\nRun: pc-synthetic-rpm-envelope-smoke-20261104-d00-3000\nRuta del resultado: C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d00-3000\nMotor SHA-256: 39ed80e1381c40fcf0c205fe40b55cf02caaa6b92ea6223cb7e3bef11c880449\nSHA-256 de resultado guardado: No informado · verificado: cc27eaadb88ea1477c25f40a180a767b13f09029a9eb6c29d275514147b30b58 · artifact guardado: cc27eaadb88ea1477c25f40a180a767b13f09029a9eb6c29d275514147b30b58\nVerificación de fuente: Verificada: hash e identidad de la corrida coinciden\nManifiesto RPM anidado: C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\dino-power-curve-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104-d00\\series.json\nSHA-256 RPM guardado: fa49c8ad519aca444acd7434ae5d6c653cced8979d5bc3197bb6a37d6964a3ca · actual: fa49c8ad519aca444acd7434ae5d6c653cced8979d5bc3197bb6a37d6964a3ca · Verificado: hash coincide\nValidación científica: NOT_CLAIMED (no se infiere del estado de ejecución)",
+  "source_verification": "VERIFIED_HASH_AND_IDENTITY",
+  "nested_sweep_verification": "HASH_MATCH",
+  "scientific_validation": "NOT_CLAIMED",
+  "capture": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\study-traceability-details\\native-study-point-traceability.png",
+  "capture_sha256": "6d570350a2c25d7cb9ba9188d58d1e5211e7b712fd37a7286cc62088e6a91f27"
+}

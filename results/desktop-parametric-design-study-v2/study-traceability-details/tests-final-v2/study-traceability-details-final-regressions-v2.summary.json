@@ -1,0 +1,28 @@
+{
+  "name": "study-traceability-details-final-regressions-v2",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "tests/test_design_study.py",
+    "tests/test_desktop_design_study.py",
+    "tests/test_desktop_technical_report.py",
+    "tests/test_dino_workbench_f0.py",
+    "-q",
+    "-k",
+    "not test_component_build_uses_backend_derived_port_schedule and not test_main_window_keeps_results_and_single_run_strip_visible"
+  ],
+  "started_at": "2026-11-04T20:56:13+00:00",
+  "finished_at": "2026-11-04T21:00:04+00:00",
+  "duration_s": 231.188,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\study-traceability-details\\tests-final-v2\\study-traceability-details-final-regressions-v2.log",
+  "log_lines": 2,
+  "log_bytes": 125,
+  "error_lines": [],
+  "tail": [
+    "...................................................................      [100%]",
+    "67 passed, 2 deselected in 230.62s (0:03:50)"
+  ]
+}

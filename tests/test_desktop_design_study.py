@@ -411,6 +411,57 @@ def test_cross_study_response_plot_uses_only_exact_period_one_metric_pairs():
     page.close();APP.processEvents()
 
 
+def test_parametric_point_details_bind_manifest_nested_sweep_and_source_status(tmp_path):
+    from motorsim.desktop.context import DesktopContext
+    page=ResultsPage(DesktopContext(new_design_project("study-traceability-details")))
+    sweep=tmp_path/"series.json";sweep.write_text('{"schema":"synthetic presentation fixture"}',encoding="utf-8")
+    sweep_hash=hashlib.sha256(sweep.read_bytes()).hexdigest()
+    points=[{"index":0,"design_index":0,"value":83.0,"unit":"mm","baseline":True,
+        "rpm":3000,"status":"COMPLETE","classification":"MAX_CYCLES_NONCONVERGED",
+        "periodicity":"INSUFFICIENT_CYCLES","cycles_completed":1,"run_id":"run-3000",
+        "source_run_id":"run-3000","engine_identity_sha256":"a"*64,
+        "result_artifact_sha256":"b"*64,"run_directory":str(tmp_path/"missing-run"),
+        "sweep_manifest":str(sweep),"sweep_manifest_sha256":sweep_hash},
+        {"index":1,"design_index":0,"value":83.0,"unit":"mm","baseline":True,
+        "rpm":4000,"status":"COMPLETE","classification":"MAX_CYCLES_NONCONVERGED",
+        "periodicity":"INSUFFICIENT_CYCLES","cycles_completed":1,"run_id":"run-4000",
+        "source_run_id":"run-4000","engine_identity_sha256":"c"*64,
+        "result_artifact_sha256":"d"*64,"sweep_manifest":str(sweep),"sweep_manifest_sha256":sweep_hash}]
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":"synthetic-rpm-details",
+        "project_id":"source-project","design_method":"RPM_ENVELOPE_V1","rpm":3000,
+        "rpms":[3000,4000],"parameter":{"id":"exhaust.length","label":"Longitud Escape","unit":"mm"},
+        "values":[83.0],"status":"COMPLETE","scientific_validation":"NOT_CLAIMED",
+        "groups":[{"index":0,"sweep_manifest":str(sweep),"sweep_manifest_sha256":sweep_hash}],
+        "points":points}
+    manifest_path=tmp_path/"study.json";raw=json.dumps(manifest,sort_keys=True).encode();manifest_path.write_bytes(raw)
+
+    page.open_design_study(manifest_path)
+
+    first=page.design_study_traceability.toPlainText()
+    assert hashlib.sha256(raw).hexdigest() in first
+    assert sweep_hash in first
+    assert "Verificado: hash coincide" in first
+    assert "Fuente no cargada" in first
+    assert "NOT_CLAIMED" in first
+    page.design_study_table.setCurrentCell(1,0);APP.processEvents()
+    assert "Punto 1 · RPM 4000" in page.design_study_traceability.toPlainText()
+    assert "run-4000" in page.design_study_traceability.toPlainText()
+
+    sweep.write_text('{"changed":true}',encoding="utf-8")
+    page._design_study_point_selected(1)
+    assert "FALLÓ: el hash" in page.design_study_traceability.toPlainText()
+    manifest_path.write_bytes(raw+b" ")
+    page._design_study_point_selected(1)
+    assert "CAMBIÓ desde la carga" in page.design_study_traceability.toPlainText()
+
+    old_study_id=page.design_study_manifest.get("study_id")
+    page.context.project=new_design_project("different-project")
+    page.context.changed.emit();APP.processEvents()
+    assert page.design_study_manifest is None
+    assert old_study_id not in page.design_study_traceability.toPlainText()
+    page.close();APP.processEvents()
+
+
 def test_cross_study_csv_export_keeps_exact_sources_pair_decisions_and_blank_nonperiodic_metrics(tmp_path,monkeypatch):
     base="9"*64
     point_a={"index":0,"value":38.40862784470379,"unit":"mm","rpm":3000.0,
