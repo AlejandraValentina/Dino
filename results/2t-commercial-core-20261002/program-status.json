@@ -15321,6 +15321,12 @@
       "task": "DESKTOP-TECHNICAL-REPORT-BUILD-PROVENANCE-V1",
       "kind": "defect_correction",
       "summary": "El primer arranque del empaquetador falló antes de PyInstaller por duplicar source_dirty en el recibo; se corrige la colisión, sin candidato generado."
+    },
+    {
+      "at": "2026-11-04T14:13:22+00:00",
+      "task": "DESKTOP-TECHNICAL-REPORT-BUILD-PROVENANCE-V1",
+      "kind": "defect_correction",
+      "summary": "Regresión empaquetada encontró reportes históricos PERIOD_1 sin campo periodicity separado; el informe ahora usa la misma clasificación observada que la interfaz y prueba el caso. Regresión Desktop: 50 PASS, 1 SKIP."
     }
   ],
   "legacy_gate_status": {

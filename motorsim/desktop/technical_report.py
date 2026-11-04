@@ -39,7 +39,10 @@ def _metric_value(row, metric):
 
 
 def _reportable(row, metric):
-    return row.get("periodicity") in PERIODIC and _metric_value(row, metric) is not None
+    periodicity = row.get("periodicity")
+    if periodicity is None and row.get("classification") in PERIODIC:
+        periodicity = row.get("classification")
+    return periodicity in PERIODIC and _metric_value(row, metric) is not None
 
 
 def _condition_status(left, right):

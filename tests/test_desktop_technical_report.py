@@ -75,6 +75,16 @@ def test_report_marks_synthetic_historical_data_and_keeps_untranslated_text_safe
     assert "no implica validación experimental" in report
 
 
+def test_report_uses_declared_periodic_class_when_legacy_field_is_absent():
+    row = _row("A", 5500, 120.000000000001)
+    row["periodicity"] = None
+    report = render_technical_report({"points": [row], "experimental_validation": "NOT_PERFORMED"},
+        source_kind="HISTORICAL_IMPL2", generated_at="fixed")
+    assert "<svg" in report
+    assert 'aria-label="Potencia de freno por RPM"' in report
+    assert "120.000000000001" in report
+
+
 def test_results_page_exports_report_using_current_variant_selection(tmp_path):
     context = DesktopContext(new_design_project("report-ui"))
     page = ResultsPage(context)
