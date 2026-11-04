@@ -1,0 +1,6 @@
+python -m pytest -q tests/test_design_study.py tests/test_desktop_design_study.py tests/test_desktop_technical_report.py tests/test_crankcase_v2.py tests/test_two_stroke_ports.py tests/test_engine_configuration_v1.py tests/test_functional_exhaust_comparison.py
+56 passed in 147.67s
+Focused factorial + report checks: 10 passed; preflight/reopen, UI action, budget and no-inferred-effect assertions.
+python -m compileall -q motorsim/design_study.py motorsim/desktop/execution_page.py motorsim/desktop/results_page.py motorsim/desktop/technical_report.py motorsim/desktop/app.py
+PASS
+Real synthetic factorial integration: run_logged exit 0, duration 50.187s, four points imported and each nonconverged with performance metrics undefined.

@@ -1,0 +1,137 @@
+{
+  "schema": "DINO_PARAMETRIC_FACTORIAL_2X2_ACCEPTANCE_V1",
+  "source_commit": "pending-local-commit",
+  "study_id": "synthetic-factorial-smoke-20261104",
+  "status": "COMPLETE",
+  "elapsed_seconds": 38.625,
+  "rpm": 3000.0,
+  "max_cycles_per_point": 1,
+  "mode": "EXPLORATORY",
+  "scientific_validation": "NOT_CLAIMED",
+  "manifest_path": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\desktop-parametric-factorial-v1\\design-studies-v1\\synthetic-factorial-integration\\synthetic-factorial-smoke-20261104\\study.json",
+  "manifest_sha256": "b40b461ea52298d741d14488372898e8a9c72da9be302ae4b543bc7df72f530a",
+  "run_logged_summary": "results/desktop-parametric-design-study-v2/factorial-run-logged/desktop-parametric-factorial-smoke-20261104.summary.json",
+  "run_logged_exit_code": 0,
+  "points": [
+    {
+      "run_id": "synthetic-factorial-smoke-20261104-p00",
+      "factor_values": [
+        {
+          "baseline": true,
+          "label": "Lumbrera · Primary transfer · altura desde PMS",
+          "parameter_id": "port:primary-window:top_mm",
+          "unit": "mm",
+          "value": 38.40862784470379
+        },
+        {
+          "baseline": true,
+          "label": "Cárter · volumen en PMI",
+          "parameter_id": "crankcase.volume_bdc_cm3",
+          "unit": "cm³",
+          "value": 356.0806777284814
+        }
+      ],
+      "engine_identity_sha256": "a2e9a57405ef86464624350682ef898baa29734e02ac2e373a55fc93687c824d",
+      "result_artifact_sha256": "472d82f2bce9282d83cda5d081b046be660589435f0a904120b46677eb914d52",
+      "run_manifest_sha256": "e7b1db69035c9ccbe9e1a7e77380c977544d7c4bd7eb197c96b751bd34f565e5",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "cycles_completed": 1,
+      "brake_power_status": "UNDEFINED",
+      "brake_torque_status": "UNDEFINED",
+      "bmep_status": "UNDEFINED"
+    },
+    {
+      "run_id": "synthetic-factorial-smoke-20261104-p01",
+      "factor_values": [
+        {
+          "baseline": true,
+          "label": "Lumbrera · Primary transfer · altura desde PMS",
+          "parameter_id": "port:primary-window:top_mm",
+          "unit": "mm",
+          "value": 38.40862784470379
+        },
+        {
+          "baseline": false,
+          "label": "Cárter · volumen en PMI",
+          "parameter_id": "crankcase.volume_bdc_cm3",
+          "unit": "cm³",
+          "value": 361.0806777284814
+        }
+      ],
+      "engine_identity_sha256": "05ab6be3d11478ae9feafeb46f01c47747a6962fb5570a9f123db123e8d13987",
+      "result_artifact_sha256": "248c661a7deb032300b6b566f9f4e6ba544b3c92e514dbea9754cac5a80b7c02",
+      "run_manifest_sha256": "68474cb9c1196a916c06d72889bb898272c7cedac0e15d015ef17dc3c6c05619",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "cycles_completed": 1,
+      "brake_power_status": "UNDEFINED",
+      "brake_torque_status": "UNDEFINED",
+      "bmep_status": "UNDEFINED"
+    },
+    {
+      "run_id": "synthetic-factorial-smoke-20261104-p02",
+      "factor_values": [
+        {
+          "baseline": false,
+          "label": "Lumbrera · Primary transfer · altura desde PMS",
+          "parameter_id": "port:primary-window:top_mm",
+          "unit": "mm",
+          "value": 39.40862784470379
+        },
+        {
+          "baseline": true,
+          "label": "Cárter · volumen en PMI",
+          "parameter_id": "crankcase.volume_bdc_cm3",
+          "unit": "cm³",
+          "value": 356.0806777284814
+        }
+      ],
+      "engine_identity_sha256": "d19145668abb0ec9c03db6c0e279de810ad03551cab9143c889f9921cceefc2c",
+      "result_artifact_sha256": "ab591058619aa6380f651d6ce7f6d6e135c37f6c8625e931ed6d1bf0c3669bdc",
+      "run_manifest_sha256": "1323667e4ee5882b48f3f180edb488760ec1e329547bb0dac1f39ae0b226b3fa",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "cycles_completed": 1,
+      "brake_power_status": "UNDEFINED",
+      "brake_torque_status": "UNDEFINED",
+      "bmep_status": "UNDEFINED"
+    },
+    {
+      "run_id": "synthetic-factorial-smoke-20261104-p03",
+      "factor_values": [
+        {
+          "baseline": false,
+          "label": "Lumbrera · Primary transfer · altura desde PMS",
+          "parameter_id": "port:primary-window:top_mm",
+          "unit": "mm",
+          "value": 39.40862784470379
+        },
+        {
+          "baseline": false,
+          "label": "Cárter · volumen en PMI",
+          "parameter_id": "crankcase.volume_bdc_cm3",
+          "unit": "cm³",
+          "value": 361.0806777284814
+        }
+      ],
+      "engine_identity_sha256": "e230cf89b8743704423e068cc99f40ae5bf3e1b4c84f052fe063b2ea63c53321",
+      "result_artifact_sha256": "a934a713eb65f6aaf812cb5568ca4fc669fae132d752e3dcfbfc3bdb2ab50878",
+      "run_manifest_sha256": "e24976e740726c2fd62288d207b5798354db14c39dba32248dd3027732f5a92a",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "cycles_completed": 1,
+      "brake_power_status": "UNDEFINED",
+      "brake_torque_status": "UNDEFINED",
+      "bmep_status": "UNDEFINED"
+    }
+  ],
+  "preflight": {
+    "status": "PASS",
+    "estimated_write_gib": 2.0,
+    "reserve_gib": 2.0,
+    "headroom_after_estimate_bytes": 21228834816
+  },
+  "solver_physics_modified": false,
+  "predictive_claim": "NOT_CLAIMED"
+}

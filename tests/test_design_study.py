@@ -11,7 +11,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 import pytest
 
 from motorsim.design_study import (available_parameters, load_prepared_study,
-    prepare_design_study, run_design_study)
+    prepare_design_study, prepare_factorial_design_study, run_design_study)
 from motorsim.engine_configuration import identity,validate
 from motorsim.desktop.services import new_design_project
 
@@ -93,6 +93,58 @@ def test_port_dimension_adapter_rebuilds_solver_event_and_area_profiles(starter)
         native=point["engine_document"]["native_configuration"]
         assert native["geometry_identity"]["ports"]==native["port_binding"]["port_set"]
         assert point["engine_document"]["provenance"]["parametric_study"]["classification"]=="SYNTHETIC_ASSUMPTION"
+
+
+def test_factorial_preflight_composes_two_existing_axes_without_solver_steps(starter):
+    engine=starter["base_engine"]
+    port=next(p for p in available_parameters(engine) if p["id"]=="port:primary-window:top_mm")
+    crankcase=next(p for p in available_parameters(engine) if p["id"]=="crankcase.volume_bdc_cm3")
+    study=prepare_factorial_design_study(engine,factors=[
+        {"parameter_id":port["id"],"values":[port["baseline"],port["baseline"]+1.]},
+        {"parameter_id":crankcase["id"],"values":[crankcase["baseline"],crankcase["baseline"]+5.]},
+        ],rpm=3000,max_cycles=1,point_budget_seconds=20,total_budget_seconds=80,
+        memory_limit_mib=512,project_id=starter["project_id"],study_id="factorial-smoke")
+    assert study["design_method"]=="FACTORIAL_2X2_V1"
+    assert len(study["points"])==4
+    assert [point["baseline"] for point in study["points"]]==[True,False,False,False]
+    assert all(point["preflight"]["solver_steps"]==0 for point in study["points"])
+    assert len({point["engine_identity_sha256"] for point in study["points"]})==4
+    assert all(len(point["factor_values"])==2 for point in study["points"])
+    assert all(point["engine_document"]["provenance"]["parametric_study"]["schema"]==
+        "DINO_PARAMETRIC_FACTORIAL_POINT_V1" for point in study["points"])
+
+
+def test_factorial_preflight_rejects_same_axes_and_insufficient_budget(starter):
+    parameter=available_parameters(starter["base_engine"])[0]
+    factors=[{"parameter_id":parameter["id"],"values":[parameter["baseline"],parameter["baseline"]+1]}]*2
+    kwargs=dict(rpm=3000,max_cycles=1,point_budget_seconds=20,total_budget_seconds=80,
+        memory_limit_mib=512,project_id=starter["project_id"])
+    with pytest.raises(ValueError,match="distintos"):
+        prepare_factorial_design_study(starter["base_engine"],factors=factors,**kwargs)
+    factors[1]={"parameter_id":available_parameters(starter["base_engine"])[1]["id"],
+        "values":[available_parameters(starter["base_engine"])[1]["baseline"],
+                  available_parameters(starter["base_engine"])[1]["baseline"]+1]}
+    with pytest.raises(ValueError,match="cuatro diseños"):
+        prepare_factorial_design_study(starter["base_engine"],factors=factors,
+            **{**kwargs,"total_budget_seconds":60})
+
+
+def test_cancelled_factorial_study_persists_all_designs_for_reopen(starter,tmp_path):
+    engine=starter["base_engine"]
+    available=available_parameters(engine)
+    study=prepare_factorial_design_study(engine,factors=[
+        {"parameter_id":available[0]["id"],"values":[available[0]["baseline"],available[0]["baseline"]+1]},
+        {"parameter_id":available[-1]["id"],"values":[available[-1]["baseline"],available[-1]["baseline"]+1]},
+        ],rpm=3000,max_cycles=1,point_budget_seconds=20,total_budget_seconds=80,
+        memory_limit_mib=512,project_id=starter["project_id"],study_id="factorial-cancel-reopen")
+    cancel=threading.Event();cancel.set()
+    result=run_design_study(study,artifact_root=tmp_path,cancel_event=cancel)
+    assert result["status"]=="CANCELLED"
+    reopened=load_prepared_study(result["design_study_manifest"])
+    assert reopened["design_method"]=="FACTORIAL_2X2_V1"
+    assert len(reopened["points"])==4
+    assert all(len(point["factor_values"])==2 for point in reopened["points"])
+    assert all(point["preflight"]["solver_steps"]==0 for point in reopened["points"])
 
 
 def test_crankcase_volume_adapter_updates_solver_geometry_and_initial_species(starter):

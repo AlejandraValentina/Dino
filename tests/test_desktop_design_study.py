@@ -16,6 +16,7 @@ def test_parametric_actions_are_available_and_study_comparison_is_explicit(tmp_p
     window=DinoDesktopWindow(new_design_project("design-study-ui-test"))
     actions={action.text() for action in window.strip_more.menu().actions()}
     assert "Estudio paramétrico geométrico…" in actions
+    assert "Estudio factorial de diseño 2×2…" in actions
     assert "Reanudar estudio paramétrico…" in actions
     context=DesktopContext(window.context.project);page=ResultsPage(context)
     baseline={"run_id":"run-base","variant_id":"study · baseline","brake_power":None,
@@ -32,7 +33,9 @@ def test_parametric_actions_are_available_and_study_comparison_is_explicit(tmp_p
         "parameter":{"label":"Escape · diffuser · longitud"},"points":[
             {"run_id":"run-base","baseline":True,"value":180.,"unit":"mm","status":"COMPLETE","cycles_completed":1},
             {"run_id":"run-var","source_run_id":"historical-run","reused_verified":True,
-             "status":"CACHED","baseline":False,"value":182.,"unit":"mm","cycles_completed":1}]}
+             "status":"CACHED","baseline":False,"value":182.,"unit":"mm","cycles_completed":1,
+             "factor_values":[{"label":"Transfer top","value":40.12345,"unit":"mm"},
+                              {"label":"Cárter","value":355.2,"unit":"cm³"}] }]}
     page.design_study_manifest_path=tmp_path/"study.json"
     page._update_design_study_summary()
     assert not page.design_study_group.isHidden()
@@ -40,6 +43,8 @@ def test_parametric_actions_are_available_and_study_comparison_is_explicit(tmp_p
     assert page.design_study_table.item(0,5).text()=="—"
     assert "histórico verificado" in page.design_study_table.item(1,0).text()
     assert "Corrida histórica reutilizada" in page.design_study_table.item(1,0).toolTip()
+    assert "Transfer top=40.123" in page.design_study_table.item(1,1).text()
+    assert "Cárter=355.2 cm³" in page.design_study_table.item(1,1).text()
     assert "NO RECLAMADA" in page.design_study_notice.text()
     window.close();page.close();APP.processEvents()
 
@@ -80,6 +85,29 @@ def test_parametric_dialog_uses_selected_axis_units(monkeypatch):
     page.start_design_study()
     assert queued["kwargs"]["parameter_id"]=="crankcase.volume_bdc_cm3"
     assert queued["kwargs"]["values"]==[context.engine()["native_configuration"]["slider_crank"]["crankcase"]["volume_bdc_cm3"],366.0]
+    page.task=None;page.close();APP.processEvents()
+
+
+def test_factorial_dialog_preflights_four_combinations_in_background(monkeypatch):
+    context=DesktopContext(new_design_project("design-study-factorial-dialog"));page=ExecutionPage(context)
+    queued={}
+    def accept_factorial(dialog):
+        from motorsim.design_study import available_parameters
+        parameters=available_parameters(context.engine())
+        first=dialog.findChild(QComboBox,"factorialParameter0")
+        second=dialog.findChild(QComboBox,"factorialParameter1")
+        second.setCurrentIndex(1)
+        dialog.findChild(QLineEdit,"factorialAlternative0").setText(str(parameters[0]["baseline"]+1))
+        dialog.findChild(QLineEdit,"factorialAlternative1").setText(str(parameters[1]["baseline"]+1))
+        return QDialog.DialogCode.Accepted
+    def record(function,*args,**kwargs):queued.update(function=function,args=args,kwargs=kwargs);return object()
+    monkeypatch.setattr(QDialog,"exec",accept_factorial)
+    monkeypatch.setattr("motorsim.desktop.execution_page.run_background",record)
+    page.start_factorial_design_study()
+    assert queued["function"].__name__=="prepare_factorial_design_study"
+    assert len(queued["kwargs"]["factors"])==2
+    assert queued["kwargs"]["total_budget_seconds"]>=4*queued["kwargs"]["point_budget_seconds"]
+    assert page.status_text.startswith("VALIDANDO FACTORIAL")
     page.task=None;page.close();APP.processEvents()
 
 

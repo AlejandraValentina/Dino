@@ -327,6 +327,74 @@ def prepare_design_study(engine: dict, *, parameter_id: str, values: list[float]
         "points":points}
 
 
+def prepare_factorial_design_study(engine: dict, *, factors: list[dict],
+                         rpm: float, max_cycles: int, point_budget_seconds: float,
+                         total_budget_seconds: float, memory_limit_mib: int = 1024,
+                         project_id: str, variant_label: str = "base",
+                         study_id: str | None = None) -> dict:
+    """Prepare an immutable two-factor, two-level matrix using existing adapters."""
+    if not isinstance(factors,list) or len(factors)!=2:
+        raise ValueError("un estudio factorial requiere exactamente dos factores")
+    plans=[]
+    for factor in factors:
+        if not isinstance(factor,dict) or set(factor)!={"parameter_id","values"}:
+            raise ValueError("cada factor requiere parameter_id y dos valores")
+        values=factor["values"]
+        if not isinstance(values,list) or len(values)!=2:
+            raise ValueError("cada factor requiere exactamente baseline y un nivel alternativo")
+        plans.append(prepare_design_study(engine,parameter_id=factor["parameter_id"],
+            values=values,rpm=rpm,max_cycles=max_cycles,point_budget_seconds=point_budget_seconds,
+            total_budget_seconds=total_budget_seconds,memory_limit_mib=memory_limit_mib,
+            project_id=project_id,variant_label=variant_label,study_id="factor-check"))
+    if plans[0]["parameter"]["id"]==plans[1]["parameter"]["id"]:
+        raise ValueError("los dos factores deben ser parámetros distintos")
+    axes=[{"parameter":plan["parameter"],"values":plan["values"]} for plan in plans]
+    combos=[(a,b) for a in axes[0]["values"] for b in axes[1]["values"]]
+    if total_budget_seconds<4*point_budget_seconds:
+        raise ValueError("el presupuesto agregado debe cubrir los cuatro diseños factoriales")
+    from .exploratory_workflow import preflight
+    points=[]
+    for index,(left,right) in enumerate(combos):
+        document=deepcopy(engine)
+        selected=[(axes[0]["parameter"],left),(axes[1]["parameter"],right)]
+        for parameter,value in selected:
+            document=_apply_parameter(document,parameter,value)
+        factor_values=[{"parameter_id":parameter["id"],"label":parameter["label"],
+            "value":value,"unit":parameter["unit"],
+            "baseline":math.isclose(value,parameter["baseline"],rel_tol=0,abs_tol=1e-12)}
+            for parameter,value in selected]
+        point_label=" · ".join(f"{item['label']}={item['value']:g} {item['unit']}" for item in factor_values)
+        document["provenance"]={**document["provenance"],"parametric_study":{
+            "schema":"DINO_PARAMETRIC_FACTORIAL_POINT_V1",
+            "parent_engine_identity_sha256":identity(engine),"factors":factor_values,
+            "classification":"SYNTHETIC_ASSUMPTION"}}
+        displacement=document.get("native_configuration",{}).get("geometry_identity",{}).get("displacement_cc")
+        if type(displacement) not in (int,float) or not math.isfinite(float(displacement)) or displacement<=0:
+            raise ValueError("el flujo de ingeniería requiere geometry_identity.displacement_cc explícito; no se infiere ni se completa automáticamente")
+        check=preflight(document,rpm=rpm,max_cycles=max_cycles,
+            budget_seconds=float(point_budget_seconds),memory_limit_mib=memory_limit_mib)
+        points.append({"index":index,"value":float(index),"unit":"factorial",
+            "label":point_label,"factor_values":factor_values,
+            "baseline":all(item["baseline"] for item in factor_values),
+            "engine_identity_sha256":identity(document),"preflight":check,"engine_document":document})
+    parameter={"id":"factorial-2x2","label":"2×2 · ".join(axis["parameter"]["label"] for axis in axes),
+        "unit":"","axes":[axis["parameter"] for axis in axes]}
+    numeric_values=[[item["value"] for item in point["factor_values"]] for point in points]
+    study_id=study_id or "ds-"+_sha_bytes(_canonical({"project":project_id,"axes":axes,
+        "baseline_identity":identity(engine),"time_ns":time.time_ns()}))[:20]
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}",project_id):
+        raise ValueError("project_id must be a safe path component")
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}",study_id):
+        raise ValueError("study_id must be a safe path component")
+    return {"schema":SCHEMA,"design_method":"FACTORIAL_2X2_V1","study_id":study_id,
+        "project_id":project_id,"variant_label":variant_label,"parameter":parameter,
+        "factors":axes,"values":numeric_values,"baseline_engine_identity_sha256":identity(engine),
+        "rpm":float(rpm),"max_cycles":max_cycles,"point_budget_seconds":float(point_budget_seconds),
+        "total_budget_seconds":float(total_budget_seconds),"memory_limit_mib":memory_limit_mib,
+        "mode":"EXPLORATORY","scientific_validation":"NOT_CLAIMED",
+        "periodicity":"EVALUATED_PER_POINT_BY_EXISTING_DETECTOR","points":points}
+
+
 def run_design_study(prepared: dict, *, artifact_root: str | Path,
                      cancel_event=None, progress=None, resume: bool = False,
                      additional_budget_seconds: float = 0,
@@ -367,6 +435,7 @@ def run_design_study(prepared: dict, *, artifact_root: str | Path,
             "mode":"EXPLORATORY","scientific_validation":"NOT_CLAIMED",
             "periodicity":"EVALUATED_PER_POINT_BY_EXISTING_DETECTOR","elapsed_seconds":0.0,
             "points":[{"index":row["index"],"value":row["value"],"unit":row["unit"],
+                "label":row.get("label"),"factor_values":row.get("factor_values"),
                 "baseline":row["baseline"],"engine_identity_sha256":row["engine_identity_sha256"],
                 "run_id":f"{prepared['study_id']}-p{row['index']:02d}","status":"NOT_STARTED",
                 "elapsed_seconds":0.0} for row in prepared["points"]]}
@@ -438,13 +507,14 @@ def run_design_study(prepared: dict, *, artifact_root: str | Path,
                 row["status"]="POINT_BUDGET_EXHAUSTED";stop_reason="POINT_BUDGET_EXHAUSTED";break
             budget=min(point_remaining,remaining)
             try:
+                point_label=design_point.get("label") or f"{prepared['parameter']['label']}={design_point['value']:g} {design_point['unit']}"
                 result=run_engineering(design_point["engine_document"],project_id=prepared["project_id"],
                     run_id=row["run_id"],artifact_root=root,rpm=prepared["rpm"],
                     max_cycles=prepared["max_cycles"],budget_seconds=max(1.0,budget),
                     memory_limit_mib=prepared["memory_limit_mib"],
                     resume=run_dir.exists(),cancel_event=cancel_event,
-                    variant_label=f"{prepared['study_id']} · {prepared['parameter']['label']}={design_point['value']:g} {design_point['unit']}",
-                    progress=(lambda detail, i=index, n=len(prepared["points"]): progress({"study_id":prepared["study_id"],"point_index":i+1,"point_count":n,"value":prepared["points"][i]["value"],"rpm":prepared["rpm"],"solver_progress":detail}) if progress else None))
+                    variant_label=f"{prepared['study_id']} · {point_label}",
+                    progress=(lambda detail, i=index, n=len(prepared["points"]): progress({"study_id":prepared["study_id"],"point_index":i+1,"point_count":n,"value":prepared["points"][i].get("label",prepared["points"][i]["value"]),"rpm":prepared["rpm"],"solver_progress":detail}) if progress else None))
             except Exception as exc:
                 row.update(status="FAILED_CLOSED",failure=f"{type(exc).__name__}: {exc}")
                 result=None;stop_reason="FAILED_CLOSED"
@@ -479,7 +549,7 @@ def run_design_study(prepared: dict, *, artifact_root: str | Path,
         manifest["updated_unix"]=time.time();_atomic_json(manifest_path,manifest)
         if stop_reason=="FAILED_CLOSED":break
         if progress:progress({"study_id":prepared["study_id"],"point_index":index+1,
-            "point_count":len(prepared["points"]),"value":design_point["value"],"status":row["status"]})
+            "point_count":len(prepared["points"]),"value":design_point.get("label",design_point["value"]),"status":row["status"]})
     else:stop_reason="ALL_POINTS_FINISHED"
     manifest["elapsed_seconds"]=elapsed_before+(time.monotonic()-started)
     all_finished=all(row.get("status") in {"COMPLETE","CACHED"} for row in manifest["points"])

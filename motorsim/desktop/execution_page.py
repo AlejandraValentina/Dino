@@ -475,13 +475,82 @@ class ExecutionPage(QWidget):
         self.cancel.setEnabled(False);self.start.setEnabled(False);self.resume.setEnabled(False)
         self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()
 
+    def start_factorial_design_study(self):
+        if self.task is not None:return
+        from ..design_study import available_parameters,prepare_factorial_design_study
+        try:parameters=available_parameters(self._engine())
+        except Exception as exc:
+            QMessageBox.warning(self,"Estudio factorial no disponible",
+                f"La geometría no ofrece adaptadores paramétricos seguros: {type(exc).__name__}: {exc}")
+            return
+        if len(parameters)<2:
+            QMessageBox.information(self,"Se requieren dos parámetros","La configuración no ofrece dos parámetros compatibles distintos.")
+            return
+        dialog=QDialog(self);dialog.setWindowTitle("Estudio factorial de diseño 2×2 · EXPLORATORY")
+        form=QFormLayout(dialog)
+        axes=[];editors=[]
+        for index,title in enumerate(("Factor A","Factor B")):
+            combo=QComboBox();combo.setObjectName(f"factorialParameter{index}")
+            for item in parameters:combo.addItem(item["label"],item["id"])
+            editor=QLineEdit();editor.setObjectName(f"factorialAlternative{index}")
+            editor.setPlaceholderText("Un nivel alternativo; el baseline se agrega automáticamente")
+            baseline=QLabel();baseline.setWordWrap(True)
+            form.addRow(f"{title} compatible",combo);form.addRow(f"{title} baseline",baseline)
+            form.addRow(f"{title} nivel alternativo",editor)
+            def sync(item_index,selector=combo,label=baseline,entry=editor,axis_index=index):
+                selected=parameters[selector.currentIndex()]
+                label.setText(f"{selected['baseline']:g} {selected['unit']} · valor actual")
+                entry.setPlaceholderText(f"Un nivel alternativo en {selected['unit']}")
+            combo.currentIndexChanged.connect(sync);sync(0)
+            axes.append(combo);editors.append(editor)
+        notice=QLabel("Se ejecutan las cuatro combinaciones baseline/alternativo con los adaptadores existentes. Máximo 4 diseños; sin topologías nuevas, interpolación ni efectos derivados. Cada punto sigue siendo EXPLORATORY y no constituye predicción validada.")
+        notice.setWordWrap(True);form.addRow(notice)
+        cycles=QSpinBox();cycles.setRange(1,111);cycles.setValue(1)
+        point_budget=QSpinBox();point_budget.setRange(1,150);point_budget.setValue(min(60,150,int(self.budget.value())))
+        total_budget=QSpinBox();total_budget.setRange(4,600);total_budget.setValue(min(600,max(4,4*point_budget.value())))
+        form.addRow("Horizonte máximo por diseño",cycles)
+        form.addRow("Presupuesto máximo por diseño (s)",point_budget)
+        form.addRow("Presupuesto agregado (s)",total_budget)
+        buttons=QDialogButtonBox(QDialogButtonBox.StandardButton.Ok|QDialogButtonBox.StandardButton.Cancel)
+        buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Preflight factorial…")
+        buttons.accepted.connect(dialog.accept);buttons.rejected.connect(dialog.reject);form.addRow(buttons)
+        if dialog.exec()!=QDialog.DialogCode.Accepted:return
+        try:
+            ids=[combo.currentData() for combo in axes]
+            if ids[0]==ids[1]:raise ValueError("seleccioná dos parámetros diferentes")
+            factors=[]
+            for combo,editor in zip(axes,editors):
+                selected=parameters[combo.currentIndex()]
+                alternative=float(editor.text().strip())
+                factors.append({"parameter_id":selected["id"],"values":[selected["baseline"],alternative]})
+            document=json.loads(json.dumps(self._engine(),allow_nan=False))
+        except Exception as exc:
+            QMessageBox.warning(self,"Estudio factorial bloqueado",f"FAIL-CLOSED: {type(exc).__name__}: {exc}");return
+        arguments={"factors":factors,"rpm":self.rpm.value(),"max_cycles":cycles.value(),
+            "point_budget_seconds":point_budget.value(),"total_budget_seconds":total_budget.value(),
+            "memory_limit_mib":self.memory.value(),"project_id":self.context.project["project_id"],
+            "variant_label":self.context.selected_variant or "base"}
+        self.cancel_event=None;self.progress_latest=None
+        self.active_sweep_settings={"rpms":[self.rpm.value()],"max_cycles":cycles.value(),
+            "total_budget_seconds":total_budget.value()}
+        self.output.appendPlainText("Preflight factorial 2×2 en segundo plano · 4 configuraciones · 0 pasos del solver.")
+        self.task=run_background(prepare_factorial_design_study,document,
+            on_done=self._design_study_preflight_done,on_error=self._failed,**arguments)
+        self.elapsed_timer.start();self.status_text="VALIDANDO FACTORIAL · SIN PASOS DEL SOLVER"
+        self.checkpoint_summary="cuatro diseños factoriales en preflight"
+        self.cancel.setEnabled(False);self.start.setEnabled(False);self.resume.setEnabled(False)
+        self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()
+
     def _design_study_preflight_done(self,prepared):
         from ..design_study import run_design_study
         try:
             from ..storage_preflight import check_storage_requirements
             check_storage_requirements([(self.artifact_root,512*1024**2*len(prepared["points"]))])
-            unit=prepared["parameter"]["unit"]
-            values_text=", ".join(f"{value:g} {unit}" for value in prepared["values"])
+            if prepared.get("design_method")=="FACTORIAL_2X2_V1":
+                values_text="\n".join(row["label"] for row in prepared["points"])
+            else:
+                unit=prepared["parameter"]["unit"]
+                values_text=", ".join(f"{value:g} {unit}" for value in prepared["values"])
             summary=(f"Proyecto: {prepared['project_id']} · variante: {prepared['variant_label']}\n"
                 f"Parámetro: {prepared['parameter']['label']}\nValores: {values_text}\n"
                 f"RPM: {prepared['rpm']:g} · hasta {prepared['max_cycles']} ciclos/punto · {prepared['total_budget_seconds']:g} s agregados\n"

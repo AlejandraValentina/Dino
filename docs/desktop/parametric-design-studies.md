@@ -61,6 +61,11 @@ delta; nonconverged and incomplete points remain visible with their own state.
   cylinder compression ratio, intake-port dimensions, and multi-factor designs
   remain unavailable until their metadata and solver bindings can be regenerated
   without stale summaries.
+- The bounded 2×2 factorial action composes exactly two existing compatible
+  adapters at baseline/one-alternative levels. It preserves the four individual
+  engine configurations and their factor values. Dino reports the observed
+  point records; it does not fit response surfaces, infer main effects, or
+  calculate interaction terms, and undefined/nonperiodic metrics remain absent.
 - Historical reuse searches the configured artifact root's exploratory run
   store and explicitly registered project result references. A completed run
   is eligible only when engine identity, RPM, cycle limit, memory limit, and

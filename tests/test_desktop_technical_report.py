@@ -117,6 +117,21 @@ def test_report_rejects_unknown_parametric_manifest_schema():
             source_kind="EXPLORATORY", design_study_manifest={"schema": "unknown"})
 
 
+def test_report_shows_factorial_values_without_derived_effects():
+    report=render_technical_report({"points":[_row("factorial",3000,None,
+        classification="MAX_CYCLES_NONCONVERGED")],"experimental_validation":"NOT_PERFORMED"},
+        source_kind="EXPLORATORY",generated_at="fixed",design_study_manifest={
+            "schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":"factorial-synthetic",
+            "status":"PARTIAL","parameter":{"label":"2×2 · top × volume"},
+            "points":[{"index":3,"status":"COMPLETE","engine_identity_sha256":"d"*64,
+                "factor_values":[{"label":"Transfer top","value":39.1,"unit":"mm"},
+                                 {"label":"Crankcase volume","value":355.0,"unit":"cm³"}]}]})
+    assert "Transfer top=39.1 mm" in report
+    assert "Crankcase volume=355 cm³" in report
+    assert "interaction effect" not in report.lower()
+    assert "no recalculan el solver" in report
+
+
 def test_results_page_exports_report_using_current_variant_selection(tmp_path):
     context = DesktopContext(new_design_project("report-ui"))
     page = ResultsPage(context)

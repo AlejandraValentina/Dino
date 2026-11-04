@@ -166,11 +166,17 @@ def render_technical_report(dataset: dict, *, source_kind: str,
         for point in manifest.get("points", []):
             value = point.get("value")
             shown_value = format_number(value) if _safe_number(value) else "No informado"
+            factors = point.get("factor_values")
+            if isinstance(factors,list) and factors:
+                shown_value = " · ".join(
+                    f"{_esc(item.get('label') or item.get('parameter_id'))}="
+                    f"{_esc(format_number(item.get('value')) if _safe_number(item.get('value')) else 'No informado')} "
+                    f"{_esc(item.get('unit') or '')}" for item in factors if isinstance(item,dict))
             identity_sha = point.get("engine_identity_sha256") or "No disponible"
             study_rows.append("<tr>" + "".join((
                 f"<td>{_esc(point.get('index'))}</td>",
                 f"<td>{_esc(point.get('status') or 'No ejecutado')}</td>",
-                f"<td>{_esc(shown_value)} {_esc(point.get('unit') or parameter.get('unit') or '')}</td>",
+                f"<td>{shown_value if isinstance(factors,list) and factors else _esc(shown_value)+' '+_esc(point.get('unit') or parameter.get('unit') or '')}</td>",
                 f"<td><code>{_esc(identity_sha)}</code></td>")) + "</tr>")
         manifest_path = Path(design_study_manifest_path) if design_study_manifest_path else None
         manifest_digest = None

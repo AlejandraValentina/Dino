@@ -11005,22 +11005,34 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-ADAPTERS-V2"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "pending-commit"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
         "motorsim/design_study.py",
+        "motorsim/desktop/app.py",
         "motorsim/desktop/execution_page.py",
         "motorsim/desktop/results_page.py",
+        "motorsim/desktop/technical_report.py",
         "tests/test_design_study.py",
         "tests/test_desktop_design_study.py",
-        "docs/desktop/parametric-design-studies.md"
+        "tests/test_desktop_technical_report.py",
+        "docs/desktop/parametric-design-studies.md",
+        "results/desktop-parametric-design-study-v2/",
+        "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Implement immutable 2x2 factorial point preparation and Desktop presentation using the existing single-point execution/import path, with strict existing budgets and no inferred effects.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/factorial-acceptance.md",
+        "results/desktop-parametric-design-study-v2/factorial-receipt.json",
+        "results/desktop-parametric-design-study-v2/factorial-tests.txt",
+        "results/desktop-parametric-design-study-v2/factorial-run-logged/desktop-parametric-factorial-smoke-20261104.summary.json"
+      ],
+      "next_action": "Continue with DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1; graph only observed defined periodic values and keep all other points visible in the study table.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -15640,6 +15652,12 @@
       "task": "DESKTOP-PARAMETRIC-MULTIFACTOR-V1",
       "kind": "task",
       "summary": "Started a bounded two-factor factorial study using only existing native parameter adapters."
+    },
+    {
+      "at": "2026-11-04T17:03:17+00:00",
+      "task": "DESKTOP-PARAMETRIC-MULTIFACTOR-V1",
+      "kind": "task",
+      "summary": "Implemented Desktop bounded 2x2 factorial studies composing two existing adapters; verified four distinct configurations, interruption/reopen, unit-labelled UI/report, and a 50.2s synthetic one-cycle integration with four nonconverged results and all performance metrics undefined."
     }
   ],
   "legacy_gate_status": {

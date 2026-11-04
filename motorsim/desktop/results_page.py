@@ -657,7 +657,10 @@ class ResultsPage(QWidget):
             design_label="Baseline" if row.get("baseline") else f"Diseño {index+1}"
             if row.get("status")=="CACHED" and row.get("reused_verified"):
                 design_label += " · histórico verificado"
-            cells=[design_label,f"{format_number(row.get('value'))} {row.get('unit','')}",
+            factor_values=row.get("factor_values") or []
+            value_text=(" · ".join(f"{item.get('label')}={format_number(item.get('value'))} {item.get('unit','')}" for item in factor_values)
+                        if factor_values else f"{format_number(row.get('value'))} {row.get('unit','')}")
+            cells=[design_label,value_text,
                 _state_label(point.get("classification") or row.get("status")),
                 _state_label(point.get("periodicity") or "NOT_EVALUATED"),
                 str(point.get("cycles_completed",row.get("cycles_completed",0))),*metrics,delta]
