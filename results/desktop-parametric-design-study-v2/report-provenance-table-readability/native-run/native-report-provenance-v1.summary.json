@@ -1,0 +1,42 @@
+{
+  "name": "native-report-provenance-v1",
+  "command": [
+    "python",
+    "results/desktop-parametric-design-study-v2/report-provenance-table-readability/verify_native_report_provenance.py"
+  ],
+  "started_at": "2026-11-04T22:42:41+00:00",
+  "finished_at": "2026-11-04T22:42:47+00:00",
+  "duration_s": 5.938,
+  "exit_code": 1,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\report-provenance-table-readability\\native-run\\native-report-provenance-v1.log",
+  "log_lines": 21,
+  "log_bytes": 1647,
+  "error_lines": [
+    "1: Traceback (most recent call last):",
+    "21: OSError: [WinError 145] El directorio no está vacío: 'C:\\\\Users\\\\AGERIB~1.MID\\\\AppData\\\\Local\\\\Temp\\\\dino-cross-report-10zgd2qf\\\\Default\\\\DawnWebGPUCache'"
+  ],
+  "tail": [
+    "Traceback (most recent call last):",
+    "  File \"E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\report-provenance-table-readability\\verify_native_report_provenance.py\", line 108, in <module>",
+    "    with tempfile.TemporaryDirectory(prefix=\"dino-cross-report-\") as profile:",
+    "  File \"C:\\Users\\ageribon\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\tempfile.py\", line 904, in __exit__",
+    "    self.cleanup()",
+    "  File \"C:\\Users\\ageribon\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\tempfile.py\", line 908, in cleanup",
+    "    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)",
+    "  File \"C:\\Users\\ageribon\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\tempfile.py\", line 890, in _rmtree",
+    "    _shutil.rmtree(name, onerror=onerror)",
+    "  File \"C:\\Users\\ageribon\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\shutil.py\", line 758, in rmtree",
+    "    return _rmtree_unsafe(path, onerror)",
+    "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+    "  File \"C:\\Users\\ageribon\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\shutil.py\", line 616, in _rmtree_unsafe",
+    "    _rmtree_unsafe(fullname, onerror)",
+    "  File \"C:\\Users\\ageribon\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\shutil.py\", line 616, in _rmtree_unsafe",
+    "    _rmtree_unsafe(fullname, onerror)",
+    "  File \"C:\\Users\\ageribon\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\shutil.py\", line 625, in _rmtree_unsafe",
+    "    onerror(os.rmdir, path, sys.exc_info())",
+    "  File \"C:\\Users\\ageribon\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\shutil.py\", line 623, in _rmtree_unsafe",
+    "    os.rmdir(path)",
+    "OSError: [WinError 145] El directorio no está vacío: 'C:\\\\Users\\\\AGERIB~1.MID\\\\AppData\\\\Local\\\\Temp\\\\dino-cross-report-10zgd2qf\\\\Default\\\\DawnWebGPUCache'"
+  ]
+}

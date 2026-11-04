@@ -52,6 +52,22 @@ def test_cross_study_report_preserves_exact_provenance_and_evidence_boundaries()
     assert "Puntos sin contraparte" in html and "total_finite_volume_cells" in html
     assert "no se interpolan, ajustan ni agregan" in html
     assert "NOT_CLAIMED" in html
+    # The visible point summary stays compact while expandable provenance retains
+    # every exact source identifier, digest, path, and verification flag.
+    points_table=html.split('<table class="points-table">',1)[1].split("</table>",1)[0]
+    summary_headers=points_table.split("</thead>",1)[0]
+    assert summary_headers.count("<th>")==9
+    assert "Motor SHA-256" not in summary_headers and "Artifact SHA-256" not in summary_headers
+    assert points_table.count('class="point-provenance"')==2
+    assert points_table.count("Ver fuente y hashes")==2
+    assert ".point-provenance{position:relative}" in html
+    assert ".provenance-grid{position:absolute" in html
+    assert "max-width:calc(100vw - 48px)" in html
+    for exact_source in ("run-a","run-b","c"*64,"2"*64,"d"*64,"3"*64,
+                         "e"*64,"4"*64,"f"*64,"5"*64,
+                         "C:/artifacts/run-a","C:/artifacts/run-b","Fuente verificada al cargar"):
+        assert exact_source in points_table
+    assert "10 kW" in points_table and "12.5 kW" in points_table
 
 
 def test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_exclusions():

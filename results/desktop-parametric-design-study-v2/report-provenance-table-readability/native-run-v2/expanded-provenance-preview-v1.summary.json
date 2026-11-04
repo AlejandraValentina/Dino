@@ -1,0 +1,19 @@
+{
+  "name": "expanded-provenance-preview-v1",
+  "command": [
+    "python",
+    "results/desktop-parametric-design-study-v2/report-provenance-table-readability/render_expanded_provenance_preview.py"
+  ],
+  "started_at": "2026-11-04T22:50:04+00:00",
+  "finished_at": "2026-11-04T22:50:05+00:00",
+  "duration_s": 1.203,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\report-provenance-table-readability\\native-run-v2\\expanded-provenance-preview-v1.log",
+  "log_lines": 1,
+  "log_bytes": 619,
+  "error_lines": [],
+  "tail": [
+    "{\"synthetic\": true, \"preview_only\": true, \"source_report\": \"results/desktop-parametric-design-study-v2/report-provenance-table-readability/native-cross-study-comparison-v2.html\", \"open_details_count\": 1, \"preview_html_sha256\": \"181a14d765b77a64bddafc4a24fae8b66ade44d27e06df3b6e680f10f888e77b\", \"scre"
+  ]
+}

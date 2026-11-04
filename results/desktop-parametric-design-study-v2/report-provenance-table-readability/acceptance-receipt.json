@@ -1,0 +1,63 @@
+{
+  "schema": "DINO_REPORT_PROVENANCE_READABILITY_ACCEPTANCE_V1",
+  "fixture_origin": "synthetic presentation fixture; no solver execution",
+  "desktop_export": {
+    "action": "Results > Compare > Exportar informe técnico HTML",
+    "native_window_capture": "results/desktop-parametric-design-study-v2/report-provenance-table-readability/native-desktop-report-export-v2.png",
+    "native_capture_sha256": "84e6181e5a7fd1035c8a4f90ce15480be38b78466997249874925fd259eecd98",
+    "html": "results/desktop-parametric-design-study-v2/report-provenance-table-readability/native-cross-study-comparison-v2.html",
+    "html_sha256": "82b77a2a6964d1175730e095896eab366a52abcc67ccd189b5c21f3680438946",
+    "browser_capture": "results/desktop-parametric-design-study-v2/report-provenance-table-readability/chrome-rendered-provenance-table-v2.png",
+    "browser_capture_sha256": "00eaf689a59ed80102573af856dcace27fbbbc25dba1795f6fad2d02728be886",
+    "dimensions_px": {
+      "native-desktop-report-export-v2.png": [
+        1440,
+        837
+      ],
+      "chrome-rendered-provenance-table-v2.png": [
+        1360,
+        2000
+      ],
+      "chrome-expanded-provenance-v1.png": [
+        1360,
+        1100
+      ]
+    },
+    "summary_header_count": 9,
+    "expandable_source_rows": 5,
+    "all_original_provenance_present": true,
+    "exact_source_json_appendix_present": true,
+    "synthetic_and_no_validation_notice_present": true
+  },
+  "tests": {
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_desktop_technical_report.py",
+      "tests/test_desktop_design_study.py"
+    ],
+    "exit_code": 0,
+    "summary": [
+      "..............................................                           [100%]",
+      "46 passed in 43.92s"
+    ],
+    "summary_sha256": "f85075d7ae8bff08193681597b3c6e802744147a8f6a63e06ba32881a51327c6"
+  },
+  "browser_runner_cleanup": {
+    "initial_attempt_exit_code": 1,
+    "initial_attempt_error": "21: OSError: [WinError 145] El directorio no está vacío: 'C:\\\\Users\\\\AGERIB~1.MID\\\\AppData\\\\Local\\\\Temp\\\\dino-cross-report-10zgd2qf\\\\Default\\\\DawnWebGPUCache'",
+    "diagnosis": "Chrome completed both captures; TemporaryDirectory cleanup raised WinError 145 for DawnWebGPUCache afterward.",
+    "runner_corrected": "TemporaryDirectory(ignore_cleanup_errors=True); no product files are affected.",
+    "final_native_desktop_browser_run_exit_code": 0,
+    "final_native_desktop_browser_run_error_lines": [],
+    "expanded_details_preview_exit_code": 0
+  },
+  "uia_com_incident": {
+    "cause_from_existing_acceptance": "pywinauto UIA held a stale provider after native-window teardown; not a Dino COM operation.",
+    "active_environment_has_pywinauto": false,
+    "native_desktop_export_verified": true,
+    "reproduced_via_pywinauto": false
+  }
+}

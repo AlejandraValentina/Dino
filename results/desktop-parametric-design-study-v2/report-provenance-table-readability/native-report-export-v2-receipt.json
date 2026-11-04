@@ -1,0 +1,27 @@
+{
+  "schema": "DINO_NATIVE_CROSS_STUDY_REPORT_PLOT_V1",
+  "synthetic": true,
+  "desktop_window_visible": true,
+  "desktop_size": [
+    1440,
+    837
+  ],
+  "project_study_references": 2,
+  "html_report_path": "results\\desktop-parametric-design-study-v2\\report-provenance-table-readability\\native-cross-study-comparison-v2.html",
+  "html_sha256": "82b77a2a6964d1175730e095896eab366a52abcc67ccd189b5c21f3680438946",
+  "html_svg_count": 1,
+  "html_marker_count": 2,
+  "no_interpolated_lines": true,
+  "excluded_nonperiodic_pair_listed": true,
+  "unpaired_point_preserved": true,
+  "manifest_hashes_preserved": true,
+  "not_claimed_preserved": true,
+  "synthetic_notice_preserved": true,
+  "desktop_capture_saved": true,
+  "browser_capture_saved": true,
+  "browser_capture_sha256": "00eaf689a59ed80102573af856dcace27fbbbc25dba1795f6fad2d02728be886",
+  "browser": "Chrome headless; renderer only; Desktop export action generated the HTML",
+  "summary_header_count": 9,
+  "expandable_point_count": 5,
+  "full_provenance_fields_preserved": true
+}

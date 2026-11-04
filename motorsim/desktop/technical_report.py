@@ -575,16 +575,32 @@ def render_study_comparison_report(comparison: dict) -> str:
                 if factor else f"{_esc((study.get('parameter') or {}).get('label') or 'Diseño')}="
                 f"{_esc(format_number(point.get('value')) if _safe_number(point.get('value')) else 'No informado')} "
                 f"{_esc(point.get('unit') or (study.get('parameter') or {}).get('unit') or '')}")
-            cells=[study.get("study_id"),design,point.get("rpm"),point.get("status"),
-                point.get("classification"),point.get("periodicity"),point.get("cycles_completed"),
-                point.get("source_run_id"),point.get("engine_identity_sha256"),point.get("identity_sha256"),
-                point.get("result_sha256"),point.get("result_artifact_sha256"),point.get("run_directory"),
-                "Sí" if point.get("source_verified") else "No"]
-            metric_cells=[]
-            for metric,(_,unit) in _STUDY_REPORT_METRICS.items():
+            metrics_summary=[]
+            for metric,(label,unit) in _STUDY_REPORT_METRICS.items():
                 value=metrics.get(metric)
-                metric_cells.append(f"<td>{_esc(format_number(value) if _safe_number(value) else '—')}{(' '+_esc(unit)) if _safe_number(value) else ''}</td>")
-            point_rows.append("<tr>"+"".join(f"<td>{_esc(value if value is not None else 'No informado')}</td>" for value in cells)+"".join(metric_cells)+"</tr>")
+                shown=(f"{_esc(format_number(value))} {_esc(unit)}" if _safe_number(value) else "—")
+                metrics_summary.append(f"<span><strong>{_esc(label)}:</strong> {shown}</span>")
+            provenance_fields=(
+                ("Run fuente",point.get("source_run_id")),
+                ("Motor SHA-256",point.get("engine_identity_sha256")),
+                ("Corrida SHA-256",point.get("identity_sha256")),
+                ("Resultado SHA-256",point.get("result_sha256")),
+                ("Artifact SHA-256",point.get("result_artifact_sha256")),
+                ("Ruta de artifact",point.get("run_directory")),
+                ("Fuente verificada al cargar","Sí" if point.get("source_verified") else "No"),
+            )
+            provenance_html="".join(f"<div><dt>{_esc(label)}</dt><dd><code>{_esc(value if value is not None else 'No informado')}</code></dd></div>"
+                for label,value in provenance_fields)
+            point_rows.append("<tr>"+"".join((
+                f"<td>{_esc(study.get('study_id'))}</td>",f"<td>{design}</td>",
+                f"<td>{_esc(format_number(point.get('rpm')) if _safe_number(point.get('rpm')) else 'No informada')}</td>",
+                f"<td>{_esc(state_label(point.get('status') or 'NOT_REPORTED'))}</td>",
+                f"<td>{_esc(state_label(point.get('classification') or 'NOT_REPORTED'))}<br>"
+                f"{_esc(state_label(point.get('periodicity') or 'NOT_EVALUATED'))}</td>",
+                f"<td>{_esc(point.get('cycles_completed') if point.get('cycles_completed') is not None else 'No informado')}</td>",
+                f"<td class=\"run-id\">{_esc(point.get('source_run_id') or 'No informado')}</td>",
+                f"<td class=\"metric-summary\">{'<br>'.join(metrics_summary)}</td>",
+                f"<td><details class=\"point-provenance\"><summary>Ver fuente y hashes</summary><dl class=\"provenance-grid\">{provenance_html}</dl></details></td>"))+"</tr>")
     pair_rows=[]
     for pair in comparison.get("pairs",[]):
         for metric,(label,unit) in _STUDY_REPORT_METRICS.items():
@@ -607,12 +623,12 @@ def render_study_comparison_report(comparison: dict) -> str:
             f"<td>{_esc(point.get('engine_identity_sha256'))}</td>",f"<td>{_esc(item.get('reason'))}</td>"))+"</tr>")
     payload=html.escape(json.dumps(comparison,ensure_ascii=False,sort_keys=True,indent=2,allow_nan=False),quote=False)
     return f'''<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Comparación paramétrica · Dino 2T</title>
-<style>body{{font:15px Segoe UI,Arial,sans-serif;color:#172536;margin:28px;max-width:1500px}}h1,h2{{color:#173852}}.notice{{padding:14px;background:#fff3dc;border-left:5px solid #cc7b18}}table{{border-collapse:collapse;width:100%;margin:12px 0 24px;font-size:12px}}th,td{{border:1px solid #becbd7;padding:6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}}th{{background:#e9f0f5}}code{{font-size:11px}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6f8;padding:16px}}.legend span{{margin-right:12px}}.legend i{{font-style:normal;font-size:18px}}.empty{{padding:12px;background:#f3f6f8}}footer{{color:#526477}}</style></head><body>
+<style>body{{font:15px Segoe UI,Arial,sans-serif;color:#172536;margin:28px;max-width:1500px}}h1,h2{{color:#173852}}.notice{{padding:14px;background:#fff3dc;border-left:5px solid #cc7b18}}table{{border-collapse:collapse;width:100%;margin:12px 0 24px;font-size:12px}}th,td{{border:1px solid #becbd7;padding:6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}}th{{background:#e9f0f5}}code{{font-size:11px}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6f8;padding:16px}}.legend span{{margin-right:12px}}.legend i{{font-style:normal;font-size:18px}}.empty{{padding:12px;background:#f3f6f8}}.run-id{{min-width:9em}}.metric-summary span{{display:inline-block;margin:0 8px 3px 0;white-space:nowrap}}.point-provenance{{position:relative}}.point-provenance summary{{cursor:pointer;min-width:9em;color:#155b78}}.provenance-grid{{position:absolute;z-index:5;right:0;top:1.5em;display:grid;grid-template-columns:repeat(auto-fit,minmax(17em,1fr));gap:6px 14px;margin:0;padding:12px;width:min(780px,70vw);max-width:calc(100vw - 48px);background:#fff;border:1px solid #91a8ba;box-shadow:0 4px 16px #17253640}}.provenance-grid div{{min-width:0}}.provenance-grid dt{{font-weight:600;color:#40556a}}.provenance-grid dd{{margin:2px 0 0;overflow-wrap:anywhere}}@media(max-width:900px){{body{{margin:16px}}table{{font-size:11px}}.metric-summary span{{white-space:normal}}.provenance-grid{{grid-template-columns:1fr;width:min(780px,70vw)}}}}footer{{color:#526477}}</style></head><body>
 <h1>Comparación de estudios paramétricos · Dino 2T</h1>
 <p class="notice"><strong>Límite de evidencia.</strong> { _esc(comparison.get('notice')) } La validación científica no está reclamada. Las diferencias son contrastes descriptivos entre puntos observados; no se interpolan, ajustan ni agregan.</p>
 <p>Baseline común: <code>{_esc(comparison.get('baseline_engine_identity_sha256'))}</code> · generación UTC: {_esc(datetime.now(timezone.utc).isoformat(timespec='seconds'))}</p>
 <h2>Manifiestos seleccionados</h2><table><thead><tr><th>Estudio</th><th>Proyecto fuente</th><th>Ruta del manifiesto</th><th>SHA-256 del manifiesto</th></tr></thead><tbody>{''.join(studies)}</tbody></table>
-<h2>Puntos y procedencia</h2><table><thead><tr><th>Estudio</th><th>Diseño</th><th>RPM</th><th>Estado ejecución</th><th>Clasificación</th><th>Periodicidad</th><th>Ciclos</th><th>Run fuente</th><th>Motor SHA-256</th><th>Corrida SHA-256</th><th>Resultado SHA-256</th><th>Artifact SHA-256</th><th>Ruta</th><th>Fuente verificada</th><th>Potencia</th><th>Torque</th><th>BMEP</th></tr></thead><tbody>{''.join(point_rows)}</tbody></table>
+<h2>Puntos y procedencia</h2><p>Resumen por punto; abra «Ver fuente y hashes» para la procedencia completa. Los registros originales exactos permanecen disponibles en el JSON del informe.</p><table class="points-table"><thead><tr><th>Estudio</th><th>Diseño</th><th>RPM</th><th>Estado</th><th>Clasificación / periodicidad</th><th>Ciclos</th><th>Run fuente</th><th>Métricas</th><th>Fuente</th></tr></thead><tbody>{''.join(point_rows)}</tbody></table>
 <h2>Respuesta observada por RPM</h2>{_cross_study_response_plots(comparison)}
 <h2>Contrastes exactos</h2><p>Los pares requieren RPM y todos los campos operativos informados compatibles. Δ = estudio B menos A. Un resultado queda vacío si falta o si no es periódico y definido.</p><table><thead><tr><th>Estudio A</th><th>Run A</th><th>Estudio B</th><th>Run B</th><th>RPM</th><th>Métrica</th><th>Δ</th><th>Regla de pareo</th></tr></thead><tbody>{''.join(pair_rows) or '<tr><td colspan="8">No hay pares compatibles exactos.</td></tr>'}</tbody></table>
 <h2>Puntos sin contraparte</h2><table><thead><tr><th>Estudio</th><th>Run ID</th><th>RPM</th><th>Clasificación</th><th>Periodicidad</th><th>Motor SHA-256</th><th>Motivo</th></tr></thead><tbody>{''.join(unpaired_rows) or '<tr><td colspan="7">Todos los puntos aparecen en al menos un pareo.</td></tr>'}</tbody></table>

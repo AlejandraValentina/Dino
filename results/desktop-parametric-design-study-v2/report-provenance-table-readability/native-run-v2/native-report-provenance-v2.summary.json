@@ -1,0 +1,19 @@
+{
+  "name": "native-report-provenance-v2",
+  "command": [
+    "python",
+    "results/desktop-parametric-design-study-v2/report-provenance-table-readability/verify_native_report_provenance_v2.py"
+  ],
+  "started_at": "2026-11-04T22:49:08+00:00",
+  "finished_at": "2026-11-04T22:49:14+00:00",
+  "duration_s": 6.438,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\report-provenance-table-readability\\native-run-v2\\native-report-provenance-v2.log",
+  "log_lines": 1,
+  "log_bytes": 887,
+  "error_lines": [],
+  "tail": [
+    "{\"schema\": \"DINO_NATIVE_CROSS_STUDY_REPORT_PLOT_V1\", \"synthetic\": true, \"desktop_window_visible\": true, \"desktop_size\": [1440, 837], \"project_study_references\": 2, \"html_report_path\": \"results\\\\desktop-parametric-design-study-v2\\\\report-provenance-table-readability\\\\native-cross-study-comparison-v2."
+  ]
+}
