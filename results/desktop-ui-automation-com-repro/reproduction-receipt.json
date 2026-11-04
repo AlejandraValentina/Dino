@@ -1,0 +1,73 @@
+{
+  "schema": "DINO_UIA_COM_LIFECYCLE_ACCEPTANCE_V1",
+  "historical_cause": "Retained pywinauto UIA provider queried for visibility after native Qt window destruction; historical receipt lacks HRESULT/exception text.",
+  "isolated_dependencies": {
+    "pywinauto": "0.6.9",
+    "comtypes": "1.4.16",
+    "pywin32": "312"
+  },
+  "py311_attempt": {
+    "python": "3.11.0",
+    "stages": [
+      "START_CHILD",
+      "CHILD_WINDOW_VISIBLE",
+      "BEFORE_UIA_WAIT_VISIBLE"
+    ],
+    "outcome": "UIA wait did not return; interrupted before close; no HRESULT; no remaining process"
+  },
+  "py310_unbounded_attempt": {
+    "python": "3.10.7",
+    "stages": [
+      "START_CHILD",
+      "CHILD_WINDOW_VISIBLE",
+      "BEFORE_UIA_WAIT_VISIBLE"
+    ],
+    "outcome": "UIA wait did not return; bounded reproduction later superseded this manual attempt"
+  },
+  "py310_bounded_attempt": {
+    "schema": "DINO_UIA_COM_LIFECYCLE_REPRO_V1",
+    "fixture_origin": "synthetic Desktop window; no solver execution",
+    "python": "3.10.7",
+    "uia_wait_timeout_seconds": 12,
+    "observed_stages": [
+      "START_CHILD",
+      "CHILD_WINDOW_VISIBLE",
+      "BEFORE_UIA_WAIT_VISIBLE",
+      "UIA_INITIAL_QUERY_TIMEOUT",
+      "POSTED_WIN32_WM_CLOSE"
+    ],
+    "uia_attached_before_close": false,
+    "uia_result": null,
+    "uia_worker_alive_after_cleanup": true,
+    "win32_visible_windows_before_close": 1,
+    "win32_window_visible_after_close": false,
+    "child_exit_code": 0,
+    "child_process_alive_after_close": false,
+    "close_method": "Win32 WM_CLOSE",
+    "post_close_window_check": "Win32 IsWindowVisible/IsWindow"
+  },
+  "win32_lifecycle": {
+    "schema": "DINO_WIN32_WINDOW_LIFECYCLE_V1",
+    "fixture_origin": "synthetic; no solver run",
+    "python": "3.10.7",
+    "visible_windows_before_close": 1,
+    "window_visible_before_close": true,
+    "window_visible_after_close": false,
+    "child_exit_code": 0,
+    "child_process_alive_after_close": false,
+    "close_method": "Win32 WM_CLOSE",
+    "post_close_check": "Win32 IsWindowVisible/IsWindow"
+  },
+  "no_dino_product_change": true,
+  "evidence_sha256": {
+    "acceptance.md": "86b79b8980aa680d455e92fa4c5540dcc06fe9bf8f5a53912dfc41f77c628654",
+    "child_desktop.py": "1fe42d675498a0cab2b53eee3d8ede7f1012d2c040ff68fc156ad6733311ab65",
+    "verify_uia_com_lifecycle.py": "738f7fba038ad4a758b20fed7cbbfdcaabd30e8b28fa25343e533fa49524badc",
+    "verify_uia_com_bounded.py": "43fbfcbddd6e3095ebaa926f39795c7d2eada0a3a23a25bde1276fde7ab1e1fc",
+    "verify_win32_lifecycle.py": "bc0cb3455e1f1db6b91591815cdeb34ae3ce1c1cb110e287e65756c55ed57ddc",
+    "uia-progress.jsonl": "7d50b95889c8537863724e16a83c655ef0695cf06ae41661e43ddce7d7ca13d0",
+    "bounded-uia-progress.jsonl": "bfafc6d6eaa728d1ee6e72c716af22e3df9be9464779cacff6c932614daf3859",
+    "bounded-uia-receipt.json": "a654575617067be747684a246580438711a06d32f63b3ada3cb2a1daca8ca1f4",
+    "win32-lifecycle-receipt.json": "5de15b1db71aabda93c70a187b452a506038ea1e401c151500102691ba990f28"
+  }
+}

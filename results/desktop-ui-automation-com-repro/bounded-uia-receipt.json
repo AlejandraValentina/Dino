@@ -1,0 +1,22 @@
+{
+  "schema": "DINO_UIA_COM_LIFECYCLE_REPRO_V1",
+  "fixture_origin": "synthetic Desktop window; no solver execution",
+  "python": "3.10.7",
+  "uia_wait_timeout_seconds": 12,
+  "observed_stages": [
+    "START_CHILD",
+    "CHILD_WINDOW_VISIBLE",
+    "BEFORE_UIA_WAIT_VISIBLE",
+    "UIA_INITIAL_QUERY_TIMEOUT",
+    "POSTED_WIN32_WM_CLOSE"
+  ],
+  "uia_attached_before_close": false,
+  "uia_result": null,
+  "uia_worker_alive_after_cleanup": true,
+  "win32_visible_windows_before_close": 1,
+  "win32_window_visible_after_close": false,
+  "child_exit_code": 0,
+  "child_process_alive_after_close": false,
+  "close_method": "Win32 WM_CLOSE",
+  "post_close_window_check": "Win32 IsWindowVisible/IsWindow"
+}
