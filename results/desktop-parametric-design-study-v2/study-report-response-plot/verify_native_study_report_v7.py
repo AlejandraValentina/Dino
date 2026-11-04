@@ -84,4 +84,3 @@ if not all((receipt['synthetic'],receipt['desktop_visible'],receipt['plotted_mar
  receipt['nonperiodic_exclusion_visible'],receipt['unstarted_point_exclusion_visible'],receipt['raw_state_codes_preserved_in_json'],receipt['unconnected_markers'],receipt['not_claimed_preserved'],app_capture)):
  raise SystemExit('Native single-study report acceptance failed')
 app.quit()
-
