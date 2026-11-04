@@ -11559,9 +11559,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-CROSS-STUDY-CSV-EXPORT-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "329fbcf"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11572,8 +11574,13 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Implement a read-only view for the existing DINO cross-study CSV export; preserve exact pairs, unpaired reasons and source bindings, and reject changed or unsupported inputs.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-csv-reimport/acceptance.md",
+        "results/desktop-parametric-design-study-v2/cross-study-csv-reimport/tests-final/parametric-cross-study-csv-reimport-final.summary.json",
+        "results/desktop-parametric-design-study-v2/cross-study-csv-reimport/native-window-receipt.json",
+        "results/desktop-parametric-design-study-v2/cross-study-csv-reimport/native-cross-study-csv-snapshot.png"
+      ],
+      "next_action": "DONE: export CSV cross-study can be reopened as a strict read-only snapshot; exact pair/unpaired rows, source hashes and scientific qualification are retained.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16383,6 +16390,13 @@
       "kind": "PRODUCT_DELIVERY",
       "summary": "Existing native factorial CSV opens in Desktop as read-only 4-point/9-contrast snapshot; manifest and current source hashes rechecked. Missing V1 contrast bindings are visibly preserved, not fabricated. 71 integrated tests passed.",
       "commit": "2679223"
+    },
+    {
+      "at": "2026-11-04T21:38:58+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-CSV-REIMPORT-V1",
+      "kind": "task",
+      "summary": "Cross-study CSV now reopens in Desktop as a strict read-only snapshot; exact pair/unpaired rows, hashes and NOT_CLAIMED status preserved; 45 focused regressions and native-window acceptance passed.",
+      "commit": "329fbcf"
     }
   ],
   "legacy_gate_status": {
