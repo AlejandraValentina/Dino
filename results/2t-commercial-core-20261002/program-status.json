@@ -10853,7 +10853,8 @@
       "commits": [
         "495cab8",
         "091deda",
-        "95a4574"
+        "95a4574",
+        "7a084cf"
       ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
@@ -15338,7 +15339,7 @@
     {
       "task": "DESKTOP-TECHNICAL-REPORT-BUILD-PROVENANCE-V1",
       "summary": "Informe técnico HTML y manifiesto reproducible integrados; smoke del EXE Windows produjo informe desde CSV/JSON sintético de 30 puntos. Artefactos y hashes registrados; el automatismo tuvo fallo COM únicamente en cierre, no se declara ejecución gráfica totalmente verde.",
-      "commit": "pending-evidence-commit"
+      "commit": "7a084cf"
     }
   ],
   "legacy_gate_status": {

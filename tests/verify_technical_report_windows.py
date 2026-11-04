@@ -121,8 +121,12 @@ def main():
     if not all(checks.values()):
         raise AssertionError(checks)
     capture_window(entry[0], args.work / "02-informe-exportado.bmp")
-    main_window.close()
-    main_window.wait_not("visible", timeout=10)
+    remaining_windows = [item for item in visible_windows() if item[1] == entry[1]]
+    app_windows = [item for item in remaining_windows if item[2].startswith("Dino 2T")]
+    if len(app_windows) != 1:
+        raise AssertionError(f"Expected one main Dino window, found {len(app_windows)}")
+    win32gui.PostMessage(entry[0], win32con.WM_CLOSE, 0, 0)
+    wait_for(lambda: not win32gui.IsWindowVisible(entry[0]), 10)
     remaining_windows = [item for item in visible_windows() if item[1] == entry[1]]
     result = {"exe": str(args.exe.resolve()), "input_csv": str(csv.resolve()),
               "input_kind": "existing synthetic historical 30-point dataset",
