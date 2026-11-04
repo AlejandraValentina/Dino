@@ -11754,9 +11754,12 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-STUDY-REPORT-RESPONSE-PLOT-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "a8f60ff",
+        "53d8372"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11766,8 +11769,13 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Replace raw status tokens in exclusion reason prose with the shared Spanish state labels; leave raw fields and source manifest unchanged, and retain a test that both the translated presentation and original JSON code are present.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/report-exclusion-state-labels/acceptance-v1.md",
+        "results/desktop-parametric-design-study-v2/report-exclusion-state-labels/tests-final/report-exclusion-state-labels-final.summary.json",
+        "results/desktop-parametric-design-study-v2/study-report-response-plot/native-study-report-v7-receipt.json",
+        "results/desktop-parametric-design-study-v2/study-report-response-plot/chrome-rendered-study-response-v7.png"
+      ],
+      "next_action": "DONE: internal status codes are translated in exclusion prose while raw codes remain in the original JSON; native Desktop export and rendered report verified.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16593,6 +16601,13 @@
       "task": "DESKTOP-PARAMETRIC-REPORT-EXCLUSION-STATE-LABELS-V1",
       "kind": "start",
       "summary": "Starting the confirmed report-presentation defect: translate exclusion prose state codes while leaving source status codes and full JSON payload unchanged."
+    },
+    {
+      "at": "2026-11-04T22:37:52+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-EXCLUSION-STATE-LABELS-V1",
+      "kind": "task",
+      "summary": "Study report exclusion reasons now use shared Spanish labels for INSUFFICIENT_CYCLES and NOT_STARTED; exact status codes remain in the JSON appendix; 46 focused tests and native Desktop/Chrome synthetic verification passed.",
+      "commit": "a8f60ff"
     }
   ],
   "legacy_gate_status": {
