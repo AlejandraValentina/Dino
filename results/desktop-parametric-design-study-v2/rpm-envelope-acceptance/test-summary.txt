@@ -1,0 +1,3 @@
+35 passed in 154.89 s: tests/test_design_study.py tests/test_desktop_design_study.py tests/test_power_curve_sweep.py (pre-final metadata guard)
+7 passed in 52.89 s: python -m compileall -q motorsim/design_study.py tests/test_design_study.py; python -m pytest tests/test_design_study.py tests/test_desktop_design_study.py -q -k rpm_envelope or completed_study_manifest_is_registered
+compileall: passed

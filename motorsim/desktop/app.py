@@ -169,7 +169,7 @@ class DinoDesktopWindow(QMainWindow):
         self.strip_more=QPushButton('Más opciones');self.strip_more.setToolTip('Barrido RPM y recuperación')
         from PySide6.QtWidgets import QMenu
         menu=QMenu(self.strip_more)
-        for label,callback in (('Barrido RPM / A/B…',execution.start_power_curve),('Estudio paramétrico geométrico…',execution.start_design_study),('Estudio factorial de diseño 2×2…',execution.start_factorial_design_study),('Reanudar estudio paramétrico…',execution.resume_design_study),('Reanudar checkpoint seleccionado…',lambda:execution.start_run(resume=True)),('Reanudar barrido…',execution.resume_power_curve)):
+        for label,callback in (('Barrido RPM / A/B…',execution.start_power_curve),('Estudio paramétrico geométrico…',execution.start_design_study),('Estudio paramétrico por RPM…',execution.start_design_rpm_envelope),('Estudio factorial de diseño 2×2…',execution.start_factorial_design_study),('Reanudar estudio paramétrico…',execution.resume_design_study),('Reanudar checkpoint seleccionado…',lambda:execution.start_run(resume=True)),('Reanudar barrido…',execution.resume_power_curve)):
             action=menu.addAction(label);action.triggered.connect(callback)
         self.resume_action=menu.actions()[1]
         self.strip_more.setMenu(menu);strip.addWidget(self.strip_more)

@@ -16,6 +16,7 @@ def test_parametric_actions_are_available_and_study_comparison_is_explicit(tmp_p
     window=DinoDesktopWindow(new_design_project("design-study-ui-test"))
     actions={action.text() for action in window.strip_more.menu().actions()}
     assert "Estudio paramétrico geométrico…" in actions
+    assert "Estudio paramétrico por RPM…" in actions
     assert "Estudio factorial de diseño 2×2…" in actions
     assert "Reanudar estudio paramétrico…" in actions
     context=DesktopContext(window.context.project);page=ResultsPage(context)
@@ -69,6 +70,25 @@ def test_parametric_preflight_runs_in_background_not_the_ui_thread(monkeypatch):
     assert queued["kwargs"]["on_done"]==page._design_study_preflight_done
     assert page.cancel_event is None
     assert "VALIDANDO" in page.status_text
+    page.task=None;page.close();APP.processEvents()
+
+
+def test_rpm_envelope_dialog_dispatches_existing_zero_step_preflight(monkeypatch):
+    context=DesktopContext(new_design_project("rpm-envelope-dialog"));page=ExecutionPage(context)
+    queued={}
+    def accept_with_value(dialog):
+        dialog.findChild(QLineEdit,"rpmEnvelopeValues").setText("84")
+        return QDialog.DialogCode.Accepted
+    def record(function,*args,**kwargs):
+        queued.update(function=function,args=args,kwargs=kwargs);return object()
+    monkeypatch.setattr(QDialog,"exec",accept_with_value)
+    monkeypatch.setattr("motorsim.desktop.execution_page.run_background",record)
+    page.start_design_rpm_envelope()
+    assert queued["function"].__name__=="prepare_design_rpm_envelope"
+    assert queued["kwargs"]["on_done"]==page._design_study_preflight_done
+    assert queued["kwargs"]["rpms"]==[3000,4000]
+    assert queued["kwargs"]["values"][0] in queued["kwargs"]["values"]
+    assert page.cancel_event is None
     page.task=None;page.close();APP.processEvents()
 
 
@@ -175,6 +195,34 @@ def test_factorial_study_is_not_collapsed_into_one_dimensional_response():
     page.close();APP.processEvents()
 
 
+def test_rpm_envelope_keeps_observed_rpm_rows_and_suppresses_mixed_rpm_response():
+    page=ResultsPage(DesktopContext(new_design_project("rpm-envelope-results")))
+    def point(run_id,rpm,power):
+        return {"run_id":run_id,"variant_id":run_id,"rpm":rpm,
+            "classification":"MAX_CYCLES_NONCONVERGED","periodicity":"INSUFFICIENT_CYCLES",
+            "cycles_completed":1,"brake_power":None,"brake_power_status":"UNDEFINED",
+            "brake_torque":None,"brake_torque_status":"UNDEFINED","BMEP":None,"BMEP_status":"UNDEFINED"}
+    page.dataset={"points":[point("base-3000",3000,None),point("base-4000",4000,None),
+        point("alt-3000",3000,None),point("alt-4000",4000,None)]}
+    page.design_study_manifest={"study_id":"envelope-synthetic","design_method":"RPM_ENVELOPE_V1",
+        "rpms":[3000,4000],"parameter":{"label":"Escape length","unit":"mm"},"points":[
+            {"run_id":"base-3000","baseline":True,"value":83.0,"unit":"mm","rpm":3000,"status":"COMPLETE"},
+            {"run_id":"base-4000","baseline":True,"value":83.0,"unit":"mm","rpm":4000,"status":"COMPLETE"},
+            {"run_id":"alt-3000","baseline":False,"value":84.0,"unit":"mm","rpm":3000,"status":"COMPLETE","design_index":1},
+            {"run_id":"alt-4000","baseline":False,"value":84.0,"unit":"mm","rpm":4000,"status":"COMPLETE","design_index":1}]}
+    page.design_study_manifest_path="synthetic-envelope-study.json"
+    page._update_design_study_summary()
+    assert page.design_study_table.rowCount()==4
+    assert page.design_study_table.item(2,1).text().endswith("3000 RPM")
+    assert page.design_study_table.item(2,0).text()=="Diseño 2"
+    assert page.design_study_table.item(3,0).text()=="Diseño 2"
+    assert "RPM: 3000, 4000" in page.design_study_notice.text()
+    assert page.design_response_plot.series==[]
+    assert "No se mezclan RPM" in page.design_response_notice.text()
+    assert page.design_study_table.item(2,5).text()=="—"
+    page.close();APP.processEvents()
+
+
 def test_completed_study_adds_schema_valid_result_references(tmp_path):
     from motorsim.engine_project import validate_project
     context=DesktopContext(new_design_project("design-study-result-ref-test"));page=ExecutionPage(context)
@@ -201,6 +249,7 @@ def test_completed_study_manifest_is_registered_and_reopens_from_project(tmp_pat
         "project_id":context.project["project_id"],"rpm":3000,
         "parameter":{"label":"Synthetic factor","unit":"mm"},"points":[]}
     manifest_path.write_text(json.dumps(manifest,sort_keys=True),encoding="utf-8")
+    emitted=[];execution.design_study_completed.connect(emitted.append)
     execution._done({"schema":"DINO_PARAMETRIC_DESIGN_STUDY_RESULT_V1","status":"COMPLETE",
         "study_id":"study-roundtrip","bindings":{"project_id":context.project["project_id"]},
         "points":[],"design_study_manifest":str(manifest_path)})
@@ -208,6 +257,7 @@ def test_completed_study_manifest_is_registered_and_reopens_from_project(tmp_pat
     assert reference["study_id"]=="study-roundtrip"
     assert reference["source_project_id"]==context.project["project_id"]
     assert reference["manifest_sha256"]==hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    assert emitted==[reference]
     project_path=tmp_path/"project.dino2t.json";save_project(project_path,context.project)
     reopened=load_project(project_path)
     assert reopened["study_references"]==context.project["study_references"]

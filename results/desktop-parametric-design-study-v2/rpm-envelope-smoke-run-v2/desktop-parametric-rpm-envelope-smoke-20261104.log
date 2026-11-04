@@ -1,0 +1,127 @@
+{"cycle": 1, "work_J": -43.6056052842375, "heat_J": 22.47642363631749, "pmax_Pa": 4304413.67015572, "wall_s": 7.674781100009568, "streak": 0}
+{"status": "MAX_CYCLES_NONCONVERGED", "cycles_completed": 1, "wall_s": 8.074262199981604, "solver_step_wall_s": 7.307630300521851, "processing_wall_s": 0.4102786007570103, "peak_rss_mib": 178.8828125, "failure": null}
+{"cycle": 1, "work_J": -46.051178568559045, "heat_J": 21.14266133913047, "pmax_Pa": 4448997.4674748415, "wall_s": 7.6755316000198945, "streak": 0}
+{"status": "MAX_CYCLES_NONCONVERGED", "cycles_completed": 1, "wall_s": 7.983835100021679, "solver_step_wall_s": 7.312450398807414, "processing_wall_s": 0.4161132012377493, "peak_rss_mib": 182.6484375, "failure": null}
+{"cycle": 1, "work_J": -43.59441410967595, "heat_J": 22.458991778380486, "pmax_Pa": 4302707.975533184, "wall_s": 7.793052900000475, "streak": 0}
+{"status": "MAX_CYCLES_NONCONVERGED", "cycles_completed": 1, "wall_s": 8.11647870001616, "solver_step_wall_s": 7.419684600899927, "processing_wall_s": 0.427095300226938, "peak_rss_mib": 182.84375, "failure": null}
+{"cycle": 1, "work_J": -46.07754741158576, "heat_J": 21.13658932060837, "pmax_Pa": 4450691.899352721, "wall_s": 7.919509899977129, "streak": 0}
+{"status": "MAX_CYCLES_NONCONVERGED", "cycles_completed": 1, "wall_s": 8.224160999991, "solver_step_wall_s": 7.543453700840473, "processing_wall_s": 0.4249472006340511, "peak_rss_mib": 182.84375, "failure": null}
+{
+  "schema": "DINO_PARAMETRIC_RPM_ENVELOPE_SMOKE_V1",
+  "project_id": "synthetic-rpm-envelope-smoke-20261104",
+  "study_id": "synthetic-rpm-envelope-smoke-20261104",
+  "status": "COMPLETE",
+  "design_method": "RPM_ENVELOPE_V1",
+  "rpm_grid": [
+    3000,
+    4000
+  ],
+  "design_values": [
+    83.0,
+    88.0
+  ],
+  "combination_count": 4,
+  "elapsed_seconds": 40.96900000004098,
+  "manifest_path": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\design-studies-v1\\synthetic-rpm-envelope-smoke-20261104\\synthetic-rpm-envelope-smoke-20261104\\rpm-envelope\\study.json",
+  "manifest_sha256": "dee8469aa9ed77e51ff4e52e03311120fc4fecbee62efa7646d724a121579c23",
+  "imported_point_count": 4,
+  "point_states": [
+    {
+      "rpm": 3000,
+      "value": 83.0,
+      "status": "COMPLETE",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d00-3000"
+    },
+    {
+      "rpm": 4000,
+      "value": 83.0,
+      "status": "COMPLETE",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d00-4000"
+    },
+    {
+      "rpm": 3000,
+      "value": 88.0,
+      "status": "COMPLETE",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d01-3000"
+    },
+    {
+      "rpm": 4000,
+      "value": 88.0,
+      "status": "COMPLETE",
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "run_directory": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts\\exploratory-workflow-v1\\synthetic-rpm-envelope-smoke-20261104\\pc-synthetic-rpm-envelope-smoke-20261104-d01-4000"
+    }
+  ],
+  "synthetic_configuration": {
+    "configuration_source": {
+      "classification": "SYNTHETIC_ASSUMPTION",
+      "description": "Plantilla estructural inicial de motor monocilíndrico con admisión por láminas; dimensiones y entradas iniciales son supuestos editables, no mediciones."
+    },
+    "design_inputs": {
+      "bore_mm": {
+        "classification": "SYNTHETIC_ASSUMPTION",
+        "rationale": "Declarado al crear el diseño; valor inicial de plantilla si no fue medido o estimado por el usuario."
+      },
+      "stroke_mm": {
+        "classification": "SYNTHETIC_ASSUMPTION",
+        "rationale": "Declarado al crear el diseño; valor inicial de plantilla si no fue medido o estimado por el usuario."
+      },
+      "rod_length_mm": {
+        "classification": "SYNTHETIC_ASSUMPTION",
+        "rationale": "Declarado al crear el diseño; valor inicial de plantilla si no fue medido o estimado por el usuario."
+      },
+      "volume_bdc_cm3": {
+        "classification": "SYNTHETIC_ASSUMPTION",
+        "rationale": "Declarado al crear el diseño; valor inicial de plantilla si no fue medido o estimado por el usuario."
+      },
+      "cylinder_compression_ratio": {
+        "classification": "SYNTHETIC_ASSUMPTION",
+        "rationale": "Declarado al crear el diseño; valor inicial de plantilla si no fue medido o estimado por el usuario."
+      },
+      "reference_rpm": {
+        "classification": "SYNTHETIC_ASSUMPTION",
+        "rationale": "Declarado al crear el diseño; valor inicial de plantilla si no fue medido o estimado por el usuario."
+      },
+      "port_dimensions": {
+        "classification": "SYNTHETIC_ASSUMPTION",
+        "rationale": "Valor inicial supuesto de plantilla; se puede editar en las pantallas Motor y Escape."
+      },
+      "intake_control": {
+        "classification": "SYNTHETIC_ASSUMPTION",
+        "rationale": "Valor inicial supuesto de plantilla; se puede editar en las pantallas Motor y Escape."
+      },
+      "exhaust_sections": {
+        "classification": "SYNTHETIC_ASSUMPTION",
+        "rationale": "Valor inicial supuesto de plantilla; se puede editar en las pantallas Motor y Escape."
+      },
+      "fuel_model": {
+        "classification": "SYNTHETIC_ASSUMPTION",
+        "rationale": "Valor inicial supuesto de plantilla; se puede editar en las pantallas Motor y Escape."
+      }
+    },
+    "fuel": {
+      "composition_mass_fraction": {
+        "C": 0.86,
+        "H": 0.14,
+        "O": 0.0
+      },
+      "fresh_air_oxygen_mass_fraction": 0.232,
+      "lower_heating_value_j_kg": 43000000.0,
+      "oxygen_required_kg_per_kg_fuel": 3.413333333333333,
+      "provenance": "SYNTHETIC_ASSUMPTION",
+      "schema": "SYNTHETIC_FUEL_SURROGATE_V1",
+      "sha256": "23dbb59e043824251805e1d3fadd2ee6375e9c508fc20b73873ac147d18be451",
+      "stoichiometric_afr": 14.712643678160918,
+      "version": "1.0.0"
+    },
+    "starter_template_origin": "Topología adaptada de un caso sintético de recuperación funcional con GAS_EXCHANGE_V2; se incluyen sólo configuración y supuestos, sin corridas ni evidencia histórica."
+  },
+  "predictive_claim": "NOT_CLAIMED"
+}

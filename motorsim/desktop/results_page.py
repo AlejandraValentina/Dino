@@ -632,6 +632,9 @@ class ResultsPage(QWidget):
     def open_design_study(self,manifest_path,verified_reference=None):
         """Open only the study's saved points and join metrics by their run IDs."""
         try:
+            if isinstance(manifest_path,dict):
+                verified_reference=manifest_path
+                manifest_path=verified_reference["path"]
             path=Path(manifest_path).resolve()
             raw=path.read_bytes()
             if verified_reference is not None and hashlib.sha256(raw).hexdigest()!=verified_reference.get("manifest_sha256"):
@@ -693,15 +696,22 @@ class ResultsPage(QWidget):
     def _update_design_study_summary(self):
         manifest=getattr(self,"design_study_manifest",None)
         if not manifest:return
+        is_envelope=manifest.get("design_method")=="RPM_ENVELOPE_V1"
         dataset_points={str(row.get("run_id")):row for row in (self.dataset or {}).get("points",[])
                         if row.get("run_id") is not None}
-        baseline_row=next((row for row in manifest.get("points",[]) if row.get("baseline")),None)
-        baseline_point=dataset_points.get(str(baseline_row.get("source_run_id") or baseline_row.get("run_id"))) if baseline_row else None
+        baseline_rows=[row for row in manifest.get("points",[]) if row.get("baseline")]
+        baseline_points={str(row.get("rpm")):dataset_points.get(str(row.get("source_run_id") or row.get("run_id")))
+            for row in baseline_rows} if is_envelope else {}
+        baseline_row=next(iter(baseline_rows),None)
+        baseline_point=(dataset_points.get(str(baseline_row.get("source_run_id") or baseline_row.get("run_id")))
+            if baseline_row and not is_envelope else None)
         values={key:(baseline_point.get(key) if baseline_point and baseline_point.get(key+"_status")=="DEFINED" else None)
                 for key in ("brake_power","brake_torque","BMEP")}
         point_name=manifest.get("parameter",{}).get("label","Parámetro")
+        rpm_summary=("RPM: "+", ".join(format_number(value) for value in manifest["rpms"])
+            if is_envelope else f"{manifest.get('rpm'):g} RPM")
         self.design_study_notice.setText(
-            f"{manifest.get('study_id')} · {point_name} · {manifest.get('rpm'):g} RPM · "
+            f"{manifest.get('study_id')} · {point_name} · {rpm_summary} · "
             f"EXPLORATORY · periodicidad evaluada por punto · validación científica NO RECLAMADA · "
             f"manifiesto: {getattr(self,'design_study_manifest_path','—')}")
         self.design_study_table.setRowCount(len(manifest.get("points",[])))
@@ -712,13 +722,17 @@ class ResultsPage(QWidget):
                 value=point.get(key) if point.get(key+"_status")=="DEFINED" else None
                 metrics.append(format_number(value) if isinstance(value,(int,float)) else "—")
             power=point.get("brake_power") if point.get("brake_power_status")=="DEFINED" else None
-            delta=(format_number(power-values["brake_power"],signed=True) if isinstance(power,(int,float)) and isinstance(values["brake_power"],(int,float)) else "—")
-            design_label="Baseline" if row.get("baseline") else f"Diseño {index+1}"
+            comparison_baseline=(baseline_points.get(str(row.get("rpm"))) if is_envelope else baseline_point)
+            baseline_power=(comparison_baseline.get("brake_power") if comparison_baseline and comparison_baseline.get("brake_power_status")=="DEFINED" else values["brake_power"])
+            delta=(format_number(power-baseline_power,signed=True) if isinstance(power,(int,float)) and isinstance(baseline_power,(int,float)) else "—")
+            design_index=row.get("design_index",index) if is_envelope else index
+            design_label="Baseline" if row.get("baseline") else f"Diseño {int(design_index)+1}"
             if row.get("status")=="CACHED" and row.get("reused_verified"):
                 design_label += " · histórico verificado"
             factor_values=row.get("factor_values") or []
             value_text=(" · ".join(f"{item.get('label')}={format_number(item.get('value'))} {item.get('unit','')}" for item in factor_values)
                         if factor_values else f"{format_number(row.get('value'))} {row.get('unit','')}")
+            if is_envelope:value_text+=f" · {format_number(row.get('rpm'))} RPM"
             cells=[design_label,value_text,
                 _state_label(point.get("classification") or row.get("status")),
                 _state_label(point.get("periodicity") or "NOT_EVALUATED"),
@@ -744,6 +758,10 @@ class ResultsPage(QWidget):
     def _refresh_design_response_plot(self,*_):
         manifest=getattr(self,"design_study_manifest",None)
         if not manifest:return
+        if manifest.get("design_method")=="RPM_ENVELOPE_V1":
+            self.design_response_plot.set_series([])
+            self.design_response_notice.setText("Envolvente RPM: se conservan los puntos exactos por diseño y régimen en la tabla y en las curvas principales. No se mezclan RPM en una respuesta geométrica 1D; los estados no periódicos permanecen identificados.")
+            return
         parameter=manifest.get("parameter",{})
         if parameter.get("axes"):
             self.design_response_plot.set_series([])

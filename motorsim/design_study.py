@@ -395,6 +395,246 @@ def prepare_factorial_design_study(engine: dict, *, factors: list[dict],
         "periodicity":"EVALUATED_PER_POINT_BY_EXISTING_DETECTOR","points":points}
 
 
+def prepare_design_rpm_envelope(engine: dict, *, parameter_id: str, values: list[float],
+                         rpms: list[int], max_cycles: int, point_budget_seconds: float,
+                         total_budget_seconds: float, memory_limit_mib: int = 1024,
+                         project_id: str, variant_label: str = "base",
+                         artifact_root: str | Path, study_id: str | None = None) -> dict:
+    """Preflight a bounded geometry × RPM matrix using existing sweep adapters."""
+    from .power_curve import plan_rpm_range
+    if not isinstance(rpms,list) or not 2 <= len(rpms) <= 6:
+        raise ValueError("la envolvente requiere de 2 a 6 RPM explícitas")
+    if any(type(value) is not int for value in rpms):
+        raise ValueError("los RPM de la envolvente deben ser enteros")
+    try:grid=plan_rpm_range(rpms[0],rpms[-1],rpms[1]-rpms[0])
+    except ValueError as exc:
+        raise ValueError("los RPM deben formar una cuadrícula ascendente uniforme y alcanzar exactamente el valor final") from exc
+    if grid!=rpms:
+        raise ValueError("los RPM deben formar una cuadrícula ascendente uniforme y explícita")
+    if not isinstance(values,list) or not 2 <= len(values) <= MAX_DESIGN_POINTS:
+        raise ValueError(f"la envolvente admite de 2 a {MAX_DESIGN_POINTS} diseños")
+    if len(values)*len(rpms)>30:
+        raise ValueError("una envolvente se limita a 30 combinaciones diseño × RPM")
+    if type(point_budget_seconds) not in (int,float) or not 1 <= point_budget_seconds <= 600:
+        raise ValueError("el presupuesto por combinación debe estar entre 1 y 600 s")
+    minimum=float(len(values)*len(rpms)*point_budget_seconds)
+    if (type(total_budget_seconds) not in (int,float) or
+            minimum > total_budget_seconds or total_budget_seconds > MAX_STUDY_BUDGET_SECONDS):
+        raise ValueError(f"el presupuesto agregado debe cubrir las {len(values)*len(rpms)} combinaciones y no superar {MAX_STUDY_BUDGET_SECONDS} s")
+    # The existing design adapter constructs consistent engine variants. The
+    # first RPM here is only a zero-step geometry preflight; each full RPM grid
+    # is then preflighted with the existing power-curve adapter below.
+    geometry=prepare_design_study(engine,parameter_id=parameter_id,values=values,
+        rpm=rpms[0],max_cycles=max_cycles,point_budget_seconds=point_budget_seconds,
+        total_budget_seconds=float(total_budget_seconds),memory_limit_mib=memory_limit_mib,
+        project_id=project_id,variant_label=variant_label,study_id=study_id)
+    from .power_curve_sweep import prepare_power_curve
+    root=Path(artifact_root).expanduser().resolve()
+    per_design_budget=float(total_budget_seconds)/len(geometry["points"])
+    groups=[]
+    for index,design in enumerate(geometry["points"]):
+        curve=prepare_power_curve(design["engine_document"],project_id=project_id,
+            variant_label=f"{variant_label} · {geometry['parameter']['label']}={design['value']:g} {design['unit']}",
+            artifact_root=root,start_rpm=rpms[0],stop_rpm=rpms[-1],step_rpm=rpms[1]-rpms[0],
+            max_cycles=max_cycles,point_budget_seconds=float(point_budget_seconds),
+            total_budget_seconds=per_design_budget,memory_limit_mib=memory_limit_mib)
+        if curve["rpms"]!=rpms:
+            raise ValueError("barrido backend cambió la cuadrícula RPM solicitada")
+        groups.append({"index":index,"value":design["value"],"unit":design["unit"],
+            "baseline":design["baseline"],"engine_identity_sha256":design["engine_identity_sha256"],
+            "sweep_id":f"{geometry['study_id']}-d{index:02d}",
+            "curve_identity_sha256":curve["identity_sha256"],
+            "point_preflights":curve["point_preflights"]})
+    immutable={"design_method":"RPM_ENVELOPE_V1","study_id":geometry["study_id"],
+        "project_id":project_id,"variant_label":variant_label,"parameter":geometry["parameter"],
+        "values":geometry["values"],"rpms":rpms,
+        "baseline_engine_identity_sha256":geometry["baseline_engine_identity_sha256"],
+        "max_cycles":max_cycles,"point_budget_seconds":float(point_budget_seconds),
+        "total_budget_seconds":float(total_budget_seconds),"memory_limit_mib":memory_limit_mib,
+        "artifact_root":str(root),"mode":"EXPLORATORY","scientific_validation":"NOT_CLAIMED",
+        "periodicity":"EVALUATED_PER_POINT_BY_EXISTING_DETECTOR"}
+    return {"schema":"DINO_PARAMETRIC_RPM_ENVELOPE_PREPARED_V1",**immutable,
+        "baseline_engine_document":deepcopy(engine),"design_points":geometry["points"],
+        "groups":groups,"immutable_spec_sha256":_sha_bytes(_canonical(immutable)),
+        "combination_count":len(values)*len(rpms),"per_design_budget_seconds":per_design_budget}
+
+
+def load_prepared_rpm_envelope(manifest_path: str | Path) -> dict:
+    """Reload and re-preflight a saved envelope before checkpoint continuation."""
+    path=Path(manifest_path).resolve()
+    if path.name!="study.json":raise ValueError("seleccioná el study.json de la envolvente RPM")
+    manifest=json.loads(path.read_text(encoding="utf-8"))
+    prepared_path=path.parent/"prepared.json";raw=prepared_path.read_bytes()
+    if _sha_bytes(raw)!=manifest.get("prepared_spec_sha256"):
+        raise ValueError("configuración preparada de envolvente no coincide con su hash")
+    prepared=json.loads(raw.decode("utf-8"))
+    if prepared.get("schema")!="DINO_PARAMETRIC_RPM_ENVELOPE_PREPARED_V1" or prepared.get("study_id")!=manifest.get("study_id"):
+        raise ValueError("identidad de envolvente guardada inválida")
+    rebuilt=prepare_design_rpm_envelope(prepared["baseline_engine_document"],
+        parameter_id=prepared["parameter"]["id"],values=prepared["values"],rpms=prepared["rpms"],
+        max_cycles=prepared["max_cycles"],point_budget_seconds=prepared["point_budget_seconds"],
+        total_budget_seconds=prepared["total_budget_seconds"],memory_limit_mib=prepared["memory_limit_mib"],
+        project_id=prepared["project_id"],variant_label=prepared["variant_label"],
+        artifact_root=prepared["artifact_root"],study_id=prepared["study_id"])
+    if _canonical(rebuilt)!=_canonical(prepared):
+        raise ValueError("preflight o identidad de la envolvente RPM cambió")
+    if manifest.get("immutable_spec_sha256")!=prepared["immutable_spec_sha256"]:
+        raise ValueError("contrato inmutable de envolvente no coincide")
+    return prepared
+
+
+def run_design_rpm_envelope(prepared: dict, *, cancel_event=None, progress=None,
+                            resume: bool = False, reuse_runs=()) -> dict:
+    """Run/resume each design through the existing bounded RPM sweep runner."""
+    from .power_curve_sweep import run_power_curve
+    if prepared.get("schema")!="DINO_PARAMETRIC_RPM_ENVELOPE_PREPARED_V1":
+        raise ValueError("unsupported RPM envelope schema")
+    immutable={key:prepared[key] for key in ("design_method","study_id","project_id","variant_label",
+        "parameter","values","rpms","baseline_engine_identity_sha256","max_cycles",
+        "point_budget_seconds","total_budget_seconds","memory_limit_mib","artifact_root",
+        "mode","scientific_validation","periodicity")}
+    if _sha_bytes(_canonical(immutable))!=prepared.get("immutable_spec_sha256"):
+        raise ValueError("RPM envelope prepared contract/hash mismatch")
+    validate(prepared["baseline_engine_document"])
+    if identity(prepared["baseline_engine_document"])!=prepared["baseline_engine_identity_sha256"]:
+        raise ValueError("RPM envelope baseline engine identity mismatch")
+    if (len(prepared.get("design_points",[]))!=len(prepared["values"]) or
+            len(prepared.get("groups",[]))!=len(prepared["values"])):
+        raise ValueError("RPM envelope design group count mismatch")
+    for index,(design,group) in enumerate(zip(prepared["design_points"],prepared["groups"])):
+        validate(design["engine_document"])
+        engine_identity=identity(design["engine_document"])
+        if (engine_identity!=design.get("engine_identity_sha256") or
+                engine_identity!=group.get("engine_identity_sha256") or
+                group.get("index")!=index or group.get("value")!=design.get("value") or
+                group.get("baseline")!=design.get("baseline") or
+                group.get("sweep_id")!=f"{prepared['study_id']}-d{index:02d}" or
+                group.get("curve_identity_sha256")!=engine_identity or
+                [row.get("rpm") for row in group.get("point_preflights",[])]!=prepared["rpms"] or
+                any(row.get("status")!="PASS" or row.get("solver_steps")!=0 or
+                    not isinstance(row.get("identity_sha256"),str) or len(row["identity_sha256"])!=64 or
+                    any(char not in "0123456789abcdef" for char in row["identity_sha256"])
+                    for row in group.get("point_preflights",[]))):
+            raise ValueError("RPM envelope prepared design/preflight identity mismatch")
+    target=study_directory(prepared["artifact_root"],prepared["project_id"],prepared["study_id"])/"rpm-envelope"
+    if target.exists() and not resume and any(target.iterdir()):
+        raise FileExistsError("RPM envelope output directory already contains files; explicit resume is required")
+    target.mkdir(parents=True,exist_ok=True)
+    prepared_path=target/"prepared.json";manifest_path=target/"study.json"
+    payload=_canonical(prepared)
+    if manifest_path.exists():
+        if not resume:raise FileExistsError("RPM envelope exists; explicit resume is required")
+        manifest=json.loads(manifest_path.read_text(encoding="utf-8"))
+        if (not prepared_path.is_file() or prepared_path.read_bytes()!=payload or
+                manifest.get("schema")!=SCHEMA or manifest.get("design_method")!="RPM_ENVELOPE_V1" or
+                manifest.get("prepared_spec_sha256")!=_sha_bytes(payload) or
+                manifest.get("immutable_spec_sha256")!=prepared["immutable_spec_sha256"]):
+            raise ValueError("RPM envelope resume rejected: immutable design or prepared bytes differ")
+        expected_manifest={"project_id":prepared["project_id"],"variant_label":prepared["variant_label"],
+            "parameter":prepared["parameter"],"values":prepared["values"],"rpms":prepared["rpms"],
+            "baseline_engine_identity_sha256":prepared["baseline_engine_identity_sha256"],
+            "max_cycles":prepared["max_cycles"],"point_budget_seconds":prepared["point_budget_seconds"],
+            "total_budget_seconds":prepared["total_budget_seconds"],"memory_limit_mib":prepared["memory_limit_mib"]}
+        if any(manifest.get(key)!=value for key,value in expected_manifest.items()):
+            raise ValueError("RPM envelope manifest identity/baseline/grid mismatch")
+    else:
+        if resume:raise FileNotFoundError("cannot resume RPM envelope without its manifest")
+        _atomic_json(prepared_path,prepared)
+        manifest={"schema":SCHEMA,"design_method":"RPM_ENVELOPE_V1","study_id":prepared["study_id"],
+            "project_id":prepared["project_id"],"variant_label":prepared["variant_label"],
+            "parameter":prepared["parameter"],"values":prepared["values"],"rpms":prepared["rpms"],
+            "baseline_engine_identity_sha256":prepared["baseline_engine_identity_sha256"],
+            "immutable_spec_sha256":prepared["immutable_spec_sha256"],
+            "prepared_spec_sha256":_sha_bytes(payload),"max_cycles":prepared["max_cycles"],
+            "point_budget_seconds":prepared["point_budget_seconds"],
+            "total_budget_seconds":prepared["total_budget_seconds"],
+            "memory_limit_mib":prepared["memory_limit_mib"],"mode":"EXPLORATORY",
+            "scientific_validation":"NOT_CLAIMED","periodicity":"EVALUATED_PER_POINT_BY_EXISTING_DETECTOR",
+            "status":"PREPARED","elapsed_seconds":0.0,"groups":[],"points":[]}
+    existing={row["index"]:row for row in manifest.get("groups",[])}
+    if len(existing)!=len(manifest.get("groups",[])) or set(existing)-set(range(len(prepared["groups"]))):
+        raise ValueError("RPM envelope resume rejected: duplicate/out-of-range design group")
+    sweep_root=Path(prepared["artifact_root"])/"dino-power-curve-v1"/prepared["project_id"]
+    for index,row in existing.items():
+        expected=prepared["groups"][index]
+        if (row.get("sweep_id")!=expected["sweep_id"] or
+                row.get("engine_identity_sha256")!=expected["engine_identity_sha256"] or
+                row.get("value")!=expected["value"] or row.get("baseline")!=expected["baseline"]):
+            raise ValueError("RPM envelope resume rejected: saved design group identity mismatch")
+        series=sweep_root/expected["sweep_id"]/"series.json"
+        saved_path=row.get("sweep_manifest")
+        if saved_path:
+            if Path(saved_path).resolve()!=series.resolve() or not series.is_file() or _sha_bytes(series.read_bytes())!=row.get("sweep_manifest_sha256"):
+                raise ValueError("RPM envelope resume rejected: nested sweep manifest path/hash mismatch")
+        elif row.get("status")=="COMPLETE":
+            raise ValueError("RPM envelope resume rejected: completed design lacks its sweep manifest binding")
+    stop_reason="ALL_DESIGNS_FINISHED"
+    manifest["status"]="RUNNING";_atomic_json(manifest_path,manifest)
+    for group in prepared["groups"]:
+        saved=existing.get(group["index"],{})
+        if cancel_event is not None and cancel_event.is_set():
+            stop_reason="CANCELLED";break
+        row={"index":group["index"],"value":group["value"],"unit":group["unit"],
+            "baseline":group["baseline"],"engine_identity_sha256":group["engine_identity_sha256"],
+            "sweep_id":group["sweep_id"],"status":"RUNNING"}
+        existing[group["index"]]=row;manifest["groups"]=[existing[i] for i in sorted(existing)]
+        manifest["status"]="RUNNING";_atomic_json(manifest_path,manifest)
+        document=prepared["design_points"][group["index"]]["engine_document"]
+        curve=run_power_curve(document,project_id=prepared["project_id"],
+            variant_label=f"{prepared['study_id']} · {prepared['parameter']['label']}={group['value']:g} {group['unit']}",
+            artifact_root=prepared["artifact_root"],start_rpm=prepared["rpms"][0],
+            stop_rpm=prepared["rpms"][-1],step_rpm=prepared["rpms"][1]-prepared["rpms"][0],
+            max_cycles=prepared["max_cycles"],point_budget_seconds=prepared["point_budget_seconds"],
+            total_budget_seconds=prepared["per_design_budget_seconds"],
+            memory_limit_mib=prepared["memory_limit_mib"],sweep_id=group["sweep_id"],
+            resume=bool(saved.get("status") not in {None,"NOT_STARTED"}),
+            cancel_event=cancel_event,reuse_runs=reuse_runs,
+            progress=(lambda detail,g=group: progress({**detail,"study_id":prepared["study_id"],
+                "design_index":g["index"]+1,"design_count":len(prepared["groups"]),
+                "design_value":g["value"]}) if progress else None))
+        row.update(status=curve.get("status"),classification=curve.get("classification"),
+            curve_availability=curve.get("curve_availability"),
+            sweep_manifest=str(Path(curve["artifact_directory"])/"series.json"),
+            elapsed_seconds=curve.get("elapsed_seconds",0),points=[])
+        sweep_manifest_path=Path(curve["artifact_directory"])/"series.json"
+        if not sweep_manifest_path.is_file():
+            raise ValueError("RPM sweep runner returned without its manifest")
+        row["sweep_manifest"]=str(sweep_manifest_path)
+        row["sweep_manifest_sha256"]=_sha_bytes(sweep_manifest_path.read_bytes())
+        for point in curve.get("points",[]):
+            flat={"run_id":point.get("run_id"),"design_index":group["index"],
+                "value":group["value"],"unit":group["unit"],"baseline":group["baseline"],
+                "rpm":point.get("rpm"),"status":point.get("status"),
+                "classification":point.get("classification"),"periodicity":point.get("periodicity"),
+                "cycles_completed":point.get("cycles_completed"),
+                "engine_identity_sha256":point.get("identity_sha256"),
+                "result_artifact_sha256":point.get("result_artifact_sha256"),
+                "run_directory":point.get("run_directory"),"sweep_manifest":str(sweep_manifest_path)}
+            row["points"].append(flat)
+        existing[group["index"]]=row;manifest["groups"]=[existing[i] for i in sorted(existing)]
+        manifest["points"]=[point for index in sorted(existing) for point in existing[index].get("points",[])]
+        manifest["elapsed_seconds"]=sum(float(item.get("elapsed_seconds",0)) for item in existing.values())
+        if progress:progress({"study_id":prepared["study_id"],"design_index":group["index"]+1,
+            "design_count":len(prepared["groups"]),"status":row["status"],"elapsed_seconds":manifest["elapsed_seconds"]})
+        complete=curve.get("status")=="COMPLETE"
+        _atomic_json(manifest_path,manifest)
+        if not complete:
+            stop_reason="CANCELLED" if cancel_event is not None and cancel_event.is_set() else "POINT_INCOMPLETE"
+            break
+    complete=(len(existing)==len(prepared["groups"]) and all(row.get("status")=="COMPLETE" for row in existing.values()))
+    manifest["status"]="COMPLETE" if complete else "CANCELLED" if stop_reason=="CANCELLED" else "PARTIAL"
+    manifest["stop_reason"]=stop_reason;manifest["updated_unix"]=time.time()
+    _atomic_json(manifest_path,manifest)
+    curve_available=(complete and all(row.get("curve_availability")=="EXPLORATORY_CURVE_AVAILABLE"
+        for row in existing.values()))
+    return {"schema":"DINO_PARAMETRIC_DESIGN_STUDY_RESULT_V1","study_id":prepared["study_id"],
+        "status":manifest["status"],"classification":"EXPLORATORY_PARAMETRIC_RPM_ENVELOPE",
+        "mode":"EXPLORATORY","scientific_validation":"NOT_CLAIMED","periodicity":"PER_POINT",
+        "elapsed_seconds":manifest["elapsed_seconds"],"points":manifest["points"],
+        "design_study_manifest":str(manifest_path),"bindings":{"project_id":prepared["project_id"]},
+        "curve_availability":"EXPLORATORY_CURVE_AVAILABLE" if curve_available else "EXPLORATORY_CURVE_PARTIAL"}
+
+
 def run_design_study(prepared: dict, *, artifact_root: str | Path,
                      cancel_event=None, progress=None, resume: bool = False,
                      additional_budget_seconds: float = 0,

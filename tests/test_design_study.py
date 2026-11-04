@@ -11,7 +11,8 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 import pytest
 
 from motorsim.design_study import (available_parameters, load_prepared_study,
-    prepare_design_study, prepare_factorial_design_study, run_design_study)
+    prepare_design_study, prepare_factorial_design_study, run_design_study,
+    prepare_design_rpm_envelope,load_prepared_rpm_envelope,run_design_rpm_envelope)
 from motorsim.engine_configuration import identity,validate
 from motorsim.desktop.services import new_design_project
 
@@ -38,6 +39,112 @@ def test_preparation_keeps_baseline_and_creates_distinct_valid_solver_identities
     assert all(point["preflight"]["solver_steps"]==0 for point in plan["points"])
     assert plan["points"][0]["baseline"] is True
     assert plan["points"][0]["engine_identity_sha256"]!=plan["points"][1]["engine_identity_sha256"]
+
+
+def test_rpm_envelope_preflights_bounded_design_grid_and_rejects_unsafe_budget(starter,tmp_path):
+    engine=starter["base_engine"];parameter=available_parameters(engine)[0]
+    plan=prepare_design_rpm_envelope(engine,parameter_id=parameter["id"],
+        values=[parameter["baseline"],parameter["baseline"]+1],rpms=[3000,4000],
+        max_cycles=1,point_budget_seconds=10,total_budget_seconds=40,memory_limit_mib=512,
+        project_id=starter["project_id"],variant_label="base",artifact_root=tmp_path,study_id="rpm-envelope-preflight")
+    assert plan["combination_count"]==4
+    assert all(len(group["point_preflights"])==2 for group in plan["groups"])
+    assert all(check["solver_steps"]==0 for group in plan["groups"] for check in group["point_preflights"])
+    with pytest.raises(ValueError,match="presupuesto agregado"):
+        prepare_design_rpm_envelope(engine,parameter_id=parameter["id"],
+            values=[parameter["baseline"],parameter["baseline"]+1],rpms=[3000,4000],
+            max_cycles=1,point_budget_seconds=10,total_budget_seconds=39,memory_limit_mib=512,
+            project_id=starter["project_id"],variant_label="base",artifact_root=tmp_path,study_id="rpm-envelope-budget")
+    with pytest.raises(ValueError,match="uniforme"):
+        prepare_design_rpm_envelope(engine,parameter_id=parameter["id"],
+            values=[parameter["baseline"],parameter["baseline"]+1],rpms=[3000,4100,5000],
+            max_cycles=1,point_budget_seconds=10,total_budget_seconds=60,memory_limit_mib=512,
+            project_id=starter["project_id"],variant_label="base",artifact_root=tmp_path,study_id="rpm-envelope-grid")
+
+
+def test_rpm_envelope_reuses_sweep_manifest_and_resumes_by_design_group(starter,tmp_path,monkeypatch):
+    engine=starter["base_engine"];parameter=available_parameters(engine)[0]
+    plan=prepare_design_rpm_envelope(engine,parameter_id=parameter["id"],
+        values=[parameter["baseline"],parameter["baseline"]+1],rpms=[3000,4000],
+        max_cycles=1,point_budget_seconds=10,total_budget_seconds=40,memory_limit_mib=512,
+        project_id=starter["project_id"],variant_label="base",artifact_root=tmp_path,study_id="rpm-envelope-resume")
+    calls=[]
+    def fake_curve(document,**kwargs):
+        calls.append((kwargs["sweep_id"],kwargs["resume"]))
+        directory=tmp_path/"dino-power-curve-v1"/kwargs["project_id"]/kwargs["sweep_id"]
+        directory.mkdir(parents=True,exist_ok=True)
+        interrupted=(kwargs["sweep_id"].endswith("d00") and not kwargs["resume"])
+        points=[{"run_id":f"{kwargs['sweep_id']}-{rpm}","rpm":rpm,
+            "status":"INTERRUPTED_CHECKPOINTED" if interrupted and rpm==4000 else "COMPLETE",
+            "classification":"MAX_CYCLES_NONCONVERGED","periodicity":"INSUFFICIENT_CYCLES",
+            "cycles_completed":1,"identity_sha256":"a"*64,
+            "result_artifact_sha256":None,"run_directory":None} for rpm in (kwargs["start_rpm"],kwargs["stop_rpm"])]
+        payload={"schema":"DINO_POWER_CURVE_SWEEP_V1","points":points,"bindings":{"sweep_id":kwargs["sweep_id"]}}
+        (directory/"series.json").write_text(json.dumps(payload,sort_keys=True),encoding="utf-8")
+        return {"status":"INTERRUPTED_CHECKPOINTED" if interrupted else "COMPLETE",
+            "classification":"EXPLORATORY_SWEEP_PARTIAL" if interrupted else "EXPLORATORY_SWEEP_EXECUTION_COMPLETE",
+            "curve_availability":"EXPLORATORY_CURVE_PARTIAL","elapsed_seconds":3,
+            "points":points,"artifact_directory":str(directory)}
+    monkeypatch.setattr("motorsim.power_curve_sweep.run_power_curve",fake_curve)
+    partial=run_design_rpm_envelope(plan)
+    assert partial["status"]=="PARTIAL"
+    manifest_path=Path(partial["design_study_manifest"])
+    reopened=load_prepared_rpm_envelope(manifest_path)
+    completed=run_design_rpm_envelope(reopened,resume=True)
+    assert completed["status"]=="COMPLETE"
+    assert len(completed["points"])==4
+    assert [resume for _sweep,resume in calls]==[False,True,False]
+    assert completed["points"][1]["periodicity"]=="INSUFFICIENT_CYCLES"
+
+
+def test_rpm_envelope_cancelled_before_first_sweep_can_resume(starter,tmp_path,monkeypatch):
+    engine=starter["base_engine"];parameter=available_parameters(engine)[0]
+    plan=prepare_design_rpm_envelope(engine,parameter_id=parameter["id"],
+        values=[parameter["baseline"],parameter["baseline"]+1],rpms=[3000,4000],
+        max_cycles=1,point_budget_seconds=10,total_budget_seconds=40,memory_limit_mib=512,
+        project_id=starter["project_id"],variant_label="base",artifact_root=tmp_path,study_id="rpm-envelope-cancel")
+    cancel=threading.Event();cancel.set()
+    def should_not_run(*args,**kwargs):raise AssertionError("cancelled envelope must not start a sweep")
+    monkeypatch.setattr("motorsim.power_curve_sweep.run_power_curve",should_not_run)
+    cancelled=run_design_rpm_envelope(plan,cancel_event=cancel)
+    assert cancelled["status"]=="CANCELLED" and cancelled["points"]==[]
+    with pytest.raises(FileExistsError,match="explicit resume"):
+        run_design_rpm_envelope(plan)
+    resumed=load_prepared_rpm_envelope(cancelled["design_study_manifest"])
+    cancel.clear();calls=[]
+    def complete_curve(document,**kwargs):
+        calls.append(kwargs["sweep_id"])
+        directory=tmp_path/"dino-power-curve-v1"/kwargs["project_id"]/kwargs["sweep_id"]
+        directory.mkdir(parents=True,exist_ok=True)
+        points=[{"run_id":f"{kwargs['sweep_id']}-{rpm}","rpm":rpm,"status":"COMPLETE",
+            "classification":"MAX_CYCLES_NONCONVERGED","periodicity":"INSUFFICIENT_CYCLES",
+            "cycles_completed":1,"identity_sha256":"a"*64,"result_artifact_sha256":None,
+            "run_directory":None} for rpm in (kwargs["start_rpm"],kwargs["stop_rpm"])]
+        (directory/"series.json").write_text(json.dumps({"points":points}),encoding="utf-8")
+        return {"status":"COMPLETE","classification":"EXPLORATORY_SWEEP_EXECUTION_COMPLETE",
+            "curve_availability":"EXPLORATORY_CURVE_PARTIAL","elapsed_seconds":2,
+            "points":points,"artifact_directory":str(directory)}
+    monkeypatch.setattr("motorsim.power_curve_sweep.run_power_curve",complete_curve)
+    complete=run_design_rpm_envelope(resumed,resume=True,cancel_event=cancel)
+    assert complete["status"]=="COMPLETE" and len(complete["points"])==4
+    assert len(calls)==2
+
+
+def test_rpm_envelope_resume_rejects_tampered_manifest_metadata(starter,tmp_path,monkeypatch):
+    engine=starter["base_engine"];parameter=available_parameters(engine)[0]
+    plan=prepare_design_rpm_envelope(engine,parameter_id=parameter["id"],
+        values=[parameter["baseline"],parameter["baseline"]+1],rpms=[3000,4000],
+        max_cycles=1,point_budget_seconds=10,total_budget_seconds=40,memory_limit_mib=512,
+        project_id=starter["project_id"],variant_label="base",artifact_root=tmp_path,study_id="rpm-envelope-tamper")
+    cancel=threading.Event();cancel.set()
+    partial=run_design_rpm_envelope(plan,cancel_event=cancel)
+    manifest_path=Path(partial["design_study_manifest"])
+    manifest=json.loads(manifest_path.read_text(encoding="utf-8"));manifest["rpms"]=[3000,4500]
+    manifest_path.write_text(json.dumps(manifest,sort_keys=True),encoding="utf-8")
+    monkeypatch.setattr("motorsim.power_curve_sweep.run_power_curve",
+        lambda *args,**kwargs: (_ for _ in ()).throw(AssertionError("tampered manifest must reject before runner")))
+    with pytest.raises(ValueError,match="manifest identity/baseline/grid mismatch"):
+        run_design_rpm_envelope(plan,resume=True)
     assert plan["scientific_validation"]=="NOT_CLAIMED"
 
 

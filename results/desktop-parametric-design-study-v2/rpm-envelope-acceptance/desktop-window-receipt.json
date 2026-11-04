@@ -1,0 +1,18 @@
+{
+  "window": "Dino Desktop source · native Windows platform",
+  "size": [
+    1440,
+    837
+  ],
+  "project_study_selector_count": 1,
+  "imported_points": 4,
+  "study_table_rows": 4,
+  "response_1d_suppressed": true,
+  "periodicity_states": [
+    "INSUFFICIENT_CYCLES"
+  ],
+  "study_id": "synthetic-rpm-envelope-smoke-20261104",
+  "manifest_sha256": "dee8469aa9ed77e51ff4e52e03311120fc4fecbee62efa7646d724a121579c23",
+  "capture_sha256": "9eb0ec27b26416a8c45dab97fed99873ac8d45ce1f1bb41c576ecfa620b9cbeb",
+  "capture": "results\\desktop-parametric-design-study-v2\\rpm-envelope-smoke-desktop-real-window.png"
+}

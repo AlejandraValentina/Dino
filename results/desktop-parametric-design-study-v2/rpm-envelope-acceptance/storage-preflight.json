@@ -1,0 +1,24 @@
+{
+  "schema": "DINO_STORAGE_PREFLIGHT_V1",
+  "status": "PASS",
+  "targets": [
+    "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts"
+  ],
+  "volumes": [
+    {
+      "volume": "C:\\",
+      "free_bytes": 23480700928,
+      "reserve_bytes": 2147483648,
+      "estimated_write_bytes": 2147483648,
+      "targets": [
+        {
+          "path": "C:\\Users\\ageribon.MIDES\\AppData\\Local\\MotorSim\\Artifacts",
+          "estimated_write_bytes": 2147483648
+        }
+      ],
+      "required_free_bytes": 4294967296,
+      "headroom_after_estimate_bytes": 21333217280,
+      "status": "PASS"
+    }
+  ]
+}

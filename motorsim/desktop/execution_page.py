@@ -475,6 +475,69 @@ class ExecutionPage(QWidget):
         self.cancel.setEnabled(False);self.start.setEnabled(False);self.resume.setEnabled(False)
         self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()
 
+    def start_design_rpm_envelope(self):
+        """Prepare a small geometry × RPM grid through existing curve sweeps."""
+        if self.task is not None:return
+        from ..design_study import available_parameters,prepare_design_rpm_envelope
+        if repository_root_containing(self.artifact_root) is not None:
+            QMessageBox.warning(self,"Artifact root bloqueado","Elegí una carpeta externa al repositorio antes de crear el estudio.");return
+        try:parameters=available_parameters(self._engine())
+        except Exception as exc:
+            QMessageBox.warning(self,"Envolvente paramétrica no disponible",f"No hay adaptadores geométricos compatibles: {type(exc).__name__}: {exc}");return
+        if not parameters:
+            QMessageBox.information(self,"Sin parámetros compatibles","Esta geometría no ofrece adaptadores paramétricos seguros.");return
+        dialog=QDialog(self);dialog.setWindowTitle("Estudio de diseño × RPM · EXPLORATORY")
+        form=QFormLayout(dialog);parameter=QComboBox();parameter.setObjectName("rpmEnvelopeParameter")
+        for item in parameters:parameter.addItem(item["label"],item["id"])
+        form.addRow("Parámetro compatible",parameter)
+        baseline=QLabel();baseline.setWordWrap(True);form.addRow("Valor baseline",baseline)
+        alternatives=QLineEdit();alternatives.setObjectName("rpmEnvelopeValues")
+        form.addRow("Valores alternativos",alternatives)
+        start_rpm=QSpinBox();start_rpm.setObjectName("rpmEnvelopeStart");start_rpm.setRange(500,15000);start_rpm.setSingleStep(500);start_rpm.setValue(min(14000,max(500,int(self.rpm.value()/1000)*1000)))
+        stop_rpm=QSpinBox();stop_rpm.setObjectName("rpmEnvelopeStop");stop_rpm.setRange(500,15000);stop_rpm.setSingleStep(500);stop_rpm.setValue(min(15000,start_rpm.value()+1000))
+        step_rpm=QSpinBox();step_rpm.setObjectName("rpmEnvelopeStep");step_rpm.setRange(100,5000);step_rpm.setSingleStep(100);step_rpm.setValue(1000)
+        form.addRow("RPM inicial",start_rpm);form.addRow("RPM final inclusivo",stop_rpm);form.addRow("Incremento RPM",step_rpm)
+        cycles=QSpinBox();cycles.setRange(1,111);cycles.setValue(1)
+        point_budget=QSpinBox();point_budget.setRange(1,600);point_budget.setValue(min(15,int(self.budget.value())))
+        total_budget=QSpinBox();total_budget.setRange(4,600);total_budget.setValue(min(600,max(4,4*point_budget.value())))
+        form.addRow("Máximo de ciclos por punto",cycles);form.addRow("Presupuesto por diseño × RPM (s)",point_budget)
+        form.addRow("Presupuesto agregado (s, máximo 600)",total_budget)
+        note=QLabel("Máximo 5 geometrías × 6 RPM = 30 puntos. La cuadrícula debe alcanzar exactamente el RPM final. Se reutiliza el barrido existente; periodicidad y métricas siguen clasificadas por punto. EXPLORATORY, sin validación predictiva.")
+        note.setWordWrap(True);form.addRow(note)
+        def sync(index):
+            selected=parameters[index];baseline.setText(f"{selected['baseline']:g} {selected['unit']} · valor actual")
+            alternatives.setPlaceholderText(f"Valores adicionales en {selected['unit']}, separados por coma")
+        parameter.currentIndexChanged.connect(sync);sync(0)
+        buttons=QDialogButtonBox(QDialogButtonBox.StandardButton.Ok|QDialogButtonBox.StandardButton.Cancel)
+        buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Preflight de la matriz…")
+        buttons.accepted.connect(dialog.accept);buttons.rejected.connect(dialog.reject);form.addRow(buttons)
+        if dialog.exec()!=QDialog.DialogCode.Accepted:return
+        try:
+            raw=alternatives.text().replace(";",",").replace("\n",",")
+            entered=[float(part.strip()) for part in raw.split(",") if part.strip()]
+            selected=parameters[parameter.currentIndex()];values=[selected["baseline"],*entered]
+            if len(values)>5:raise ValueError("el estudio admite hasta 5 diseños incluyendo baseline")
+            rpms=list(range(start_rpm.value(),stop_rpm.value()+1,step_rpm.value()))
+            if not rpms or rpms[-1]!=stop_rpm.value():raise ValueError("el incremento debe alcanzar exactamente el RPM final")
+            if len(rpms)>6:raise ValueError("el estudio admite hasta 6 puntos RPM")
+            document=json.loads(json.dumps(self._engine(),allow_nan=False))
+        except Exception as exc:
+            QMessageBox.warning(self,"Envolvente bloqueada",f"FAIL-CLOSED: {type(exc).__name__}: {exc}");return
+        arguments={"parameter_id":selected["id"],"values":values,"rpms":rpms,
+            "max_cycles":cycles.value(),"point_budget_seconds":point_budget.value(),
+            "total_budget_seconds":total_budget.value(),"memory_limit_mib":self.memory.value(),
+            "project_id":self.context.project["project_id"],"variant_label":self.context.selected_variant or "base",
+            "artifact_root":self.artifact_root}
+        self.cancel_event=None;self.progress_latest=None
+        self.active_sweep_settings={"rpms":rpms,"max_cycles":cycles.value(),"total_budget_seconds":total_budget.value()}
+        self.output.appendPlainText(f"Preflight diseño × RPM en segundo plano · {len(values)*len(rpms)} combinaciones · 0 pasos del solver.")
+        self.task=run_background(prepare_design_rpm_envelope,document,on_done=self._design_study_preflight_done,
+            on_error=self._failed,**arguments)
+        self.elapsed_timer.start();self.status_text="VALIDANDO MATRIZ DISEÑO × RPM · SIN PASOS DEL SOLVER"
+        self.checkpoint_summary="preflight geométrico y de todos los RPM"
+        self.cancel.setEnabled(False);self.start.setEnabled(False);self.resume.setEnabled(False)
+        self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()
+
     def start_factorial_design_study(self):
         if self.task is not None:return
         from ..design_study import available_parameters,prepare_factorial_design_study
@@ -542,19 +605,23 @@ class ExecutionPage(QWidget):
         self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()
 
     def _design_study_preflight_done(self,prepared):
-        from ..design_study import run_design_study
+        from ..design_study import run_design_study,run_design_rpm_envelope
         try:
             from ..storage_preflight import check_storage_requirements
-            check_storage_requirements([(self.artifact_root,512*1024**2*len(prepared["points"]))])
+            point_count=prepared.get("combination_count",len(prepared["points"]))
+            check_storage_requirements([(self.artifact_root,512*1024**2*point_count)])
             if prepared.get("design_method")=="FACTORIAL_2X2_V1":
                 values_text="\n".join(row["label"] for row in prepared["points"])
+            elif prepared.get("design_method")=="RPM_ENVELOPE_V1":
+                values_text=", ".join(f"{value:g} {prepared['parameter']['unit']}" for value in prepared["values"])
             else:
                 unit=prepared["parameter"]["unit"]
                 values_text=", ".join(f"{value:g} {unit}" for value in prepared["values"])
+            rpm_text=(", ".join(map(str,prepared["rpms"]))+" RPM" if prepared.get("design_method")=="RPM_ENVELOPE_V1" else f"{prepared['rpm']:g} RPM")
             summary=(f"Proyecto: {prepared['project_id']} · variante: {prepared['variant_label']}\n"
                 f"Parámetro: {prepared['parameter']['label']}\nValores: {values_text}\n"
-                f"RPM: {prepared['rpm']:g} · hasta {prepared['max_cycles']} ciclos/punto · {prepared['total_budget_seconds']:g} s agregados\n"
-                f"Preflight: {len(prepared['points'])} configuraciones válidas · 0 pasos del solver\n"
+                f"RPM: {rpm_text} · hasta {prepared['max_cycles']} ciclos/punto · {prepared['total_budget_seconds']:g} s agregados\n"
+                f"Preflight: {point_count} configuraciones válidas · 0 pasos del solver\n"
                 f"Salida durable: {self.artifact_root / 'design-studies-v1' / prepared['project_id']}\n\n"
                 "Cada punto usará el EXPLORATORY integrado con identidad y checkpoint propios. Los resultados periódicos se clasifican por punto; la corrida terminada o el estado COMPLETE del estudio no garantiza periodicidad ni validación.")
             if QMessageBox.question(self,"Confirmar estudio paramétrico",summary,
@@ -564,54 +631,82 @@ class ExecutionPage(QWidget):
         except Exception as exc:
             self._failed(f"{type(exc).__name__}: {exc}");return
         self.cancel_event=threading.Event();self.progress_latest=None
-        self.output.appendPlainText(f"Estudio paramétrico EXPLORATORY iniciado · {prepared['study_id']} · {len(prepared['points'])} diseños.")
-        self.task=run_background(run_design_study,prepared,artifact_root=self.artifact_root,
-            history_references=self.context.project.get("result_references",[]),
-            cancel_event=self.cancel_event,progress=self.progress_signal.emit,
-            on_done=self._done,on_error=self._failed)
+        design_count=len(prepared.get("design_points",prepared.get("points",[])))
+        self.output.appendPlainText(f"Estudio paramétrico EXPLORATORY iniciado · {prepared['study_id']} · {design_count} diseños.")
+        if prepared.get("design_method")=="RPM_ENVELOPE_V1":
+            self.task=run_background(run_design_rpm_envelope,prepared,
+                reuse_runs=[item["path"] for item in self.context.project.get("result_references",[])],
+                cancel_event=self.cancel_event,progress=self.progress_signal.emit,on_done=self._done,on_error=self._failed)
+        else:
+            self.task=run_background(run_design_study,prepared,artifact_root=self.artifact_root,
+                history_references=self.context.project.get("result_references",[]),
+                cancel_event=self.cancel_event,progress=self.progress_signal.emit,
+                on_done=self._done,on_error=self._failed)
         self.status_text="CORRIENDO ESTUDIO DE DISEÑO";self.checkpoint_summary="manifiesto y checkpoint independientes por diseño"
         self.cancel.setEnabled(True);self.start.setEnabled(False);self.resume.setEnabled(False)
         self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()
 
     def resume_design_study(self):
         if self.task is not None:return
-        from ..design_study import load_prepared_study,run_design_study
+        from ..design_study import (load_prepared_study,run_design_study,
+            load_prepared_rpm_envelope,run_design_rpm_envelope)
         selected,_=QFileDialog.getOpenFileName(self,"Reanudar estudio paramétrico",str(self.artifact_root),"Estudio Dino (study.json)")
         if not selected:return
         try:
-            manifest_path=Path(selected).resolve();prepared=load_prepared_study(manifest_path)
+            manifest_path=Path(selected).resolve()
+            saved_manifest=json.loads(manifest_path.read_text(encoding="utf-8"))
+            envelope=saved_manifest.get("design_method")=="RPM_ENVELOPE_V1"
+            prepared=(load_prepared_rpm_envelope(manifest_path) if envelope
+                else load_prepared_study(manifest_path))
             if prepared["project_id"]!=self.context.project["project_id"]:
                 raise ValueError("el estudio pertenece a otro proyecto")
             if prepared["variant_label"]!=(self.context.selected_variant or "base"):
                 raise ValueError("seleccioná la variante baseline con la que se creó el estudio")
             if identity(self._engine())!=prepared["baseline_engine_identity_sha256"]:
                 raise ValueError("la configuración actual no coincide con el baseline guardado")
-            extension,ok=QInputDialog.getInt(self,"Presupuesto de reanudación",
-                "Segundos adicionales para el estudio (se suman al límite total y por punto):",60,0,600)
-            if not ok:return
-            answer=QMessageBox.question(self,"Confirmar reanudación",
-                f"Estudio {prepared['study_id']} · {len(prepared['points'])} diseños\n"
-                f"Presupuesto adicional: {extension} s\nLos puntos completos se reutilizan sólo tras verificar sus artifacts; los interrumpidos continúan desde checkpoints válidos.",
+            if envelope:
+                extension=0
+                prompt=(f"Estudio {prepared['study_id']} · {prepared['combination_count']} combinaciones diseño × RPM\n"
+                    f"Presupuesto agregado original: {prepared['total_budget_seconds']:g} s\n"
+                    "No se agrega presupuesto. Cada sub-barrido verificará sus bindings y checkpoints antes de continuar.")
+            else:
+                extension,ok=QInputDialog.getInt(self,"Presupuesto de reanudación",
+                    "Segundos adicionales para el estudio (se suman al límite total y por punto):",60,0,600)
+                if not ok:return
+                prompt=(f"Estudio {prepared['study_id']} · {len(prepared['points'])} diseños\n"
+                    f"Presupuesto adicional: {extension} s\nLos puntos completos se reutilizan sólo tras verificar sus artifacts; los interrumpidos continúan desde checkpoints válidos.")
+            answer=QMessageBox.question(self,"Confirmar reanudación",prompt,
                 QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No,QMessageBox.StandardButton.No)
             if answer!=QMessageBox.StandardButton.Yes:return
             # The study file is its durable index; continuation always writes beside it.
-            self.artifact_root=manifest_path.parents[3]
+            self.artifact_root=(Path(prepared["artifact_root"]) if envelope else manifest_path.parents[3])
             from .preferences import set_artifact_root,repository_root_containing
             if repository_root_containing(self.artifact_root) is not None:
                 raise ValueError("el artifact root del estudio está dentro del repositorio")
-            expected=(self.artifact_root/"design-studies-v1"/prepared["project_id"]/prepared["study_id"])/"study.json"
+            expected=(self.artifact_root/"design-studies-v1"/prepared["project_id"]/prepared["study_id"])
+            if envelope:expected=expected/"rpm-envelope"
+            expected=expected/"study.json"
             if manifest_path!=expected.resolve():raise ValueError("ruta del manifiesto no coincide con su raíz durable")
             set_artifact_root(self.artifact_root);self.root_label.setText(str(self.artifact_root))
             self.history.artifact_root=self.artifact_root;self.artifact_root_changed.emit(self.artifact_root)
         except Exception as exc:
             QMessageBox.warning(self,"Reanudación bloqueada",f"FAIL-CLOSED: {type(exc).__name__}: {exc}");return
-        self.cancel_event=threading.Event();self.active_sweep_settings={"rpms":[prepared["rpm"]],
-            "max_cycles":prepared["max_cycles"],"total_budget_seconds":max(1,extension)}
-        self.task=run_background(run_design_study,prepared,artifact_root=self.artifact_root,
-            cancel_event=self.cancel_event,progress=self.progress_signal.emit,resume=True,
-            additional_budget_seconds=extension,
-            history_references=self.context.project.get("result_references",[]),
-            on_done=self._done,on_error=self._failed)
+        self.cancel_event=threading.Event()
+        if envelope:
+            self.active_sweep_settings={"rpms":prepared["rpms"],"max_cycles":prepared["max_cycles"],
+                "total_budget_seconds":prepared["total_budget_seconds"]}
+            self.task=run_background(run_design_rpm_envelope,prepared,resume=True,
+                reuse_runs=[item["path"] for item in self.context.project.get("result_references",[])],
+                cancel_event=self.cancel_event,progress=self.progress_signal.emit,
+                on_done=self._done,on_error=self._failed)
+        else:
+            self.active_sweep_settings={"rpms":[prepared["rpm"]],
+                "max_cycles":prepared["max_cycles"],"total_budget_seconds":max(1,extension)}
+            self.task=run_background(run_design_study,prepared,artifact_root=self.artifact_root,
+                cancel_event=self.cancel_event,progress=self.progress_signal.emit,resume=True,
+                additional_budget_seconds=extension,
+                history_references=self.context.project.get("result_references",[]),
+                on_done=self._done,on_error=self._failed)
         self.elapsed_timer.start();self.status_text="REANUDANDO ESTUDIO";self.checkpoint_summary="checkpoints por diseño"
         self.cancel.setEnabled(True);self.start.setEnabled(False);self.resume.setEnabled(False)
         self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()
@@ -717,7 +812,7 @@ class ExecutionPage(QWidget):
                             "manifest_sha256":hashlib.sha256(raw).hexdigest(),
                             "schema":manifest["schema"],"source_project_id":manifest["project_id"]}
                         self.context.add_study_reference(reference)
-                        self.design_study_completed.emit(str(manifest_path))
+                        self.design_study_completed.emit(reference)
                     except Exception as exc:
                         self.output.appendPlainText(f"Estudio completado, pero no se pudo registrar su manifiesto en el proyecto: {type(exc).__name__}: {exc}")
             else:
