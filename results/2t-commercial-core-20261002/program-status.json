@@ -12065,7 +12065,7 @@
       "id": "DESKTOP-PARAMETRIC-RESUME-SELECTED-STUDY-FROM-RESULTS-V1",
       "description": "Connect the selected, project-bound parametric study in Results to the existing explicit resume workflow, preserving project/variant/baseline/hash checks, its saved artifact root, original budget limits, cancellation and checkpoint semantics.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -12080,7 +12080,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Inspect current Results study selector and Execution resume entry point; add one explicit continuation affordance for a verified selected manifest, reuse the existing resume method and fail-closed checks, and test stale/mismatched references plus navigation without launching solver calculations.",
+      "next_action": "Implement a Results action passing the currently selected project study manifest to the existing Execution resume preflight. Preserve project/variant/baseline/hash checks and budget prompt; test event routing and mismatch rejection without solver execution.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -12101,6 +12101,26 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Inspect existing factor_effects output and result visualization primitives. Plot only defined descriptive effect values; show undefined contrasts as unavailable without zero filling or uncertainty bars; verify synthetic fixture and keep the numeric table as source.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-STUDY-RESULT-FILTER-V1",
+      "description": "Add optional filters for large parametric design-study result matrices (design/RPM and recorded execution/periodicity state), with every row included by default and no state or value rewriting.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/study-result-filter/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Inspect existing design_study_table and RPM envelope rows; implement non-destructive optional row filters for design/RPM/status, retain all rows in the manifest/export, and verify nonconverged and not-started points remain visible by default.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17067,6 +17087,12 @@
       "task": "DESKTOP-WORKBENCH-F0-NAV-TEST-ALIGNMENT-V1",
       "kind": "task",
       "summary": "Tres expectativas de test ajustadas a la navegación/modo y etiquetas aceptadas; 26 pruebas F0+UX pasan. Replanificación concreta añade visualización descriptiva de contrastes factoriales existentes para mejorar el análisis de estudios sin inferencias ni modelos nuevos."
+    },
+    {
+      "at": "2026-11-04T23:59:48+00:00",
+      "task": "DESKTOP-PARAMETRIC-RESUME-SELECTED-STUDY-FROM-RESULTS-V1",
+      "kind": "task",
+      "summary": "Iniciada integración entre selección del estudio en Resultados y reanudación en Simular; se reutilizarán checks de proyecto/variante/baseline/manifest y el presupuesto explícito ya existentes. Replanificación añade filtros no destructivos para estudios de muchos puntos."
     }
   ],
   "legacy_gate_status": {
