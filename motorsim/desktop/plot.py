@@ -2,7 +2,7 @@
 from __future__ import annotations
 import math
 from PySide6.QtCore import QPointF, Signal, Qt
-from PySide6.QtGui import QColor, QPainter, QPen, QFont
+from PySide6.QtGui import QColor, QPainter, QPen, QFont, QFontMetrics
 from PySide6.QtWidgets import QWidget
 from .presentation import format_number
 
@@ -47,6 +47,21 @@ class CurvePlot(QWidget):
         painter=QPainter(self); painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.fillRect(self.rect(),QColor("#101a28")); rect=self.rect().adjusted(76,18,-18,-40)
         allp=self._points()
+        if self.series:
+            painter.setFont(QFont("Segoe UI",8));metrics=QFontMetrics(painter.font())
+            legend_x=rect.left();legend_y=2;legend_right=rect.right()
+            for index,series in enumerate(self.series):
+                color=QColor("#f6bd60" if series.get("role")=="baseline" else self.COLORS[index%len(self.COLORS)])
+                label=str(series.get("name") or f"Serie {index+1}")
+                available=legend_right-legend_x-14
+                if available<20:break
+                label=metrics.elidedText(label,Qt.TextElideMode.ElideRight,available)
+                width=metrics.horizontalAdvance(label)
+                painter.setPen(QPen(color,2));painter.drawLine(legend_x,legend_y+7,legend_x+8,legend_y+7)
+                painter.setPen(QColor("#cad8e7"));painter.drawText(
+                    legend_x+11,legend_y,max(0,width),14,
+                    Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter,label)
+                legend_x+=width+28
         painter.setPen(QPen(QColor("#34475c"),1))
         for i in range(5):
             y=rect.top()+i*rect.height()/4; painter.drawLine(rect.left(),round(y),rect.right(),round(y))

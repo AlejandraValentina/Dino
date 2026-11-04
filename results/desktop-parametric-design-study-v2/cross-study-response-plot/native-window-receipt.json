@@ -1,0 +1,44 @@
+{
+  "window": "Dino Desktop source · native Windows Qt window",
+  "size": [
+    1440,
+    837
+  ],
+  "fixture_origin": "synthetic presentation-only fixture; no solver execution or physical evidence",
+  "metric": "brake_power",
+  "plot_series": [
+    {
+      "name": "synthetic-study-A",
+      "points": [
+        {
+          "rpm": 3000.0,
+          "value": 10.0
+        }
+      ],
+      "connect": false
+    },
+    {
+      "name": "synthetic-study-B",
+      "points": [
+        {
+          "rpm": 3000.0,
+          "value": 12.0
+        }
+      ],
+      "connect": false
+    }
+  ],
+  "excluded_exact_pairs": 1,
+  "table_rows_including_nonperiodic_and_unpaired": 3,
+  "captures": [
+    {
+      "path": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\cross-study-response-plot\\cross-study-response-plot-native-chart.png",
+      "sha256": "5eede58b1303899ed936b92760278d1c8a1b87f8898044ad1c877ca3f845a1c9"
+    },
+    {
+      "path": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\cross-study-response-plot\\cross-study-response-plot-native-table.png",
+      "sha256": "5a4a7908b910b7dfea573c5a2a2cfa8495013ca3517025c65358930d4174e57d"
+    }
+  ],
+  "scientific_validation": "NOT_CLAIMED"
+}

@@ -364,6 +364,53 @@ def test_cross_study_comparison_page_keeps_full_identity_and_metric_states():
     page.close();APP.processEvents()
 
 
+def test_cross_study_response_plot_uses_only_exact_period_one_metric_pairs():
+    page=ResultsPage(DesktopContext(new_design_project("cross-study-response-plot")))
+    studies=[{"study_id":name,"manifest_path":f"{name}.study.json","manifest_sha256":str(index)*64,
+        "parameter":{"label":"Escape"}} for index,name in enumerate(("A","B","C"),1)]
+    def point(run,rpm,periodicity,power,torque):
+        return {"index":rpm,"run_id":run,"rpm":float(rpm),"status":"COMPLETE",
+            "classification":periodicity,"periodicity":periodicity,
+            "metrics":{"brake_power":power,"brake_torque":torque,"BMEP":None},
+            "engine_identity_sha256":"a"*64,"identity_sha256":"b"*64,
+            "result_sha256":"c"*64,"result_artifact_sha256":"d"*64}
+    a3=point("a-3",3000,"PERIOD_1",10.0,20.0);b3=point("b-3",3000,"PERIOD_1",12.0,24.0)
+    b4=point("b-4",4000,"PERIOD_1",16.0,32.0);c4=point("c-4",4000,"PERIOD_1",18.0,36.0)
+    a5=point("a-5",5000,"INSUFFICIENT_CYCLES",None,None);c5=point("c-5",5000,"PERIOD_1",22.0,44.0)
+    pair=lambda left_id,left,right_id,right,rpm:{"study_a":left_id,"point_a":left,
+        "study_b":right_id,"point_b":right,"rpm":float(rpm),
+        "pairing":"EXACT_RPM_AND_OPERATING_CONTEXT",
+        "metrics":{"brake_power":{"a":left["metrics"]["brake_power"],
+            "b":right["metrics"]["brake_power"],"delta":None},
+            "brake_torque":{"a":left["metrics"]["brake_torque"],
+                "b":right["metrics"]["brake_torque"],"delta":None},
+            "BMEP":{"a":None,"b":None,"delta":None}}}
+    comparison={"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
+        "baseline_engine_identity_sha256":"9"*64,"studies":studies,
+        "pairs":[pair("A",a3,"B",b3,3000),pair("B",b4,"C",c4,4000),
+                 pair("A",a5,"C",c5,5000)],
+        "unpaired":[{"study_id":"A","point":point("a-6",6000,"PERIOD_1",30.0,60.0),
+            "reason":"No existe un punto de otro estudio en la misma RPM exacta."}],"notice":"sin interpolación"}
+
+    page._study_comparison_loaded(comparison)
+
+    plotted={series["name"]:series for series in page.study_comparison_response_plot.series}
+    assert set(plotted)=={"A","B","C"}
+    assert [point["rpm"] for point in plotted["A"]["points"]]==[3000.0]
+    assert [point["rpm"] for point in plotted["B"]["points"]]==[3000.0,4000.0]
+    assert [point["rpm"] for point in plotted["C"]["points"]]==[4000.0]
+    assert all(series["connect"] is False for series in plotted.values())
+    assert [point["value"] for point in plotted["B"]["points"]]==[12.0,16.0]
+    assert "A · 1 punto(s)" in page.study_comparison_response_legend.text()
+    assert "B · 2 punto(s)" in page.study_comparison_response_legend.text()
+    assert "1 par(es) exacto(s) excluido(s)" in page.study_comparison_response_notice.text()
+    assert page.study_comparison_table.rowCount()==4  # includes the non-periodic pair and unpaired point
+    page.study_comparison_metric.setCurrentIndex(page.study_comparison_metric.findData("brake_torque"))
+    assert [point["value"] for point in page.study_comparison_response_plot.series[1]["points"]]==[24.0,32.0]
+    assert "Torque de freno" in page.study_comparison_response_notice.text()
+    page.close();APP.processEvents()
+
+
 def test_cross_study_csv_export_keeps_exact_sources_pair_decisions_and_blank_nonperiodic_metrics(tmp_path,monkeypatch):
     base="9"*64
     point_a={"index":0,"value":38.40862784470379,"unit":"mm","rpm":3000.0,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 import csv,json
 import hashlib
+import html
 import math
 from pathlib import Path
 import uuid
@@ -819,6 +820,13 @@ class ResultsPage(QWidget):
         comparison_bar.addWidget(self.export_study_comparison_csv_button);comparison_bar.addStretch(1)
         self.study_comparison_notice=QLabel("Elegí entre dos y cuatro estudios guardados en este proyecto. Se verifica cada manifiesto y artifact antes de comparar.")
         self.study_comparison_notice.setWordWrap(True);comparison_layout.addWidget(self.study_comparison_notice)
+        self.study_comparison_response_notice=QLabel("La gráfica usa sólo extremos de pares exactos con ambos puntos PERIOD_1 y la métrica definida; no interpola ni conecta RPM.")
+        self.study_comparison_response_notice.setWordWrap(True);comparison_layout.addWidget(self.study_comparison_response_notice)
+        self.study_comparison_response_legend=QLabel("Sin series periódicas con la métrica seleccionada.")
+        self.study_comparison_response_legend.setTextFormat(Qt.TextFormat.RichText)
+        self.study_comparison_response_legend.setWordWrap(True);comparison_layout.addWidget(self.study_comparison_response_legend)
+        self.study_comparison_response_plot=CurvePlot();self.study_comparison_response_plot.setObjectName("crossStudyResponsePlot")
+        self.study_comparison_response_plot.setMinimumHeight(210);comparison_layout.addWidget(self.study_comparison_response_plot)
         self.study_comparison_table=QTableWidget(0,11);self.study_comparison_table.setObjectName("crossStudyComparison")
         self.study_comparison_table.setHorizontalHeaderLabels(["RPM","Diseño A","ID A","Estado A","Métrica A","Diseño B","ID B","Estado B","Métrica B","Δ B−A","Pareo"])
         self.study_comparison_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
@@ -971,6 +979,9 @@ class ResultsPage(QWidget):
         self.study_comparison=None
         self.study_comparison_notice.setText(f"Comparación rechazada: {error}")
         self.study_comparison_table.setRowCount(0)
+        self.study_comparison_response_plot.set_series([])
+        self.study_comparison_response_notice.setText("No hay una comparación verificada para graficar.")
+        self.study_comparison_response_legend.setText("Sin series disponibles.")
 
     @staticmethod
     def _study_point_label(study,point):
@@ -991,6 +1002,33 @@ class ResultsPage(QWidget):
         comparison=self.study_comparison
         if not comparison:return
         metric=self.study_comparison_metric.currentData() or "brake_power"
+        metric_labels={"brake_power":("Potencia de freno","kW"),
+            "brake_torque":("Torque de freno","N·m"),"BMEP":("BMEP","kPa")}
+        metric_label,metric_unit=metric_labels.get(metric,(metric,""))
+        response_points={study["study_id"]:{} for study in comparison.get("studies",[])}
+        eligible_pairs=0
+        for pair in comparison.get("pairs",[]):
+            point_a=pair.get("point_a") or {};point_b=pair.get("point_b") or {}
+            value_a=point_a.get("metrics",{}).get(metric);value_b=point_b.get("metrics",{}).get(metric)
+            if (point_a.get("periodicity")!="PERIOD_1" or point_b.get("periodicity")!="PERIOD_1" or
+                    type(value_a) not in (int,float) or type(value_b) not in (int,float) or
+                    not math.isfinite(float(value_a)) or not math.isfinite(float(value_b)) or
+                    pair.get("pairing")!="EXACT_RPM_AND_OPERATING_CONTEXT"):
+                continue
+            eligible_pairs+=1
+            for study_id,point,value in ((pair.get("study_a"),point_a,value_a),
+                                         (pair.get("study_b"),point_b,value_b)):
+                if study_id not in response_points:continue
+                identity=(point.get("run_id") or point.get("source_run_id") or point.get("index"),float(pair["rpm"]))
+                response_points[study_id][identity]={"rpm":float(pair["rpm"]),"value":float(value)}
+        series=[{"name":str(study_id),"unit":metric_unit,"x_key":"rpm","x_label":"RPM",
+                 "connect":False,"points":sorted(points.values(),key=lambda point:point["rpm"])}
+                for study_id,points in response_points.items() if points]
+        self.study_comparison_response_plot.set_series(series,y_scale_mode="data_margin")
+        self.study_comparison_response_legend.setText("&nbsp;&nbsp;".join(
+            f'<span style="color:{CurvePlot.COLORS[index%len(CurvePlot.COLORS)]};">●</span> '
+            f'{html.escape(item["name"])} · {len(item["points"])} punto(s)'
+            for index,item in enumerate(series)) or "Sin pares periódicos con esta métrica definida.")
         self.study_comparison_table.setSortingEnabled(False);self.study_comparison_table.setRowCount(0)
         studies={study["study_id"]:study for study in comparison["studies"]}
         rows=[]
@@ -1043,6 +1081,11 @@ class ResultsPage(QWidget):
         self.study_comparison_notice.setText(
             f"Baseline común {comparison['baseline_engine_identity_sha256']} · {len(comparison['pairs'])} pares exactos · "
             f"{len(comparison['unpaired'])} puntos sin par · {comparison['notice']} Métrica seleccionada: {_STUDY_COMPARE_METRICS[metric][0]}.")
+        excluded=len(comparison.get("pairs",[]))-eligible_pairs
+        self.study_comparison_response_notice.setText(
+            f"{metric_label} ({metric_unit}) · {eligible_pairs} par(es) exacto(s) con ambos puntos PERIOD_1 y métrica definida; "
+            f"{excluded} par(es) exacto(s) excluido(s) por estado no periódico o valor indefinido. "
+            "Sólo marcadores observados, sin interpolación ni ajuste. Los puntos sin pareja y estados completos permanecen en la tabla.")
 
     def export_study_comparison(self):
         if not self.study_comparison:return False
