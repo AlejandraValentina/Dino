@@ -11754,7 +11754,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-STUDY-REPORT-RESPONSE-PLOT-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11767,7 +11767,29 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Use the saved rendered report screenshot/source to identify raw state tokens in exclusion prose; render user-facing labels via the shared presentation mapping, retain raw values in the exact source JSON, and assert both.",
+      "next_action": "Replace raw status tokens in exclusion reason prose with the shared Spanish state labels; leave raw fields and source manifest unchanged, and retain a test that both the translated presentation and original JSON code are present.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-TRACEABILITY-DETAILS-V1",
+      "description": "Let an engineer inspect the exact four source run IDs and result hashes bound to a selected factorial CONTRAST row in the read-only CSV snapshot, without reconstructing bindings or changing the CSV.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-SOURCE-BINDINGS-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/factorial-contrast-traceability/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Add selection details for CONTRAST rows that display their stored source ID/hash arrays and bind status; verify with the source-bound CSV roundtrip fixture and keep the snapshot read-only.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16565,6 +16587,12 @@
       "kind": "task",
       "summary": "Fixed the nested-outcome lookup that emitted null contrast bindings; 9 CONTRAST rows now carry exactly the 4 POINT source IDs and SHA-256s, retained by read-only snapshot reimport and Desktop view; 37 focused tests passed.",
       "commit": "e496f45"
+    },
+    {
+      "at": "2026-11-04T22:34:43+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-EXCLUSION-STATE-LABELS-V1",
+      "kind": "start",
+      "summary": "Starting the confirmed report-presentation defect: translate exclusion prose state codes while leaving source status codes and full JSON payload unchanged."
     }
   ],
   "legacy_gate_status": {
