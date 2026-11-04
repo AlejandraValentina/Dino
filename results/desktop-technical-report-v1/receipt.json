@@ -1,0 +1,55 @@
+{
+  "package_zip": {
+    "artifact": "Windows/MotorSim-0.1.0-rc12-windows-x64-95a4574d-trial-20261104T141343Z.zip",
+    "sha256": "2d843ccd8abf64bc08dd4b194f47d118fa61dfc9e4ca88fb7ac8ea76a1d97373",
+    "size_bytes": 46997060
+  },
+  "build_metadata": {
+    "artifact": "Windows/MotorSim-0.1.0-rc12-windows-x64-95a4574d-trial-20261104T141343Z/MotorSim/build.json",
+    "sha256": "40a2262ad6411a50c2630e98c5caa7f4712129855180c60b61e5ea3841d6374e",
+    "size_bytes": 44879
+  },
+  "executable": {
+    "artifact": "Windows/MotorSim-0.1.0-rc12-windows-x64-95a4574d-trial-20261104T141343Z/MotorSim/Dino2T.exe",
+    "sha256": "bc2305749ba96e0ff8d38b80d208760c20067cb47cfbf892989a82aa7d2d4d53",
+    "size_bytes": 2421722
+  },
+  "html_report": {
+    "artifact": "desktop-technical-report-v1/windows-smoke-20261104T1415/workbench-historical.informe.html",
+    "sha256": "ce16a14670f15d2e5bf2c992910967a284c4041092d400539d1d39a398da038f",
+    "size_bytes": 385511
+  },
+  "screenshot_results": {
+    "artifact": "desktop-technical-report-v1/windows-smoke-20261104T1415/01-resultados-sinteticos.bmp",
+    "sha256": "528b4c7a8a3672a9df2619722bea10081492bb6674765f8ee1484ab9ba400c85",
+    "size_bytes": 5101878
+  },
+  "screenshot_report": {
+    "artifact": "desktop-technical-report-v1/windows-smoke-20261104T1415/02-informe-exportado.bmp",
+    "sha256": "91b6525ea80ce06f27772ef1615552e3092c52b0b263bd3e433ce8a8a11d41f0",
+    "size_bytes": 5101878
+  },
+  "build": {
+    "source_commit": "95a4574dd463fb3b230d26eeb2ac8d49c189a611",
+    "trial": true,
+    "built_utc": "20261104T141343Z",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "architecture": "AMD64",
+    "project_format": 6,
+    "packaged_inputs_clean": true,
+    "packaged_input_count": 226,
+    "packaged_input_manifest_sha256": "fbec6ec8df7de96a71dfcd42e80aaa8ef46481cc43993b51cd97e8f40eaeb149"
+  },
+  "packaged_gui": {
+    "launched_actual_frozen_executable": true,
+    "imported_synthetic_csv_and_json_in_gui": true,
+    "results_curves_and_invalid_status_visible": true,
+    "html_report_exported_by_gui": true,
+    "report_contains_30_exact_source_records": true,
+    "report_contains_27_PERIOD_1_legacy_records": true,
+    "report_contains_inline_svg": true,
+    "report_labels_synthetic_origin_and_validation_not_performed": true,
+    "one_window_count_assertion_added_to_verifier": true,
+    "automation_exit": "NONZERO_AFTER_FUNCTIONAL_CHECKS_DURING_POST_CLOSE_COM_WAIT; retry failed from UIA COM provider before interaction; no pass claimed"
+  }
+}

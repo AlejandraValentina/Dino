@@ -10848,9 +10848,13 @@
       "id": "DESKTOP-TECHNICAL-REPORT-BUILD-PROVENANCE-V1",
       "description": "Add self-contained, provenance-bound technical result reports and require clean, hash-manifested Windows package inputs while preserving unrelated local work.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "495cab8",
+        "091deda",
+        "95a4574"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -10865,8 +10869,11 @@
         "results/desktop-technical-report-v1/"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Run focused Desktop regressions, verify exact packaged-input provenance, then perform one packaged Windows report-export smoke test if storage preflight passes.",
+      "evidence": [
+        "results/desktop-technical-report-v1/acceptance.md",
+        "results/desktop-technical-report-v1/receipt.json"
+      ],
+      "next_action": "Siguiente mejora de producto: exploración paramétrica de variantes de motor, claramente separada del barrido de RPM y sin campañas físicas demostrativas.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -15327,6 +15334,11 @@
       "task": "DESKTOP-TECHNICAL-REPORT-BUILD-PROVENANCE-V1",
       "kind": "defect_correction",
       "summary": "Regresión empaquetada encontró reportes históricos PERIOD_1 sin campo periodicity separado; el informe ahora usa la misma clasificación observada que la interfaz y prueba el caso. Regresión Desktop: 50 PASS, 1 SKIP."
+    },
+    {
+      "task": "DESKTOP-TECHNICAL-REPORT-BUILD-PROVENANCE-V1",
+      "summary": "Informe técnico HTML y manifiesto reproducible integrados; smoke del EXE Windows produjo informe desde CSV/JSON sintético de 30 puntos. Artefactos y hashes registrados; el automatismo tuvo fallo COM únicamente en cierre, no se declara ejecución gráfica totalmente verde.",
+      "commit": "pending-evidence-commit"
     }
   ],
   "legacy_gate_status": {
@@ -15421,7 +15433,7 @@
   },
   "campaigns_started": 1,
   "campaign_runtime_status": "IMPL2_EXTENSION_COMPLETE_WITH_NUMERICAL_INVALID_POINTS",
-  "updated_at": "2026-11-04T13:46:45+00:00",
+  "updated_at": "2026-11-04T15:00:00-03:00",
   "full_rpm_sweep_impl2_campaign_readiness": {
     "state": "READY_FOR_CAMPAIGN_DECISION",
     "classification": "FULL_RPM_SWEEP_IMPL2_READY_FOR_CAMPAIGN_DECISION",
