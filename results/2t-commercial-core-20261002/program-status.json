@@ -11616,11 +11616,13 @@
     },
     {
       "id": "DESKTOP-WORKBENCH-F0-NAV-TEST-ALIGNMENT-V1",
-      "description": "Align the two stale workbench navigation assertions with the accepted three-mode Desktop labels; keep this test-only and verify the previously failing integrated checks.",
+      "description": "Align obsolete workbench assertions with the accepted three-mode Desktop labels, the current component tab names, and the help-text location; keep this regression fix test-only.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "12c46ea6702fc7a9b18914a0b774b0fcfd3b329c"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "verification",
       "write_scope": [
@@ -11629,8 +11631,10 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Confirm labels in the current visible three-mode workbench, update only obsolete assertions, then run tests/test_dino_workbench_f0.py and its previously failing integrated checks.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/workbench-navigation-test-alignment/acceptance.md"
+      ],
+      "next_action": "Only the stale label/count/tooltip assertions were changed; integrated F0 plus UX regression tests pass.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -12077,6 +12081,26 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Inspect current Results study selector and Execution resume entry point; add one explicit continuation affordance for a verified selected manifest, reuse the existing resume method and fail-closed checks, and test stale/mismatched references plus navigation without launching solver calculations.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-FACTORIAL-EFFECT-PLOT-V1",
+      "description": "Add a descriptive visualization of the already-computed 2×2 factorial effects in Results, using only stored/verified contrast values. Preserve unavailable states, source table/formulas, and explicit no-inference/no-validation language.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/factorial-effect-plot/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Inspect existing factor_effects output and result visualization primitives. Plot only defined descriptive effect values; show undefined contrasts as unavailable without zero filling or uncertainty bars; verify synthetic fixture and keep the numeric table as source.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17037,6 +17061,12 @@
       "task": "DESKTOP-WORKBENCH-F0-NAV-TEST-ALIGNMENT-V1",
       "kind": "task",
       "summary": "Iniciada corrección de regresión test-only: la implementación aceptada usa MODELO/SIMULAR/RESULTADOS, mientras dos aserciones F0 todavía esperan la navegación anterior."
+    },
+    {
+      "at": "2026-11-04T23:59:03+00:00",
+      "task": "DESKTOP-WORKBENCH-F0-NAV-TEST-ALIGNMENT-V1",
+      "kind": "task",
+      "summary": "Tres expectativas de test ajustadas a la navegación/modo y etiquetas aceptadas; 26 pruebas F0+UX pasan. Replanificación concreta añade visualización descriptiva de contrastes factoriales existentes para mejorar el análisis de estudios sin inferencias ni modelos nuevos."
     }
   ],
   "legacy_gate_status": {
