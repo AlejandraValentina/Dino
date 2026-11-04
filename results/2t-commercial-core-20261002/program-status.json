@@ -11527,9 +11527,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-CSV-EXPORT-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "2679223"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11537,11 +11539,18 @@
         "motorsim/desktop/factorial_snapshot.py",
         "tests/test_desktop_factorial_snapshot.py",
         "results/desktop-parametric-design-study-v2/factor-effects-csv-import/",
-        "results/2t-commercial-core-20261002/program-status.json"
+        "results/2t-commercial-core-20261002/program-status.json",
+        "motorsim/desktop/parametric_factorial_snapshot.py",
+        "motorsim/desktop/services.py",
+        "tests/test_parametric_factorial_snapshot.py"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Implement read-only import of the exported factorial CSV as a review snapshot; fail closed on schema/hash/source mismatches and preserve unavailable/nonperiodic states without converting it to a saved runnable study.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/factorial-csv-reimport/acceptance.md",
+        "results/desktop-parametric-design-study-v2/factorial-csv-reimport/tests-final-v3/factorial-csv-reimport-final-regressions-v3.summary.json",
+        "results/desktop-parametric-design-study-v2/factorial-csv-reimport/native-window-receipt.json"
+      ],
+      "next_action": "DONE: existing factorial CSV opens as an exact 4-point/9-contrast read-only snapshot; manifests and current point artifacts are rechecked when available, and missing contrast source bindings remain explicitly absent.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11550,7 +11559,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-CROSS-STUDY-CSV-EXPORT-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11613,6 +11622,29 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Reuse the verified comparison data and metric qualification already used by Desktop; render a labeled gap-free plot in the HTML report and list all excluded or unpaired points with status and source provenance.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-SOURCE-BINDINGS-V1",
+      "description": "Correct future factorial CSV exports so each CONTRAST row binds the exact four source run IDs and result SHA-256 values already verified for its POINT rows; keep existing exports importable and never rewrite historical files.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-CSV-EXPORT-V1",
+        "DESKTOP-PARAMETRIC-FACTORIAL-CSV-REIMPORT-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/factorial-contrast-source-bindings/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Reproduce the existing V1 null bindings without changing the archived CSV; fix the export rows for subsequent files and verify their run-ID/hash arrays match the four source point rows exactly.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16344,6 +16376,13 @@
       "kind": "PRODUCT_DELIVERY",
       "summary": "Selected study-point details now show loaded/current manifest hashes, project binding, source and nested RPM sweep verification; changed project clears stale selections. Native existing synthetic RPM study verified read-only.",
       "commit": "bd13d8c"
+    },
+    {
+      "at": "2026-11-04T21:25:54+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTORIAL-CSV-REIMPORT-V1",
+      "kind": "PRODUCT_DELIVERY",
+      "summary": "Existing native factorial CSV opens in Desktop as read-only 4-point/9-contrast snapshot; manifest and current source hashes rechecked. Missing V1 contrast bindings are visibly preserved, not fabricated. 71 integrated tests passed.",
+      "commit": "2679223"
     }
   ],
   "legacy_gate_status": {
@@ -16438,7 +16477,7 @@
   },
   "campaigns_started": 1,
   "campaign_runtime_status": "IMPL2_EXTENSION_COMPLETE_WITH_NUMERICAL_INVALID_POINTS",
-  "updated_at": "2026-11-04T21:01:14+00:00",
+  "updated_at": "2026-11-04T21:25:54+00:00",
   "full_rpm_sweep_impl2_campaign_readiness": {
     "state": "READY_FOR_CAMPAIGN_DECISION",
     "classification": "FULL_RPM_SWEEP_IMPL2_READY_FOR_CAMPAIGN_DECISION",
