@@ -11188,7 +11188,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11249,6 +11249,30 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Compare two or more project-linked manifests only after SHA/schema/source verification; expose exact RPM, source engine identity and per-point periodicity, preserve nonconverged/missing metrics, and reject unsupported aggregate effects or incompatible baselines.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-STUDY-DATA-EXPORT-V1",
+      "description": "Export a saved parametric study matrix from Desktop with exact parameter values, per-point states, source identities and manifest provenance, without rounding stored values or claiming unsupported effects.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_design_study.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/study-data-export/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Add a user-facing export for selected saved study rows, preserving exact manifest values, classification/periodicity, source run IDs and SHA-bound manifest reference; verify round-trip values and label synthetic/nonconverged rows without altering source artifacts.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -15828,6 +15852,12 @@
       "task": "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1",
       "kind": "task",
       "summary": "Added project V3 references to external parametric manifests with SHA-bound fail-closed reopen and V1/V2 migration; 19 focused tests and 2 migrations pass. Added cross-study exact-evidence comparison as product queue work during required <3 READY reconciliation."
+    },
+    {
+      "at": "2026-11-04T17:31:28+00:00",
+      "task": "DESKTOP-PARAMETRIC-RPM-ENVELOPE-V1",
+      "kind": "task",
+      "summary": "Started bounded RPM envelope product work using existing power-curve preflight/runner; no solver or scientific contract changes planned."
     }
   ],
   "legacy_gate_status": {
