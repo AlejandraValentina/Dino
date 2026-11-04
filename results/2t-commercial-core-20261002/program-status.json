@@ -11284,6 +11284,29 @@
       "evidence": [],
       "next_action": "Add a user-facing export for selected saved study rows, preserving exact manifest values, classification/periodicity, source run IDs and SHA-bound manifest reference; verify round-trip values and label synthetic/nonconverged rows without altering source artifacts.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-RPM-ENVELOPE-REPORT-V1",
+      "description": "Include geometry×RPM envelope manifests and exact observed point states in the existing technical report without recomputation, interpolation or predictive claims.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-RPM-ENVELOPE-V1",
+        "DESKTOP-PARAMETRIC-REPORT-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/rpm-envelope-report/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Render a saved RPM-envelope study in the existing report; retain exact RPM/geometry/source identities and mark transient or missing metrics without summaries that imply periodic performance.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
   "audit_remediation_mode": false,
@@ -15887,6 +15910,12 @@
       "task": "DESKTOP-PARAMETRIC-FACTORIAL-INTERRUPTION-V1",
       "kind": "start",
       "summary": "Started interruption/resume integrity verification for existing factorial studies; mock runner only, no new physical campaign."
+    },
+    {
+      "at": "2026-11-04T18:08:24+00:00",
+      "task": "DESKTOP-PARAMETRIC-RPM-ENVELOPE-REPORT-V1",
+      "kind": "queue-replan",
+      "summary": "Añadida una integración de informe técnico para la nueva matriz geometría×RPM, reutilizando manifiestos y conservando estados punto por punto; tercer entregable READY concreto sin tocar física."
     }
   ],
   "legacy_gate_status": {
