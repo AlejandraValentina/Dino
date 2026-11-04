@@ -1,0 +1,3 @@
+# Project-referenced history tamper rejection — regression
+
+Tests cover project-registered external run references with the real cache policy boundary: exact artifact hash and engine identity match may proceed to the importer; a wrong artifact hash, wrong engine identity, or missing referenced result is rejected before importer invocation. The existing test also verifies a changed stored result file is rejected before importer. Focused result: **2 passed** in 4.85 s, including the no-solver integration runner test. The engineering importer remains the final integrity gate for candidates with matching references.

@@ -220,6 +220,17 @@ def test_historical_reuse_requires_exact_contract_and_verified_importer(tmp_path
         memory_limit_mib=512,history_references=[reference])
     assert match and match["historical_source_reference"] is True
     assert imports[-1]==external
+    import_count=len(imports)
+    wrong_hash={**reference,"artifact_sha256":"0"*64}
+    assert _verified_historical_match(tmp_path,point,rpm=3000.0,max_cycles=1,
+        memory_limit_mib=512,history_references=[wrong_hash]) is None
+    wrong_identity={**reference,"identity_sha256":"1"*64}
+    assert _verified_historical_match(tmp_path,point,rpm=3000.0,max_cycles=1,
+        memory_limit_mib=512,history_references=[wrong_identity]) is None
+    missing={**reference,"path":str(external/"missing-result.json")}
+    assert _verified_historical_match(tmp_path,point,rpm=3000.0,max_cycles=1,
+        memory_limit_mib=512,history_references=[missing]) is None
+    assert len(imports)==import_count
 
 
 def test_study_runner_reuses_exact_historical_point_without_running_solver(starter,tmp_path,monkeypatch):

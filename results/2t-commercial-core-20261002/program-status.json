@@ -11130,17 +11130,24 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-REFERENCED-HISTORY-V1"
       ],
-      "state": "READY",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "pending-commit"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "verification",
       "write_scope": [
-        "tests/test_design_study.py"
+        "tests/test_design_study.py",
+        "results/desktop-parametric-design-study-v2/reference-tamper-tests.txt",
+        "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Add tampering and missing-source regressions for external project-referenced history; assert rejected artifacts never reach the engineering importer or solver reuse path.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/reference-tamper-tests.txt",
+        "tests/test_design_study.py"
+      ],
+      "next_action": "Continue with DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1 to make study manifests discoverable from projects without embedding bulk artifacts.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11188,6 +11195,26 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Bound design×RPM point count and aggregate budget; delegate each point to existing engineering/sweep execution and plot only observed defined periodic metrics with no interpolation.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-FACTORIAL-INTERRUPTION-V1",
+      "description": "Verify factorial studies can resume an interrupted subset while preserving all factor combinations, identities and terminal point evidence.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-MULTIFACTOR-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "verification",
+      "write_scope": [
+        "tests/test_design_study.py",
+        "motorsim/design_study.py"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Interrupt after a completed factorial point, reload the prepared study, resume through the existing workflow, and verify completed points remain exact and are not recalculated.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -15743,6 +15770,18 @@
       "task": "DESKTOP-PARAMETRIC-CACHE-TRACE-V1",
       "kind": "task",
       "summary": "Exposed exact source run/project/path, engine identity and result hashes in study-row traceability and report tables; 58 regressions pass, source manifest JSON preserved."
+    },
+    {
+      "at": "2026-11-04T17:16:01+00:00",
+      "task": "DESKTOP-PARAMETRIC-REFERENCE-TAMPER-V1",
+      "kind": "task",
+      "summary": "Started negative tests ensuring project-referenced artifact hash, engine identity and missing source paths reject before importer invocation or reuse."
+    },
+    {
+      "at": "2026-11-04T17:16:23+00:00",
+      "task": "DESKTOP-PARAMETRIC-REFERENCE-TAMPER-V1",
+      "kind": "task",
+      "summary": "Added fail-closed regressions for wrong project reference artifact hash, wrong engine identity, missing result, and tampered result bytes; all rejected before importer and reuse."
     }
   ],
   "legacy_gate_status": {
