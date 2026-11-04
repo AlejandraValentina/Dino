@@ -254,6 +254,91 @@ def test_cancelled_factorial_study_persists_all_designs_for_reopen(starter,tmp_p
     assert all(point["preflight"]["solver_steps"]==0 for point in reopened["points"])
 
 
+def test_factorial_resume_preserves_completed_point_evidence_and_only_runs_remaining_subset(
+        starter,tmp_path,monkeypatch):
+    import hashlib
+    from motorsim import engineering_workflow
+
+    engine=starter["base_engine"]
+    available=available_parameters(engine)
+    study=prepare_factorial_design_study(engine,factors=[
+        {"parameter_id":available[0]["id"],"values":[available[0]["baseline"],available[0]["baseline"]+1]},
+        {"parameter_id":available[-1]["id"],"values":[available[-1]["baseline"],available[-1]["baseline"]+1]},
+        ],rpm=3000,max_cycles=1,point_budget_seconds=20,total_budget_seconds=80,
+        memory_limit_mib=512,project_id=starter["project_id"],study_id="factorial-resume-subset")
+    cancel=threading.Event()
+    solver_calls=[]
+    importer_calls=[]
+    expected={point["engine_identity_sha256"]:point["preflight"]["identity_sha256"]
+              for point in study["points"]}
+
+    def import_runs(paths):
+        run_dir=Path(paths[0])
+        importer_calls.append(run_dir.name)
+        result=json.loads((run_dir/"result.json").read_text(encoding="utf-8"))
+        return {"points":[{"run_id":result["bindings"]["run_id"],
+                            "point_configuration_sha256":"verified-config"}]}
+
+    def fake_run(document,*,project_id,run_id,artifact_root,resume,**kwargs):
+        run_dir=Path(artifact_root)/"exploratory-workflow-v1"/project_id/run_id
+        run_dir.mkdir(parents=True,exist_ok=True)
+        solver_calls.append((run_id,resume,(run_dir/"checkpoint.json").is_file()))
+        point_identity=expected[identity(document)]
+        terminal=(len(solver_calls)!=2)
+        status="COMPLETE" if terminal else "INTERRUPTED_CHECKPOINTED"
+        payload={"schema":"DINO_ENGINEERING_RUN_V1","status":status,
+            "classification":"MAX_CYCLES_NONCONVERGED" if terminal else "INTERRUPTED_CHECKPOINTED",
+            "periodicity":"INSUFFICIENT_CYCLES" if terminal else "NOT_EVALUATED",
+            "cycles_completed":1 if terminal else 0,
+            "bindings":{"identity_sha256":point_identity,"run_id":run_id,"project_id":project_id},
+            "elapsed_seconds":1.0}
+        result_bytes=json.dumps(payload,sort_keys=True).encode("utf-8")
+        result_hash=hashlib.sha256(result_bytes).hexdigest()
+        (run_dir/"result.json").write_bytes(result_bytes)
+        (run_dir/"run.json").write_text(json.dumps({"result_sha256":result_hash}),encoding="utf-8")
+        (run_dir/"checkpoint.json").write_text(json.dumps({"cycle":1,"run_id":run_id}),encoding="utf-8")
+        if not terminal:
+            cancel.set()
+        return {"status":status,"classification":payload["classification"],
+            "periodicity":payload["periodicity"],"cycles_completed":payload["cycles_completed"],
+            "artifact_directory":str(run_dir),"result_sha256":result_hash,
+            "identity_sha256":point_identity,"elapsed_seconds":1.0}
+
+    monkeypatch.setattr(engineering_workflow,"run",fake_run)
+    monkeypatch.setattr(engineering_workflow,"import_desktop_runs",import_runs)
+    first=run_design_study(study,artifact_root=tmp_path,cancel_event=cancel)
+    assert first["status"]=="CANCELLED"
+    assert [row["status"] for row in first["points"]]==[
+        "COMPLETE","INTERRUPTED_CHECKPOINTED","NOT_STARTED","NOT_STARTED"]
+    completed_evidence={key:first["points"][0][key] for key in (
+        "run_id","engine_identity_sha256","identity_sha256","result_sha256",
+        "result_artifact_sha256","classification","periodicity","cycles_completed")}
+    original_factor_matrix=[point["factor_values"] for point in load_prepared_study(
+        first["design_study_manifest"])["points"]]
+
+    reopened=load_prepared_study(first["design_study_manifest"])
+    cancel.clear()
+    final=run_design_study(reopened,artifact_root=tmp_path,cancel_event=cancel,resume=True)
+
+    assert final["status"]=="COMPLETE"
+    assert [point["factor_values"] for point in reopened["points"]]==original_factor_matrix
+    assert [row["status"] for row in final["points"]]==["COMPLETE"]*4
+    assert {key:final["points"][0][key] for key in completed_evidence}==completed_evidence
+    assert solver_calls==[
+        ("factorial-resume-subset-p00",False,False),
+        ("factorial-resume-subset-p01",False,False),
+        ("factorial-resume-subset-p01",True,True),
+        ("factorial-resume-subset-p02",False,False),
+        ("factorial-resume-subset-p03",False,False)]
+    assert importer_calls.count("factorial-resume-subset-p00")==1
+    assert [row["identity_sha256"] for row in final["points"]]==[
+        point["preflight"]["identity_sha256"] for point in reopened["points"]]
+    assert all(row["classification"]=="MAX_CYCLES_NONCONVERGED" and
+               row["periodicity"]=="INSUFFICIENT_CYCLES"
+               for row in final["points"])
+    assert final["scientific_validation"]=="NOT_CLAIMED"
+
+
 def test_crankcase_volume_adapter_updates_solver_geometry_and_initial_species(starter):
     engine=starter["base_engine"]
     parameter=next(p for p in available_parameters(engine)

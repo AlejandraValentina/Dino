@@ -1,0 +1,2 @@
+4 passed, 14 deselected in 65.50 s: python -m pytest tests/test_design_study.py -q -k factorial
+1 passed, 17 deselected in 20.92 s: python -m pytest tests/test_design_study.py -q -k factorial_resume_preserves_completed_point_evidence
