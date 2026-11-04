@@ -1,0 +1,104 @@
+{
+  "schema": "DINO_DESKTOP_QUALITY_V2_PACKAGED_ACCEPTANCE_V1",
+  "source_commit": "232a405160d6141f248fac47b9084c490fa7c57d",
+  "package_version": "0.1.0-rc12",
+  "trial": true,
+  "package_zip": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\Windows\\MotorSim-0.1.0-rc12-windows-x64-232a4051-trial-20261104T125555Z.zip",
+  "package_sha256": "c920858d6678636c5ebcc66f8231cbd7bfbee8049d10f9b5c55e5c8b7c263baf",
+  "package_bytes": 46926106,
+  "exe": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\Windows\\MotorSim-0.1.0-rc12-windows-x64-232a4051-trial-20261104T125555Z\\MotorSim\\Dino2T.exe",
+  "exe_sha256": "3b410c544597e0336781c669c6706c6fa6f8e331e0e738eca3787b4f3b323246",
+  "build": {
+    "built_utc": "20261104T125555Z",
+    "python": "3.11.0 (main, Oct 24 2022, 18:26:48) [MSC v.1933 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "architecture": "AMD64",
+    "source_dirty": true,
+    "trial": true,
+    "application_source_tree_clean_at_build": true,
+    "notes": "El indicador source_dirty refleja únicamente cambios locales ajenos; motorsim estaba limpio y las fuentes empaquetadas comparadas coinciden byte a byte con el commit."
+  },
+  "runtime_checks": {
+    "started_exe": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\Windows\\MotorSim-0.1.0-rc12-windows-x64-232a4051-trial-20261104T125555Z\\MotorSim\\Dino2T.exe",
+    "pid": 10812,
+    "window_title": "Dino 2T — dino-2t-starter",
+    "single_visible_main_window": true,
+    "opened_bundled_example": "MotorSim/Ejemplos/desktop-dino-2t-starter.dino2t.json",
+    "project_id": "dino-2t-starter",
+    "opened_historical_result": "E:\\dino\\Dino-active\\results\\engine-physics-v1\\campaign-evidence-r3\\engine_a_3000\\result.json",
+    "historical_result_sha256": "6ebdcdb4ea1fbda4d689758d771068fd2f813ec13f6f2d0ee352b52d93e4a0a4",
+    "classification": "NO_CONVERGENCE_WITHIN_HORIZON",
+    "periodicity": "NOT_CONVERGED",
+    "performance_metrics": "absent; shown as undefined; performance plot remains empty",
+    "traceability": "actual path and SHA visible; hard-gate keys localized; unknown original values retained as technical/unclassified with raw detail available",
+    "solver_run_performed": false
+  },
+  "tests": {
+    "expanded_command": "python -m pytest -q tests/test_desktop_quality_v2.py tests/test_desktop_rc11_corrections.py tests/test_dino_desktop_ux_v2.py tests/test_functional_exhaust_comparison.py tests/test_dino_desktop.py tests/test_desktop_rpm_curves.py tests/test_desktop_model_editor_v2.py tests/test_dino_commercial_desktop_v3.py tests/test_dino_desktop_v3_1_visual_parity.py tests/test_engineering_desktop_result.py tests/test_desktop_rc10_integration.py",
+    "expanded_result": "105 passed, 1 skipped in 484.52s",
+    "final_traceability_regression": "python -m pytest -q tests/test_desktop_quality_v2.py — 6 passed in 3.78s",
+    "visual_source_receipt": "results/desktop-quality-v2/visual-receipt.json"
+  },
+  "package_source_hash_checks": [
+    {
+      "path": "motorsim/desktop/presentation.py",
+      "source_sha256": "729d8e53b668e83b7e7e170428aecbfd45ad26ffeb75d0b31a60d6b82fb7a2bf",
+      "package_sha256": "729d8e53b668e83b7e7e170428aecbfd45ad26ffeb75d0b31a60d6b82fb7a2bf",
+      "matches": true
+    },
+    {
+      "path": "motorsim/desktop/results_page.py",
+      "source_sha256": "d62610ce25c32b1dbb29c72271eb828d008238791fe1521b0cc40b72d09417cb",
+      "package_sha256": "d62610ce25c32b1dbb29c72271eb828d008238791fe1521b0cc40b72d09417cb",
+      "matches": true
+    }
+  ],
+  "captures": [
+    {
+      "path": "results\\desktop-quality-v2\\packaged-captures\\modelo-proyecto-real-980x680.png",
+      "size": [
+        980,
+        680
+      ],
+      "sha256": "64a447e427cb77906649c35f764a0e73608b618968f26cc82265e4bd368c1875",
+      "bytes": 45863
+    },
+    {
+      "path": "results\\desktop-quality-v2\\packaged-captures\\modelo-proyecto-real-1360x900.png",
+      "size": [
+        1360,
+        900
+      ],
+      "sha256": "f70627ec24e75d5ad3a4abd11f964a7d03c6a21177c75d7f2a023742c740a1bf",
+      "bytes": 55687
+    },
+    {
+      "path": "results\\desktop-quality-v2\\packaged-captures\\resultados-historico-curvas-real-980x680.png",
+      "size": [
+        980,
+        680
+      ],
+      "sha256": "cae080a820ef51e3d970a96f3d3389551a8dcf27180a74835b4d79f67982763d",
+      "bytes": 43027
+    },
+    {
+      "path": "results\\desktop-quality-v2\\packaged-captures\\resultados-historico-curvas-real-1360x900.png",
+      "size": [
+        1360,
+        900
+      ],
+      "sha256": "213329f66a78f786a6c06f71837ff27c8e0fa47cbe0e916b08040a9133828466",
+      "bytes": 57488
+    },
+    {
+      "path": "results\\desktop-quality-v2\\packaged-captures\\trazabilidad-historico-real-1360x900-abajo.png",
+      "size": [
+        1360,
+        900
+      ],
+      "sha256": "7f50f46a134c4c6ea3221f03de58021b16d312f28549a68368c085a3cf6e0c47",
+      "bytes": 66390
+    }
+  ],
+  "acceptance": "PASS_INTERNAL_DESKTOP_SMOKE"
+}
