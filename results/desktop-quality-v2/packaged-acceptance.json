@@ -35,9 +35,11 @@
   },
   "tests": {
     "expanded_command": "python -m pytest -q tests/test_desktop_quality_v2.py tests/test_desktop_rc11_corrections.py tests/test_dino_desktop_ux_v2.py tests/test_functional_exhaust_comparison.py tests/test_dino_desktop.py tests/test_desktop_rpm_curves.py tests/test_desktop_model_editor_v2.py tests/test_dino_commercial_desktop_v3.py tests/test_dino_desktop_v3_1_visual_parity.py tests/test_engineering_desktop_result.py tests/test_desktop_rc10_integration.py",
-    "expanded_result": "105 passed, 1 skipped in 484.52s",
+    "expanded_result": "107 passed, 1 skipped in 482.87s",
     "final_traceability_regression": "python -m pytest -q tests/test_desktop_quality_v2.py — 6 passed in 3.78s",
-    "visual_source_receipt": "results/desktop-quality-v2/visual-receipt.json"
+    "visual_source_receipt": "results/desktop-quality-v2/visual-receipt.json",
+    "expanded_code_commit": "232a405160d6141f248fac47b9084c490fa7c57d",
+    "expanded_final_run": true
   },
   "package_source_hash_checks": [
     {
