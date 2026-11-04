@@ -11843,9 +11843,11 @@
       "id": "DESKTOP-PARAMETRIC-REPORT-PAIRING-CONTEXT-LABELS-V1",
       "description": "Present cross-study pairing codes and internal operating-context field IDs as readable engineering labels in exact-pair and unpaired explanations; retain original values in the embedded source JSON and do not alter pairing rules.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "bbdf4d5"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11856,9 +11858,13 @@
       ],
       "evidence_level": "L0",
       "evidence": [
-        "results/desktop-parametric-design-study-v2/report-provenance-table-readability/chrome-rendered-provenance-table-v2.png"
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/pairing-context-acceptance.md",
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/pairing-context-acceptance-receipt.json",
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/tests-final-pairing-context/pairing-context-labels-final-v1.summary.json",
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/native-pairing-context-v1.html",
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-pairing-context-v1.png"
       ],
-      "next_action": "Translate the exact-pair rule name and condition-field IDs in cross-study contrast and unpaired explanations; keep original codes in source JSON and exact pair semantics unchanged.",
+      "next_action": "DONE: exact-pair criterion and operating-context mismatch names are localized in report tables; full JSON retains original values, pair rules unchanged; native Desktop and Chrome plus 46 regressions verified.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11881,6 +11887,28 @@
         "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-report-v1.png"
       ],
       "next_action": "Avoid repeating identical classification and periodicity labels in each point summary; keep both original fields in report JSON and show both labels if the values differ.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-REASON-LABEL-V1",
+      "description": "Replace the raw PERIOD_1 token in the descriptive response-chart exclusion sentence with a clear, precise label while retaining source period codes in the original JSON; do not change which endpoints qualify.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/report-period-1-reason-label/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-report-v1.png"
+      ],
+      "next_action": "Localize the PERIOD_1-only chart exclusion phrase without altering the eligibility rule or raw report JSON.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16723,6 +16751,13 @@
       "task": "DESKTOP-PARAMETRIC-REPORT-PAIRING-CONTEXT-LABELS-V1",
       "kind": "task",
       "summary": "Started the confirmed report-presentation task: code-like pairing name and operating-context field IDs remain visible; translation must not change pair rules or source JSON."
+    },
+    {
+      "at": "2026-11-04T23:04:39+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-PAIRING-CONTEXT-LABELS-V1",
+      "kind": "task",
+      "summary": "Localized exact pairing criteria and mismatch-field labels in report HTML; original JSON still retains enum and field IDs. Synthetic native export, 1360px Chrome, and 46 tests pass.",
+      "commit": "bbdf4d5"
     }
   ],
   "legacy_gate_status": {
