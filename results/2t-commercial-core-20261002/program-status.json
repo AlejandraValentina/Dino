@@ -11318,7 +11318,7 @@
         "DESKTOP-PARAMETRIC-RPM-ENVELOPE-V1",
         "DESKTOP-PARAMETRIC-REPORT-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11331,7 +11331,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Render a saved RPM-envelope study in the existing report; retain exact RPM/geometry/source identities and mark transient or missing metrics without summaries that imply periodic performance.",
+      "next_action": "Render a saved RPM-envelope study in the existing technical report; retain exact RPM/geometry/source identities and mark transient or missing metrics without summaries that imply periodic performance.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11365,9 +11365,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "065e127"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11377,8 +11379,15 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Add a user-facing export for the active verified cross-study comparison; retain exact observed values, source hashes, pair decisions and unpaired reasons, with nonperiodic/undefined metrics blank.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-csv-export/acceptance.md",
+        "results/desktop-parametric-design-study-v2/cross-study-csv-export/tests-verified/parametric-cross-study-csv-final.summary.json",
+        "results/desktop-parametric-design-study-v2/cross-study-csv-export/native-window-receipt.json",
+        "results/desktop-parametric-design-study-v2/cross-study-csv-export/native-cross-study-csv.png",
+        "results/desktop-parametric-design-study-v2/cross-study-csv-export/synthetic-comparison.csv",
+        "tests/test_desktop_design_study.py"
+      ],
+      "next_action": "Implement DESKTOP-PARAMETRIC-RPM-ENVELOPE-REPORT-V1 with exact point states and no computation.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11401,6 +11410,28 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Inspect whether exported study CSV can be reopened through existing Desktop import paths; implement a read-only snapshot importer only if a concrete gap is confirmed, preserving source-manifest hashes, original point states and explicit NOT_RECLAIMED qualification.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESPONSE-PLOT-V1",
+      "description": "Visualize only exact compatible periodic response pairs from the active saved cross-study comparison; keep transient, nonperiodic, unmatched and undefined points visibly excluded without interpolation, fitting or predictive claims.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/cross-study-response-plot/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Use the already verified exact comparison pairs to draw a response-versus-RPM view for a selected defined scalar; render periodic measured values only, preserve gaps and labels for excluded points, and verify no interpolation/fitting or change to source data.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16055,6 +16086,12 @@
       "task": "DESKTOP-PARAMETRIC-STUDY-DATA-EXPORT-V1",
       "kind": "completion-and-replan",
       "summary": "Added selected-row exact-precision study CSV export, verified manifest/source bindings and nonperiodic blank metrics; 46 targeted regression tests and native Desktop synthetic export passed. Started cross-study CSV export and queued explicit CSV reopenability as a user-facing interoperability gap."
+    },
+    {
+      "at": "2026-11-04T19:24:04+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-CSV-EXPORT-V1",
+      "kind": "completion-and-replan",
+      "summary": "Added exact provenance-bound CSV export for verified cross-study pairs and unpaired points; 47 targeted regressions passed and the native synthetic UI action produced a two-row CSV. Started the queued RPM-envelope technical-report integration and recorded an exact-pair response plot as a concrete remaining comparison visualization gap."
     }
   ],
   "legacy_gate_status": {
