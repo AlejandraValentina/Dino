@@ -12036,7 +12036,7 @@
       "id": "DESKTOP-UIA-COM-SESSION-LIFECYCLE-REPRO-V1",
       "description": "Reproduce the prior Windows UI Automation COM error against the visible Desktop, separate application defects from stale UIA provider lifetime/cleanup, and preserve a minimal reproducible result. Apply only a harness lifecycle fix if the application is unaffected.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -12047,7 +12047,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "With Windows session unlocked, launch one native Dino Desktop window, run the existing UIA/COM interaction and teardown path, capture the HRESULT/stack and process/window lifetime, and report whether it is a product or harness defect. Do not repeat unrelated UI acceptance.",
+      "next_action": "Use the isolated Windows UIA COM dependency in a fresh verifier process, reproduce the old close/wait sequence and corrected sequence, capture HRESULT and visible-window state, then classify product versus harness.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16984,6 +16984,12 @@
       "task": "DESKTOP-PARAMETRIC-STUDY-BUDGET-LIFECYCLE-SUMMARY-V1",
       "kind": "task",
       "summary": "Results muestra presupuesto/tiempo que constan en manifiesto, puntos completos e incompletos, estado y motivo de cancelación; manifiestos antiguos muestran tiempos no registrados, sin estimar duración restante. 47 pruebas pasan y Desktop real muestra un fixture sintético. Commit 4a175b3."
+    },
+    {
+      "at": "2026-11-04T23:38:27+00:00",
+      "task": "DESKTOP-UIA-COM-SESSION-LIFECYCLE-REPRO-V1",
+      "kind": "task",
+      "summary": "Comprobación focalizada solicitada: los recibos históricos ubican el fallo después de cerrar la ventana nativa mientras el harness vuelve a consultar un provider UIA COM. El entorno activo no trae pywinauto; prepararé un entorno aislado para reproducir el ciclo."
     }
   ],
   "legacy_gate_status": {
