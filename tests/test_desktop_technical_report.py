@@ -108,6 +108,11 @@ def test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_ex
     assert report.count('class="observed-point"')==2
     assert "Pares excluidos de esta gráfica · Potencia de freno" in report
     assert "Uno o ambos endpoints no están clasificados PERIOD_1." in report
+    assert "Periódica · ciclo 1 / Periódica · ciclo 1" in report
+    assert "Límite de ciclos · no convergida / Ciclos insuficientes" in report
+    assert "MAX_CYCLES_NONCONVERGED / INSUFFICIENT_CYCLES" not in report
+    assert '"classification": "MAX_CYCLES_NONCONVERGED"' in report
+    assert '"periodicity": "INSUFFICIENT_CYCLES"' in report
     assert "No hay observaciones pareadas elegibles para esta métrica." in report
     assert "5000 RPM" in report or "5000" in report
     assert "SYNTHETIC/A.study.json" in report and "1"*64 in report

@@ -1,0 +1,42 @@
+{
+  "schema": "DINO_CROSS_STUDY_REPORT_STATE_LABELS_ACCEPTANCE_V1",
+  "fixture_origin": "synthetic presentation fixture; no solver or scientific campaign",
+  "visible_exclusion_statuses_translated": true,
+  "raw_source_state_codes_retained_in_full_report_json": true,
+  "desktop_native_export": {
+    "html_path": "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/cross-study-comparison-synthetic-v1.html",
+    "html_sha256": "ebb86e5e7b2657801fc4f59ad01f59d7e4b74032b528f1d97ea7c63faaa9027e",
+    "desktop_capture_path": "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/desktop-export-v1.png",
+    "desktop_capture_sha256": "84e6181e5a7fd1035c8a4f90ce15480be38b78466997249874925fd259eecd98",
+    "browser_capture_path": "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-report-v1.png",
+    "browser_capture_sha256": "549196ff98b51c72ae43a800300ed9e329db7df256b38842bf200d443dfb27d3",
+    "capture_dimensions_px": {
+      "desktop-export-v1.png": [
+        1440,
+        837
+      ],
+      "chrome-report-v1.png": [
+        1360,
+        2000
+      ]
+    },
+    "desktop_window_visible": true,
+    "synthetic_notice_and_not_claimed": true
+  },
+  "tests": {
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_desktop_technical_report.py",
+      "tests/test_desktop_design_study.py"
+    ],
+    "exit_code": 0,
+    "tail": [
+      "..............................................                           [100%]",
+      "46 passed in 43.69s"
+    ],
+    "summary_sha256": "8253661b2b4b06aba4c94433c91f28b8a3a39c0cf3d91926766fa88d9c5ab3c5"
+  }
+}

@@ -737,9 +737,11 @@ def _cross_study_response_plots(comparison):
                 rows.append('<tr>'+''.join((
                     f'<td>{pair_index+1}</td>',f'<td>{_esc(pair.get("rpm"))}</td>',
                     f'<td>{_esc(pair.get("study_a"))} · {_esc(point_a.get("source_run_id") or point_a.get("run_id"))}</td>',
-                    f'<td>{_esc(point_a.get("classification"))} / {_esc(point_a.get("periodicity"))}</td>',
+                    f'<td>{_esc(state_label(point_a.get("classification") or "NOT_REPORTED"))} / '
+                    f'{_esc(state_label(point_a.get("periodicity") or "NOT_EVALUATED"))}</td>',
                     f'<td>{_esc(pair.get("study_b"))} · {_esc(point_b.get("source_run_id") or point_b.get("run_id"))}</td>',
-                    f'<td>{_esc(point_b.get("classification"))} / {_esc(point_b.get("periodicity"))}</td>',
+                    f'<td>{_esc(state_label(point_b.get("classification") or "NOT_REPORTED"))} / '
+                    f'{_esc(state_label(point_b.get("periodicity") or "NOT_EVALUATED"))}</td>',
                     f'<td>{_esc(reason)}</td>'))+'</tr>')
             parts.append('<h4>Pares excluidos de esta gráfica · '+_esc(label)+'</h4>'
                 '<table><thead><tr><th>Fila</th><th>RPM</th><th>Estudio/run A</th><th>Estado A</th>'
