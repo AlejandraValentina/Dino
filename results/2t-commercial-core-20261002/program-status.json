@@ -11999,6 +11999,26 @@
       ],
       "next_action": "Present source manifest paths and hashes compactly while leaving exact traceability accessible; do not alter manifests or source identities.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-STUDY-BUDGET-LIFECYCLE-SUMMARY-V1",
+      "description": "Show an exact manifest-derived study budget/lifecycle summary in Results: allocated and consumed seconds when recorded, completed/incomplete points, and cancellation/interruption state. Avoid runtime predictions or recomputing scientific data.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/study-budget-lifecycle-summary/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Use fields already persisted in a design study manifest to present budget allocated/elapsed and per-point terminal/interrupted state; add focused Results tests and synthetic presentation evidence. Do not infer remaining wall time or modify runner semantics.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
   "audit_remediation_mode": false,
@@ -16904,6 +16924,12 @@
       "task": "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-TRACEABILITY-DETAILS-V1",
       "kind": "task",
       "summary": "Iniciada inspección focalizada: los CSV factoriales importados ya conservan arrays de IDs/hashes por contraste, pero la selección actual sólo muestra detalles de puntos; se implementará inspección de fuente por fila CONTRAST sin mutar snapshot."
+    },
+    {
+      "at": "2026-11-04T23:24:43+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-TRACEABILITY-DETAILS-V1",
+      "kind": "task",
+      "summary": "Replanificación compacta conforme al umbral de 3 READY: agregada una entrega funcional de Results para exponer el presupuesto y estado de ciclo de vida ya persistidos en manifiestos, sin estimar runtime ni tocar el solver."
     }
   ],
   "legacy_gate_status": {
