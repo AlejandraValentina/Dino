@@ -11732,9 +11732,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-RESPONSE-PLOT-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "7ebc5c6"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11744,8 +11746,15 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Refactor the 17-column comparison report table into a readable summary plus accessible per-point provenance details; preserve every original source field/value and verify the generated report visually at 1360 px.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/report-provenance-table-readability/acceptance.md",
+        "results/desktop-parametric-design-study-v2/report-provenance-table-readability/acceptance-receipt.json",
+        "results/desktop-parametric-design-study-v2/report-provenance-table-readability/tests-final-v2/report-provenance-focused-v2.summary.json",
+        "results/desktop-parametric-design-study-v2/report-provenance-table-readability/native-report-export-v2-receipt.json",
+        "results/desktop-parametric-design-study-v2/report-provenance-table-readability/chrome-rendered-provenance-table-v2.png",
+        "results/desktop-parametric-design-study-v2/report-provenance-table-readability/chrome-expanded-provenance-v1.png"
+      ],
+      "next_action": "DONE: 17-column source table replaced by a 9-column summary with expandable exact provenance; native Desktop export, 1360px Chrome render, expanded-detail preview and 46 regressions verified.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16636,6 +16645,13 @@
       "task": "DESKTOP-PARAMETRIC-REPORT-PROVENANCE-TABLE-READABILITY-V1",
       "kind": "start",
       "summary": "Starting the screenshot-confirmed HTML report readability correction; collapse long provenance fields into per-row details while retaining all exact sources and hashes."
+    },
+    {
+      "at": "2026-11-04T22:53:13+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-PROVENANCE-TABLE-READABILITY-V1",
+      "kind": "task",
+      "summary": "Reduced comparison report to 9 readable columns; expandable source provenance and full JSON preserved. Native Desktop export, 1360px report and expanded detail preview verified; 46 tests passed.",
+      "commit": "7ebc5c6"
     }
   ],
   "legacy_gate_status": {
