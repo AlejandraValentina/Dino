@@ -1,0 +1,24 @@
+{
+  "name": "cross-study-report-response-plot-focused",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_desktop_technical_report.py",
+    "tests/test_desktop_design_study.py"
+  ],
+  "started_at": "2026-11-04T22:08:18+00:00",
+  "finished_at": "2026-11-04T22:09:02+00:00",
+  "duration_s": 44.078,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\cross-study-report-response-plot\\tests-final\\cross-study-report-response-plot-focused.log",
+  "log_lines": 2,
+  "log_bytes": 100,
+  "error_lines": [],
+  "tail": [
+    "............................................                             [100%]",
+    "44 passed in 43.53s"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schema": "DINO_NATIVE_CROSS_STUDY_REPORT_PLOT_V1",
+  "synthetic": true,
+  "desktop_window_visible": true,
+  "desktop_size": [
+    1440,
+    837
+  ],
+  "project_study_references": 2,
+  "html_report_path": "results\\desktop-parametric-design-study-v2\\cross-study-report-response-plot\\native-cross-study-comparison-v4.html",
+  "html_sha256": "9d9171d46bb1ad5bbc65aadd8e120158658506e7de91d4d0ef70eeb782e5bdc3",
+  "html_svg_count": 1,
+  "html_marker_count": 2,
+  "no_interpolated_lines": true,
+  "excluded_nonperiodic_pair_listed": true,
+  "unpaired_point_preserved": true,
+  "manifest_hashes_preserved": true,
+  "not_claimed_preserved": true,
+  "synthetic_notice_preserved": true,
+  "desktop_capture_saved": true,
+  "browser_capture_saved": true,
+  "browser_capture_sha256": "140481eb04533348610c1a19b1d85a488a488c7fc9aa54a1f08a1fceba2d921b",
+  "browser": "Chrome headless; renderer only; Desktop export action generated the HTML"
+}

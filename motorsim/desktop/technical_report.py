@@ -416,12 +416,13 @@ def render_study_comparison_report(comparison: dict) -> str:
             f"<td>{_esc(point.get('engine_identity_sha256'))}</td>",f"<td>{_esc(item.get('reason'))}</td>"))+"</tr>")
     payload=html.escape(json.dumps(comparison,ensure_ascii=False,sort_keys=True,indent=2,allow_nan=False),quote=False)
     return f'''<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Comparación paramétrica · Dino 2T</title>
-<style>body{{font:15px Segoe UI,Arial,sans-serif;color:#172536;margin:28px;max-width:1500px}}h1,h2{{color:#173852}}.notice{{padding:14px;background:#fff3dc;border-left:5px solid #cc7b18}}table{{border-collapse:collapse;width:100%;margin:12px 0 24px;font-size:12px}}th,td{{border:1px solid #becbd7;padding:6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}}th{{background:#e9f0f5}}code{{font-size:11px}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6f8;padding:16px}}footer{{color:#526477}}</style></head><body>
+<style>body{{font:15px Segoe UI,Arial,sans-serif;color:#172536;margin:28px;max-width:1500px}}h1,h2{{color:#173852}}.notice{{padding:14px;background:#fff3dc;border-left:5px solid #cc7b18}}table{{border-collapse:collapse;width:100%;margin:12px 0 24px;font-size:12px}}th,td{{border:1px solid #becbd7;padding:6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}}th{{background:#e9f0f5}}code{{font-size:11px}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6f8;padding:16px}}.legend span{{margin-right:12px}}.legend i{{font-style:normal;font-size:18px}}.empty{{padding:12px;background:#f3f6f8}}footer{{color:#526477}}</style></head><body>
 <h1>Comparación de estudios paramétricos · Dino 2T</h1>
 <p class="notice"><strong>Límite de evidencia.</strong> { _esc(comparison.get('notice')) } La validación científica no está reclamada. Las diferencias son contrastes descriptivos entre puntos observados; no se interpolan, ajustan ni agregan.</p>
 <p>Baseline común: <code>{_esc(comparison.get('baseline_engine_identity_sha256'))}</code> · generación UTC: {_esc(datetime.now(timezone.utc).isoformat(timespec='seconds'))}</p>
 <h2>Manifiestos seleccionados</h2><table><thead><tr><th>Estudio</th><th>Proyecto fuente</th><th>Ruta del manifiesto</th><th>SHA-256 del manifiesto</th></tr></thead><tbody>{''.join(studies)}</tbody></table>
 <h2>Puntos y procedencia</h2><table><thead><tr><th>Estudio</th><th>Diseño</th><th>RPM</th><th>Estado ejecución</th><th>Clasificación</th><th>Periodicidad</th><th>Ciclos</th><th>Run fuente</th><th>Motor SHA-256</th><th>Corrida SHA-256</th><th>Resultado SHA-256</th><th>Artifact SHA-256</th><th>Ruta</th><th>Fuente verificada</th><th>Potencia</th><th>Torque</th><th>BMEP</th></tr></thead><tbody>{''.join(point_rows)}</tbody></table>
+<h2>Respuesta observada por RPM</h2>{_cross_study_response_plots(comparison)}
 <h2>Contrastes exactos</h2><p>Los pares requieren RPM y todos los campos operativos informados compatibles. Δ = estudio B menos A. Un resultado queda vacío si falta o si no es periódico y definido.</p><table><thead><tr><th>Estudio A</th><th>Run A</th><th>Estudio B</th><th>Run B</th><th>RPM</th><th>Métrica</th><th>Δ</th><th>Regla de pareo</th></tr></thead><tbody>{''.join(pair_rows) or '<tr><td colspan="8">No hay pares compatibles exactos.</td></tr>'}</tbody></table>
 <h2>Puntos sin contraparte</h2><table><thead><tr><th>Estudio</th><th>Run ID</th><th>RPM</th><th>Clasificación</th><th>Periodicidad</th><th>Motor SHA-256</th><th>Motivo</th></tr></thead><tbody>{''.join(unpaired_rows) or '<tr><td colspan="7">Todos los puntos aparecen en al menos un pareo.</td></tr>'}</tbody></table>
 <h2>Datos reproducibles</h2><details><summary>Objeto completo de comparación, puntos y source manifests</summary><pre>{payload}</pre></details>
@@ -430,6 +431,115 @@ def render_study_comparison_report(comparison: dict) -> str:
 
 _STUDY_REPORT_METRICS={"brake_power":("Potencia de freno","kW"),
     "brake_torque":("Torque de freno","N·m"),"BMEP":("BMEP","kPa")}
+
+
+def _cross_study_response_plots(comparison):
+    """Render exact observed PERIOD_1 pairs as unconnected markers only."""
+    studies=comparison.get("studies",[])
+    studies_by_id={str(study.get("study_id")):study for study in studies}
+    study_ids=[str(study.get("study_id")) for study in studies]
+    plots=[]
+    width,height=820,360
+    left,top,right,bottom=82,42,24,62
+    plot_width,plot_height=width-left-right,height-top-bottom
+    for metric,(label,unit) in _STUDY_REPORT_METRICS.items():
+        observed={study_id:{} for study_id in study_ids};excluded=[]
+        for pair_index,pair in enumerate(comparison.get("pairs",[])):
+            study_a,study_b=pair.get("study_a"),pair.get("study_b")
+            point_a=pair.get("point_a") if isinstance(pair.get("point_a"),dict) else {}
+            point_b=pair.get("point_b") if isinstance(pair.get("point_b"),dict) else {}
+            def source_endpoint(study_id,candidate):
+                if candidate.get("periodicity") is not None and isinstance(candidate.get("metrics"),dict):
+                    return candidate
+                study=studies_by_id.get(str(study_id),{})
+                for source_point in study.get("points",[]):
+                    if ((candidate.get("index") is not None and source_point.get("index")==candidate.get("index")) or
+                            (candidate.get("run_id") and candidate.get("run_id")==source_point.get("run_id")) or
+                            (candidate.get("source_run_id") and candidate.get("source_run_id")==source_point.get("source_run_id"))):
+                        return source_point
+                return candidate
+            point_a=source_endpoint(study_a,point_a);point_b=source_endpoint(study_b,point_b)
+            reason=None
+            if pair.get("pairing")!="EXACT_RPM_AND_OPERATING_CONTEXT":
+                reason="El pareo no conserva RPM y contexto exactos."
+            elif point_a.get("periodicity")!="PERIOD_1" or point_b.get("periodicity")!="PERIOD_1":
+                reason="Uno o ambos endpoints no están clasificados PERIOD_1."
+            elif study_a not in observed or study_b not in observed:
+                reason="La identidad de un estudio no pertenece a los manifiestos seleccionados."
+            else:
+                value_a=(point_a.get("metrics") or {}).get(metric)
+                value_b=(point_b.get("metrics") or {}).get(metric)
+                if not _safe_number(value_a) or not _safe_number(value_b):
+                    reason="La métrica no está definida y finita en ambos endpoints PERIOD_1."
+            if reason:
+                excluded.append((pair_index,pair,point_a,point_b,reason));continue
+            rpm=pair.get("rpm")
+            if not _safe_number(rpm) or float(rpm)<=0:
+                excluded.append((pair_index,pair,point_a,point_b,"RPM no válida para representar el punto."));continue
+            for study_id,point,value in ((study_a,point_a,value_a),(study_b,point_b,value_b)):
+                identity=(point.get("index"),point.get("source_run_id") or point.get("run_id"),float(rpm))
+                record={"rpm":float(rpm),"value":float(value),"point":point}
+                previous=observed[study_id].get(identity)
+                if previous is not None and previous["value"]!=record["value"]:
+                    raise ValueError(f"El mismo punto de {study_id} conserva valores distintos para {label}.")
+                observed[study_id][identity]=record
+        eligible=[record for points in observed.values() for record in points.values()]
+        parts=[f'<section class="cross-study-response"><h3>{_esc(label)} por RPM exacta</h3>',
+            '<p>Solo extremos de pares con RPM/contexto exactos, ambos endpoints PERIOD_1 y valores finitos definidos. '
+            'Los marcadores no se conectan, interpolan ni ajustan.</p>']
+        if not eligible:
+            parts.append('<p class="empty">No hay observaciones pareadas elegibles para esta métrica.</p>')
+        else:
+            rpms=[row["rpm"] for row in eligible];values=[row["value"] for row in eligible]
+            xmin,xmax=min(rpms),max(rpms);ymin,ymax=min(values),max(values)
+            if xmin==xmax:xmin-=1;xmax+=1
+            if ymin==ymax:
+                pad=max(abs(ymin)*.05,1.0);ymin-=pad;ymax+=pad
+            else:
+                pad=(ymax-ymin)*.08;ymin-=pad;ymax+=pad
+            x=lambda value:left+(float(value)-xmin)/(xmax-xmin)*plot_width
+            y=lambda value:top+(ymax-float(value))/(ymax-ymin)*plot_height
+            parts.append(f'<svg role="img" aria-label="{_esc(label)} por RPM exacta" viewBox="0 0 {width} {height}" '
+                'xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;background:#fff">')
+            parts.append(f'<path d="M{left} {top}V{top+plot_height}H{left+plot_width}" fill="none" stroke="#526273"/>')
+            for tick_index in range(5):
+                fraction=tick_index/4
+                yy=top+plot_height*fraction;value=ymax-(ymax-ymin)*fraction
+                xx=left+plot_width*fraction;rpm=xmin+(xmax-xmin)*fraction
+                parts.append(f'<path d="M{left} {yy:.2f}H{left+plot_width}" stroke="#e1e7ec"/>')
+                parts.append(f'<text x="{left-8}" y="{yy+4:.2f}" text-anchor="end">{_esc(format_number(value))}</text>')
+                parts.append(f'<path d="M{xx:.2f} {top}V{top+plot_height}" stroke="#eef1f4"/>')
+                parts.append(f'<text x="{xx:.2f}" y="{top+plot_height+20}" text-anchor="middle">{_esc(format_number(rpm))}</text>')
+            parts.append(f'<text x="{left+plot_width/2}" y="{height-8}" text-anchor="middle">RPM</text>')
+            parts.append(f'<text transform="translate(18 {top+plot_height/2}) rotate(-90)" text-anchor="middle">{_esc(unit)}</text>')
+            legend=[]
+            for study_index,study_id in enumerate(study_ids):
+                color=COLORS[study_index%len(COLORS)]
+                records=sorted(observed[study_id].values(),key=lambda item:item["rpm"])
+                legend.append(f'<span><i style="color:{color}">●</i> {_esc(study_id)} · {len(records)} punto(s)</span>')
+                for item in records:
+                    point=item["point"]
+                    title=(f"{study_id} · {point.get('source_run_id') or point.get('run_id') or 'run no informado'} · "
+                        f"{format_number(item['rpm'])} RPM · {format_number(item['value'])} {unit}")
+                    parts.append(f'<circle class="observed-point" cx="{x(item["rpm"]):.2f}" cy="{y(item["value"]):.2f}" r="5" '
+                        f'fill="{color}"><title>{_esc(title)}</title></circle>')
+            parts.append('</svg><p class="legend">'+' · '.join(legend)+'</p>')
+        if excluded:
+            rows=[]
+            for pair_index,pair,point_a,point_b,reason in excluded:
+                rows.append('<tr>'+''.join((
+                    f'<td>{pair_index+1}</td>',f'<td>{_esc(pair.get("rpm"))}</td>',
+                    f'<td>{_esc(pair.get("study_a"))} · {_esc(point_a.get("source_run_id") or point_a.get("run_id"))}</td>',
+                    f'<td>{_esc(point_a.get("classification"))} / {_esc(point_a.get("periodicity"))}</td>',
+                    f'<td>{_esc(pair.get("study_b"))} · {_esc(point_b.get("source_run_id") or point_b.get("run_id"))}</td>',
+                    f'<td>{_esc(point_b.get("classification"))} / {_esc(point_b.get("periodicity"))}</td>',
+                    f'<td>{_esc(reason)}</td>'))+'</tr>')
+            parts.append('<h4>Pares excluidos de esta gráfica · '+_esc(label)+'</h4>'
+                '<table><thead><tr><th>Fila</th><th>RPM</th><th>Estudio/run A</th><th>Estado A</th>'
+                '<th>Estudio/run B</th><th>Estado B</th><th>Motivo</th></tr></thead><tbody>'+
+                ''.join(rows)+'</tbody></table>')
+        plots.append(''.join(parts)+'</section>')
+    return ''.join(plots)
 
 
 def write_study_comparison_report(path, comparison: dict) -> Path:

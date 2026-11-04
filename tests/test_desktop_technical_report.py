@@ -54,6 +54,51 @@ def test_cross_study_report_preserves_exact_provenance_and_evidence_boundaries()
     assert "NOT_CLAIMED" in html
 
 
+def test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_exclusions():
+    def point(run_id,rpm,periodicity,power,code):
+        return {"index":int(rpm),"run_id":run_id,"source_run_id":run_id,"rpm":rpm,
+            "status":"COMPLETE","classification":"PERIOD_1" if periodicity=="PERIOD_1" else "MAX_CYCLES_NONCONVERGED",
+            "periodicity":periodicity,"cycles_completed":5,"source_verified":True,
+            "engine_identity_sha256":code*64,"identity_sha256":code.upper()*64,
+            "result_sha256":("a" if code=="b" else "c")*64,
+            "result_artifact_sha256":("d" if code=="b" else "e")*64,
+            "run_directory":f"C:/synthetic/{run_id}",
+            "metrics":{"brake_power":power,"brake_torque":None,"BMEP":None}}
+    a3=point("a-3000",3000,"PERIOD_1",10.0,"a")
+    b3=point("b-3000",3000,"PERIOD_1",12.0,"b")
+    a4=point("a-4000",4000,"PERIOD_1",15.0,"c")
+    b4=point("b-4000",4000,"INSUFFICIENT_CYCLES",None,"f")
+    studies=[{"study_id":name,"source_project_id":"SYNTHETIC project",
+        "manifest_path":f"SYNTHETIC/{name}.study.json","manifest_sha256":code*64,
+        "baseline_engine_identity_sha256":"9"*64,"parameter":{"label":"Escape"},
+        "points":points} for name,code,points in (("A","1",[a3,a4]),("B","2",[b3,b4]))]
+    comparison={"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
+        "baseline_engine_identity_sha256":"9"*64,"scientific_validation":"NOT_CLAIMED",
+        "notice":"Fixture de reporte sintético; sin predicción.","studies":studies,
+        "pairs":[
+            {"study_a":"A","point_a":{"run_id":"a-3000"},"study_b":"B","point_b":{"run_id":"b-3000"},
+             "rpm":3000.0,"pairing":"EXACT_RPM_AND_OPERATING_CONTEXT",
+             "metrics":{"brake_power":{"a":10.0,"b":12.0,"delta":2.0}}},
+            {"study_a":"A","point_a":{"run_id":"a-4000"},"study_b":"B","point_b":{"run_id":"b-4000"},
+             "rpm":4000.0,"pairing":"EXACT_RPM_AND_OPERATING_CONTEXT",
+             "metrics":{"brake_power":{"a":15.0,"b":None,"delta":None}}}],
+        "unpaired":[{"study_id":"B","reason":"Sin endpoint a 5000 RPM.",
+            "point":{"run_id":"b-5000","rpm":5000,"classification":"NOT_STARTED",
+                "periodicity":"NOT_EVALUATED","engine_identity_sha256":"7"*64}}]}
+    report=render_study_comparison_report(comparison)
+    assert "Respuesta observada por RPM" in report
+    assert 'aria-label="Potencia de freno por RPM exacta"' in report
+    assert "A · 1 punto(s)" in report and "B · 1 punto(s)" in report
+    assert report.count('class="observed-point"')==2
+    assert "Pares excluidos de esta gráfica · Potencia de freno" in report
+    assert "Uno o ambos endpoints no están clasificados PERIOD_1." in report
+    assert "No hay observaciones pareadas elegibles para esta métrica." in report
+    assert "5000 RPM" in report or "5000" in report
+    assert "SYNTHETIC/A.study.json" in report and "1"*64 in report
+    assert "no se interpolan, ajustan ni agregan" in report
+    assert "<polyline" not in report and "NOT_CLAIMED" in report
+
+
 def test_results_page_exports_selected_cross_study_comparison(tmp_path):
     context=DesktopContext(new_design_project("cross-study-report-export"))
     page=ResultsPage(context)
