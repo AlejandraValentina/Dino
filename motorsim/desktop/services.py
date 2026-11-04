@@ -21,6 +21,7 @@ from ..crankcase import CrankcaseGeometry
 from ..integrated_2t import SliderCrankChambers2T
 from ..two_stroke_ports import TwoStrokePortSet, DuctBinding, PortDefinition
 from .preferences import impl2_historical_report_candidate
+from .parametric_study_snapshot import import_parametric_study_csv_snapshot
 
 ROOT = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[2]))
 FIXTURE = ROOT / "results/2t-commercial-core-20261002/fixtures/v1-prime-mesh/fixture_a_prime-mesh-0.json"
@@ -125,6 +126,8 @@ def starter_reed_petals():
 def load_results(path: str | Path):
     path = Path(path)
     if path.suffix.lower() == ".csv":
+        snapshot=import_parametric_study_csv_snapshot(path)
+        if snapshot is not None:return snapshot
         return import_report(path, metadata_path=path.with_suffix(".json"))
     if path.suffix.lower() == ".json":
         raw=path.read_bytes()

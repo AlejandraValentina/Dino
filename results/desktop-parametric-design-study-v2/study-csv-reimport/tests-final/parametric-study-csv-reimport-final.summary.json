@@ -1,0 +1,26 @@
+{
+  "name": "parametric-study-csv-reimport-final",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_design_study.py",
+    "tests/test_desktop_design_study.py",
+    "tests/test_desktop_technical_report.py",
+    "tests/test_parametric_study_snapshot.py"
+  ],
+  "started_at": "2026-11-04T20:22:40+00:00",
+  "finished_at": "2026-11-04T20:26:12+00:00",
+  "duration_s": 212.578,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\study-csv-reimport\\tests-final\\parametric-study-csv-reimport-final.log",
+  "log_lines": 2,
+  "log_bytes": 111,
+  "error_lines": [],
+  "tail": [
+    "..............................................................           [100%]",
+    "62 passed in 212.00s (0:03:31)"
+  ]
+}

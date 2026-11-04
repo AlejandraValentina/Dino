@@ -1,0 +1,32 @@
+{
+  "evidence_type": "NATIVE_WINDOWS_QT_PARAMETRIC_CSV_SNAPSHOT_SYNTHETIC",
+  "synthetic_only": true,
+  "solver_invoked": false,
+  "platform": "windows",
+  "window_visible": true,
+  "window_size": [
+    1440,
+    837
+  ],
+  "source_csv": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\study-data-export\\synthetic-native-selected.csv",
+  "source_csv_sha256": "3a2e71ee547e31b94257afbb1a6d98e5aef1b49dab193836b9d03ef766834f67",
+  "snapshot_schema": "DINO_PARAMETRIC_STUDY_CSV_SNAPSHOT_V1",
+  "study_id": "synthetic-matrix-csv-native-ui",
+  "point_count": 2,
+  "periodicity": [
+    "PERIOD_1",
+    "INSUFFICIENT_CYCLES"
+  ],
+  "source_verification_at_export": [
+    "NOT_LOADED",
+    "NOT_LOADED"
+  ],
+  "metrics": [
+    "",
+    ""
+  ],
+  "imported_snapshot_sha256": "3a2e71ee547e31b94257afbb1a6d98e5aef1b49dab193836b9d03ef766834f67",
+  "capture": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\study-csv-reimport\\native-study-csv-snapshot-v2.png",
+  "capture_sha256": "ebe8046a4b445c743b80ef0e27d6c9e308b02d7813c47dac2728efee82ef114e",
+  "notice": "Estudio synthetic-matrix-csv-native-ui · método GEOMETRY_V1 · manifiesto SHA-256 aeeed060e7786e7eec5aa41439a99164583a05ecccf77e6705e65d280082cb79 · CSV SHA-256 3a2e71ee547e31b94257afbb1a6d98e5aef1b49dab193836b9d03ef766834f67 · fuentes: estado registrado al exportar (no re-verificado en este snapshot) · sólo lectura · validación científica NOT_CLAIMED."
+}

@@ -8,12 +8,13 @@ from PySide6.QtCore import Qt,Signal,QRect
 from PySide6.QtGui import QPixmap,QColor,QPainter,QPen,QImage
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QLabel,QComboBox,QPushButton,
     QFileDialog,QCheckBox,QGroupBox,QListWidget,QListWidgetItem,QTableWidget,QTableWidgetItem,QHeaderView,QMessageBox,
-    QDialog,QDialogButtonBox,QFormLayout,QLineEdit,QTabWidget,QScrollArea,QFrame,QAbstractItemView)
+    QDialog,QDialogButtonBox,QFormLayout,QLineEdit,QTabWidget,QScrollArea,QFrame,QAbstractItemView,QPlainTextEdit)
 from .plot import CurvePlot
 from .performance_curves import PowerCurvePanel
 from .services import load_results,run_background
 from .preferences import artifact_root,impl2_historical_report_candidate,settings
 from .technical_report import write_technical_report
+from .parametric_study_snapshot import SNAPSHOT_SCHEMA as PARAMETRIC_STUDY_SNAPSHOT_SCHEMA
 from ..exploratory_workflow import import_exploratory_runs
 from .. import measurement_data
 from ..engine_project import validate_project
@@ -693,7 +694,7 @@ class ResultsPage(QWidget):
         historical=QPushButton("Evidencia IMPL2 histórica…");historical.clicked.connect(self.choose_historical);actions.addWidget(historical)
         browse_runs=QPushButton("Abrir corridas EXPLORATORY…");browse_runs.clicked.connect(self.choose_exploratory);actions.addWidget(browse_runs);actions.addStretch()
         self.variants=QListWidget();self.variants.setMaximumHeight(80);self.variants.setFlow(QListWidget.Flow.LeftToRight);self.variants.setWrapping(True);root.addWidget(self.variants)
-        baseline_row=QHBoxLayout();root.addLayout(baseline_row);baseline_row.addWidget(QLabel("Baseline del proyecto"));self.baseline_selector=QComboBox();baseline_row.addWidget(self.baseline_selector)
+        baseline_row=QHBoxLayout();root.addLayout(baseline_row);self.baseline_label=QLabel("Baseline del proyecto");baseline_row.addWidget(self.baseline_label);self.baseline_selector=QComboBox();baseline_row.addWidget(self.baseline_selector)
         self.baseline_notice=QLabel("La baseline identifica la referencia de comparación; las curvas usan sólo puntos realmente disponibles.");self.baseline_notice.setWordWrap(True);baseline_row.addWidget(self.baseline_notice,1)
         measured=QGroupBox("Mediciones externas · contraste descriptivo");measured_layout=QVBoxLayout(measured)
         measured_row=QHBoxLayout();measured_layout.addLayout(measured_row)
@@ -713,11 +714,11 @@ class ResultsPage(QWidget):
         self.power_curves=PowerCurvePanel();root.addWidget(self.power_curves)
         controls=QHBoxLayout();root.addLayout(controls)
         self.unit=QLabel();controls.addWidget(self.unit);controls.addStretch()
-        export_report=QPushButton("Exportar informe técnico HTML…");export_report.setObjectName("exportTechnicalReport")
-        export_report.setToolTip("Informe local autosuficiente con origen, estados, pares exactos, gráficos y registros originales seleccionados.")
-        export_report.clicked.connect(self.export_technical_report);controls.addWidget(export_report)
-        export_table=QPushButton("Exportar tabla CSV");export_table.setToolTip("Reportes históricos: CSV + JSON compañero para reabrir. Corridas exploratorias: tabla de consulta; conservar los artifacts originales.");export_table.clicked.connect(self.export_csv);controls.addWidget(export_table)
-        export_plot=QPushButton("Exportar gráfico PNG");export_plot.clicked.connect(self.export_png);controls.addWidget(export_plot)
+        self.export_report_button=QPushButton("Exportar informe técnico HTML…");self.export_report_button.setObjectName("exportTechnicalReport")
+        self.export_report_button.setToolTip("Informe local autosuficiente con origen, estados, pares exactos, gráficos y registros originales seleccionados.")
+        self.export_report_button.clicked.connect(self.export_technical_report);controls.addWidget(self.export_report_button)
+        self.export_table_button=QPushButton("Exportar tabla CSV");self.export_table_button.setToolTip("Reportes históricos: CSV + JSON compañero para reabrir. Corridas exploratorias: tabla de consulta; conservar los artifacts originales.");self.export_table_button.clicked.connect(self.export_csv);controls.addWidget(self.export_table_button)
+        self.export_plot_button=QPushButton("Exportar gráfico PNG");self.export_plot_button.clicked.connect(self.export_png);controls.addWidget(self.export_plot_button)
         self.point_table=QTableWidget(0,8);self.point_table.setHorizontalHeaderLabels(["Variante","RPM","Estado","Período","Auditoría","Ciclos","Balance","BMEP"]);self.point_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch);self.point_table.horizontalHeader().setMinimumSectionSize(48);self.point_table.setMinimumHeight(125);self.point_table.setMaximumHeight(190);self.point_table.currentCellChanged.connect(self._point_row_selected);root.addWidget(self.point_table)
         self.trace_group=QGroupBox("Señales de presión, ondas y flujo EXPLORATORY")
         trace_layout=QVBoxLayout(self.trace_group)
@@ -780,6 +781,24 @@ class ResultsPage(QWidget):
         self.export_factorial_effects_button.clicked.connect(self.export_factorial_effects_csv)
         self.export_factorial_effects_button.setEnabled(False);self.export_factorial_effects_button.hide()
         study_layout.addWidget(self.export_factorial_effects_button)
+        self.study_csv_snapshot_group=QGroupBox("Estudio paramétrico importado · snapshot de sólo lectura")
+        snapshot_layout=QVBoxLayout(self.study_csv_snapshot_group)
+        self.study_csv_snapshot_notice=QLabel("Los snapshots conservan la tabla exportada y no pueden iniciar corridas.")
+        self.study_csv_snapshot_notice.setWordWrap(True);snapshot_layout.addWidget(self.study_csv_snapshot_notice)
+        self.study_csv_snapshot_table=QTableWidget(0,10);self.study_csv_snapshot_table.setObjectName("parametricStudyCsvSnapshot")
+        self.study_csv_snapshot_table.setHorizontalHeaderLabels([
+            "Punto","Diseño","RPM","Estado","Periodicidad","Ciclos","Potencia (kW)",
+            "Torque (N·m)","BMEP (kPa)","Fuente al exportar"])
+        self.study_csv_snapshot_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.study_csv_snapshot_table.horizontalHeader().setStretchLastSection(True)
+        self.study_csv_snapshot_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.study_csv_snapshot_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.study_csv_snapshot_table.currentCellChanged.connect(self._study_csv_snapshot_row_selected)
+        snapshot_layout.addWidget(self.study_csv_snapshot_table)
+        self.study_csv_snapshot_detail=QPlainTextEdit();self.study_csv_snapshot_detail.setReadOnly(True)
+        self.study_csv_snapshot_detail.setMaximumHeight(125);self.study_csv_snapshot_detail.setPlaceholderText(
+            "Seleccioná un punto para consultar su procedencia exacta.")
+        snapshot_layout.addWidget(self.study_csv_snapshot_detail);self.study_csv_snapshot_group.hide()
         self.study_comparison_group=QGroupBox("Comparar estudios guardados")
         comparison_layout=QVBoxLayout(self.study_comparison_group)
         comparison_bar=QHBoxLayout();comparison_layout.addLayout(comparison_bar)
@@ -828,7 +847,7 @@ class ResultsPage(QWidget):
         view('Variables',[self.plot,self.point_table])
         waves=view('Presiones y ondas',[self.trace_group])
         wave_help=QLabel('Las señales se muestran cuando las corridas contienen primarios compatibles. Un reporte agregado de curvas no contiene trazas ni geometría adicional.');wave_help.setWordWrap(True);waves.insertWidget(0,wave_help)
-        view('Comparar',[self.compare_group,self.design_study_group])
+        view('Comparar',[self.compare_group,self.design_study_group,self.study_csv_snapshot_group])
         view('Mediciones',[measured])
         view('Trazabilidad',[self.source_notice,self.path_label,self.details])
         # Source paths and identifiers stay available in Trazabilidad. Keep
@@ -1691,6 +1710,12 @@ class ResultsPage(QWidget):
             except (OSError,ValueError):pass
         self.loading=True;self.trace_group.hide();self.path_label.setText(f"Cargando {path}…")
         def done(data):
+            if data.get("schema")==PARAMETRIC_STUDY_SNAPSHOT_SCHEMA:
+                self._show_parametric_study_csv_snapshot(data,path)
+                return
+            self.variants.show();self.baseline_label.show();self.baseline_selector.show();self.baseline_notice.show()
+            self.export_report_button.show();self.export_table_button.show();self.export_plot_button.show()
+            self.study_csv_snapshot_group.hide()
             self.dataset=data;self.source=path
             legacy=data.get("schema")=="DINO_DESKTOP_LEGACY_HISTORICAL_SUMMARY_V1"
             self.source_kind="LEGACY_HISTORICAL" if legacy else "HISTORICAL_IMPL2" if historical else "IMPORTED_EXTERNAL"
@@ -1707,8 +1732,67 @@ class ResultsPage(QWidget):
             self.variants.blockSignals(False);self._project_context_changed();self.loading=False;self.redraw();self._baseline_changed();self._dataset_summary();self.evidence_updated.emit()
         def fail(message):
             self.loading=False;self.path_label.setText("No se pudieron cargar los datos; selección anterior conservada")
-            QMessageBox.warning(self,"Reporte inválido",'El CSV histórico necesita su JSON compañero con el mismo nombre y hashes válidos. Conservá ambos archivos. Un CSV de curvas de consulta no reemplaza los artefactos originales.\n\nDetalle: '+message)
+            QMessageBox.warning(self,"Importación inválida",'No se pudo validar el CSV o reporte seleccionado. Los snapshots paramétricos son de sólo lectura; los CSV históricos conservan su JSON compañero.\n\nDetalle: '+message)
         run_background(load_results,path,on_done=done,on_error=fail)
+
+    def _show_parametric_study_csv_snapshot(self,data,path):
+        snapshot=data.get("snapshot") or {};points=data.get("snapshot_points") or []
+        self.dataset=data;self.source=Path(path);self.source_kind="PARAMETRIC_STUDY_CSV_SNAPSHOT";self.loading=False
+        self.trace_group.hide();self.compare_group.hide();self.design_study_group.hide();self.study_comparison_group.hide()
+        self.variants.hide();self.baseline_label.hide();self.baseline_selector.hide();self.baseline_notice.hide()
+        self.export_report_button.hide();self.export_table_button.hide();self.export_plot_button.hide()
+        self.study_csv_snapshot_group.show();self.result_tabs.setCurrentIndex(3)
+        self.source_notice.setText(
+            "Snapshot CSV paramétrico de sólo lectura. Los valores se presentan como se exportaron; "
+            "no inicia ni reconstruye corridas, y la validación predictiva no se infiere del archivo.")
+        self.path_label.setText(f"{Path(path)} · {len(points)} punto(s) · CSV SHA-256 {snapshot.get('csv_sha256','No disponible')}")
+        self.run_summary.setText(
+            f"Snapshot paramétrico · {snapshot.get('study_id','estudio sin ID')} · {len(points)} punto(s) seleccionados · "
+            f"estado científico {snapshot.get('scientific_validation','NOT_CLAIMED')}")
+        self.study_csv_snapshot_notice.setText(
+            f"Estudio {snapshot.get('study_id')} · método {snapshot.get('design_method')} · "
+            f"manifiesto SHA-256 {snapshot.get('manifest_sha256')} · CSV SHA-256 {snapshot.get('csv_sha256')} · "
+            f"fuentes: estado registrado al exportar (no re-verificado en este snapshot) · sólo lectura · "
+            f"validación científica {snapshot.get('scientific_validation','NOT_CLAIMED')}.")
+        self.study_csv_snapshot_table.setRowCount(len(points))
+        for index,point in enumerate(points):
+            factors=[]
+            for item in point.get("factor_values",[]):
+                if not isinstance(item,dict):continue
+                label=item.get("label") or item.get("parameter_id") or item.get("id") or "Factor"
+                value=item.get("value")
+                factors.append(f"{label}={value if value is not None else '—'} {item.get('unit') or ''}".rstrip())
+            design=" · ".join(factors) or f"{point.get('design_value','')} {point.get('design_unit','')}".strip()
+            verification=point.get("source_verification")
+            source_state=("Verificada al exportar" if point.get("source_verified_at_export") else {
+                "NOT_LOADED":"Fuente no cargada al exportar",
+                "NO_EXACT_ARTIFACT_MATCH":"Sin coincidencia exacta de fuente al exportar",
+                "SOURCE_ARTIFACT_CHANGED":"Artifact fuente alterado al exportar",
+                "VERIFIED_HASH_AND_IDENTITY":"Verificada al exportar",
+            }.get(verification,"No verificada al exportar"))
+            cells=[str(point.get("point_index")),design,point.get("rpm",""),
+                _state_label(point.get("classification") or point.get("execution_status") or "Sin informar"),
+                _state_label(point.get("periodicity") or "NOT_REPORTED"),point.get("cycles_completed",""),
+                point.get("brake_power_kw") or "—",point.get("brake_torque_nm") or "—",
+                point.get("BMEP_kpa") or "—",source_state]
+            detail=json.dumps(point,ensure_ascii=False,indent=2,sort_keys=True)
+            for column,value in enumerate(cells):
+                item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                item.setData(Qt.ItemDataRole.UserRole,detail);item.setToolTip(detail)
+                self.study_csv_snapshot_table.setItem(index,column,item)
+        self.study_csv_snapshot_detail.clear()
+        if points:
+            self.study_csv_snapshot_table.setCurrentCell(0,0)
+            self._study_csv_snapshot_row_selected(0,0,-1,-1)
+        else:self.study_csv_snapshot_detail.setPlainText("El snapshot no contiene puntos.")
+        self.plot.set_series([]);self.power_curves.set_dataset(None,set());self.trace_plot.set_series([])
+        self.trace_map.set_grid([],[]);self.point_table.setRowCount(0);self.details.setRowCount(0)
+        for card,name in zip(self.metric_cards,('Potencia','Torque','BMEP','Auditoría')):card.setText(name+'\n—')
+        self.result_tabs.setCurrentIndex(3);self.evidence_updated.emit()
+
+    def _study_csv_snapshot_row_selected(self,row,column,previous_row,previous_column):
+        item=self.study_csv_snapshot_table.item(row,0) if row>=0 else None
+        self.study_csv_snapshot_detail.setPlainText(item.data(Qt.ItemDataRole.UserRole) if item else "")
 
     def _dataset_summary(self):
         rows=self.dataset.get('points',[]) if self.dataset else []
