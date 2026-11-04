@@ -12010,9 +12010,11 @@
       "id": "DESKTOP-PARAMETRIC-STUDY-BUDGET-LIFECYCLE-SUMMARY-V1",
       "description": "Show an exact manifest-derived study budget/lifecycle summary in Results: allocated and consumed seconds when recorded, completed/incomplete points, and cancellation/interruption state. Avoid runtime predictions or recomputing scientific data.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "4a175b3d1fe57dfcd0185b395556adefb08aa2da"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -12022,8 +12024,12 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Implement a Results summary computed only from manifest totals, elapsed seconds, point statuses and stop_reason; cover standard study and RPM envelope, missing fields, cancellation and PARTIAL states in synthetic tests.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/study-budget-lifecycle-summary/native-v5/acceptance.md",
+        "results/desktop-parametric-design-study-v2/study-budget-lifecycle-summary/native-v5/receipt.json",
+        "results/desktop-parametric-design-study-v2/study-budget-lifecycle-summary/native-v5/cancelled-synthetic-study-summary.png"
+      ],
+      "next_action": "",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16972,6 +16978,12 @@
       "task": "DESKTOP-UIA-COM-SESSION-LIFECYCLE-REPRO-V1",
       "kind": "task",
       "summary": "Replanificación focalizada para la regresión COM/UIA pendiente solicitada por el usuario: verificar ciclo de vida del proveedor en una ventana Desktop real, sin auditoría visual general."
+    },
+    {
+      "at": "2026-11-04T23:36:56+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-BUDGET-LIFECYCLE-SUMMARY-V1",
+      "kind": "task",
+      "summary": "Results muestra presupuesto/tiempo que constan en manifiesto, puntos completos e incompletos, estado y motivo de cancelación; manifiestos antiguos muestran tiempos no registrados, sin estimar duración restante. 47 pruebas pasan y Desktop real muestra un fixture sintético. Commit 4a175b3."
     }
   ],
   "legacy_gate_status": {
