@@ -58,16 +58,30 @@ def study_directory(artifact_root: str | Path, project_id: str, study_id: str) -
 
 def _verified_historical_match(artifact_root: Path, design_point: dict, *, rpm: float,
                                max_cycles: int, memory_limit_mib: int,
-                               exclude: Path | None = None) -> dict | None:
+                               exclude: Path | None = None,
+                               history_references: list | None = None) -> dict | None:
     """Find a completed exact-identity engineering run and verify it via importer."""
     from .engineering_workflow import import_desktop_runs
     from .engine_configuration import implementation_source_hashes
     run_root = artifact_root / "exploratory-workflow-v1"
-    if not run_root.is_dir():
-        return None
     expected = design_point["preflight"]
-    for project_dir in sorted(path for path in run_root.iterdir() if path.is_dir()):
-        for candidate in sorted(path for path in project_dir.iterdir() if path.is_dir()):
+    candidates = []
+    if run_root.is_dir():
+        candidates.extend(path for project_dir in sorted(run_root.iterdir()) if project_dir.is_dir()
+                          for path in sorted(project_dir.iterdir()) if path.is_dir())
+    reference_by_path = {}
+    for reference in history_references or []:
+        if not isinstance(reference, dict) or not isinstance(reference.get("path"), str):
+            continue
+        path = Path(reference["path"]).expanduser()
+        if not path.is_absolute():path = artifact_root / path
+        path = path.resolve()
+        candidate = path.parent if path.name == "result.json" else path
+        if candidate.is_dir():
+            candidates.append(candidate)
+            reference_by_path.setdefault(candidate, []).append(reference)
+    unique = sorted({path.resolve() for path in candidates}, key=lambda path: str(path).casefold())
+    for candidate in unique:
             if exclude is not None and candidate.resolve() == exclude.resolve():
                 continue
             result_path = candidate / "result.json"
@@ -81,6 +95,12 @@ def _verified_historical_match(artifact_root: Path, design_point: dict, *, rpm: 
                 preflight = raw.get("preflight", {})
                 result_hash = run.get("result_sha256")
                 if not result_hash or result_hash != _sha_bytes(result_path.read_bytes()):
+                    continue
+                references = reference_by_path.get(candidate, [])
+                if references and not any(
+                        ref.get("identity_sha256") == bindings.get("identity_sha256") and
+                        ref.get("artifact_sha256") == _sha_bytes(result_path.read_bytes())
+                        for ref in references):
                     continue
                 if (raw.get("schema") != "DINO_ENGINEERING_RUN_V1" or
                         raw.get("status") != "COMPLETE" or
@@ -106,6 +126,7 @@ def _verified_historical_match(artifact_root: Path, design_point: dict, *, rpm: 
                     "elapsed_seconds": raw.get("elapsed_seconds", 0), "reused_verified": True,
                     "historical_source_run_id": bindings.get("run_id"),
                     "historical_source_project_id": bindings.get("project_id"),
+                    "historical_source_reference": bool(references),
                     "history_reuse_policy": "EXACT_IDENTITY_OPERATING_POINT_SOURCES_ARTIFACTS_V1"}
             except Exception:
                 # Damaged or unsupported history is never eligible for reuse.
@@ -308,7 +329,8 @@ def prepare_design_study(engine: dict, *, parameter_id: str, values: list[float]
 
 def run_design_study(prepared: dict, *, artifact_root: str | Path,
                      cancel_event=None, progress=None, resume: bool = False,
-                     additional_budget_seconds: float = 0) -> dict:
+                     additional_budget_seconds: float = 0,
+                     history_references: list | None = None) -> dict:
     """Run bounded points serially, preserving checkpoints and manifest on interruption."""
     from .engineering_workflow import run as run_engineering, import_desktop_runs
     if prepared.get("schema") != SCHEMA:
@@ -409,7 +431,7 @@ def run_design_study(prepared: dict, *, artifact_root: str | Path,
         if result is None:
             result=_verified_historical_match(root,design_point,rpm=prepared["rpm"],
                 max_cycles=prepared["max_cycles"],memory_limit_mib=prepared["memory_limit_mib"],
-                exclude=run_dir)
+                exclude=run_dir,history_references=history_references)
         if result is None:
             point_remaining=max(0,float(manifest["effective_point_budget_seconds"])-float(row.get("elapsed_seconds",0)))
             if point_remaining<=0:
@@ -447,6 +469,7 @@ def run_design_study(prepared: dict, *, artifact_root: str | Path,
                 historical_source_run_id=result.get("historical_source_run_id"),
                 historical_source_project_id=result.get("historical_source_project_id"),
                 history_reuse_policy=result.get("history_reuse_policy"),
+                historical_source_reference=result.get("historical_source_reference",False),
                 source_run_id=result.get("historical_source_run_id") or row.get("run_id"))
             if status!="COMPLETE":
                 stop_reason=("CANCELLED" if cancel_event is not None and cancel_event.is_set()

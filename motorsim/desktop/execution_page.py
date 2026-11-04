@@ -497,6 +497,7 @@ class ExecutionPage(QWidget):
         self.cancel_event=threading.Event();self.progress_latest=None
         self.output.appendPlainText(f"Estudio paramétrico EXPLORATORY iniciado · {prepared['study_id']} · {len(prepared['points'])} diseños.")
         self.task=run_background(run_design_study,prepared,artifact_root=self.artifact_root,
+            history_references=self.context.project.get("result_references",[]),
             cancel_event=self.cancel_event,progress=self.progress_signal.emit,
             on_done=self._done,on_error=self._failed)
         self.status_text="CORRIENDO ESTUDIO DE DISEÑO";self.checkpoint_summary="manifiesto y checkpoint independientes por diseño"
@@ -539,7 +540,9 @@ class ExecutionPage(QWidget):
             "max_cycles":prepared["max_cycles"],"total_budget_seconds":max(1,extension)}
         self.task=run_background(run_design_study,prepared,artifact_root=self.artifact_root,
             cancel_event=self.cancel_event,progress=self.progress_signal.emit,resume=True,
-            additional_budget_seconds=extension,on_done=self._done,on_error=self._failed)
+            additional_budget_seconds=extension,
+            history_references=self.context.project.get("result_references",[]),
+            on_done=self._done,on_error=self._failed)
         self.elapsed_timer.start();self.status_text="REANUDANDO ESTUDIO";self.checkpoint_summary="checkpoints por diseño"
         self.cancel.setEnabled(True);self.start.setEnabled(False);self.resume.setEnabled(False)
         self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()

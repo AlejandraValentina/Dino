@@ -1,0 +1,34 @@
+{
+  "schema": "DINO_PARAMETRIC_REFERENCED_HISTORY_V1_ACCEPTANCE",
+  "source_commit": "pending-local-commit",
+  "study_id": "project-reference-reuse-20261104",
+  "status": "COMPLETE",
+  "elapsed_seconds": 0.07800000003771856,
+  "manifest_path": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\desktop-parametric-reference-reuse-v1\\design-studies-v1\\synthetic-transfer-study\\project-reference-reuse-20261104\\study.json",
+  "manifest_sha256": "43ada4c3000c04177a5a026f0e8062f0147d9ffb96756b575d0d266f583d547a",
+  "references_resolved_from_existing_project_contract": true,
+  "solver_invocation_guard": "engineering_workflow.run replaced with assertion failure",
+  "points": [
+    {
+      "status": "CACHED",
+      "source_run_id": "history-reuse-smoke-20261104-p00",
+      "historical_source_reference": true,
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "identity_sha256": "360f51fb8b1eb120d923a0c8a1a44eb0c6a5f8b4f1f0f1635beb6e5171545102",
+      "artifact_sha256": "d9b0295f81588ce977bb1eece88fbc8a6fc315046340b924dc37c2275d71d084",
+      "source_path": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\desktop-parametric-design-study-v1\\engine-study-20261104T\\exploratory-workflow-v1\\synthetic-transfer-study\\history-reuse-smoke-20261104-p00\\result.json"
+    },
+    {
+      "status": "CACHED",
+      "source_run_id": "history-reuse-smoke-20261104-p01",
+      "historical_source_reference": true,
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "identity_sha256": "432cb3fcb8d15e46e5f3744e67446da0bab5c14c2403cdaad0e0c9ab3137fc7d",
+      "artifact_sha256": "2f7311d4c0235d21c2081b53b4c74254178186081a9bc9780de8c6331155cd6e",
+      "source_path": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\desktop-parametric-design-study-v1\\engine-study-20261104T\\exploratory-workflow-v1\\synthetic-transfer-study\\history-reuse-smoke-20261104-p01\\result.json"
+    }
+  ],
+  "scientific_validation": "NOT_CLAIMED; both records remain one-cycle nonconverged synthetic engineering runs"
+}

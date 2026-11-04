@@ -137,7 +137,8 @@ def test_historical_reuse_requires_exact_contract_and_verified_importer(tmp_path
     imports=[]
     def verify(paths):
         imports.append(Path(paths[0]))
-        return {"points":[{"run_id":"old-run","rpm":3000.0,"cycles_requested":1,
+        run_id=Path(paths[0]).name
+        return {"points":[{"run_id":run_id,"rpm":3000.0,"cycles_requested":1,
                             "implementation_identity_sha256":"verified-sources"}]}
     monkeypatch.setattr(engineering_workflow,"import_desktop_runs",verify)
     point={"preflight":{"identity_sha256":expected_identity}}
@@ -155,6 +156,18 @@ def test_historical_reuse_requires_exact_contract_and_verified_importer(tmp_path
     assert _verified_historical_match(tmp_path,point,rpm=3000.0,max_cycles=1,
         memory_limit_mib=512) is None
     assert len(imports)==1
+    external=tmp_path.parent/"external-referenced-run"
+    external.mkdir()
+    referenced_raw={**raw,"bindings":{**raw["bindings"],"run_id":external.name}}
+    referenced_bytes=json.dumps(referenced_raw).encode("utf-8")
+    (external/"result.json").write_bytes(referenced_bytes)
+    (external/"run.json").write_text(json.dumps({"result_sha256":hashlib.sha256(referenced_bytes).hexdigest()}),encoding="utf-8")
+    reference={"path":str(external/"result.json"),"identity_sha256":expected_identity,
+        "artifact_sha256":hashlib.sha256(referenced_bytes).hexdigest()}
+    match=_verified_historical_match(tmp_path,point,rpm=3000.0,max_cycles=1,
+        memory_limit_mib=512,history_references=[reference])
+    assert match and match["historical_source_reference"] is True
+    assert imports[-1]==external
 
 
 def test_study_runner_reuses_exact_historical_point_without_running_solver(starter,tmp_path,monkeypatch):

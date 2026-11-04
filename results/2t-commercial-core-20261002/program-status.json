@@ -11005,7 +11005,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-ADAPTERS-V2"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11020,7 +11020,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Compose two existing model adapters into a bounded 2x2 study, retain immutable source designs and label all points EXPLORATORY; never derive effects from undefined/nonperiodic metrics.",
+      "next_action": "Implement immutable 2x2 factorial point preparation and Desktop presentation using the existing single-point execution/import path, with strict existing budgets and no inferred effects.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11029,19 +11029,29 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-HISTORY-REUSE-V1"
       ],
-      "state": "READY",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "pending-commit"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
         "motorsim/design_study.py",
-        "motorsim/desktop/run_history.py",
-        "tests/test_design_study.py"
+        "motorsim/desktop/execution_page.py",
+        "tests/test_design_study.py",
+        "tests/test_desktop_design_study.py",
+        "docs/desktop/parametric-design-studies.md",
+        "results/desktop-parametric-design-study-v2/",
+        "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Resolve only project-declared result references, apply exact identity/operating/source matching, and require the normal importer to verify every candidate before reuse.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/referenced-history-receipt.json",
+        "results/desktop-parametric-design-study-v2/referenced-history-tests.txt",
+        "results/desktop-parametric-design-study-v2/history-reuse-acceptance.md"
+      ],
+      "next_action": "Continue with DESKTOP-PARAMETRIC-MULTIFACTOR-V1 using only existing adapters and a bounded factorial matrix.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11064,6 +11074,47 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Plot only observed defined periodic study metrics against parameter values; show nonconverged/absent points explicitly and avoid fitting or interpolation.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CACHE-TRACE-V1",
+      "description": "Expose verified cached-run source IDs, paths and artifact hashes in study traceability and reports.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-REFERENCED-HISTORY-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_design_study.py",
+        "tests/test_desktop_technical_report.py"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Make the original source run and verified artifact evidence directly inspectable from each cached comparison row without editing the source record.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-REFERENCE-TAMPER-V1",
+      "description": "Verify project result references fail closed when their registered artifact hash, identity or source evidence no longer matches.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-REFERENCED-HISTORY-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "verification",
+      "write_scope": [
+        "tests/test_design_study.py"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Add tampering and missing-source regressions for external project-referenced history; assert rejected artifacts never reach the engineering importer or solver reuse path.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -15571,6 +15622,24 @@
       "task": "DESKTOP-PARAMETRIC-HISTORY-REUSE-V1",
       "kind": "task",
       "summary": "Completed exact-identity, source-bound historical reuse with importer verification, CACHED row provenance, tamper rejection, technical report manifest integration and a real no-solver historical reuse check; synthetic evidence only."
+    },
+    {
+      "at": "2026-11-04T16:46:53+00:00",
+      "task": "DESKTOP-PARAMETRIC-REFERENCED-HISTORY-V1",
+      "kind": "task",
+      "summary": "Started project-referenced reuse integration; existing project references must be hash-bound and pass the same exact identity and engineering importer verification, including references outside artifact root."
+    },
+    {
+      "at": "2026-11-04T16:49:32+00:00",
+      "task": "DESKTOP-PARAMETRIC-REFERENCED-HISTORY-V1",
+      "kind": "task",
+      "summary": "Completed reuse of project-registered external result references with artifact hash binding and normal importer verification; real artifact-root-isolated two-point check completed as CACHED with solver guarded."
+    },
+    {
+      "at": "2026-11-04T16:49:32+00:00",
+      "task": "DESKTOP-PARAMETRIC-MULTIFACTOR-V1",
+      "kind": "task",
+      "summary": "Started a bounded two-factor factorial study using only existing native parameter adapters."
     }
   ],
   "legacy_gate_status": {

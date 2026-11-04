@@ -2,7 +2,7 @@ from __future__ import annotations
 import hashlib,json,os
 from pathlib import Path
 os.environ.setdefault("QT_QPA_PLATFORM","offscreen")
-from PySide6.QtWidgets import QApplication,QComboBox,QDialog,QLineEdit
+from PySide6.QtWidgets import QApplication,QComboBox,QDialog,QLineEdit,QMessageBox
 from motorsim.desktop.app import DinoDesktopWindow
 from motorsim.desktop.context import DesktopContext
 from motorsim.desktop.execution_page import ExecutionPage
@@ -80,6 +80,26 @@ def test_parametric_dialog_uses_selected_axis_units(monkeypatch):
     page.start_design_study()
     assert queued["kwargs"]["parameter_id"]=="crankcase.volume_bdc_cm3"
     assert queued["kwargs"]["values"]==[context.engine()["native_configuration"]["slider_crank"]["crankcase"]["volume_bdc_cm3"],366.0]
+    page.task=None;page.close();APP.processEvents()
+
+
+def test_project_historical_references_are_forwarded_to_study_runner(tmp_path,monkeypatch):
+    context=DesktopContext(new_design_project("design-study-reference-forward-test"))
+    reference={"path":str(tmp_path/"historical"/"result.json"),
+        "identity_sha256":"a"*64,"artifact_sha256":"b"*64,"classification":"PERIOD_1"}
+    context.project["result_references"]=[reference]
+    page=ExecutionPage(context);page.artifact_root=tmp_path;queued={}
+    prepared={"project_id":context.project["project_id"],"variant_label":"base",
+        "parameter":{"unit":"mm","label":"synthetic parameter"},"values":[1.,2.],
+        "rpm":3000.,"max_cycles":1,"total_budget_seconds":60.,"study_id":"reference-test",
+        "points":[{},{}]}
+    monkeypatch.setattr("motorsim.storage_preflight.check_storage_requirements",lambda *args,**kwargs:None)
+    monkeypatch.setattr(QMessageBox,"question",lambda *args,**kwargs:QMessageBox.StandardButton.Yes)
+    def record(function,*args,**kwargs):queued.update(function=function,args=args,kwargs=kwargs);return object()
+    monkeypatch.setattr("motorsim.desktop.execution_page.run_background",record)
+    page._design_study_preflight_done(prepared)
+    assert queued["function"].__name__=="run_design_study"
+    assert queued["kwargs"]["history_references"]==[reference]
     page.task=None;page.close();APP.processEvents()
 
 

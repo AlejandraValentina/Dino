@@ -22,4 +22,4 @@ The first real reuse probe failed to match because the engineering contract stor
 
 ## Limits
 
-Only the configured artifact root's `exploratory-workflow-v1` store is searched. Project references whose artifacts live outside that root are not traversed yet. Multi-factor studies and a parameter-response visualization remain unavailable. The Desktop integration is source-level; no Windows package was rebuilt. This evidence is functional and synthetic only, not experimental validation.
+Historical search includes the configured artifact root's `exploratory-workflow-v1` store and project-registered result references, including references outside that root. Arbitrary external paths not registered by the project are not searched. Multi-factor studies and a parameter-response visualization remain unavailable. The Desktop integration is source-level; no Windows package was rebuilt. This evidence is functional and synthetic only, not experimental validation.
