@@ -647,7 +647,7 @@ class ResultsPage(QWidget):
             f"manifiesto: {getattr(self,'design_study_manifest_path','—')}")
         self.design_study_table.setRowCount(len(manifest.get("points",[])))
         for index,row in enumerate(manifest.get("points",[])):
-            point=dataset_points.get(str(row.get("run_id")),{})
+            point=dataset_points.get(str(row.get("source_run_id") or row.get("run_id")),{})
             metrics=[]
             for key in ("brake_power","brake_torque","BMEP"):
                 value=point.get(key) if point.get(key+"_status")=="DEFINED" else None
@@ -655,13 +655,16 @@ class ResultsPage(QWidget):
             power=point.get("brake_power") if point.get("brake_power_status")=="DEFINED" else None
             delta=(format_number(power-values["brake_power"],signed=True) if isinstance(power,(int,float)) and isinstance(values["brake_power"],(int,float)) else "—")
             design_label="Baseline" if row.get("baseline") else f"Diseño {index+1}"
+            if row.get("status")=="CACHED" and row.get("reused_verified"):
+                design_label += " · histórico verificado"
             cells=[design_label,f"{format_number(row.get('value'))} {row.get('unit','')}",
                 _state_label(point.get("classification") or row.get("status")),
                 _state_label(point.get("periodicity") or "NOT_EVALUATED"),
                 str(point.get("cycles_completed",row.get("cycles_completed",0))),*metrics,delta]
             for column,value in enumerate(cells):
                 item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-                if column in (2,3,8):item.setToolTip(str(value))
+                if column in (2,3,8) or row.get("status")=="CACHED":
+                    item.setToolTip(str(value)+("\nCorrida histórica reutilizada tras verificar identidad y artefactos." if row.get("status")=="CACHED" else ""))
                 self.design_study_table.setItem(index,column,item)
         self.design_study_group.show()
     def _exploratory_failed(self,message):

@@ -1,0 +1,48 @@
+{
+  "schema": "DINO_PARAMETRIC_HISTORY_REUSE_V1_ACCEPTANCE",
+  "source_commit": "pending-local-commit",
+  "real_historical_reuse": {
+    "study_id": "history-reuse-verified-20261104",
+    "status": "COMPLETE",
+    "elapsed_seconds": 0.09399999998277053,
+    "manifest_path": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\desktop-parametric-design-study-v1\\engine-study-20261104T\\design-studies-v1\\synthetic-transfer-study\\history-reuse-verified-20261104\\study.json",
+    "manifest_sha256": "582254da655ebf14b30255b0f3708cbf298a3102f5be669d28b72e7b582c0441",
+    "solver_invocation_guard": "engineering_workflow.run replaced with assertion failure during this execution",
+    "points": [
+      {
+        "study_point_run_id": "history-reuse-verified-20261104-p00",
+        "source_run_id": "history-reuse-smoke-20261104-p00",
+        "status": "CACHED",
+        "classification": "MAX_CYCLES_NONCONVERGED",
+        "periodicity": "INSUFFICIENT_CYCLES",
+        "reused_verified": true,
+        "identity_sha256": "360f51fb8b1eb120d923a0c8a1a44eb0c6a5f8b4f1f0f1635beb6e5171545102",
+        "result_artifact_sha256": "d9b0295f81588ce977bb1eece88fbc8a6fc315046340b924dc37c2275d71d084",
+        "source_result_path": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\desktop-parametric-design-study-v1\\engine-study-20261104T\\exploratory-workflow-v1\\synthetic-transfer-study\\history-reuse-smoke-20261104-p00\\result.json"
+      },
+      {
+        "study_point_run_id": "history-reuse-verified-20261104-p01",
+        "source_run_id": "history-reuse-smoke-20261104-p01",
+        "status": "CACHED",
+        "classification": "MAX_CYCLES_NONCONVERGED",
+        "periodicity": "INSUFFICIENT_CYCLES",
+        "reused_verified": true,
+        "identity_sha256": "432cb3fcb8d15e46e5f3744e67446da0bab5c14c2403cdaad0e0c9ab3137fc7d",
+        "result_artifact_sha256": "2f7311d4c0235d21c2081b53b4c74254178186081a9bc9780de8c6331155cd6e",
+        "source_result_path": "C:\\Users\\ageribon.MIDES\\Dino-artifacts\\desktop-parametric-design-study-v1\\engine-study-20261104T\\exploratory-workflow-v1\\synthetic-transfer-study\\history-reuse-smoke-20261104-p01\\result.json"
+      }
+    ]
+  },
+  "failed_initial_probe": {
+    "study_id": "history-reuse-smoke-20261104",
+    "result": "cache did not match before correcting result hash location; two synthetic single-cycle runs executed and preserved",
+    "runs": [
+      "history-reuse-smoke-20261104-p00",
+      "history-reuse-smoke-20261104-p01"
+    ],
+    "classification": "MAX_CYCLES_NONCONVERGED",
+    "periodicity": "INSUFFICIENT_CYCLES",
+    "predictive_claim": "NOT_CLAIMED"
+  },
+  "scientific_status": "synthetic functional integration only; no experimental validation; no solver/physics/config/tolerance changes"
+}

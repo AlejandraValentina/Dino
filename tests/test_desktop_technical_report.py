@@ -134,5 +134,7 @@ def test_results_page_exports_report_using_current_variant_selection(tmp_path):
         assert page.export_technical_report()
     assert destination.is_file()
     assert "Informe técnico de resultados" in destination.read_text(encoding="utf-8")
+    assert "Estudio paramétrico asociado" in destination.read_text(encoding="utf-8")
+    assert "ui-study" in destination.read_text(encoding="utf-8")
     assert page.findChild(QPushButton, "exportTechnicalReport") is not None
     page.close()

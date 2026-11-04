@@ -1,0 +1,6 @@
+python -m pytest -q tests/test_design_study.py tests/test_desktop_design_study.py tests/test_desktop_technical_report.py tests/test_crankcase_v2.py tests/test_two_stroke_ports.py
+38 passed in 70.01s
+python -m pytest -q tests/test_desktop_technical_report.py
+6 passed in 1.13s
+python -m compileall -q motorsim/design_study.py motorsim/desktop/results_page.py motorsim/desktop/technical_report.py
+PASS

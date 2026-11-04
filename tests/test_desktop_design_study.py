@@ -26,16 +26,20 @@ def test_parametric_actions_are_available_and_study_comparison_is_explicit(tmp_p
         "brake_power_status":"UNDEFINED","brake_torque":None,"brake_torque_status":"UNDEFINED",
         "BMEP":None,"BMEP_status":"UNDEFINED","classification":"MAX_CYCLES_NONCONVERGED",
         "periodicity":"NOT_EVALUATED","cycles_completed":1}
-    page.dataset={"points":[baseline,candidate]}
+    historical=dict(candidate,run_id="historical-run",variant_id="old study label")
+    page.dataset={"points":[baseline,historical]}
     page.design_study_manifest={"study_id":"synthetic-study","rpm":3000,
         "parameter":{"label":"Escape · diffuser · longitud"},"points":[
             {"run_id":"run-base","baseline":True,"value":180.,"unit":"mm","status":"COMPLETE","cycles_completed":1},
-            {"run_id":"run-var","baseline":False,"value":182.,"unit":"mm","status":"COMPLETE","cycles_completed":1}]}
+            {"run_id":"run-var","source_run_id":"historical-run","reused_verified":True,
+             "status":"CACHED","baseline":False,"value":182.,"unit":"mm","cycles_completed":1}]}
     page.design_study_manifest_path=tmp_path/"study.json"
     page._update_design_study_summary()
     assert not page.design_study_group.isHidden()
     assert page.design_study_table.rowCount()==2
     assert page.design_study_table.item(0,5).text()=="—"
+    assert "histórico verificado" in page.design_study_table.item(1,0).text()
+    assert "Corrida histórica reutilizada" in page.design_study_table.item(1,0).toolTip()
     assert "NO RECLAMADA" in page.design_study_notice.text()
     window.close();page.close();APP.processEvents()
 

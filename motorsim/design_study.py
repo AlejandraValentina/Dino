@@ -56,6 +56,63 @@ def study_directory(artifact_root: str | Path, project_id: str, study_id: str) -
     return target
 
 
+def _verified_historical_match(artifact_root: Path, design_point: dict, *, rpm: float,
+                               max_cycles: int, memory_limit_mib: int,
+                               exclude: Path | None = None) -> dict | None:
+    """Find a completed exact-identity engineering run and verify it via importer."""
+    from .engineering_workflow import import_desktop_runs
+    from .engine_configuration import implementation_source_hashes
+    run_root = artifact_root / "exploratory-workflow-v1"
+    if not run_root.is_dir():
+        return None
+    expected = design_point["preflight"]
+    for project_dir in sorted(path for path in run_root.iterdir() if path.is_dir()):
+        for candidate in sorted(path for path in project_dir.iterdir() if path.is_dir()):
+            if exclude is not None and candidate.resolve() == exclude.resolve():
+                continue
+            result_path = candidate / "result.json"
+            manifest_path = candidate / "run.json"
+            if not result_path.is_file() or not manifest_path.is_file():
+                continue
+            try:
+                raw = json.loads(result_path.read_text(encoding="utf-8"))
+                run = json.loads(manifest_path.read_text(encoding="utf-8"))
+                bindings = raw.get("bindings", {})
+                preflight = raw.get("preflight", {})
+                result_hash = run.get("result_sha256")
+                if not result_hash or result_hash != _sha_bytes(result_path.read_bytes()):
+                    continue
+                if (raw.get("schema") != "DINO_ENGINEERING_RUN_V1" or
+                        raw.get("status") != "COMPLETE" or
+                        bindings.get("identity_sha256") != expected.get("identity_sha256") or
+                        raw.get("source_hashes") != implementation_source_hashes() or
+                        preflight.get("rpm") != rpm or
+                        preflight.get("max_cycles") != max_cycles or
+                        preflight.get("memory_limit_mib") != memory_limit_mib):
+                    continue
+                imported = import_desktop_runs([candidate])["points"]
+                if len(imported) != 1:
+                    continue
+                record = imported[0]
+                if (record.get("run_id") != bindings.get("run_id") or
+                        record.get("rpm") != rpm or
+                        record.get("cycles_requested") != max_cycles or
+                        record.get("implementation_identity_sha256") is None):
+                    continue
+                return {"status": raw["status"], "classification": raw.get("classification"),
+                    "periodicity": raw.get("periodicity"), "cycles_completed": raw.get("cycles_completed"),
+                    "artifact_directory": str(candidate), "result_sha256": result_hash,
+                    "identity_sha256": bindings["identity_sha256"],
+                    "elapsed_seconds": raw.get("elapsed_seconds", 0), "reused_verified": True,
+                    "historical_source_run_id": bindings.get("run_id"),
+                    "historical_source_project_id": bindings.get("project_id"),
+                    "history_reuse_policy": "EXACT_IDENTITY_OPERATING_POINT_SOURCES_ARTIFACTS_V1"}
+            except Exception:
+                # Damaged or unsupported history is never eligible for reuse.
+                continue
+    return None
+
+
 def available_parameters(engine: dict) -> list[dict]:
     """List only explicit native fields with a consistency-preserving adapter."""
     validate(engine)
@@ -300,20 +357,27 @@ def run_design_study(prepared: dict, *, artifact_root: str | Path,
         row=manifest["points"][index]
         run_dir=root/"exploratory-workflow-v1"/prepared["project_id"]/row["run_id"]
         if row.get("status") in {"COMPLETE","CACHED"}:
+            completed_dir=Path(row.get("run_directory") or run_dir)
             try:
-                raw=json.loads((run_dir/"result.json").read_text(encoding="utf-8"))
-                verified=import_desktop_runs([run_dir])["points"]
+                raw=json.loads((completed_dir/"result.json").read_text(encoding="utf-8"))
+                run_manifest=json.loads((completed_dir/"run.json").read_text(encoding="utf-8"))
+                verified=import_desktop_runs([completed_dir])["points"]
                 point_identity=raw.get("bindings",{}).get("identity_sha256")
                 if (raw.get("status")!="COMPLETE" or len(verified)!=1 or
                         point_identity!=design_point["preflight"]["identity_sha256"] or
-                        row.get("engine_identity_sha256")!=design_point["engine_identity_sha256"]):
+                        row.get("engine_identity_sha256")!=design_point["engine_identity_sha256"] or
+                        (row.get("result_sha256") and run_manifest.get("result_sha256")!=row.get("result_sha256")) or
+                        (row.get("result_artifact_sha256") and
+                         _sha_bytes((completed_dir/"result.json").read_bytes())!=row.get("result_artifact_sha256"))):
                     raise ValueError("completed point identity/artifact does not match the saved design")
-                artifact_sha=_sha_bytes((run_dir/"result.json").read_bytes())
+                artifact_sha=_sha_bytes((completed_dir/"result.json").read_bytes())
                 row.update(solver_status="COMPLETE",identity_sha256=point_identity,
-                    result_sha256=raw.get("result_sha256"),result_artifact_sha256=artifact_sha,
-                    run_directory=str(run_dir),classification=raw.get("classification"),
+                    result_sha256=run_manifest.get("result_sha256"),result_artifact_sha256=artifact_sha,
+                    run_directory=str(completed_dir),classification=raw.get("classification"),
                     periodicity=raw.get("periodicity"),cycles_completed=raw.get("cycles_completed"),
-                    elapsed_seconds=raw.get("elapsed_seconds",row.get("elapsed_seconds",0)),reused_verified=True)
+                    elapsed_seconds=raw.get("elapsed_seconds",row.get("elapsed_seconds",0)),reused_verified=True,
+                    source_run_id=raw.get("bindings",{}).get("run_id"),
+                    status="CACHED" if completed_dir.resolve()!=run_dir.resolve() else "COMPLETE")
                 continue
             except Exception as exc:
                 row.update(status="FAILED_CLOSED",failure=f"completed point verification failed: {type(exc).__name__}: {exc}")
@@ -327,6 +391,7 @@ def run_design_study(prepared: dict, *, artifact_root: str | Path,
         if (run_dir/"result.json").is_file() and (run_dir/"run.json").is_file():
             try:
                 raw=json.loads((run_dir/"result.json").read_text(encoding="utf-8"))
+                run_manifest=json.loads((run_dir/"run.json").read_text(encoding="utf-8"))
                 if raw.get("status")!="COMPLETE":raise ValueError("incomplete point requires checkpoint resume")
                 verified=import_desktop_runs([run_dir])["points"]
                 if len(verified)!=1 or verified[0].get("point_configuration_sha256") is None:
@@ -335,12 +400,16 @@ def run_design_study(prepared: dict, *, artifact_root: str | Path,
                     raise ValueError("existing point identity differs from the requested design")
                 result={"status":raw["status"],"classification":raw["classification"],
                     "periodicity":raw["periodicity"],"cycles_completed":raw["cycles_completed"],
-                    "artifact_directory":str(run_dir),"result_sha256":raw["result_sha256"],
+                    "artifact_directory":str(run_dir),"result_sha256":run_manifest["result_sha256"],
                     "identity_sha256":raw["bindings"]["identity_sha256"],"elapsed_seconds":raw.get("elapsed_seconds",0),
                     "reused_verified":True}
             except Exception:
                 result=None
         else:result=None
+        if result is None:
+            result=_verified_historical_match(root,design_point,rpm=prepared["rpm"],
+                max_cycles=prepared["max_cycles"],memory_limit_mib=prepared["memory_limit_mib"],
+                exclude=run_dir)
         if result is None:
             point_remaining=max(0,float(manifest["effective_point_budget_seconds"])-float(row.get("elapsed_seconds",0)))
             if point_remaining<=0:
@@ -361,7 +430,8 @@ def run_design_study(prepared: dict, *, artifact_root: str | Path,
             status=result.get("status")
             result_path=Path(result.get("artifact_directory") or run_dir)/"result.json"
             artifact_sha=_sha_bytes(result_path.read_bytes()) if result_path.is_file() else None
-            row.update(status="COMPLETE" if status=="COMPLETE" else status or "UNKNOWN",
+            row.update(status=("CACHED" if result.get("reused_verified") and result.get("historical_source_run_id")
+                               else "COMPLETE" if status=="COMPLETE" else status or "UNKNOWN"),
                 solver_status=status,classification=result.get("classification"),
                 periodicity=result.get("periodicity"),cycles_completed=result.get("cycles_completed"),
                 run_directory=str(result.get("artifact_directory") or run_dir),
@@ -373,7 +443,11 @@ def run_design_study(prepared: dict, *, artifact_root: str | Path,
                 # checkpointed invocations, so adding the saved value again
                 # would double-count resumed points and exhaust their budget.
                 elapsed_seconds=float(result.get("elapsed_seconds",row.get("elapsed_seconds",0))),
-                reused_verified=bool(result.get("reused_verified",False)))
+                reused_verified=bool(result.get("reused_verified",False)),
+                historical_source_run_id=result.get("historical_source_run_id"),
+                historical_source_project_id=result.get("historical_source_project_id"),
+                history_reuse_policy=result.get("history_reuse_policy"),
+                source_run_id=result.get("historical_source_run_id") or row.get("run_id"))
             if status!="COMPLETE":
                 stop_reason=("CANCELLED" if cancel_event is not None and cancel_event.is_set()
                              else "POINT_INCOMPLETE")

@@ -10974,6 +10974,61 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-DESIGN-STUDY-V1"
       ],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [
+        "pending-commit"
+      ],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/design_study.py",
+        "motorsim/desktop/results_page.py",
+        "tests/test_design_study.py",
+        "tests/test_desktop_design_study.py",
+        "docs/desktop/parametric-design-studies.md",
+        "results/desktop-parametric-design-study-v2/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/history-reuse-acceptance.md",
+        "results/desktop-parametric-design-study-v2/history-reuse-receipt.json",
+        "results/desktop-parametric-design-study-v2/history-reuse-tests.txt"
+      ],
+      "next_action": "Continue with DESKTOP-PARAMETRIC-REFERENCED-HISTORY-V1, the highest-priority remaining safety/product gap in reuse.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-MULTIFACTOR-V1",
+      "description": "Add bounded two-factor factorial design studies using only existing consistency-preserving parameter adapters and strict point/budget caps.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-ADAPTERS-V2"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/design_study.py",
+        "motorsim/desktop/execution_page.py",
+        "motorsim/desktop/results_page.py",
+        "tests/test_design_study.py",
+        "tests/test_desktop_design_study.py",
+        "docs/desktop/parametric-design-studies.md"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Compose two existing model adapters into a bounded 2x2 study, retain immutable source designs and label all points EXPLORATORY; never derive effects from undefined/nonperiodic metrics.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-REFERENCED-HISTORY-V1",
+      "description": "Reuse exact matching completed historical runs registered as project result references even when their artifacts are outside the default artifact-root run store.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-HISTORY-REUSE-V1"
+      ],
       "state": "READY",
       "blocker": null,
       "commits": [],
@@ -10986,7 +11041,29 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Reuse only results whose configuration, operating point, solver sources and verified primary artifacts match exactly.",
+      "next_action": "Resolve only project-declared result references, apply exact identity/operating/source matching, and require the normal importer to verify every candidate before reuse.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1",
+      "description": "Show parameter-versus-result response plots for existing study points while preserving periodicity, undefined metrics and synthetic/exploratory provenance.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-REPORT-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "motorsim/desktop/performance_curves.py",
+        "tests/test_desktop_design_study.py",
+        "docs/desktop/parametric-design-studies.md"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Plot only observed defined periodic study metrics against parameter values; show nonconverged/absent points explicitly and avoid fitting or interpolation.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -15482,6 +15559,18 @@
       "task": "DESKTOP-PARAMETRIC-REPORT-V1",
       "kind": "task",
       "summary": "Integrated verified parametric manifest, parameter values, engine identities, manifest hash and exact JSON appendix into existing technical HTML reports; preserved result rows and evidence boundaries; 6 report tests pass."
+    },
+    {
+      "at": "2026-11-04T16:41:19+00:00",
+      "task": "DESKTOP-PARAMETRIC-HISTORY-REUSE-V1",
+      "kind": "task",
+      "summary": "Started exact-identity historical run reuse after report integration; requires current solver source/config/RPM/cycle/memory match and full importer verification."
+    },
+    {
+      "at": "2026-11-04T16:41:44+00:00",
+      "task": "DESKTOP-PARAMETRIC-HISTORY-REUSE-V1",
+      "kind": "task",
+      "summary": "Completed exact-identity, source-bound historical reuse with importer verification, CACHED row provenance, tamper rejection, technical report manifest integration and a real no-solver historical reuse check; synthetic evidence only."
     }
   ],
   "legacy_gate_status": {

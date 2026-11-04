@@ -61,8 +61,14 @@ delta; nonconverged and incomplete points remain visible with their own state.
   cylinder compression ratio, intake-port dimensions, and multi-factor designs
   remain unavailable until their metadata and solver bindings can be regenerated
   without stale summaries.
-- Existing global result history is not searched as a design cache. Reuse is
-  limited to fully verified points already bound to the same study.
+- Historical reuse searches only the configured artifact root's existing
+  exploratory run store. A completed run is eligible only when engine identity,
+  RPM, cycle limit, memory limit, and current solver source hashes match
+  exactly, followed by successful verification through the existing result
+  importer. Reused points are marked `CACHED` and identify the original run;
+  missing, changed, or unsupported artifacts are ignored. No interpolation or
+  source-record relabeling occurs. External locations outside this store are
+  not searched.
 
 The study manifest is an analysis/execution record. It is not an experimental
 validation record and does not alter the project's scientific validation state.
