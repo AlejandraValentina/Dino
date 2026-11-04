@@ -191,7 +191,6 @@ def test_report_uses_declared_periodic_class_when_legacy_field_is_absent():
 
 def test_report_embeds_parametric_manifest_and_preserves_study_provenance(tmp_path):
     manifest_path = tmp_path / "study.json"
-    manifest_path.write_text('{"source":"synthetic fixture"}', encoding="utf-8")
     manifest = {
         "schema": "DINO_PARAMETRIC_DESIGN_STUDY_V1", "study_id": "synthetic-study",
         "status": "PARTIAL", "rpm": 3000,
@@ -206,6 +205,7 @@ def test_report_embeds_parametric_manifest_and_preserves_study_provenance(tmp_pa
                     "classification": "MAX_CYCLES_NONCONVERGED",
                     "periodicity": "INSUFFICIENT_CYCLES"}],
     }
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
     digest = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
     html = render_technical_report({"points": [_row("Synthetic A", 3000, None,
         classification="MAX_CYCLES_NONCONVERGED")], "experimental_validation": "NOT_PERFORMED"},
@@ -220,6 +220,87 @@ def test_report_embeds_parametric_manifest_and_preserves_study_provenance(tmp_pa
     assert "Artefacto SHA-256" in html and "Reuso verificado" in html
     assert "no implica periodicidad ni validación científica" in html
     assert "Manifiesto paramétrico original adjunto (JSON)" in html
+
+
+def test_single_study_report_plots_only_hash_bound_period_one_sources(tmp_path):
+    identity = "c" * 64
+    dataset_points = []
+    study_points = []
+    for index, (run_id, value, rpm, state, power) in enumerate((
+        ("source-base", 10.0, 3000, "PERIOD_1", 10.0),
+        ("source-alt", 20.0, 3000, "PERIOD_1", 15.0),
+        ("source-transient", 30.0, 3000, "INSUFFICIENT_CYCLES", None),
+    )):
+        run_dir = tmp_path / run_id
+        run_dir.mkdir()
+        attempt = run_dir / "attempt-001"
+        attempt.mkdir()
+        diagnostic_raw = json.dumps({"cycles": [{"cycle": 8}]}, sort_keys=True,
+            separators=(",", ":")).encode()
+        (attempt / "manifest.json").write_bytes(diagnostic_raw)
+        source_result = {"schema": "DINO_ENGINEERING_RUN_V1", "status": "COMPLETE",
+            "attempt": "attempt-001", "diagnostic_manifest_sha256": hashlib.sha256(diagnostic_raw).hexdigest(),
+            "bindings": {"run_id": run_id, "identity_sha256": identity}}
+        raw = json.dumps(source_result, sort_keys=True, separators=(",", ":")).encode()
+        (run_dir / "result.json").write_bytes(raw)
+        digest = hashlib.sha256(raw).hexdigest()
+        (run_dir / "run.json").write_text(json.dumps({"result_sha256": digest}), encoding="utf-8")
+        imported = _row(run_id, rpm, power, classification=state)
+        imported.update(run_id=run_id, artifact_directory=str(run_dir), result_sha256=digest)
+        dataset_points.append(imported)
+        study_points.append({"index": index, "value": value, "unit": "mm", "rpm": rpm,
+            "baseline": index == 0, "status": "COMPLETE", "source_run_id": run_id,
+            "run_id": run_id, "run_directory": str(run_dir), "identity_sha256": identity,
+            "engine_identity_sha256": identity, "result_sha256": digest,
+            "result_artifact_sha256": digest, "periodicity": state})
+    study_points.append({"index": 3, "value": 40.0, "unit": "mm", "rpm": 3000,
+        "status": "NOT_STARTED", "classification": "NOT_STARTED", "periodicity": "NOT_EVALUATED"})
+    manifest = {"schema": "DINO_PARAMETRIC_DESIGN_STUDY_V1", "study_id": "synthetic-response-study",
+        "project_id": "synthetic-project", "status": "PARTIAL", "rpm": 3000,
+        "scientific_validation": "NOT_CLAIMED",
+        "parameter": {"id": "exhaust:length", "label": "Longitud de escape", "unit": "mm"},
+        "points": study_points}
+    manifest_path = tmp_path / "study.json"
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+    manifest_hash = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    report = render_technical_report({"points": dataset_points, "experimental_validation": "NOT_CLAIMED"},
+        source_kind="EXPLORATORY", design_study_manifest=manifest,
+        design_study_manifest_path=manifest_path, design_study_manifest_sha256=manifest_hash,
+        generated_at="fixed")
+    assert report.count('class="observed-point"') == 6
+    assert 'aria-label="Potencia de freno por Longitud de escape"' in report
+    assert "Baseline · 1 punto(s)" in report and "Diseños alternativos · 1 punto(s)" in report
+    assert "Puntos excluidos de la respuesta · Potencia de freno" in report
+    assert "requiere PERIOD_1" in report and "sin resultado terminal" in report
+    assert "No se conectan, interpolan ni ajustan puntos" in report
+    assert "NOT_CLAIMED" in report
+    import pytest
+    with pytest.raises(ValueError, match="referencia verificada guardada"):
+        render_technical_report({"points": dataset_points, "experimental_validation": "NOT_CLAIMED"},
+            source_kind="EXPLORATORY", design_study_manifest=manifest,
+            design_study_manifest_path=manifest_path, design_study_manifest_sha256=manifest_hash,
+            design_study_reference={"manifest_sha256": manifest_hash, "study_id": manifest["study_id"],
+                "source_project_id": "different-project"}, generated_at="fixed")
+    # Diagnostic payloads are bound by the verified result and rechecked at export.
+    diagnostic_path = tmp_path / "source-base" / "attempt-001" / "manifest.json"
+    original_diagnostics = json.dumps({"cycles": [{"cycle": 8}]}, sort_keys=True,
+        separators=(",", ":")).encode()
+    diagnostic_path.write_text("{}", encoding="utf-8")
+    report_after_diagnostic_tamper = render_technical_report({"points": dataset_points,
+        "experimental_validation": "NOT_CLAIMED"}, source_kind="EXPLORATORY",
+        design_study_manifest=manifest, design_study_manifest_path=manifest_path,
+        design_study_manifest_sha256=manifest_hash, generated_at="fixed")
+    assert report_after_diagnostic_tamper.count('class="observed-point"') == 3
+    assert "manifiesto de diagnóstico cambió" in report_after_diagnostic_tamper
+    diagnostic_path.write_bytes(original_diagnostics)
+    # A source result modified after import must also fail closed at export time.
+    (tmp_path / "source-base" / "result.json").write_text("{}", encoding="utf-8")
+    report_after_tamper = render_technical_report({"points": dataset_points,
+        "experimental_validation": "NOT_CLAIMED"}, source_kind="EXPLORATORY",
+        design_study_manifest=manifest, design_study_manifest_path=manifest_path,
+        design_study_manifest_sha256=manifest_hash, generated_at="fixed")
+    assert report_after_tamper.count('class="observed-point"') == 3
+    assert "no supera la comprobación actual de hash e identidad" in report_after_tamper
 
 
 def test_rpm_envelope_report_retains_exact_grid_states_and_hash_bound_sources(tmp_path):

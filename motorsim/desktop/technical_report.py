@@ -5,6 +5,7 @@ This module is presentation/export only. It never recomputes or changes results.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import hashlib
 import html
 import json
 import math
@@ -114,11 +115,189 @@ def _chart_svg(rows, variants, label, metric, unit):
     return "".join(parts)
 
 
+def _study_response_plot_html(manifest, imported_points, *, manifest_bound=True):
+    """Render scalar study response from unique, artifact-bound PERIOD_1 rows."""
+    method = manifest.get("design_method")
+    parameter = manifest.get("parameter") or {}
+    if method == "RPM_ENVELOPE_V1":
+        return ("<h3>Respuesta paramétrica</h3><p class=\"empty\">Estudio de envolvente RPM: "
+                "los puntos se presentan en la tabla por diseño y RPM; no se mezclan regímenes en una respuesta 1D.</p>")
+    if parameter.get("axes") or method == "FACTORIAL_2X2_V1":
+        return ("<h3>Respuesta paramétrica</h3><p class=\"empty\">Estudio factorial: "
+                "la matriz se conserva como tal y no se reduce a una respuesta unidimensional.</p>")
+    if not manifest_bound:
+        return ("<h3>Respuesta paramétrica</h3><p class=\"empty\">No se grafica: no se pudo verificar "
+                "la procedencia actual del manifiesto del estudio.</p>")
+
+    by_run = {}
+    for row in imported_points if isinstance(imported_points, list) else []:
+        if isinstance(row, dict) and row.get("run_id") is not None:
+            by_run.setdefault(str(row["run_id"]), []).append(row)
+
+    definitions = (
+        ("Potencia de freno", "brake_power", "kW"),
+        ("Torque de freno", "brake_torque", "N·m"),
+        ("BMEP", "BMEP", "kPa"),
+    )
+    study_points = manifest.get("points") if isinstance(manifest.get("points"), list) else []
+    plots = []
+    width, height = 760, 330
+    left, top, right, bottom = 72, 34, 22, 58
+    plot_w, plot_h = width-left-right, height-top-bottom
+
+    for label, metric, unit in definitions:
+        eligible, excluded = [], []
+        for index, point in enumerate(study_points):
+            value_x = point.get("value")
+            run_id = (point.get("source_run_id") or point.get("historical_source_run_id") or
+                      point.get("run_id"))
+            reason = None
+            result_row = None
+            if not _safe_number(value_x):
+                reason = "El valor del parámetro no es numérico y finito."
+            elif point.get("status") not in {"COMPLETE", "CACHED"}:
+                reason = f"Punto sin resultado terminal: {point.get('status') or 'estado no informado'}."
+            elif point.get("status") == "CACHED" and not point.get("reused_verified"):
+                reason = "Resultado histórico reutilizado sin verificación declarada."
+            elif not run_id:
+                reason = "El manifiesto no conserva un run ID de origen."
+            else:
+                candidates = by_run.get(str(run_id), [])
+                source_dir = point.get("run_directory")
+                source_hash = point.get("result_artifact_sha256") or point.get("result_sha256")
+                if not source_dir or not source_hash:
+                    reason = "El manifiesto no conserva ruta y hash del artifact fuente."
+                else:
+                    try:
+                        expected_dir = Path(source_dir).resolve()
+                    except (OSError, TypeError, ValueError):
+                        expected_dir = None
+                    try:
+                        candidates = [row for row in candidates
+                            if expected_dir is not None and row.get("artifact_directory") and
+                            Path(row["artifact_directory"]).resolve() == expected_dir and
+                            row.get("result_sha256") == source_hash]
+                    except (OSError, RuntimeError, TypeError, ValueError):
+                        candidates = []
+                    if len(candidates) != 1:
+                        reason = ("La fuente importada no coincide de forma única con el run, ruta y hash del manifiesto."
+                                  if candidates else "No se encontró el artifact importado que coincide con el manifiesto.")
+                    else:
+                        result_row = candidates[0]
+                        try:
+                            raw = (expected_dir / "result.json").read_bytes()
+                            source_result = json.loads(raw.decode("utf-8"))
+                            run_meta = json.loads((expected_dir / "run.json").read_text(encoding="utf-8"))
+                            identity = point.get("identity_sha256") or point.get("engine_identity_sha256")
+                            bindings = source_result.get("bindings") or {}
+                            if (hashlib_sha256(raw) != source_hash or run_meta.get("result_sha256") != source_hash or
+                                    (point.get("result_sha256") is not None and point.get("result_sha256") != source_hash) or
+                                    source_result.get("status") != "COMPLETE" or
+                                    source_result.get("schema") != "DINO_ENGINEERING_RUN_V1" or
+                                    bindings.get("run_id") != run_id or
+                                    (identity is not None and bindings.get("identity_sha256") != identity)):
+                                reason = "El artifact fuente no supera la comprobación actual de hash e identidad."
+                            else:
+                                attempt = source_result.get("attempt")
+                                expected_diagnostics_hash = source_result.get("diagnostic_manifest_sha256")
+                                diagnostics_path = expected_dir / str(attempt) / "manifest.json" if attempt else None
+                                if not diagnostics_path or not expected_diagnostics_hash:
+                                    reason = "El resultado no conserva el hash de su manifiesto de diagnóstico."
+                                elif hashlib.sha256(diagnostics_path.read_bytes()).hexdigest() != expected_diagnostics_hash:
+                                    reason = "El manifiesto de diagnóstico cambió desde la importación del resultado."
+                        except (OSError, RuntimeError, UnicodeDecodeError, ValueError, TypeError, json.JSONDecodeError):
+                            reason = "No se pudo volver a verificar result.json/run.json del punto."
+            if reason is None and result_row is not None:
+                periodicity = result_row.get("periodicity") or result_row.get("classification")
+                if periodicity != "PERIOD_1":
+                    reason = f"La fuente está clasificada {periodicity or 'sin periodicidad'}; se requiere PERIOD_1."
+                elif ((point.get("periodicity") or point.get("classification")) not in (None, "PERIOD_1")):
+                    reason = "La periodicidad del manifiesto no coincide con la fuente PERIOD_1."
+                elif result_row.get(metric + "_status") != "DEFINED" or not _safe_number(result_row.get(metric)):
+                    reason = "La métrica no está definida y finita en la fuente PERIOD_1."
+                else:
+                    expected_rpm = point.get("rpm", manifest.get("rpm"))
+                    if (_safe_number(expected_rpm) and
+                            (not _safe_number(result_row.get("rpm")) or
+                             float(expected_rpm) != float(result_row["rpm"]))):
+                        reason = "La RPM importada no coincide exactamente con el punto del manifiesto."
+            if reason:
+                excluded.append((index, point, run_id, reason))
+            else:
+                eligible.append({"x": float(value_x), "y": float(result_row[metric]),
+                    "baseline": bool(point.get("baseline")), "run_id": str(run_id),
+                    "hash": point.get("result_artifact_sha256") or point.get("result_sha256")})
+
+        parts = [f'<section class="study-response"><h3>{_esc(label)} por parámetro</h3>',
+            '<p>Marcadores observados de fuentes únicas con run ID, ruta y SHA-256 coincidentes; '
+            'result.json, run.json y el hash del manifiesto de diagnóstico se comprueban otra vez al exportar. '
+            'Sólo PERIOD_1 con métrica definida. '
+            'No se conectan, interpolan ni ajustan puntos.</p>']
+        if not eligible:
+            parts.append('<p class="empty">No hay puntos PERIOD_1 con fuente y métrica verificadas para esta gráfica.</p>')
+        else:
+            xs = [row["x"] for row in eligible]; ys = [row["y"] for row in eligible]
+            xmin, xmax = min(xs), max(xs); ymin, ymax = min(ys), max(ys)
+            if xmin == xmax:
+                delta = max(abs(xmin)*.05, 1.0); xmin -= delta; xmax += delta
+            if ymin == ymax:
+                delta = max(abs(ymin)*.05, 1.0); ymin -= delta; ymax += delta
+            else:
+                delta = (ymax-ymin)*.08; ymin -= delta; ymax += delta
+            x = lambda value: left + (value-xmin)/(xmax-xmin)*plot_w
+            y = lambda value: top + (ymax-value)/(ymax-ymin)*plot_h
+            x_unit = parameter.get("unit") or ""
+            x_label = parameter.get("label") or parameter.get("id") or "Parámetro"
+            parts.append(f'<svg role="img" aria-label="{_esc(label)} por {_esc(x_label)}" '
+                f'viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">'
+                f'<rect width="{width}" height="{height}" fill="#fff"/>'
+                f'<path d="M{left} {top}V{top+plot_h}H{left+plot_w}" fill="none" stroke="#526273"/>')
+            for tick in range(5):
+                fraction = tick/4
+                yy = top + plot_h*fraction; y_value = ymax-(ymax-ymin)*fraction
+                xx = left + plot_w*fraction; x_value = xmin+(xmax-xmin)*fraction
+                parts.append(f'<path d="M{left} {yy:.2f}H{left+plot_w}" stroke="#e1e7ec"/>'
+                    f'<text x="{left-8}" y="{yy+4:.2f}" text-anchor="end">{_esc(format_number(y_value))}</text>'
+                    f'<text x="{xx:.2f}" y="{top+plot_h+22}" text-anchor="middle">{_esc(format_number(x_value))}</text>')
+            parts.append(f'<text x="{left+plot_w/2}" y="{height-10}" text-anchor="middle">{_esc(x_label)} ({_esc(x_unit)})</text>'
+                f'<text transform="translate(17 {top+plot_h/2}) rotate(-90)" text-anchor="middle">{_esc(unit)}</text>')
+            legend = []
+            for baseline, name, color in ((True, "Baseline", COLORS[0]), (False, "Diseños alternativos", COLORS[1])):
+                markers = [row for row in eligible if row["baseline"] is baseline]
+                if not markers:
+                    continue
+                legend.append(f'<span><i style="color:{color}">●</i> {_esc(name)} · {len(markers)} punto(s)</span>')
+                for row in markers:
+                    title = (f"{row['run_id']} · {format_number(row['x'])} {x_unit} · "
+                             f"{format_number(row['y'])} {unit} · SHA-256 {row['hash']}")
+                    parts.append(f'<circle class="observed-point" cx="{x(row["x"]):.2f}" '
+                        f'cy="{y(row["y"]):.2f}" r="5" fill="{color}"><title>{_esc(title)}</title></circle>')
+            parts.append('</svg><p class="legend">'+' · '.join(legend)+'</p>')
+        if excluded:
+            rows = []
+            for index, point, run_id, reason in excluded:
+                rows.append('<tr>'+''.join((f'<td>{index+1}</td>',f'<td>{_esc(run_id or "No informado")}</td>',
+                    f'<td>{_esc(format_number(point.get("value")) if _safe_number(point.get("value")) else "No informado")} {_esc(point.get("unit") or parameter.get("unit") or "")}</td>',
+                    f'<td>{_esc(state_label(point.get("classification") or point.get("status") or "NOT_REPORTED"))} / {_esc(state_label(point.get("periodicity") or "NOT_EVALUATED"))}</td>',
+                    f'<td>{_esc(reason)}</td>'))+'</tr>')
+            parts.append('<h4>Puntos excluidos de la respuesta · '+_esc(label)+'</h4>'
+                '<table><thead><tr><th>Punto</th><th>Run fuente</th><th>Parámetro</th><th>Estado informado</th><th>Motivo</th></tr></thead><tbody>'+''.join(rows)+'</tbody></table>')
+        parts.append('</section>')
+        plots.append(''.join(parts))
+    return ''.join(plots)
+
+
+def hashlib_sha256(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
 def render_technical_report(dataset: dict, *, source_kind: str,
                             selected_variants=None, source_path=None,
                             active_project_id=None, generated_at=None,
                             design_study_manifest=None,
                             design_study_manifest_path=None,
+                            design_study_manifest_sha256=None,
+                            design_study_reference=None,
                             factorial_effects=None) -> str:
     """Render exact selected result records and an explicit evidence boundary."""
     points = dataset.get("points") if isinstance(dataset, dict) else None
@@ -203,9 +382,17 @@ def render_technical_report(dataset: dict, *, source_kind: str,
         if manifest_path:
             try:
                 manifest_raw=manifest_path.read_bytes()
-                manifest_digest=__import__("hashlib").sha256(manifest_raw).hexdigest()
-                if is_rpm_envelope and json.loads(manifest_raw.decode("utf-8"))!=manifest:
-                    raise ValueError("El manifiesto RPM cambió desde que se abrió; vuelva a cargar el estudio antes de exportar.")
+                manifest_digest=hashlib.sha256(manifest_raw).hexdigest()
+                if (json.loads(manifest_raw.decode("utf-8")) != manifest or
+                        (design_study_manifest_sha256 and manifest_digest != design_study_manifest_sha256)):
+                    if is_rpm_envelope:
+                        raise ValueError("El manifiesto RPM cambió desde que se abrió; vuelva a cargar el estudio antes de exportar.")
+                    raise ValueError("El manifiesto cambió desde que se abrió; vuelva a cargar el estudio antes de exportar.")
+                if design_study_reference is not None and (
+                        design_study_reference.get("manifest_sha256") != manifest_digest or
+                        design_study_reference.get("study_id") != manifest.get("study_id") or
+                        design_study_reference.get("source_project_id") != manifest.get("project_id")):
+                    raise ValueError("El manifiesto no coincide con la referencia verificada guardada en el proyecto.")
                 if is_rpm_envelope:
                     for group in manifest.get("groups",[]):
                         sweep_path=group.get("sweep_manifest")
@@ -264,12 +451,14 @@ def render_technical_report(dataset: dict, *, source_kind: str,
                 f"{_esc(factorial_effects.get('reason') or '')}</p>"
                 "<table><thead><tr><th>Métrica</th><th>Contraste</th><th>Valor</th><th>Estado</th><th>Definición exacta</th></tr></thead>"
                 f"<tbody>{''.join(effect_rows)}</tbody></table>")
+        response_plot_html = _study_response_plot_html(
+            manifest, points, manifest_bound=bool(manifest_path and manifest_digest))
         study_html = ("<h2>Estudio paramétrico asociado</h2>"
             f"<p>Estudio <code>{_esc(manifest.get('study_id'))}</code>; parámetro "
             f"<strong>{_esc(parameter.get('label') or parameter.get('id') or 'No informado')}</strong>; "
             f"estado {_esc(state_label(manifest.get('status')))}. Los puntos conservan su clasificación de ejecución; "
             "la finalización del estudio no implica periodicidad ni validación científica.</p>"
-            f"{manifest_origin}{envelope_summary}{factorial_html}<table><thead><tr><th>Punto</th><th>Estado de ejecución</th>"
+            f"{manifest_origin}{envelope_summary}{factorial_html}{response_plot_html}<table><thead><tr><th>Punto</th><th>Estado de ejecución</th>"
             "<th>RPM</th><th>Clasificación</th><th>Periodicidad</th><th>Ciclos</th><th>Valor(es)</th>"
             f"<th>Run de origen</th><th>Proyecto de origen</th><th>Ruta de resultado</th>"
             f"<th>Resultado SHA-256</th><th>Artefacto SHA-256</th><th>Manifiesto sweep</th>"
@@ -334,7 +523,7 @@ body{{font:15px/1.5 "Segoe UI",Arial,sans-serif;color:#202b36;max-width:1180px;m
 h1,h2,h3{{color:#173d57}}.boundary{{border-left:5px solid #c18420;background:#fff6df;padding:12px 16px}}
 table{{border-collapse:collapse;width:100%;margin:14px 0 24px;font-size:13px}}th,td{{border:1px solid #ccd5dc;padding:7px;text-align:left;vertical-align:top}}
 th{{background:#edf2f6}}code,pre{{font-family:Consolas,monospace}}pre{{overflow:auto;background:#f3f5f7;padding:12px;white-space:pre-wrap;word-break:break-word}}
-svg{{width:100%;height:auto;border:1px solid #d4dbe1}}svg text{{font:12px Arial;fill:#273746}}.note,.muted{{color:#536273;font-size:13px}}.empty{{padding:24px;background:#f3f5f7}}
+svg{{width:100%;height:auto;border:1px solid #d4dbe1}}svg text{{font:12px Arial;fill:#273746}}.note,.muted{{color:#536273;font-size:13px}}.legend span{{margin-right:12px}}.legend i{{font-style:normal;font-size:18px}}.empty{{padding:24px;background:#f3f5f7}}
 @media print{{body{{max-width:none;margin:0}}details{{break-before:page}}}}
 </style></head><body>
 <h1>Informe técnico de resultados · Dino 2T</h1>

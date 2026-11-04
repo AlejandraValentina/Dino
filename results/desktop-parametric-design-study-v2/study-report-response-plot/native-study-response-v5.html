@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Informe técnico Dino 2T</title><style>
+body{font:15px/1.5 "Segoe UI",Arial,sans-serif;color:#202b36;max-width:1180px;margin:24px auto;padding:0 20px}
+h1,h2,h3{color:#173d57}.boundary{border-left:5px solid #c18420;background:#fff6df;padding:12px 16px}
+table{border-collapse:collapse;width:100%;margin:14px 0 24px;font-size:13px}th,td{border:1px solid #ccd5dc;padding:7px;text-align:left;vertical-align:top}
+th{background:#edf2f6}code,pre{font-family:Consolas,monospace}pre{overflow:auto;background:#f3f5f7;padding:12px;white-space:pre-wrap;word-break:break-word}
+svg{width:100%;height:auto;border:1px solid #d4dbe1}svg text{font:12px Arial;fill:#273746}.note,.muted{color:#536273;font-size:13px}.legend span{margin-right:12px}.legend i{font-style:normal;font-size:18px}.empty{padding:24px;background:#f3f5f7}
+@media print{body{max-width:none;margin:0}details{break-before:page}}
+</style></head><body>
+<h1>Informe técnico de resultados · Dino 2T</h1>
+<div class="boundary"><strong>Límite de evidencia.</strong> Corridas exploratorias; los transitorios no se presentan como prestaciones definitivas. Validación experimental: <strong>No declarada</strong>. La observación de periodicidad no valida predicción física. Los marcadores de desempeño incluyen sólo filas PERIOD_1/PERIOD_2 con métrica definida; los transitorios permanecen identificados y fuera de esos gráficos.</div>
+<p>Generado UTC: 2026-11-04T22:26:16+00:00 · Formato de datos: <code>DINO_DESKTOP_ENGINEERING_DATA_V1</code> · Procedencia declarada: Synthetic report presentation fixture</p>
+<p>Proyecto abierto al exportar: <code>SYNTHETIC study report</code>. Este contexto no reasigna la procedencia de las corridas.</p><h2>Origen y reproducibilidad</h2><table><thead><tr><th>Archivo fuente</th><th>SHA-256 actual</th></tr></thead><tbody><tr><td>Ruta de origen no conservada por el importador</td><td>No disponible</td></tr></tbody></table>
+<p>Las filas completas seleccionadas se incluyen al final sin redondear. Las tablas y gráficos de este informe son una vista legible de esos datos; no recalculan el solver.</p>
+<h2>Estudio paramétrico asociado</h2><p>Estudio <code>SYNTHETIC-single-study-report-v5</code>; parámetro <strong>Largo de escape</strong>; estado PARTIAL. Los puntos conservan su clasificación de ejecución; la finalización del estudio no implica periodicidad ni validación científica.</p><p>Manifiesto: <code>E:\dino\Dino-active\results\desktop-parametric-design-study-v2\study-report-response-plot\synthetic-study-v5.study.json</code> · SHA-256 actual: <code>0f68859682c427fd07e90ab0f581c4ee2e5544d77bb7f34deb9cb8fbae31be28</code></p><section class="study-response"><h3>Potencia de freno por parámetro</h3><p>Marcadores observados de fuentes únicas con run ID, ruta y SHA-256 coincidentes; result.json, run.json y el hash del manifiesto de diagnóstico se comprueban otra vez al exportar. Sólo PERIOD_1 con métrica definida. No se conectan, interpolan ni ajustan puntos.</p><svg role="img" aria-label="Potencia de freno por Largo de escape" viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg"><rect width="760" height="330" fill="#fff"/><path d="M72 34V272H738" fill="none" stroke="#526273"/><path d="M72 34.00H738" stroke="#e1e7ec"/><text x="64" y="38.00" text-anchor="end">15.4</text><text x="72.00" y="294" text-anchor="middle">10</text><path d="M72 93.50H738" stroke="#e1e7ec"/><text x="64" y="97.50" text-anchor="end">13.95</text><text x="238.50" y="294" text-anchor="middle">12.5</text><path d="M72 153.00H738" stroke="#e1e7ec"/><text x="64" y="157.00" text-anchor="end">12.5</text><text x="405.00" y="294" text-anchor="middle">15</text><path d="M72 212.50H738" stroke="#e1e7ec"/><text x="64" y="216.50" text-anchor="end">11.05</text><text x="571.50" y="294" text-anchor="middle">17.5</text><path d="M72 272.00H738" stroke="#e1e7ec"/><text x="64" y="276.00" text-anchor="end">9.6</text><text x="738.00" y="294" text-anchor="middle">20</text><text x="405.0" y="320" text-anchor="middle">Largo de escape (mm)</text><text transform="translate(17 153.0) rotate(-90)" text-anchor="middle">kW</text><circle class="observed-point" cx="72.00" cy="255.59" r="5" fill="#167d9a"><title>synthetic-study-base · 10 mm · 10 kW · SHA-256 e64e17026f5c072854cb0629f147b9fc1ded5b31e70b1f0b32b8c45e7d733390</title></circle><circle class="observed-point" cx="738.00" cy="50.41" r="5" fill="#d16a32"><title>synthetic-study-alt · 20 mm · 15 kW · SHA-256 8e71aaa2d6bd6d89878257036d8418c741dff70393338aea128fade53ec1dbf9</title></circle></svg><p class="legend"><span><i style="color:#167d9a">●</i> Baseline · 1 punto(s)</span> · <span><i style="color:#d16a32">●</i> Diseños alternativos · 1 punto(s)</span></p><h4>Puntos excluidos de la respuesta · Potencia de freno</h4><table><thead><tr><th>Punto</th><th>Run fuente</th><th>Parámetro</th><th>Estado informado</th><th>Motivo</th></tr></thead><tbody><tr><td>3</td><td>synthetic-study-transient</td><td>30 mm</td><td>Ciclos insuficientes / Ciclos insuficientes</td><td>La fuente está clasificada INSUFFICIENT_CYCLES; se requiere PERIOD_1.</td></tr><tr><td>4</td><td>No informado</td><td>40 mm</td><td>No iniciada / No evaluada</td><td>Punto sin resultado terminal: NOT_STARTED.</td></tr></tbody></table></section><section class="study-response"><h3>Torque de freno por parámetro</h3><p>Marcadores observados de fuentes únicas con run ID, ruta y SHA-256 coincidentes; result.json, run.json y el hash del manifiesto de diagnóstico se comprueban otra vez al exportar. Sólo PERIOD_1 con métrica definida. No se conectan, interpolan ni ajustan puntos.</p><p class="empty">No hay puntos PERIOD_1 con fuente y métrica verificadas para esta gráfica.</p><h4>Puntos excluidos de la respuesta · Torque de freno</h4><table><thead><tr><th>Punto</th><th>Run fuente</th><th>Parámetro</th><th>Estado informado</th><th>Motivo</th></tr></thead><tbody><tr><td>1</td><td>synthetic-study-base</td><td>10 mm</td><td>Periódica · ciclo 1 / Periódica · ciclo 1</td><td>La métrica no está definida y finita en la fuente PERIOD_1.</td></tr><tr><td>2</td><td>synthetic-study-alt</td><td>20 mm</td><td>Periódica · ciclo 1 / Periódica · ciclo 1</td><td>La métrica no está definida y finita en la fuente PERIOD_1.</td></tr><tr><td>3</td><td>synthetic-study-transient</td><td>30 mm</td><td>Ciclos insuficientes / Ciclos insuficientes</td><td>La fuente está clasificada INSUFFICIENT_CYCLES; se requiere PERIOD_1.</td></tr><tr><td>4</td><td>No informado</td><td>40 mm</td><td>No iniciada / No evaluada</td><td>Punto sin resultado terminal: NOT_STARTED.</td></tr></tbody></table></section><section class="study-response"><h3>BMEP por parámetro</h3><p>Marcadores observados de fuentes únicas con run ID, ruta y SHA-256 coincidentes; result.json, run.json y el hash del manifiesto de diagnóstico se comprueban otra vez al exportar. Sólo PERIOD_1 con métrica definida. No se conectan, interpolan ni ajustan puntos.</p><p class="empty">No hay puntos PERIOD_1 con fuente y métrica verificadas para esta gráfica.</p><h4>Puntos excluidos de la respuesta · BMEP</h4><table><thead><tr><th>Punto</th><th>Run fuente</th><th>Parámetro</th><th>Estado informado</th><th>Motivo</th></tr></thead><tbody><tr><td>1</td><td>synthetic-study-base</td><td>10 mm</td><td>Periódica · ciclo 1 / Periódica · ciclo 1</td><td>La métrica no está definida y finita en la fuente PERIOD_1.</td></tr><tr><td>2</td><td>synthetic-study-alt</td><td>20 mm</td><td>Periódica · ciclo 1 / Periódica · ciclo 1</td><td>La métrica no está definida y finita en la fuente PERIOD_1.</td></tr><tr><td>3</td><td>synthetic-study-transient</td><td>30 mm</td><td>Ciclos insuficientes / Ciclos insuficientes</td><td>La fuente está clasificada INSUFFICIENT_CYCLES; se requiere PERIOD_1.</td></tr><tr><td>4</td><td>No informado</td><td>40 mm</td><td>No iniciada / No evaluada</td><td>Punto sin resultado terminal: NOT_STARTED.</td></tr></tbody></table></section><table><thead><tr><th>Punto</th><th>Estado de ejecución</th><th>RPM</th><th>Clasificación</th><th>Periodicidad</th><th>Ciclos</th><th>Valor(es)</th><th>Run de origen</th><th>Proyecto de origen</th><th>Ruta de resultado</th><th>Resultado SHA-256</th><th>Artefacto SHA-256</th><th>Manifiesto sweep</th><th>Manifiesto sweep SHA-256</th><th>Reuso verificado</th><th>Identidad de motor SHA-256</th></tr></thead><tbody><tr><td>0</td><td>COMPLETE</td><td>3000</td><td>Periódica · ciclo 1</td><td>Periódica · ciclo 1</td><td>—</td><td>10 mm</td><td>synthetic-study-base</td><td>No informado</td><td><code>E:\dino\Dino-active\results\desktop-parametric-design-study-v2\study-report-response-plot\synthetic-study-base-v5</code></td><td><code>e64e17026f5c072854cb0629f147b9fc1ded5b31e70b1f0b32b8c45e7d733390</code></td><td><code>e64e17026f5c072854cb0629f147b9fc1ded5b31e70b1f0b32b8c45e7d733390</code></td><td><code>No informada</code></td><td><code>No disponible</code></td><td>No</td><td><code>cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc</code></td></tr><tr><td>1</td><td>COMPLETE</td><td>3000</td><td>Periódica · ciclo 1</td><td>Periódica · ciclo 1</td><td>—</td><td>20 mm</td><td>synthetic-study-alt</td><td>No informado</td><td><code>E:\dino\Dino-active\results\desktop-parametric-design-study-v2\study-report-response-plot\synthetic-study-alt-v5</code></td><td><code>8e71aaa2d6bd6d89878257036d8418c741dff70393338aea128fade53ec1dbf9</code></td><td><code>8e71aaa2d6bd6d89878257036d8418c741dff70393338aea128fade53ec1dbf9</code></td><td><code>No informada</code></td><td><code>No disponible</code></td><td>No</td><td><code>cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc</code></td></tr><tr><td>2</td><td>COMPLETE</td><td>3000</td><td>Ciclos insuficientes</td><td>Ciclos insuficientes</td><td>—</td><td>30 mm</td><td>synthetic-study-transient</td><td>No informado</td><td><code>E:\dino\Dino-active\results\desktop-parametric-design-study-v2\study-report-response-plot\synthetic-study-transient-v5</code></td><td><code>a8ebbc95242b8cf097614b77d8676609cb852f1499daffaac47c89822180f8a6</code></td><td><code>a8ebbc95242b8cf097614b77d8676609cb852f1499daffaac47c89822180f8a6</code></td><td><code>No informada</code></td><td><code>No disponible</code></td><td>No</td><td><code>cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc</code></td></tr><tr><td>3</td><td>NOT_STARTED</td><td>3000</td><td>No iniciada</td><td>No evaluada</td><td>—</td><td>40 mm</td><td>No informado</td><td>No informado</td><td><code>No informada</code></td><td><code>No disponible</code></td><td><code>No disponible</code></td><td><code>No informada</code></td><td><code>No disponible</code></td><td>No</td><td><code>No disponible</code></td></tr></tbody></table><details><summary>Manifiesto paramétrico original adjunto (JSON)</summary><pre>{
+  "parameter": {
+    "id": "exhaust:length",
+    "label": "Largo de escape",
+    "unit": "mm"
+  },
+  "points": [
+    {
+      "baseline": true,
+      "classification": "PERIOD_1",
+      "engine_identity_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "identity_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "index": 0,
+      "periodicity": "PERIOD_1",
+      "result_artifact_sha256": "e64e17026f5c072854cb0629f147b9fc1ded5b31e70b1f0b32b8c45e7d733390",
+      "result_sha256": "e64e17026f5c072854cb0629f147b9fc1ded5b31e70b1f0b32b8c45e7d733390",
+      "rpm": 3000,
+      "run_directory": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\study-report-response-plot\\synthetic-study-base-v5",
+      "run_id": "synthetic-study-base",
+      "source_run_id": "synthetic-study-base",
+      "status": "COMPLETE",
+      "unit": "mm",
+      "value": 10.0
+    },
+    {
+      "baseline": false,
+      "classification": "PERIOD_1",
+      "engine_identity_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "identity_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "index": 1,
+      "periodicity": "PERIOD_1",
+      "result_artifact_sha256": "8e71aaa2d6bd6d89878257036d8418c741dff70393338aea128fade53ec1dbf9",
+      "result_sha256": "8e71aaa2d6bd6d89878257036d8418c741dff70393338aea128fade53ec1dbf9",
+      "rpm": 3000,
+      "run_directory": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\study-report-response-plot\\synthetic-study-alt-v5",
+      "run_id": "synthetic-study-alt",
+      "source_run_id": "synthetic-study-alt",
+      "status": "COMPLETE",
+      "unit": "mm",
+      "value": 20.0
+    },
+    {
+      "baseline": false,
+      "classification": "INSUFFICIENT_CYCLES",
+      "engine_identity_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "identity_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "index": 2,
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "result_artifact_sha256": "a8ebbc95242b8cf097614b77d8676609cb852f1499daffaac47c89822180f8a6",
+      "result_sha256": "a8ebbc95242b8cf097614b77d8676609cb852f1499daffaac47c89822180f8a6",
+      "rpm": 3000,
+      "run_directory": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\study-report-response-plot\\synthetic-study-transient-v5",
+      "run_id": "synthetic-study-transient",
+      "source_run_id": "synthetic-study-transient",
+      "status": "COMPLETE",
+      "unit": "mm",
+      "value": 30.0
+    },
+    {
+      "classification": "NOT_STARTED",
+      "index": 3,
+      "periodicity": "NOT_EVALUATED",
+      "rpm": 3000,
+      "status": "NOT_STARTED",
+      "unit": "mm",
+      "value": 40.0
+    }
+  ],
+  "project_id": "synthetic-report-project",
+  "rpm": 3000,
+  "schema": "DINO_PARAMETRIC_DESIGN_STUDY_V1",
+  "scientific_validation": "NOT_CLAIMED",
+  "status": "PARTIAL",
+  "study_id": "SYNTHETIC-single-study-report-v5"
+}</pre></details>
+<h2>Resultados por variante y RPM</h2><table><thead><tr><th>Variante</th><th>Condición</th><th>Estado</th><th>Periodicidad</th><th>Auditoría</th><th>Ciclos</th><th>Potencia</th><th>Torque</th><th>BMEP</th></tr></thead><tbody><tr><td>synthetic-study-alt</td><td>3000 RPM</td><td>Periódica · ciclo 1</td><td>Periódica · ciclo 1</td><td>No realizada</td><td>8</td><td>15 kW</td><td>No definida</td><td>No definida</td></tr><tr><td>synthetic-study-base</td><td>3000 RPM</td><td>Periódica · ciclo 1</td><td>Periódica · ciclo 1</td><td>No realizada</td><td>8</td><td>10 kW</td><td>No definida</td><td>No definida</td></tr><tr><td>synthetic-study-transient</td><td>3000 RPM</td><td>Ciclos insuficientes</td><td>Ciclos insuficientes</td><td>No realizada</td><td>8</td><td>No definida</td><td>No definida</td><td>No definida</td></tr></tbody></table>
+<h2>Identidad y procedencia por punto</h2><table><thead><tr><th>Variante</th><th>RPM</th><th>Run ID</th><th>Point ID</th><th>Carpeta de artifacts</th><th>Resultado SHA-256</th><th>Primario SHA-256</th><th>Configuración SHA-256</th></tr></thead><tbody><tr><td>synthetic-study-alt</td><td>3000</td><td>synthetic-study-alt</td><td>synthetic-study-alt</td><td>E:\dino\Dino-active\results\desktop-parametric-design-study-v2\study-report-response-plot\synthetic-study-alt-v5</td><td>8e71aaa2d6bd6d89878257036d8418c741dff70393338aea128fade53ec1dbf9</td><td>No informado</td><td>No informado</td></tr><tr><td>synthetic-study-base</td><td>3000</td><td>synthetic-study-base</td><td>synthetic-study-base</td><td>E:\dino\Dino-active\results\desktop-parametric-design-study-v2\study-report-response-plot\synthetic-study-base-v5</td><td>e64e17026f5c072854cb0629f147b9fc1ded5b31e70b1f0b32b8c45e7d733390</td><td>No informado</td><td>No informado</td></tr><tr><td>synthetic-study-transient</td><td>3000</td><td>synthetic-study-transient</td><td>synthetic-study-transient</td><td>E:\dino\Dino-active\results\desktop-parametric-design-study-v2\study-report-response-plot\synthetic-study-transient-v5</td><td>a8ebbc95242b8cf097614b77d8676609cb852f1499daffaac47c89822180f8a6</td><td>No informado</td><td>No informado</td></tr></tbody></table>
+<h2>Comparación entre variantes</h2><p class="muted">Sólo RPM exactas comunes. Δ = segunda variante menos primera; es un contraste descriptivo, no una atribución causal. No se interpolan puntos. Las diferencias y ausencias en los campos de operación se indican por fila. Se incluyen métricas definidas únicamente en resultados periódicos observados.</p>
+<table><thead><tr><th>Par</th><th>RPM</th><th>Métrica</th><th>Δ descriptivo</th><th>Consistencia de condiciones informadas</th></tr></thead><tbody><tr><td>synthetic-study-alt → synthetic-study-base</td><td>3000 RPM</td><td>Potencia de freno</td><td>-5 kW</td><td>No verificable; faltan: fuel_id, afr_kg_air_per_kg_fuel, mesh_resolution, total_finite_volume_cells, cycles_requested, solver_identity_sha256, implementation_identity_sha256, periodicity_contract</td></tr></tbody></table>
+<h2>Visualización de puntos periódicos observados</h2><section><h3>Potencia de freno</h3><svg role="img" aria-label="Potencia de freno por RPM" viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg"><rect width="760" height="330" fill="#fff"/><path d="M72 34V272H738" fill="none" stroke="#526273"/><path d="M72 34.00H738" stroke="#e1e7ec"/><text x="64" y="38.00" text-anchor="end">15.4</text><text x="72.00" y="294" text-anchor="middle">2999</text><path d="M72 93.50H738" stroke="#e1e7ec"/><text x="64" y="97.50" text-anchor="end">13.95</text><text x="238.50" y="294" text-anchor="middle">2999.5</text><path d="M72 153.00H738" stroke="#e1e7ec"/><text x="64" y="157.00" text-anchor="end">12.5</text><text x="405.00" y="294" text-anchor="middle">3000</text><path d="M72 212.50H738" stroke="#e1e7ec"/><text x="64" y="216.50" text-anchor="end">11.05</text><text x="571.50" y="294" text-anchor="middle">3000.5</text><path d="M72 272.00H738" stroke="#e1e7ec"/><text x="64" y="276.00" text-anchor="end">9.6</text><text x="738.00" y="294" text-anchor="middle">3001</text><text x="405.0" y="320" text-anchor="middle">RPM</text><text transform="translate(17 153.0) rotate(-90)" text-anchor="middle">kW</text><circle cx="405.00" cy="50.41" r="5" fill="#167d9a"><title>synthetic-study-alt · 3000 RPM · 15 kW</title></circle><circle cx="77.00" cy="22" r="5" fill="#167d9a"/><text x="87.00" y="26">synthetic-study-alt</text><circle cx="405.00" cy="255.59" r="5" fill="#d16a32"><title>synthetic-study-base · 3000 RPM · 10 kW</title></circle><circle cx="267.00" cy="22" r="5" fill="#d16a32"/><text x="277.00" y="26">synthetic-study-base</text><circle cx="457.00" cy="22" r="5" fill="#6a8d3b"/><text x="467.00" y="26">synthetic-study-transient</text></svg><p class="note">Marcadores = puntos disponibles. No hay interpolación. La clasificación periódica observada no equivale a validación experimental.</p></section><section><h3>Torque de freno</h3><p class="empty">No hay puntos clasificados PERIOD_1/PERIOD_2 con la métrica definida.</p></section>
+<details><summary>Registros originales exactos seleccionados (JSON)</summary><pre>[
+  {
+    "BMEP": null,
+    "BMEP_status": "UNDEFINED",
+    "artifact_directory": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\study-report-response-plot\\synthetic-study-base-v5",
+    "audit_status": "NOT_PERFORMED",
+    "brake_power": 10.0,
+    "brake_power_status": "DEFINED",
+    "brake_torque": null,
+    "brake_torque_status": "UNDEFINED",
+    "classification": "PERIOD_1",
+    "cycles_completed": 8,
+    "periodicity": "PERIOD_1",
+    "point_id": "synthetic-study-base",
+    "project_id": "synthetic-source",
+    "result_sha256": "e64e17026f5c072854cb0629f147b9fc1ded5b31e70b1f0b32b8c45e7d733390",
+    "rpm": 3000,
+    "run_id": "synthetic-study-base",
+    "variant_id": "synthetic-study-base"
+  },
+  {
+    "BMEP": null,
+    "BMEP_status": "UNDEFINED",
+    "artifact_directory": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\study-report-response-plot\\synthetic-study-alt-v5",
+    "audit_status": "NOT_PERFORMED",
+    "brake_power": 15.0,
+    "brake_power_status": "DEFINED",
+    "brake_torque": null,
+    "brake_torque_status": "UNDEFINED",
+    "classification": "PERIOD_1",
+    "cycles_completed": 8,
+    "periodicity": "PERIOD_1",
+    "point_id": "synthetic-study-alt",
+    "project_id": "synthetic-source",
+    "result_sha256": "8e71aaa2d6bd6d89878257036d8418c741dff70393338aea128fade53ec1dbf9",
+    "rpm": 3000,
+    "run_id": "synthetic-study-alt",
+    "variant_id": "synthetic-study-alt"
+  },
+  {
+    "BMEP": null,
+    "BMEP_status": "UNDEFINED",
+    "artifact_directory": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\study-report-response-plot\\synthetic-study-transient-v5",
+    "audit_status": "NOT_PERFORMED",
+    "brake_power": null,
+    "brake_power_status": "UNDEFINED",
+    "brake_torque": null,
+    "brake_torque_status": "UNDEFINED",
+    "classification": "INSUFFICIENT_CYCLES",
+    "cycles_completed": 8,
+    "periodicity": "INSUFFICIENT_CYCLES",
+    "point_id": "synthetic-study-transient",
+    "project_id": "synthetic-source",
+    "result_sha256": "a8ebbc95242b8cf097614b77d8676609cb852f1499daffaac47c89822180f8a6",
+    "rpm": 3000,
+    "run_id": "synthetic-study-transient",
+    "variant_id": "synthetic-study-transient"
+  }
+]</pre></details>
+<footer class="muted">Dino 2T Desktop · documento local autosuficiente · no implica validación experimental ni recomendación comercial.</footer>
+</body></html>

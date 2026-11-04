@@ -2409,6 +2409,8 @@ class ResultsPage(QWidget):
                 active_project_id=self.context.project.get('project_id'),
                 design_study_manifest=getattr(self,'design_study_manifest',None),
                 design_study_manifest_path=getattr(self,'design_study_manifest_path',None),
+                design_study_manifest_sha256=getattr(self,'design_study_manifest_sha256',None),
+                design_study_reference=getattr(self,'design_study_reference',None),
                 factorial_effects=_factorial_effects_from_study(
                     getattr(self,'design_study_manifest',None),(self.dataset or {}).get('points',[])))
             self.path_label.setText(f"Informe técnico autosuficiente exportado: {Path(path).name}")

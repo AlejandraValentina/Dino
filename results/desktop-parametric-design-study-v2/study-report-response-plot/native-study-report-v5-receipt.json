@@ -1,0 +1,22 @@
+{
+  "schema": "DINO_NATIVE_SINGLE_STUDY_REPORT_RESPONSE_V1",
+  "synthetic": true,
+  "desktop_visible": true,
+  "desktop_size": [
+    1440,
+    837
+  ],
+  "report_path": "results\\desktop-parametric-design-study-v2\\study-report-response-plot\\native-study-response-v5.html",
+  "report_sha256": "472812b108e8a658f45caf2ea7f6ed4b20b2630c19617807fb2c16db5eba5142",
+  "manifest_sha256": "0f68859682c427fd07e90ab0f581c4ee2e5544d77bb7f34deb9cb8fbae31be28",
+  "plotted_marker_count": 2,
+  "svg_count": 2,
+  "nonperiodic_exclusion_visible": true,
+  "unstarted_point_exclusion_visible": true,
+  "unconnected_markers": true,
+  "not_claimed_preserved": true,
+  "tamper_guard_tested": "tests/test_desktop_technical_report.py::test_single_study_report_plots_only_hash_bound_period_one_sources",
+  "desktop_capture_saved": true,
+  "browser_capture_sha256": "ff49a3326ec66a82c445270ab856b5ccdd194efffc11ab65c7bd7dcb3ff45c96",
+  "renderer": "Chrome headless; actual HTML created by Desktop export action"
+}
