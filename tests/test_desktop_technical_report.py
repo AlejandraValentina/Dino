@@ -118,6 +118,8 @@ def test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_ex
     assert "Pares excluidos de esta gráfica · Potencia de freno" in report
     assert "Uno o ambos extremos no tienen periodicidad observada de orden 1." in report
     assert "La métrica no está definida y finita en ambos resultados periódicos de orden 1." in report
+    assert "Se muestran pares con RPM y contexto operativos exactos, periodicidad observada de orden 1 en ambos extremos, y una métrica definida y finita." in report
+    assert "endpoints PERIOD_1" not in report
     assert "Uno o ambos endpoints no están clasificados PERIOD_1." not in report
     assert '"classification": "PERIOD_1"' in report
     assert '"periodicity": "PERIOD_1"' in report

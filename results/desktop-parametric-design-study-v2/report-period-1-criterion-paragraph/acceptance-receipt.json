@@ -1,0 +1,44 @@
+{
+  "schema": "DINO_REPORT_PERIOD_1_CRITERION_PARAGRAPH_ACCEPTANCE_V1",
+  "fixture_origin": "synthetic presentation fixture; no solver execution",
+  "visible_criterion_translated": true,
+  "raw_periodicity_codes_preserved_in_source_json": true,
+  "eligibility_notice_still_exact": true,
+  "evidence": {
+    "html_path": "results/desktop-parametric-design-study-v2/report-period-1-criterion-paragraph/cross-study-report-v1.html",
+    "html_sha256": "706c61b88d50ea0908efbf915f461fee11fcf4f355ace7b3425ae0d91cb2d955",
+    "desktop_capture_path": "results/desktop-parametric-design-study-v2/report-period-1-criterion-paragraph/desktop-export-v1.png",
+    "desktop_capture_sha256": "2a2a31373616faae191322805e8710290e706e8b51c078e10ed8686b936ba8fb",
+    "browser_capture_path": "results/desktop-parametric-design-study-v2/report-period-1-criterion-paragraph/chrome-report-v1.png",
+    "browser_capture_sha256": "d8b928815b96d42a1570499963aecfcaf0c8bda53d78b3f03abc2c27cd351fe7",
+    "capture_dimensions_px": {
+      "desktop-export-v1.png": [
+        1440,
+        837
+      ],
+      "chrome-report-v1.png": [
+        1360,
+        3000
+      ]
+    },
+    "desktop_window_visible": true,
+    "synthetic_notice": true,
+    "native_runner_exit_code": 0
+  },
+  "tests": {
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_desktop_technical_report.py",
+      "tests/test_desktop_design_study.py"
+    ],
+    "exit_code": 0,
+    "tail": [
+      "..............................................                           [100%]",
+      "46 passed in 43.93s"
+    ],
+    "summary_sha256": "e532acb26a59c27e7e0c8d0a3d347c3341d2b9d0557ecfae8a254aa7d5ce8c2a"
+  }
+}

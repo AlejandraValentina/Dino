@@ -724,7 +724,8 @@ def _cross_study_response_plots(comparison):
                 observed[study_id][identity]=record
         eligible=[record for points in observed.values() for record in points.values()]
         parts=[f'<section class="cross-study-response"><h3>{_esc(label)} por RPM exacta</h3>',
-            '<p>Solo extremos de pares con RPM/contexto exactos, ambos endpoints PERIOD_1 y valores finitos definidos. '
+            '<p>Se muestran pares con RPM y contexto operativos exactos, periodicidad observada de orden 1 en ambos extremos, '
+            'y una métrica definida y finita. '
             'Los marcadores no se conectan, interpolan ni ajustan.</p>']
         if not eligible:
             parts.append('<p class="empty">No hay observaciones pareadas elegibles para esta métrica.</p>')
