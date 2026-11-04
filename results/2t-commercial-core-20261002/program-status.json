@@ -11871,7 +11871,7 @@
       "id": "DESKTOP-PARAMETRIC-REPORT-DUPLICATE-STATE-SUMMARY-V1",
       "description": "Remove duplicate visible classification/periodicity wording from cross-study point summaries when both source fields carry the same state; retain both exact fields in the source JSON and preserve distinct labels when they differ.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11886,7 +11886,7 @@
       "evidence": [
         "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/chrome-report-v1.png"
       ],
-      "next_action": "Avoid repeating identical classification and periodicity labels in each point summary; keep both original fields in report JSON and show both labels if the values differ.",
+      "next_action": "In the visible point summary, collapse classification and periodicity only when the original state codes are equal; preserve both labels when distinct and keep all source JSON untouched.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16758,6 +16758,12 @@
       "kind": "task",
       "summary": "Localized exact pairing criteria and mismatch-field labels in report HTML; original JSON still retains enum and field IDs. Synthetic native export, 1360px Chrome, and 46 tests pass.",
       "commit": "bbdf4d5"
+    },
+    {
+      "at": "2026-11-04T23:05:08+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-DUPLICATE-STATE-SUMMARY-V1",
+      "kind": "task",
+      "summary": "Started screenshot-confirmed table cleanup: identical classification and periodicity labels are duplicated; distinct state combinations must remain explicit."
     }
   ],
   "legacy_gate_status": {
