@@ -11229,7 +11229,8 @@
       "owner_role": "verification",
       "write_scope": [
         "tests/test_design_study.py",
-        "motorsim/design_study.py"
+        "motorsim/design_study.py",
+        "results/desktop-parametric-design-study-v2/factorial-interruption/"
       ],
       "evidence_level": "L0",
       "evidence": [],
