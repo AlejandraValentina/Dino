@@ -11705,7 +11705,7 @@
         "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-CSV-EXPORT-V1",
         "DESKTOP-PARAMETRIC-FACTORIAL-CSV-REIMPORT-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11718,7 +11718,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Reproduce the existing V1 null bindings without changing the archived CSV; fix the export rows for subsequent files and verify their run-ID/hash arrays match the four source point rows exactly.",
+      "next_action": "Add an exact regression that all nine CONTRAST rows carry the same four source_run_id and result SHA-256 arrays as the verified POINT rows, then round-trip the exported CSV through the read-only factorial snapshot importer and confirm the binding status.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11741,6 +11741,28 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Use the saved native/Chrome report screenshot as the baseline. Reflow or group provenance columns responsively while preserving all original values; verify rendered HTML at 1360px and test complete provenance retention.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-REPORT-EXCLUSION-STATE-LABELS-V1",
+      "description": "Translate internal execution and periodicity codes in the new study-report plot exclusion reasons; keep raw codes in the appended original JSON and preserve their exact scientific meaning.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-STUDY-REPORT-RESPONSE-PLOT-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/report-exclusion-state-labels/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Use the saved rendered report screenshot/source to identify raw state tokens in exclusion prose; render user-facing labels via the shared presentation mapping, retain raw values in the exact source JSON, and assert both.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16525,6 +16547,12 @@
       "kind": "task",
       "summary": "Scalar design-study reports now plot only unique PERIOD_1 sources matching exact run ID, path, result hash, RPM and current diagnostic-manifest hash; exclusions retained; 45 focused regressions and native Desktop/Chrome synthetic report acceptance passed.",
       "commit": "5de8191"
+    },
+    {
+      "at": "2026-11-04T22:31:13+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-SOURCE-BINDINGS-V1",
+      "kind": "start",
+      "summary": "Verifying the already-implemented exact factorial CONTRAST source arrays and closing the missing export-to-read-only-snapshot regression; no solver execution."
     }
   ],
   "legacy_gate_status": {
