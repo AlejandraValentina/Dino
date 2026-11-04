@@ -11499,9 +11499,11 @@
         "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1",
         "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "bd13d8c"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11511,8 +11513,12 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Inspect the selected study point detail/tooltip path; add exact source manifest and nested sweep hashes plus current source verification status where available, preserve raw IDs and distinguish unavailable metadata from failed verification.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/study-traceability-details/acceptance.md",
+        "results/desktop-parametric-design-study-v2/study-traceability-details/tests-final-v2/study-traceability-details-final-regressions-v2.summary.json",
+        "results/desktop-parametric-design-study-v2/study-traceability-details/native-window-receipt.json"
+      ],
+      "next_action": "DONE: selected points expose exact study and nested sweep hashes, current artifact verification and explicit unavailable/changed states; changing project clears stale details.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11521,7 +11527,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-FACTOR-EFFECTS-CSV-EXPORT-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11582,6 +11588,31 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Connect exact plotted source points to their comparison-table rows; expose already verified source identities and provenance on selection, preserving unmatched/transient rows and existing contracts.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-RESPONSE-PLOT-V1",
+      "description": "Include the exact-periodic cross-study response plot and its study/color legend in the existing HTML comparison report, while retaining every excluded/unpaired point and all source manifest hashes; no interpolation, fitting or new calculations.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-CROSS-STUDY-RESPONSE-PLOT-V1",
+        "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_technical_report.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/cross-study-report-response-plot/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Reuse the verified comparison data and metric qualification already used by Desktop; render a labeled gap-free plot in the HTML report and list all excluded or unpaired points with status and source provenance.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16306,6 +16337,13 @@
       "kind": "PRODUCT_DELIVERY",
       "summary": "Native Qt cross-study response chart now plots only exact compatible PERIOD_1 metric pairs, adds color legend, preserves all excluded rows; 66/68 integrated tests pass with two unrelated stale UI assertions documented. Started study provenance details.",
       "commit": "e85df58"
+    },
+    {
+      "at": "2026-11-04T21:01:14+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-TRACEABILITY-DETAILS-V1",
+      "kind": "PRODUCT_DELIVERY",
+      "summary": "Selected study-point details now show loaded/current manifest hashes, project binding, source and nested RPM sweep verification; changed project clears stale selections. Native existing synthetic RPM study verified read-only.",
+      "commit": "bd13d8c"
     }
   ],
   "legacy_gate_status": {
@@ -16400,7 +16438,7 @@
   },
   "campaigns_started": 1,
   "campaign_runtime_status": "IMPL2_EXTENSION_COMPLETE_WITH_NUMERICAL_INVALID_POINTS",
-  "updated_at": "2026-11-04T20:45:29+00:00",
+  "updated_at": "2026-11-04T21:01:14+00:00",
   "full_rpm_sweep_impl2_campaign_readiness": {
     "state": "READY_FOR_CAMPAIGN_DECISION",
     "classification": "FULL_RPM_SWEEP_IMPL2_READY_FOR_CAMPAIGN_DECISION",
