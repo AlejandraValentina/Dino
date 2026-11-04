@@ -1,0 +1,25 @@
+{
+  "schema": "DINO_NATIVE_CROSS_STUDY_CSV_REIMPORT_V1",
+  "synthetic": true,
+  "native_window_visible": true,
+  "outer_size": [
+    1440,
+    837
+  ],
+  "source_csv": "results\\desktop-parametric-design-study-v2\\cross-study-csv-export\\synthetic-comparison.csv",
+  "source_csv_sha256": "819af0ddfaf839cb221e790526f9b6be9282bca50fa31e539a3b14f13028905a",
+  "snapshot_schema": "DINO_PARAMETRIC_CROSS_STUDY_CSV_SNAPSHOT_V1",
+  "read_only": true,
+  "comparison_rows": 2,
+  "row_types": [
+    "Pareja exacta",
+    "Sin pareja"
+  ],
+  "nonperiodic_status_visible": true,
+  "unpaired_reason_visible": true,
+  "horizontal_scroll_not_required": true,
+  "scientific_status_not_claimed": true,
+  "normal_curves_cleared": true,
+  "capture_saved": true,
+  "capture_sha256": "3f9e0da02ee6c5e9bb3614aac2f45706015482863cd7ae2d675baf4baa6fa41c"
+}

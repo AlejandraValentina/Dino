@@ -126,6 +126,9 @@ def starter_reed_petals():
 def load_results(path: str | Path):
     path = Path(path)
     if path.suffix.lower() == ".csv":
+        from .comparison_snapshot import import_cross_study_comparison_csv_snapshot
+        comparison_snapshot=import_cross_study_comparison_csv_snapshot(path)
+        if comparison_snapshot is not None:return comparison_snapshot
         from .parametric_factorial_snapshot import import_parametric_factorial_csv_snapshot
         factorial_snapshot=import_parametric_factorial_csv_snapshot(path)
         if factorial_snapshot is not None:return factorial_snapshot
