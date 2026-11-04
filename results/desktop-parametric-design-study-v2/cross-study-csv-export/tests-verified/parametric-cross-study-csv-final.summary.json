@@ -1,0 +1,25 @@
+{
+  "name": "parametric-cross-study-csv-final",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_design_study.py",
+    "tests/test_desktop_design_study.py",
+    "tests/test_desktop_technical_report.py"
+  ],
+  "started_at": "2026-11-04T19:18:48+00:00",
+  "finished_at": "2026-11-04T19:22:12+00:00",
+  "duration_s": 203.891,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\cross-study-csv-export\\tests-verified\\parametric-cross-study-csv-final.log",
+  "log_lines": 2,
+  "log_bytes": 111,
+  "error_lines": [],
+  "tail": [
+    "...............................................                          [100%]",
+    "47 passed in 203.34s (0:03:23)"
+  ]
+}

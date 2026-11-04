@@ -1,0 +1,21 @@
+{
+  "schema": "DINO_NATIVE_CROSS_STUDY_CSV_CHECK_V1",
+  "synthetic": true,
+  "native_window_visible": true,
+  "outer_size": [
+    1440,
+    837
+  ],
+  "comparison_rows_visible": 2,
+  "csv_export_action_succeeded": true,
+  "csv_rows": 2,
+  "row_types": [
+    "EXACT_PAIR",
+    "UNPAIRED"
+  ],
+  "nonperiodic_metrics_blank": true,
+  "unpaired_reason_preserved": "Fixture sint\u00e9tico: sin punto compatible a 4000 RPM.",
+  "csv_sha256": "819af0ddfaf839cb221e790526f9b6be9282bca50fa31e539a3b14f13028905a",
+  "screenshot": "native-cross-study-csv.png",
+  "screenshot_sha256": "688c91f5b9065ea268ced07af7d1c2f99426ac7f8fb434511db9bfc6c7bdbcfc"
+}

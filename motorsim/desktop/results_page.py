@@ -57,6 +57,127 @@ _STUDY_EXPORT_FIELDS=("study_schema","study_id","project_id","design_method","ma
     "engine_identity_sha256","identity_sha256","result_sha256","result_artifact_sha256",
     "run_directory","reused_verified","source_verified","source_verification","brake_power_kw","brake_torque_nm","BMEP_kpa",
     "scientific_validation")
+_CROSS_STUDY_CSV_FIELDS=("comparison_schema","baseline_engine_identity_sha256","row_type",
+    "study_a_id","study_a_manifest_path","study_a_manifest_sha256","point_a_index","point_a_run_id",
+    "point_a_source_run_id","point_a_design_value","point_a_design_unit","point_a_factor_values_json",
+    "point_a_classification","point_a_periodicity","point_a_cycles_completed","point_a_engine_identity_sha256",
+    "point_a_identity_sha256","point_a_result_sha256","point_a_result_artifact_sha256","point_a_run_directory","point_a_source_verified",
+    "study_b_id","study_b_manifest_path","study_b_manifest_sha256","point_b_index","point_b_run_id",
+    "point_b_source_run_id","point_b_design_value","point_b_design_unit","point_b_factor_values_json",
+    "point_b_classification","point_b_periodicity","point_b_cycles_completed","point_b_engine_identity_sha256",
+    "point_b_identity_sha256","point_b_result_sha256","point_b_result_artifact_sha256","point_b_run_directory","point_b_source_verified",
+    "rpm","pairing_status","pairing_reason","brake_power_a_kw","brake_power_b_kw","brake_power_delta_kw",
+    "brake_torque_a_nm","brake_torque_b_nm","brake_torque_delta_nm","BMEP_a_kpa","BMEP_b_kpa",
+    "BMEP_delta_kpa","scientific_validation")
+
+
+def _build_cross_study_comparison_csv(comparison):
+    """Flatten a verified comparison without rounding or synthesizing pair data."""
+    if not isinstance(comparison,dict) or comparison.get("schema")!="DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1":
+        raise ValueError("comparación paramétrica no compatible")
+    studies=comparison.get("studies")
+    if not isinstance(studies,list) or not 2<=len(studies)<=4:
+        raise ValueError("la comparación debe conservar entre dos y cuatro estudios")
+    by_id={study.get("study_id"):study for study in studies}
+    if len(by_id)!=len(studies) or None in by_id:
+        raise ValueError("identidad de estudio ambigua en la comparación")
+    base=comparison.get("baseline_engine_identity_sha256")
+    for study in studies:
+        try:
+            manifest_raw=Path(study["manifest_path"]).read_bytes()
+            if hashlib.sha256(manifest_raw).hexdigest()!=study.get("manifest_sha256"):
+                raise ValueError(f"cambió el manifiesto de {study.get('study_id')}")
+            live_manifest=json.loads(manifest_raw.decode("utf-8"))
+            if (live_manifest.get("schema")!="DINO_PARAMETRIC_DESIGN_STUDY_V1" or
+                    live_manifest.get("study_id")!=study.get("study_id") or
+                    live_manifest.get("baseline_engine_identity_sha256")!=base):
+                raise ValueError(f"identidad o baseline del manifiesto cambió para {study.get('study_id')}")
+            saved_manifest=study.get("manifest")
+            if saved_manifest is not None and live_manifest!=saved_manifest:
+                raise ValueError(f"el contenido del manifiesto ya no coincide con la comparación de {study.get('study_id')}")
+        except (OSError,KeyError,TypeError,json.JSONDecodeError) as exc:
+            raise ValueError(f"no se puede verificar el manifiesto de {study.get('study_id')}: {exc}") from exc
+        for point in study.get("points",[]):
+            if not point.get("source_verified"):
+                continue
+            try:
+                source_dir=Path(point["run_directory"])
+                result_raw=(source_dir/"result.json").read_bytes()
+                run_meta=json.loads((source_dir/"run.json").read_text(encoding="utf-8"))
+                result=json.loads(result_raw)
+                result_hash=hashlib.sha256(result_raw).hexdigest()
+                expected_run=point.get("source_run_id") or point.get("run_id")
+                expected_identity=point.get("identity_sha256") or point.get("engine_identity_sha256")
+                if (result_hash!=point.get("result_artifact_sha256") or
+                        result_hash!=run_meta.get("result_sha256") or
+                        (point.get("result_sha256") is not None and result_hash!=point.get("result_sha256")) or
+                        result.get("bindings",{}).get("run_id")!=expected_run or
+                        result.get("bindings",{}).get("identity_sha256")!=expected_identity):
+                    raise ValueError("hash de artifact o identidad de corrida cambió")
+            except (OSError,KeyError,TypeError,ValueError,json.JSONDecodeError) as exc:
+                raise ValueError(f"fuente verificada modificada para {study.get('study_id')} · {point.get('run_id')}: {exc}") from exc
+
+    def point_fields(prefix,study_id,point):
+        fields={f"study_{prefix}_id":"",f"study_{prefix}_manifest_path":"",
+            f"study_{prefix}_manifest_sha256":""}
+        point_columns=("index","run_id","source_run_id","design_value","design_unit","factor_values_json",
+            "classification","periodicity","cycles_completed","engine_identity_sha256","identity_sha256",
+            "result_sha256","result_artifact_sha256","run_directory","source_verified")
+        for key in point_columns:fields[f"point_{prefix}_{key}"]=""
+        if point is None:return fields
+        study=by_id[study_id];source=point.get("source_manifest_point") or point
+        fields.update({f"study_{prefix}_id":study_id,
+            f"study_{prefix}_manifest_path":study.get("manifest_path"),
+            f"study_{prefix}_manifest_sha256":study.get("manifest_sha256"),
+            f"point_{prefix}_index":point.get("index"),
+            f"point_{prefix}_run_id":point.get("run_id"),
+            f"point_{prefix}_source_run_id":point.get("source_run_id") or point.get("run_id"),
+            f"point_{prefix}_design_value":source.get("value",point.get("value")),
+            f"point_{prefix}_design_unit":source.get("unit",point.get("unit")),
+            f"point_{prefix}_factor_values_json":json.dumps(source.get("factor_values") or [],
+                ensure_ascii=False,allow_nan=False,separators=(",",":")),
+            f"point_{prefix}_classification":point.get("classification") or point.get("status"),
+            f"point_{prefix}_periodicity":point.get("periodicity"),
+            f"point_{prefix}_cycles_completed":point.get("cycles_completed"),
+            f"point_{prefix}_engine_identity_sha256":point.get("engine_identity_sha256"),
+            f"point_{prefix}_identity_sha256":point.get("identity_sha256"),
+            f"point_{prefix}_result_sha256":point.get("result_sha256"),
+            f"point_{prefix}_result_artifact_sha256":point.get("result_artifact_sha256"),
+            f"point_{prefix}_run_directory":point.get("run_directory"),
+            f"point_{prefix}_source_verified":bool(point.get("source_verified"))})
+        return fields
+
+    def record(row_type,study_a,point_a,study_b,point_b,rpm,pairing_status,pairing_reason,metrics=None):
+        row={key:"" for key in _CROSS_STUDY_CSV_FIELDS}
+        row.update({"comparison_schema":comparison["schema"],
+            "baseline_engine_identity_sha256":base,"row_type":row_type,"rpm":rpm,
+            "pairing_status":pairing_status,"pairing_reason":pairing_reason,
+            "scientific_validation":comparison.get("scientific_validation","NOT_CLAIMED")})
+        row.update(point_fields("a",study_a,point_a));row.update(point_fields("b",study_b,point_b))
+        for metric,stem in (("brake_power","brake_power"),("brake_torque","brake_torque"),("BMEP","BMEP")):
+            item=(metrics or {}).get(metric,{})
+            pa=str((point_a or {}).get("periodicity") or "").startswith("PERIOD_1")
+            pb=str((point_b or {}).get("periodicity") or "").startswith("PERIOD_1")
+            a=item.get("a") if pa else None;b=item.get("b") if pb else None
+            delta=item.get("delta") if pa and pb else None
+            for side,value in (("a",a),("b",b),("delta",delta)):
+                column=f"{stem}_{side}_{'kw' if metric=='brake_power' else 'nm' if metric=='brake_torque' else 'kpa'}"
+                row[column]=value if isinstance(value,(int,float)) and math.isfinite(float(value)) else ""
+        return row
+
+    rows=[]
+    for pair in comparison.get("pairs",[]):
+        rows.append(record("EXACT_PAIR",pair["study_a"],pair["point_a"],pair["study_b"],pair["point_b"],
+            pair.get("rpm"),pair.get("pairing"),"",pair.get("metrics")))
+    first_id=studies[0]["study_id"]
+    for item in comparison.get("unpaired",[]):
+        if item.get("study_id")==first_id:
+            rows.append(record("UNPAIRED",first_id,item.get("point"),"",None,
+                (item.get("point") or {}).get("rpm"),"NO_EXACT_COMPATIBLE_PAIR",item.get("reason")))
+        else:
+            rows.append(record("UNPAIRED",first_id,None,item["study_id"],item.get("point"),
+                (item.get("point") or {}).get("rpm"),"NO_EXACT_COMPATIBLE_PAIR",item.get("reason")))
+    return rows
 
 
 def _build_parametric_study_export(manifest,manifest_path,manifest_sha256,selected_indexes,imported_points=()):
@@ -428,7 +549,12 @@ class ResultsPage(QWidget):
         comparison_bar.addWidget(self.study_comparison_metric)
         self.export_study_comparison_button=QPushButton("Exportar comparación HTML…")
         self.export_study_comparison_button.clicked.connect(self.export_study_comparison)
-        comparison_bar.addWidget(self.export_study_comparison_button);comparison_bar.addStretch(1)
+        comparison_bar.addWidget(self.export_study_comparison_button)
+        self.export_study_comparison_csv_button=QPushButton("Exportar comparación CSV…")
+        self.export_study_comparison_csv_button.setToolTip("CSV con filas pareadas y no pareadas, estados, valores observados y procedencia SHA-256.")
+        self.export_study_comparison_csv_button.clicked.connect(self.export_study_comparison_csv)
+        self.export_study_comparison_csv_button.setEnabled(False)
+        comparison_bar.addWidget(self.export_study_comparison_csv_button);comparison_bar.addStretch(1)
         self.study_comparison_notice=QLabel("Elegí entre dos y cuatro estudios guardados en este proyecto. Se verifica cada manifiesto y artifact antes de comparar.")
         self.study_comparison_notice.setWordWrap(True);comparison_layout.addWidget(self.study_comparison_notice)
         self.study_comparison_table=QTableWidget(0,11);self.study_comparison_table.setObjectName("crossStudyComparison")
@@ -527,6 +653,7 @@ class ResultsPage(QWidget):
         if signature!=self._study_reference_signature:
             self._study_reference_signature=signature
             self.study_comparison=None;self.study_comparison_table.setRowCount(0)
+            self.export_study_comparison_csv_button.setEnabled(False)
             self.study_comparison_notice.setText("Elegí entre dos y cuatro estudios guardados en este proyecto. Se verifica cada manifiesto y artifact antes de comparar.")
         previous=self.project_study_selector.currentData()
         self.project_study_selector.blockSignals(True);self.project_study_selector.clear()
@@ -572,11 +699,14 @@ class ResultsPage(QWidget):
 
     def _study_comparison_loaded(self,comparison):
         self.study_comparison=comparison
+        self.export_study_comparison_csv_button.setEnabled(True)
         self.compare_studies_button.setEnabled(len(self.context.project.get("study_references",[]))>=2)
         self.study_comparison_group.show();self._render_study_comparison()
 
     def _study_comparison_failed(self,error):
         self.compare_studies_button.setEnabled(len(self.context.project.get("study_references",[]))>=2)
+        self.export_study_comparison_csv_button.setEnabled(False)
+        self.study_comparison=None
         self.study_comparison_notice.setText(f"Comparación rechazada: {error}")
         self.study_comparison_table.setRowCount(0)
 
@@ -664,6 +794,25 @@ class ResultsPage(QWidget):
             return True
         except (OSError,TypeError,ValueError) as exc:
             QMessageBox.warning(self,"No se pudo exportar la comparación",str(exc));return False
+
+    def export_study_comparison_csv(self):
+        if not self.study_comparison:return False
+        default=Path(self.context.path).with_suffix(".comparacion-estudios.csv") if self.context.path else Path.cwd()/"dino-comparacion-estudios.csv"
+        path,_=QFileDialog.getSaveFileName(self,"Exportar comparación paramétrica como CSV",str(default),"CSV (*.csv)")
+        if not path:return False
+        try:
+            rows=_build_cross_study_comparison_csv(self.study_comparison)
+            if not rows:raise ValueError("la comparación no contiene pares ni puntos sin pareja para exportar")
+            with Path(path).open("x",encoding="utf-8-sig",newline="") as stream:
+                writer=csv.DictWriter(stream,fieldnames=_CROSS_STUDY_CSV_FIELDS,extrasaction="ignore")
+                writer.writeheader();writer.writerows(rows)
+            digest=hashlib.sha256(Path(path).read_bytes()).hexdigest()
+            self.study_comparison_notice.setText(
+                f"{len(rows)} fila(s) exportadas sin redondeo · SHA-256 {digest} · "
+                "pares exactos y puntos sin pareja conservados; métricas no definidas permanecen vacías.")
+            return True
+        except (OSError,TypeError,ValueError) as exc:
+            QMessageBox.warning(self,"No se pudo exportar la comparación CSV",str(exc));return False
 
     def open_selected_project_study(self):
         reference=self.project_study_selector.currentData()

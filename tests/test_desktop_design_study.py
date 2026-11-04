@@ -7,7 +7,8 @@ from PySide6.QtWidgets import QApplication,QComboBox,QDialog,QFileDialog,QLineEd
 from motorsim.desktop.app import DinoDesktopWindow
 from motorsim.desktop.context import DesktopContext
 from motorsim.desktop.execution_page import ExecutionPage
-from motorsim.desktop.results_page import ResultsPage,_build_parametric_study_export,_load_verified_study_comparison
+from motorsim.desktop.results_page import (ResultsPage,_build_cross_study_comparison_csv,
+    _build_parametric_study_export,_load_verified_study_comparison)
 from motorsim.desktop.services import new_design_project
 
 APP=QApplication.instance() or QApplication([])
@@ -358,6 +359,105 @@ def test_cross_study_comparison_page_keeps_full_identity_and_metric_states():
     assert page.study_comparison_table.item(0,4).text()=="—"
     assert "a"*64 in page.study_comparison_table.item(0,2).toolTip()
     assert "RPM exacta:" in page.study_comparison_table.item(0,2).toolTip()
+    page.close();APP.processEvents()
+
+
+def test_cross_study_csv_export_keeps_exact_sources_pair_decisions_and_blank_nonperiodic_metrics(tmp_path,monkeypatch):
+    base="9"*64
+    point_a={"index":0,"value":38.40862784470379,"unit":"mm","rpm":3000.0,
+        "status":"COMPLETE","classification":"PERIOD_1","periodicity":"PERIOD_1","cycles_completed":5,
+        "run_id":"run-a","source_run_id":"run-a-source","engine_identity_sha256":"a"*64,
+        "identity_sha256":"b"*64,"result_sha256":"c"*64,"result_artifact_sha256":"d"*64,
+        "run_directory":"C:/synthetic/a","source_manifest_point":{"index":0,"value":38.40862784470379,
+            "unit":"mm","factor_values":[{"id":"transfer_top","value":40.123456789,"unit":"mm"}]}}
+    point_b={"index":2,"value":41.98765432109876,"unit":"mm","rpm":3000.0,
+        "status":"COMPLETE","classification":"PERIOD_1","periodicity":"PERIOD_1","cycles_completed":5,
+        "run_id":"run-b","source_run_id":"run-b-source","engine_identity_sha256":"e"*64,
+        "identity_sha256":"f"*64,"result_sha256":"1"*64,"result_artifact_sha256":"2"*64,
+        "run_directory":"C:/synthetic/b","source_manifest_point":{"index":2,"value":41.98765432109876,
+            "unit":"mm","factor_values":[]}}
+    point_transient={"index":3,"value":44.1234567890123,"unit":"mm","rpm":4000.0,
+        "status":"COMPLETE","classification":"MAX_CYCLES_NONCONVERGED","periodicity":"INSUFFICIENT_CYCLES",
+        "cycles_completed":2,"run_id":"run-b-transient","source_run_id":"run-b-transient",
+        "engine_identity_sha256":"3"*64,"identity_sha256":"4"*64,"result_sha256":"5"*64,
+        "result_artifact_sha256":"6"*64,"run_directory":"C:/synthetic/b-transient",
+        "source_manifest_point":{"index":3,"value":44.1234567890123,"unit":"mm"}}
+    study_files=[]
+    for study_id in ("study-a","study-b"):
+        manifest_path=tmp_path/f"{study_id}.study.json"
+        manifest_raw=json.dumps({"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":study_id,
+            "project_id":"synthetic-project","baseline_engine_identity_sha256":base,"points":[]},
+            sort_keys=True,separators=(",",":")).encode()
+        manifest_path.write_bytes(manifest_raw)
+        study_files.append({"study_id":study_id,"manifest_path":str(manifest_path),
+            "manifest_sha256":hashlib.sha256(manifest_raw).hexdigest(),"parameter":{"label":"Escape"}})
+    verified_dir=tmp_path/"verified-run-a";verified_dir.mkdir()
+    verified_result={"schema":"DINO_ENGINEERING_RUN_V1","status":"COMPLETE",
+        "bindings":{"run_id":"run-a-source","identity_sha256":point_a["identity_sha256"]}}
+    verified_raw=json.dumps(verified_result,sort_keys=True,separators=(",",":")).encode()
+    verified_hash=hashlib.sha256(verified_raw).hexdigest()
+    (verified_dir/"result.json").write_bytes(verified_raw)
+    (verified_dir/"run.json").write_text(json.dumps({"result_sha256":verified_hash}),encoding="utf-8")
+    point_a.update({"run_directory":str(verified_dir),"result_sha256":verified_hash,
+        "result_artifact_sha256":verified_hash,"source_verified":True})
+    study_files[0]["points"]=[point_a]
+    study_files[1]["points"]=[point_b,point_transient]
+    comparison={"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
+        "baseline_engine_identity_sha256":base,"scientific_validation":"NOT_CLAIMED",
+        "notice":"sin interpolación ni reclamos predictivos.",
+        "studies":study_files,
+        "pairs":[{"study_a":"study-a","point_a":point_a,"study_b":"study-b","point_b":point_b,
+            "rpm":3000.0,"pairing":"EXACT_RPM_AND_OPERATING_CONTEXT",
+            "metrics":{"brake_power":{"a":12.3456789012345,"b":13.4567890123456,"delta":1.1111101111111},
+                "brake_torque":{"a":4.1,"b":4.5,"delta":0.4},"BMEP":{"a":130.1,"b":131.2,"delta":1.1}}}],
+        "unpaired":[{"study_id":"study-b","point":point_transient,
+            "reason":"No existe una corrida compatible a 4000 RPM."}]}
+    rows=_build_cross_study_comparison_csv(comparison)
+    assert len(rows)==2
+    pair,unpaired=rows
+    assert pair["row_type"]=="EXACT_PAIR"
+    assert pair["point_a_design_value"]==38.40862784470379
+    assert json.loads(pair["point_a_factor_values_json"])[0]["value"]==40.123456789
+    assert pair["study_a_manifest_sha256"]==study_files[0]["manifest_sha256"]
+    assert pair["study_b_manifest_sha256"]==study_files[1]["manifest_sha256"]
+    assert pair["point_a_source_verified"] is True
+    assert pair["point_a_source_run_id"]=="run-a-source"
+    assert pair["brake_power_delta_kw"]==1.1111101111111
+    assert unpaired["row_type"]=="UNPAIRED" and unpaired["pairing_reason"]=="No existe una corrida compatible a 4000 RPM."
+    assert unpaired["point_b_periodicity"]=="INSUFFICIENT_CYCLES"
+    assert unpaired["brake_power_a_kw"]==unpaired["brake_power_b_kw"]==unpaired["brake_power_delta_kw"]==""
+
+    page=ResultsPage(DesktopContext(new_design_project("cross-study-csv-native-handler")))
+    assert not page.export_study_comparison_csv_button.isEnabled()
+    page._study_comparison_loaded(comparison)
+    assert page.export_study_comparison_csv_button.isEnabled()
+    destination=tmp_path/"comparison.csv"
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *args:(str(destination),"CSV (*.csv)"))
+    assert page.export_study_comparison_csv() is True
+    with destination.open(encoding="utf-8-sig",newline="") as stream:
+        records=list(csv.DictReader(stream))
+    assert len(records)==2 and records[0]["pairing_status"]=="EXACT_RPM_AND_OPERATING_CONTEXT"
+    assert records[1]["point_b_design_value"]=="44.1234567890123"
+    assert records[1]["point_b_classification"]=="MAX_CYCLES_NONCONVERGED"
+    assert "SHA-256" in page.study_comparison_notice.text()
+    monkeypatch.setattr(QMessageBox,"warning",lambda *args:None)
+    assert page.export_study_comparison_csv() is False
+    assert len(list(csv.DictReader(destination.open(encoding="utf-8-sig",newline=""))))==2
+    (verified_dir/"result.json").write_text("{}",encoding="utf-8")
+    stale_artifact=tmp_path/"stale-artifact.csv"
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *args:(str(stale_artifact),"CSV (*.csv)"))
+    assert page.export_study_comparison_csv() is False
+    assert not stale_artifact.exists()
+    tampered=Path(study_files[1]["manifest_path"]);tampered.write_text("{}",encoding="utf-8")
+    new_destination=tmp_path/"stale-comparison.csv"
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *args:(str(new_destination),"CSV (*.csv)"))
+    assert page.export_study_comparison_csv() is False
+    assert not new_destination.exists()
+    page.context.project["study_references"]=[{"path":item["manifest_path"],"study_id":item["study_id"],
+        "manifest_sha256":item["manifest_sha256"]} for item in study_files]
+    page.context.changed.emit();APP.processEvents()
+    assert page.study_comparison is None
+    assert not page.export_study_comparison_csv_button.isEnabled()
     page.close();APP.processEvents()
 
 
