@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import csv
 import hashlib
 import os
 import tempfile
@@ -12,7 +13,7 @@ from unittest.mock import patch
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from copy import deepcopy
 from PySide6.QtCore import Qt,QTimer
-from PySide6.QtWidgets import QApplication,QDialog,QLabel,QMessageBox,QTableWidget,QFileDialog,QComboBox
+from PySide6.QtWidgets import QApplication,QDialog,QLabel,QMessageBox,QTableWidget,QTableWidgetItem,QPlainTextEdit,QFileDialog,QComboBox
 from PySide6.QtTest import QTest
 import desktop_qsettings_isolation  # noqa: F401
 
@@ -454,7 +455,7 @@ class DinoDesktopTests(unittest.TestCase):
         context=DesktopContext(new_project("measurement-ui"))
         with tempfile.TemporaryDirectory() as tmp:
             project_path=Path(tmp)/"measurement-ui.dino2t.json";save_project(project_path,context.project);context.path=project_path
-            csv_path=Path(tmp)/"dyno.csv";csv_path.write_text("rpm,value,uncertainty\n5000,12.5,0.4\n6000,15,0.5\n",encoding="utf-8")
+            csv_path=Path(tmp)/"dyno.csv";csv_path.write_text("rpm,value,uncertainty\n5000,12.123456789012345,0.000000000012345\n6000,15,0.5\n",encoding="utf-8")
             page=ResultsPage(context)
             with patch("motorsim.desktop.results_page.QFileDialog.getOpenFileName",return_value=(str(csv_path),"CSV (*.csv)")), \
                  patch.object(QDialog,"exec",return_value=QDialog.DialogCode.Accepted):
@@ -474,7 +475,15 @@ class DinoDesktopTests(unittest.TestCase):
             contrast_path=Path(tmp)/"contrast.csv"
             with patch("motorsim.desktop.results_page.QFileDialog.getSaveFileName",return_value=(str(contrast_path),"CSV (*.csv)")):
                 self.assertTrue(page.export_measurement_comparison())
-            self.assertIn("run-1",contrast_path.read_text(encoding="utf-8-sig"))
+            with contrast_path.open(encoding="utf-8-sig",newline="") as stream:
+                exported=list(csv.DictReader(stream))
+            self.assertEqual(exported[0]["run_ids"],"run-1")
+            # UI uses compact rounding; CSV must preserve the original
+            # imported measurement and full-precision solver comparison.
+            self.assertEqual(float(exported[0]["Medido"]),12.123456789012345*1000)
+            self.assertEqual(float(exported[0]["Incertidumbre"]),0.000000000012345*1000)
+            self.assertEqual(float(exported[0]["Simulado"]),12.0*1000)
+            self.assertEqual(float(exported[0]["Simulado − medido"]),page._measurement_export_rows[0]["difference"])
             pressure_path=Path(tmp)/"pressure.csv";pressure_path.write_text("cycle,crank_angle_deg,value,uncertainty\n1,0,100000,1000\n1,360,110000,1000\n",encoding="utf-8")
             def accept_pressure(dialog):
                 choices=dialog.findChildren(QComboBox)
@@ -497,6 +506,22 @@ class DinoDesktopTests(unittest.TestCase):
             reopened_page=ResultsPage(reopened)
             self.assertEqual(len(reopened_page.measurement_datasets),2)
             self.assertEqual(reopened_page.measurement_datasets[0]["metadata"]["provenance"],"UNKNOWN")
+
+    def test_evidence_drawer_uses_selected_artifact_provenance_not_active_engine(self):
+        from types import SimpleNamespace
+        details=QTableWidget(2,2)
+        details.setItem(0,0,QTableWidgetItem("Resultado SHA-256"));details.setItem(0,1,QTableWidgetItem("a"*64))
+        details.setItem(1,0,QTableWidgetItem("Configuración SHA-256"));details.setItem(1,1,QTableWidgetItem("b"*64))
+        results=SimpleNamespace(source=None,source_kind="EXPLORATORY",path_label=QLabel("1 corrida EXPLORATORY"),details=details)
+        shell=SimpleNamespace(evidence_text=QPlainTextEdit(),context=SimpleNamespace(project={"project_id":"trace-test"}),results=results)
+        DinoDesktopWindow._update_evidence(shell)
+        text=shell.evidence_text.toPlainText()
+        assert "Corridas EXPLORATORY importadas" in text
+        assert "No hay una ruta de importación única declarada" in text
+        assert "Artifact source: importación auditada / historial" not in text
+        assert "Resultado SHA-256: "+"a"*64 in text
+        assert "Configuración SHA-256: "+"b"*64 in text
+        assert "Configuración SHA-256: "+identity(new_project("trace-test")["base_engine"]) not in text
 
     def test_legacy_project_v1_migrates_without_changing_engine(self):
         project=new_project("legacy-v1");engine_hash=identity(project["base_engine"])

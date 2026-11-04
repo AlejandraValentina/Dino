@@ -163,8 +163,11 @@ class PowerCurvePanel(QGroupBox):
         controls.addWidget(self.torque_toggle)
         self.exploratory_toggle=QCheckBox("Mostrar transitorios · EXPLORATORIO")
         self.exploratory_toggle.setChecked(False);controls.addWidget(self.exploratory_toggle)
+        self.exploratory_toggle.setToolTip("Mostrar sólo si se solicita; las estimaciones transitorias no son curvas de prestaciones convergidas.")
+        self.exploratory_toggle.setMinimumWidth(0)
         controls.addStretch(1)
         self.export_button = QPushButton("Exportar curva CSV…")
+        self.export_button.setMinimumWidth(0);self.export_button.setMaximumWidth(170)
         self.export_button.clicked.connect(self.choose_export)
         controls.addWidget(self.export_button)
         layout.addLayout(controls)
@@ -188,9 +191,15 @@ class PowerCurvePanel(QGroupBox):
         self.comparison.setMaximumHeight(155)
         layout.addWidget(self.comparison)
         self.points = QTableWidget(0, 9)
-        self.points.setHorizontalHeaderLabels(["Variante / serie", "RPM", "Clasificación", "Periodicidad", "Potencia", "Torque", "Estado", "Tiempo (s)", "Variación últimos ciclos"])
-        self.points.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-        self.points.horizontalHeader().setStretchLastSection(True)
+        point_headers=("Serie","RPM","Clasif.","Período","Potencia","Torque","Estado","Tiempo","Δ observado")
+        point_tooltips=("Variante o serie","RPM","Clasificación científica","Periodicidad global",
+            "Potencia de freno","Torque","Estado de las magnitudes","Tiempo transcurrido (s)",
+            "Variación observada en los últimos ciclos; no es una cota de error")
+        self.points.setHorizontalHeaderLabels(point_headers)
+        for column,tooltip in enumerate(point_tooltips):
+            self.points.horizontalHeaderItem(column).setToolTip(tooltip)
+        self.points.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.points.horizontalHeader().setStretchLastSection(False)
         self.points.setMaximumHeight(210)
         self.points.itemSelectionChanged.connect(self._selected_point)
         layout.addWidget(self.points)
@@ -203,6 +212,7 @@ class PowerCurvePanel(QGroupBox):
         layout.addWidget(self.views,1)
         self.views.tabBar().hide()
         self.view_selector=QComboBox();self.view_selector.addItems(['Gráfico','Puntos y diferencias'])
+        self.view_selector.setMinimumWidth(0);self.view_selector.setMaximumWidth(180)
         self.view_selector.currentIndexChanged.connect(self.views.setCurrentIndex)
         self.view_selector.currentIndexChanged.connect(lambda *_:self._fit_view())
         controls.insertWidget(0,self.view_selector)
@@ -218,6 +228,12 @@ class PowerCurvePanel(QGroupBox):
         self.plot.setMinimumHeight(150 if compact else 230)
         self.setTitle('' if compact else 'Curvas de rendimiento')
         self.setStyleSheet('QGroupBox {border:0;margin-top:0;padding:0;}' if compact else '')
+        self.view_selector.setMaximumWidth(165 if compact else 180)
+        self.power_toggle.setMinimumWidth(0);self.torque_toggle.setMinimumWidth(0)
+        self.exploratory_toggle.setText("Transitorios" if compact else "Mostrar transitorios")
+        self.unit_selector.setMaximumWidth(64 if compact else 80)
+        self.export_button.setText("Exportar CSV…")
+        self.export_button.setMaximumWidth(150 if compact else 170)
         self.view_selector.setToolTip(self.provenance.text()+'\n'+self.peaks.text())
         self._fit_view()
 
@@ -269,7 +285,10 @@ class PowerCurvePanel(QGroupBox):
         deltas = exact_rpm_differences(self.curves)
         self.comparison.setRowCount(len(deltas))
         if len(self.curves) >= 2:
-            self.compare_label.setText(f"{self.curves[0]['name']} → {self.curves[1]['name']} · sólo RPM comunes exactos; sin interpolación.")
+            if deltas:
+                self.compare_label.setText(f"{self.curves[0]['name']} → {self.curves[1]['name']} · sólo RPM comunes exactos; sin interpolación.")
+            else:
+                self.compare_label.setText(f"{self.curves[0]['name']} y {self.curves[1]['name']} no tienen RPM comunes exactos; no se calculan diferencias ni se interpola.")
         else:
             self.compare_label.setText("Seleccioná dos series para comparar; sólo se usan RPM comunes exactos y no se interpola.")
         power_unit = self.unit_selector.currentData()

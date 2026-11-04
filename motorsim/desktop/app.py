@@ -296,15 +296,16 @@ class DinoDesktopWindow(QMainWindow):
             self.component_nav.setTabToolTip(i,"Error o configuración no válida" if invalid else ("Cambios pendientes de aplicar" if modified else "Configuración disponible"))
     def _update_evidence(self,*_):
         if not hasattr(self,"evidence_text"):return
-        lines=["Proyecto: "+self.context.project["project_id"],"Fuente: "+self.results.path_label.text(),
-               "Artifact source: "+str(self.results.source or "importación auditada / historial")]
+        kind=getattr(self.results,"source_kind",None)
+        source_labels={"EXPLORATORY":"Corridas EXPLORATORY importadas",
+            "HISTORICAL_IMPL2":"Evidencia histórica IMPL2 sintética",
+            "IMPORTED_EXTERNAL":"Datos importados externamente"}
+        lines=["Proyecto abierto: "+self.context.project["project_id"],
+            "Origen del conjunto: "+source_labels.get(kind,"No informado por la fuente"),
+            "Archivo de importación: "+(str(self.results.source) if self.results.source else "No hay una ruta de importación única declarada")]
         for row in range(self.results.details.rowCount()):
             key=self.results.details.item(row,0);value=self.results.details.item(row,1)
             if key and value:lines.append(f"{key.text()}: {value.text()}")
-        from ..engine_configuration import identity
-        engine=self.context.engine();lines.append(f"Configuración SHA-256: {identity(engine)}")
-        snapshot=((engine.get("native_configuration",{}).get("fuel_coupled_combustion") or {}).get("fuel_snapshot") or {})
-        if snapshot.get("sha256"):lines.append(f"Fuel snapshot SHA-256: {snapshot['sha256']}")
         self.evidence_text.setPlainText("\n".join(lines))
     def _start_from_strip(self,execution):
         execution.start_run(resume=False);self._update_strip()

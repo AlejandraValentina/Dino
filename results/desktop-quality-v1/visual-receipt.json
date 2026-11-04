@@ -1,0 +1,58 @@
+{
+  "application": "DinoDesktopWindow (fuente actual)",
+  "fixture": "SYNTHETIC_UI_FIXTURE; no solver, no project writes, not physical evidence",
+  "checks": {
+    "window_visible": true,
+    "no_exact_rpm_pair_notice": true,
+    "exploratory_is_opt_in": true,
+    "result_horizontal_scroll_maximum": {
+      "980x680-comparacion": {
+        "results_page": 0,
+        "points_table": 0
+      },
+      "980x680-curvas": {
+        "results_page": 0,
+        "points_table": 0
+      },
+      "1360x900-comparacion": {
+        "results_page": 0,
+        "points_table": 0
+      },
+      "1360x900-curvas": {
+        "results_page": 0,
+        "points_table": 0
+      }
+    },
+    "results_fit_without_horizontal_scroll": true
+  },
+  "captures": [
+    {
+      "path": "results\\desktop-quality-v1\\captures\\desktop-980x680-comparacion.png",
+      "width": 980,
+      "height": 680,
+      "bytes": 61202,
+      "sha256": "41d7b69a0943f5910ec1f83d3142289506b2c44cabb887f839e5cdf0fdbc330c"
+    },
+    {
+      "path": "results\\desktop-quality-v1\\captures\\desktop-980x680-curvas.png",
+      "width": 980,
+      "height": 680,
+      "bytes": 56267,
+      "sha256": "b2410db4c39475b5a704982aa911cf07da5abd3fe3dc85a8bb43afcaba85e6ee"
+    },
+    {
+      "path": "results\\desktop-quality-v1\\captures\\desktop-1360x900-comparacion.png",
+      "width": 1360,
+      "height": 900,
+      "bytes": 74960,
+      "sha256": "b5107d50ae7d6b827d7e465dacc0ec4b176030d5a05bcdf65800be3f2df16d45"
+    },
+    {
+      "path": "results\\desktop-quality-v1\\captures\\desktop-1360x900-curvas.png",
+      "width": 1360,
+      "height": 900,
+      "bytes": 67833,
+      "sha256": "998df2971f468756d9ac5aeccff213a1552c1723c935352e35948f543e416179"
+    }
+  ]
+}

@@ -293,6 +293,7 @@ class ResultsPage(QWidget):
 
     def compare_measurement(self,*_):
         self.measurement_table.setRowCount(0)
+        self._measurement_export_rows=[]
         if not getattr(self,"measurement_datasets",None) or self.measurement_selector.currentIndex()<0 or not self.dataset:return
         external=self.measurement_datasets[self.measurement_selector.currentIndex()];meta=external["metadata"]
         variant=self.baseline_selector.currentData() or "base";simulated=[]
@@ -317,6 +318,10 @@ class ResultsPage(QWidget):
                 if value is not None:simulated.append({"x":point["rpm"],"value":float(value)*(1000 if metric=="brake_power" else 1)})
             unit=meta["canonical_value_unit"]
         comparison=measurement_data.exploratory_overlay(external,simulated,simulated_unit=unit)
+        # Keep the full source values separate from the compact UI rendering.
+        # The table intentionally uses human-readable precision, while an
+        # exported comparison must retain the exact imported/calculated values.
+        self._measurement_export_rows=list(comparison["rows"])
         self.measurement_table.setHorizontalHeaderLabels(["Ciclo / ángulo (°CA)" if meta["kind"]=="pressure_trace" else "RPM",
             "Medido", "Incertidumbre", "Simulado", "Simulado − medido"])
         if meta["kind"]=="pressure_trace":
@@ -352,7 +357,11 @@ class ResultsPage(QWidget):
                 writer=csv.writer(stream);metadata=self._measurement_export_metadata
                 context_fields=["dataset_id","provenance","source","engine","configuration","conditions","variant","run_ids","comparison_status","interpolation"]
                 writer.writerow(context_fields+[self.measurement_table.horizontalHeaderItem(c).text() for c in range(self.measurement_table.columnCount())])
-                for row in range(self.measurement_table.rowCount()):writer.writerow([metadata[key] for key in context_fields]+[self.measurement_table.item(row,c).text() for c in range(self.measurement_table.columnCount())])
+                for row in self._measurement_export_rows:
+                    values=(row["key"],row["measured"],row["uncertainty"],row["simulated"],row["difference"])
+                    writer.writerow([metadata[key] for key in context_fields]+[
+                        json.dumps(value,ensure_ascii=False,separators=(",",":"))
+                        if isinstance(value,(dict,list,tuple)) else value for value in values])
             return True
         except OSError as exc:
             QMessageBox.warning(self,"No se pudo exportar el contraste",str(exc));return False

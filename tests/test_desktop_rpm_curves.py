@@ -1,6 +1,7 @@
 """Display and orchestration tests, not synthetic scientific results."""
 import hashlib
 import json
+import csv
 from pathlib import Path
 
 import pytest
@@ -101,7 +102,7 @@ def test_existing_plot_renders_exploratory_points_and_csv_preserves_state(tmp_pa
     app=QApplication.instance() or QApplication([])
     row=dict(variant_id='A',rpm=8000,mode='ENGINEERING_EXPLORATORY',classification='MAX_CYCLES_NONCONVERGED',
         periodicity='NOT_CONVERGED',brake_power_status='UNDEFINED',brake_torque_status='UNDEFINED',
-        transient_estimates=dict(brake_power=3,brake_torque=4))
+        transient_estimates=dict(brake_power=3.123456789012345,brake_torque=4.123456789012345))
     panel=PowerCurvePanel();panel.resize(1100,800);panel.set_dataset(dict(points=[row],requested_rpms=[8000,9000,10000]),{'A'})
     assert not panel.exploratory_toggle.isChecked()
     panel.exploratory_toggle.setChecked(True)  # Explicit opt-in after rc11 safety correction.
@@ -109,9 +110,36 @@ def test_existing_plot_renders_exploratory_points_and_csv_preserves_state(tmp_pa
     assert panel.rows[0]['power_status']=='TRANSIENT_ESTIMATE'
     target=tmp_path/'curve.csv';panel.export_csv(target)
     assert 'TRANSIENT_ESTIMATE' in target.read_text(encoding='utf-8-sig')
+    with target.open(encoding='utf-8-sig',newline='') as stream:exported=next(csv.DictReader(stream))
+    assert float(exported['brake_power_HP'])==panel.rows[0]['power']
+    assert float(exported['brake_torque_Nm'])==panel.rows[0]['torque']
     panel.exploratory_toggle.setChecked(False)
     assert all(p['power'] is None for p in panel.rows)
     assert row['brake_power_status']=='UNDEFINED' and row['periodicity']=='NOT_CONVERGED'
+    panel.close()
+
+
+def test_comparison_explains_when_selected_series_have_no_exact_rpm_pair():
+    from PySide6.QtWidgets import QApplication
+    from motorsim.desktop.performance_curves import PowerCurvePanel
+    app=QApplication.instance() or QApplication([])
+    rows=[]
+    for variant,rpm in (("Escape base",4000),("Escape B",5000)):
+        rows.append(dict(variant_id=variant,rpm=rpm,classification="PERIOD_1",
+            periodicity="PERIOD_1",brake_power_status="DEFINED",brake_power=4.0,
+            brake_torque_status="DEFINED",brake_torque=8.0,
+            implementation_identity_sha256="impl",solver_identity_sha256="solver",
+            fuel_id="fuel",mechanical_loss_model_sha256="loss",
+            total_finite_volume_cells=44))
+    panel=PowerCurvePanel();panel.set_dataset(dict(points=rows),{"Escape base","Escape B"})
+    app.processEvents()
+    assert panel.comparison.rowCount()==0
+    assert "no tienen RPM comunes exactos" in panel.compare_label.text()
+    assert "ni se interpola" in panel.compare_label.text()
+    panel.set_compact_layout(True)
+    assert panel.sizeHint().width()<=980
+    panel.set_compact_layout(False)
+    assert panel.sizeHint().width()<=1360
     panel.close()
 
 

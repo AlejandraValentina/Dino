@@ -112,7 +112,8 @@ class DesktopContextV2Tests(unittest.TestCase):
             page.open_runs(["read-only-fixture/result.json"])
             QTimer.singleShot(3000,loop.quit);loop.exec()
         timer.stop();self.assertIs(page.dataset,dataset);importer.assert_called_once()
-        self.assertIn("corridas EXPLORATORY importadas",page.source_notice.text())
+        self.assertIn("Corridas exploratorias",page.source_notice.text())
+        self.assertIn("sin asociación automática al proyecto",page.source_notice.text())
         page.close()
 
     def test_history_widget_compare_requires_two_readable_runs(self):
@@ -163,7 +164,10 @@ class DesktopContextV2Tests(unittest.TestCase):
     def test_project_tree_and_splitter_fit_minimum_supported_window(self):
         window=DinoDesktopWindow(new_project("ux-small-window"));window.resize(980,680);window.show();APP.processEvents()
         self.assertGreaterEqual(window.width(),980);self.assertEqual(window.project_tree.topLevelItemCount(),1)
-        self.assertGreaterEqual(window.nav.width(),128);self.assertTrue(window.nav.isVisible())
+        # The current editor uses the component selector; the former tab
+        # navigation is intentionally hidden to avoid duplicate navigation.
+        self.assertGreaterEqual(window.model_selector.width(),128);self.assertTrue(window.model_selector.isVisible())
+        self.assertFalse(window.nav.isVisible())
         window.close()
 
     def test_variant_selection_stays_visible_across_pages(self):
