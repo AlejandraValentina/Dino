@@ -50,6 +50,92 @@ _STUDY_COMPARE_CONTEXT=("fuel_id","afr_kg_air_per_kg_fuel","total_finite_volume_
     "cycles_requested","solver_identity_sha256","implementation_identity_sha256")
 _STUDY_COMPARE_METRICS={"brake_power":("Potencia de freno","kW"),
     "brake_torque":("Torque de freno","N·m"),"BMEP":("BMEP","kPa")}
+_STUDY_EXPORT_FIELDS=("study_schema","study_id","project_id","design_method","manifest_path",
+    "manifest_sha256","baseline_engine_identity_sha256","parameter_id","parameter_label",
+    "parameter_unit","point_index","design_value","design_unit","factor_values_json","rpm",
+    "run_id","source_run_id","execution_status","classification","periodicity","cycles_completed",
+    "engine_identity_sha256","identity_sha256","result_sha256","result_artifact_sha256",
+    "run_directory","reused_verified","source_verified","source_verification","brake_power_kw","brake_torque_nm","BMEP_kpa",
+    "scientific_validation")
+
+
+def _build_parametric_study_export(manifest,manifest_path,manifest_sha256,selected_indexes,imported_points=()):
+    """Build exact, provenance-bound CSV rows from a verified study snapshot."""
+    if not isinstance(manifest,dict) or manifest.get("schema")!="DINO_PARAMETRIC_DESIGN_STUDY_V1":
+        raise ValueError("manifiesto paramétrico no compatible")
+    points=manifest.get("points")
+    if not isinstance(points,list) or len(points)>30:
+        raise ValueError("la exportación admite como máximo 30 puntos por estudio")
+    indexes=sorted(set(selected_indexes))
+    if not indexes or any(type(index) is not int or index<0 or index>=len(points) for index in indexes):
+        raise ValueError("seleccioná al menos un punto válido de la matriz")
+    parameter=manifest.get("parameter") or {}
+    imported_by_run={}
+    for row in imported_points:
+        run_id=row.get("run_id")
+        if run_id is not None:imported_by_run.setdefault(str(run_id),[]).append(row)
+    exported=[]
+    for index in indexes:
+        point=points[index]
+        run_id=point.get("source_run_id") or point.get("historical_source_run_id") or point.get("run_id")
+        imported=None
+        source_verification="NOT_LOADED"
+        expected_directory=point.get("run_directory")
+        candidates=imported_by_run.get(str(run_id),[])
+        for candidate in candidates:
+            candidate_directory=candidate.get("artifact_directory")
+            if expected_directory and candidate_directory:
+                if Path(expected_directory).resolve()!=Path(candidate_directory).resolve():continue
+            expected_hash=point.get("result_sha256") or point.get("result_artifact_sha256")
+            if expected_hash and candidate.get("result_sha256")!=expected_hash:continue
+            expected_rpm=point.get("rpm",manifest.get("rpm"))
+            if expected_rpm is not None and candidate.get("rpm")!=expected_rpm:continue
+            imported=candidate;break
+        if candidates and imported is None:source_verification="NO_EXACT_ARTIFACT_MATCH"
+        if imported is not None:
+            try:
+                source_dir=Path(imported["artifact_directory"]).resolve()
+                result_raw=(source_dir/"result.json").read_bytes();result=json.loads(result_raw)
+                run_meta=json.loads((source_dir/"run.json").read_text(encoding="utf-8"))
+                result_hash=hashlib.sha256(result_raw).hexdigest()
+                expected_identity=point.get("identity_sha256") or point.get("engine_identity_sha256")
+                expected_artifact=point.get("result_artifact_sha256")
+                expected_result=point.get("result_sha256") or expected_artifact
+                if (result_hash!=run_meta.get("result_sha256") or
+                        (expected_artifact is not None and result_hash!=expected_artifact) or
+                        (expected_result is not None and result_hash!=expected_result) or
+                        result.get("bindings",{}).get("run_id")!=run_id or
+                        result.get("bindings",{}).get("identity_sha256")!=expected_identity):
+                    raise ValueError("source hash or identity changed")
+                source_verification="VERIFIED_HASH_AND_IDENTITY"
+            except (OSError,ValueError,TypeError,KeyError,json.JSONDecodeError):
+                imported=None;source_verification="SOURCE_ARTIFACT_CHANGED"
+        metrics={}
+        periodic=str((imported or {}).get("periodicity") or point.get("periodicity") or "").startswith("PERIOD_1")
+        for metric in _STUDY_COMPARE_METRICS:
+            value=(imported or {}).get(metric);status=(imported or {}).get(metric+"_status")
+            metrics[metric]=value if periodic and status=="DEFINED" and isinstance(value,(int,float)) and math.isfinite(float(value)) else ""
+        exported.append({
+            "study_schema":manifest["schema"],"study_id":manifest.get("study_id"),"project_id":manifest.get("project_id"),
+            "design_method":manifest.get("design_method","GEOMETRY_V1"),"manifest_path":str(manifest_path),
+            "manifest_sha256":manifest_sha256,"baseline_engine_identity_sha256":manifest.get("baseline_engine_identity_sha256"),
+            "parameter_id":parameter.get("id"),"parameter_label":parameter.get("label"),"parameter_unit":parameter.get("unit"),
+            "point_index":point.get("index",index),"design_value":point.get("value"),"design_unit":point.get("unit"),
+            "factor_values_json":json.dumps(point.get("factor_values") or [],ensure_ascii=False,allow_nan=False,separators=(",",":")),
+            "rpm":point.get("rpm",manifest.get("rpm")),"run_id":point.get("run_id"),"source_run_id":run_id,
+            "execution_status":point.get("status"),"classification":(imported or {}).get("classification") or point.get("classification"),
+            "periodicity":(imported or {}).get("periodicity") or point.get("periodicity"),
+            "cycles_completed":(imported or {}).get("cycles_completed",point.get("cycles_completed")),
+            "engine_identity_sha256":point.get("engine_identity_sha256"),
+            "identity_sha256":point.get("identity_sha256") or point.get("engine_identity_sha256"),
+            "result_sha256":point.get("result_sha256") or (imported or {}).get("result_sha256"),
+            "result_artifact_sha256":point.get("result_artifact_sha256"),
+            "run_directory":point.get("run_directory"),"reused_verified":bool(point.get("reused_verified")),
+            "source_verified":source_verification=="VERIFIED_HASH_AND_IDENTITY",
+            "source_verification":source_verification,"brake_power_kw":metrics["brake_power"],
+            "brake_torque_nm":metrics["brake_torque"],"BMEP_kpa":metrics["BMEP"],
+            "scientific_validation":manifest.get("scientific_validation","NOT_CLAIMED")})
+    return exported
 
 
 def _load_verified_study_comparison(references):
@@ -323,7 +409,13 @@ class ResultsPage(QWidget):
         self.design_study_table.setHorizontalHeaderLabels(["Diseño","Valor","Estado","Periodicidad","Ciclos","Potencia","Torque","BMEP","Δ potencia vs base"])
         self.design_study_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.design_study_table.horizontalHeader().setStretchLastSection(True);self.design_study_table.setMaximumHeight(230)
+        self.design_study_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.design_study_table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         study_layout.addWidget(self.design_study_table)
+        self.export_design_study_button=QPushButton("Exportar puntos seleccionados CSV…")
+        self.export_design_study_button.setToolTip("CSV sin redondeo, con estados, identidades y SHA-256 del manifiesto ligado al proyecto.")
+        self.export_design_study_button.clicked.connect(self.export_design_study_csv)
+        self.export_design_study_button.setEnabled(False);study_layout.addWidget(self.export_design_study_button)
         self.study_comparison_group=QGroupBox("Comparar estudios guardados")
         comparison_layout=QVBoxLayout(self.study_comparison_group)
         comparison_bar=QHBoxLayout();comparison_layout.addLayout(comparison_bar)
@@ -990,6 +1082,7 @@ class ResultsPage(QWidget):
     def _update_design_study_summary(self):
         manifest=getattr(self,"design_study_manifest",None)
         if not manifest:return
+        self.export_design_study_button.setEnabled(bool(getattr(self,"design_study_manifest_path",None)))
         is_envelope=manifest.get("design_method")=="RPM_ENVELOPE_V1"
         dataset_points={str(row.get("run_id")):row for row in (self.dataset or {}).get("points",[])
                         if row.get("run_id") is not None}
@@ -1028,8 +1121,8 @@ class ResultsPage(QWidget):
                         if factor_values else f"{format_number(row.get('value'))} {row.get('unit','')}")
             if is_envelope:value_text+=f" · {format_number(row.get('rpm'))} RPM"
             cells=[design_label,value_text,
-                _state_label(point.get("classification") or row.get("status")),
-                _state_label(point.get("periodicity") or "NOT_EVALUATED"),
+                _state_label(point.get("classification") or row.get("classification") or row.get("status")),
+                _state_label(point.get("periodicity") or row.get("periodicity") or "NOT_EVALUATED"),
                 str(point.get("cycles_completed",row.get("cycles_completed",0))),*metrics,delta]
             for column,value in enumerate(cells):
                 item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
@@ -1048,6 +1141,38 @@ class ResultsPage(QWidget):
                 self.design_study_table.setItem(index,column,item)
         self._refresh_design_response_plot()
         self.design_study_group.show()
+
+    def export_design_study_csv(self):
+        manifest=getattr(self,"design_study_manifest",None)
+        manifest_path=getattr(self,"design_study_manifest_path",None)
+        if not manifest or not manifest_path:return False
+        selected=sorted({index.row() for index in self.design_study_table.selectionModel().selectedRows()})
+        if not selected:
+            self.design_study_notice.setText("Seleccioná uno o más puntos de la matriz para exportarlos.")
+            return False
+        path,_=QFileDialog.getSaveFileName(self,"Exportar puntos del estudio paramétrico",
+            str(Path(self.context.path).parent if self.context.path else Path.cwd()),"CSV (*.csv)")
+        if not path:return False
+        try:
+            source=Path(manifest_path).resolve();raw=source.read_bytes();digest=hashlib.sha256(raw).hexdigest()
+            live=json.loads(raw.decode("utf-8"))
+            reference=next((ref for ref in self.context.project.get("study_references",[])
+                if Path(ref.get("path","")).resolve()==source),None)
+            if (live!=manifest or not reference or reference.get("manifest_sha256")!=digest or
+                    reference.get("study_id")!=manifest.get("study_id")):
+                raise ValueError("el manifiesto cambió o no coincide con la referencia SHA guardada en el proyecto")
+            imported_points=(self.dataset or {}).get("points",[])
+            records=_build_parametric_study_export(live,source,digest,selected,imported_points)
+            if len(records)!=len(selected):raise ValueError("la matriz cambió desde que se abrió el estudio")
+            with Path(path).open("x",encoding="utf-8-sig",newline="") as stream:
+                writer=csv.DictWriter(stream,fieldnames=_STUDY_EXPORT_FIELDS,extrasaction="ignore")
+                writer.writeheader();writer.writerows(records)
+            self.design_study_notice.setText(
+                f"{len(records)} punto(s) exportado(s) sin redondeo · SHA-256 del manifiesto {digest} · "
+                "estados y fuentes conservados; valores ausentes permanecen vacíos.")
+            return True
+        except (OSError,ValueError,TypeError) as exc:
+            QMessageBox.warning(self,"No se pudo exportar la matriz paramétrica",str(exc));return False
 
     def _refresh_design_response_plot(self,*_):
         manifest=getattr(self,"design_study_manifest",None)

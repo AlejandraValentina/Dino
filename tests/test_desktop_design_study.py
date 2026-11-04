@@ -1,13 +1,13 @@
 from __future__ import annotations
-import hashlib,json,os
+import csv,hashlib,json,os
 from pathlib import Path
 import pytest
 os.environ.setdefault("QT_QPA_PLATFORM","offscreen")
-from PySide6.QtWidgets import QApplication,QComboBox,QDialog,QLineEdit,QMessageBox
+from PySide6.QtWidgets import QApplication,QComboBox,QDialog,QFileDialog,QLineEdit,QMessageBox
 from motorsim.desktop.app import DinoDesktopWindow
 from motorsim.desktop.context import DesktopContext
 from motorsim.desktop.execution_page import ExecutionPage
-from motorsim.desktop.results_page import ResultsPage,_load_verified_study_comparison
+from motorsim.desktop.results_page import ResultsPage,_build_parametric_study_export,_load_verified_study_comparison
 from motorsim.desktop.services import new_design_project
 
 APP=QApplication.instance() or QApplication([])
@@ -438,6 +438,111 @@ def test_project_study_reference_rejects_changed_manifest(tmp_path):
     assert page.open_selected_project_study() is False
     assert "SHA-256 no coincide" in page.design_study_notice.text()
     assert getattr(page,"design_study_manifest",None) is None
+    page.close();APP.processEvents()
+
+
+def test_parametric_study_csv_export_preserves_precision_states_and_verified_sources(tmp_path,monkeypatch):
+    context=DesktopContext(new_design_project("study-csv-export-synthetic"))
+    source_dir=tmp_path/"run-periodic";source_dir.mkdir()
+    identity=hashlib.sha256(b"synthetic-engine-identity").hexdigest()
+    run_id="synthetic-periodic-run"
+    result={"schema":"DINO_ENGINEERING_RUN_V1","classification":"PERIOD_1",
+        "periodicity":"PERIOD_1","cycles_completed":4,
+        "bindings":{"run_id":run_id,"identity_sha256":identity,
+                    "project_id":context.project["project_id"]}}
+    result_raw=json.dumps(result,sort_keys=True,separators=(",",":")).encode()
+    result_hash=hashlib.sha256(result_raw).hexdigest()
+    (source_dir/"result.json").write_bytes(result_raw)
+    (source_dir/"run.json").write_text(json.dumps({"result_sha256":result_hash}),encoding="utf-8")
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":"synthetic-export-study",
+        "project_id":context.project["project_id"],"design_method":"GEOMETRY_V1","rpm":3000,
+        "baseline_engine_identity_sha256":"b"*64,"scientific_validation":"NOT_CLAIMED",
+        "parameter":{"id":"exhaust:length","label":"Longitud del escape","unit":"mm"},
+        "points":[
+            {"index":0,"value":38.40862784470379,"unit":"mm","rpm":3000,"status":"COMPLETE",
+             "run_id":run_id,"source_run_id":run_id,"engine_identity_sha256":"e"*64,
+             "identity_sha256":identity,"result_sha256":result_hash,"result_artifact_sha256":result_hash,
+             "run_directory":str(source_dir),"classification":"PERIOD_1","periodicity":"PERIOD_1",
+             "cycles_completed":4,"factor_values":[{"id":"transfer_top","value":40.123456789,"unit":"mm"}]},
+            {"index":1,"value":41.98765432109876,"unit":"mm","rpm":3000,"status":"COMPLETE",
+             "run_id":"synthetic-nonconverged-run","source_run_id":"synthetic-nonconverged-run",
+             "engine_identity_sha256":"f"*64,"identity_sha256":"a"*64,"result_sha256":"d"*64,
+             "run_directory":str(tmp_path/"missing-nonconverged"),"classification":"MAX_CYCLES_NONCONVERGED",
+             "periodicity":"INSUFFICIENT_CYCLES","cycles_completed":2,
+             "factor_values":[{"id":"transfer_top","value":41.234567891,"unit":"mm"}]}]}
+    manifest_path=tmp_path/"synthetic.study.json"
+    manifest_raw=json.dumps(manifest,sort_keys=True,separators=(",",":")).encode()
+    manifest_path.write_bytes(manifest_raw)
+    digest=hashlib.sha256(manifest_raw).hexdigest()
+    context.add_study_reference({"path":str(manifest_path),"study_id":manifest["study_id"],
+        "source_project_id":context.project["project_id"],"schema":manifest["schema"],
+        "manifest_sha256":digest})
+    page=ResultsPage(context)
+    page.design_study_manifest=manifest;page.design_study_manifest_path=manifest_path
+    page.dataset={"points":[{"artifact_directory":str(source_dir),"run_id":run_id,"rpm":3000,
+        "result_sha256":result_hash,
+        "classification":"PERIOD_1","periodicity":"PERIOD_1","cycles_completed":4,
+        "brake_power":12.3456789012345,"brake_power_status":"DEFINED",
+        "brake_torque":7.6543210987654,"brake_torque_status":"DEFINED",
+        "BMEP":123.456789012345,"BMEP_status":"DEFINED"}]}
+    page._update_design_study_summary()
+    assert page.design_study_table.rowCount()==2
+    assert page.design_study_table.item(0,2).text()=="Periódica · ciclo 1"
+    assert page.design_study_table.item(0,3).text()=="Periódica · ciclo 1"
+    assert "no convergida" in page.design_study_table.item(1,2).text().lower()
+    assert "insuficientes" in page.design_study_table.item(1,3).text().lower()
+    from PySide6.QtCore import QItemSelectionModel
+    selection=page.design_study_table.selectionModel()
+    selection.select(page.design_study_table.model().index(0,0),
+        QItemSelectionModel.SelectionFlag.Select|QItemSelectionModel.SelectionFlag.Rows)
+    selection.select(page.design_study_table.model().index(1,0),
+        QItemSelectionModel.SelectionFlag.Select|QItemSelectionModel.SelectionFlag.Rows)
+    output=tmp_path/"selected-points.csv"
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *args:(str(output),"CSV (*.csv)"))
+    assert page.export_design_study_csv() is True
+    with output.open(encoding="utf-8-sig",newline="") as stream:
+        records=list(csv.DictReader(stream))
+    assert len(records)==2
+    first,second=records
+    assert float(first["design_value"])==38.40862784470379
+    assert json.loads(first["factor_values_json"])[0]["value"]==40.123456789
+    assert first["source_verification"]=="VERIFIED_HASH_AND_IDENTITY",first
+    assert first["manifest_sha256"]==digest and first["source_verified"]=="True",first
+    assert first["source_verification"]=="VERIFIED_HASH_AND_IDENTITY"
+    assert first["brake_power_kw"]=="12.3456789012345"
+    assert first["scientific_validation"]=="NOT_CLAIMED"
+    assert second["classification"]=="MAX_CYCLES_NONCONVERGED"
+    assert second["periodicity"]=="INSUFFICIENT_CYCLES"
+    assert second["source_verified"]=="False"
+    assert second["brake_power_kw"]==""
+    assert (source_dir/"result.json").read_bytes()==result_raw
+    assert "SHA-256 del manifiesto" in page.design_study_notice.text()
+    assert _build_parametric_study_export(manifest,manifest_path,digest,[0],page.dataset["points"])[0]["source_verified"]
+    page.close();APP.processEvents()
+
+
+def test_parametric_study_csv_export_rejects_manifest_tampering_and_existing_target(tmp_path,monkeypatch):
+    context=DesktopContext(new_design_project("study-csv-export-integrity"))
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":"integrity-export",
+        "project_id":context.project["project_id"],"rpm":3000,
+        "parameter":{"id":"exhaust:length","label":"Escape","unit":"mm"},
+        "points":[{"index":0,"value":38.4,"unit":"mm","status":"COMPLETE"}]}
+    manifest_path=tmp_path/"study.json";manifest_path.write_text(json.dumps(manifest),encoding="utf-8")
+    raw=manifest_path.read_bytes();digest=hashlib.sha256(raw).hexdigest()
+    context.add_study_reference({"path":str(manifest_path),"study_id":manifest["study_id"],
+        "source_project_id":context.project["project_id"],"schema":manifest["schema"],"manifest_sha256":digest})
+    page=ResultsPage(context);page.design_study_manifest=manifest;page.design_study_manifest_path=manifest_path
+    page._update_design_study_summary();page.design_study_table.selectRow(0)
+    output=tmp_path/"existing.csv";output.write_text("keep",encoding="utf-8")
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *args:(str(output),"CSV (*.csv)"))
+    monkeypatch.setattr(QMessageBox,"warning",lambda *args:None)
+    assert page.export_design_study_csv() is False
+    assert output.read_text(encoding="utf-8")=="keep"
+    manifest_path.write_text(json.dumps(dict(manifest,study_id="tampered")),encoding="utf-8")
+    fresh=tmp_path/"new.csv"
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *args:(str(fresh),"CSV (*.csv)"))
+    assert page.export_design_study_csv() is False
+    assert not fresh.exists()
     page.close();APP.processEvents()
 
 

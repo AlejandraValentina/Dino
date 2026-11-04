@@ -1,0 +1,23 @@
+{
+  "schema": "DINO_NATIVE_DESKTOP_STUDY_CSV_CHECK_V1",
+  "synthetic": true,
+  "native_window_visible": true,
+  "outer_size": [
+    1440,
+    837
+  ],
+  "study_opened_from_project": true,
+  "rows_in_table": 2,
+  "export_action_succeeded": true,
+  "export_row_count": 2,
+  "states": [
+    "PERIOD_1",
+    "INSUFFICIENT_CYCLES"
+  ],
+  "nonperiodic_metric_blank": true,
+  "manifest_hash_bound": true,
+  "csv_sha256": "3a2e71ee547e31b94257afbb1a6d98e5aef1b49dab193836b9d03ef766834f67",
+  "manifest_sha256": "aeeed060e7786e7eec5aa41439a99164583a05ecccf77e6705e65d280082cb79",
+  "screenshot": "native-window-study-csv-export.png",
+  "screenshot_sha256": "b7f5709b7af3f1d2d40450599b66546c46e5ac0eeb0a7347ed518bde385efdea"
+}
