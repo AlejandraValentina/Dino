@@ -11950,9 +11950,11 @@
       "id": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-CRITERION-PARAGRAPH-V1",
       "description": "Replace PERIOD_1 in the explanatory paragraph above cross-study response charts with an accurate user-facing periodicity phrase, while preserving the exact eligibility rule and original state codes in source JSON.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "ea82d18"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11963,9 +11965,35 @@
       ],
       "evidence_level": "L0",
       "evidence": [
-        "results/desktop-parametric-design-study-v2/report-period-1-reason-label/chrome-report-v2.png"
+        "results/desktop-parametric-design-study-v2/report-period-1-criterion-paragraph/acceptance.md",
+        "results/desktop-parametric-design-study-v2/report-period-1-criterion-paragraph/acceptance-receipt.json",
+        "results/desktop-parametric-design-study-v2/report-period-1-criterion-paragraph/tests-final/period-criterion-final-v1.summary.json",
+        "results/desktop-parametric-design-study-v2/report-period-1-criterion-paragraph/cross-study-report-v1.html",
+        "results/desktop-parametric-design-study-v2/report-period-1-criterion-paragraph/chrome-report-v1.png"
       ],
-      "next_action": "Rewrite the descriptive intro to cross-study response charts in user-facing terms for exact RPM/context, order-1 periodicity and finite defined metrics; preserve all selection predicates and source codes.",
+      "next_action": "DONE: chart intro now describes exact RPM/context, order-1 periodicity and defined finite metrics in Spanish; PERIOD_1 source fields and chart eligibility remain unchanged; Desktop/Chrome and 46 tests verified.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-REPORT-MANIFEST-PROVENANCE-LAYOUT-V1",
+      "description": "Improve readability of the selected-manifest provenance table in cross-study HTML reports: long local paths and SHA-256 values currently compete for width; keep exact paths/hashes accessible and preserve all source manifests/JSON.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/report-manifest-provenance-layout/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/report-period-1-criterion-paragraph/chrome-report-v1.png"
+      ],
+      "next_action": "Present source manifest paths and hashes compactly while leaving exact traceability accessible; do not alter manifests or source identities.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16847,6 +16875,13 @@
       "task": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-CRITERION-PARAGRAPH-V1",
       "kind": "task",
       "summary": "Started the visible chart-method text correction; replace PERIOD_1 token with exact Spanish meaning only, preserving filter logic."
+    },
+    {
+      "at": "2026-11-04T23:15:29+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-PERIOD-1-CRITERION-PARAGRAPH-V1",
+      "kind": "task",
+      "summary": "Chart introductions now state exact RPM/context, observed order-1 periodicity, and defined finite metrics without the enum; source JSON and selection unchanged. Native Desktop, Chrome and 46 tests pass.",
+      "commit": "ea82d18"
     }
   ],
   "legacy_gate_status": {
