@@ -165,6 +165,11 @@ class ResultsPage(QWidget):
         study_layout=QVBoxLayout(self.design_study_group)
         self.design_study_notice=QLabel("Los estudios se conservan con su manifiesto, configuración e identidad por punto.")
         self.design_study_notice.setWordWrap(True);study_layout.addWidget(self.design_study_notice)
+        study_open_row=QHBoxLayout();study_open_row.addWidget(QLabel("Estudios de este proyecto"))
+        self.project_study_selector=QComboBox();self.project_study_selector.setObjectName("projectStudySelector");study_open_row.addWidget(self.project_study_selector,1)
+        self.open_project_study_button=QPushButton("Abrir estudio")
+        self.open_project_study_button.clicked.connect(self.open_selected_project_study);study_open_row.addWidget(self.open_project_study_button)
+        study_layout.addLayout(study_open_row)
         response_bar=QHBoxLayout();response_bar.addWidget(QLabel("Respuesta paramétrica"))
         self.design_response_metric=QComboBox();self.design_response_metric.setObjectName("designResponseMetric")
         for label,key in (("Potencia de freno (kW)","brake_power"),("Torque de freno (N·m)","brake_torque"),("BMEP (kPa)","BMEP")):
@@ -238,6 +243,7 @@ class ResultsPage(QWidget):
             self._project_reference_signature=signature
             paths=[Path(ref["path"]) for ref in refs if ref.get("path") and Path(ref["path"]).is_file()]
             if paths:self.open_runs(paths)
+        self._refresh_project_studies()
         names={"base",*self.context.project["variants"]}
         data_names=set()
         if self.dataset:
@@ -256,6 +262,42 @@ class ResultsPage(QWidget):
             selected=next((row for row in self.dataset["points"]
                            if row.get("point_id")==self._selected_point_id),self.dataset["points"][0])
             self.show_point(selected)
+
+    def _refresh_project_studies(self):
+        refs=self.context.project.get("study_references",[])
+        previous=self.project_study_selector.currentData()
+        self.project_study_selector.blockSignals(True);self.project_study_selector.clear()
+        for ref in refs:
+            label=f"{ref.get('study_id','Estudio')} · {Path(ref.get('path','')).name or 'manifiesto'}"
+            self.project_study_selector.addItem(label,dict(ref))
+        if previous:
+            index=next((i for i in range(self.project_study_selector.count())
+                if self.project_study_selector.itemData(i)==previous),-1)
+            if index>=0:self.project_study_selector.setCurrentIndex(index)
+        self.project_study_selector.blockSignals(False)
+        available=bool(refs)
+        self.open_project_study_button.setEnabled(available)
+        self.design_study_group.setVisible(available or getattr(self,"design_study_manifest",None) is not None)
+
+    def open_selected_project_study(self):
+        reference=self.project_study_selector.currentData()
+        if not reference:return False
+        try:
+            path=Path(reference["path"]).resolve();raw=path.read_bytes()
+            digest=hashlib.sha256(raw).hexdigest()
+            manifest=json.loads(raw.decode("utf-8"))
+            if digest!=reference["manifest_sha256"]:
+                raise ValueError("el SHA-256 no coincide con la referencia guardada")
+            if (manifest.get("schema")!=reference["schema"] or
+                    manifest.get("study_id")!=reference["study_id"] or
+                    manifest.get("project_id")!=reference["source_project_id"]):
+                raise ValueError("la identidad del manifiesto no coincide con su procedencia registrada")
+            self.open_design_study(path,verified_reference=reference)
+            return True
+        except Exception as exc:
+            self.design_study_group.show()
+            self.design_study_notice.setText(f"Estudio rechazado de forma segura: {type(exc).__name__}: {exc}")
+            return False
 
     def _reload_measurement_references(self):
         loaded=[];errors=[]
@@ -587,13 +629,20 @@ class ResultsPage(QWidget):
             from ..power_curve import import_curve_runs
             run_background(import_curve_runs,paths,on_done=self._loaded_exploratory,on_error=self._exploratory_failed)
 
-    def open_design_study(self,manifest_path):
+    def open_design_study(self,manifest_path,verified_reference=None):
         """Open only the study's saved points and join metrics by their run IDs."""
         try:
             path=Path(manifest_path).resolve()
-            manifest=json.loads(path.read_text(encoding="utf-8"))
+            raw=path.read_bytes()
+            if verified_reference is not None and hashlib.sha256(raw).hexdigest()!=verified_reference.get("manifest_sha256"):
+                raise ValueError("el SHA-256 del manifiesto cambió antes de cargarlo")
+            manifest=json.loads(raw.decode("utf-8"))
             if manifest.get("schema")!="DINO_PARAMETRIC_DESIGN_STUDY_V1":
                 raise ValueError("manifiesto paramétrico no compatible")
+            if verified_reference is not None and (
+                    manifest.get("study_id")!=verified_reference.get("study_id") or
+                    manifest.get("project_id")!=verified_reference.get("source_project_id")):
+                raise ValueError("identidad del manifiesto incompatible con referencia del proyecto")
             self.design_study_manifest=manifest;self.design_study_manifest_path=path
             run_paths=[row["run_directory"] for row in manifest.get("points",[])
                        if row.get("run_directory") and Path(row["run_directory"]).joinpath("result.json").is_file()]

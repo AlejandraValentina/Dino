@@ -701,7 +701,25 @@ class ExecutionPage(QWidget):
                 f"{not_started} sin iniciar · {state_label(result.get('curve_availability','curva parcial'))}")
             if result.get("schema")=="DINO_PARAMETRIC_DESIGN_STUDY_RESULT_V1":
                 self.output.appendPlainText(f"Estudio paramétrico {result.get('study_id')} · {result.get('status')} · {complete} diseños con corrida terminada · {interrupted} interrumpidos con checkpoint · {not_started} no iniciados. Los estados periódicos se muestran por separado; EXPLORATORY, sin validación predictiva.")
-                if result.get("design_study_manifest"):self.design_study_completed.emit(result["design_study_manifest"])
+                manifest_value=result.get("design_study_manifest")
+                if manifest_value:
+                    try:
+                        import hashlib,json
+                        manifest_path=Path(manifest_value).resolve()
+                        raw=manifest_path.read_bytes();manifest=json.loads(raw.decode("utf-8"))
+                        project_id=self.context.project["project_id"]
+                        if (manifest.get("schema")!="DINO_PARAMETRIC_DESIGN_STUDY_V1" or
+                                manifest.get("study_id")!=result.get("study_id") or
+                                manifest.get("project_id")!=project_id or
+                                result.get("bindings",{}).get("project_id")!=project_id):
+                            raise ValueError("el manifiesto no coincide con el estudio o proyecto activo")
+                        reference={"path":str(manifest_path),"study_id":manifest["study_id"],
+                            "manifest_sha256":hashlib.sha256(raw).hexdigest(),
+                            "schema":manifest["schema"],"source_project_id":manifest["project_id"]}
+                        self.context.add_study_reference(reference)
+                        self.design_study_completed.emit(str(manifest_path))
+                    except Exception as exc:
+                        self.output.appendPlainText(f"Estudio completado, pero no se pudo registrar su manifiesto en el proyecto: {type(exc).__name__}: {exc}")
             else:
                 self.output.appendPlainText(f"Barrido finalizado · {complete} puntos completados · {interrupted} con checkpoint · {not_started} sin iniciar · {state_label(result.get('curve_availability','curva parcial'))}. Evidencia íntegra disponible en Resultados y Trazabilidad.")
         else:

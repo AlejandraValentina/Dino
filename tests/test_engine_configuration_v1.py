@@ -124,14 +124,18 @@ def test_packaged_exhaust_sensitivity_fixture_changes_only_diffuser_geometry_and
 
 def test_project_roundtrip_duplicate_and_external_reference(tmp_path):
     base = configured()
+    study_ref={"path":"external/study.json","study_id":"study-001","manifest_sha256":"c"*64,
+        "schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","source_project_id":"demo"}
     project = create_project("demo", base, result_references=[{
         "path": "external/report.json", "identity_sha256": "a"*64,
-        "artifact_sha256": "b"*64, "classification": "SYNTHETIC"}])
+        "artifact_sha256": "b"*64, "classification": "SYNTHETIC"}],study_references=[study_ref])
     path = tmp_path / "project.json"
     digest = save_project(path, project)
     assert len(digest) == 64 and load_project(path) == project
     duplicate = duplicate_project(project, project_id="copy", display_name="renamed")
     assert duplicate["base_identity_sha256"] == project["base_identity_sha256"]
+    assert duplicate["study_references"]==[study_ref]
+    assert duplicate["study_references"][0]["source_project_id"]=="demo"
 
 
 def test_curve_comparison_preserves_invalid_gaps_and_hard_gates(tmp_path):

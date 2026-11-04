@@ -12,13 +12,15 @@ from typing import Any
 from .engine_configuration import identity, validate
 from .engine_variants import compare_configurations
 
-SCHEMA = "MOTORSIM_ENGINE_PROJECT_V2"
+SCHEMA = "MOTORSIM_ENGINE_PROJECT_V3"
+V2_SCHEMA = "MOTORSIM_ENGINE_PROJECT_V2"
 LEGACY_SCHEMA = "MOTORSIM_ENGINE_PROJECT_V1"
 
 
 def create_project(project_id: str, base_engine: dict, *, simulation_recipes: dict | None = None,
                    variants: dict | None = None, result_references: list | None = None,
-                   scientific_validation_status: str = "NOT_RUN") -> dict:
+                   scientific_validation_status: str = "NOT_RUN",
+                   study_references: list | None = None) -> dict:
     validate(base_engine)
     variants = variants or {}
     for name, item in variants.items():
@@ -29,22 +31,28 @@ def create_project(project_id: str, base_engine: dict, *, simulation_recipes: di
         if not isinstance(ref, dict) or set(ref) != {"path", "identity_sha256", "artifact_sha256", "classification"}:
             raise ValueError("result reference must contain path, identities, hash and classification only")
         if any(not isinstance(ref[k], str) or not ref[k] for k in ref): raise ValueError("result reference values must be nonempty strings")
-    return {"schema": SCHEMA, "project_id": project_id, "base_engine": deepcopy(base_engine),
+    studies = study_references or []
+    project = {"schema": SCHEMA, "project_id": project_id, "base_engine": deepcopy(base_engine),
             "base_identity_sha256": identity(base_engine),
             "variants": deepcopy(variants), "simulation_recipes": deepcopy(simulation_recipes or {}),
             "result_references": deepcopy(refs),
             "measurement_references": [],
+            "study_references": deepcopy(studies),
             "scientific_validation_status": scientific_validation_status}
+    validate_project(project)
+    return project
 
 
 def validate_project(project: dict) -> None:
     fields = {"schema", "project_id", "base_engine", "base_identity_sha256", "variants",
               "simulation_recipes", "result_references", "scientific_validation_status"}
     v2_fields = fields | {"measurement_references"}
+    v3_fields = v2_fields | {"study_references"}
     if (not isinstance(project, dict) or
-            (project.get("schema") == SCHEMA and set(project) != v2_fields) or
+            (project.get("schema") == SCHEMA and set(project) != v3_fields) or
+            (project.get("schema") == V2_SCHEMA and set(project) != v2_fields) or
             (project.get("schema") == LEGACY_SCHEMA and set(project) != fields) or
-            project.get("schema") not in {SCHEMA, LEGACY_SCHEMA}):
+            project.get("schema") not in {SCHEMA, V2_SCHEMA, LEGACY_SCHEMA}):
         raise ValueError("engine project schema/fields invalid")
     validate(project["base_engine"])
     if identity(project["base_engine"]) != project["base_identity_sha256"]:
@@ -75,6 +83,18 @@ def validate_project(project: dict) -> None:
             value = ref[key]
             if not isinstance(value, str) or len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
                 raise ValueError(f"invalid measurement reference {key}")
+    for ref in project.get("study_references", []):
+        required = {"path", "study_id", "manifest_sha256", "schema", "source_project_id"}
+        if not isinstance(ref, dict) or set(ref) != required:
+            raise ValueError("invalid parametric study reference")
+        if (not isinstance(ref["path"], str) or not ref["path"] or
+                not isinstance(ref["study_id"], str) or not ref["study_id"] or
+                ref["schema"] != "DINO_PARAMETRIC_DESIGN_STUDY_V1" or
+                not isinstance(ref["source_project_id"], str) or not ref["source_project_id"]):
+            raise ValueError("invalid parametric study reference identity")
+        value = ref["manifest_sha256"]
+        if not isinstance(value, str) or len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
+            raise ValueError("invalid parametric study reference manifest_sha256")
     # Explicitly prevent accidentally embedding primary/checkpoint payloads.
     forbidden = {"primaries", "primary_evidence", "checkpoint_payload", "cycle_primaries", "cycle_data"}
     def walk(value, path="project"):
@@ -108,6 +128,10 @@ def load_project(path: str | Path) -> dict:
     if project.get("schema") == LEGACY_SCHEMA:
         project["schema"] = SCHEMA
         project["measurement_references"] = []
+        project["study_references"] = []
+    elif project.get("schema") == V2_SCHEMA:
+        project["schema"] = SCHEMA
+        project["study_references"] = []
     validate_project(project)
     # Explicit ./ references travel with packaged examples. Legacy relative
     # paths retain their artifact-root semantics; evidence bytes are untouched.
@@ -115,6 +139,9 @@ def load_project(path: str | Path) -> dict:
         if ref["path"].startswith(("./", ".\\")):
             ref["path"] = str((path.resolve().parent / ref["path"]).resolve())
     for ref in project["measurement_references"]:
+        if ref["path"].startswith(("./", ".\\")):
+            ref["path"] = str((path.resolve().parent / ref["path"]).resolve())
+    for ref in project["study_references"]:
         if ref["path"].startswith(("./", ".\\")):
             ref["path"] = str((path.resolve().parent / ref["path"]).resolve())
     return project

@@ -190,3 +190,61 @@ def test_completed_study_adds_schema_valid_result_references(tmp_path):
     assert context.project["result_references"]==[{"path":str(result_path),"identity_sha256":point_identity,
         "artifact_sha256":digest,"classification":"MAX_CYCLES_NONCONVERGED"}]
     page.close();APP.processEvents()
+
+
+def test_completed_study_manifest_is_registered_and_reopens_from_project(tmp_path):
+    from motorsim.engine_project import load_project,save_project
+    from motorsim.desktop.services import new_design_project
+    context=DesktopContext(new_design_project("study-project-reference"));execution=ExecutionPage(context)
+    manifest_path=tmp_path/"study.json"
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":"study-roundtrip",
+        "project_id":context.project["project_id"],"rpm":3000,
+        "parameter":{"label":"Synthetic factor","unit":"mm"},"points":[]}
+    manifest_path.write_text(json.dumps(manifest,sort_keys=True),encoding="utf-8")
+    execution._done({"schema":"DINO_PARAMETRIC_DESIGN_STUDY_RESULT_V1","status":"COMPLETE",
+        "study_id":"study-roundtrip","bindings":{"project_id":context.project["project_id"]},
+        "points":[],"design_study_manifest":str(manifest_path)})
+    reference=context.project["study_references"][0]
+    assert reference["study_id"]=="study-roundtrip"
+    assert reference["source_project_id"]==context.project["project_id"]
+    assert reference["manifest_sha256"]==hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    project_path=tmp_path/"project.dino2t.json";save_project(project_path,context.project)
+    reopened=load_project(project_path)
+    assert reopened["study_references"]==context.project["study_references"]
+    duplicate=__import__("motorsim.engine_project",fromlist=["duplicate_project"]).duplicate_project(
+        reopened,project_id="study-project-copy")
+    assert duplicate["study_references"]==reopened["study_references"]
+
+    page=ResultsPage(DesktopContext(reopened));page.show()
+    assert page.project_study_selector.count()==1
+    assert page.open_selected_project_study() is True
+    assert page.design_study_manifest["study_id"]=="study-roundtrip"
+    assert not page.design_study_group.isHidden()
+    page.close();execution.close();APP.processEvents()
+
+
+def test_project_study_reference_rejects_changed_manifest(tmp_path):
+    from motorsim.desktop.services import new_design_project
+    context=DesktopContext(new_design_project("tampered-study-project"))
+    path=tmp_path/"study.json"
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":"tamper-study",
+        "project_id":context.project["project_id"],"rpm":3000,"parameter":{"label":"test"},"points":[]}
+    raw=json.dumps(manifest,sort_keys=True).encode("utf-8");path.write_bytes(raw)
+    context.add_study_reference({"path":str(path),"study_id":manifest["study_id"],
+        "manifest_sha256":hashlib.sha256(raw).hexdigest(),"schema":manifest["schema"],
+        "source_project_id":manifest["project_id"]})
+    page=ResultsPage(context);path.write_text(json.dumps(dict(manifest,study_id="changed")),encoding="utf-8")
+    assert page.open_selected_project_study() is False
+    assert "SHA-256 no coincide" in page.design_study_notice.text()
+    assert getattr(page,"design_study_manifest",None) is None
+    page.close();APP.processEvents()
+
+
+def test_recompleted_study_replaces_its_stale_project_reference(tmp_path):
+    context=DesktopContext(__import__("motorsim.desktop.services",fromlist=["new_design_project"]).new_design_project("study-reference-refresh"))
+    first={"path":str(tmp_path/"first.json"),"study_id":"same-study","manifest_sha256":"a"*64,
+        "schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","source_project_id":context.project["project_id"]}
+    second={**first,"path":str(tmp_path/"resumed.json"),"manifest_sha256":"b"*64}
+    assert context.add_study_reference(first) is True
+    assert context.add_study_reference(second) is True
+    assert context.project["study_references"]==[second]

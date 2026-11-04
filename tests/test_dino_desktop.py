@@ -527,13 +527,25 @@ class DinoDesktopTests(unittest.TestCase):
 
     def test_legacy_project_v1_migrates_without_changing_engine(self):
         project=new_project("legacy-v1");engine_hash=identity(project["base_engine"])
-        legacy=deepcopy(project);legacy["schema"]="MOTORSIM_ENGINE_PROJECT_V1";legacy.pop("measurement_references")
+        legacy=deepcopy(project);legacy["schema"]="MOTORSIM_ENGINE_PROJECT_V1";legacy.pop("measurement_references");legacy.pop("study_references")
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/"legacy.dino2t.json";path.write_text(json.dumps(legacy),encoding="utf-8")
             loaded=load_project(path)
-        self.assertEqual(loaded["schema"],"MOTORSIM_ENGINE_PROJECT_V2")
+        self.assertEqual(loaded["schema"],"MOTORSIM_ENGINE_PROJECT_V3")
         self.assertEqual(loaded["measurement_references"],[])
+        self.assertEqual(loaded["study_references"],[])
         self.assertEqual(identity(loaded["base_engine"]),engine_hash)
+
+    def test_legacy_project_v2_migrates_with_measurements_and_empty_studies(self):
+        project=new_project("legacy-v2")
+        legacy=deepcopy(project);legacy["schema"]="MOTORSIM_ENGINE_PROJECT_V2";legacy.pop("study_references")
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/"legacy-v2.dino2t.json";path.write_text(json.dumps(legacy),encoding="utf-8")
+            loaded=load_project(path)
+        self.assertEqual(loaded["schema"],"MOTORSIM_ENGINE_PROJECT_V3")
+        self.assertEqual(loaded["measurement_references"],[])
+        self.assertEqual(loaded["study_references"],[])
+        self.assertEqual(identity(loaded["base_engine"]),identity(project["base_engine"]))
 
     def test_execution_page_dispatches_ab_curve_as_independent_rpm_workers(self):
         project=load_project(Path("configs/reference_cases/functional_exhaust_ab_125cc_v1.dino.json"))

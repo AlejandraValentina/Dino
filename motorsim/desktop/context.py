@@ -105,3 +105,18 @@ class DesktopContext(QObject):
         validate_project(project); self.project=deepcopy(project); self.path=path
         self._selected_variant=None; self.dirty=False
         self.variant_changed.emit(None); self.changed.emit()
+
+    def add_study_reference(self, reference):
+        """Register a verified external study manifest without embedding its data."""
+        candidate=deepcopy(self.project)
+        refs=candidate.setdefault("study_references",[])
+        index=next((i for i,item in enumerate(refs)
+            if item.get("study_id")==reference.get("study_id") and
+               item.get("source_project_id")==reference.get("source_project_id")),None)
+        if index is not None and refs[index]==reference:
+            return False
+        if index is None:refs.append(deepcopy(reference))
+        else:refs[index]=deepcopy(reference)
+        validate_project(candidate)
+        self.project=candidate;self.dirty=True;self.changed.emit()
+        return True
