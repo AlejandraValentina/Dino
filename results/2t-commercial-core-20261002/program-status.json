@@ -11156,9 +11156,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1"
       ],
-      "state": "READY",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "dd47ed7"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "architecture",
       "write_scope": [
@@ -11169,8 +11171,15 @@
         "tests/test_desktop_design_study.py"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Define a versioned Desktop project reference to study manifest + SHA, retain existing project compatibility, and verify missing/changed studies fail closed without embedding bulk artifacts.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/project-references/acceptance.md",
+        "results/desktop-parametric-design-study-v2/project-references/focused-tests.txt",
+        "results/desktop-parametric-design-study-v2/project-references/migration-tests.txt",
+        "tests/test_desktop_design_study.py",
+        "tests/test_engine_configuration_v1.py",
+        "tests/test_dino_desktop.py"
+      ],
+      "next_action": "Continue with DESKTOP-PARAMETRIC-RPM-ENVELOPE-V1, then verify interruption/resume of factorial studies.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11215,6 +11224,31 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Interrupt after a completed factorial point, reload the prepared study, resume through the existing workflow, and verify completed points remain exact and are not recalculated.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1",
+      "description": "Allow engineers to compare saved parametric design studies by their verified point identities and observed results, without fitting, interpolating, or merging incompatible RPM/configuration evidence.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1",
+        "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "architecture",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_design_study.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/cross-study-comparison/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Compare two or more project-linked manifests only after SHA/schema/source verification; expose exact RPM, source engine identity and per-point periodicity, preserve nonconverged/missing metrics, and reject unsupported aggregate effects or incompatible baselines.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -15782,6 +15816,18 @@
       "task": "DESKTOP-PARAMETRIC-REFERENCE-TAMPER-V1",
       "kind": "task",
       "summary": "Added fail-closed regressions for wrong project reference artifact hash, wrong engine identity, missing result, and tampered result bytes; all rejected before importer and reuse."
+    },
+    {
+      "at": "2026-11-04T17:21:20+00:00",
+      "task": "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1",
+      "kind": "task",
+      "summary": "Started versioned project-to-study manifest reference integration; preserving V1/V2 migrations and validating exact manifest provenance."
+    },
+    {
+      "at": "2026-11-04T17:30:05+00:00",
+      "task": "DESKTOP-PARAMETRIC-PROJECT-STUDY-REFERENCES-V1",
+      "kind": "task",
+      "summary": "Added project V3 references to external parametric manifests with SHA-bound fail-closed reopen and V1/V2 migration; 19 focused tests and 2 migrations pass. Added cross-study exact-evidence comparison as product queue work during required <3 READY reconciliation."
     }
   ],
   "legacy_gate_status": {
