@@ -49,6 +49,9 @@ def test_cross_study_report_preserves_exact_provenance_and_evidence_boundaries()
     html=render_study_comparison_report(comparison)
     assert "study &lt;A&gt;" in html and "2.5 kW" in html
     assert "C:/artifacts/run-a" in html and "a"*64 in html and "f"*64 in html
+    assert '<details class="baseline-digest"><summary>SHA-256 · aaaaaaaaaaaa…</summary>' in html
+    assert f'<code>{"a"*64}</code></details>' in html
+    assert '"baseline_engine_identity_sha256": "' + "a"*64 in html
     assert "Puntos sin contraparte" in html and "total_finite_volume_cells" in html
     unpaired_table=html.split("<h2>Puntos sin contraparte</h2>",1)[1].split("</table>",1)[0]
     assert "Condiciones informadas incompatibles: cantidad de celdas de volumen finito." in unpaired_table

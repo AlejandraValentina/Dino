@@ -1,0 +1,16 @@
+{
+  "schema": "DINO_REPORT_BASELINE_DIGEST_DISCLOSURE_V1",
+  "fixture_origin": "synthetic; no solver execution",
+  "desktop_visible": true,
+  "desktop_size": [
+    1440,
+    837
+  ],
+  "compact_summary_present": true,
+  "full_digest_disclosed": true,
+  "exact_digest_preserved_in_source_json": true,
+  "html_sha256": "2e8d2fd702b62081c4b546e8fe9a00e6512814dd61a26aa5911dd54cc2d5adb3",
+  "desktop_capture_sha256": "e2edcbd4fb08a74277a8b1b11325c2b0e6f25cbaedacddffaf83c2b1f6182995",
+  "chrome_capture_sha256": "c6bc8b065c6cb96edd7a4277143b1ef17f45b030f4717f1232c8e01c5e35358e",
+  "browser": "Chrome headless HTML renderer; Desktop generated report"
+}
