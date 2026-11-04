@@ -11732,7 +11732,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-RESPONSE-PLOT-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11745,7 +11745,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Use the saved native/Chrome report screenshot as the baseline. Reflow or group provenance columns responsively while preserving all original values; verify rendered HTML at 1360px and test complete provenance retention.",
+      "next_action": "Refactor the 17-column comparison report table into a readable summary plus accessible per-point provenance details; preserve every original source field/value and verify the generated report visually at 1360 px.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11798,6 +11798,28 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Add selection details for CONTRAST rows that display their stored source ID/hash arrays and bind status; verify with the source-bound CSV roundtrip fixture and keep the snapshot read-only.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-STATE-LABELS-V1",
+      "description": "Translate internal execution/classification/periodicity codes in cross-study report summary and excluded-pair tables while preserving raw manifest/source JSON values.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-RESPONSE-PLOT-V1"
+      ],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/cross-study-report-state-labels/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Use the current native/Chrome comparison report capture to identify raw state codes in visible tables; apply shared state labels without altering source payloads or pair qualification.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -16608,6 +16630,12 @@
       "kind": "task",
       "summary": "Study report exclusion reasons now use shared Spanish labels for INSUFFICIENT_CYCLES and NOT_STARTED; exact status codes remain in the JSON appendix; 46 focused tests and native Desktop/Chrome synthetic verification passed.",
       "commit": "a8f60ff"
+    },
+    {
+      "at": "2026-11-04T22:38:47+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-PROVENANCE-TABLE-READABILITY-V1",
+      "kind": "start",
+      "summary": "Starting the screenshot-confirmed HTML report readability correction; collapse long provenance fields into per-row details while retaining all exact sources and hashes."
     }
   ],
   "legacy_gate_status": {
