@@ -11640,9 +11640,11 @@
         "DESKTOP-PARAMETRIC-CROSS-STUDY-RESPONSE-PLOT-V1",
         "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "3e82d6e"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11654,8 +11656,14 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Render the exact eligible PERIOD_1 response points in the existing HTML cross-study report, with the same metric gates and per-study legend as Desktop; list all excluded and unpaired observations and retain all manifest bindings.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-report-response-plot/acceptance-v1.md",
+        "results/desktop-parametric-design-study-v2/cross-study-report-response-plot/tests-final/cross-study-report-response-plot-focused.summary.json",
+        "results/desktop-parametric-design-study-v2/cross-study-report-response-plot/native-report-export-v4-receipt.json",
+        "results/desktop-parametric-design-study-v2/cross-study-report-response-plot/chrome-rendered-response-plots-v4.png",
+        "results/desktop-parametric-design-study-v2/cross-study-report-response-plot/native-desktop-report-export-v4.png"
+      ],
+      "next_action": "DONE: HTML comparison reports show exact observed PERIOD_1 response markers by study and list all excluded pairs; source/provenance and NOT_CLAIMED status preserved.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16467,6 +16475,13 @@
       "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-RESPONSE-PLOT-V1",
       "kind": "task-started",
       "summary": "Started exact evidence plot integration into existing cross-study HTML report; preserve metric qualification and all exclusions."
+    },
+    {
+      "at": "2026-11-04T22:10:43+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-RESPONSE-PLOT-V1",
+      "kind": "task",
+      "summary": "The HTML comparison report now plots only finite PERIOD_1 endpoints from exact RPM/context pairs, retains all exclusions/unpaired rows and source manifests; native Desktop export and browser rendering verified with synthetic data; 44 focused tests passed.",
+      "commit": "3e82d6e"
     }
   ],
   "legacy_gate_status": {
