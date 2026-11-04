@@ -11411,9 +11411,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-STUDY-DATA-EXPORT-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "4249c26"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11425,8 +11427,12 @@
         "tests/test_parametric_study_snapshot.py"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Implement read-only Desktop import of previously exported DINO_PARAMETRIC_STUDY_EXPORT_V1 CSV snapshots; preserve exact values, point/source qualifications, manifest provenance and nonperiodic blanks without reconstructing or executing source studies.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/study-csv-reimport/acceptance.md",
+        "results/desktop-parametric-design-study-v2/study-csv-reimport/tests-final/parametric-study-csv-reimport-final.summary.json",
+        "results/desktop-parametric-design-study-v2/study-csv-reimport/native-window-receipt-v2.json"
+      ],
+      "next_action": "DONE: existing study CSV opens as a read-only exact snapshot with status, source and hashes retained; malformed recognized study CSV fails closed.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -11435,7 +11441,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-CROSS-STUDY-COMPARISON-V1"
       ],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -11448,7 +11454,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Use the already verified exact comparison pairs to draw a response-versus-RPM view for a selected defined scalar; render periodic measured values only, preserve gaps and labels for excluded points, and verify no interpolation/fitting or change to source data.",
+      "next_action": "Render only exact compatible PERIOD_1 response pairs from the already saved cross-study comparison, show unmatched/transient/undefined points and gaps without interpolation, fitting or source-data changes; verify with existing synthetic comparison artifacts.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16250,6 +16256,19 @@
       "task": "DESKTOP-PARAMETRIC-STUDY-CSV-REIMPORT-V1",
       "kind": "queue-replan",
       "summary": "Replenished actionable product queue after it fell below three READY: added read-only round-trip review of the already implemented factorial and cross-study CSV exports, both provenance-preserving and independent of solver execution."
+    },
+    {
+      "at": "2026-11-04T20:27:04+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-CSV-REIMPORT-V1",
+      "kind": "implementation",
+      "summary": "Added provenance-preserving read-only import of the existing single-study CSV; 62 regressions passed and the native Windows app loaded its previous two-point synthetic export without solver execution. Implementation 4249c26.",
+      "commit": "4249c26"
+    },
+    {
+      "at": "2026-11-04T20:27:04+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESPONSE-PLOT-V1",
+      "kind": "implementation",
+      "summary": "Started response visualization from the previously saved verified cross-study comparison; retain exact pair qualification and exclude gaps from connected curves."
     }
   ],
   "legacy_gate_status": {
