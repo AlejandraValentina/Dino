@@ -11793,9 +11793,11 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-SOURCE-BINDINGS-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "e8ef5c56261b5ec6cceda0544c8ade9d5e4dfbe1"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11805,8 +11807,12 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Display the exact four source run IDs, result digests, and binding status when selecting a CONTRAST row; retain read-only snapshot semantics and raw source values.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/factorial-contrast-traceability/native-v4/acceptance.md",
+        "results/desktop-parametric-design-study-v2/factorial-contrast-traceability/native-v4/native-receipt.json",
+        "results/desktop-parametric-design-study-v2/factorial-contrast-traceability/native-v4/desktop-contrast-traceability.png"
+      ],
+      "next_action": "",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16930,6 +16936,12 @@
       "task": "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-TRACEABILITY-DETAILS-V1",
       "kind": "task",
       "summary": "Replanificación compacta conforme al umbral de 3 READY: agregada una entrega funcional de Results para exponer el presupuesto y estado de ciclo de vida ya persistidos en manifiestos, sin estimar runtime ni tocar el solver."
+    },
+    {
+      "at": "2026-11-04T23:30:16+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTORIAL-CONTRAST-TRACEABILITY-DETAILS-V1",
+      "kind": "task",
+      "summary": "Detalle seleccionable por fila CONTRAST muestra los cuatro run IDs, hashes, binding y fórmula fuente; datos omitidos siguen explícitamente ausentes. 46 tests pasan y Desktop visible verifica el CSV factorial sintético de sólo lectura. Commit e8ef5c5."
     }
   ],
   "legacy_gate_status": {
