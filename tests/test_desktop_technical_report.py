@@ -271,6 +271,12 @@ def test_single_study_report_plots_only_hash_bound_period_one_sources(tmp_path):
     assert 'aria-label="Potencia de freno por Longitud de escape"' in report
     assert "Baseline · 1 punto(s)" in report and "Diseños alternativos · 1 punto(s)" in report
     assert "Puntos excluidos de la respuesta · Potencia de freno" in report
+    assert "La fuente está clasificada Ciclos insuficientes; se requiere PERIOD_1." in report
+    assert "La fuente está clasificada INSUFFICIENT_CYCLES" not in report
+    assert '"periodicity": "INSUFFICIENT_CYCLES"' in report
+    assert "Punto sin resultado terminal: No iniciada." in report
+    assert "Punto sin resultado terminal: NOT_STARTED." not in report
+    assert '"status": "NOT_STARTED"' in report
     assert "requiere PERIOD_1" in report and "sin resultado terminal" in report
     assert "No se conectan, interpolan ni ajustan puntos" in report
     assert "NOT_CLAIMED" in report

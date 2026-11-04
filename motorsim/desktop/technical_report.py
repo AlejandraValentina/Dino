@@ -156,7 +156,8 @@ def _study_response_plot_html(manifest, imported_points, *, manifest_bound=True)
             if not _safe_number(value_x):
                 reason = "El valor del parámetro no es numérico y finito."
             elif point.get("status") not in {"COMPLETE", "CACHED"}:
-                reason = f"Punto sin resultado terminal: {point.get('status') or 'estado no informado'}."
+                shown_status = state_label(point.get("status") or "NOT_REPORTED")
+                reason = f"Punto sin resultado terminal: {shown_status}."
             elif point.get("status") == "CACHED" and not point.get("reused_verified"):
                 reason = "Resultado histórico reutilizado sin verificación declarada."
             elif not run_id:
@@ -210,7 +211,8 @@ def _study_response_plot_html(manifest, imported_points, *, manifest_bound=True)
             if reason is None and result_row is not None:
                 periodicity = result_row.get("periodicity") or result_row.get("classification")
                 if periodicity != "PERIOD_1":
-                    reason = f"La fuente está clasificada {periodicity or 'sin periodicidad'}; se requiere PERIOD_1."
+                    shown_periodicity = state_label(periodicity or "NOT_REPORTED")
+                    reason = f"La fuente está clasificada {shown_periodicity}; se requiere PERIOD_1."
                 elif ((point.get("periodicity") or point.get("classification")) not in (None, "PERIOD_1")):
                     reason = "La periodicidad del manifiesto no coincide con la fuente PERIOD_1."
                 elif result_row.get(metric + "_status") != "DEFINED" or not _safe_number(result_row.get(metric)):
