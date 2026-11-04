@@ -12036,9 +12036,11 @@
       "id": "DESKTOP-UIA-COM-SESSION-LIFECYCLE-REPRO-V1",
       "description": "Reproduce the prior Windows UI Automation COM error against the visible Desktop, separate application defects from stale UIA provider lifetime/cleanup, and preserve a minimal reproducible result. Apply only a harness lifecycle fix if the application is unaffected.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "f36eebb68a1c4e862dea12e02fb4b703cb255abe"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "verification",
       "write_scope": [
@@ -12046,8 +12048,13 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Use the isolated Windows UIA COM dependency in a fresh verifier process, reproduce the old close/wait sequence and corrected sequence, capture HRESULT and visible-window state, then classify product versus harness.",
+      "evidence": [
+        "results/desktop-ui-automation-com-repro/acceptance.md",
+        "results/desktop-ui-automation-com-repro/reproduction-receipt.json",
+        "results/desktop-ui-automation-com-repro/bounded-uia-receipt.json",
+        "results/desktop-ui-automation-com-repro/win32-lifecycle-receipt.json"
+      ],
+      "next_action": "",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -17018,6 +17025,12 @@
       "task": "DESKTOP-UIA-COM-SESSION-LIFECYCLE-REPRO-V1",
       "kind": "task",
       "summary": "Replanificación compacta: la ruta de reanudación ya tiene contratos fail-closed, pero desde Results se debe reubicar manualmente el manifiesto. Se añadió una tarea de integración directa desde el estudio seleccionado para mejorar el ciclo paramétrico sin cambiar ejecución ni solver."
+    },
+    {
+      "at": "2026-11-04T23:52:30+00:00",
+      "task": "DESKTOP-UIA-COM-SESSION-LIFECYCLE-REPRO-V1",
+      "kind": "task",
+      "summary": "Causa histórica confirmada como consulta del wrapper UIA retenido después de destruir la ventana; el recibo antiguo no conserva HRESULT. Repro acotado Python 3.10 queda detenido en la consulta inicial UIA; Win32 abre una ventana y WM_CLOSE/IsWindowVisible cierran con exit 0 y sin proceso sobrante. Sin cambio de producto. Commit f36eebb."
     }
   ],
   "legacy_gate_status": {
