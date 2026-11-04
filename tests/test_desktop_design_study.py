@@ -11,7 +11,7 @@ from motorsim.desktop.execution_page import ExecutionPage
 from motorsim.desktop.results_page import (ResultsPage,_build_cross_study_comparison_csv,
     _build_factorial_effects_csv,_build_parametric_study_export,_factorial_effects_from_study,
     _load_verified_study_comparison,_write_factorial_effects_csv)
-from motorsim.desktop.services import new_design_project
+from motorsim.desktop.services import load_results,new_design_project
 
 APP=QApplication.instance() or QApplication([])
 
@@ -459,6 +459,34 @@ def test_parametric_point_details_bind_manifest_nested_sweep_and_source_status(t
     page.context.changed.emit();APP.processEvents()
     assert page.design_study_manifest is None
     assert old_study_id not in page.design_study_traceability.toPlainText()
+    page.close();APP.processEvents()
+
+
+def test_factorial_csv_reimport_is_read_only_and_keeps_point_and_contrast_qualification():
+    path=Path("results/desktop-parametric-design-study-v2/factor-effects-csv/native-smoke-20261104T200320Z/factorial-export.csv")
+    data=load_results(path)
+    page=ResultsPage(DesktopContext(new_design_project("factorial-csv-snapshot-view")))
+
+    page._show_parametric_factorial_csv_snapshot(data,path)
+
+    assert not page.factorial_csv_snapshot_group.isHidden()
+    assert page.result_tabs.currentIndex()==3
+    assert page.factorial_csv_snapshot_points.rowCount()==4
+    assert page.factorial_csv_snapshot_contrasts.rowCount()==9
+    assert page.factorial_csv_snapshot_points.item(0,1).text()=="0.0 mm"
+    assert page.factorial_csv_snapshot_points.item(0,8).text()=="10.0"
+    assert page.factorial_csv_snapshot_points.item(0,11).text()=="Verificada ahora"
+    assert page.factorial_csv_snapshot_contrasts.item(0,3).text()=="Descriptivo disponible · no validado"
+    assert "El CSV de origen omitió" in page.factorial_csv_snapshot_notice.text()
+    assert "4 verificado ahora (hash e identidad)" in page.factorial_csv_snapshot_notice.text()
+    assert "CURRENT_HASH_AND_IDENTITY_MATCH" not in page.factorial_csv_snapshot_notice.text()
+    assert "NOT_CLAIMED" in page.factorial_csv_snapshot_notice.text()
+    assert page.plot.series==[]
+    assert page.design_study_table.rowCount()==0
+    assert page.export_table_button.isHidden()
+    assert page.factorial_csv_snapshot_detail.toPlainText().find("result_artifact_sha256")>=0
+    page.factorial_csv_snapshot_points.setCurrentCell(1,0);APP.processEvents()
+    assert "factorial-source-1" in page.factorial_csv_snapshot_detail.toPlainText()
     page.close();APP.processEvents()
 
 

@@ -1,0 +1,27 @@
+{
+  "name": "factorial-csv-reimport-final-regressions-v3",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "tests/test_design_study.py",
+    "tests/test_desktop_design_study.py",
+    "tests/test_desktop_technical_report.py",
+    "tests/test_parametric_study_snapshot.py",
+    "tests/test_parametric_factorial_snapshot.py",
+    "-q"
+  ],
+  "started_at": "2026-11-04T21:21:30+00:00",
+  "finished_at": "2026-11-04T21:25:03+00:00",
+  "duration_s": 212.969,
+  "exit_code": 0,
+  "timed_out": false,
+  "log_path": "results\\desktop-parametric-design-study-v2\\factorial-csv-reimport\\tests-final-v3\\factorial-csv-reimport-final-regressions-v3.log",
+  "log_lines": 2,
+  "log_bytes": 111,
+  "error_lines": [],
+  "tail": [
+    ".......................................................................  [100%]",
+    "71 passed in 212.38s (0:03:32)"
+  ]
+}

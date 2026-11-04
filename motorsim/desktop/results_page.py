@@ -16,6 +16,7 @@ from .services import load_results,run_background
 from .preferences import artifact_root,impl2_historical_report_candidate,settings
 from .technical_report import write_technical_report
 from .parametric_study_snapshot import SNAPSHOT_SCHEMA as PARAMETRIC_STUDY_SNAPSHOT_SCHEMA
+from .parametric_factorial_snapshot import SNAPSHOT_SCHEMA as PARAMETRIC_FACTORIAL_SNAPSHOT_SCHEMA
 from ..exploratory_workflow import import_exploratory_runs
 from .. import measurement_data
 from ..engine_project import validate_project
@@ -809,6 +810,30 @@ class ResultsPage(QWidget):
         self.study_csv_snapshot_detail.setMaximumHeight(125);self.study_csv_snapshot_detail.setPlaceholderText(
             "Seleccioná un punto para consultar su procedencia exacta.")
         snapshot_layout.addWidget(self.study_csv_snapshot_detail);self.study_csv_snapshot_group.hide()
+        self.factorial_csv_snapshot_group=QGroupBox("Matriz factorial importada · snapshot de sólo lectura")
+        factorial_snapshot_layout=QVBoxLayout(self.factorial_csv_snapshot_group)
+        self.factorial_csv_snapshot_notice=QLabel("El snapshot conserva cuatro diseños y nueve contrastes descriptivos; no inicia corridas.")
+        self.factorial_csv_snapshot_notice.setWordWrap(True);factorial_snapshot_layout.addWidget(self.factorial_csv_snapshot_notice)
+        self.factorial_csv_snapshot_points=QTableWidget(0,12);self.factorial_csv_snapshot_points.setObjectName("factorialCsvSnapshotPoints")
+        self.factorial_csv_snapshot_points.setHorizontalHeaderLabels([
+            "Punto","Factor A","Factor B","RPM","Ejecución","Clasificación","Periodicidad","Ciclos",
+            "Potencia (kW)","Torque (N·m)","BMEP (kPa)","Fuente actual"])
+        self.factorial_csv_snapshot_points.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.factorial_csv_snapshot_points.horizontalHeader().setStretchLastSection(True)
+        self.factorial_csv_snapshot_points.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.factorial_csv_snapshot_points.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.factorial_csv_snapshot_points.currentCellChanged.connect(self._factorial_csv_snapshot_point_selected)
+        factorial_snapshot_layout.addWidget(self.factorial_csv_snapshot_points)
+        self.factorial_csv_snapshot_detail=QPlainTextEdit();self.factorial_csv_snapshot_detail.setReadOnly(True)
+        self.factorial_csv_snapshot_detail.setMaximumHeight(140);factorial_snapshot_layout.addWidget(self.factorial_csv_snapshot_detail)
+        self.factorial_csv_snapshot_contrasts=QTableWidget(0,6);self.factorial_csv_snapshot_contrasts.setObjectName("factorialCsvSnapshotContrasts")
+        self.factorial_csv_snapshot_contrasts.setHorizontalHeaderLabels([
+            "Métrica","Contraste","Valor","Estado","Definición","Motivo / fuentes"])
+        self.factorial_csv_snapshot_contrasts.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.factorial_csv_snapshot_contrasts.horizontalHeader().setStretchLastSection(True)
+        self.factorial_csv_snapshot_contrasts.setMaximumHeight(330)
+        factorial_snapshot_layout.addWidget(self.factorial_csv_snapshot_contrasts)
+        self.factorial_csv_snapshot_group.hide()
         self.study_comparison_group=QGroupBox("Comparar estudios guardados")
         comparison_layout=QVBoxLayout(self.study_comparison_group)
         comparison_bar=QHBoxLayout();comparison_layout.addLayout(comparison_bar)
@@ -864,7 +889,7 @@ class ResultsPage(QWidget):
         view('Variables',[self.plot,self.point_table])
         waves=view('Presiones y ondas',[self.trace_group])
         wave_help=QLabel('Las señales se muestran cuando las corridas contienen primarios compatibles. Un reporte agregado de curvas no contiene trazas ni geometría adicional.');wave_help.setWordWrap(True);waves.insertWidget(0,wave_help)
-        view('Comparar',[self.compare_group,self.design_study_group,self.study_csv_snapshot_group])
+        view('Comparar',[self.compare_group,self.design_study_group,self.study_csv_snapshot_group,self.factorial_csv_snapshot_group])
         view('Mediciones',[measured])
         view('Trazabilidad',[self.source_notice,self.path_label,self.details])
         # Source paths and identifiers stay available in Trazabilidad. Keep
@@ -1842,9 +1867,12 @@ class ResultsPage(QWidget):
             if data.get("schema")==PARAMETRIC_STUDY_SNAPSHOT_SCHEMA:
                 self._show_parametric_study_csv_snapshot(data,path)
                 return
+            if data.get("schema")==PARAMETRIC_FACTORIAL_SNAPSHOT_SCHEMA:
+                self._show_parametric_factorial_csv_snapshot(data,path)
+                return
             self.variants.show();self.baseline_label.show();self.baseline_selector.show();self.baseline_notice.show()
             self.export_report_button.show();self.export_table_button.show();self.export_plot_button.show()
-            self.study_csv_snapshot_group.hide()
+            self.study_csv_snapshot_group.hide();self.factorial_csv_snapshot_group.hide()
             self.dataset=data;self.source=path
             legacy=data.get("schema")=="DINO_DESKTOP_LEGACY_HISTORICAL_SUMMARY_V1"
             self.source_kind="LEGACY_HISTORICAL" if legacy else "HISTORICAL_IMPL2" if historical else "IMPORTED_EXTERNAL"
@@ -1870,7 +1898,7 @@ class ResultsPage(QWidget):
         self.trace_group.hide();self.compare_group.hide();self.design_study_group.hide();self.study_comparison_group.hide()
         self.variants.hide();self.baseline_label.hide();self.baseline_selector.hide();self.baseline_notice.hide()
         self.export_report_button.hide();self.export_table_button.hide();self.export_plot_button.hide()
-        self.study_csv_snapshot_group.show();self.result_tabs.setCurrentIndex(3)
+        self.factorial_csv_snapshot_group.hide();self.study_csv_snapshot_group.show();self.result_tabs.setCurrentIndex(3)
         self.source_notice.setText(
             "Snapshot CSV paramétrico de sólo lectura. Los valores se presentan como se exportaron; "
             "no inicia ni reconstruye corridas, y la validación predictiva no se infiere del archivo.")
@@ -1922,6 +1950,88 @@ class ResultsPage(QWidget):
     def _study_csv_snapshot_row_selected(self,row,column,previous_row,previous_column):
         item=self.study_csv_snapshot_table.item(row,0) if row>=0 else None
         self.study_csv_snapshot_detail.setPlainText(item.data(Qt.ItemDataRole.UserRole) if item else "")
+
+    def _show_parametric_factorial_csv_snapshot(self,data,path):
+        snapshot=data.get("snapshot") or {};points=data.get("snapshot_points") or []
+        contrasts=data.get("snapshot_contrasts") or []
+        self.dataset=data;self.source=Path(path);self.source_kind="PARAMETRIC_FACTORIAL_CSV_SNAPSHOT";self.loading=False
+        self.trace_group.hide();self.compare_group.hide();self.design_study_group.hide();self.study_comparison_group.hide()
+        self.study_csv_snapshot_group.hide();self.factorial_csv_snapshot_group.show()
+        self.variants.hide();self.baseline_label.hide();self.baseline_selector.hide();self.baseline_notice.hide()
+        self.export_report_button.hide();self.export_table_button.hide();self.export_plot_button.hide()
+        self.result_tabs.setCurrentIndex(3)
+        self.source_notice.setText(
+            "Snapshot factorial CSV de sólo lectura. No crea corridas, no entra en curvas normales y no implica atribución causal ni validación predictiva.")
+        self.path_label.setText(f"{Path(path)} · CSV SHA-256 {snapshot.get('csv_sha256','No disponible')}")
+        self.run_summary.setText(
+            f"Snapshot factorial · {snapshot.get('study_id','estudio sin ID')} · 4 puntos · 9 contrastes descriptivos · "
+            f"validación científica {snapshot.get('scientific_validation','NOT_CLAIMED')}")
+        manifest_state={"CURRENT_HASH_AND_IDENTITY_MATCH":"hash e identidad actuales coinciden",
+            "CHANGED":"el manifiesto actual cambió", "UNAVAILABLE":"manifiesto original no disponible",
+            "UNAVAILABLE_OR_INVALID":"no se pudo leer o validar el manifiesto actual",
+            "IDENTITY_MISMATCH":"la identidad del manifiesto actual no coincide"}.get(
+                snapshot.get("manifest_current_verification"),"estado del manifiesto actual no disponible")
+        source_counts={}
+        for point in points:
+            state=point.get("current_source_verification","SOURCE_UNAVAILABLE")
+            source_counts[state]=source_counts.get(state,0)+1
+        source_labels={"CURRENT_HASH_AND_IDENTITY_MATCH":"verificado ahora (hash e identidad)",
+            "SOURCE_UNAVAILABLE":"no disponible ahora; registrado verificado al exportar",
+            "SOURCE_UNAVAILABLE_OR_INVALID":"no se pudo re-verificar ahora",
+            "SOURCE_CHANGED_OR_IDENTITY_MISMATCH":"hash o identidad actual no coincide"}
+        source_summary="; ".join(f"{count} {source_labels.get(state,'estado de fuente no disponible')}"
+            for state,count in sorted(source_counts.items())) or "sin fuentes"
+        bindings=snapshot.get("contrast_source_bindings")
+        binding_notice=("El CSV de origen omitió los IDs/hashes fuente en filas CONTRAST; no se reconstruyen. Se conservan los cuatro registros POINT."
+            if bindings=="MISSING_IN_EXPORTED_CONTRAST_ROWS" else "Las filas CONTRAST enlazan las cuatro fuentes POINT.")
+        self.factorial_csv_snapshot_notice.setText(
+            f"Estudio {snapshot.get('study_id')} · FACTORIAL_2X2_V1 · manifiesto SHA-256 {snapshot.get('manifest_sha256')} ({manifest_state}) · "
+            f"CSV SHA-256 {snapshot.get('csv_sha256')} · verificación original registrada al exportar; revisión actual de artifacts: {source_summary} · "
+            f"{binding_notice} · sólo lectura · validación científica {snapshot.get('scientific_validation','NOT_CLAIMED')}.")
+        source_labels={"CURRENT_HASH_AND_IDENTITY_MATCH":"Verificada ahora",
+            "SOURCE_UNAVAILABLE":"No disponible ahora · verificada al exportar",
+            "SOURCE_UNAVAILABLE_OR_INVALID":"No se pudo re-verificar ahora",
+            "SOURCE_CHANGED_OR_IDENTITY_MISMATCH":"Hash o identidad actual no coincide"}
+        self.factorial_csv_snapshot_points.setRowCount(len(points))
+        point_details=[]
+        for index,point in enumerate(points):
+            detail=json.dumps(point,ensure_ascii=False,indent=2,sort_keys=True);point_details.append(detail)
+            factor_a=f"{point.get('factor_a_value','')} {point.get('factor_a_unit') or ''}".strip()
+            factor_b=f"{point.get('factor_b_value','')} {point.get('factor_b_unit') or ''}".strip()
+            source_state=source_labels.get(point.get("current_source_verification"),"Estado actual no disponible")
+            cells=[point.get("point_index",""),factor_a,factor_b,point.get("rpm",""),
+                point.get("execution_status",""),_state_label(point.get("classification") or "NOT_REPORTED"),
+                _state_label(point.get("periodicity") or "NOT_REPORTED"),point.get("cycles_completed",""),
+                point.get("brake_power_kw") or "—",point.get("brake_torque_nm") or "—",
+                point.get("BMEP_kpa") or "—",source_state]
+            for column,value in enumerate(cells):
+                item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                item.setToolTip(detail);item.setData(Qt.ItemDataRole.UserRole,detail)
+                self.factorial_csv_snapshot_points.setItem(index,column,item)
+        self.factorial_csv_snapshot_detail.setPlainText(point_details[0] if point_details else "El snapshot no contiene puntos.")
+        self.factorial_csv_snapshot_contrasts.setRowCount(len(contrasts))
+        for index,row in enumerate(contrasts):
+            defined=row.get("contrast_status")=="DESCRIPTIVE_DEFINED"
+            state="Descriptivo disponible · no validado" if defined else "No disponible · sin valor imputado"
+            binding=row.get("contrast_source_binding_status")
+            reason=row.get("contrast_reason") or (
+                "Binding de fuentes ausente en fila CONTRAST; ver los cuatro puntos." if binding=="NOT_PRESENT_IN_EXPORTED_CONTRAST_ROW" else "—")
+            cells=[row.get("metric_label") or row.get("metric_id"),row.get("contrast_term"),
+                f"{row.get('contrast_value')} {row.get('contrast_unit') or ''}".strip() if defined else "—",
+                state,row.get("contrast_formula") or "No informada",reason]
+            for column,value in enumerate(cells):
+                item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                if column in (4,5):item.setToolTip(str(value))
+                self.factorial_csv_snapshot_contrasts.setItem(index,column,item)
+        if points:self.factorial_csv_snapshot_points.setCurrentCell(0,0)
+        self.plot.set_series([]);self.power_curves.set_dataset(None,set());self.trace_plot.set_series([])
+        self.trace_map.set_grid([],[]);self.point_table.setRowCount(0);self.details.setRowCount(0)
+        for card,name in zip(self.metric_cards,("Potencia","Torque","BMEP","Auditoría")):card.setText(name+"\n—")
+        self.evidence_updated.emit()
+
+    def _factorial_csv_snapshot_point_selected(self,row,column,previous_row,previous_column):
+        item=self.factorial_csv_snapshot_points.item(row,0) if row>=0 else None
+        self.factorial_csv_snapshot_detail.setPlainText(item.data(Qt.ItemDataRole.UserRole) if item else "")
 
     def _dataset_summary(self):
         rows=self.dataset.get('points',[]) if self.dataset else []

@@ -126,6 +126,9 @@ def starter_reed_petals():
 def load_results(path: str | Path):
     path = Path(path)
     if path.suffix.lower() == ".csv":
+        from .parametric_factorial_snapshot import import_parametric_factorial_csv_snapshot
+        factorial_snapshot=import_parametric_factorial_csv_snapshot(path)
+        if factorial_snapshot is not None:return factorial_snapshot
         snapshot=import_parametric_study_csv_snapshot(path)
         if snapshot is not None:return snapshot
         return import_report(path, metadata_path=path.with_suffix(".json"))

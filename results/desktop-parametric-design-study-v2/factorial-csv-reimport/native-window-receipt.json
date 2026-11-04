@@ -1,0 +1,37 @@
+{
+  "window": "Dino Desktop source · native Windows Qt window",
+  "window_size": [
+    1440,
+    837
+  ],
+  "source_csv": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\factor-effects-csv\\native-smoke-20261104T200320Z\\factorial-export.csv",
+  "source_csv_sha256": "753e67bf1aaef28effdada5cf455c744310161300ae0c9ddf67821e9a356b834",
+  "csv_schema": "DINO_PARAMETRIC_FACTORIAL_EXPORT_V1",
+  "study_id": "factorial-export-synthetic-20261104T200320Z",
+  "manifest_sha256": "79eb2cff8b3253842e84d7e891a1f5f5de0687cfafad45ac7d411db311cd49cd",
+  "manifest_current_verification": "CURRENT_HASH_AND_IDENTITY_MATCH",
+  "source_verification_time": "VERIFIED_AT_EXPORT_ONLY",
+  "current_source_states": [
+    "CURRENT_HASH_AND_IDENTITY_MATCH",
+    "CURRENT_HASH_AND_IDENTITY_MATCH",
+    "CURRENT_HASH_AND_IDENTITY_MATCH",
+    "CURRENT_HASH_AND_IDENTITY_MATCH"
+  ],
+  "point_rows": 4,
+  "contrast_rows": 9,
+  "snapshot_notice": "Estudio factorial-export-synthetic-20261104T200320Z · FACTORIAL_2X2_V1 · manifiesto SHA-256 79eb2cff8b3253842e84d7e891a1f5f5de0687cfafad45ac7d411db311cd49cd (hash e identidad actuales coinciden) · CSV SHA-256 753e67bf1aaef28effdada5cf455c744310161300ae0c9ddf67821e9a356b834 · verificación original registrada al exportar; revisión actual de artifacts: 4 verificado ahora (hash e identidad) · El CSV de origen omitió los IDs/hashes fuente en filas CONTRAST; no se reconstruyen. Se conservan los cuatro registros POINT. · sólo lectura · validación científica NOT_CLAIMED.",
+  "contrast_source_bindings": "MISSING_IN_EXPORTED_CONTRAST_ROWS",
+  "plot_series": [],
+  "scientific_validation": "NOT_CLAIMED",
+  "fixture_origin": "previously saved synthetic presentation/export fixture; import only; no solver execution",
+  "captures": [
+    {
+      "path": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\factorial-csv-reimport\\factorial-csv-snapshot-native-points.png",
+      "sha256": "41bd96ae21dfd2992437e74b118ff9983a4b939279c264046c427aa9cc18f9bd"
+    },
+    {
+      "path": "E:\\dino\\Dino-active\\results\\desktop-parametric-design-study-v2\\factorial-csv-reimport\\factorial-csv-snapshot-native-contrasts.png",
+      "sha256": "c10fdf7597b6cf5c962e3438923cda702209483dfb9156c5d6fe425d8f9c17e7"
+    }
+  ]
+}
