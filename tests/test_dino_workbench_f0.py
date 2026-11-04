@@ -71,9 +71,9 @@ class WorkbenchF0Tests(unittest.TestCase):
     def test_component_build_uses_backend_derived_port_schedule(self):
         page=__import__("motorsim.desktop.engine_page",fromlist=["EnginePage"]).EnginePage(DesktopContext(new_project("components")))
         self.assertEqual([page.component_tabs.tabText(i).split(" · ")[0] for i in range(4)],
-                         ["Cilindro y operación","Lumbreras y distribución","Pérdidas","Combustión y combustible"])
+                         ["Cilindro y culata","Lumbreras y transferencias","Pérdidas","Combustión"])
         self.assertGreater(page.port_areas.rowCount(),0)
-        self.assertIn("transiciones de área efectiva",page.derived.text())
+        self.assertIn("transiciones de área efectiva",page.derived.toolTip())
         self.assertGreater(page.timing.rowCount(),0)
 
     def test_results_angle_cell_map_preserves_discrete_samples_and_baseline(self):
@@ -103,7 +103,7 @@ class WorkbenchF0Tests(unittest.TestCase):
         from motorsim.desktop.app import DinoDesktopWindow
         window=DinoDesktopWindow(new_project("workbench-shell"));window.resize(980,680);window.show();APP.processEvents()
         self.assertFalse(window.results.isVisible());self.assertTrue(window.simulation_strip.isVisible())
-        self.assertEqual(window.mode_stack.count(),2)
+        self.assertEqual(window.mode_stack.count(),3)
         self.assertTrue(window.analysis_mode.isCheckable())
         self.assertTrue(window.pages[3].start.isEnabled())
         window.set_workspace_mode(1);APP.processEvents();self.assertTrue(window.results.isVisible())
