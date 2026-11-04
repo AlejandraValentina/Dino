@@ -15315,6 +15315,12 @@
       "task": "DESKTOP-TECHNICAL-REPORT-BUILD-PROVENANCE-V1",
       "kind": "implementation",
       "summary": "Implementación vertical iniciada: inventario de capacidades existente, exportador técnico autocontenido con datos exactos y endurecimiento de procedencia del paquete; regresión Desktop focalizada en curso."
+    },
+    {
+      "at": "2026-11-04T13:47:56+00:00",
+      "task": "DESKTOP-TECHNICAL-REPORT-BUILD-PROVENANCE-V1",
+      "kind": "defect_correction",
+      "summary": "El primer arranque del empaquetador falló antes de PyInstaller por duplicar source_dirty en el recibo; se corrige la colisión, sin candidato generado."
     }
   ],
   "legacy_gate_status": {

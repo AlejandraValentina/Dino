@@ -70,7 +70,7 @@ def main():
     for name in ('LGPL-3.0-only.txt','GPL-3.0-only.txt','SOURCES.txt'):
         if not (ROOT/'packaging/licenses'/name).is_file():raise RuntimeError('Falta aviso requerido: '+name)
     work=work_base/uuid.uuid4().hex;generated=work/'inputs';generated.mkdir(parents=True)
-    info=dict(app_version=APP_VERSION,source_commit=commit,source_dirty=dirty,trial=args.trial,
+    info=dict(app_version=APP_VERSION,source_commit=commit,trial=args.trial,
         built_utc=stamp,python=sys.version,platform=platform.platform(),architecture=platform.machine(),
         project_format=6,result_formats=dict(two_stroke=[1,2,3],four_stroke=4),
         models=dict(two_stroke=MODEL_VERSION,four_stroke=FOUR_MODEL_VERSION),dependencies=versions,
