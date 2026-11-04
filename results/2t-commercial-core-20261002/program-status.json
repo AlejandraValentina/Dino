@@ -11673,9 +11673,11 @@
         "DESKTOP-PARAMETRIC-RESPONSE-VIEW-V1",
         "DESKTOP-PARAMETRIC-STUDY-TRACEABILITY-DETAILS-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "5de8191"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -11686,8 +11688,14 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Reuse exact source-bound study point data to add a technical-report response plot with per-parameter series, PERIOD_1/defined-metric gates, and an explicit exclusion/provenance table; do not interpolate or recalculate.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/study-report-response-plot/acceptance-v1.md",
+        "results/desktop-parametric-design-study-v2/study-report-response-plot/tests-final-v3/single-study-report-response-plot-verified.summary.json",
+        "results/desktop-parametric-design-study-v2/study-report-response-plot/native-study-report-v5-receipt.json",
+        "results/desktop-parametric-design-study-v2/study-report-response-plot/chrome-rendered-study-response-v5.png",
+        "results/desktop-parametric-design-study-v2/study-report-response-plot/native-desktop-export-v5.png"
+      ],
+      "next_action": "DONE: scalar single-study HTML reports render artifact-bound PERIOD_1 response markers with explicit exclusions; factorial matrices and RPM envelopes remain unflattened.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -16510,6 +16518,13 @@
       "task": "DESKTOP-PARAMETRIC-STUDY-REPORT-RESPONSE-PLOT-V1",
       "kind": "start",
       "summary": "Starting single-study technical-report response plots from already source-bound observed design points; exact values only, PERIOD_1/defined metrics, no interpolation or solver execution."
+    },
+    {
+      "at": "2026-11-04T22:27:52+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-REPORT-RESPONSE-PLOT-V1",
+      "kind": "task",
+      "summary": "Scalar design-study reports now plot only unique PERIOD_1 sources matching exact run ID, path, result hash, RPM and current diagnostic-manifest hash; exclusions retained; 45 focused regressions and native Desktop/Chrome synthetic report acceptance passed.",
+      "commit": "5de8191"
     }
   ],
   "legacy_gate_status": {
