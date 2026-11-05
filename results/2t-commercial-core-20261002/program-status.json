@@ -12316,7 +12316,9 @@
       "dependencies": [],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "ad37de4"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -12333,6 +12335,26 @@
         "tests/test_desktop_technical_report.py::test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_exclusions"
       ],
       "next_action": "Revisar la siguiente capacidad funcional desbloqueada del estudio paramétrico; no iniciar cálculos científicos mientras continúen las dependencias de datos/presupuesto registradas.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-STUDY-MATRIX-EXECUTION-STATE-V1",
+      "description": "In the single-study point matrix, expose the persisted execution status beside solver classification; currently the Estado column shows classification whenever present, hiding whether the point actually completed, was cached, cancelled or failed.",
+      "dependencies": [],
+      "state": "IN_PROGRESS",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/study-matrix-execution-state/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Present translated persisted execution status and solver classification as two explicitly named lines in the point matrix while preserving column order and existing periodicity, metrics and CSV payloads. Test COMPLETE nonconverged and checkpointed/cached states.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17474,6 +17496,12 @@
       "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-EXECUTION-STATE-V1",
       "kind": "task",
       "summary": "El HTML exportado por Desktop separa ejecución, clasificación y periodicidad en pares excluidos y puntos sin contraparte; 16 pruebas y render Chrome verificados con fixture sintético."
+    },
+    {
+      "at": "2026-11-05T01:47:54+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-MATRIX-EXECUTION-STATE-V1",
+      "kind": "task",
+      "summary": "Replanificación funcional: la matriz de puntos de un estudio aún usa clasificación como estado, aunque status de ejecución se persiste y se separó en trazabilidad e informes."
     }
   ],
   "legacy_gate_status": {
