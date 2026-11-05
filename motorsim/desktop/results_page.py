@@ -983,6 +983,26 @@ class ResultsPage(QWidget):
         self.study_comparison_response_plot=CurvePlot();self.study_comparison_response_plot.setObjectName("crossStudyResponsePlot")
         self.study_comparison_response_plot.pointSelected.connect(self._cross_study_response_point_selected)
         self.study_comparison_response_plot.setMinimumHeight(210);comparison_layout.addWidget(self.study_comparison_response_plot)
+        comparison_filter_bar=QHBoxLayout();comparison_layout.addLayout(comparison_filter_bar)
+        comparison_filter_bar.addWidget(QLabel("RPM exacta"))
+        self.cross_study_rpm_filter=QComboBox();self.cross_study_rpm_filter.setObjectName("crossStudyRpmFilter")
+        self.cross_study_rpm_filter.addItem("Todas",None)
+        self.cross_study_rpm_filter.currentIndexChanged.connect(self._apply_cross_study_filters)
+        comparison_filter_bar.addWidget(self.cross_study_rpm_filter)
+        comparison_filter_bar.addWidget(QLabel("Pareamiento"))
+        self.cross_study_pair_filter=QComboBox();self.cross_study_pair_filter.setObjectName("crossStudyPairFilter")
+        self.cross_study_pair_filter.addItem("Todos", "all")
+        self.cross_study_pair_filter.addItem("Pares exactos", "paired")
+        self.cross_study_pair_filter.addItem("Puntos sin pareja", "unpaired")
+        self.cross_study_pair_filter.currentIndexChanged.connect(self._apply_cross_study_filters)
+        comparison_filter_bar.addWidget(self.cross_study_pair_filter)
+        self.cross_study_filter_clear=QPushButton("Limpiar filtros")
+        self.cross_study_filter_clear.clicked.connect(self._clear_cross_study_filters)
+        comparison_filter_bar.addWidget(self.cross_study_filter_clear)
+        comparison_filter_bar.addStretch(1)
+        self.cross_study_filter_count=QLabel("0 de 0 filas visibles")
+        self.cross_study_filter_count.setObjectName("crossStudyFilterCount")
+        comparison_filter_bar.addWidget(self.cross_study_filter_count)
         self.study_comparison_table=QTableWidget(0,11);self.study_comparison_table.setObjectName("crossStudyComparison")
         self.study_comparison_table.setHorizontalHeaderLabels(["RPM","Diseño A","ID A","Estado A","Métrica A","Diseño B","ID B","Estado B","Métrica B","Δ B−A","Pareo"])
         self.study_comparison_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
@@ -1140,7 +1160,51 @@ class ResultsPage(QWidget):
         self.study_comparison=comparison
         self.export_study_comparison_csv_button.setEnabled(True)
         self.compare_studies_button.setEnabled(len(self.context.project.get("study_references",[]))>=2)
+        self._refresh_cross_study_rpm_options(comparison)
         self.study_comparison_group.show();self._render_study_comparison()
+
+    def _refresh_cross_study_rpm_options(self,comparison):
+        rpms={}
+        for pair in comparison.get("pairs",[]):
+            rpm=pair.get("rpm")
+            if isinstance(rpm,(int,float)) and math.isfinite(float(rpm)):
+                rpms[float(rpm)]=format_number(rpm)
+        for item in comparison.get("unpaired",[]):
+            rpm=(item.get("point") or {}).get("rpm")
+            if isinstance(rpm,(int,float)) and math.isfinite(float(rpm)):
+                rpms[float(rpm)]=format_number(rpm)
+        self.cross_study_rpm_filter.blockSignals(True)
+        self.cross_study_rpm_filter.clear();self.cross_study_rpm_filter.addItem("Todas",None)
+        for rpm in sorted(rpms):
+            self.cross_study_rpm_filter.addItem(format_number(rpm,significant=10),rpm)
+            self.cross_study_rpm_filter.setItemData(
+                self.cross_study_rpm_filter.count()-1,f"RPM exacta almacenada: {rpm!r}",
+                Qt.ItemDataRole.ToolTipRole)
+        self.cross_study_rpm_filter.setCurrentIndex(0);self.cross_study_rpm_filter.blockSignals(False)
+        self.cross_study_pair_filter.setCurrentIndex(0)
+
+    def _clear_cross_study_filters(self):
+        self.cross_study_rpm_filter.setCurrentIndex(0)
+        self.cross_study_pair_filter.setCurrentIndex(0)
+        self._apply_cross_study_filters()
+
+    def _apply_cross_study_filters(self,*_):
+        if not hasattr(self,"study_comparison_table"):return
+        selected_rpm=self.cross_study_rpm_filter.currentData()
+        pair_mode=self.cross_study_pair_filter.currentData() or "all"
+        visible=0
+        for row in range(self.study_comparison_table.rowCount()):
+            item=self.study_comparison_table.item(row,0)
+            metadata=item.data(Qt.ItemDataRole.UserRole+1) if item else None
+            metadata=metadata if isinstance(metadata,dict) else {}
+            row_rpm=metadata.get("rpm")
+            paired=bool(metadata.get("paired"))
+            show=(selected_rpm is None or row_rpm==selected_rpm)
+            show=show and (pair_mode=="all" or (pair_mode=="paired")==paired)
+            self.study_comparison_table.setRowHidden(row,not show)
+            visible+=int(show)
+        total=self.study_comparison_table.rowCount()
+        self.cross_study_filter_count.setText(f"{visible} de {total} filas visibles")
 
     def _study_comparison_failed(self,error):
         self.compare_studies_button.setEnabled(len(self.context.project.get("study_references",[]))>=2)
@@ -1148,6 +1212,9 @@ class ResultsPage(QWidget):
         self.study_comparison=None
         self.study_comparison_notice.setText(f"Comparación rechazada: {error}")
         self.study_comparison_table.setRowCount(0)
+        self.cross_study_rpm_filter.clear();self.cross_study_rpm_filter.addItem("Todas",None)
+        self.cross_study_pair_filter.setCurrentIndex(0)
+        self._apply_cross_study_filters()
         self.study_comparison_response_plot.set_series([])
         self.study_comparison_point_details.clear()
         self.study_comparison_response_notice.setText("No hay una comparación verificada para graficar.")
@@ -1236,7 +1303,11 @@ class ResultsPage(QWidget):
                 format_number(delta,signed=True) if isinstance(delta,(int,float)) else "—",pairing]
             for column,value in enumerate(cells):
                 item=QTableWidgetItem(str(value));item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-                if column==0:item.setData(Qt.ItemDataRole.UserRole,comparison_row)
+                if column==0:
+                    item.setData(Qt.ItemDataRole.UserRole,comparison_row)
+                    item.setData(Qt.ItemDataRole.UserRole+1,{
+                        "rpm":float(rpm) if isinstance(rpm,(int,float)) and math.isfinite(float(rpm)) else None,
+                        "paired":comparison_row is not None})
                 point=a if column in (1,2,3,4) else b
                 if point is not None and column in (1,2,3,5,6,7):
                     study=studies[a_id if column in (1,2,3) else b_id]
@@ -1254,6 +1325,7 @@ class ResultsPage(QWidget):
                     item.setToolTip(str(value))
                 self.study_comparison_table.setItem(index,column,item)
         self.study_comparison_table.setSortingEnabled(True)
+        self._apply_cross_study_filters()
         self.study_comparison_notice.setText(
             f"Baseline común {comparison['baseline_engine_identity_sha256']} · {len(comparison['pairs'])} pares exactos · "
             f"{len(comparison['unpaired'])} puntos sin par · {comparison['notice']} Métrica seleccionada: {_STUDY_COMPARE_METRICS[metric][0]}.")

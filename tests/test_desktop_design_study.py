@@ -365,6 +365,61 @@ def test_cross_study_comparison_page_keeps_full_identity_and_metric_states():
     page.close();APP.processEvents()
 
 
+def test_cross_study_filters_are_view_only_and_csv_keeps_all_rows(tmp_path):
+    page=ResultsPage(DesktopContext(new_design_project("cross-study-view-filter")))
+    studies=[]
+    for name,identity in (("A","a"),("B","b")):
+        manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":name,
+            "project_id":"synthetic-cross-study-filter","baseline_engine_identity_sha256":"9"*64,
+            "points":[]}
+        manifest_path=tmp_path/f"{name}.study.json"
+        raw=json.dumps(manifest,sort_keys=True,separators=(",",":")).encode("utf-8")
+        manifest_path.write_bytes(raw)
+        studies.append({"study_id":name,"manifest_path":str(manifest_path),
+            "manifest_sha256":hashlib.sha256(raw).hexdigest(),"manifest":manifest,
+            "parameter":{"label":"Escape"}})
+    def point(index,rpm,identity):
+        return {"index":index,"run_id":f"run-{identity}-{rpm}","rpm":float(rpm),
+            "status":"COMPLETE","classification":"PERIOD_1","periodicity":"PERIOD_1",
+            "engine_identity_sha256":identity*64,"identity_sha256":identity.upper()*64,
+            "result_sha256":"c"*64,"result_artifact_sha256":"d"*64,
+            "metrics":{"brake_power":float(rpm)/100,"brake_torque":None,"BMEP":None}}
+    def pair(rpm):
+        left=point(rpm,rpm,"a");right=point(rpm,rpm,"b")
+        return {"study_a":"A","point_a":left,"study_b":"B","point_b":right,
+            "rpm":float(rpm),"pairing":"EXACT_RPM_AND_OPERATING_CONTEXT",
+            "metrics":{"brake_power":{"a":left["metrics"]["brake_power"],
+                "b":right["metrics"]["brake_power"],"delta":0.0},
+                "brake_torque":{"a":None,"b":None,"delta":None},
+                "BMEP":{"a":None,"b":None,"delta":None}}}
+    comparison={"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
+        "baseline_engine_identity_sha256":"9"*64,"studies":studies,
+        "pairs":[pair(3000),pair(4000)],"unpaired":[{"study_id":"A",
+            "point":point(5000,5000,"a"),"reason":"Sin pareja exacta"}],
+        "notice":"Fixture sintético de presentación; no es resultado físico."}
+    page._study_comparison_loaded(comparison)
+    table=page.study_comparison_table
+    def visible_rpms():
+        return {table.item(row,0).data(Qt.ItemDataRole.UserRole+1)["rpm"]
+            for row in range(table.rowCount()) if not table.isRowHidden(row)}
+    assert page.cross_study_filter_count.text()=="3 de 3 filas visibles"
+    page.cross_study_rpm_filter.setCurrentIndex(
+        page.cross_study_rpm_filter.findData(4000.0))
+    assert visible_rpms()=={4000.0}
+    assert page.cross_study_filter_count.text()=="1 de 3 filas visibles"
+    page.cross_study_pair_filter.setCurrentIndex(page.cross_study_pair_filter.findData("unpaired"))
+    assert visible_rpms()==set()
+    page._clear_cross_study_filters()
+    page.cross_study_pair_filter.setCurrentIndex(page.cross_study_pair_filter.findData("unpaired"))
+    assert visible_rpms()=={5000.0}
+    exported=_build_cross_study_comparison_csv(page.study_comparison)
+    assert len(exported)==3
+    assert {float(row["rpm"]) for row in exported}=={3000.0,4000.0,5000.0}
+    assert {row["pairing_status"] for row in exported}=={
+        "EXACT_RPM_AND_OPERATING_CONTEXT","NO_EXACT_COMPATIBLE_PAIR"}
+    page.close();APP.processEvents()
+
+
 def test_cross_study_response_plot_uses_only_exact_period_one_metric_pairs():
     page=ResultsPage(DesktopContext(new_design_project("cross-study-response-plot")))
     studies=[{"study_id":name,"manifest_path":f"{name}.study.json","manifest_sha256":str(index)*64,
