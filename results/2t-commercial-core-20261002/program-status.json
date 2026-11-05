@@ -12091,7 +12091,7 @@
       "id": "DESKTOP-PARAMETRIC-FACTORIAL-EFFECT-PLOT-V1",
       "description": "Add a descriptive visualization of the already-computed 2×2 factorial effects in Results, using only stored/verified contrast values. Preserve unavailable states, source table/formulas, and explicit no-inference/no-validation language.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -12104,7 +12104,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Inspect existing factor_effects output and result visualization primitives. Plot only defined descriptive effect values; show undefined contrasts as unavailable without zero filling or uncertainty bars; verify synthetic fixture and keep the numeric table as source.",
+      "next_action": "Inspect the current verified factorial contrast model and Results widgets; add a descriptive plot driven only by defined stored contrasts, retaining the table/formulas and unavailable qualifications.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -12125,6 +12125,28 @@
       "evidence_level": "L0",
       "evidence": [],
       "next_action": "Inspect existing design_study_table and RPM envelope rows; implement non-destructive optional row filters for design/RPM/status, retain all rows in the manifest/export, and verify nonconverged and not-started points remain visible by default.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-FACTORIAL-PLOT-EXPORT-PROVENANCE-V1",
+      "description": "Export the already displayed 2×2 descriptive factorial effect plot as a reproducible image, with its stored contrast CSV/hash and no-validation qualification attached; do not recompute or alter effects.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-FACTORIAL-EFFECT-PLOT-V1"
+      ],
+      "state": "WAITING",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/factorial-effect-plot-export/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "When the factorial plot is complete, export the exact displayed chart and include a companion/source identifier that resolves to the stored verified contrast CSV; preserve exact source data and qualification.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17104,6 +17126,12 @@
       "kind": "task",
       "summary": "Resultados ahora despacha el manifiesto de estudio del proyecto a la reanudación fail-closed de Simular; 35 pruebas de estudios, 19 de resultados/estudio y 3 regresiones enfocadas pasan sin solver.",
       "commit": "f6260ac52ffc970b356b69b28b10e25c8d08363f"
+    },
+    {
+      "at": "2026-11-05T00:13:54+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTORIAL-EFFECT-PLOT-V1",
+      "kind": "task",
+      "summary": "Iniciada figura descriptiva de contrastes factoriales verificados; conservará tabla, fórmula y disponibilidad científica. Se separa como siguiente entrega el exportado reproducible de la figura con su fuente."
     }
   ],
   "legacy_gate_status": {
