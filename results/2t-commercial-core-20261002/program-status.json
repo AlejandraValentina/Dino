@@ -12181,6 +12181,26 @@
       ],
       "next_action": "Complete; the full export includes every design/RPM row regardless of current selection and retains precise values, stored states and provenance.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESULT-FILTER-V1",
+      "description": "Add optional filters to large cross-study comparison matrices for exact RPM and exact-pair/unpaired state. Show visible/total counts; include all source rows by default and leave the underlying comparison and full CSV export unchanged.",
+      "dependencies": [],
+      "state": "READY",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/cross-study-result-filter/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Add view-only RPM and paired/unpaired filters to the selected-study comparison table; default to all pair/unpaired records, keep the exported comparison complete, and test exact pairing/status and clearing filters.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
   "audit_remediation_mode": false,
@@ -17192,6 +17212,19 @@
       "kind": "task",
       "summary": "Agregado export explícito de matriz completa no factorial; test confirma que incluye todos los puntos aun con una sola fila seleccionada y conserva precisión, estados y métricas vacías. Suite: 38 PASS.",
       "commit": "29bf76eb00348c7dca9748d227266af73527fcf7"
+    },
+    {
+      "at": "2026-11-05T00:35:43+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-FULL-MATRIX-EXPORT-V1",
+      "kind": "task",
+      "summary": "Agregado export explícito de matriz completa no factorial; incluye todos los puntos aun con selección parcial y conserva precisión, estados y métricas vacías. Suite: 38 PASS.",
+      "commit": "29bf76eb00348c7dca9748d227266af73527fcf7"
+    },
+    {
+      "at": "2026-11-05T00:35:43+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESULT-FILTER-V1",
+      "kind": "task",
+      "summary": "Replanificación concreta: matrices comparativas entre estudios también pueden crecer; se añade tarea de filtros RPM/pareados sin modificar filas fuente ni exportación integral."
     }
   ],
   "legacy_gate_status": {
