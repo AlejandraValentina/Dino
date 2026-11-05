@@ -11992,7 +11992,7 @@
       "id": "DESKTOP-PARAMETRIC-REPORT-MANIFEST-PROVENANCE-LAYOUT-V1",
       "description": "Improve readability of the selected-manifest provenance table in cross-study HTML reports: long local paths and SHA-256 values currently compete for width; keep exact paths/hashes accessible and preserve all source manifests/JSON.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -12007,7 +12007,7 @@
       "evidence": [
         "results/desktop-parametric-design-study-v2/report-period-1-criterion-paragraph/chrome-report-v1.png"
       ],
-      "next_action": "Present source manifest paths and hashes compactly while leaving exact traceability accessible; do not alter manifests or source identities.",
+      "next_action": "Inspect only the selected-manifest provenance table and its HTML test fixture; make long paths and hashes readable while preserving the exact copyable values and source JSON.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -17263,6 +17263,12 @@
       "kind": "task",
       "summary": "Agregados filtros de RPM exacta y pareamiento sólo de vista a comparaciones entre estudios; exportación conserva todos los pares y puntos sin pareja. 40 pruebas y captura Qt/Windows con fixture sintético aprobadas.",
       "commit": "a3723b4"
+    },
+    {
+      "at": "2026-11-05T01:00:51+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-MANIFEST-PROVENANCE-LAYOUT-V1",
+      "kind": "task",
+      "summary": "Iniciada la corrección focalizada del layout de procedencia de manifiestos seleccionados en informes de comparación; conservar valores completos y fuentes sin cambio."
     }
   ],
   "legacy_gate_status": {
