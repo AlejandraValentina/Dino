@@ -12091,9 +12091,11 @@
       "id": "DESKTOP-PARAMETRIC-FACTORIAL-EFFECT-PLOT-V1",
       "description": "Add a descriptive visualization of the already-computed 2×2 factorial effects in Results, using only stored/verified contrast values. Preserve unavailable states, source table/formulas, and explicit no-inference/no-validation language.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "c0d48c1ae787f9bcb59007709f6cf992c6a6f93b"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -12103,8 +12105,11 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Inspect the current verified factorial contrast model and Results widgets; add a descriptive plot driven only by defined stored contrasts, retaining the table/formulas and unavailable qualifications.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/factorial-effect-plot/acceptance.md",
+        "results/desktop-parametric-design-study-v2/factorial-effect-plot/factorial-effect-plot-synthetic.png"
+      ],
+      "next_action": "Complete; verified signed contrasts now have an explanatory grouped plot while exact table/formula and unavailable states remain authoritative.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -12133,7 +12138,7 @@
       "dependencies": [
         "DESKTOP-PARAMETRIC-FACTORIAL-EFFECT-PLOT-V1"
       ],
-      "state": "WAITING",
+      "state": "READY",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -17132,6 +17137,13 @@
       "task": "DESKTOP-PARAMETRIC-FACTORIAL-EFFECT-PLOT-V1",
       "kind": "task",
       "summary": "Iniciada figura descriptiva de contrastes factoriales verificados; conservará tabla, fórmula y disponibilidad científica. Se separa como siguiente entrega el exportado reproducible de la figura con su fuente."
+    },
+    {
+      "at": "2026-11-05T00:19:19+00:00",
+      "task": "DESKTOP-PARAMETRIC-FACTORIAL-EFFECT-PLOT-V1",
+      "kind": "task",
+      "summary": "Resultados incorpora gráfico firmado de contrastes factoriales verificados, con escalas y unidades separadas, sin barras para métricas no disponibles; 36 pruebas pasan y la captura Windows es explícitamente sintética.",
+      "commit": "c0d48c1ae787f9bcb59007709f6cf992c6a6f93b"
     }
   ],
   "legacy_gate_status": {
@@ -17163,7 +17175,7 @@
     "remaining": [
       "PRED-VALIDATION"
     ],
-    "updated_at": "2026-11-04T19:56:04+00:00"
+    "updated_at": "2026-11-05T00:19:19+00:00"
   },
   "r2_gate_status": {
     "objective": "MOTORSIM_2T_V1_CLOSURE_R2",
