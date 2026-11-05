@@ -859,6 +859,10 @@ class ResultsPage(QWidget):
         self.export_design_study_button.setToolTip("CSV sin redondeo, con estados, identidades y SHA-256 del manifiesto ligado al proyecto.")
         self.export_design_study_button.clicked.connect(self.export_design_study_csv)
         self.export_design_study_button.setEnabled(False);study_layout.addWidget(self.export_design_study_button)
+        self.export_full_design_study_button=QPushButton("Exportar matriz completa CSV…")
+        self.export_full_design_study_button.setToolTip("Exporta todos los puntos del manifiesto, incluso los no seleccionados, sin imputar métricas ni alterar estados.")
+        self.export_full_design_study_button.clicked.connect(self.export_full_design_study_csv)
+        self.export_full_design_study_button.setEnabled(False);study_layout.addWidget(self.export_full_design_study_button)
         self.export_factorial_effects_button=QPushButton("Exportar matriz y contrastes factoriales CSV…")
         self.export_factorial_effects_button.setToolTip(
             "Exporta los cuatro puntos y sus contrastes descriptivos con procedencia exacta; los efectos no elegibles quedan vacíos.")
@@ -1823,6 +1827,9 @@ class ResultsPage(QWidget):
         self.export_design_study_button.setEnabled(bool(getattr(self,"design_study_manifest_path",None)))
         is_envelope=manifest.get("design_method")=="RPM_ENVELOPE_V1"
         is_factorial=manifest.get("design_method")=="FACTORIAL_2X2_V1"
+        self.export_full_design_study_button.setVisible(not is_factorial)
+        self.export_full_design_study_button.setEnabled(not is_factorial and
+            bool(getattr(self,"design_study_manifest_path",None)) and bool(manifest.get("points")))
         self.export_factorial_effects_button.setVisible(is_factorial)
         self.export_factorial_effects_button.setEnabled(is_factorial and bool(getattr(self,"design_study_manifest_path",None)))
         self.export_factorial_plot_button.setVisible(is_factorial)
@@ -1956,15 +1963,26 @@ class ResultsPage(QWidget):
                 self.factor_effects_table.setItem(row_index,column,item)
 
     def export_design_study_csv(self):
+        return self._export_design_study_csv(full_matrix=False)
+
+    def export_full_design_study_csv(self):
+        return self._export_design_study_csv(full_matrix=True)
+
+    def _export_design_study_csv(self,*,full_matrix):
         manifest=getattr(self,"design_study_manifest",None)
         manifest_path=getattr(self,"design_study_manifest_path",None)
         if not manifest or not manifest_path:return False
-        selected=sorted({index.row() for index in self.design_study_table.selectionModel().selectedRows()})
+        selected=(list(range(len(manifest.get("points",[])))) if full_matrix else
+            sorted({index.row() for index in self.design_study_table.selectionModel().selectedRows()}))
         if not selected:
-            self.design_study_notice.setText("Seleccioná uno o más puntos de la matriz para exportarlos.")
+            self.design_study_notice.setText("El estudio no contiene puntos exportables." if full_matrix else
+                "Seleccioná uno o más puntos de la matriz para exportarlos.")
             return False
-        path,_=QFileDialog.getSaveFileName(self,"Exportar puntos del estudio paramétrico",
-            str(Path(self.context.path).parent if self.context.path else Path.cwd()),"CSV (*.csv)")
+        directory=Path(self.context.path).parent if self.context.path else Path.cwd()
+        suggested=(directory/f"{manifest.get('study_id') or 'parametric-study'}-matriz-completa.csv"
+            if full_matrix else directory)
+        title="Exportar matriz paramétrica completa" if full_matrix else "Exportar puntos del estudio paramétrico"
+        path,_=QFileDialog.getSaveFileName(self,title,str(suggested),"CSV (*.csv)")
         if not path:return False
         try:
             source=Path(manifest_path).resolve();raw=source.read_bytes();digest=hashlib.sha256(raw).hexdigest()
@@ -1981,7 +1999,7 @@ class ResultsPage(QWidget):
                 writer=csv.DictWriter(stream,fieldnames=_STUDY_EXPORT_FIELDS,extrasaction="ignore")
                 writer.writeheader();writer.writerows(records)
             self.design_study_notice.setText(
-                f"{len(records)} punto(s) exportado(s) sin redondeo · SHA-256 del manifiesto {digest} · "
+                f"{len(records)} punto(s){' de la matriz completa' if full_matrix else ''} exportado(s) sin redondeo · SHA-256 del manifiesto {digest} · "
                 "estados y fuentes conservados; valores ausentes permanecen vacíos.")
             return True
         except (OSError,ValueError,TypeError) as exc:

@@ -790,6 +790,62 @@ def test_factorial_effect_plot_export_binds_png_csv_and_manifest_hash(tmp_path,m
     page.close();APP.processEvents()
 
 
+def test_full_parametric_matrix_export_includes_all_states_and_exact_precision(tmp_path,monkeypatch):
+    context=DesktopContext(new_design_project("full-matrix-export-synthetic"))
+    points=[
+        {"index":0,"value":38.40862784470379,"unit":"mm","status":"COMPLETE",
+         "classification":"MAX_CYCLES_NONCONVERGED","periodicity":"INSUFFICIENT_CYCLES","cycles_completed":2},
+        {"index":1,"value":40.12500000000001,"unit":"mm","status":"PREPARED",
+         "classification":"NOT_STARTED","periodicity":"NOT_EVALUATED","cycles_completed":0},
+        {"index":2,"value":42.75,"unit":"mm","status":"CANCELLED",
+         "classification":"CANCELLED","periodicity":"NOT_EVALUATED","cycles_completed":1},
+    ]
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","design_method":"GEOMETRY_V1",
+        "study_id":"synthetic-full-matrix","project_id":context.project["project_id"],"rpm":3000,
+        "baseline_engine_identity_sha256":"b"*64,"scientific_validation":"NOT_CLAIMED",
+        "parameter":{"id":"exhaust:header:length","label":"Longitud de header","unit":"mm"},
+        "points":points}
+    manifest_path=tmp_path/"study.json";raw=json.dumps(manifest,sort_keys=True).encode("utf-8")
+    manifest_path.write_bytes(raw)
+    reference={"path":str(manifest_path),"study_id":manifest["study_id"],
+        "manifest_sha256":hashlib.sha256(raw).hexdigest(),"schema":manifest["schema"],
+        "source_project_id":manifest["project_id"]}
+    context.add_study_reference(reference)
+    page=ResultsPage(context);page.design_study_manifest=manifest
+    page.design_study_manifest_path=manifest_path;page.design_study_manifest_sha256=reference["manifest_sha256"]
+    page.dataset={"points":[]};page._update_design_study_summary()
+    output=tmp_path/"full-matrix.csv";warnings=[]
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *a:(str(output),"CSV (*.csv)"))
+    monkeypatch.setattr(QMessageBox,"warning",lambda *a:warnings.append(a[2]))
+    assert page.export_full_design_study_button.isEnabled()
+    assert page.export_full_design_study_button.isHidden() is False
+    page.design_study_table.clearSelection()
+    assert page.export_design_study_csv() is False
+    assert "Seleccioná uno o más puntos" in page.design_study_notice.text()
+    page.design_study_table.selectRow(1)
+    assert page.export_full_design_study_csv() is True
+    with output.open(encoding="utf-8-sig",newline="") as stream:
+        rows=list(csv.DictReader(stream))
+    assert len(rows)==len(points)
+    assert [row["point_index"] for row in rows]==["0","1","2"]
+    assert [row["execution_status"] for row in rows]==["COMPLETE","PREPARED","CANCELLED"]
+    assert [row["classification"] for row in rows]==[
+        "MAX_CYCLES_NONCONVERGED","NOT_STARTED","CANCELLED"]
+    assert [row["design_value"] for row in rows]==[
+        "38.40862784470379","40.12500000000001","42.75"]
+    assert all(row["brake_power_kw"]=="" and row["BMEP_kpa"]=="" for row in rows)
+    assert all(row["source_verification"]=="NOT_LOADED" for row in rows)
+    assert all(row["manifest_sha256"]==reference["manifest_sha256"] for row in rows)
+    assert "matriz completa" in page.design_study_notice.text()
+    factorial_page=ResultsPage(DesktopContext(new_design_project("factorial-button-hidden")))
+    factorial_manifest={**manifest,"design_method":"FACTORIAL_2X2_V1"}
+    factorial_page.design_study_manifest=factorial_manifest
+    factorial_page.design_study_manifest_path=manifest_path
+    factorial_page._update_design_study_summary()
+    assert factorial_page.export_full_design_study_button.isHidden()
+    page.close();factorial_page.close();APP.processEvents()
+
+
 def test_factorial_effects_flow_into_desktop_technical_report(tmp_path,monkeypatch):
     manifest,imported=_factorial_effect_fixture(tmp_path)
     manifest_path=tmp_path/"verified-factorial.study.json"
