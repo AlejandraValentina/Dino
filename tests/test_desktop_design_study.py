@@ -378,23 +378,25 @@ def test_cross_study_filters_are_view_only_and_csv_keeps_all_rows(tmp_path):
         studies.append({"study_id":name,"manifest_path":str(manifest_path),
             "manifest_sha256":hashlib.sha256(raw).hexdigest(),"manifest":manifest,
             "parameter":{"label":"Escape"}})
-    def point(index,rpm,identity):
+    def point(index,rpm,identity,periodicity="PERIOD_1"):
         return {"index":index,"run_id":f"run-{identity}-{rpm}","rpm":float(rpm),
-            "status":"COMPLETE","classification":"PERIOD_1","periodicity":"PERIOD_1",
+            "status":"COMPLETE","classification":periodicity,"periodicity":periodicity,
             "engine_identity_sha256":identity*64,"identity_sha256":identity.upper()*64,
             "result_sha256":"c"*64,"result_artifact_sha256":"d"*64,
-            "metrics":{"brake_power":float(rpm)/100,"brake_torque":None,"BMEP":None}}
-    def pair(rpm):
-        left=point(rpm,rpm,"a");right=point(rpm,rpm,"b")
+            "metrics":{"brake_power":float(rpm)/100 if periodicity=="PERIOD_1" else None,
+                "brake_torque":None,"BMEP":None}}
+    def pair(rpm,periodicity_b="PERIOD_1"):
+        left=point(rpm,rpm,"a");right=point(rpm,rpm,"b",periodicity_b)
         return {"study_a":"A","point_a":left,"study_b":"B","point_b":right,
             "rpm":float(rpm),"pairing":"EXACT_RPM_AND_OPERATING_CONTEXT",
             "metrics":{"brake_power":{"a":left["metrics"]["brake_power"],
-                "b":right["metrics"]["brake_power"],"delta":0.0},
+                "b":right["metrics"]["brake_power"],
+                "delta":0.0 if periodicity_b=="PERIOD_1" else None},
                 "brake_torque":{"a":None,"b":None,"delta":None},
                 "BMEP":{"a":None,"b":None,"delta":None}}}
     comparison={"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
         "baseline_engine_identity_sha256":"9"*64,"studies":studies,
-        "pairs":[pair(3000),pair(4000)],"unpaired":[{"study_id":"A",
+        "pairs":[pair(3000,"INSUFFICIENT_CYCLES"),pair(4000)],"unpaired":[{"study_id":"A",
             "point":point(5000,5000,"a"),"reason":"Sin pareja exacta"}],
         "notice":"Fixture sintético de presentación; no es resultado físico."}
     page._study_comparison_loaded(comparison)
@@ -410,13 +412,32 @@ def test_cross_study_filters_are_view_only_and_csv_keeps_all_rows(tmp_path):
     page.cross_study_pair_filter.setCurrentIndex(page.cross_study_pair_filter.findData("unpaired"))
     assert visible_rpms()==set()
     page._clear_cross_study_filters()
+    assert page.cross_study_periodicity_a_filter.findText("Periódica · ciclo 1")>=0
+    page.cross_study_periodicity_a_filter.setCurrentIndex(
+        page.cross_study_periodicity_a_filter.findData("PERIOD_1"))
+    page.cross_study_periodicity_b_filter.setCurrentIndex(
+        page.cross_study_periodicity_b_filter.findData("INSUFFICIENT_CYCLES"))
+    assert visible_rpms()=={3000.0}
+    assert page.cross_study_filter_count.text()=="1 de 3 filas visibles"
+    page._clear_cross_study_filters()
     page.cross_study_pair_filter.setCurrentIndex(page.cross_study_pair_filter.findData("unpaired"))
+    page.cross_study_periodicity_a_filter.setCurrentIndex(
+        page.cross_study_periodicity_a_filter.findData("PERIOD_1"))
+    page.cross_study_periodicity_b_filter.setCurrentIndex(
+        page.cross_study_periodicity_b_filter.findText("Sin punto"))
     assert visible_rpms()=={5000.0}
+    page._clear_cross_study_filters()
     exported=_build_cross_study_comparison_csv(page.study_comparison)
     assert len(exported)==3
     assert {float(row["rpm"]) for row in exported}=={3000.0,4000.0,5000.0}
     assert {row["pairing_status"] for row in exported}=={
         "EXACT_RPM_AND_OPERATING_CONTEXT","NO_EXACT_COMPATIBLE_PAIR"}
+    page.context.project["study_references"]=[{"study_id":study["study_id"],
+        "path":study["manifest_path"],"manifest_sha256":study["manifest_sha256"]} for study in studies]
+    page.context.changed.emit();APP.processEvents()
+    assert table.rowCount()==0 and page.cross_study_filter_count.text()=="0 de 0 filas visibles"
+    assert page.cross_study_periodicity_a_filter.count()==1
+    assert page.cross_study_periodicity_a_filter.itemText(0)=="Todos"
     page.close();APP.processEvents()
 
 

@@ -24,6 +24,7 @@ from ..engine_project import validate_project
 from .presentation import display_value,field_label,format_number,state_label as _state_label
 
 METRICS={"Potencia de freno (kW)":"brake_power","Torque (N·m)":"brake_torque","IMEP (kPa)":"IMEP","FMEP (kPa)":"FMEP","BMEP (kPa)":"BMEP","BSFC (g/kWh)":"BSFC"}
+_CROSS_STUDY_NO_ENDPOINT="__DINO_CROSS_STUDY_NO_ENDPOINT__"
 
 def _nonconverged(point):
     """Treat both explicit non-convergence and too-short horizons as transient."""
@@ -1003,6 +1004,20 @@ class ResultsPage(QWidget):
         self.cross_study_filter_count=QLabel("0 de 0 filas visibles")
         self.cross_study_filter_count.setObjectName("crossStudyFilterCount")
         comparison_filter_bar.addWidget(self.cross_study_filter_count)
+        periodicity_filter_bar=QHBoxLayout();comparison_layout.addLayout(periodicity_filter_bar)
+        periodicity_filter_bar.addWidget(QLabel("Periodicidad del extremo A"))
+        self.cross_study_periodicity_a_filter=QComboBox()
+        self.cross_study_periodicity_a_filter.setObjectName("crossStudyPeriodicityAFilter")
+        self.cross_study_periodicity_a_filter.addItem("Todos",None)
+        self.cross_study_periodicity_a_filter.currentIndexChanged.connect(self._apply_cross_study_filters)
+        periodicity_filter_bar.addWidget(self.cross_study_periodicity_a_filter)
+        periodicity_filter_bar.addWidget(QLabel("Periodicidad del extremo B"))
+        self.cross_study_periodicity_b_filter=QComboBox()
+        self.cross_study_periodicity_b_filter.setObjectName("crossStudyPeriodicityBFilter")
+        self.cross_study_periodicity_b_filter.addItem("Todos",None)
+        self.cross_study_periodicity_b_filter.currentIndexChanged.connect(self._apply_cross_study_filters)
+        periodicity_filter_bar.addWidget(self.cross_study_periodicity_b_filter)
+        periodicity_filter_bar.addStretch(1)
         self.study_comparison_table=QTableWidget(0,11);self.study_comparison_table.setObjectName("crossStudyComparison")
         self.study_comparison_table.setHorizontalHeaderLabels(["RPM","Diseño A","ID A","Estado A","Métrica A","Diseño B","ID B","Estado B","Métrica B","Δ B−A","Pareo"])
         self.study_comparison_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
@@ -1112,6 +1127,9 @@ class ResultsPage(QWidget):
             self._study_reference_signature=signature
             self.study_comparison=None;self.study_comparison_table.setRowCount(0)
             self.export_study_comparison_csv_button.setEnabled(False)
+            self.cross_study_rpm_filter.clear();self.cross_study_rpm_filter.addItem("Todas",None)
+            self.cross_study_pair_filter.setCurrentIndex(0)
+            self._reset_cross_study_periodicity_options();self._apply_cross_study_filters()
             self.study_comparison_notice.setText("Elegí entre dos y cuatro estudios guardados en este proyecto. Se verifica cada manifiesto y artifact antes de comparar.")
         previous=self.project_study_selector.currentData()
         self.project_study_selector.blockSignals(True);self.project_study_selector.clear()
@@ -1161,6 +1179,7 @@ class ResultsPage(QWidget):
         self.export_study_comparison_csv_button.setEnabled(True)
         self.compare_studies_button.setEnabled(len(self.context.project.get("study_references",[]))>=2)
         self._refresh_cross_study_rpm_options(comparison)
+        self._refresh_cross_study_periodicity_options(comparison)
         self.study_comparison_group.show();self._render_study_comparison()
 
     def _refresh_cross_study_rpm_options(self,comparison):
@@ -1183,24 +1202,64 @@ class ResultsPage(QWidget):
         self.cross_study_rpm_filter.setCurrentIndex(0);self.cross_study_rpm_filter.blockSignals(False)
         self.cross_study_pair_filter.setCurrentIndex(0)
 
+    @staticmethod
+    def _cross_study_periodicity_filter_value(point):
+        if not isinstance(point,dict):return _CROSS_STUDY_NO_ENDPOINT
+        value=point.get("periodicity")
+        return str(value) if value not in (None,"") else "NOT_EVALUATED"
+
+    def _refresh_cross_study_periodicity_options(self,comparison):
+        states={"a":set(),"b":set()}
+        for pair in comparison.get("pairs",[]):
+            states["a"].add(self._cross_study_periodicity_filter_value(pair.get("point_a")))
+            states["b"].add(self._cross_study_periodicity_filter_value(pair.get("point_b")))
+        studies=comparison.get("studies",[])
+        first_study=studies[0].get("study_id") if studies else None
+        for item in comparison.get("unpaired",[]):
+            side="a" if item.get("study_id")==first_study else "b"
+            other="b" if side=="a" else "a"
+            states[side].add(self._cross_study_periodicity_filter_value(item.get("point")))
+            states[other].add(_CROSS_STUDY_NO_ENDPOINT)
+        for side,combo in (("a",self.cross_study_periodicity_a_filter),
+                           ("b",self.cross_study_periodicity_b_filter)):
+            combo.blockSignals(True);combo.clear();combo.addItem("Todos",None)
+            ordered=sorted(states[side],key=lambda value:(value==_CROSS_STUDY_NO_ENDPOINT,
+                _state_label("NOT_REPORTED" if value==_CROSS_STUDY_NO_ENDPOINT else value).casefold()))
+            for value in ordered:
+                label=("Sin punto" if value==_CROSS_STUDY_NO_ENDPOINT else _state_label(value))
+                combo.addItem(label,value)
+            combo.setCurrentIndex(0);combo.blockSignals(False)
+
     def _clear_cross_study_filters(self):
         self.cross_study_rpm_filter.setCurrentIndex(0)
         self.cross_study_pair_filter.setCurrentIndex(0)
+        self.cross_study_periodicity_a_filter.setCurrentIndex(0)
+        self.cross_study_periodicity_b_filter.setCurrentIndex(0)
         self._apply_cross_study_filters()
+
+    def _reset_cross_study_periodicity_options(self):
+        for combo in (self.cross_study_periodicity_a_filter,self.cross_study_periodicity_b_filter):
+            combo.blockSignals(True);combo.clear();combo.addItem("Todos",None);combo.blockSignals(False)
 
     def _apply_cross_study_filters(self,*_):
         if not hasattr(self,"study_comparison_table"):return
         selected_rpm=self.cross_study_rpm_filter.currentData()
         pair_mode=self.cross_study_pair_filter.currentData() or "all"
+        periodicity_a=self.cross_study_periodicity_a_filter.currentData()
+        periodicity_b=self.cross_study_periodicity_b_filter.currentData()
         visible=0
         for row in range(self.study_comparison_table.rowCount()):
             item=self.study_comparison_table.item(row,0)
             metadata=item.data(Qt.ItemDataRole.UserRole+1) if item else None
             metadata=metadata if isinstance(metadata,dict) else {}
+            periodicity_metadata=item.data(Qt.ItemDataRole.UserRole+2) if item else None
+            periodicity_metadata=periodicity_metadata if isinstance(periodicity_metadata,dict) else {}
             row_rpm=metadata.get("rpm")
             paired=bool(metadata.get("paired"))
             show=(selected_rpm is None or row_rpm==selected_rpm)
             show=show and (pair_mode=="all" or (pair_mode=="paired")==paired)
+            show=show and (periodicity_a is None or periodicity_metadata.get("periodicity_a")==periodicity_a)
+            show=show and (periodicity_b is None or periodicity_metadata.get("periodicity_b")==periodicity_b)
             self.study_comparison_table.setRowHidden(row,not show)
             visible+=int(show)
         total=self.study_comparison_table.rowCount()
@@ -1214,6 +1273,7 @@ class ResultsPage(QWidget):
         self.study_comparison_table.setRowCount(0)
         self.cross_study_rpm_filter.clear();self.cross_study_rpm_filter.addItem("Todas",None)
         self.cross_study_pair_filter.setCurrentIndex(0)
+        self._reset_cross_study_periodicity_options()
         self._apply_cross_study_filters()
         self.study_comparison_response_plot.set_series([])
         self.study_comparison_point_details.clear()
@@ -1308,6 +1368,9 @@ class ResultsPage(QWidget):
                     item.setData(Qt.ItemDataRole.UserRole+1,{
                         "rpm":float(rpm) if isinstance(rpm,(int,float)) and math.isfinite(float(rpm)) else None,
                         "paired":comparison_row is not None})
+                    item.setData(Qt.ItemDataRole.UserRole+2,{
+                        "periodicity_a":self._cross_study_periodicity_filter_value(a),
+                        "periodicity_b":self._cross_study_periodicity_filter_value(b)})
                 point=a if column in (1,2,3,4) else b
                 if point is not None and column in (1,2,3,5,6,7):
                     study=studies[a_id if column in (1,2,3) else b_id]
