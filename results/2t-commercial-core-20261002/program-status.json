@@ -12116,9 +12116,11 @@
       "id": "DESKTOP-PARAMETRIC-STUDY-RESULT-FILTER-V1",
       "description": "Add optional filters for large parametric design-study result matrices (design/RPM and recorded execution/periodicity state), with every row included by default and no state or value rewriting.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "24b268152eaa0ed365eb113c89c38b8c2ce38f4e"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -12128,8 +12130,11 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Inspect the design_study_table and RPM-envelope point metadata; add optional design/RPM and recorded execution/periodicity filters, default to every row, and confirm all-point exports remain unchanged.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/study-result-filter/acceptance.md",
+        "results/desktop-parametric-design-study-v2/study-result-filter/filter-widget-synthetic.png"
+      ],
+      "next_action": "Complete; optional view filters now isolate design, exact RPM, execution and periodicity while keeping every point and full exports intact.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -17231,6 +17236,13 @@
       "task": "DESKTOP-PARAMETRIC-STUDY-RESULT-FILTER-V1",
       "kind": "task",
       "summary": "Iniciada mejora de exploración para matrices extensas; filtros sólo de vista, filas completas visibles por defecto y exportación basada en manifiesto sin alteraciones."
+    },
+    {
+      "at": "2026-11-05T00:44:31+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-RESULT-FILTER-V1",
+      "kind": "task",
+      "summary": "Resultados agrega filtros de vista por diseño/RPM/estado/periodicidad, todos visibles por defecto; exportación completa sigue incluyendo la matriz íntegra. 39 pruebas PASS y captura sintética Windows.",
+      "commit": "24b268152eaa0ed365eb113c89c38b8c2ce38f4e"
     }
   ],
   "legacy_gate_status": {
