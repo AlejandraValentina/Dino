@@ -12232,7 +12232,8 @@
       "state": "DONE",
       "blocker": null,
       "commits": [
-        "1527ee0"
+        "1527ee0",
+        "7bbedaf"
       ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
@@ -12247,9 +12248,13 @@
         "results/desktop-parametric-design-study-v2/cross-study-periodicity-filter/acceptance.md",
         "results/desktop-parametric-design-study-v2/cross-study-periodicity-filter/cross-study-periodicity-synthetic.png",
         "results/desktop-parametric-design-study-v2/cross-study-periodicity-filter/capture_synthetic_periodicity_filter.py",
-        "tests/test_desktop_design_study.py"
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/cross-study-periodicity-filter/capture-receipt.json",
+        "results/desktop-parametric-design-study-v2/cross-study-periodicity-filter/cross-study-periodicity-980x680.png",
+        "results/desktop-parametric-design-study-v2/cross-study-periodicity-filter/cross-study-periodicity-1360x900.png",
+        "results/desktop-parametric-design-study-v2/cross-study-periodicity-filter/cross-study-periodicity-1600x1020.png"
       ],
-      "next_action": "Periodicidad filters are complete. Continue only with a concrete reliability/product need; measured validation and periodic GCI remain externally/budget blocked.",
+      "next_action": "Responsive screenshots verified at 980×680, 1360×900 and 1600×1020; retain 980-pixel horizontal table scroll. No additional periodicity campaign or UIA dependency.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17341,6 +17346,13 @@
       "kind": "task",
       "summary": "Tras confirmación de sesión desbloqueada, repro UIA/COM local acotado: la consulta UIA inicial vuelve a agotar 12 s; Win32 cierra una ventana Qt sintética y el hijo termina sin proceso sobrante. No es operación COM de Dino; se conserva diagnóstico histórico de provider retenido post-destrucción.",
       "commit": "6f5f6c2"
+    },
+    {
+      "at": "2026-11-05T01:22:41+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-PERIODICITY-FILTER-V1",
+      "kind": "task",
+      "summary": "La inspección gráfica confirmó selectores/contador visibles a 980×680, tabla desplazable horizontalmente, y todas las 11 columnas visibles a 1360×900; capturas y hashes añadidos.",
+      "commit": "7bbedaf"
     }
   ],
   "legacy_gate_status": {
