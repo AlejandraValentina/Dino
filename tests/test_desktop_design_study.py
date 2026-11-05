@@ -583,6 +583,9 @@ def test_parametric_point_details_bind_manifest_nested_sweep_and_source_status(t
     assert "Verificado: hash coincide" in first
     assert "Fuente no cargada" in first
     assert "NOT_CLAIMED" in first
+    assert "Estado de ejecución: Terminada" in first
+    assert "Clasificación: Límite de ciclos · no convergida" in first
+    assert "Periodicidad observada: Ciclos insuficientes" in first
     page.design_study_table.setCurrentCell(1,0);APP.processEvents()
     assert "Punto 1 · RPM 4000" in page.design_study_traceability.toPlainText()
     assert "run-4000" in page.design_study_traceability.toPlainText()

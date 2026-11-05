@@ -1,0 +1,33 @@
+{
+  "design_method": "ONE_FACTOR_AT_A_TIME_V1",
+  "parameter": {
+    "id": "exhaust.length",
+    "label": "Longitud de escape",
+    "unit": "mm"
+  },
+  "points": [
+    {
+      "baseline": true,
+      "classification": "MAX_CYCLES_NONCONVERGED",
+      "cycles_completed": 1,
+      "design_index": 0,
+      "engine_identity_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "index": 0,
+      "periodicity": "INSUFFICIENT_CYCLES",
+      "result_artifact_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "result_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "rpm": 3000.0,
+      "run_id": "synthetic-run-000",
+      "source_run_id": "synthetic-run-000",
+      "status": "COMPLETE",
+      "unit": "mm",
+      "value": 83.0
+    }
+  ],
+  "project_id": "synthetic-project",
+  "rpm": 3000.0,
+  "schema": "DINO_PARAMETRIC_DESIGN_STUDY_V1",
+  "scientific_validation": "NOT_CLAIMED",
+  "status": "COMPLETE",
+  "study_id": "synthetic-point-status-display"
+}

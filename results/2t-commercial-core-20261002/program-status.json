@@ -12282,6 +12282,31 @@
       ],
       "next_action": "Reevaluar dependencias científicas externas y trabajo funcional real contra DINO_PREDICTIVE_RELIABILITY_V1; no crear tareas de actividad ni campañas sin presupuesto.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-STUDY-TRACEABILITY-EXECUTION-STATE-V1",
+      "description": "In the selected-point traceability panel, show the persisted point execution status independently from solver classification and observed periodicity; retain raw metadata in the manifest and show translated user-facing labels.",
+      "dependencies": [],
+      "state": "DONE",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/study-point-execution-traceability/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/study-point-execution-traceability/acceptance.md",
+        "results/desktop-parametric-design-study-v2/study-point-execution-traceability/capture-receipt.json",
+        "results/desktop-parametric-design-study-v2/study-point-execution-traceability/native-point-execution-traceability-1440x837.png",
+        "tests/test_desktop_design_study.py::test_parametric_point_details_bind_manifest_nested_sweep_and_source_status"
+      ],
+      "next_action": "Continuar con la presentación reproducible de los estados de ejecución en informes comparativos HTML, preservando clasificación, periodicidad y los datos originales.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
   "audit_remediation_mode": false,
@@ -17398,6 +17423,18 @@
       "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-EXECUTION-STATE-V1",
       "kind": "task",
       "summary": "La comparación A/B de estudios muestra ahora status de ejecución persistido separado de clasificación y periodicidad, con filtros independientes sólo de vista; 56 pruebas y capturas sintéticas verificadas."
+    },
+    {
+      "at": "2026-11-05T01:35:36+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-TRACEABILITY-EXECUTION-STATE-V1",
+      "kind": "task",
+      "summary": "Nueva continuación de producto derivada de la revisión: la ficha de un punto individual aún confunde estado guardado, clasificación y periodicidad."
+    },
+    {
+      "at": "2026-11-05T01:39:59+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-TRACEABILITY-EXECUTION-STATE-V1",
+      "kind": "task",
+      "summary": "La ficha del punto paramétrico separa ejecución persistida, clasificación y periodicidad. Suite del estudio: 40 PASS; ventana Dino nativa con fixture sintético capturada y hash registrada."
     }
   ],
   "legacy_gate_status": {

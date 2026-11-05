@@ -1,0 +1,17 @@
+{
+  "schema": "DINO_SYNTHETIC_POINT_EXECUTION_TRACEABILITY_CAPTURE_V1",
+  "fixture_origin": "Synthetic UI-only manifest; no solver execution or scientific claim",
+  "window_size": [
+    1440,
+    837
+  ],
+  "manifest_sha256": "e1a8ed6788a31058360869005a5542053a4232e115e27cdadd3de4d92817c65c",
+  "visible_state_fields": [
+    "Estado de ejecución: Terminada",
+    "Clasificación: Límite de ciclos · no convergida",
+    "Periodicidad observada: Ciclos insuficientes"
+  ],
+  "scientific_validation": "NOT_CLAIMED",
+  "capture": "native-point-execution-traceability-1440x837.png",
+  "capture_sha256": "25767a70a0e331be89c28a6e228f0f41efb70c6f84867be190c925c8817cd889"
+}
