@@ -12261,7 +12261,7 @@
       "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-EXECUTION-STATE-V1",
       "description": "In cross-study comparison, show recorded execution status separately from solver classification and periodicity; add independent view-only endpoint status filters using observed values and translated labels. Keep all rows in the verified comparison and CSV export.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -12273,8 +12273,12 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Use only status stored on each point; distinguish missing status from no endpoint. Present stored status, classification and periodicity without conflation. Test complete/nonconverged, checkpointed cancellation and unpaired synthetic rows; filters must not alter the full CSV.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-execution-state/acceptance.md",
+        "results/desktop-parametric-design-study-v2/cross-study-execution-state/capture-receipt.json",
+        "tests/test_desktop_design_study.py::test_cross_study_filters_are_view_only_and_csv_keeps_all_rows"
+      ],
+      "next_action": "Reevaluar dependencias científicas externas y trabajo funcional real contra DINO_PREDICTIVE_RELIABILITY_V1; no crear tareas de actividad ni campañas sin presupuesto.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17386,6 +17390,12 @@
       "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-EXECUTION-STATE-V1",
       "kind": "task",
       "summary": "Replanificación por defecto reproducible en la matriz A/B: el resumen mostraba clasificación/periodicidad y omitía el estado de ejecución guardado. Se corrige y hace filtrable sin alterar ciencia o exportación."
+    },
+    {
+      "at": "2026-11-05T01:33:21+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-EXECUTION-STATE-V1",
+      "kind": "task",
+      "summary": "La comparación A/B de estudios muestra ahora status de ejecución persistido separado de clasificación y periodicidad, con filtros independientes sólo de vista; 56 pruebas y capturas sintéticas verificadas."
     }
   ],
   "legacy_gate_status": {

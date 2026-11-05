@@ -378,15 +378,15 @@ def test_cross_study_filters_are_view_only_and_csv_keeps_all_rows(tmp_path):
         studies.append({"study_id":name,"manifest_path":str(manifest_path),
             "manifest_sha256":hashlib.sha256(raw).hexdigest(),"manifest":manifest,
             "parameter":{"label":"Escape"}})
-    def point(index,rpm,identity,periodicity="PERIOD_1"):
+    def point(index,rpm,identity,periodicity="PERIOD_1",execution_status="COMPLETE",classification=None):
         return {"index":index,"run_id":f"run-{identity}-{rpm}","rpm":float(rpm),
-            "status":"COMPLETE","classification":periodicity,"periodicity":periodicity,
+            "status":execution_status,"classification":classification or periodicity,"periodicity":periodicity,
             "engine_identity_sha256":identity*64,"identity_sha256":identity.upper()*64,
             "result_sha256":"c"*64,"result_artifact_sha256":"d"*64,
             "metrics":{"brake_power":float(rpm)/100 if periodicity=="PERIOD_1" else None,
                 "brake_torque":None,"BMEP":None}}
-    def pair(rpm,periodicity_b="PERIOD_1"):
-        left=point(rpm,rpm,"a");right=point(rpm,rpm,"b",periodicity_b)
+    def pair(rpm,periodicity_b="PERIOD_1",status_b="COMPLETE",classification_b=None):
+        left=point(rpm,rpm,"a");right=point(rpm,rpm,"b",periodicity_b,status_b,classification_b)
         return {"study_a":"A","point_a":left,"study_b":"B","point_b":right,
             "rpm":float(rpm),"pairing":"EXACT_RPM_AND_OPERATING_CONTEXT",
             "metrics":{"brake_power":{"a":left["metrics"]["brake_power"],
@@ -396,15 +396,27 @@ def test_cross_study_filters_are_view_only_and_csv_keeps_all_rows(tmp_path):
                 "BMEP":{"a":None,"b":None,"delta":None}}}
     comparison={"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
         "baseline_engine_identity_sha256":"9"*64,"studies":studies,
-        "pairs":[pair(3000,"INSUFFICIENT_CYCLES"),pair(4000)],"unpaired":[{"study_id":"A",
-            "point":point(5000,5000,"a"),"reason":"Sin pareja exacta"}],
+        "pairs":[pair(3000,"INSUFFICIENT_CYCLES","COMPLETE","MAX_CYCLES_NONCONVERGED"),pair(4000)],
+        "unpaired":[{"study_id":"A",
+            "point":point(5000,5000,"a","NOT_EVALUATED","CANCELLED_CHECKPOINTED"),
+            "reason":"Sin pareja exacta"}],
         "notice":"Fixture sintético de presentación; no es resultado físico."}
     page._study_comparison_loaded(comparison)
     table=page.study_comparison_table
+    assert "clasificación / periodicidad" in table.horizontalHeaderItem(3).toolTip()
     def visible_rpms():
         return {table.item(row,0).data(Qt.ItemDataRole.UserRole+1)["rpm"]
             for row in range(table.rowCount()) if not table.isRowHidden(row)}
     assert page.cross_study_filter_count.text()=="3 de 3 filas visibles"
+    row_3000=next(row for row in range(table.rowCount())
+        if table.item(row,0).data(Qt.ItemDataRole.UserRole+1)["rpm"]==3000.0)
+    visible_state=" ".join(table.item(row_3000,column).text() for column in (3,7))
+    assert "Terminada" in visible_state
+    assert "Límite de ciclos" in visible_state and "Ciclos insuficientes" in visible_state
+    row_5000=next(row for row in range(table.rowCount())
+        if table.item(row,0).data(Qt.ItemDataRole.UserRole+1)["rpm"]==5000.0)
+    assert "Cancelada · checkpoint disponible" in table.item(row_5000,3).text()
+    assert "Estado guardado: Cancelada · checkpoint disponible" in table.item(row_5000,3).toolTip()
     page.cross_study_rpm_filter.setCurrentIndex(
         page.cross_study_rpm_filter.findData(4000.0))
     assert visible_rpms()=={4000.0}
@@ -417,12 +429,20 @@ def test_cross_study_filters_are_view_only_and_csv_keeps_all_rows(tmp_path):
         page.cross_study_periodicity_a_filter.findData("PERIOD_1"))
     page.cross_study_periodicity_b_filter.setCurrentIndex(
         page.cross_study_periodicity_b_filter.findData("INSUFFICIENT_CYCLES"))
+    page.cross_study_execution_a_filter.setCurrentIndex(
+        page.cross_study_execution_a_filter.findData("COMPLETE"))
+    page.cross_study_execution_b_filter.setCurrentIndex(
+        page.cross_study_execution_b_filter.findData("COMPLETE"))
     assert visible_rpms()=={3000.0}
     assert page.cross_study_filter_count.text()=="1 de 3 filas visibles"
     page._clear_cross_study_filters()
     page.cross_study_pair_filter.setCurrentIndex(page.cross_study_pair_filter.findData("unpaired"))
+    page.cross_study_execution_a_filter.setCurrentIndex(
+        page.cross_study_execution_a_filter.findData("CANCELLED_CHECKPOINTED"))
+    page.cross_study_execution_b_filter.setCurrentIndex(
+        page.cross_study_execution_b_filter.findText("Sin punto"))
     page.cross_study_periodicity_a_filter.setCurrentIndex(
-        page.cross_study_periodicity_a_filter.findData("PERIOD_1"))
+        page.cross_study_periodicity_a_filter.findData("NOT_EVALUATED"))
     page.cross_study_periodicity_b_filter.setCurrentIndex(
         page.cross_study_periodicity_b_filter.findText("Sin punto"))
     assert visible_rpms()=={5000.0}
@@ -438,6 +458,8 @@ def test_cross_study_filters_are_view_only_and_csv_keeps_all_rows(tmp_path):
     assert table.rowCount()==0 and page.cross_study_filter_count.text()=="0 de 0 filas visibles"
     assert page.cross_study_periodicity_a_filter.count()==1
     assert page.cross_study_periodicity_a_filter.itemText(0)=="Todos"
+    assert page.cross_study_execution_a_filter.count()==1
+    assert page.cross_study_execution_a_filter.itemText(0)=="Todos"
     page.close();APP.processEvents()
 
 

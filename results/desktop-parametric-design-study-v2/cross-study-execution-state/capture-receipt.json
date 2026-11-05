@@ -1,0 +1,26 @@
+{
+  "schema": "DINO_SYNTHETIC_CROSS_STUDY_EXECUTION_STATE_CAPTURE_V1",
+  "fixture_origin": "synthetic display/interaction only; no solver or scientific claim",
+  "visible_rows": "1 de 2 filas visibles",
+  "total_rows": 2,
+  "captures": {
+    "cross-study-state-periodicity-980x680.png": {
+      "sha256": "947a638b2a504a0bad085849c6d5a5c793a8b995431e3c1d1d979af7fac03ce5",
+      "bytes": 28526,
+      "width": 980,
+      "height": 680
+    },
+    "cross-study-execution-states-1360x900.png": {
+      "sha256": "2d3df1b34091f28bb5626505a9d771637240966b4024c17904092633997c8b2e",
+      "bytes": 31460,
+      "width": 1360,
+      "height": 900
+    },
+    "cross-study-cancelled-checkpoint-1600x1020.png": {
+      "sha256": "9c1ef457cfe4330c2840dcc02001c7a46466407dc813f0150bcd59597a261038",
+      "bytes": 32419,
+      "width": 1600,
+      "height": 1020
+    }
+  }
+}
