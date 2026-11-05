@@ -12219,6 +12219,26 @@
       ],
       "next_action": "Complete the already-READY cross-study report manifest provenance layout task; keep source paths and hashes readable without changing report data or scientific claims.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-PERIODICITY-FILTER-V1",
+      "description": "Add independent, view-only filters for the observed periodicity of comparison endpoint A and B. Populate choices from stored points, translate labels for display, show all rows by default, and preserve the full exact/unpaired comparison and exports.",
+      "dependencies": [],
+      "state": "IN_PROGRESS",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/cross-study-periodicity-filter/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Implement exact per-endpoint periodicity selectors using only values present in the verified comparison; ensure missing endpoints are explicit and the comparison data/full CSV remain unchanged. Verify paired PERIOD_1/nonperiodic and unpaired synthetic rows.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
   "audit_remediation_mode": false,
@@ -17289,6 +17309,12 @@
       "kind": "task",
       "summary": "Informe de comparación: tabla de manifiestos ahora muestra nombre y hash abreviado con disclosure para ruta/SHA-256 completos; los valores íntegros quedan en el JSON. Pruebas y capturas visuales sintéticas aprobadas.",
       "commit": "f581f79"
+    },
+    {
+      "at": "2026-11-05T01:08:45+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-PERIODICITY-FILTER-V1",
+      "kind": "task",
+      "summary": "Repriorizada una mejora funcional concreta de resultados: aislar periodicidad observada por extremo en matrices cross-study para inspección de filas periódicas y transitorias, sin alterar comparación ni CSV."
     }
   ],
   "legacy_gate_status": {
