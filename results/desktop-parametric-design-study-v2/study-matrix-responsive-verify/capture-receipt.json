@@ -1,0 +1,75 @@
+{
+  "schema": "DINO_SYNTHETIC_STUDY_MATRIX_RESPONSIVE_CAPTURE_V1",
+  "fixture_origin": "Synthetic display-only study records; no solver or scientific claim",
+  "requested_window_sizes": [
+    [
+      980,
+      680
+    ],
+    [
+      1360,
+      900
+    ]
+  ],
+  "captured_window_sizes": [
+    [
+      980,
+      680
+    ],
+    [
+      1360,
+      881
+    ]
+  ],
+  "1360_height_limit": "The visible Windows work area capped the Qt client height at 881 px; the table widget stayed at its normal size.",
+  "state_cells": [
+    [
+      "Completo",
+      "Periódica · ciclo 1",
+      "Periódica · ciclo 1"
+    ],
+    [
+      "Completo",
+      "Límite de ciclos · no convergida",
+      "Ciclos insuficientes"
+    ]
+  ],
+  "horizontal_scroll_maximum_at_980": 0,
+  "all_columns_ordered": [
+    "Diseño",
+    "Valor",
+    "Ejecución",
+    "Clasificación",
+    "Periodicidad",
+    "Ciclos",
+    "Potencia",
+    "Torque",
+    "BMEP",
+    "Δ potencia vs base"
+  ],
+  "scientific_validation": "NOT_CLAIMED",
+  "captures": {
+    "study-matrix-980x680-left.png": {
+      "sha256": "c169294e77c1edac8f10bc09469d76dcdb4846baa337025cf2f8add02988682a",
+      "bytes": 9813,
+      "scroll_value": 0,
+      "scroll_maximum": 0,
+      "state_column_widths": [
+        78,
+        200,
+        130
+      ]
+    },
+    "study-matrix-1360x881-left.png": {
+      "sha256": "ef170b26e9e9b4a68bede8e1a976bba4e9fc7e673bb8a44ab1508deaf888e686",
+      "bytes": 11951,
+      "scroll_value": 0,
+      "scroll_maximum": 0,
+      "state_column_widths": [
+        78,
+        200,
+        130
+      ]
+    }
+  }
+}

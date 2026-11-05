@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 os.environ.setdefault("QT_QPA_PLATFORM","offscreen")
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication,QAbstractItemView,QComboBox,QDialog,QFileDialog,QLineEdit,QMessageBox
+from PySide6.QtWidgets import QApplication,QAbstractItemView,QComboBox,QDialog,QFileDialog,QHeaderView,QLineEdit,QMessageBox
 from motorsim.desktop.app import DinoDesktopWindow
 from motorsim.desktop.context import DesktopContext
 from motorsim.desktop.execution_page import ExecutionPage
@@ -1389,6 +1389,9 @@ def test_parametric_study_csv_export_preserves_precision_states_and_verified_sou
         "BMEP":123.456789012345,"BMEP_status":"DEFINED"}]}
     page._update_design_study_summary()
     assert page.design_study_table.rowCount()==2
+    assert page.design_study_table.horizontalHeader().sectionResizeMode(1)==QHeaderView.ResizeMode.Stretch
+    assert not page.design_study_table.horizontalHeader().stretchLastSection()
+    assert [page.design_study_table.columnWidth(column) for column in (2,3,4)]==[78,200,130]
     assert page.design_study_table.horizontalHeaderItem(2).text()=="Ejecución"
     assert page.design_study_table.horizontalHeaderItem(3).text()=="Clasificación"
     assert page.design_study_table.item(0,2).text()=="Completo"

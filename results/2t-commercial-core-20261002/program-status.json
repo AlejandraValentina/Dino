@@ -12369,22 +12369,30 @@
     },
     {
       "id": "DESKTOP-PARAMETRIC-STUDY-MATRIX-RESPONSIVE-VERIFY-V1",
-      "description": "Verify the newly separated single-study execution/classification/periodicity columns in the actual Qt table at compact 980x680 and 1360x900; prove every field remains accessible and values are not clipped or reordered.",
+      "description": "Verify the independent single-study state columns in the actual Qt table at compact 980x680 and 1360x900, correcting the demonstrated last-column stretch that truncated states and checking all fields remain legible.",
       "dependencies": [
         "DESKTOP-PARAMETRIC-STUDY-MATRIX-EXECUTION-STATE-V1"
       ],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "verification",
       "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
         "results/desktop-parametric-design-study-v2/study-matrix-responsive-verify/",
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Capture the native table at both sizes, scroll horizontally if needed, assert status/classification/periodicity cells and report any actual truncation defect.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/study-matrix-responsive-verify/acceptance.md",
+        "results/desktop-parametric-design-study-v2/study-matrix-responsive-verify/capture-receipt.json",
+        "results/desktop-parametric-design-study-v2/study-matrix-responsive-verify/study-matrix-980x680-left.png",
+        "results/desktop-parametric-design-study-v2/study-matrix-responsive-verify/study-matrix-1360x881-left.png",
+        "tests/test_desktop_design_study.py"
+      ],
+      "next_action": "Reevaluar trabajo verdaderamente desbloqueado según la hoja unificada; no generar tareas repetitivas. Validación experimental continúa esperando entradas completas externas y E1.3/GCI carece de presupuesto.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17550,6 +17558,12 @@
       "task": "DESKTOP-PARAMETRIC-STUDY-MATRIX-RESPONSIVE-VERIFY-V1",
       "kind": "task",
       "summary": "Verificación de regresión pendiente por la nueva columna: comprobar que la matriz de estudio sigue legible y desplazable en la ventana compacta aprobada."
+    },
+    {
+      "at": "2026-11-05T02:03:40+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-MATRIX-RESPONSIVE-VERIFY-V1",
+      "kind": "task",
+      "summary": "La matriz nativa queda legible en 980×680 y 1360 px de ancho; se corrigió el estiramiento que truncaba estados. Capturas sintéticas con hashes y 40 pruebas PASS."
     }
   ],
   "legacy_gate_status": {

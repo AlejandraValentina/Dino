@@ -850,7 +850,12 @@ class ResultsPage(QWidget):
         self.design_study_table=QTableWidget(0,10);self.design_study_table.setObjectName("designStudyResults")
         self.design_study_table.setHorizontalHeaderLabels(["Diseño","Valor","Ejecución","Clasificación","Periodicidad","Ciclos","Potencia","Torque","BMEP","Δ potencia vs base"])
         self.design_study_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-        self.design_study_table.horizontalHeader().setStretchLastSection(True);self.design_study_table.setMaximumHeight(230)
+        self.design_study_table.horizontalHeader().setSectionResizeMode(1,QHeaderView.ResizeMode.Stretch)
+        self.design_study_table.horizontalHeader().setStretchLastSection(False);self.design_study_table.setMaximumHeight(230)
+        for column,width in ((2,78),(3,200),(4,130)):
+            self.design_study_table.horizontalHeader().setSectionResizeMode(
+                column,QHeaderView.ResizeMode.Interactive)
+            self.design_study_table.setColumnWidth(column,width)
         self.design_study_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.design_study_table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.design_study_table.currentCellChanged.connect(self._design_study_point_selected)
