@@ -12065,9 +12065,11 @@
       "id": "DESKTOP-PARAMETRIC-RESUME-SELECTED-STUDY-FROM-RESULTS-V1",
       "description": "Connect the selected, project-bound parametric study in Results to the existing explicit resume workflow, preserving project/variant/baseline/hash checks, its saved artifact root, original budget limits, cancellation and checkpoint semantics.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "f6260ac52ffc970b356b69b28b10e25c8d08363f"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -12079,8 +12081,10 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Implement a Results action passing the currently selected project study manifest to the existing Execution resume preflight. Preserve project/variant/baseline/hash checks and budget prompt; test event routing and mismatch rejection without solver execution.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/resume-selected-study/acceptance.md"
+      ],
+      "next_action": "Complete; selected project studies now route through the existing fail-closed resume workflow. Continue with a READY product task.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -17093,6 +17097,13 @@
       "task": "DESKTOP-PARAMETRIC-RESUME-SELECTED-STUDY-FROM-RESULTS-V1",
       "kind": "task",
       "summary": "Iniciada integración entre selección del estudio en Resultados y reanudación en Simular; se reutilizarán checks de proyecto/variante/baseline/manifest y el presupuesto explícito ya existentes. Replanificación añade filtros no destructivos para estudios de muchos puntos."
+    },
+    {
+      "at": "2026-11-05T00:12:38+00:00",
+      "task": "DESKTOP-PARAMETRIC-RESUME-SELECTED-STUDY-FROM-RESULTS-V1",
+      "kind": "task",
+      "summary": "Resultados ahora despacha el manifiesto de estudio del proyecto a la reanudación fail-closed de Simular; 35 pruebas de estudios, 19 de resultados/estudio y 3 regresiones enfocadas pasan sin solver.",
+      "commit": "f6260ac52ffc970b356b69b28b10e25c8d08363f"
     }
   ],
   "legacy_gate_status": {
