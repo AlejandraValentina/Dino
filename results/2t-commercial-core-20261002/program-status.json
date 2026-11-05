@@ -12049,7 +12049,8 @@
       "state": "DONE",
       "blocker": null,
       "commits": [
-        "f36eebb68a1c4e862dea12e02fb4b703cb255abe"
+        "f36eebb68a1c4e862dea12e02fb4b703cb255abe",
+        "6f5f6c2"
       ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "verification",
@@ -12062,7 +12063,11 @@
         "results/desktop-ui-automation-com-repro/acceptance.md",
         "results/desktop-ui-automation-com-repro/reproduction-receipt.json",
         "results/desktop-ui-automation-com-repro/bounded-uia-receipt.json",
-        "results/desktop-ui-automation-com-repro/win32-lifecycle-receipt.json"
+        "results/desktop-ui-automation-com-repro/win32-lifecycle-receipt.json",
+        "results/desktop-ui-automation-com-repro/unlocked-session-20261105/README.md",
+        "results/desktop-ui-automation-com-repro/unlocked-session-20261105/bounded-uia-receipt.json",
+        "results/desktop-ui-automation-com-repro/unlocked-session-20261105/bounded-uia-progress.jsonl",
+        "results/desktop-ui-automation-com-repro/unlocked-session-20261105/verify_uia_com_bounded_unlocked.py"
       ],
       "next_action": "",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
@@ -17329,6 +17334,13 @@
       "kind": "task",
       "summary": "Agregados filtros view-only de periodicidad para extremos A/B, con estados traducidos, sin punto explícito y reinicio al cambiar proyecto. 56 pruebas y captura PySide6/Windows sintética aprobadas; CSV completo intacto.",
       "commit": "1527ee0"
+    },
+    {
+      "at": "2026-11-05T01:22:10+00:00",
+      "task": "DESKTOP-UIA-COM-SESSION-LIFECYCLE-REPRO-V1",
+      "kind": "task",
+      "summary": "Tras confirmación de sesión desbloqueada, repro UIA/COM local acotado: la consulta UIA inicial vuelve a agotar 12 s; Win32 cierra una ventana Qt sintética y el hijo termina sin proceso sobrante. No es operación COM de Dino; se conserva diagnóstico histórico de provider retenido post-destrucción.",
+      "commit": "6f5f6c2"
     }
   ],
   "legacy_gate_status": {
