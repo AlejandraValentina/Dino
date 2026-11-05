@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 import uuid
 from PySide6.QtCore import Qt,Signal,QRect
-from PySide6.QtGui import QPixmap,QColor,QPainter,QPen,QImage
+from PySide6.QtGui import QPixmap,QColor,QPainter,QPen,QImage,QFontMetrics
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QLabel,QComboBox,QPushButton,
     QFileDialog,QCheckBox,QGroupBox,QListWidget,QListWidgetItem,QTableWidget,QTableWidgetItem,QHeaderView,QMessageBox,
     QDialog,QDialogButtonBox,QFormLayout,QLineEdit,QTabWidget,QScrollArea,QFrame,QAbstractItemView,QPlainTextEdit)
@@ -677,6 +677,63 @@ class DiscreteAngleCellMap(QWidget):
             f=1-(y-bar.top())/max(bar.height(),1);p.setPen(self._color(f));p.drawLine(bar.left(),y,bar.right(),y)
         p.setPen(QColor("#cad8e7"));p.drawText(bar.left()-70,bar.top(),64,15,Qt.AlignmentFlag.AlignRight,format_number(high,5));p.drawText(bar.left()-70,bar.bottom(),64,15,Qt.AlignmentFlag.AlignRight,format_number(low,5));p.end()
 
+
+class FactorialEffectsPlot(QWidget):
+    """Descriptive signed contrasts, grouped by metric with independent scales."""
+    def __init__(self,parent=None):
+        super().__init__(parent);self.metrics=[];self.setObjectName("factorialEffectsPlot")
+        self.setMinimumHeight(276);self.setMaximumHeight(315)
+        self.setToolTip("Contrastes descriptivos. Escala independiente por métrica; sin barras de incertidumbre ni inferencia causal.")
+
+    def set_effects(self,effects):
+        self.metrics=list((effects or {}).get("metrics",[]))
+        self.update()
+
+    def paintEvent(self,event):
+        painter=QPainter(self);painter.fillRect(self.rect(),QColor("#101a28"))
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing,True)
+        painter.setPen(QColor("#aabbd0"))
+        painter.drawText(12,17,"Efectos firmados · escalas separadas por métrica · no son predicción validada")
+        if not self.metrics:
+            painter.drawText(12,48,"Gráfico disponible al abrir un estudio factorial 2×2 compatible.")
+            painter.end();return
+        width=self.width();height=self.height();left=220;right=116;plot_left=left;plot_right=max(left+80,width-right)
+        plot_width=plot_right-plot_left;zero_x=plot_left+plot_width/2
+        top=26;group_height=max(76,(height-top-4)/max(1,len(self.metrics)))
+        row_labels=QFontMetrics(painter.font())
+        for metric_index,metric in enumerate(self.metrics):
+            y0=top+metric_index*group_height
+            effects=metric.get("effects",[])
+            defined=metric.get("status")=="DEFINED"
+            values=[effect.get("value") for effect in effects
+                    if defined and isinstance(effect.get("value"),(int,float)) and math.isfinite(float(effect["value"]))]
+            scale=max((abs(float(value)) for value in values),default=0.0) or 1.0
+            painter.setPen(QColor("#dce8f5"))
+            painter.drawText(12,round(y0+14),f"{metric.get('label','Métrica')} ({metric.get('unit','')})")
+            painter.setPen(QColor("#7589a2"))
+            painter.drawText(plot_left,round(y0+14),f"−{format_number(scale)}")
+            painter.drawText(plot_right-46,round(y0+14),f"+{format_number(scale)}")
+            painter.setPen(QPen(QColor("#52647a"),1,Qt.PenStyle.DashLine))
+            painter.drawLine(round(zero_x),round(y0+20),round(zero_x),round(y0+group_height-2))
+            for effect_index,effect in enumerate(effects[:3]):
+                y=round(y0+31+effect_index*20)
+                painter.setPen(QColor("#c3d0df"))
+                label=row_labels.elidedText(str(effect.get("term","Efecto")),Qt.TextElideMode.ElideRight,left-24)
+                painter.drawText(12,y+4,label)
+                value=effect.get("value")
+                if not defined or not isinstance(value,(int,float)) or not math.isfinite(float(value)):
+                    painter.setPen(QColor("#9caec2"));painter.drawText(plot_left,y+4,"No disponible")
+                    continue
+                extent=(plot_width/2)*(float(value)/scale)
+                bar=QRect(round(zero_x if value>=0 else zero_x+extent),y-6,
+                    max(1,round(abs(extent))),12)
+                painter.fillRect(bar,QColor("#38a7e8" if value>=0 else "#ef9b62"))
+                painter.setPen(QColor("#e5edf7"))
+                painter.drawText(plot_right+6,y+4,f"{format_number(value,signed=True)} {effect.get('unit') or ''}".rstrip())
+            if not defined and not effects:
+                painter.setPen(QColor("#9caec2"));painter.drawText(plot_left,round(y0+42),"Efectos no disponibles")
+        painter.end()
+
 class ResultsPage(QWidget):
     evidence_updated=Signal()
     resume_project_study_requested=Signal(object)
@@ -787,6 +844,7 @@ class ResultsPage(QWidget):
         factor_effects_layout=QVBoxLayout(self.factor_effects_group)
         self.factor_effects_notice=QLabel("Los contrastes requieren los cuatro resultados exactos, periódicos y compatibles.")
         self.factor_effects_notice.setWordWrap(True);factor_effects_layout.addWidget(self.factor_effects_notice)
+        self.factor_effects_plot=FactorialEffectsPlot();factor_effects_layout.addWidget(self.factor_effects_plot)
         self.factor_effects_table=QTableWidget(0,5);self.factor_effects_table.setObjectName("factorialEffects")
         self.factor_effects_table.setHorizontalHeaderLabels(["Métrica","Contraste","Valor","Estado","Definición"])
         self.factor_effects_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
@@ -1859,8 +1917,9 @@ class ResultsPage(QWidget):
         available=bool(manifest and manifest.get("design_method")=="FACTORIAL_2X2_V1")
         self.factor_effects_group.setVisible(available)
         if not available:
-            self.factor_effects_table.setRowCount(0);return
+            self.factor_effects_table.setRowCount(0);self.factor_effects_plot.set_effects(None);return
         effects=_factorial_effects_from_study(manifest,(self.dataset or {}).get("points",[]))
+        self.factor_effects_plot.set_effects(effects)
         self.factor_effects_table.setRowCount(0)
         if not effects:
             self.factor_effects_notice.setText("El estudio factorial no contiene una matriz compatible.");return

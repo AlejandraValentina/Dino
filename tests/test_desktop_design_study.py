@@ -710,8 +710,29 @@ def test_factorial_ui_keeps_four_rows_and_shows_unavailable_effects_for_transien
     assert "None=" not in page.design_study_table.item(0,1).text()
     assert not page.factor_effects_group.isHidden()
     assert page.factor_effects_table.rowCount()==9
+    assert all(metric["status"]=="UNAVAILABLE" for metric in page.factor_effects_plot.metrics)
+    assert all(effect["value"] is None for metric in page.factor_effects_plot.metrics for effect in metric["effects"])
     assert all(page.factor_effects_table.item(index,2).text()=="—" for index in range(9))
     assert "no periódico" in page.factor_effects_notice.text().lower()
+    page.close();APP.processEvents()
+
+
+def test_factorial_effect_plot_uses_verified_signed_values_and_renders(tmp_path):
+    manifest,imported=_factorial_effect_fixture(tmp_path)
+    for point,value in zip(imported,[30.0,40.0,10.0,25.0]):
+        point["BMEP"]=value
+    page=ResultsPage(DesktopContext(new_design_project("factorial-effect-plot-synthetic")))
+    page.design_study_manifest=manifest;page.design_study_manifest_path=tmp_path/"manifest.json"
+    page.dataset={"points":imported};page._update_design_study_summary();APP.processEvents()
+    assert len(page.factor_effects_plot.metrics)==3
+    assert all(metric["status"]=="DEFINED" for metric in page.factor_effects_plot.metrics)
+    assert [effect["value"] for effect in page.factor_effects_plot.metrics[0]["effects"]]==[12.0,6.0,4.0]
+    assert [effect["value"] for effect in page.factor_effects_plot.metrics[0]["effects"]][0]>0
+    assert [effect["value"] for effect in page.factor_effects_plot.metrics[2]["effects"]]==[-17.5,12.5,5.0]
+    assert page.factor_effects_plot.metrics[2]["effects"][0]["value"]<0
+    assert "Escala independiente" in page.factor_effects_plot.toolTip()
+    page.factor_effects_plot.resize(900,276)
+    assert not page.factor_effects_plot.grab().isNull()
     page.close();APP.processEvents()
 
 
