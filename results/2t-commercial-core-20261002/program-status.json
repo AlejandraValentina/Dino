@@ -17282,6 +17282,13 @@
       "kind": "task",
       "summary": "El informe HTML identifica cada manifiesto con nombre y hash breve; la ruta y SHA-256 exactos se expanden sin ensanchar la tabla y siguen completos en el JSON. 56 pruebas combinadas y revisión Chrome 1360×1100 aprobadas.",
       "commit": "f581f79"
+    },
+    {
+      "at": "2026-11-05T01:08:10+00:00",
+      "task": "DESKTOP-PARAMETRIC-REPORT-MANIFEST-PROVENANCE-LAYOUT-V1",
+      "kind": "task",
+      "summary": "Informe de comparación: tabla de manifiestos ahora muestra nombre y hash abreviado con disclosure para ruta/SHA-256 completos; los valores íntegros quedan en el JSON. Pruebas y capturas visuales sintéticas aprobadas.",
+      "commit": "f581f79"
     }
   ],
   "legacy_gate_status": {
