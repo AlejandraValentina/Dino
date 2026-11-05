@@ -141,6 +141,7 @@ class DinoDesktopWindow(QMainWindow):
         execution=self.pages[3];results=self.pages[4]
         execution.open_runs_requested.connect(self._open_indexed_runs)
         execution.design_study_completed.connect(self.results.open_design_study)
+        results.resume_project_study_requested.connect(self._resume_project_study)
         results.evidence_updated.connect(self._update_evidence)
         self.inspector=QGroupBox("Motor y evidencia");self.inspector.setObjectName("inspector");self.inspector.setMinimumWidth(145);self.inspector.setMaximumWidth(320)
         inspector_layout=QVBoxLayout(self.inspector);inspector_layout.setContentsMargins(12,12,10,12)
@@ -234,6 +235,10 @@ class DinoDesktopWindow(QMainWindow):
         if index==1:self.analysis_history.activate()
         if index==0:self._component_selected(max(0,self.component_nav.currentIndex()))
         if index==2:self.analysis_history.activate();self.pages[3].refresh()
+
+    def _resume_project_study(self,reference):
+        self.set_workspace_mode(2)
+        self.pages[3].resume_design_study(reference)
 
     def _show_project(self):
         self.set_workspace_mode(0);self.component_nav.setCurrentIndex(5);self.explorer_dock.hide()

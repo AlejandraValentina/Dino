@@ -679,6 +679,7 @@ class DiscreteAngleCellMap(QWidget):
 
 class ResultsPage(QWidget):
     evidence_updated=Signal()
+    resume_project_study_requested=Signal(object)
     def __init__(self,context):
         super().__init__();self.context=context;self.dataset=None;self.source=None;self.loading=False;self._selected_point_id=None
         self._project_reference_signature=None
@@ -751,6 +752,10 @@ class ResultsPage(QWidget):
         self.project_study_selector=QComboBox();self.project_study_selector.setObjectName("projectStudySelector");study_open_row.addWidget(self.project_study_selector,1)
         self.open_project_study_button=QPushButton("Abrir estudio")
         self.open_project_study_button.clicked.connect(self.open_selected_project_study);study_open_row.addWidget(self.open_project_study_button)
+        self.resume_project_study_button=QPushButton("Reanudar estudio…")
+        self.resume_project_study_button.setToolTip("Enviar el manifiesto seleccionado a Simular; se volverán a verificar proyecto, variante, baseline, ruta durable y checkpoints.")
+        self.resume_project_study_button.clicked.connect(self.resume_selected_project_study)
+        study_open_row.addWidget(self.resume_project_study_button)
         study_layout.addLayout(study_open_row)
         response_bar=QHBoxLayout();response_bar.addWidget(QLabel("Respuesta paramétrica"))
         self.design_response_metric=QComboBox();self.design_response_metric.setObjectName("designResponseMetric")
@@ -1012,6 +1017,7 @@ class ResultsPage(QWidget):
         self.project_study_selector.blockSignals(False)
         available=bool(refs)
         self.open_project_study_button.setEnabled(available)
+        self.resume_project_study_button.setEnabled(available)
         self.design_study_group.setVisible(available or getattr(self,"design_study_manifest",None) is not None)
         self.compare_studies_button.setEnabled(len(refs)>=2)
         self.study_comparison_group.setVisible(len(refs)>=2 or self.study_comparison is not None)
@@ -1277,6 +1283,18 @@ class ResultsPage(QWidget):
             self.design_study_group.show()
             self.design_study_notice.setText(f"Estudio rechazado de forma segura: {type(exc).__name__}: {exc}")
             return False
+
+    def resume_selected_project_study(self):
+        """Route the selected, project-registered study to the existing resume preflight."""
+        reference=self.project_study_selector.currentData()
+        if not isinstance(reference,dict):return False
+        registered=next((item for item in self.context.project.get("study_references",[])
+                         if isinstance(item,dict) and item==reference),None)
+        if registered is None:
+            self.design_study_notice.setText("Reanudación bloqueada: el manifiesto seleccionado ya no coincide con una referencia del proyecto activo.")
+            return False
+        self.resume_project_study_requested.emit(dict(registered))
+        return True
 
     def _reload_measurement_references(self):
         loaded=[];errors=[]

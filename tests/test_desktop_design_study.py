@@ -971,6 +971,86 @@ def test_project_study_reference_rejects_changed_manifest(tmp_path):
     page.close();APP.processEvents()
 
 
+def test_selected_project_study_routes_to_existing_resume_flow(monkeypatch,tmp_path):
+    window=DinoDesktopWindow(new_design_project("resume-study-from-results"))
+    manifest_path=tmp_path/"study.json"
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":"resume-study",
+        "project_id":window.context.project["project_id"],"rpm":3000,
+        "parameter":{"label":"Synthetic factor"},"points":[]}
+    raw=json.dumps(manifest,sort_keys=True).encode("utf-8");manifest_path.write_bytes(raw)
+    reference={"path":str(manifest_path),"study_id":manifest["study_id"],
+        "manifest_sha256":hashlib.sha256(raw).hexdigest(),"schema":manifest["schema"],
+        "source_project_id":manifest["project_id"]}
+    window.context.add_study_reference(reference);APP.processEvents()
+    calls=[]
+    monkeypatch.setattr(window.pages[3],"resume_design_study",lambda selected=None:calls.append(selected))
+    monkeypatch.setattr(window.pages[3],"refresh",lambda *_:None)
+    assert window.results.project_study_selector.count()==1
+    window.results.project_study_selector.setCurrentIndex(0)
+    window.results.resume_project_study_button.click();APP.processEvents()
+    assert window.mode_stack.currentIndex()==2
+    assert calls==[reference]
+    window.context.dirty=False
+    window.close();APP.processEvents()
+
+
+def test_resume_from_project_reference_rejects_changed_manifest_before_worker(monkeypatch,tmp_path):
+    context=DesktopContext(new_design_project("resume-study-tamper"))
+    path=tmp_path/"study.json"
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":"resume-study-tamper",
+        "project_id":context.project["project_id"],"rpm":3000,
+        "parameter":{"label":"Synthetic factor"},"points":[]}
+    raw=json.dumps(manifest,sort_keys=True).encode("utf-8");path.write_bytes(raw)
+    reference={"path":str(path),"study_id":manifest["study_id"],
+        "manifest_sha256":hashlib.sha256(raw).hexdigest(),"schema":manifest["schema"],
+        "source_project_id":manifest["project_id"]}
+    context.add_study_reference(reference)
+    path.write_text(json.dumps(dict(manifest,rpm=4000),sort_keys=True),encoding="utf-8")
+    page=ExecutionPage(context);warnings=[];workers=[]
+    monkeypatch.setattr(QMessageBox,"warning",lambda *args:warnings.append(args[2]))
+    monkeypatch.setattr("motorsim.desktop.execution_page.run_background",lambda *a,**k:workers.append((a,k)))
+    page.resume_design_study(reference)
+    assert warnings and "SHA-256 no coincide" in warnings[0]
+    assert workers==[] and page.task is None
+    page.close();APP.processEvents()
+
+
+def test_resume_from_selected_project_study_reuses_existing_preflight(monkeypatch,tmp_path):
+    from motorsim.engine_configuration import identity
+    import motorsim.design_study as design_study
+    context=DesktopContext(new_design_project("resume-study-valid-reference"))
+    project_id=context.project["project_id"]
+    artifact_root=tmp_path/"artifacts"
+    manifest_path=artifact_root/"design-studies-v1"/project_id/"resume-study-valid"/"study.json"
+    manifest_path.parent.mkdir(parents=True)
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","study_id":"resume-study-valid",
+        "project_id":project_id,"rpm":3000,"parameter":{"label":"Synthetic factor"},"points":[]}
+    raw=json.dumps(manifest,sort_keys=True).encode("utf-8");manifest_path.write_bytes(raw)
+    reference={"path":str(manifest_path),"study_id":manifest["study_id"],
+        "manifest_sha256":hashlib.sha256(raw).hexdigest(),"schema":manifest["schema"],
+        "source_project_id":project_id}
+    context.add_study_reference(reference)
+    page=ExecutionPage(context);loaded=[];workers=[]
+    prepared={"project_id":project_id,"variant_label":"base",
+        "baseline_engine_identity_sha256":identity(context.engine()),"artifact_root":str(artifact_root),
+        "study_id":manifest["study_id"],"points":[],"rpm":3000,"max_cycles":2,
+        "total_budget_seconds":60}
+    monkeypatch.setattr(design_study,"load_prepared_study",lambda path:(loaded.append(path) or prepared))
+    monkeypatch.setattr("motorsim.desktop.execution_page.QInputDialog.getInt",lambda *a,**k:(0,True))
+    monkeypatch.setattr("motorsim.desktop.execution_page.QMessageBox.question",
+        lambda *a,**k:QMessageBox.StandardButton.Yes)
+    monkeypatch.setattr("motorsim.desktop.preferences.set_artifact_root",lambda path:None)
+    monkeypatch.setattr("motorsim.desktop.execution_page.run_background",
+        lambda function,*args,**kwargs:(workers.append((function,args,kwargs)) or object()))
+    page.resume_design_study(reference)
+    assert loaded==[manifest_path.resolve()]
+    assert len(workers)==1 and workers[0][0] is design_study.run_design_study
+    assert workers[0][2]["resume"] is True
+    assert workers[0][2]["additional_budget_seconds"]==0
+    assert page.status_text=="REANUDANDO ESTUDIO"
+    page.close();APP.processEvents()
+
+
 def test_parametric_study_csv_export_preserves_precision_states_and_verified_sources(tmp_path,monkeypatch):
     context=DesktopContext(new_design_project("study-csv-export-synthetic"))
     source_dir=tmp_path/"run-periodic";source_dir.mkdir()

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 from pathlib import Path
 import tempfile
@@ -646,15 +647,30 @@ class ExecutionPage(QWidget):
         self.cancel.setEnabled(True);self.start.setEnabled(False);self.resume.setEnabled(False)
         self.sweep.setEnabled(False);self.resume_sweep.setEnabled(False);self.state_changed.emit()
 
-    def resume_design_study(self):
+    def resume_design_study(self, reference=None):
         if self.task is not None:return
         from ..design_study import (load_prepared_study,run_design_study,
             load_prepared_rpm_envelope,run_design_rpm_envelope)
-        selected,_=QFileDialog.getOpenFileName(self,"Reanudar estudio paramétrico",str(self.artifact_root),"Estudio Dino (study.json)")
+        if reference is None:
+            selected,_=QFileDialog.getOpenFileName(self,"Reanudar estudio paramétrico",str(self.artifact_root),"Estudio Dino (study.json)")
+        else:
+            selected=reference.get("path") if isinstance(reference,dict) else None
         if not selected:return
         try:
             manifest_path=Path(selected).resolve()
-            saved_manifest=json.loads(manifest_path.read_text(encoding="utf-8"))
+            raw=manifest_path.read_bytes()
+            saved_manifest=json.loads(raw.decode("utf-8"))
+            if reference is not None:
+                registered=next((item for item in self.context.project.get("study_references",[])
+                    if isinstance(item,dict) and item==reference),None)
+                if registered is None:
+                    raise ValueError("el manifiesto seleccionado ya no está registrado en el proyecto activo")
+                if hashlib.sha256(raw).hexdigest()!=reference.get("manifest_sha256"):
+                    raise ValueError("el SHA-256 no coincide con la referencia guardada en el proyecto")
+                if (saved_manifest.get("schema")!=reference.get("schema") or
+                        saved_manifest.get("study_id")!=reference.get("study_id") or
+                        saved_manifest.get("project_id")!=reference.get("source_project_id")):
+                    raise ValueError("la identidad del manifiesto no coincide con la referencia del proyecto")
             envelope=saved_manifest.get("design_method")=="RPM_ENVELOPE_V1"
             prepared=(load_prepared_rpm_envelope(manifest_path) if envelope
                 else load_prepared_study(manifest_path))
