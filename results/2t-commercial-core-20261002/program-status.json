@@ -12191,7 +12191,7 @@
       "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESULT-FILTER-V1",
       "description": "Add optional filters to large cross-study comparison matrices for exact RPM and exact-pair/unpaired state. Show visible/total counts; include all source rows by default and leave the underlying comparison and full CSV export unchanged.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -12204,7 +12204,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Add view-only RPM and paired/unpaired filters to the selected-study comparison table; default to all pair/unpaired records, keep the exported comparison complete, and test exact pairing/status and clearing filters.",
+      "next_action": "Inspect cross-study comparison rows and their exact/unpaired status; add view-only exact-RPM and pair-status filters with counts, default all, and preserve the full underlying CSV.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17243,6 +17243,12 @@
       "kind": "task",
       "summary": "Resultados agrega filtros de vista por diseño/RPM/estado/periodicidad, todos visibles por defecto; exportación completa sigue incluyendo la matriz íntegra. 39 pruebas PASS y captura sintética Windows.",
       "commit": "24b268152eaa0ed365eb113c89c38b8c2ce38f4e"
+    },
+    {
+      "at": "2026-11-05T00:44:44+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESULT-FILTER-V1",
+      "kind": "task",
+      "summary": "Iniciada navegación de matrices comparativas grandes entre estudios: filtros sólo de vista para RPM exacta y pareado/no pareado; exportación completa permanece íntegra."
     }
   ],
   "legacy_gate_status": {
