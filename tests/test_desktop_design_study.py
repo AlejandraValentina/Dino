@@ -846,6 +846,57 @@ def test_full_parametric_matrix_export_includes_all_states_and_exact_precision(t
     page.close();factorial_page.close();APP.processEvents()
 
 
+def test_parametric_study_filters_are_view_only_default_all_and_full_export_ignores_them(tmp_path,monkeypatch):
+    context=DesktopContext(new_design_project("study-filter-synthetic"))
+    points=[]
+    samples=[(0,3000,"COMPLETE","PERIOD_1","PERIOD_1"),
+        (0,4000,"COMPLETE","MAX_CYCLES_NONCONVERGED","INSUFFICIENT_CYCLES"),
+        (1,3000,"COMPLETE","PERIOD_1","PERIOD_1"),
+        (1,4000,"CANCELLED","CANCELLED","NOT_EVALUATED")]
+    for index,(design,rpm,status,classification,periodicity) in enumerate(samples):
+        run_id=f"synthetic-filter-run-{index}"
+        points.append({"index":index,"design_index":design,"rpm":rpm,"baseline":design==0,
+            "value":80.0+design,"unit":"mm","status":status,"classification":classification,
+            "periodicity":periodicity,"run_id":run_id,"source_run_id":run_id,"cycles_completed":5})
+    manifest={"schema":"DINO_PARAMETRIC_DESIGN_STUDY_V1","design_method":"RPM_ENVELOPE_V1",
+        "study_id":"synthetic-study-filter","project_id":context.project["project_id"],
+        "rpms":[3000,4000],"parameter":{"id":"exhaust:length","label":"Escape · longitud","unit":"mm"},
+        "points":points}
+    path=tmp_path/"study.json";raw=json.dumps(manifest,sort_keys=True).encode("utf-8");path.write_bytes(raw)
+    reference={"path":str(path),"study_id":manifest["study_id"],
+        "manifest_sha256":hashlib.sha256(raw).hexdigest(),"schema":manifest["schema"],
+        "source_project_id":manifest["project_id"]}
+    context.add_study_reference(reference)
+    page=ResultsPage(context);page.design_study_manifest=manifest
+    page.design_study_manifest_path=path;page.design_study_manifest_sha256=reference["manifest_sha256"]
+    page.dataset={"points":[]};page._update_design_study_summary()
+    assert page.design_study_table.rowCount()==4
+    assert all(not page.design_study_table.isRowHidden(index) for index in range(4))
+    assert page.study_filter_count.text()=="Puntos visibles: 4 de 4 · la exportación completa incluye todos"
+    cancelled_option=page.study_filter_execution.findData("CANCELLED")
+    assert page.study_filter_execution.itemText(cancelled_option)=="Cancelado"
+    def select(combo,value):
+        index=combo.findData(value);assert index>=0;combo.setCurrentIndex(index)
+    select(page.study_filter_design,1);select(page.study_filter_rpm,4000)
+    select(page.study_filter_execution,"CANCELLED");select(page.study_filter_periodicity,"NOT_EVALUATED")
+    assert [i for i in range(4) if not page.design_study_table.isRowHidden(i)]==[3]
+    assert page.study_filter_count.text().startswith("Puntos visibles: 1 de 4")
+    select(page.study_filter_design,None);select(page.study_filter_rpm,None)
+    select(page.study_filter_execution,None);select(page.study_filter_periodicity,"INSUFFICIENT_CYCLES")
+    assert [i for i in range(4) if not page.design_study_table.isRowHidden(i)]==[1]
+    page.clear_study_filters_button.click();APP.processEvents()
+    assert all(not page.design_study_table.isRowHidden(index) for index in range(4))
+    select(page.study_filter_rpm,3000)
+    assert [i for i in range(4) if not page.design_study_table.isRowHidden(i)]==[0,2]
+    output=tmp_path/"filtered-view-full-export.csv"
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *a:(str(output),"CSV (*.csv)"))
+    assert page.export_full_design_study_csv() is True
+    with output.open(encoding="utf-8-sig",newline="") as stream:exported=list(csv.DictReader(stream))
+    assert len(exported)==4 and [row["rpm"] for row in exported]==["3000","4000","3000","4000"]
+    assert [row["execution_status"] for row in exported]==[row["status"] for row in points]
+    page.close();APP.processEvents()
+
+
 def test_factorial_effects_flow_into_desktop_technical_report(tmp_path,monkeypatch):
     manifest,imported=_factorial_effect_fixture(tmp_path)
     manifest_path=tmp_path/"verified-factorial.study.json"

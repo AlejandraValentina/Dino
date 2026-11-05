@@ -9,7 +9,7 @@ from PySide6.QtCore import Qt,Signal,QRect,QBuffer,QIODevice
 from PySide6.QtGui import QPixmap,QColor,QPainter,QPen,QImage,QFontMetrics,QImageWriter
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QLabel,QComboBox,QPushButton,
     QFileDialog,QCheckBox,QGroupBox,QListWidget,QListWidgetItem,QTableWidget,QTableWidgetItem,QHeaderView,QMessageBox,
-    QDialog,QDialogButtonBox,QFormLayout,QLineEdit,QTabWidget,QScrollArea,QFrame,QAbstractItemView,QPlainTextEdit)
+    QDialog,QDialogButtonBox,QFormLayout,QLineEdit,QTabWidget,QScrollArea,QFrame,QAbstractItemView,QPlainTextEdit,QGridLayout)
 from .plot import CurvePlot
 from .performance_curves import PowerCurvePanel
 from .services import load_results,run_background
@@ -73,6 +73,7 @@ _FACTORIAL_EFFECTS_CSV_FIELDS=("csv_schema","record_type","study_schema","study_
     "metric_id","metric_label","metric_unit","contrast_term","contrast_value","contrast_unit",
     "contrast_status","contrast_formula","contrast_reason","contrast_source_run_ids_json",
     "contrast_source_result_sha256s_json")
+_STUDY_FILTER_MISSING="__DINO_MISSING_RECORDED_VALUE__"
 _CROSS_STUDY_CSV_FIELDS=("comparison_schema","baseline_engine_identity_sha256","row_type",
     "study_a_id","study_a_manifest_path","study_a_manifest_sha256","point_a_index","point_a_run_id",
     "point_a_source_run_id","point_a_design_value","point_a_design_unit","point_a_factor_values_json",
@@ -824,6 +825,27 @@ class ResultsPage(QWidget):
         self.design_response_notice.setWordWrap(True);study_layout.addWidget(self.design_response_notice)
         self.design_response_plot=CurvePlot();self.design_response_plot.setObjectName("designResponsePlot")
         self.design_response_plot.setMinimumHeight(210);study_layout.addWidget(self.design_response_plot)
+        self.study_filter_group=QGroupBox("Filtros de vista · no modifican el estudio")
+        filter_grid=QGridLayout(self.study_filter_group)
+        self.study_filter_design=QComboBox();self.study_filter_design.setObjectName("studyFilterDesign")
+        self.study_filter_rpm=QComboBox();self.study_filter_rpm.setObjectName("studyFilterRpm")
+        self.study_filter_execution=QComboBox();self.study_filter_execution.setObjectName("studyFilterExecution")
+        self.study_filter_periodicity=QComboBox();self.study_filter_periodicity.setObjectName("studyFilterPeriodicity")
+        for widget in (self.study_filter_design,self.study_filter_rpm,
+                       self.study_filter_execution,self.study_filter_periodicity):
+            widget.currentIndexChanged.connect(self._apply_design_study_filters)
+            widget.setMinimumContentsLength(12)
+        filter_grid.addWidget(QLabel("Diseño"),0,0);filter_grid.addWidget(self.study_filter_design,0,1)
+        filter_grid.addWidget(QLabel("RPM"),0,2);filter_grid.addWidget(self.study_filter_rpm,0,3)
+        filter_grid.addWidget(QLabel("Ejecución"),1,0);filter_grid.addWidget(self.study_filter_execution,1,1)
+        filter_grid.addWidget(QLabel("Periodicidad"),1,2);filter_grid.addWidget(self.study_filter_periodicity,1,3)
+        self.clear_study_filters_button=QPushButton("Limpiar filtros")
+        self.clear_study_filters_button.clicked.connect(self.clear_design_study_filters)
+        filter_grid.addWidget(self.clear_study_filters_button,2,0,1,1)
+        self.study_filter_count=QLabel("Puntos visibles: 0 de 0")
+        self.study_filter_count.setObjectName("studyFilterVisibleCount")
+        filter_grid.addWidget(self.study_filter_count,2,1,1,3)
+        study_layout.addWidget(self.study_filter_group)
         self.design_study_table=QTableWidget(0,9);self.design_study_table.setObjectName("designStudyResults")
         self.design_study_table.setHorizontalHeaderLabels(["Diseño","Valor","Estado","Periodicidad","Ciclos","Potencia","Torque","BMEP","Δ potencia vs base"])
         self.design_study_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
@@ -1782,6 +1804,96 @@ class ResultsPage(QWidget):
             f"SHA-256 RPM guardado: {sweep_hash or ('No informado' if rpm_envelope else 'No aplica')} · actual: {actual_sweep_hash or 'No disponible' if rpm_envelope else 'No aplica'} · {sweep_state}",
             f"Validación científica: {manifest.get('scientific_validation','NOT_CLAIMED')} (no se infiere del estado de ejecución)"]
         self.design_study_traceability.setPlainText("\n".join(lines))
+
+    def _refresh_design_study_filters(self):
+        manifest=getattr(self,"design_study_manifest",None) or {};points=manifest.get("points",[])
+        imported_by_run={str(row.get("run_id")):row for row in (self.dataset or {}).get("points",[])
+            if row.get("run_id") is not None}
+        controls=(self.study_filter_design,self.study_filter_rpm,
+            self.study_filter_execution,self.study_filter_periodicity)
+        for control in controls:control.blockSignals(True);control.clear()
+        self.study_filter_design.addItem("Todos los diseños",None)
+        designs={};rpms=set();statuses=set();periodicities=set()
+        is_envelope=manifest.get("design_method")=="RPM_ENVELOPE_V1"
+        for index,point in enumerate(points):
+            design_index=point.get("design_index",index) if is_envelope else index
+            label=(self.design_study_table.item(index,0).text()
+                if index<self.design_study_table.rowCount() and self.design_study_table.item(index,0)
+                else f"Diseño {int(design_index)+1}")
+            if not is_envelope and index<self.design_study_table.rowCount() and self.design_study_table.item(index,1):
+                label+=f" · {self.design_study_table.item(index,1).text()}"
+            designs.setdefault(design_index,label)
+            rpm=point.get("rpm")
+            if rpm is None and not is_envelope:rpm=manifest.get("rpm")
+            rpms.add(rpm if type(rpm) in (int,float) and math.isfinite(float(rpm)) else _STUDY_FILTER_MISSING)
+            status=point.get("status")
+            statuses.add(status if isinstance(status,str) and status else _STUDY_FILTER_MISSING)
+            imported=imported_by_run.get(str(point.get("source_run_id") or point.get("run_id")),{})
+            periodicity=imported.get("periodicity") or point.get("periodicity")
+            periodicities.add(periodicity if isinstance(periodicity,str) and periodicity else _STUDY_FILTER_MISSING)
+        for design_index,label in sorted(designs.items(),key=lambda item:str(item[0])):
+            self.study_filter_design.addItem(label,design_index)
+        self.study_filter_rpm.addItem("Todas las RPM",None)
+        for rpm in sorted(rpms,key=lambda value:(value==_STUDY_FILTER_MISSING,
+                                                   float(value) if value!=_STUDY_FILTER_MISSING else 0)):
+            self.study_filter_rpm.addItem("RPM no registrada/válida" if rpm==_STUDY_FILTER_MISSING
+                else f"{format_number(rpm)} RPM",rpm)
+        self.study_filter_execution.addItem("Todos los estados",None)
+        for status in sorted(statuses,key=lambda value:(value==_STUDY_FILTER_MISSING,str(value))):
+            self.study_filter_execution.addItem("Estado no informado" if status==_STUDY_FILTER_MISSING
+                else self._study_execution_state_label(status),status)
+        self.study_filter_periodicity.addItem("Todas las periodicidades",None)
+        for periodicity in sorted(periodicities,key=lambda value:(value==_STUDY_FILTER_MISSING,str(value))):
+            self.study_filter_periodicity.addItem("Periodicidad no informada" if periodicity==_STUDY_FILTER_MISSING
+                else _state_label(periodicity),periodicity)
+        for control in controls:control.blockSignals(False)
+        self._apply_design_study_filters()
+
+    @staticmethod
+    def _study_filter_matches(value,selected):
+        if selected is None:return True
+        if selected==_STUDY_FILTER_MISSING:return value is None
+        return value==selected
+
+    @staticmethod
+    def _study_execution_state_label(value):
+        labels={"COMPLETE":"Completo","CACHED":"Reutilizado","PREPARED":"Preparado",
+            "RUNNING":"En ejecución","PARTIAL":"Parcial","CANCELLED":"Cancelado",
+            "FAILED":"Falló","ERROR":"Error"}
+        return labels.get(value,_state_label(value))
+
+    def _apply_design_study_filters(self,*_):
+        manifest=getattr(self,"design_study_manifest",None) or {};points=manifest.get("points",[])
+        imported_by_run={str(row.get("run_id")):row for row in (self.dataset or {}).get("points",[])
+            if row.get("run_id") is not None}
+        design_filter=self.study_filter_design.currentData();rpm_filter=self.study_filter_rpm.currentData()
+        execution_filter=self.study_filter_execution.currentData();periodicity_filter=self.study_filter_periodicity.currentData()
+        is_envelope=manifest.get("design_method")=="RPM_ENVELOPE_V1";visible=0
+        for index in range(self.design_study_table.rowCount()):
+            point=points[index] if index<len(points) else {}
+            design_index=point.get("design_index",index) if is_envelope else index
+            rpm=point.get("rpm")
+            if rpm is None and not is_envelope:rpm=manifest.get("rpm")
+            status=point.get("status") if isinstance(point.get("status"),str) else None
+            imported=imported_by_run.get(str(point.get("source_run_id") or point.get("run_id")),{})
+            periodicity=imported.get("periodicity") or point.get("periodicity")
+            periodicity=periodicity if isinstance(periodicity,str) else None
+            rpm_value=rpm if type(rpm) in (int,float) and math.isfinite(float(rpm)) else None
+            match=(self._study_filter_matches(design_index,design_filter) and
+                self._study_filter_matches(rpm_value,rpm_filter) and
+                self._study_filter_matches(status,execution_filter) and
+                self._study_filter_matches(periodicity,periodicity_filter))
+            self.design_study_table.setRowHidden(index,not match);visible+=int(match)
+        self.design_study_table.clearSelection()
+        current=self.design_study_table.currentRow()
+        if current>=0 and self.design_study_table.isRowHidden(current):self.design_study_table.setCurrentCell(-1,-1)
+        self.study_filter_count.setText(f"Puntos visibles: {visible} de {len(points)} · la exportación completa incluye todos")
+
+    def clear_design_study_filters(self):
+        for control in (self.study_filter_design,self.study_filter_rpm,
+            self.study_filter_execution,self.study_filter_periodicity):control.setCurrentIndex(0)
+        self._apply_design_study_filters()
+
     def _loaded_exploratory(self,data):
         requested_rpms=_referenced_curve_rpms(self.context.project,data)
         if requested_rpms:data['requested_rpms']=requested_rpms
@@ -1918,6 +2030,7 @@ class ResultsPage(QWidget):
                     item.setToolTip(str(value)+"\n\n"+trace)
                 elif column in (2,3,8):item.setToolTip(str(value))
                 self.design_study_table.setItem(index,column,item)
+        self._refresh_design_study_filters()
         if self.design_study_table.rowCount():
             self.design_study_table.setCurrentCell(0,0);self._design_study_point_selected(0)
         else:self.design_study_traceability.clear()
