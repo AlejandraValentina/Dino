@@ -12341,20 +12341,28 @@
       "id": "DESKTOP-PARAMETRIC-STUDY-MATRIX-EXECUTION-STATE-V1",
       "description": "In the single-study point matrix, expose the persisted execution status beside solver classification; currently the Estado column shows classification whenever present, hiding whether the point actually completed, was cached, cancelled or failed.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
         "motorsim/desktop/results_page.py",
+        "motorsim/desktop/presentation.py",
         "tests/test_desktop_design_study.py",
         "results/desktop-parametric-design-study-v2/study-matrix-execution-state/",
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Present translated persisted execution status and solver classification as two explicitly named lines in the point matrix while preserving column order and existing periodicity, metrics and CSV payloads. Test COMPLETE nonconverged and checkpointed/cached states.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/study-matrix-execution-state/acceptance.md",
+        "results/desktop-parametric-design-study-v2/study-matrix-execution-state/capture-receipt.json",
+        "results/desktop-parametric-design-study-v2/study-matrix-execution-state/synthetic-study-matrix-native-1360x340.png",
+        "tests/test_desktop_design_study.py::test_parametric_actions_are_available_and_study_comparison_is_explicit",
+        "tests/test_desktop_design_study.py::test_full_parametric_matrix_export_includes_all_states_and_exact_precision",
+        "tests/test_desktop_design_study.py::test_parametric_study_filters_are_view_only_default_all_and_full_export_ignores_them"
+      ],
+      "next_action": "Reevaluar entregables funcionales reales contra la especificación de estudios paramétricos; evitar tareas cosméticas repetitivas y no activar cálculos científicos sin las dependencias vigentes.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17502,6 +17510,12 @@
       "task": "DESKTOP-PARAMETRIC-STUDY-MATRIX-EXECUTION-STATE-V1",
       "kind": "task",
       "summary": "Replanificación funcional: la matriz de puntos de un estudio aún usa clasificación como estado, aunque status de ejecución se persiste y se separó en trazabilidad e informes."
+    },
+    {
+      "at": "2026-11-05T01:54:45+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-MATRIX-EXECUTION-STATE-V1",
+      "kind": "task",
+      "summary": "La matriz del estudio separa estado de ejecución, clasificación y periodicidad en columnas visibles; 40 pruebas de estudio y cuatro regresiones focalizadas pasaron, incluida cancelación/cache."
     }
   ],
   "legacy_gate_status": {

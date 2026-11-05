@@ -48,7 +48,9 @@ def test_parametric_actions_are_available_and_study_comparison_is_explicit(tmp_p
     page._update_design_study_summary()
     assert not page.design_study_group.isHidden()
     assert page.design_study_table.rowCount()==2
-    assert page.design_study_table.item(0,5).text()=="—"
+    assert page.design_study_table.item(0,6).text()=="—"
+    assert page.design_study_table.item(1,2).text()=="Reutilizado"
+    assert "no convergida" in page.design_study_table.item(1,3).text().lower()
     assert "histórico verificado" in page.design_study_table.item(1,0).text()
     assert "corrida histórica reutilizada" in page.design_study_table.item(1,0).toolTip()
     assert "C:/artifacts/historical-run" in page.design_study_table.item(1,0).toolTip()
@@ -183,7 +185,9 @@ def test_parametric_response_plots_only_defined_periodic_markers():
     assert page.design_response_plot.series[0]["connect"] is False
     assert [row["value"] for row in page.design_response_plot.series[1]["points"]]==[9.0,None]
     assert "2 punto(s) periódico(s)" in page.design_response_notice.text()
-    assert page.design_study_table.item(2,2).text()!="PERIOD_1"
+    assert page.design_study_table.item(2,2).text()=="Completo"
+    assert "Límite de ciclos" in page.design_study_table.item(2,3).text()
+    assert page.design_study_table.item(2,4).text()=="Ciclos insuficientes"
     page.design_response_metric.setCurrentIndex(1)
     assert page.design_response_plot.series[0]["points"][0]["value"]==16.0
     page.close();APP.processEvents()
@@ -224,7 +228,7 @@ def test_rpm_envelope_keeps_observed_rpm_rows_and_suppresses_mixed_rpm_response(
     assert "RPM: 3000, 4000" in page.design_study_notice.text()
     assert page.design_response_plot.series==[]
     assert "No se mezclan RPM" in page.design_response_notice.text()
-    assert page.design_study_table.item(2,5).text()=="—"
+    assert page.design_study_table.item(2,6).text()=="—"
     page.close();APP.processEvents()
 
 
@@ -972,6 +976,11 @@ def test_parametric_study_filters_are_view_only_default_all_and_full_export_igno
     page.design_study_manifest_path=path;page.design_study_manifest_sha256=reference["manifest_sha256"]
     page.dataset={"points":[]};page._update_design_study_summary()
     assert page.design_study_table.rowCount()==4
+    assert page.design_study_table.item(1,2).text()=="Completo"
+    assert "Límite de ciclos" in page.design_study_table.item(1,3).text()
+    assert page.design_study_table.item(3,2).text()=="Cancelado"
+    assert page.design_study_table.item(3,3).text()=="Cancelado"
+    assert page.design_study_table.item(3,4).text()=="No evaluada"
     assert all(not page.design_study_table.isRowHidden(index) for index in range(4))
     assert page.study_filter_count.text()=="Puntos visibles: 4 de 4 · la exportación completa incluye todos"
     cancelled_option=page.study_filter_execution.findData("CANCELLED")
@@ -1380,10 +1389,14 @@ def test_parametric_study_csv_export_preserves_precision_states_and_verified_sou
         "BMEP":123.456789012345,"BMEP_status":"DEFINED"}]}
     page._update_design_study_summary()
     assert page.design_study_table.rowCount()==2
-    assert page.design_study_table.item(0,2).text()=="Periódica · ciclo 1"
+    assert page.design_study_table.horizontalHeaderItem(2).text()=="Ejecución"
+    assert page.design_study_table.horizontalHeaderItem(3).text()=="Clasificación"
+    assert page.design_study_table.item(0,2).text()=="Completo"
     assert page.design_study_table.item(0,3).text()=="Periódica · ciclo 1"
-    assert "no convergida" in page.design_study_table.item(1,2).text().lower()
-    assert "insuficientes" in page.design_study_table.item(1,3).text().lower()
+    assert page.design_study_table.item(0,4).text()=="Periódica · ciclo 1"
+    assert page.design_study_table.item(1,2).text()=="Completo"
+    assert "Límite de ciclos" in page.design_study_table.item(1,3).text()
+    assert "insuficientes" in page.design_study_table.item(1,4).text().lower()
     from PySide6.QtCore import QItemSelectionModel
     selection=page.design_study_table.selectionModel()
     selection.select(page.design_study_table.model().index(0,0),

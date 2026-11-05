@@ -1,0 +1,31 @@
+{
+  "schema": "DINO_SYNTHETIC_STUDY_MATRIX_EXECUTION_STATE_CAPTURE_V1",
+  "fixture_origin": "Synthetic display-only study points; no solver or scientific claim",
+  "headers": [
+    "Diseño",
+    "Valor",
+    "Ejecución",
+    "Clasificación",
+    "Periodicidad",
+    "Ciclos",
+    "Potencia",
+    "Torque",
+    "BMEP",
+    "Δ potencia vs base"
+  ],
+  "execution_cells": [
+    "Completo",
+    "Completo"
+  ],
+  "classification_cells": [
+    "Periódica · ciclo 1",
+    "Límite de ciclos · no convergida"
+  ],
+  "periodicity_cells": [
+    "Periódica · ciclo 1",
+    "Ciclos insuficientes"
+  ],
+  "scientific_validation": "NOT_CLAIMED",
+  "capture": "synthetic-study-matrix-native-1360x340.png",
+  "capture_sha256": "4d70a330eb783ba64e3386e439a102d8eaf667c100f8c8ae8acd3e8ffaa9b493"
+}

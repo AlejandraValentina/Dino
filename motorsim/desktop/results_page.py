@@ -847,8 +847,8 @@ class ResultsPage(QWidget):
         self.study_filter_count.setObjectName("studyFilterVisibleCount")
         filter_grid.addWidget(self.study_filter_count,2,1,1,3)
         study_layout.addWidget(self.study_filter_group)
-        self.design_study_table=QTableWidget(0,9);self.design_study_table.setObjectName("designStudyResults")
-        self.design_study_table.setHorizontalHeaderLabels(["Diseño","Valor","Estado","Periodicidad","Ciclos","Potencia","Torque","BMEP","Δ potencia vs base"])
+        self.design_study_table=QTableWidget(0,10);self.design_study_table.setObjectName("designStudyResults")
+        self.design_study_table.setHorizontalHeaderLabels(["Diseño","Valor","Ejecución","Clasificación","Periodicidad","Ciclos","Potencia","Torque","BMEP","Δ potencia vs base"])
         self.design_study_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.design_study_table.horizontalHeader().setStretchLastSection(True);self.design_study_table.setMaximumHeight(230)
         self.design_study_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
@@ -2223,8 +2223,10 @@ class ResultsPage(QWidget):
                 for item in factor_values if isinstance(item,dict))
                         if factor_values else f"{format_number(row.get('value'))} {row.get('unit','')}")
             if is_envelope:value_text+=f" · {format_number(row.get('rpm'))} RPM"
-            cells=[design_label,value_text,
-                _state_label(point.get("classification") or row.get("classification") or row.get("status")),
+            classification=point.get("classification") or row.get("classification") or "NOT_REPORTED"
+            execution=self._study_execution_state_label(row.get("status") or "NOT_REPORTED")
+            cells=[design_label,value_text,execution,
+                _state_label(classification),
                 _state_label(point.get("periodicity") or row.get("periodicity") or "NOT_EVALUATED"),
                 str(point.get("cycles_completed",row.get("cycles_completed",0))),*metrics,delta]
             for column,value in enumerate(cells):
@@ -2241,7 +2243,7 @@ class ResultsPage(QWidget):
                     if row.get("history_reuse_policy"):
                         trace+=f"\nPolítica de reuso: {row['history_reuse_policy']}"
                     item.setToolTip(str(value)+"\n\n"+trace)
-                elif column in (2,3,8):item.setToolTip(str(value))
+                elif column in (2,3,4,9):item.setToolTip(str(value))
                 self.design_study_table.setItem(index,column,item)
         self._refresh_design_study_filters()
         if self.design_study_table.rowCount():

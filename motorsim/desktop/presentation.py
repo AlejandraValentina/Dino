@@ -20,6 +20,7 @@ STATES = {
     'NO_PERIODICITY_TRANSIENT_ONLY':'Sin periodicidad · sólo transitorio',
     'DEFINED':'Definido', 'EXPLORATORY':'Exploratoria · no validada',
     'COMPLETE':'Terminada', 'RUNNING':'En ejecución', 'PASS':'Correcto',
+    'CANCELLED':'Cancelado',
     'FAIL':'Falló', 'REPORTED':'Reportado', 'SYNTHETIC':'Sintético',
     'SYNTHETIC_ASSUMPTION':'Supuesto sintético', 'UNKNOWN':'Desconocido',
     'TIME_LIMIT_NONCONVERGED':'Tiempo agotado · no convergida',
