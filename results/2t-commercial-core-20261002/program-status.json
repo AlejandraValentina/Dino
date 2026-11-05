@@ -12289,7 +12289,9 @@
       "dependencies": [],
       "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "e41c451"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -12306,6 +12308,26 @@
         "tests/test_desktop_design_study.py::test_parametric_point_details_bind_manifest_nested_sweep_and_source_status"
       ],
       "next_action": "Continuar con la presentación reproducible de los estados de ejecución en informes comparativos HTML, preservando clasificación, periodicidad y los datos originales.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-EXECUTION-STATE-V1",
+      "description": "In the HTML cross-study report, render each excluded endpoint execution status separately from solver classification and periodicity, so incomplete and nonconverged comparisons remain interpretable in exported technical documentation.",
+      "dependencies": [],
+      "state": "IN_PROGRESS",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/technical_report.py",
+        "tests/test_desktop_technical_report.py",
+        "results/desktop-parametric-design-study-v2/cross-study-report-execution-state/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Render translated execution status, classification and periodicity in separate report columns; verify COMPLETE nonconverged, cancelled/unpaired and older missing-status data without changing scientific results or the embedded source comparison.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17435,6 +17457,12 @@
       "task": "DESKTOP-PARAMETRIC-STUDY-TRACEABILITY-EXECUTION-STATE-V1",
       "kind": "task",
       "summary": "La ficha del punto paramétrico separa ejecución persistida, clasificación y periodicidad. Suite del estudio: 40 PASS; ventana Dino nativa con fixture sintético capturada y hash registrada."
+    },
+    {
+      "at": "2026-11-05T01:40:30+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-EXECUTION-STATE-V1",
+      "kind": "task",
+      "summary": "Replanificación de producto: el HTML de comparación conserva datos embebidos pero su tabla de pares excluidos todavía omite el status de ejecución persistido."
     }
   ],
   "legacy_gate_status": {
