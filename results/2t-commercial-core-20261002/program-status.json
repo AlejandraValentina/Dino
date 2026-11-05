@@ -12256,6 +12256,26 @@
       ],
       "next_action": "Responsive screenshots verified at 980×680, 1360×900 and 1600×1020; retain 980-pixel horizontal table scroll. No additional periodicity campaign or UIA dependency.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-EXECUTION-STATE-V1",
+      "description": "In cross-study comparison, show recorded execution status separately from solver classification and periodicity; add independent view-only endpoint status filters using observed values and translated labels. Keep all rows in the verified comparison and CSV export.",
+      "dependencies": [],
+      "state": "IN_PROGRESS",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/cross-study-execution-state/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Use only status stored on each point; distinguish missing status from no endpoint. Present stored status, classification and periodicity without conflation. Test complete/nonconverged, checkpointed cancellation and unpaired synthetic rows; filters must not alter the full CSV.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
   "audit_remediation_mode": false,
@@ -17360,6 +17380,12 @@
       "kind": "task",
       "summary": "Evidencia visual ampliada para 980×680, 1360×900 y 1600×1020 con fixture sintético; receipt guarda tamaños y hashes. UIA/COM se reprobaron por separado en sesión desbloqueada.",
       "commit": "7bbedaf"
+    },
+    {
+      "at": "2026-11-05T01:24:38+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-EXECUTION-STATE-V1",
+      "kind": "task",
+      "summary": "Replanificación por defecto reproducible en la matriz A/B: el resumen mostraba clasificación/periodicidad y omitía el estado de ejecución guardado. Se corrige y hace filtrable sin alterar ciencia o exportación."
     }
   ],
   "legacy_gate_status": {
