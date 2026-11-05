@@ -12116,7 +12116,7 @@
       "id": "DESKTOP-PARAMETRIC-STUDY-RESULT-FILTER-V1",
       "description": "Add optional filters for large parametric design-study result matrices (design/RPM and recorded execution/periodicity state), with every row included by default and no state or value rewriting.",
       "dependencies": [],
-      "state": "READY",
+      "state": "IN_PROGRESS",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -12129,7 +12129,7 @@
       ],
       "evidence_level": "L0",
       "evidence": [],
-      "next_action": "Inspect existing design_study_table and RPM envelope rows; implement non-destructive optional row filters for design/RPM/status, retain all rows in the manifest/export, and verify nonconverged and not-started points remain visible by default.",
+      "next_action": "Inspect the design_study_table and RPM-envelope point metadata; add optional design/RPM and recorded execution/periodicity filters, default to every row, and confirm all-point exports remain unchanged.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     },
     {
@@ -17225,6 +17225,12 @@
       "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESULT-FILTER-V1",
       "kind": "task",
       "summary": "Replanificación concreta: matrices comparativas entre estudios también pueden crecer; se añade tarea de filtros RPM/pareados sin modificar filas fuente ni exportación integral."
+    },
+    {
+      "at": "2026-11-05T00:35:54+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-RESULT-FILTER-V1",
+      "kind": "task",
+      "summary": "Iniciada mejora de exploración para matrices extensas; filtros sólo de vista, filas completas visibles por defecto y exportación basada en manifiesto sin alteraciones."
     }
   ],
   "legacy_gate_status": {
