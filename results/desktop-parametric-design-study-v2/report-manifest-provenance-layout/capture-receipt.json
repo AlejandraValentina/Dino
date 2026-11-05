@@ -1,0 +1,29 @@
+{
+  "schema": "DINO_SYNTHETIC_MANIFEST_REPORT_LAYOUT_CAPTURE_V1",
+  "fixture_origin": "synthetic display only; no solver and no scientific claim",
+  "browser": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "viewport": {
+    "width": 1360,
+    "height": 1100
+  },
+  "report_sha256": "33eed6db9c707110a52c01bcabe878bc6e750b51d3c085d8d5f0b834b1c5ae66",
+  "expanded_report_sha256": "7c6f69e943c7c11ef54241725a443214aab7f156029709c5aa28fca7e1569bd9",
+  "captures": {
+    "manifest-provenance-compact.png": {
+      "sha256": "b539064a166d7857e7a016391ea039c43d532efa0f304b3a619af858e52dd88d",
+      "bytes": 95377
+    },
+    "manifest-provenance-expanded.png": {
+      "sha256": "d22b0d9f070b4dedc524a787cfb4b5d29f6de28573c50b11f7a6920ceab656d9",
+      "bytes": 102317
+    }
+  },
+  "manifest_source_paths": [
+    "C:/Users/Engineer/Documents/Dino 2T/Projects/Escape principal/Archived parameter sweeps/2026/large-name-study-manifest.json",
+    "C:/Users/Engineer/Documents/Dino 2T/Projects/Escape alternativo/Archived parameter sweeps/2026/large-name-study-manifest.json"
+  ],
+  "manifest_sha256_values": [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ]
+}

@@ -79,6 +79,34 @@ def test_cross_study_report_preserves_exact_provenance_and_evidence_boundaries()
     assert "10 kW" in points_table and "12.5 kW" in points_table
 
 
+def test_cross_study_manifest_provenance_is_compact_but_exactly_accessible():
+    manifest_path=("C:/Users/Engineer/Documents/Dino 2T/Projects/Long Engine Name/"
+        "Parametric Studies/MK1 Exhaust Variant A/manifest.json")
+    manifest_digest="a"*64
+    comparison={"schema":"DINO_PARAMETRIC_CROSS_STUDY_COMPARISON_V1",
+        "baseline_engine_identity_sha256":"9"*64,"scientific_validation":"NOT_CLAIMED",
+        "notice":"Fixture sintético de presentación; no validado.","studies":[
+            {"study_id":"Study A","source_project_id":"project-a",
+             "manifest_path":manifest_path,"manifest_sha256":manifest_digest,
+             "baseline_engine_identity_sha256":"9"*64,"points":[]},
+            {"study_id":"Study B","source_project_id":"project-b",
+             "manifest_path":"D:/Synthetic/Study B/manifest.json","manifest_sha256":"b"*64,
+             "baseline_engine_identity_sha256":"9"*64,"points":[]}],
+        "pairs":[],"unpaired":[]}
+    report=render_study_comparison_report(comparison)
+    manifest_table=report.split('<table class="manifest-table">',1)[1].split("</table>",1)[0]
+    assert manifest_table.split("</thead>",1)[0].count("<th>")==3
+    assert "<strong>manifest.json</strong>" in manifest_table
+    assert "SHA-256 · aaaaaaaaaaaa…" in manifest_table
+    assert '<details class="manifest-provenance"><summary>Ruta y hash completos</summary>' in manifest_table
+    details=manifest_table.split('<details class="manifest-provenance">',1)[1].split("</details>",1)[0]
+    assert manifest_path in details and manifest_digest in details
+    assert '"manifest_path": "'+manifest_path+'"' in report
+    assert '"manifest_sha256": "'+manifest_digest+'"' in report
+    assert ".manifest-table{table-layout:fixed}" in report
+    assert "word-break:break-word" in report
+
+
 def test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_exclusions():
     def point(run_id,rpm,periodicity,power,code):
         return {"index":int(rpm),"run_id":run_id,"source_run_id":run_id,"rpm":rpm,
