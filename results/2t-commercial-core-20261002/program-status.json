@@ -17353,6 +17353,13 @@
       "kind": "task",
       "summary": "La inspección gráfica confirmó selectores/contador visibles a 980×680, tabla desplazable horizontalmente, y todas las 11 columnas visibles a 1360×900; capturas y hashes añadidos.",
       "commit": "7bbedaf"
+    },
+    {
+      "at": "2026-11-05T01:23:33+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-PERIODICITY-FILTER-V1",
+      "kind": "task",
+      "summary": "Evidencia visual ampliada para 980×680, 1360×900 y 1600×1020 con fixture sintético; receipt guarda tamaños y hashes. UIA/COM se reprobaron por separado en sesión desbloqueada.",
+      "commit": "7bbedaf"
     }
   ],
   "legacy_gate_status": {
