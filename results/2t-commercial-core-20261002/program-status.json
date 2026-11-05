@@ -12366,6 +12366,26 @@
       ],
       "next_action": "Reevaluar la siguiente entrega de producto paramétrico desbloqueada con evidencia concreta; no crear tareas de actividad ni ejecutar cálculos científicos sin autorización específica.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-STUDY-MATRIX-RESPONSIVE-VERIFY-V1",
+      "description": "Verify the newly separated single-study execution/classification/periodicity columns in the actual Qt table at compact 980x680 and 1360x900; prove every field remains accessible and values are not clipped or reordered.",
+      "dependencies": [
+        "DESKTOP-PARAMETRIC-STUDY-MATRIX-EXECUTION-STATE-V1"
+      ],
+      "state": "IN_PROGRESS",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "verification",
+      "write_scope": [
+        "results/desktop-parametric-design-study-v2/study-matrix-responsive-verify/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Capture the native table at both sizes, scroll horizontally if needed, assert status/classification/periodicity cells and report any actual truncation defect.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
   "audit_remediation_mode": false,
@@ -17524,6 +17544,12 @@
       "task": "DESKTOP-PARAMETRIC-STUDY-MATRIX-EXECUTION-STATE-V1",
       "kind": "task",
       "summary": "La matriz muestra ejecución, clasificación y periodicidad en columnas separadas; suite de estudios 40 PASS y cuatro pruebas focalizadas pasan, incluyendo filas COMPLETE no convergidas, canceladas y cacheadas."
+    },
+    {
+      "at": "2026-11-05T01:58:03+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-MATRIX-RESPONSIVE-VERIFY-V1",
+      "kind": "task",
+      "summary": "Verificación de regresión pendiente por la nueva columna: comprobar que la matriz de estudio sigue legible y desplazable en la ventana compacta aprobada."
     }
   ],
   "legacy_gate_status": {
