@@ -1,0 +1,5 @@
+{"stage": "START_CHILD", "monotonic": 303221.25}
+{"stage": "CHILD_WINDOW_VISIBLE", "monotonic": 303226.5}
+{"stage": "BEFORE_UIA_WAIT_VISIBLE", "monotonic": 303226.921}
+{"stage": "UIA_INITIAL_QUERY_TIMEOUT", "monotonic": 303238.515}
+{"stage": "POSTED_WIN32_WM_CLOSE", "monotonic": 303238.515}
