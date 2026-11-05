@@ -20,8 +20,8 @@ completo conserva pares y puntos sin contraparte aunque se filtre la tabla.
 
 - `python -m pytest tests/test_desktop_technical_report.py tests/test_desktop_design_study.py -q` — **56 passed**.
 - La regresión usa un fixture sintético con un par `PERIOD_1`/`INSUFFICIENT_CYCLES` y un punto no evaluado sin contraparte. Comprueba filtros independientes A/B, estado traducido, opción **Sin punto**, contador, limpieza, reinicio al cambiar el proyecto y que el CSV completo aún incluye las tres RPM y sus tipos de pareamiento.
-- `capture_synthetic_periodicity_filter.py` renderizó la sección Comparar real de PySide6/Windows con un fixture sintético. La captura muestra los filtros A/B, un extremo periódico, otro con ciclos insuficientes y `1 de 2 filas visibles`.
-- Captura: `cross-study-periodicity-synthetic.png`.
+- `capture_synthetic_periodicity_filter.py` renderizó la sección Comparar real de PySide6/Windows con un fixture sintético. Se verificó a **980×680**, **1360×900** y **1600×1020**. A 980×680 los filtros y el contador permanecen visibles y la tabla ofrece desplazamiento horizontal para sus 11 columnas; a 1360×900 las columnas se ven completas.
+- Capturas: `cross-study-periodicity-980x680.png`, `cross-study-periodicity-1360x900.png` y `cross-study-periodicity-1600x1020.png`; `capture-receipt.json` registra dimensiones y SHA-256.
 - `git diff --check` — limpio.
 
 La captura y los fixtures son **sintéticos y sólo verifican presentación/flujo**;

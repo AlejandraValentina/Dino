@@ -1,0 +1,26 @@
+{
+  "schema": "DINO_SYNTHETIC_CROSS_STUDY_PERIODICITY_FILTER_CAPTURE_V1",
+  "fixture_origin": "synthetic display/interaction only; no solver or scientific claim",
+  "visible_rows": "1 de 2 filas visibles",
+  "total_rows": 2,
+  "captures": {
+    "cross-study-periodicity-980x680.png": {
+      "sha256": "b852d7cd37b1102ad701fc8180ce9d95f4e11b7eb2e1b33aafc9ef5d87fb601e",
+      "bytes": 27031,
+      "width": 980,
+      "height": 680
+    },
+    "cross-study-periodicity-1360x900.png": {
+      "sha256": "460b776bc2c709c836f7e92e93d9b60daa8aa905cc292ce7432bf92e87388c34",
+      "bytes": 29658,
+      "width": 1360,
+      "height": 900
+    },
+    "cross-study-periodicity-1600x1020.png": {
+      "sha256": "876a6d9d53ad19616f6a86c674982e6ecb35fa4cefd3b05ff55995c0de00699f",
+      "bytes": 30264,
+      "width": 1600,
+      "height": 1020
+    }
+  }
+}

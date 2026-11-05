@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import sys
+import hashlib
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -16,7 +18,7 @@ from motorsim.desktop.services import new_design_project
 
 
 def main() -> int:
-    output = Path(__file__).with_name("cross-study-periodicity-synthetic.png")
+    output_dir = Path(__file__).resolve().parent
     app = QApplication.instance() or QApplication(sys.argv)
     page = ResultsPage(DesktopContext(new_design_project("synthetic-periodicity-filter")))
     studies = [
@@ -66,14 +68,24 @@ def main() -> int:
     window = QMainWindow()
     window.setWindowTitle("Dino 2T — periodicidad por extremo · sintético")
     window.setCentralWidget(comparison_group)
-    window.resize(1600, 1020)
     window.show();app.processEvents()
-    app.processEvents()
-    if not window.grab().save(str(output)):
-        raise RuntimeError(f"No se pudo guardar la captura: {output}")
-    print(f"capture={output}\nrows={page.study_comparison_table.rowCount()}\n"
+    captures={}
+    for width,height in ((980,680),(1360,900),(1600,1020)):
+        window.resize(width,height);app.processEvents();app.processEvents()
+        output=output_dir/f"cross-study-periodicity-{width}x{height}.png"
+        if not window.grab().save(str(output)):
+            raise RuntimeError(f"No se pudo guardar la captura: {output}")
+        captures[output.name]={"sha256":hashlib.sha256(output.read_bytes()).hexdigest(),
+            "bytes":output.stat().st_size,"width":width,"height":height}
+    receipt={"schema":"DINO_SYNTHETIC_CROSS_STUDY_PERIODICITY_FILTER_CAPTURE_V1",
+        "fixture_origin":"synthetic display/interaction only; no solver or scientific claim",
+        "visible_rows":page.cross_study_filter_count.text(),"total_rows":page.study_comparison_table.rowCount(),
+        "captures":captures}
+    (output_dir/"capture-receipt.json").write_text(
+        json.dumps(receipt,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+    print(f"rows={page.study_comparison_table.rowCount()}\n"
           f"visible={page.cross_study_filter_count.text()}\n"
-          "fixture=SYNTHETIC_NOT_VALIDATION")
+          f"fixture=SYNTHETIC_NOT_VALIDATION\ncaptures={list(captures)}")
     window.close();app.processEvents()
     return 0
 
