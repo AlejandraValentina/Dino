@@ -12191,9 +12191,11 @@
       "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESULT-FILTER-V1",
       "description": "Add optional filters to large cross-study comparison matrices for exact RPM and exact-pair/unpaired state. Show visible/total counts; include all source rows by default and leave the underlying comparison and full CSV export unchanged.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
-      "commits": [],
+      "commits": [
+        "a3723b4"
+      ],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
       "owner_role": "implementation",
       "write_scope": [
@@ -12203,8 +12205,13 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Inspect cross-study comparison rows and their exact/unpaired status; add view-only exact-RPM and pair-status filters with counts, default all, and preserve the full underlying CSV.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-result-filter/acceptance.md",
+        "results/desktop-parametric-design-study-v2/cross-study-result-filter/cross-study-filter-synthetic.png",
+        "results/desktop-parametric-design-study-v2/cross-study-result-filter/capture_synthetic_cross_study_filter.py",
+        "tests/test_desktop_design_study.py"
+      ],
+      "next_action": "Complete the already-READY cross-study report manifest provenance layout task; keep source paths and hashes readable without changing report data or scientific claims.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17249,6 +17256,13 @@
       "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESULT-FILTER-V1",
       "kind": "task",
       "summary": "Iniciada navegación de matrices comparativas grandes entre estudios: filtros sólo de vista para RPM exacta y pareado/no pareado; exportación completa permanece íntegra."
+    },
+    {
+      "at": "2026-11-05T00:58:05+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-RESULT-FILTER-V1",
+      "kind": "task",
+      "summary": "Agregados filtros de RPM exacta y pareamiento sólo de vista a comparaciones entre estudios; exportación conserva todos los pares y puntos sin pareja. 40 pruebas y captura Qt/Windows con fixture sintético aprobadas.",
+      "commit": "a3723b4"
     }
   ],
   "legacy_gate_status": {
