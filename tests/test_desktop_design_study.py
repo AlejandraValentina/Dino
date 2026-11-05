@@ -736,6 +736,60 @@ def test_factorial_effect_plot_uses_verified_signed_values_and_renders(tmp_path)
     page.close();APP.processEvents()
 
 
+def test_factorial_effect_plot_export_binds_png_csv_and_manifest_hash(tmp_path,monkeypatch):
+    from PySide6.QtGui import QImageReader
+    context=DesktopContext(new_design_project("synthetic-factorial"))
+    manifest,imported=_factorial_effect_fixture(tmp_path)
+    manifest_path=tmp_path/"factorial-source.study.json"
+    raw=json.dumps(manifest,sort_keys=True).encode("utf-8");manifest_path.write_bytes(raw)
+    reference={"path":str(manifest_path),"study_id":manifest["study_id"],
+        "manifest_sha256":hashlib.sha256(raw).hexdigest(),"schema":manifest["schema"],
+        "source_project_id":manifest["project_id"]}
+    context.add_study_reference(reference)
+    page=ResultsPage(context);page.design_study_manifest=manifest
+    page.design_study_manifest_path=manifest_path;page.design_study_manifest_sha256=reference["manifest_sha256"]
+    page.dataset={"points":imported};page._update_design_study_summary();APP.processEvents()
+    output=tmp_path/"factorial-effect.png";warnings=[]
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *a:(str(output),"PNG (*.png)"))
+    monkeypatch.setattr(QMessageBox,"warning",lambda *a:warnings.append(a[2]))
+    assert page.export_factorial_plot_button.isEnabled()
+    assert page.export_factorial_effect_plot() is True
+    csv_path=tmp_path/"factorial-effect.factorial-effects.csv"
+    receipt_path=tmp_path/"factorial-effect.factorial-effects.json"
+    receipt=json.loads(receipt_path.read_text(encoding="utf-8"))
+    csv_bytes=csv_path.read_bytes();png_bytes=output.read_bytes()
+    assert hashlib.sha256(csv_bytes).hexdigest()==receipt["csv_sha256"]
+    assert hashlib.sha256(png_bytes).hexdigest()==receipt["plot_sha256"]
+    assert receipt["manifest_sha256"]==reference["manifest_sha256"]
+    assert receipt["scientific_validation"]=="NOT_CLAIMED"
+    with csv_path.open(encoding="utf-8-sig",newline="") as stream:
+        exported=list(csv.DictReader(stream))
+    assert len(exported)==13
+    assert sum(row["record_type"]=="CONTRAST" for row in exported)==9
+    reader=QImageReader(str(output));rendered=reader.read();assert not rendered.isNull()
+    assert rendered.text("Dino.study_id")==manifest["study_id"]
+    assert rendered.text("Dino.factorial_csv_sha256")==receipt["csv_sha256"]
+    assert "NOT_CLAIMED" in rendered.text("Dino.scientific_qualification")
+    assert page.export_factorial_effect_plot() is False
+    assert output.read_bytes()==png_bytes and csv_path.read_bytes()==csv_bytes
+    assert warnings and "no se sobrescriben" in warnings[-1]
+    stale_output=tmp_path/"stale.png"
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *a:(str(stale_output),"PNG (*.png)"))
+    page.dataset["points"][0]["brake_power"]+=1.0
+    assert page.export_factorial_effect_plot() is False
+    assert not stale_output.exists()
+    assert "figura visible no coincide" in warnings[-1]
+    tampered_output=tmp_path/"tampered.png"
+    manifest_path.write_text(json.dumps(dict(manifest,rpm=3100),sort_keys=True),encoding="utf-8")
+    monkeypatch.setattr(QFileDialog,"getSaveFileName",lambda *a:(str(tampered_output),"PNG (*.png)"))
+    assert page.export_factorial_effect_plot() is False
+    assert not tampered_output.exists()
+    assert not (tmp_path/"tampered.factorial-effects.csv").exists()
+    assert not (tmp_path/"tampered.factorial-effects.json").exists()
+    assert "manifiesto cambió" in warnings[-1]
+    page.close();APP.processEvents()
+
+
 def test_factorial_effects_flow_into_desktop_technical_report(tmp_path,monkeypatch):
     manifest,imported=_factorial_effect_fixture(tmp_path)
     manifest_path=tmp_path/"verified-factorial.study.json"

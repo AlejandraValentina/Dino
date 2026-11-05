@@ -1,12 +1,12 @@
 from __future__ import annotations
-import csv,json
+import csv,json,io
 import hashlib
 import html
 import math
 from pathlib import Path
 import uuid
-from PySide6.QtCore import Qt,Signal,QRect
-from PySide6.QtGui import QPixmap,QColor,QPainter,QPen,QImage,QFontMetrics
+from PySide6.QtCore import Qt,Signal,QRect,QBuffer,QIODevice
+from PySide6.QtGui import QPixmap,QColor,QPainter,QPen,QImage,QFontMetrics,QImageWriter
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QLabel,QComboBox,QPushButton,
     QFileDialog,QCheckBox,QGroupBox,QListWidget,QListWidgetItem,QTableWidget,QTableWidgetItem,QHeaderView,QMessageBox,
     QDialog,QDialogButtonBox,QFormLayout,QLineEdit,QTabWidget,QScrollArea,QFrame,QAbstractItemView,QPlainTextEdit)
@@ -845,6 +845,10 @@ class ResultsPage(QWidget):
         self.factor_effects_notice=QLabel("Los contrastes requieren los cuatro resultados exactos, periódicos y compatibles.")
         self.factor_effects_notice.setWordWrap(True);factor_effects_layout.addWidget(self.factor_effects_notice)
         self.factor_effects_plot=FactorialEffectsPlot();factor_effects_layout.addWidget(self.factor_effects_plot)
+        self.export_factorial_plot_button=QPushButton("Exportar gráfico factorial PNG + fuentes…")
+        self.export_factorial_plot_button.setToolTip("Exporta la figura visible con el CSV exacto de contrastes y un recibo JSON que enlaza hashes del gráfico, CSV y manifiesto.")
+        self.export_factorial_plot_button.clicked.connect(self.export_factorial_effect_plot)
+        factor_effects_layout.addWidget(self.export_factorial_plot_button)
         self.factor_effects_table=QTableWidget(0,5);self.factor_effects_table.setObjectName("factorialEffects")
         self.factor_effects_table.setHorizontalHeaderLabels(["Métrica","Contraste","Valor","Estado","Definición"])
         self.factor_effects_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
@@ -1821,6 +1825,8 @@ class ResultsPage(QWidget):
         is_factorial=manifest.get("design_method")=="FACTORIAL_2X2_V1"
         self.export_factorial_effects_button.setVisible(is_factorial)
         self.export_factorial_effects_button.setEnabled(is_factorial and bool(getattr(self,"design_study_manifest_path",None)))
+        self.export_factorial_plot_button.setVisible(is_factorial)
+        self.export_factorial_plot_button.setEnabled(is_factorial and bool(getattr(self,"design_study_manifest_path",None)))
         dataset_points={str(row.get("run_id")):row for row in (self.dataset or {}).get("points",[])
                         if row.get("run_id") is not None}
         baseline_rows=[row for row in manifest.get("points",[]) if row.get("baseline")]
@@ -2006,6 +2012,73 @@ class ResultsPage(QWidget):
             return True
         except (OSError,ValueError,TypeError,csv.Error) as exc:
             QMessageBox.warning(self,"No se pudo exportar el estudio factorial",str(exc));return False
+
+    def export_factorial_effect_plot(self):
+        """Export the displayed factorial chart with exact source CSV and hashes."""
+        manifest=getattr(self,"design_study_manifest",None)
+        manifest_path=getattr(self,"design_study_manifest_path",None)
+        if not manifest or not manifest_path or manifest.get("design_method")!="FACTORIAL_2X2_V1":return False
+        suggested=Path(self.context.path).parent if self.context.path else Path.cwd()
+        suggested=suggested/f"{manifest.get('study_id') or 'factorial-study'}-effects.png"
+        selected,_=QFileDialog.getSaveFileName(self,"Exportar gráfico y fuentes factoriales",str(suggested),"PNG (*.png)")
+        if not selected:return False
+        output=Path(selected)
+        if output.suffix.lower()!=".png":output=output.with_suffix(".png")
+        csv_path=output.with_name(output.stem+".factorial-effects.csv")
+        receipt_path=output.with_name(output.stem+".factorial-effects.json")
+        created=[]
+        try:
+            source=Path(manifest_path).resolve();raw=source.read_bytes();manifest_digest=hashlib.sha256(raw).hexdigest()
+            live=json.loads(raw.decode("utf-8"))
+            reference=next((ref for ref in self.context.project.get("study_references",[])
+                if Path(ref.get("path","")).resolve()==source),None)
+            if (live!=manifest or not reference or reference.get("manifest_sha256")!=manifest_digest or
+                    reference.get("study_id")!=manifest.get("study_id") or
+                    reference.get("schema")!=manifest.get("schema") or
+                    reference.get("source_project_id")!=manifest.get("project_id")):
+                raise ValueError("el manifiesto cambió o no coincide con la referencia SHA guardada en el proyecto")
+            current_effects=_factorial_effects_from_study(live,(self.dataset or {}).get("points",[]))
+            if not current_effects or current_effects.get("metrics")!=self.factor_effects_plot.metrics:
+                raise ValueError("la figura visible no coincide con los contrastes verificados actuales; reabrí el estudio antes de exportar")
+            rows=_build_factorial_effects_csv(source,manifest_digest,live,(self.dataset or {}).get("points",[]))
+            csv_stream=io.StringIO(newline="")
+            writer=csv.DictWriter(csv_stream,fieldnames=_FACTORIAL_EFFECTS_CSV_FIELDS,extrasaction="raise")
+            writer.writeheader();writer.writerows(rows)
+            csv_bytes=("\ufeff"+csv_stream.getvalue()).encode("utf-8")
+            csv_digest=hashlib.sha256(csv_bytes).hexdigest()
+            image=self.factor_effects_plot.grab().toImage();buffer=QBuffer();buffer.open(QIODevice.OpenModeFlag.WriteOnly)
+            image_writer=QImageWriter(buffer,b"png")
+            image_writer.setText("Dino.study_id",str(manifest.get("study_id") or ""))
+            image_writer.setText("Dino.manifest_sha256",manifest_digest)
+            image_writer.setText("Dino.factorial_csv_sha256",csv_digest)
+            image_writer.setText("Dino.scientific_qualification","Descriptive factorial contrasts; NOT_CLAIMED; not predictive validation")
+            if not image_writer.write(image):raise OSError(image_writer.errorString())
+            png_bytes=bytes(buffer.data());buffer.close()
+            qualification=("Contrastes factoriales descriptivos; NOT_CLAIMED; no constituyen validación predictiva ni inferencia causal.")
+            receipt={"schema":"DINO_FACTORIAL_EFFECT_PLOT_EXPORT_V1","study_id":manifest.get("study_id"),
+                "project_id":manifest.get("project_id"),"scientific_validation":"NOT_CLAIMED",
+                "qualification":qualification,"manifest_path":str(source),"manifest_sha256":manifest_digest,
+                "csv_path":str(csv_path.resolve()),"csv_sha256":csv_digest,
+                "plot_path":str(output.resolve()),"plot_sha256":hashlib.sha256(png_bytes).hexdigest(),
+                "effects_status":(self.factor_effects_plot.metrics and
+                    ("AVAILABLE" if all(metric.get("status")=="DEFINED" for metric in self.factor_effects_plot.metrics) else "PARTIAL_OR_UNAVAILABLE")) or "UNAVAILABLE",
+                "effects":self.factor_effects_plot.metrics}
+            outputs=((output,png_bytes),(csv_path,csv_bytes),
+                (receipt_path,(json.dumps(receipt,indent=2,ensure_ascii=False,sort_keys=True)+"\n").encode("utf-8")))
+            for target,_data in outputs:
+                if target.exists():raise FileExistsError(f"no se sobrescriben artifacts existentes: {target}")
+            for target,data in outputs:
+                with target.open("xb") as stream:
+                    created.append(target);stream.write(data)
+            self.factor_effects_notice.setText(
+                f"PNG, CSV de 13 filas y recibo exportados sin sobrescribir · SHA-256 manifiesto {manifest_digest} · "
+                f"SHA-256 CSV {csv_digest} · {qualification}")
+            return True
+        except (OSError,ValueError,TypeError,csv.Error) as exc:
+            for target in created:
+                try:target.unlink(missing_ok=True)
+                except OSError:pass
+            QMessageBox.warning(self,"No se pudo exportar el gráfico factorial",str(exc));return False
 
     def _refresh_design_response_plot(self,*_):
         manifest=getattr(self,"design_study_manifest",None)
