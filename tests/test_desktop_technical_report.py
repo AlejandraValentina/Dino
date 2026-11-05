@@ -136,8 +136,12 @@ def test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_ex
              "rpm":4000.0,"pairing":"EXACT_RPM_AND_OPERATING_CONTEXT",
              "metrics":{"brake_power":{"a":15.0,"b":None,"delta":None}}}],
         "unpaired":[{"study_id":"B","reason":"Sin endpoint a 5000 RPM.",
-            "point":{"run_id":"b-5000","rpm":5000,"classification":"NOT_STARTED",
-                "periodicity":"NOT_EVALUATED","engine_identity_sha256":"7"*64}}]}
+            "point":{"run_id":"b-5000","rpm":5000,"status":"CANCELLED_CHECKPOINTED",
+                "classification":"NOT_STARTED","periodicity":"NOT_EVALUATED",
+                "engine_identity_sha256":"7"*64}},
+            {"study_id":"A","reason":"Punto histórico sin status registrado.",
+             "point":{"run_id":"a-5500","rpm":5500,"classification":"MAX_CYCLES_NONCONVERGED",
+                "periodicity":"INSUFFICIENT_CYCLES","engine_identity_sha256":"8"*64}}]}
     report=render_study_comparison_report(comparison)
     point_summary=report.split('<table class="points-table">',1)[1].split("</table>",1)[0]
     assert point_summary.count("Periódica · ciclo 1")==3
@@ -154,8 +158,15 @@ def test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_ex
     assert "Uno o ambos endpoints no están clasificados PERIOD_1." not in report
     assert '"classification": "PERIOD_1"' in report
     assert '"periodicity": "PERIOD_1"' in report
-    assert "Periódica · ciclo 1 / Periódica · ciclo 1" in report
-    assert "Límite de ciclos · no convergida / Ciclos insuficientes" in report
+    assert "Estado del punto A" in report and "Estado del punto B" in report
+    excluded_table=report.split("<h4>Pares excluidos de esta gráfica · Potencia de freno</h4>",1)[1].split("</table>",1)[0]
+    assert "<strong>Ejecución:</strong> Terminada" in excluded_table
+    assert "<strong>Clasificación:</strong> Límite de ciclos · no convergida" in excluded_table
+    assert "<strong>Periodicidad:</strong> Ciclos insuficientes" in excluded_table
+    unpaired_table=report.split("<h2>Puntos sin contraparte</h2>",1)[1].split("</table>",1)[0]
+    assert "<th>Ejecución</th>" in unpaired_table
+    assert "Cancelada · checkpoint disponible" in unpaired_table
+    assert "No informada" in unpaired_table
     assert "MAX_CYCLES_NONCONVERGED / INSUFFICIENT_CYCLES" not in report
     assert '"classification": "MAX_CYCLES_NONCONVERGED"' in report
     assert '"periodicity": "INSUFFICIENT_CYCLES"' in report

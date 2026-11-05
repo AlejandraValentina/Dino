@@ -1,0 +1,17 @@
+{
+  "schema": "DINO_SYNTHETIC_CROSS_STUDY_REPORT_EXECUTION_STATE_CAPTURE_V1",
+  "fixture_origin": "Synthetic display/document fixture only; no solver or scientific claim",
+  "desktop_window_size": [
+    1440,
+    837
+  ],
+  "desktop_export_action_success": true,
+  "html_report_sha256": "bade5d1c0181e7d54b5f2cc066c13ffa81a81ae1e824685a848d1fe60a6082c3",
+  "browser_capture_sha256": "e9d7bf948345312f7886639c853b187ba60c2053ea4c8d54a630b1460ae62bf9",
+  "complete_nonconverged_endpoint_separated": true,
+  "checkpointed_unpaired_endpoint_visible": true,
+  "missing_execution_status_explicit": true,
+  "raw_comparison_preserved": true,
+  "scientific_validation": "NOT_CLAIMED",
+  "browser": "Chrome headless rendering of HTML exported by the Desktop action"
+}

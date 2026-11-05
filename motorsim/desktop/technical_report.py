@@ -577,6 +577,15 @@ def write_technical_report(path, dataset: dict, **kwargs) -> Path:
     return path
 
 
+def _cross_study_point_state_markup(point: dict) -> str:
+    """Render stored execution and scientific state fields without conflating them."""
+    return "<br>".join((
+        f"<strong>Ejecución:</strong> {_esc(state_label(point.get('status') or 'NOT_REPORTED'))}",
+        f"<strong>Clasificación:</strong> {_esc(state_label(point.get('classification') or 'NOT_REPORTED'))}",
+        f"<strong>Periodicidad:</strong> {_esc(state_label(point.get('periodicity') or 'NOT_EVALUATED'))}",
+    ))
+
+
 def render_study_comparison_report(comparison: dict) -> str:
     """Render a hash-bound comparison of verified saved-study observations."""
     if (not isinstance(comparison,dict) or
@@ -661,7 +670,8 @@ def render_study_comparison_report(comparison: dict) -> str:
         point=item.get("point",{})
         unpaired_rows.append("<tr>"+"".join((f"<td>{_esc(item.get('study_id'))}</td>",
             f"<td>{_esc(point.get('run_id'))}</td>",f"<td>{_esc(format_number(point.get('rpm')))} RPM</td>",
-            f"<td>{_esc(state_label(point.get('classification') or point.get('status')))}</td>",
+            f"<td>{_esc(state_label(point.get('status') or 'NOT_REPORTED'))}</td>",
+            f"<td>{_esc(state_label(point.get('classification') or 'NOT_REPORTED'))}</td>",
             f"<td>{_esc(state_label(point.get('periodicity') or 'NOT_EVALUATED'))}</td>",
             f"<td>{_esc(point.get('engine_identity_sha256'))}</td>",
             f"<td>{_esc(_pairing_reason_label(item.get('reason')))}</td>"))+"</tr>")
@@ -681,7 +691,7 @@ def render_study_comparison_report(comparison: dict) -> str:
 <h2>Puntos y procedencia</h2><p>Resumen por punto; abra «Ver fuente y hashes» para la procedencia completa. Los registros originales exactos permanecen disponibles en el JSON del informe.</p><table class="points-table"><thead><tr><th>Estudio</th><th>Diseño</th><th>RPM</th><th>Estado</th><th>Clasificación / periodicidad</th><th>Ciclos</th><th>Run fuente</th><th>Métricas</th><th>Fuente</th></tr></thead><tbody>{''.join(point_rows)}</tbody></table>
 <h2>Respuesta observada por RPM</h2>{_cross_study_response_plots(comparison)}
 <h2>Contrastes exactos</h2><p>Los pares requieren RPM y todos los campos operativos informados compatibles. Δ = estudio B menos A. Un resultado queda vacío si falta o si no es periódico y definido.</p><table><thead><tr><th>Estudio A</th><th>Run A</th><th>Estudio B</th><th>Run B</th><th>RPM</th><th>Métrica</th><th>Δ</th><th>Regla de pareo</th></tr></thead><tbody>{''.join(pair_rows) or '<tr><td colspan="8">No hay pares compatibles exactos.</td></tr>'}</tbody></table>
-<h2>Puntos sin contraparte</h2><table><thead><tr><th>Estudio</th><th>Run ID</th><th>RPM</th><th>Clasificación</th><th>Periodicidad</th><th>Motor SHA-256</th><th>Motivo</th></tr></thead><tbody>{''.join(unpaired_rows) or '<tr><td colspan="7">Todos los puntos aparecen en al menos un pareo.</td></tr>'}</tbody></table>
+<h2>Puntos sin contraparte</h2><table><thead><tr><th>Estudio</th><th>Run ID</th><th>RPM</th><th>Ejecución</th><th>Clasificación</th><th>Periodicidad</th><th>Motor SHA-256</th><th>Motivo</th></tr></thead><tbody>{''.join(unpaired_rows) or '<tr><td colspan="8">Todos los puntos aparecen en al menos un pareo.</td></tr>'}</tbody></table>
 <h2>Datos reproducibles</h2><details><summary>Objeto completo de comparación, puntos y source manifests</summary><pre>{payload}</pre></details>
 <footer>Dino Desktop · exportación descriptiva. Los resultados transitorios no representan prestaciones periódicas; la periodicidad tampoco constituye validación experimental.</footer></body></html>'''
 
@@ -788,15 +798,13 @@ def _cross_study_response_plots(comparison):
                 rows.append('<tr>'+''.join((
                     f'<td>{pair_index+1}</td>',f'<td>{_esc(pair.get("rpm"))}</td>',
                     f'<td>{_esc(pair.get("study_a"))} · {_esc(point_a.get("source_run_id") or point_a.get("run_id"))}</td>',
-                    f'<td>{_esc(state_label(point_a.get("classification") or "NOT_REPORTED"))} / '
-                    f'{_esc(state_label(point_a.get("periodicity") or "NOT_EVALUATED"))}</td>',
+                f'<td>{_cross_study_point_state_markup(point_a)}</td>',
                     f'<td>{_esc(pair.get("study_b"))} · {_esc(point_b.get("source_run_id") or point_b.get("run_id"))}</td>',
-                    f'<td>{_esc(state_label(point_b.get("classification") or "NOT_REPORTED"))} / '
-                    f'{_esc(state_label(point_b.get("periodicity") or "NOT_EVALUATED"))}</td>',
+                f'<td>{_cross_study_point_state_markup(point_b)}</td>',
                     f'<td>{_esc(reason)}</td>'))+'</tr>')
             parts.append('<h4>Pares excluidos de esta gráfica · '+_esc(label)+'</h4>'
-                '<table><thead><tr><th>Fila</th><th>RPM</th><th>Estudio/run A</th><th>Estado A</th>'
-                '<th>Estudio/run B</th><th>Estado B</th><th>Motivo</th></tr></thead><tbody>'+
+                '<table><thead><tr><th>Fila</th><th>RPM</th><th>Estudio/run A</th><th>Estado del punto A</th>'
+                '<th>Estudio/run B</th><th>Estado del punto B</th><th>Motivo</th></tr></thead><tbody>'+
                 ''.join(rows)+'</tbody></table>')
         plots.append(''.join(parts)+'</section>')
     return ''.join(plots)

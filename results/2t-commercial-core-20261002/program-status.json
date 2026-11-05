@@ -12314,7 +12314,7 @@
       "id": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-EXECUTION-STATE-V1",
       "description": "In the HTML cross-study report, render each excluded endpoint execution status separately from solver classification and periodicity, so incomplete and nonconverged comparisons remain interpretable in exported technical documentation.",
       "dependencies": [],
-      "state": "IN_PROGRESS",
+      "state": "DONE",
       "blocker": null,
       "commits": [],
       "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
@@ -12326,8 +12326,13 @@
         "results/2t-commercial-core-20261002/program-status.json"
       ],
       "evidence_level": "L0",
-      "evidence": [],
-      "next_action": "Render translated execution status, classification and periodicity in separate report columns; verify COMPLETE nonconverged, cancelled/unpaired and older missing-status data without changing scientific results or the embedded source comparison.",
+      "evidence": [
+        "results/desktop-parametric-design-study-v2/cross-study-report-execution-state/acceptance.md",
+        "results/desktop-parametric-design-study-v2/cross-study-report-execution-state/capture-receipt.json",
+        "results/desktop-parametric-design-study-v2/cross-study-report-execution-state/html-report-state-view-1360x2400.png",
+        "tests/test_desktop_technical_report.py::test_cross_study_report_plots_only_exact_periodic_defined_pairs_and_lists_exclusions"
+      ],
+      "next_action": "Revisar la siguiente capacidad funcional desbloqueada del estudio paramétrico; no iniciar cálculos científicos mientras continúen las dependencias de datos/presupuesto registradas.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
@@ -17463,6 +17468,12 @@
       "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-EXECUTION-STATE-V1",
       "kind": "task",
       "summary": "Replanificación de producto: el HTML de comparación conserva datos embebidos pero su tabla de pares excluidos todavía omite el status de ejecución persistido."
+    },
+    {
+      "at": "2026-11-05T01:47:04+00:00",
+      "task": "DESKTOP-PARAMETRIC-CROSS-STUDY-REPORT-EXECUTION-STATE-V1",
+      "kind": "task",
+      "summary": "El HTML exportado por Desktop separa ejecución, clasificación y periodicidad en pares excluidos y puntos sin contraparte; 16 pruebas y render Chrome verificados con fixture sintético."
     }
   ],
   "legacy_gate_status": {
