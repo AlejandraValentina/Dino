@@ -12157,6 +12157,26 @@
       ],
       "next_action": "Complete; the exported PNG, exact factorial CSV and provenance receipt cross-bind their hashes and refuse stale or conflicting source/output files.",
       "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
+    },
+    {
+      "id": "DESKTOP-PARAMETRIC-STUDY-FULL-MATRIX-EXPORT-V1",
+      "description": "Add an explicit full-matrix CSV export for an opened non-factorial parametric study without requiring row selection; preserve every manifest point, exact values, statuses, unavailable metrics and provenance. Keep selected-point export available.",
+      "dependencies": [],
+      "state": "IN_PROGRESS",
+      "blocker": null,
+      "commits": [],
+      "objective": "DINO_PREDICTIVE_RELIABILITY_V1",
+      "owner_role": "implementation",
+      "write_scope": [
+        "motorsim/desktop/results_page.py",
+        "tests/test_desktop_design_study.py",
+        "results/desktop-parametric-design-study-v2/full-matrix-export/",
+        "results/2t-commercial-core-20261002/program-status.json"
+      ],
+      "evidence_level": "L0",
+      "evidence": [],
+      "next_action": "Add a separate full-matrix export action for non-factorial design/RPM studies; reuse the verified export builder and retain exact source bindings. Test with unselected rows, nonconverged/unstarted points, precision and fail-closed manifest checks.",
+      "classification": "POST_DINO_PREDICTIVE_RELIABILITY_V1_BACKLOG"
     }
   ],
   "audit_remediation_mode": false,
@@ -17155,6 +17175,12 @@
       "kind": "task",
       "summary": "Exportación PNG+CSV+JSON enlaza hashes y calificación NOT_CLAIMED; rechaza cambios del manifiesto, figura obsoleta y sobrescritura. Suite factorial Desktop: 37 PASS.",
       "commit": "ee6ddb82055725651e25ec5ac68c47120c2bc711"
+    },
+    {
+      "at": "2026-11-05T00:28:37+00:00",
+      "task": "DESKTOP-PARAMETRIC-STUDY-FULL-MATRIX-EXPORT-V1",
+      "kind": "task",
+      "summary": "Replanificación basada en un hueco reproducible de producto: la matriz paramétrica sólo se exporta tras seleccionar filas; los informes completos existentes no sustituyen una tabla CSV completa y trazable."
     }
   ],
   "legacy_gate_status": {
